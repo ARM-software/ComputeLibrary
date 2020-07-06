@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_CLRNN_LAYER_H
 #define ARM_COMPUTE_CLRNN_LAYER_H
 
-#include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 
@@ -88,7 +88,7 @@ private:
     MemoryGroup                          _memory_group;
     CLGEMM                               _gemm_state_f;
     CLSaturatedArithmeticOperationKernel _add_kernel;
-    CLActivationLayerKernel              _activation_kernel;
+    CLActivationLayer                    _activation;
     CLFullyConnectedLayer                _fully_connected_kernel;
     CLCopyKernel                         _copy_kernel;
     CLTensor                             _fully_connected_out;

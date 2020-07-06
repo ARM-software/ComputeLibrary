@@ -49,23 +49,13 @@ public:
      *
      * @note If the output tensor is a nullptr, the activation function will be performed in-place
      *
-     * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
-     *                          of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
-     * @param[out]     output   Destination tensor. Data type supported: same as @p input
-     * @param[in]      act_info Activation layer information.
-     */
-    void configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
-    /** Set the input and output tensor.
-     *
-     * @note If the output tensor is a nullptr, the activation function will be performed in-place
-     *
      * @param[in]      compile_context The compile context to be used.
      * @param[in, out] input           Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
      *                                 of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
      * @param[out]     output          Destination tensor. Data type supported: same as @p input
      * @param[in]      act_info        Activation layer information.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
+    void configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLActivationLayerKernel
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result
@@ -78,12 +68,11 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    ICLTensor *_input;
-    ICLTensor *_output;
-    bool       _run_in_place;
+    bool _run_in_place;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H */

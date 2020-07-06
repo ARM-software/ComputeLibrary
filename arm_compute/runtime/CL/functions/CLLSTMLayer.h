@@ -26,7 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
@@ -34,6 +33,7 @@
 #include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
@@ -207,28 +207,28 @@ private:
     CLArithmeticAddition                 _accum_input_gate1;
     CLSaturatedArithmeticOperationKernel _subtract_input_gate;
     CLPixelWiseMultiplicationKernel      _pixelwise_mul_input_gate;
-    CLActivationLayerKernel              _activation_input_gate;
+    CLActivationLayer                    _activation_input_gate;
     CLFullyConnectedLayer                _fully_connected_forget_gate;
     CLArithmeticAddition                 _accum_forget_gate1;
     CLPixelWiseMultiplicationKernel      _pixelwise_mul_forget_gate;
-    CLActivationLayerKernel              _activation_forget_gate;
+    CLActivationLayer                    _activation_forget_gate;
     CLFullyConnectedLayer                _fully_connected_cell_state;
     CLGEMM                               _gemm_cell_state1;
     CLTransposeKernel                    _transpose_cell_state;
     CLSaturatedArithmeticOperationKernel _accum_cell_state1;
     CLSaturatedArithmeticOperationKernel _accum_cell_state2;
     CLPixelWiseMultiplicationKernel      _pixelwise_mul_cell_state1;
-    CLActivationLayerKernel              _activation_cell_state;
-    CLActivationLayerKernel              _cell_clip;
+    CLActivationLayer                    _activation_cell_state;
+    CLActivationLayer                    _cell_clip;
     CLPixelWiseMultiplicationKernel      _pixelwise_mul_cell_state2;
     CLFullyConnectedLayer                _fully_connected_output;
     CLPixelWiseMultiplicationKernel      _pixelwise_mul_output_state1;
     CLArithmeticAddition                 _accum_output1;
-    CLActivationLayerKernel              _activation_output;
-    CLActivationLayerKernel              _activation_output_state;
+    CLActivationLayer                    _activation_output;
+    CLActivationLayer                    _activation_output_state;
     CLPixelWiseMultiplicationKernel      _pixelwise_mul_output_state2;
     CLFullyConnectedLayer                _fully_connected_output_state;
-    CLActivationLayerKernel              _projection_clip;
+    CLActivationLayer                    _projection_clip;
     CLCopyKernel                         _copy_cell_state;
     CLCopyKernel                         _copy_output;
     CLConcatenateLayer                   _concat_scratch_buffer;

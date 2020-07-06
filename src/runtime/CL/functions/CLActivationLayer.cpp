@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 
+#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
@@ -30,17 +31,9 @@
 
 namespace arm_compute
 {
-CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
-    : ICLSimpleFunction(ctx)
+namespace experimental
 {
-}
-
-void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
-}
-
-void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+void CLActivationLayer::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>();
     k->configure(compile_context, input, output, act_info);
@@ -50,5 +43,60 @@ void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTe
 Status CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     return CLActivationLayerKernel::validate(input, output, act_info);
+}
+
+MemoryRequirements CLActivationLayer::workspace() const
+{
+    return MemoryRequirements{};
+}
+} // namespace experimental
+
+struct CLActivationLayer::Impl
+{
+    const ICLTensor                                 *src{ nullptr };
+    ICLTensor                                       *dst{ nullptr };
+    CLRuntimeContext                                *ctx{ nullptr };
+    std::unique_ptr<experimental::CLActivationLayer> op{ nullptr };
+};
+
+CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+    _impl->ctx = ctx;
+}
+
+CLActivationLayer::CLActivationLayer(CLActivationLayer &&) = default;
+
+CLActivationLayer &CLActivationLayer::operator=(CLActivationLayer &&) = default;
+
+CLActivationLayer::~CLActivationLayer() = default;
+
+void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
+}
+
+void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+
+    _impl->src = input;
+    _impl->dst = output == nullptr ? input : output;
+
+    _impl->op = arm_compute::support::cpp14::make_unique<experimental::CLActivationLayer>();
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), act_info);
+}
+
+Status CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+{
+    return experimental::CLActivationLayer::validate(input, output, act_info);
+}
+
+void CLActivationLayer::run()
+{
+    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+
+    _impl->op->run(src, dst, {});
 }
 } // namespace arm_compute

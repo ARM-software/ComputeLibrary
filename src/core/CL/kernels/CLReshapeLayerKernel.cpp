@@ -34,6 +34,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 
 #include <string>
 
@@ -107,8 +108,8 @@ void CLReshapeLayerKernel::run_op(const InputTensorMap &inputs, const OutputTens
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice            = window_collapsed.first_slice_window_3D();
 
-    const auto src = dynamic_cast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC));
-    auto       dst = dynamic_cast<ICLTensor *>(outputs.at(TensorType::ACL_DST));
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(outputs.at(TensorType::ACL_DST));
 
     // Set inputs
     unsigned int idx = 0;
