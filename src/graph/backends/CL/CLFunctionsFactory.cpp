@@ -42,7 +42,7 @@ namespace backends
 struct CLTargetInfo
 {
     using TensorType         = arm_compute::ICLTensor;
-    using SrcTensorType      = TensorType;
+    using SrcTensorType      = const arm_compute::ICLTensor;
     using TensorConcreteType = CLTensor;
     static Target TargetType;
 };

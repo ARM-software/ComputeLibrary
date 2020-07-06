@@ -110,7 +110,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     _forget_gate_out2.allocator()->init(TensorInfo(concat_shape, 1, input->info()->data_type()));
 
     _memory_group.manage(&_forget_gate_out2);
-    _concat_inputs_forget_gate.configure(compile_context, input, output_state_in, &_forget_gate_out2);
+    _concat_inputs_forget_gate.configure(compile_context, inputs_vector, &_forget_gate_out2, Window::DimX);
 
     std::vector<const ICLTensor *> weights_vector;
 
@@ -119,7 +119,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     const TensorShape weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(weights_vector, 0);
     _forget_gate_out6.allocator()->init(TensorInfo(weights_concat_shape, 1, input->info()->data_type()));
 
-    _concat_weights_forget_gate.configure(compile_context, input_to_forget_weights, recurrent_to_forget_weights, &_forget_gate_out6);
+    _concat_weights_forget_gate.configure(compile_context, weights_vector, &_forget_gate_out6, Window::DimX);
 
     _memory_group.manage(&_forget_gate_out5);
     _fully_connected_forget_gate.configure(compile_context, &_forget_gate_out2, &_forget_gate_out6, (_is_layer_norm_lstm) ? nullptr : forget_gate_bias, &_forget_gate_out5);
@@ -188,7 +188,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
         TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(lstm_weights, 0);
         _input_gate_out2.allocator()->init(TensorInfo(lstm_weights_concat_shape, 1, input->info()->data_type()));
 
-        _concat_weights_input_gate.configure(compile_context, lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), &_input_gate_out2);
+        _concat_weights_input_gate.configure(compile_context, lstm_weights, &_input_gate_out2, Window::DimX);
 
         _memory_group.manage(&_input_gate_out1);
 
@@ -290,7 +290,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(in_out_weights, 0);
     _output2.allocator()->init(TensorInfo(in_out_weights_concat_shape, 1, input->info()->data_type()));
 
-    _concat_weights_output.configure(compile_context, input_to_output_weights, recurrent_to_output_weights, &_output2);
+    _concat_weights_output.configure(compile_context, in_out_weights, &_output2, Window::DimX);
 
     _memory_group.manage(&_output1);
     _memory_group.manage(&_output4);
@@ -371,7 +371,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     _copy_output.configure(compile_context, output_state_out, output);
 
     // Vector for holding the tensors to store in scratch buffer
-    std::vector<ICLTensor *> scratch_inputs;
+    std::vector<const ICLTensor *> scratch_inputs;
     if(!lstm_params.has_cifg_opt())
     {
         scratch_inputs.emplace_back(input_gate_out);
@@ -485,7 +485,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     const TensorShape concat_shape       = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, 0);
     TensorInfo        forget_gate_concat = TensorInfo(concat_shape, 1, input->data_type());
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(input, output_state_in, &forget_gate_concat));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConcatenateLayer::validate(inputs_vector, &forget_gate_concat, Window::DimX));
 
     if(lstm_params.has_peephole_opt())
     {
@@ -516,7 +516,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
         lstm_weights.emplace_back(lstm_params.recurrent_to_input_weights());
         TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(lstm_weights, 0);
         TensorInfo  lstm_gate_concat          = TensorInfo(lstm_weights_concat_shape, 1, input->data_type());
-        ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), &lstm_gate_concat));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLConcatenateLayer::validate(lstm_weights, &lstm_gate_concat, Window::DimX));
 
         ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, lstm_params.input_to_input_weights(), (lstm_params.use_layer_norm()) ? nullptr : lstm_params.input_gate_bias(), &input_gate));
 
@@ -567,7 +567,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     in_out_weights.emplace_back(recurrent_to_output_weights);
     TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(in_out_weights, 0);
     TensorInfo  in_out_gate_concat          = TensorInfo(in_out_weights_concat_shape, 1, input->data_type());
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(input_to_output_weights, recurrent_to_output_weights, &in_out_gate_concat));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConcatenateLayer::validate(in_out_weights, &in_out_gate_concat, Window::DimX));
     // Validate output gate tmp
     ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, input_to_output_weights, (lstm_params.use_layer_norm()) ? nullptr : output_gate_bias, &output_gate_tmp));
 
@@ -604,7 +604,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(output_state_out, output));
 
     // Validate scratch concatenation
-    std::vector<ITensorInfo *> inputs_vector_info_raw;
+    std::vector<const ITensorInfo *> inputs_vector_info_raw;
     if(!lstm_params.has_cifg_opt())
     {
         inputs_vector_info_raw.push_back(&input_gate);
@@ -623,7 +623,7 @@ void CLLSTMLayer::run()
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    CLScheduler::get().enqueue(_concat_inputs_forget_gate);
+    _concat_inputs_forget_gate.run();
 
     _fully_connected_forget_gate.run();
 
@@ -721,12 +721,12 @@ void CLLSTMLayer::prepare()
 {
     if(!_is_prepared)
     {
-        CLScheduler::get().enqueue(_concat_weights_forget_gate);
+        _concat_weights_forget_gate.run();
         if(!_run_cifg_opt)
         {
-            CLScheduler::get().enqueue(_concat_weights_input_gate);
+            _concat_weights_input_gate.run();
         }
-        CLScheduler::get().enqueue(_concat_weights_output);
+        _concat_weights_output.run();
         _is_prepared = true;
     }
 }

@@ -40,6 +40,8 @@
 
 namespace arm_compute
 {
+namespace experimental
+{
 CLConcatenateLayer::CLConcatenateLayer()
     : _concat_kernels(),
       _num_inputs(0),
@@ -47,54 +49,23 @@ CLConcatenateLayer::CLConcatenateLayer()
 {
 }
 
-void CLConcatenateLayer::configure(std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), inputs_vector, output, axis);
-}
-
-void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
-{
-    configure_internal(compile_context, std::move(inputs_vector), output, axis);
-}
-
-void CLConcatenateLayer::configure(std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), inputs_vector, output, axis);
-}
-
-void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
-{
-    configure_internal(compile_context, std::move(inputs_vector), output, axis);
-}
-
-Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
-{
-    return validate_internal(inputs_vector, output, axis);
-}
-
-Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
-{
-    return validate_internal(inputs_vector, output, axis);
-}
-
-template <typename TensorType>
-void CLConcatenateLayer::configure_internal(const CLCompileContext &compile_context, std::vector<TensorType *> &&inputs_vector, ICLTensor *output, size_t axis)
+void CLConcatenateLayer::configure(const CLCompileContext &compile_context, const std::vector<ITensorInfo *> &inputs_vector, ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
     _axis       = axis;
     _num_inputs = inputs_vector.size();
 
-    std::vector<ITensorInfo *> inputs_vector_info(inputs_vector.size());
-    std::transform(inputs_vector.begin(), inputs_vector.end(), inputs_vector_info.begin(), [](TensorType * t)
+    TensorShape                      output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, _axis);
+    std::vector<const ITensorInfo *> const_inputs_vector(inputs_vector.size());
+    std::transform(inputs_vector.begin(), inputs_vector.end(), const_inputs_vector.begin(), [](ITensorInfo * t)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(t);
-        return t->info();
+        return t;
     });
-    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, _axis);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
-    ARM_COMPUTE_ERROR_THROW_ON(CLConcatenateLayer::validate(inputs_vector_info, output->info(), axis));
+    auto_init_if_empty(*output, output_shape, 1, inputs_vector[0]->data_type());
+    ARM_COMPUTE_ERROR_THROW_ON(CLConcatenateLayer::validate(const_inputs_vector, output, axis));
 
     unsigned int offset = 0;
     switch(_axis)
@@ -126,7 +97,7 @@ void CLConcatenateLayer::configure_internal(const CLCompileContext &compile_cont
                     {
                         auto kernel = support::cpp14::make_unique<CLWidthConcatenateLayerKernel>();
                         kernel->configure(compile_context, inputs_vector.at(i), offset, output);
-                        offset += inputs_vector.at(i)->info()->dimension(_axis);
+                        offset += inputs_vector.at(i)->dimension(_axis);
                         _concat_kernels.emplace_back(std::move(kernel));
                     }
                     break;
@@ -140,7 +111,7 @@ void CLConcatenateLayer::configure_internal(const CLCompileContext &compile_cont
             {
                 auto kernel = support::cpp14::make_unique<CLHeightConcatenateLayerKernel>();
                 kernel->configure(compile_context, inputs_vector.at(i), offset, output);
-                offset += inputs_vector.at(i)->info()->dimension(_axis);
+                offset += inputs_vector.at(i)->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
             }
             break;
@@ -151,7 +122,7 @@ void CLConcatenateLayer::configure_internal(const CLCompileContext &compile_cont
             {
                 auto kernel = support::cpp14::make_unique<CLDepthConcatenateLayerKernel>();
                 kernel->configure(compile_context, inputs_vector.at(i), offset, output);
-                offset += inputs_vector.at(i)->info()->dimension(_axis);
+                offset += inputs_vector.at(i)->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
             }
             break;
@@ -162,7 +133,7 @@ void CLConcatenateLayer::configure_internal(const CLCompileContext &compile_cont
             {
                 auto kernel = support::cpp14::make_unique<CLBatchConcatenateLayerKernel>();
                 kernel->configure(compile_context, inputs_vector.at(i), offset, output);
-                offset += inputs_vector.at(i)->info()->dimension(_axis);
+                offset += inputs_vector.at(i)->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
             }
             break;
@@ -172,8 +143,7 @@ void CLConcatenateLayer::configure_internal(const CLCompileContext &compile_cont
     }
 }
 
-template <typename TensorInfoType>
-Status CLConcatenateLayer::validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output, size_t axis)
+Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(output == nullptr);
     const unsigned int num_inputs = inputs_vector.size();
@@ -250,11 +220,101 @@ Status CLConcatenateLayer::validate_internal(const std::vector<TensorInfoType *>
     return Status{};
 }
 
+MemoryRequirements CLConcatenateLayer::workspace() const
+{
+    return MemoryRequirements{};
+}
+
+void CLConcatenateLayer::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+{
+    ARM_COMPUTE_UNUSED(workspace);
+
+    if(inputs.empty() || outputs.empty())
+    {
+        ARM_COMPUTE_ERROR("No inputs provided");
+    }
+
+    if(inputs.size() != _num_inputs)
+    {
+        ARM_COMPUTE_ERROR("Configured with different number of inputs");
+    }
+
+    if(_axis == Window::DimX && (_num_inputs == 2 || _num_inputs == 4))
+    {
+        ARM_COMPUTE_ERROR_ON(_concat_kernels.empty());
+        CLScheduler::get().enqueue_op(*_concat_kernels.at(0), inputs, outputs, true);
+    }
+    else
+    {
+        int i = 0;
+        for(auto &k : _concat_kernels)
+        {
+            const InputTensorMap input = { { TensorType::ACL_SRC, inputs.at(ACL_SRC_VEC + i) } };
+            CLScheduler::get().enqueue_op(*k, input, outputs, true);
+            ++i;
+        }
+    }
+}
+} // namespace experimental
+
+struct CLConcatenateLayer::Impl
+{
+    std::vector<const ICLTensor *>                    srcs{};
+    ICLTensor                                        *dst{ nullptr };
+    unsigned int                                      num_inputs{ 0 };
+    unsigned int                                      axis{ 0 };
+    std::unique_ptr<experimental::CLConcatenateLayer> op{ nullptr };
+};
+
+CLConcatenateLayer::CLConcatenateLayer()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+
+CLConcatenateLayer::CLConcatenateLayer(CLConcatenateLayer &&) = default;
+
+CLConcatenateLayer &CLConcatenateLayer::operator=(CLConcatenateLayer &&) = default;
+
+CLConcatenateLayer::~CLConcatenateLayer() = default;
+
+void CLConcatenateLayer::configure(std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), inputs_vector, output, axis);
+}
+
+void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+{
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    _impl->srcs       = inputs_vector;
+    _impl->dst        = output;
+    _impl->axis       = axis;
+    _impl->num_inputs = inputs_vector.size();
+    _impl->op         = arm_compute::support::cpp14::make_unique<experimental::CLConcatenateLayer>();
+
+    std::vector<ITensorInfo *> inputs_vector_info;
+    for(unsigned int i = 0; i < inputs_vector.size(); ++i)
+    {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(inputs_vector.at(i));
+        inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
+    }
+    _impl->op->configure(compile_context, inputs_vector_info, _impl->dst->info(), axis);
+}
+
+Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+{
+    return experimental::CLConcatenateLayer::validate(inputs_vector, output, axis);
+}
+
 void CLConcatenateLayer::run()
 {
-    for(auto &kernel : _concat_kernels)
+    InputTensorMap srcs;
+    for(unsigned i = 0; i < _impl->num_inputs; ++i)
     {
-        CLScheduler::get().enqueue(*kernel, true);
+        srcs.insert(std::make_pair(TensorType::ACL_SRC_VEC + i, _impl->srcs.at(i)));
     }
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+
+    _impl->op->run(srcs, dst, {});
 }
 } // namespace arm_compute

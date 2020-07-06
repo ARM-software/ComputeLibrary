@@ -27,18 +27,13 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "support/StringSupport.h"
-
-#include <map>
 
 namespace arm_compute
 {
@@ -77,7 +72,7 @@ Status validate_arguments(const ITensorInfo *input, unsigned int height_offset, 
 } // namespace
 
 CLHeightConcatenateLayerKernel::CLHeightConcatenateLayerKernel()
-    : _input(nullptr), _output(nullptr), _height_offset(0), _num_elems_processed_per_iteration()
+    : _height_offset(0), _num_elems_processed_per_iteration()
 {
 }
 
@@ -89,33 +84,26 @@ Status CLHeightConcatenateLayerKernel::validate(const ITensorInfo *input, unsign
     return Status{};
 }
 
-void CLHeightConcatenateLayerKernel::configure(const ICLTensor *input, unsigned int height_offset, ICLTensor *output)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, height_offset, output);
-}
-
-void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int height_offset, ICLTensor *output)
+void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_context, ITensorInfo *input, unsigned int height_offset, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), height_offset, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, height_offset, output));
 
-    _input         = input;
-    _output        = output;
     _height_offset = height_offset;
 
-    auto win_config = validate_and_configure_window(input->info(), output->info(), _num_elems_processed_per_iteration);
+    auto win_config = validate_and_configure_window(input, output, _num_elems_processed_per_iteration);
 
     // Add build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->element_size()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(_num_elems_processed_per_iteration));
     build_opts.add_option("-DHEIGHT_OFFSET=" + support::cpp11::to_string(_height_offset));
-    build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
+    build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input->dimension(2)));
 
-    if(is_data_type_quantized_asymmetric(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info())
+    if(is_data_type_quantized_asymmetric(input->data_type()) && input->quantization_info() != output->quantization_info())
     {
-        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
 
         build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iq_info.offset));
         build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oq_info.offset));
@@ -132,17 +120,21 @@ void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_c
     ICLKernel::configure_internal(std::get<1>(win_config));
 
     // Set output valid region
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 }
 
-void CLHeightConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLHeightConcatenateLayerKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                                            const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(outputs.at(TensorType::ACL_DST));
+
     unsigned int idx = 0;
-    add_4D_tensor_argument(idx, _input, window);
-    add_4D_tensor_argument(idx, _output, window);
+    add_4D_tensor_argument(idx, src, window);
+    add_4D_tensor_argument(idx, dst, window);
     enqueue(queue, *this, window, lws_hint());
 }
 } // namespace arm_compute

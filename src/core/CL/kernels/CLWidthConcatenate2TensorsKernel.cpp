@@ -28,11 +28,10 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/helpers/tensor_info.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "support/StringSupport.h"
@@ -79,11 +78,6 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
 }
 } // namespace
 
-CLWidthConcatenate2TensorsKernel::CLWidthConcatenate2TensorsKernel()
-    : _input1(nullptr), _input2(nullptr), _output(nullptr)
-{
-}
-
 Status CLWidthConcatenate2TensorsKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output));
@@ -91,35 +85,26 @@ Status CLWidthConcatenate2TensorsKernel::validate(const ITensorInfo *input1, con
     return Status{};
 }
 
-void CLWidthConcatenate2TensorsKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
-}
-
-void CLWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info()));
-
-    _input1 = input1;
-    _input2 = input2;
-    _output = output;
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1, input2, output));
 
     // Add build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input1->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input1->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
-    build_opts.add_option("-DINPUT1_WIDTH=" + support::cpp11::to_string(input1->info()->dimension(0)));
-    build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input1->info()->element_size()));
+    build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input1->dimension(2)));
+    build_opts.add_option("-DINPUT1_WIDTH=" + support::cpp11::to_string(input1->dimension(0)));
+    build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input1->element_size()));
 
     // If input have different quantization info set quantization parameters needed for the re-quantization process
-    const bool have_different_qinfo = helpers::tensor_info::tensors_have_different_quantization_info(output->info(), input1->info(), input2->info());
-    if(is_data_type_quantized_asymmetric(input1->info()->data_type()) && have_different_qinfo)
+    const bool have_different_qinfo = helpers::tensor_info::tensors_have_different_quantization_info(output, input1, input2);
+    if(is_data_type_quantized_asymmetric(input1->data_type()) && have_different_qinfo)
     {
-        const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
-        const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info  = output->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq1_info = input1->quantization_info().uniform();
+        const UniformQuantizationInfo iq2_info = input2->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info  = output->quantization_info().uniform();
 
         build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iq1_info.offset));
         build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iq1_info.scale));
@@ -133,16 +118,16 @@ void CLWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile
     _kernel = create_kernel(compile_context, "concatenate_width_x2", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info());
+    auto win_config = validate_and_configure_window(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     ICLKernel::configure_internal(std::get<1>(win_config));
 
     // Set output valid region
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     // Pass paddings as arguments to the kernel
-    const unsigned int input1_width         = input1->info()->dimension(0);
+    const unsigned int input1_width         = input1->dimension(0);
     const unsigned int input1_right_padding = ceil_to_multiple(input1_width, num_elems_processed_per_iteration) - input1_width;
     const unsigned int input2_left_padding  = input1_width % num_elems_processed_per_iteration;
     unsigned int       idx0                 = 3 * num_arguments_per_4D_tensor();
@@ -151,30 +136,35 @@ void CLWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile
 
     // Set config_id for enabling LWS tuning
     _config_id = "concatenate_width_x2_";
-    _config_id += lower_string(string_from_data_type(input1->info()->data_type()));
+    _config_id += lower_string(string_from_data_type(input1->data_type()));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input1->info()->dimension(0));
+    _config_id += support::cpp11::to_string(input1->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input1->info()->dimension(1));
+    _config_id += support::cpp11::to_string(input1->dimension(1));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input2->info()->dimension(0));
+    _config_id += support::cpp11::to_string(input2->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input2->info()->dimension(1));
+    _config_id += support::cpp11::to_string(input2->dimension(1));
 }
 
-void CLWidthConcatenate2TensorsKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLWidthConcatenate2TensorsKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                                              const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
     Window slice = window.first_slice_window_4D();
 
+    const auto src0 = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC_VEC));
+    const auto src1 = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC_VEC + 1));
+    auto       dst  = utils::cast::polymorphic_downcast<ICLTensor *>(outputs.at(TensorType::ACL_DST));
+
     do
     {
         unsigned int idx = 0;
-        add_4D_tensor_argument(idx, _input1, slice);
-        add_4D_tensor_argument(idx, _input2, slice);
-        add_4D_tensor_argument(idx, _output, slice);
+        add_4D_tensor_argument(idx, src0, slice);
+        add_4D_tensor_argument(idx, src1, slice);
+        add_4D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, window, lws_hint());
     }
     while(window.slide_window_slice_4D(slice));

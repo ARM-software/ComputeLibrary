@@ -43,11 +43,11 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T, bool CI = true>
 class ConcatenateLayerValidationFixture : public framework::Fixture
 {
 private:
-    using SrcITensorType = typename std::conditional<std::is_same<ITensorType, ITensor>::value, const ITensorType, ITensorType>::type;
+    using SrcITensorType = typename std::conditional<CI, const ITensorType, ITensorType>::type;
 
 public:
     template <typename...>

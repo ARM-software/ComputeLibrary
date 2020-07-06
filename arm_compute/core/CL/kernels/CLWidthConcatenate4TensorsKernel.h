@@ -30,8 +30,6 @@
 
 namespace arm_compute
 {
-class ICLTensor;
-
 /** Interface for the width concatenate kernel of 4 tensors.
  *  All input tensors will be concatenated into the output tensor.
  */
@@ -52,15 +50,6 @@ public:
     ~CLWidthConcatenate4TensorsKernel() = default;
     /** Initialise the kernel's input1s and output
      *
-     * @param[in]  input1 First input tensor. Data types supported: All.
-     * @param[in]  input2 Second input tensor. Data types supported: same as @p input1
-     * @param[in]  input3 Third input tensor. Data types supported: same as @p input1
-     * @param[in]  input4 Fourth input tensor. Data types supported: same as @p input1
-     * @param[out] output Output tensor. Data types supported: Same as @p input1.
-     */
-    void configure(const ICLTensor *input1, const ICLTensor *input2, const ICLTensor *input3, const ICLTensor *input4, ICLTensor *output);
-    /** Initialise the kernel's input1s and output
-     *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input1          First input tensor. Data types supported: All.
      * @param[in]  input2          Second input tensor. Data types supported: same as @p input1
@@ -68,7 +57,7 @@ public:
      * @param[in]  input4          Fourth input tensor. Data types supported: same as @p input1
      * @param[out] output          Output tensor. Data types supported: Same as @p input1.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, const ICLTensor *input3, const ICLTensor *input4, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *input3, ITensorInfo *input4, ITensorInfo *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLWidthConcatenate4TensorsKernel
      *
      * @param[in] input1 First tensor info. Data types supported: All.
@@ -82,14 +71,8 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *input3, const ITensorInfo *input4, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
-
-private:
-    const ICLTensor *_input1;
-    const ICLTensor *_input2;
-    const ICLTensor *_input3;
-    const ICLTensor *_input4;
-    ICLTensor       *_output;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLWIDTHCONCATENATE_4TENSORS_KERNEL_H */

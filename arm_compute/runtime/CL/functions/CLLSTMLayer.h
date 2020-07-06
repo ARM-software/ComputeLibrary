@@ -30,7 +30,6 @@
 #include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
-#include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -232,10 +231,10 @@ private:
     CLCopyKernel                         _copy_cell_state;
     CLCopyKernel                         _copy_output;
     CLConcatenateLayer                   _concat_scratch_buffer;
-    CLWidthConcatenate2TensorsKernel     _concat_inputs_forget_gate;
-    CLWidthConcatenate2TensorsKernel     _concat_weights_forget_gate;
-    CLWidthConcatenate2TensorsKernel     _concat_weights_input_gate;
-    CLWidthConcatenate2TensorsKernel     _concat_weights_output;
+    CLConcatenateLayer                   _concat_inputs_forget_gate;
+    CLConcatenateLayer                   _concat_weights_forget_gate;
+    CLConcatenateLayer                   _concat_weights_input_gate;
+    CLConcatenateLayer                   _concat_weights_output;
     CLMemsetKernel                       _ones_memset_kernel;
     CLMeanStdDevNormalizationLayer       _mean_std_norm_input_gate;
     CLPixelWiseMultiplicationKernel      _pixelwise_mul_input_gate_coeff;

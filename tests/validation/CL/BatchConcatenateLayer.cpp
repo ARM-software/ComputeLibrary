@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,7 +70,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     inputs_vector_info.emplace_back(std::move(input_info1));
     inputs_vector_info.emplace_back(std::move(input_info2));
 
-    std::vector<ITensorInfo *> inputs_vector_info_raw;
+    std::vector<const ITensorInfo *> inputs_vector_info_raw;
     inputs_vector_info_raw.reserve(inputs_vector_info.size());
     for(auto &input : inputs_vector_info)
     {
@@ -97,8 +97,8 @@ TEST_CASE(Configuration, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    CLConcatenateLayer       concat_layer;
-    std::vector<ICLTensor *> inputs;
+    CLConcatenateLayer             concat_layer;
+    std::vector<const ICLTensor *> inputs;
     inputs.emplace_back(&src1);
     inputs.emplace_back(&src2);
     inputs.emplace_back(&src3);

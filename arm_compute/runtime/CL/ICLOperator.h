@@ -54,7 +54,7 @@ public:
     ICLOperator &operator=(ICLOperator &&) = default;
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override final;
+    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
     void prepare(OperatorTensorMap constants) override final;
 
 protected:
