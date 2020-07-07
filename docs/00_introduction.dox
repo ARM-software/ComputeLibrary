@@ -246,6 +246,7 @@ v20.08 Public major release
       "axis" has been renamed to "reduce_end_axis", which is the last axis (inclusive) before which all dimensions are reduced/collapsed.
       The default "axis" (now "reduce_end_axis") value for @ref NESoftmaxLayer and @ref NELogSoftmaxLayer is changed from -1 to 0.
       The default "axis" (now "reduce_end_axis") value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer is changed from 1 to 0.
+ - The support for quantized data types has been removed from @ref CLLogSoftmaxLayer due to implementation complexity.
  - Added new data type QASYMM8_SIGNED support for:
       - @ref CLArgMinMaxLayer
       - @ref CLArgMinMaxLayerKernel

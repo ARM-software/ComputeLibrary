@@ -85,7 +85,7 @@ SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, in
         {
             if(is_log)
             {
-                return val - sum;
+                return val - static_cast<T>(std::log(sum));
             }
             else
             {

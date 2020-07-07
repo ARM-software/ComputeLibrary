@@ -39,10 +39,10 @@ class ITensor;
 /** Basic function to compute a SoftmaxLayer and a Log SoftmaxLayer.
  *
  * Softmax is calculated by :
- * @f[ out = \frac{e^{x - max(x)}}{\sum{e^{x - max(x)}}} @f]
+ * @f[ out = exp((x - max(x)) * beta) / sum(exp((x - max(x)) * beta)) @f]
  *
  * Log Softmax is calculated by :
- * @f[ out = (x - max(x)) - \sum{e^{x - max(x)}} @f]
+ * @f[ out = (x - max(x) * beta) - log(\sum{e^{x - max(x) * beta}}) @f]
  *
  * This function runs the following kernels:
  * -# @ref NEFillBorderKernel

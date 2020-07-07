@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -570,14 +570,12 @@ __kernel void softmax_layer_norm_quantized(
     int sum_val = *((__global int *)offset(&sum, 0, get_global_id(1)));
 
     // It will be better to calculate this in prev layer and pass here as parameter
-#ifndef LOG_SOFTMAX
     uint  sum_val_u               = convert_uint(sum_val);
     int   headroom_plus_one       = clz(sum_val_u);
     int   num_bits_over_unit      = EXP_ACCUMULATION_INT_BITS - headroom_plus_one;
     int   shifted_sum_minus_one_1 = convert_int((sum_val_u << headroom_plus_one) - (1u << 31));
     int16 shifted_sum_minus_one   = shifted_sum_minus_one_1;
     int16 shifted_scale           = ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1(shifted_sum_minus_one, 16);
-#endif /* LOG_SOFTMAX */
 
     // It was already calculated in prev layer, should be stored into tmp output and reused
     int16 data_diff      = vload16(0, (__global int *)offset(&src, 0, 0));
@@ -589,18 +587,13 @@ __kernel void softmax_layer_norm_quantized(
     }
 #endif /* defined(INPUT_BETA_MULTIPLIER) && defined(INPUT_BETA_LEFT_SHIFT) */
 
-#ifdef LOG_SOFTMAX
-    long16 data = SUB_OP(convert_long16(data_diff_mult), (long16)(sum_val), long, 16);
-    data        = select(0L, data, convert_long16(data_diff) >= (long16)(DIFF_MIN));
-#else /* LOG_SOFTMAX */
     int16 data = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 16);
     data       = ASYMM_MULT(shifted_scale, data, 16);
     data       = ASYMM_ROUNDING_DIVIDE_BY_POW2(data, num_bits_over_unit + 31 - 8, 16);
 #ifdef QASYMM8_SIGNED
-    data       = ADD_OP(data, (int16)(MIN_VALUE), int, 16);
+    data = ADD_OP(data, (int16)(MIN_VALUE), int, 16);
 #endif /* QASYMM8_SIGNED */
-    data       = select(MIN_VALUE, data, data_diff >= (int16)(DIFF_MIN));
-#endif /* LOG_SOFTMAX */
+    data = select(MIN_VALUE, data, data_diff >= (int16)(DIFF_MIN));
     vstore16(CONVERT_SAT(data, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)offset(&dst, 0, 0));
 }
 

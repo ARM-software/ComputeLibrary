@@ -129,6 +129,7 @@ Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *su
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(sum, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
+    ARM_COMPUTE_RETURN_ERROR_ON(info.is_log && !is_data_type_float(info.input_data_type));
 
     // Note: output should always have a scale of 1/256 and offset 0
     const QuantizationInfo allowed_quantization_info = get_softmax_output_quantization_info(info.input_data_type, info.is_log);

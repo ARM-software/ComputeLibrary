@@ -203,7 +203,7 @@ public:
     CLLogits1DNormKernel &operator=(CLLogits1DNormKernel &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: S32/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: S32/F16/F32. If this kernel is used for log softmax, only F32/F16 is supported.
      * @param[in]  sum    Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
      * @param[out] output Destination tensor. Data types supported: QASYMM8 for S32 @p input, or same as @p input
      * @param[in]  info   Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
@@ -212,7 +212,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data types supported: S32/F16/F32
+     * @param[in]  input           Source tensor. Data types supported: S32/F16/F32. If this kernel is used for log softmax, only F32/F16 is supported.
      * @param[in]  sum             Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
      * @param[out] output          Destination tensor. Data types supported: QASYMM8 for S32 @p input, or same as @p input
      * @param[in]  info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
@@ -220,7 +220,7 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLogits1DNormKernel
      *
-     * @param[in] input  Source tensor. Data types supported: S32/F16/F32
+     * @param[in] input  Source tensor. Data types supported: S32/F16/F32. If this kernel is used for log softmax, only F32/F16 is supported.
      * @param[in] sum    Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
      * @param[in] output Destination tensor. Data types supported: QASYMM8 for S32 @p input, or same as @p input
      * @param[in] info   Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.

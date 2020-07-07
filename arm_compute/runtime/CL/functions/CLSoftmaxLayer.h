@@ -44,7 +44,7 @@ class ICLTensor;
  * @f[ out = exp((x - max(x)) * beta) / sum(exp((x - max(x)) * beta)) @f]
  *
  * Log Softmax is calculated by :
- * @f[ out = (x - max(x) * beta) - \sum{e^{x - max(x) * beta}} @f]
+ * @f[ out = (x - max(x) * beta) - log(\sum{e^{x - max(x) * beta}}) @f]
  *
  * This function runs the following kernels:
  * -# @ref CLLogits1DMaxKernel
@@ -63,7 +63,7 @@ public:
     CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input           Source tensor. Data types supported: QASYMM8/F16/F32
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/F16/F32 for Softmax and F16/F32 for Log Softmax
      * @param[out] output          Destination tensor. Data types supported: same as @p input
      * @param[in]  beta            (Optional) A scaling factor for the exponent. Defaults to 1.f
      * @param[in]  reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
@@ -75,7 +75,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data types supported: QASYMM8/F16/F32
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/F16/F32 for Softmax and F16/F32 for Log Softmax
      * @param[out] output          Destination tensor. Data types supported: same as @p input
      * @param[in]  beta            (Optional) A scaling factor for the exponent. Defaults to 1.f
      * @param[in]  reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
@@ -86,7 +86,7 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta = 1.0f, size_t reduce_end_axis = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSoftmaxLayer
      *
-     * @param[in] input           Source tensor. Data types supported: QASYMM8/F16/F32
+     * @param[in] input           Source tensor. Data types supported: QASYMM8/F16/F32 for Softmax and F16/F32 for Log Softmax
      * @param[in] output          Destination tensor. Data types supported: same as @p input
      * @param[in] beta            (Optional) A scaling factor for the exponent. Defaults to 1.f
      * @param[in] reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
