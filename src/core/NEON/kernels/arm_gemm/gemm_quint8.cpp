@@ -72,7 +72,7 @@ static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_meth
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "hybrid_u8u32_dot_16x4",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && args._Ksize>=16; },
-    [](const GemmArgs &args, const Requantize32 &) { return args._Nsize<=256 && args._Ksize>128; },
+    [](const GemmArgs &args, const Requantize32 &) { return ((args._Nsize<=256) && (args._Ksize>128)) || (args._maxthreads >= 8); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_u8u32_dot_16x4, uint8_t, uint8_t>(args, qp); }
 },
 /** QUANTIZE_WRAPPER_2D enables 2D parallelisation hint for IScheduler in NEGEMMAssemblyDispatch */
