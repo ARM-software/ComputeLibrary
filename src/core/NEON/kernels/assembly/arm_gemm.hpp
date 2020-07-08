@@ -48,12 +48,13 @@ enum class GemmMethod
 
 struct KernelDescription
 {
-    GemmMethod  method     = GemmMethod::DEFAULT;
-    std::string name       = "";
-    bool        is_default = false;
+    GemmMethod  method         = GemmMethod::DEFAULT;
+    std::string name           = "";
+    bool        is_default     = false;
+    uint64_t    cycle_estimate = 0;
 
-    KernelDescription(GemmMethod m, std::string n, bool d = false)
-        : method(m), name(n), is_default(d)
+    KernelDescription(GemmMethod m, std::string n, bool d = false, uint64_t c = 0)
+        : method(m), name(n), is_default(d), cycle_estimate(c)
     {
     }
     KernelDescription() noexcept

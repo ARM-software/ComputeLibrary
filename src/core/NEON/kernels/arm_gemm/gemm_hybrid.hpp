@@ -23,17 +23,15 @@
  */
 #pragma once
 
-#include <assert.h>
-
 #include <algorithm>
+#include <cassert>
 
 #include "arm_gemm.hpp"
 #include "bias_adder.hpp"
 #include "ndrange.hpp"
-#include "utils.hpp"
-
-#include "mergeresults.hpp"
+#include "performance_parameters.hpp"
 #include "transform.hpp"
+#include "utils.hpp"
 
 #ifdef CYCLE_PROFILING
 #include "profiler.hpp"
@@ -251,6 +249,28 @@ public:
 
     void set_pretransposed_B_data(void *in_buffer) override {
         _B_transposed = reinterpret_cast<Toi *>(in_buffer);
+    }
+
+    // Estimate cycles for given problem given provided parameters
+    static uint64_t estimate_cycles(const GemmArgs &args, const PerformanceParameters &params) {
+        // Note: Current hybrid kernels don't actually round up height (they
+        // have paths for each possible height).  Might need to make this
+        // configurable in future.
+        uint64_t total_macs = static_cast<uint64_t>(args._nbatches) * args._nmulti * args._Msize * roundup(args._Nsize, strategy::out_width()) * roundup(args._Ksize, strategy::k_unroll());
+
+        float mac_cycles = static_cast<float>(total_macs) / params.kernel_macs_cycle;
+
+        // TODO: A bit of a kludge here: current hybrid kernels incur extra
+        // overhead where the width is not a multiple of kernel width.  It's
+        // most noticable where the overall width is quite low, so add 15%
+        // penalty for such widths.
+        if ((args._Nsize < strategy::out_width()) || (args._Nsize > strategy::out_width() && args._Nsize < 2*strategy::out_width())) {
+            mac_cycles *= 1.15f;
+        }
+
+        uint64_t total_cycles = mac_cycles;
+
+        return total_cycles;
     }
 };
 

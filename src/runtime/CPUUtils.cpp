@@ -126,6 +126,9 @@ CPUModel midr_to_model(const unsigned int midr)
             case 0xd44: // X1
                 model = CPUModel::X1;
                 break;
+            case 0xd09: // A73
+                model = CPUModel::A73;
+                break;
             case 0xd0a: // A75
                 if(variant != 0)
                 {

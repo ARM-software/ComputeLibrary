@@ -101,6 +101,13 @@ static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
     [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_u8u32_dot_4x6, uint8_t, uint32_t>(args); }
 },
 {
+    GemmMethod::GEMM_INTERLEAVED,
+    "gemm_u16_12x8",
+    nullptr,
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53; },
+    [](const GemmArgs &args) { return new GemmInterleaved<gemm_u16_12x8, uint8_t, uint32_t>(args); },
+},
+{
     GemmMethod::GEMM_HYBRID,
     "hybrid_u8u32_dot_16x4",
     [](const GemmArgs &args) { return args._ci->has_dotprod() && args._Ksize>=16; },

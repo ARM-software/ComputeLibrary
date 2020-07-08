@@ -25,7 +25,7 @@
 
 #ifdef __aarch64__
 
-
+#include "../performance_parameters.hpp"
 #include "../std_transforms_fixed.hpp"
 
 namespace arm_gemm
@@ -73,6 +73,22 @@ public:
     static constexpr bool supports_activation()
     {
         return true;
+    }
+
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
+        switch (ci->get_cpu_model()) {
+            case CPUModel::A55r1:
+                return { 2.866 };
+
+            case CPUModel::A53:
+                return { 1.419 };
+
+            case CPUModel::A73:
+                return { 2.551 };
+
+            default:
+                return { 6.25 };
+        }
     }
 
     StdTransformsFixed<operand_type, result_type, 4, 16, 1> transforms = {};

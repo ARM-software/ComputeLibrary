@@ -45,7 +45,8 @@ enum class CPUModel
     A53,
     A55r0,
     A55r1,
-    X1
+    X1,
+    A73
 };
 
 /** Global memory policy.
@@ -98,6 +99,10 @@ inline std::string cpu_model_to_string(CPUModel val)
         case CPUModel::X1:
         {
             return std::string("X1");
+        }
+        case CPUModel::A73:
+        {
+            return std::string("A73");
         }
         default:
         {
