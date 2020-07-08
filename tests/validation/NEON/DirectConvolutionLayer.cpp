@@ -98,6 +98,25 @@ const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKer
 const auto data_precommit    = combine(data, framework::dataset::make("NumKernels", { 1 }));
 const auto data_precommit9x9 = combine(data9x9, framework::dataset::make("NumKernels", { 4 }));
 
+/* The following tests is from real use-case that made DirectConvolution
+ * overflows in terms of its tensor indexing. This test case is using
+ * a separate tolerance due to the following reason.
+ * - It has shown that it requires generally larger absolute tolerance
+ *   for large numbers or larger relative tolerance for small numbers.
+ * - With the first reason, since it is mainly testing index overflow,
+ *   a value with a margin is used to avoid uninteded test failures
+ *   during nightly.
+ */
+constexpr AbsoluteTolerance<float> usecase_tolerance_fp32(0.05f);
+
+const auto data_nightly_usecase = combine(framework::dataset::make("InputShape", { TensorShape{ 3U, 800U, 800U } }),
+                                          combine(framework::dataset::make("StrideX", { 1 }),
+                                                  combine(framework::dataset::make("StrideY", { 1 }),
+                                                          combine(framework::dataset::make("PadX", { 4 }),
+                                                                  combine(framework::dataset::make("PadY", { 4 }),
+                                                                          combine(framework::dataset::make("KernelSize", 9),
+                                                                                  framework::dataset::make("NumKernels", { 16 })))))));
+
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
@@ -226,6 +245,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<float>, framewo
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeUsecase, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly_usecase, framework::dataset::make("DataType",
+                       DataType::F32)),
+                       framework::dataset::make("ActivationInfo", { ActivationLayerInfo() })),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, usecase_tolerance_fp32);
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
