@@ -58,21 +58,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
     if(rhs_info.export_to_cl_image)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.n0 == 2) || (rhs_info.n0 == 3), "Export to cl_image only supported with n0 = 4, 8 or 16");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.k0 == 2) || (rhs_info.k0 == 3), "Export to cl_image only supported with k0 = 4, 8 or 16");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() != DataType::F32, "Export to cl_image only supported with F32 data type");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()), "The extension cl_khr_image2d_from_buffer is not supported on the target platform");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0, "Impossible to retrieve the cl_image pitch alignment");
-
-        TensorShape output_shape = compute_rhs_reshaped_shape(*input, rhs_info);
-
-        // Check the width and height of the output tensor.
-        // Since we cannot create a 3d image from a buffer, the third dimension is collapsed with the second dimension
-        size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
-        size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
-
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_shape[0] > max_image_w * 4, "Not supported width for cl_image");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_shape[1] * output_shape[2] > max_image_h, "Not supported height for cl_image");
+        const TensorInfo tensor_reshaped_info(compute_rhs_reshaped_shape(*input, rhs_info), 1, DataType::F32);
+        ARM_COMPUTE_RETURN_ON_ERROR(cl_gemm::validate_image2d_support_on_rhs(tensor_reshaped_info, rhs_info));
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);

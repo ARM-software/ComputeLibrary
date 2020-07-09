@@ -29,32 +29,45 @@
 
 namespace arm_compute
 {
+class ITensorInfo;
+struct GEMMRHSMatrixInfo;
+
 namespace cl_gemm
 {
 /** Configure @ref GEMMLHSMatrixInfo and @ref GEMMRHSMatrixInfo
  *
- * @param[in] m              Number of rows (M) in the LHS matrix not reshaped
- * @param[in] n              Number of columns (N) in the RHS matrix not reshaped
- * @param[in] m0             Number of rows processed by each thread/work-item
- * @param[in] n0             Number of columns processed by each thread/work-item
- * @param[in] k0             Number of inner accumulation performed by each thread/work-item
- * @param[in] v0             Number of vertical blocks of size (m0xk0) stored on the same output row
- * @param[in] h0             Number of horizontal blocks of size (k0xn0) stored on the same output row
- * @param[in] lhs_interleave True if the v0 (m0xk0) blocks have to be interleaved in the output row
- * @param[in] rhs_interleave True if the h0 (k0xn0) blocks have to be interleaved in the output row
- * @param[in] lhs_transpose  True if the (m0xk0) block has to be transposed before been stored
- * @param[in] rhs_transpose  True if the (k0xn0) block has to be transposed before been stored
+ * @param[in] m                  Number of rows (M) in the LHS matrix not reshaped
+ * @param[in] n                  Number of columns (N) in the RHS matrix not reshaped
+ * @param[in] m0                 Number of rows processed by each thread/work-item
+ * @param[in] n0                 Number of columns processed by each thread/work-item
+ * @param[in] k0                 Number of inner accumulation performed by each thread/work-item
+ * @param[in] v0                 Number of vertical blocks of size (m0xk0) stored on the same output row
+ * @param[in] h0                 Number of horizontal blocks of size (k0xn0) stored on the same output row
+ * @param[in] lhs_interleave     True if the v0 (m0xk0) blocks have to be interleaved in the output row
+ * @param[in] rhs_interleave     True if the h0 (k0xn0) blocks have to be interleaved in the output row
+ * @param[in] lhs_transpose      True if the (m0xk0) block has to be transposed before been stored
+ * @param[in] rhs_transpose      True if the (k0xn0) block has to be transposed before been stored
+ * @param[in] export_to_cl_image (Optional) True if the RHS reshaped matrix has to be exported to cl_image
  *
  * @return @ref GEMMLHSMatrixInfo and @ref GEMMRHSMatrixInfo
  */
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_lhs_rhs_info(unsigned int m, unsigned int n, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0,
-                                                                       bool lhs_interleave, bool rhs_interleave, bool lhs_transpose, bool rhs_transpose);
+                                                                       bool lhs_interleave, bool rhs_interleave, bool lhs_transpose, bool rhs_transpose, bool export_to_cl_image = false);
 
 /** Update padding required to export the OpenCL buffer to OpenCL image2d
  *
  * @param[in,out] tensor ITensorInfo of the tensor required to be exported to OpenCL image2d
  */
 void update_padding_for_cl_image(ITensorInfo *tensor);
+
+/** Utility function to validate the image2d OpenCL object support on the RHS reshaped matrix
+ *
+ * @param[in] tensor_reshaped_info TensorInfo for the RHS reshaped matrix
+ * @param[in] rhs_info             @ref GEMMRHSMatrixInfo
+ *
+ * @return Status reporting if we can use the image2d OpenCL object on the RHS reshaped matrix
+ */
+Status validate_image2d_support_on_rhs(const ITensorInfo &tensor_reshaped_info, const GEMMRHSMatrixInfo &rhs_info);
 } // namespace cl_gemm
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMHELPERS_H */

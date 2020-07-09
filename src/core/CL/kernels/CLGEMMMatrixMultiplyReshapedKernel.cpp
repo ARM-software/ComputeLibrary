@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -79,23 +80,7 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
                                     && (!gemm_info.broadcast_bias),
                                     "Bias addition only supported with broadcast mode in case the input or output has to be reinterpreted as 3D");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.fp_mixed_precision && (input0->data_type() == DataType::F32), "Mixed precision only supported for F16 data type");
-
-    if(rhs_info.export_to_cl_image)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.n0 == 2) || (rhs_info.n0 == 3), "Export to cl_image only supported with n0 = 4, 8 or 16");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.k0 == 2) || (rhs_info.k0 == 3), "Export to cl_image only supported with k0 = 4, 8 or 16");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() != DataType::F32, "Export to cl_image only supported with F32 data type");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()), "The extension cl_khr_image2d_from_buffer is not supported on the target platform");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0, "Impossible to retrieve the cl_image pitch alignment");
-
-        // Check the width and height of the output tensor.
-        // Since we cannot create a 3d image from a buffer, the third dimension is collapsed with the second dimension
-        size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
-        size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
-
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->tensor_shape()[0] > max_image_w * 4, "Not supported width for cl_image");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->tensor_shape()[1] * input1->tensor_shape()[2] > max_image_h, "Not supported height for cl_image");
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(cl_gemm::validate_image2d_support_on_rhs(*input1, rhs_info));
 
     const unsigned int m = gemm_info.m;
     const unsigned int n = gemm_info.n;
