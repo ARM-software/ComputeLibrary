@@ -63,6 +63,11 @@ public:
         _real_scheduler.set_num_threads(num_threads);
     }
 
+    void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func) override
+    {
+        _real_scheduler.set_num_threads_with_affinity(num_threads, func);
+    }
+
     unsigned int num_threads() const override
     {
         return _real_scheduler.num_threads();

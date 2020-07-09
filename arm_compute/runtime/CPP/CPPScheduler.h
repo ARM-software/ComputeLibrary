@@ -39,16 +39,6 @@ public:
     CPPScheduler();
     /** Default destructor */
     ~CPPScheduler();
-    /** Sets the number of threads the scheduler will use to run the kernels.
-     *
-     * @param[in] num_threads If set to 0, then the maximum number of threads supported by C++11 will be used, otherwise the number of threads specified.
-     */
-    void set_num_threads(unsigned int num_threads) override;
-    /** Returns the number of threads that the CPPScheduler has in his pool.
-     *
-     * @return Number of threads available in CPPScheduler.
-     */
-    unsigned int num_threads() const override;
 
     /** Access the scheduler singleton
      *
@@ -56,27 +46,12 @@ public:
      * @return The scheduler
      */
     static CPPScheduler &get();
-    /** Multithread the execution of the passed kernel if possible.
-     *
-     * The kernel will run on a single thread if any of these conditions is true:
-     * - ICPPKernel::is_parallelisable() returns false
-     * - The scheduler has been initialized with only one thread.
-     *
-     * @param[in] kernel Kernel to execute.
-     * @param[in] hints  Hints for the scheduler.
-     */
+
+    // Inherited functions overridden
+    void set_num_threads(unsigned int num_threads) override;
+    void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func) override;
+    unsigned int num_threads() const override;
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
-    /** Multithread the execution of the passed kernel if possible.
-     *
-     * The kernel will run on a single thread if any of these conditions is true:
-     * - ICPPKernel::is_parallelisable() returns false
-     * - The scheduler has been initialized with only one thread.
-     *
-     * @param[in] kernel  Kernel to execute.
-     * @param[in] hints   Hints for the scheduler.
-     * @param[in] inputs  Vector that contains the input tensors.
-     * @param[in] outputs Vector that contains the output tensors.
-     */
     void schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs) override;
 
 protected:

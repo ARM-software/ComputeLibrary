@@ -144,38 +144,31 @@ void process_workloads(std::vector<IScheduler::Workload> &workloads, ThreadFeede
     }
     while(feeder.get_next(workload_index));
 }
-} //namespace
 
-struct CPPScheduler::Impl final
+void set_thread_affinity(int core_id)
 {
-    explicit Impl(unsigned int thread_hint)
-        : _num_threads(thread_hint), _threads(_num_threads - 1)
+    if(core_id < 0)
     {
-    }
-    void set_num_threads(unsigned int num_threads, unsigned int thead_hint)
-    {
-        _num_threads = num_threads == 0 ? thead_hint : num_threads;
-        _threads.resize(_num_threads - 1);
-    }
-    unsigned int num_threads() const
-    {
-        return _num_threads;
+        return;
     }
 
-    void run_workloads(std::vector<IScheduler::Workload> &workloads);
+    cpu_set_t set;
+    CPU_ZERO(&set);
+    CPU_SET(core_id, &set);
+    ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set),
+                            "Error setting thread affinity");
+}
 
-    class Thread;
-
-    unsigned int       _num_threads;
-    std::list<Thread>  _threads;
-    arm_compute::Mutex _run_workloads_mutex{};
-};
-
-class CPPScheduler::Impl::Thread final
+class Thread final
 {
 public:
-    /** Start a new thread. */
-    Thread();
+    /** Start a new thread
+     *
+     * Thread will be pinned to a given core id if value is non-negative
+     *
+     * @param[in] core_pin Core id to pin the thread on. If negative no thread pinning will take place
+     */
+    explicit Thread(int core_pin = -1);
 
     Thread(const Thread &) = delete;
     Thread &operator=(const Thread &) = delete;
@@ -211,14 +204,16 @@ private:
     bool                               _wait_for_work{ false };
     bool                               _job_complete{ true };
     std::exception_ptr                 _current_exception{ nullptr };
+    int                                _core_pin{ -1 };
 };
 
-CPPScheduler::Impl::Thread::Thread()
+Thread::Thread(int core_pin)
+    : _core_pin(core_pin)
 {
     _thread = std::thread(&Thread::worker_thread, this);
 }
 
-CPPScheduler::Impl::Thread::~Thread()
+Thread::~Thread()
 {
     // Make sure worker thread has ended
     if(_thread.joinable())
@@ -229,7 +224,7 @@ CPPScheduler::Impl::Thread::~Thread()
     }
 }
 
-void CPPScheduler::Impl::Thread::start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &feeder, const ThreadInfo &info)
+void Thread::start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &feeder, const ThreadInfo &info)
 {
     _workloads = workloads;
     _feeder    = &feeder;
@@ -242,7 +237,7 @@ void CPPScheduler::Impl::Thread::start(std::vector<IScheduler::Workload> *worklo
     _cv.notify_one();
 }
 
-void CPPScheduler::Impl::Thread::wait()
+void Thread::wait()
 {
     {
         std::unique_lock<std::mutex> lock(_m);
@@ -255,8 +250,10 @@ void CPPScheduler::Impl::Thread::wait()
     }
 }
 
-void CPPScheduler::Impl::Thread::worker_thread()
+void Thread::worker_thread()
 {
+    set_thread_affinity(_core_pin);
+
     while(true)
     {
         std::unique_lock<std::mutex> lock(_m);
@@ -289,6 +286,44 @@ void CPPScheduler::Impl::Thread::worker_thread()
         _cv.notify_one();
     }
 }
+} //namespace
+
+struct CPPScheduler::Impl final
+{
+    explicit Impl(unsigned int thread_hint)
+        : _num_threads(thread_hint), _threads(_num_threads - 1)
+    {
+    }
+    void set_num_threads(unsigned int num_threads, unsigned int thread_hint)
+    {
+        _num_threads = num_threads == 0 ? thread_hint : num_threads;
+        _threads.resize(_num_threads - 1);
+    }
+    void set_num_threads_with_affinity(unsigned int num_threads, unsigned int thread_hint, BindFunc func)
+    {
+        _num_threads = num_threads == 0 ? thread_hint : num_threads;
+
+        // Set affinity on main thread
+        set_thread_affinity(func(0, thread_hint));
+
+        // Set affinity on worked threads
+        _threads.clear();
+        for(auto i = 1U; i < _num_threads; ++i)
+        {
+            _threads.emplace_back(func(i, thread_hint));
+        }
+    }
+    unsigned int num_threads() const
+    {
+        return _num_threads;
+    }
+
+    void run_workloads(std::vector<IScheduler::Workload> &workloads);
+
+    unsigned int       _num_threads;
+    std::list<Thread>  _threads;
+    arm_compute::Mutex _run_workloads_mutex{};
+};
 
 /*
  * This singleton has been deprecated and will be removed in the next release
@@ -311,6 +346,13 @@ void CPPScheduler::set_num_threads(unsigned int num_threads)
     // No changes in the number of threads while current workloads are running
     arm_compute::lock_guard<std::mutex> lock(_impl->_run_workloads_mutex);
     _impl->set_num_threads(num_threads, num_threads_hint());
+}
+
+void CPPScheduler::set_num_threads_with_affinity(unsigned int num_threads, BindFunc func)
+{
+    // No changes in the number of threads while current workloads are running
+    arm_compute::lock_guard<std::mutex> lock(_impl->_run_workloads_mutex);
+    _impl->set_num_threads_with_affinity(num_threads, num_threads_hint(), func);
 }
 
 unsigned int CPPScheduler::num_threads() const

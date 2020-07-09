@@ -47,6 +47,13 @@ public:
         DYNAMIC, /**< Split the workload dynamically using a bucket system */
     };
 
+    /** Function to be used and map a given thread id to a logical core id
+     *
+     * Mapping function expects the thread index and total number of cores as input,
+     * and returns the logical core index to bind against
+     */
+    using BindFunc = std::function<int(int, int)>;
+
     /** When arm_compute::ISchedular::Hints::_split_dimension is initialized with this value
      * then the schedular is free to break down the problem space over as many dimensions
      * as it wishes
@@ -136,6 +143,13 @@ public:
      * @param[in] num_threads If set to 0, then one thread per CPU core available on the system will be used, otherwise the number of threads specified.
      */
     virtual void set_num_threads(unsigned int num_threads) = 0;
+
+    /** Sets the number of threads the scheduler will use to run the kernels but also using a binding function to pin the threads to given logical cores
+     *
+     * @param[in] num_threads If set to 0, then one thread per CPU core available on the system will be used, otherwise the number of threads specified.
+     * @param[in] func        Binding function to use.
+     */
+    virtual void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func);
 
     /** Returns the number of threads that the SingleThreadScheduler has in his pool.
      *
