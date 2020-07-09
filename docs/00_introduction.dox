@@ -240,6 +240,13 @@ If there is more than one release in a month then an extra sequential number is 
 v20.08 Public major release
  - Various bug fixes.
  - Various optimisations.
+ - Added new data type QASYMM8_SIGNED support for:
+      - @ref CLArgMinMaxLayer
+      - @ref CLArgMinMaxLayerKernel
+ - New graph example:
+      - graph_yolov3_output_detector
+ - Removed padding from:
+     - @ref NEPixelWiseMultiplicationKernel
  - Deprecated functions / interfaces:
    - Non-descriptor based interfaces for @ref NEThreshold, @ref CLThreshold
    - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer :
@@ -247,9 +254,6 @@ v20.08 Public major release
       The default "axis" (now "reduce_end_axis") value for @ref NESoftmaxLayer and @ref NELogSoftmaxLayer is changed from -1 to 0.
       The default "axis" (now "reduce_end_axis") value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer is changed from 1 to 0.
  - The support for quantized data types has been removed from @ref CLLogSoftmaxLayer due to implementation complexity.
- - Added new data type QASYMM8_SIGNED support for:
-      - @ref CLArgMinMaxLayer
-      - @ref CLArgMinMaxLayerKernel
 
 v20.05 Public major release
  - Various bug fixes.
