@@ -241,12 +241,22 @@ v20.08 Public major release
  - Various bug fixes.
  - Various optimisations.
  - Added new data type QASYMM8_SIGNED support for:
-      - @ref CLArgMinMaxLayer
-      - @ref CLArgMinMaxLayerKernel
+   - @ref CLArgMinMaxLayer
+   - @ref CLArgMinMaxLayerKernel
+ - Added new data type U8 support for:
+   - @ref NECropKernel
+   - @ref CLCropKernel
+ - Added aligh_corner support for nearest neighbor interpolation in:
+   - @ref NEScaleKernel
+   - @ref CLScaleKernel
+ - New OpenCL kernels / functions:
+   - @ref CLMaxUnpoolingLayerKernel
+ - New NEON kernels / functions:
+   - @ref NEMaxUnpoolingLayerKernel
  - New graph example:
-      - graph_yolov3_output_detector
+   - graph_yolov3_output_detector
  - Removed padding from:
-     - @ref NEPixelWiseMultiplicationKernel
+   - @ref NEPixelWiseMultiplicationKernel
  - Deprecated functions / interfaces:
    - Non-descriptor based interfaces for @ref NEThreshold, @ref CLThreshold
    - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer :
