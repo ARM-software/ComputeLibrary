@@ -210,6 +210,9 @@ TEST_SUITE_END() // Float
 template <typename T>
 using NEArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticAddition, T>;
 
+template <typename T>
+using NEArithmeticAdditionQuantizedBroadcastFixture = ArithmeticAdditionValidationQuantizedBroadcastFixture<Tensor, Accessor, NEArithmeticAddition, T>;
+
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
@@ -239,6 +242,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                                framework::dataset::make("Src0QInfo", { QuantizationInfo(0.5f, 20) })),
                                        framework::dataset::make("Src1QInfo", { QuantizationInfo(0.5f, 10) })),
                                framework::dataset::make("OutQInfo", { QuantizationInfo(0.5f, 5) })))
+{
+    // Validate output
+#ifdef __aarch64__
+    validate(Accessor(_target), _reference);
+#else  //__aarch64__
+    validate(Accessor(_target), _reference, tolerance_quant);
+#endif //__aarch64__
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticAdditionQuantizedBroadcastFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(
+                           datasets::SmallShapesBroadcast(), ArithmeticAdditionQASYMM8SIGNEDDataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(0.5f, 20) })),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(0.5f, 10) })),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(0.5f, 5) })))
 {
     // Validate output
 #ifdef __aarch64__

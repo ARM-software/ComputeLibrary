@@ -343,11 +343,7 @@ void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const 
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
     const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
 
-    const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
-    const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
     const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
-    const int32x4_t   voffset1   = vdupq_n_s32(iq1_info.offset);
-    const int32x4_t   voffset2   = vdupq_n_s32(iq2_info.offset);
     const float32x4_t voffseto   = vdupq_n_f32(oq_info.offset);
 
     if(is_broadcast_across_x)
@@ -359,6 +355,11 @@ void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const 
         const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
         const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
         const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
+
+        const float32x4_t vscale1  = is_broadcast_input_2 ? vdupq_n_f32(iq1_info.scale) : vdupq_n_f32(iq2_info.scale);
+        const float32x4_t vscale2  = is_broadcast_input_2 ? vdupq_n_f32(iq2_info.scale) : vdupq_n_f32(iq1_info.scale);
+        const int32x4_t   voffset1 = is_broadcast_input_2 ? vdupq_n_s32(iq1_info.offset) : vdupq_n_s32(iq2_info.offset);
+        const int32x4_t   voffset2 = is_broadcast_input_2 ? vdupq_n_s32(iq2_info.offset) : vdupq_n_s32(iq1_info.offset);
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -442,6 +443,10 @@ void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const 
         Iterator input2(in2, input2_win);
         Iterator output(out, win);
 
+        const float32x4_t vscale1  = vdupq_n_f32(iq1_info.scale);
+        const float32x4_t vscale2  = vdupq_n_f32(iq2_info.scale);
+        const int32x4_t   voffset1 = vdupq_n_s32(iq1_info.offset);
+        const int32x4_t   voffset2 = vdupq_n_s32(iq2_info.offset);
         execute_window_loop(win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const int8_t *>(input1.ptr());
