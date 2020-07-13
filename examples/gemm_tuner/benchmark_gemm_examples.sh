@@ -36,6 +36,9 @@ EXAMPLE_BIN_NATIVE="benchmark_cl_gemm_native"
 EXAMPLE_BIN_RESHAPED_RHS_ONLY="benchmark_cl_gemm_reshaped_rhs_only"
 EXAMPLE_BIN_RESHAPED="benchmark_cl_gemm_reshaped"
 
+# Default data type
+DEFAULT_DATA_TYPE="F32"
+
 # Default output directory
 DEFAULT_OUT_DIR="out"
 
@@ -233,6 +236,10 @@ Options:
         -c <gemm_config_file>
         Path to gemm config csv file
 
+        -d <data_type>
+        Data type option with which to run benchmark examples
+        Default: ${DEFAULT_DATA_TYPE}
+
         -o <out_dir>
         Path to output directory that holds output json files
         Default: ${DEFAULT_OUT_DIR}
@@ -350,9 +357,9 @@ function run() {
     while read gemm_config
     do
       # Ignore empty lines and lines starting with # (comments)
-      if echo "$gemm_shape" | grep -Eq "$match_expression" && echo "$gemm_config" | grep -Pq "$match_expression";then
+      if echo "$gemm_shape" | grep -Eq "$match_expression" && echo "$gemm_config" | grep -Eq "$match_expression";then
         echo "Running..." 1>&2
-        example_args="${gemm_shape},${gemm_config}"
+        example_args="${gemm_shape},${gemm_config},--type=${DATA_TYPE}"
         # Run experiment
         ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${expr_count}.${OUT_EXTENSION} --instruments=OPENCL_TIMER_MS
         # Print progress
@@ -411,6 +418,8 @@ GEMM_SHAPES_FILE=""
 # Path to gemm configs file
 GEMM_CONFIGS_FILE=""
 STRATEGY_OPTION=""
+# Data type to use
+DATA_TYPE=${DEFAULT_DATA_TYPE}
 # Path to output directory
 OUT_DIR=${DEFAULT_OUT_DIR}
 # Output benchmark result file extension
@@ -419,13 +428,14 @@ OUT_EXTENSION="gemmtuner_benchmark"
 HELP=false
 
 # Obtain options
-while getopts "hs:e:g:c:o:" opt; do
+while getopts "hs:e:g:c:d:o:" opt; do
   case "$opt" in
     h) HELP=true ;;
     s) STRATEGY_OPTION=$(to_lower "${OPTARG}");;
     e) EXAMPLE_BIN_DIR="${OPTARG}";;
     g) GEMM_SHAPES_FILE="${OPTARG}";;
     c) GEMM_CONFIGS_FILE="${OPTARG}";;
+    d) DATA_TYPE="${OPTARG}";;
     o) OUT_DIR="${OPTARG}";;
   esac
 done
