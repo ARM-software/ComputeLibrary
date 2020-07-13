@@ -383,7 +383,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
     }
 
     // Extract IO and info
-    std::vector<typename TargetInfo::TensorType *> inputs;
+    std::vector<typename TargetInfo::SrcTensorType *> inputs;
     for(unsigned int i = 0; i < node.num_inputs(); ++i)
     {
         inputs.push_back(get_backing_tensor<TargetInfo>(node.input(i)));

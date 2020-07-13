@@ -347,7 +347,7 @@ void NELSTMLayer::configure(const ITensor *input,
     _copy_output.configure(output_state_out, output);
 
     // Vector for holding the tensors to store in scratch buffer
-    std::vector<ITensor *> scratch_inputs;
+    std::vector<const ITensor *> scratch_inputs;
     if(!lstm_params.has_cifg_opt())
     {
         scratch_inputs.emplace_back(input_gate_out);
@@ -579,7 +579,7 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ON_ERROR(NECopyKernel::validate(output_state_out, output));
 
     // Validate scratch concatenation
-    std::vector<ITensorInfo *> inputs_vector_info_raw;
+    std::vector<const ITensorInfo *> inputs_vector_info_raw;
     if(!lstm_params.has_cifg_opt())
     {
         inputs_vector_info_raw.push_back(&input_gate);

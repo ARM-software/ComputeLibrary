@@ -56,15 +56,15 @@ public:
     ~NEBatchConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: All.
+     * @param[in]     input        Input tensor info. Data types supported: All.
      * @param[in]     batch_offset The offset on axis # 3.
-     * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
+     * @param[in,out] output       Output tensor info. Data types supported: Same as @p input.
      *
      * @note: The output tensor's low two dimensions can't be smaller than the input one's.
      * @note: The gaps between the two lowest dimensions of input and output need to be divisible by 2.
      *
      */
-    void configure(const ITensor *input, unsigned int batch_offset, ITensor *output);
+    void configure(const ITensorInfo *input, unsigned int batch_offset, ITensorInfo *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEBatchConcatenateLayerKernel
      *
      * @param[in] input        Input tensor info. Data types supported: All.
@@ -76,15 +76,14 @@ public:
     static Status validate(const ITensorInfo *input, unsigned int batch_offset, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                const Window &window, const ThreadInfo &info) override;
 
 private:
     using BatchConcatFunction = void(const ITensor *in, ITensor *out, unsigned int batch_offset, const Window &window);
 
 private:
     BatchConcatFunction *_func;
-    const ITensor       *_input;
-    ITensor             *_output;
     unsigned int         _batch_offset;
 };
 } // namespace arm_compute

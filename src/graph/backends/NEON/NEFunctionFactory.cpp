@@ -47,6 +47,7 @@ namespace backends
 struct NETargetInfo
 {
     using TensorType         = arm_compute::ITensor;
+    using SrcTensorType      = const arm_compute::ITensor;
     using TensorConcreteType = arm_compute::Tensor;
     static Target TargetType;
 };

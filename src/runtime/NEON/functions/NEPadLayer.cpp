@@ -117,7 +117,7 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
             const int32_t end_mask_after    = ends_after[i] < 0 ? ~0 : ~(1u << i);
 
             // Reflect the input values for the padding before and after the input.
-            std::vector<ITensor *> concat_vector;
+            std::vector<const ITensor *> concat_vector;
             if(_padding[i].first > 0)
             {
                 if(i < prev->info()->num_dimensions())

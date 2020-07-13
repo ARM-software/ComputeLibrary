@@ -58,24 +58,22 @@ Status validate_arguments(const ITensorInfo *input, unsigned int width_offset, c
 } // namespace
 
 NEWidthConcatenateLayerKernel::NEWidthConcatenateLayerKernel()
-    : _input(nullptr), _output(nullptr), _width_offset(0)
+    : _width_offset(0)
 {
 }
 
-void NEWidthConcatenateLayerKernel::configure(const ITensor *input, unsigned int width_offset, ITensor *output)
+void NEWidthConcatenateLayerKernel::configure(const ITensorInfo *input, unsigned int width_offset, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), width_offset, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, width_offset, output));
 
-    _input        = input;
-    _output       = output;
     _width_offset = width_offset;
 
     // Configure kernel window
-    Window      win = calculate_max_window(*input->info(), Steps());
+    Window      win = calculate_max_window(*input, Steps());
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
 
     INEKernel::configure(win);
 }
@@ -86,28 +84,32 @@ Status NEWidthConcatenateLayerKernel::validate(const ITensorInfo *input, unsigne
     return Status{};
 }
 
-void NEWidthConcatenateLayerKernel::run(const Window &window, const ThreadInfo &info)
+void NEWidthConcatenateLayerKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                                           const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
+    const auto src = inputs.at(TensorType::ACL_SRC);
+    auto       dst = outputs.at(TensorType::ACL_DST);
+
     // Offset output pointer to the correct position
-    uint8_t *output_ptr = _output->buffer() + _output->info()->offset_first_element_in_bytes() + _width_offset * _output->info()->strides_in_bytes()[0];
+    uint8_t *output_ptr = dst->buffer() + dst->info()->offset_first_element_in_bytes() + _width_offset * dst->info()->strides_in_bytes()[0];
 
     const auto    window_start_x = static_cast<int>(window.x().start());
-    const auto    window_end_x   = static_cast<int>(window.x().end()) * static_cast<int>(_output->info()->element_size());
+    const auto    window_end_x   = static_cast<int>(window.x().end()) * static_cast<int>(dst->info()->element_size());
     constexpr int window_step_x  = 16;
 
     Window win{ window };
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     // Create iterators
-    Iterator                       input(_input, win);
-    Iterator                       output(_output, win);
-    const DataType                 dt           = _input->info()->data_type();
-    const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
+    Iterator                       input(src, win);
+    Iterator                       output(dst, win);
+    const DataType                 dt           = src->info()->data_type();
+    const UniformQuantizationInfo &input_qinfo  = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &output_qinfo = dst->info()->quantization_info().uniform();
     if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
         execute_window_loop(win, [&](const Coordinates &)

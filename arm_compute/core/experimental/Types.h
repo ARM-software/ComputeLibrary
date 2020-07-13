@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 
 /** Memory type */
-enum class TensorType
+enum TensorType : int32_t
 {
     ACL_UNKNOWN = -1,
     ACL_SRC     = 0,
@@ -47,11 +47,12 @@ enum class TensorType
     ACL_INT     = 50,
     ACL_INT_0   = 50,
     ACL_INT_1   = 51,
-    ACL_INT_2   = 52
+    ACL_INT_2   = 52,
+    ACL_SRC_VEC = 256,
 };
 
-using InputTensorMap    = std::map<TensorType, const ITensor *>;
-using OutputTensorMap   = std::map<TensorType, ITensor *>;
+using InputTensorMap    = std::map<int32_t, const ITensor *>;
+using OutputTensorMap   = std::map<int32_t, ITensor *>;
 using OperatorTensorMap = OutputTensorMap;
 
 namespace experimental

@@ -141,21 +141,19 @@ Status validate_arguments(const ITensorInfo *input, unsigned int batch_offset, c
 } // namespace
 
 NEBatchConcatenateLayerKernel::NEBatchConcatenateLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _batch_offset(0)
+    : _func(nullptr), _batch_offset(0)
 {
 }
 
-void NEBatchConcatenateLayerKernel::configure(const ITensor *input, unsigned int batch_offset, ITensor *output)
+void NEBatchConcatenateLayerKernel::configure(const ITensorInfo *input, unsigned int batch_offset, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), batch_offset, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, batch_offset, output));
 
     _func         = nullptr;
-    _input        = input;
-    _output       = output;
     _batch_offset = batch_offset;
 
-    switch(input->info()->data_type())
+    switch(input->data_type())
     {
         case DataType::S8:
         case DataType::U8:
@@ -178,10 +176,10 @@ void NEBatchConcatenateLayerKernel::configure(const ITensor *input, unsigned int
     }
 
     // Configure kernel window
-    Window      win = calculate_max_window(*output->info(), Steps());
+    Window      win = calculate_max_window(*output, Steps());
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
     INEKernel::configure(win);
 }
 
@@ -193,13 +191,14 @@ Status NEBatchConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *i
     return Status{};
 }
 
-void NEBatchConcatenateLayerKernel::run(const Window &window, const ThreadInfo &info)
+void NEBatchConcatenateLayerKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                                           const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (*_func)(_input, _output, _batch_offset, window);
+    (*_func)(inputs.at(TensorType::ACL_SRC), outputs.at(TensorType::ACL_DST), _batch_offset, window);
 }
 } // namespace arm_compute

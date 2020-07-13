@@ -40,7 +40,8 @@ namespace backends
 /** Target specific information structure used to pass information to the layer templates */
 struct GCTargetInfo
 {
-    using TensorType = arm_compute::IGCTensor;
+    using TensorType    = arm_compute::IGCTensor;
+    using SrcTensorType = TensorType;
     static Target TargetType;
 };
 

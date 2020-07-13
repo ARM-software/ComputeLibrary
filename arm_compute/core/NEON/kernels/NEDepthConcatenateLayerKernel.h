@@ -56,15 +56,15 @@ public:
     ~NEDepthConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]     input        Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]     depth_offset The offset on the Z axis.
-     * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
+     * @param[in,out] output       Output tensor info. Data types supported: Same as @p input.
      *
      * @note: The output tensor's low two dimensions can't be smaller than the input one's.
      * @note: The gaps between the two lowest dimensions of input and output need to be divisible by 2.
      *
      */
-    void configure(const ITensor *input, unsigned int depth_offset, ITensor *output);
+    void configure(const ITensorInfo *input, unsigned int depth_offset, ITensorInfo *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEDepthConcatenateLayerKernel
      *
      * @param[in] input        Input tensor info. Data types supported:  QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -76,15 +76,14 @@ public:
     static Status validate(const ITensorInfo *input, unsigned int depth_offset, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                const Window &window, const ThreadInfo &info) override;
 
 private:
     using DepthConcatFunction = void(const ITensor *in, ITensor *out, unsigned int depth_offset, const Window &window);
 
 private:
     DepthConcatFunction *_func;
-    const ITensor       *_input;
-    ITensor             *_output;
     unsigned int         _depth_offset;
 };
 } // namespace arm_compute
