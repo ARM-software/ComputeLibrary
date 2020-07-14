@@ -55,7 +55,10 @@ public:
      * @note Output shape must be equal to the shape of the original input to pool.
      *
      * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[out] indices   The indices of the maximal values. Data type supported: U32.
+     * @param[in]  indices   Tensor containing the offset to store the input elements in the output tensor.
+     *                       @ref NEPoolingLayerKernel with indices should precede this function in order to
+     *                       properly reconstruct the output tensor.
+     *                       The tensor shape of this tensor has to be equal to the input tensor shape. Data type supported: U32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */

@@ -99,6 +99,9 @@ SimpleTensor<T> max_unpooling_layer(const SimpleTensor<T> &src, const PoolingLay
 template SimpleTensor<float> max_unpooling_layer(const SimpleTensor<float> &src, const PoolingLayerInfo &info,
                                                  const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> &indices,
                                                  TensorShape output_shape, DataLayout data_layout);
+template SimpleTensor<half> max_unpooling_layer(const SimpleTensor<half> &src, const PoolingLayerInfo &info,
+                                                const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> &indices,
+                                                TensorShape output_shape, DataLayout data_layout);
 
 } // namespace reference
 } // namespace validation

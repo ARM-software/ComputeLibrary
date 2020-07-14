@@ -45,7 +45,7 @@ public:
     NEMaxUnpoolingLayer();
     /** Set the input and output tensors.
      *
-     * @note F16 is supported for pool sizes 2 and 3 only
+     * @note Only supported pool size 2
      *
      * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]     output    Destination tensor. Data types supported: Same as @p input.
@@ -55,7 +55,7 @@ public:
     void configure(ITensor *input, ITensor *indices, ITensor *output, const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEMaxUnpoolingLayer
      *
-     * @note F16 is supported for pool sizes 2 and 3 only
+     * @note Only supported pool size 2
      *
      * @param[in] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] indices   The indices of the maximal values. Data type supported: U32.
