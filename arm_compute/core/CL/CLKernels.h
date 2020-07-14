@@ -108,6 +108,7 @@
 #include "arm_compute/core/CL/kernels/CLLKTrackerKernel.h"
 #include "arm_compute/core/CL/kernels/CLLocallyConnectedMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLMagnitudePhaseKernel.h"
+#include "arm_compute/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
 #include "arm_compute/core/CL/kernels/CLMeanStdDevNormalizationKernel.h"
 #include "arm_compute/core/CL/kernels/CLMedian3x3Kernel.h"

@@ -283,6 +283,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "lktracker_stage0", "optical_flow_pyramid_lk.cl" },
     { "lktracker_stage1", "optical_flow_pyramid_lk.cl" },
     { "magnitude_phase", "magnitude_phase.cl" },
+    { "max_unpooling_layer_2", "unpooling_layer.cl" },
     { "mean_stddev_accumulate", "mean_stddev.cl" },
     { "mean_stddev_normalization", "mean_stddev_normalization.cl" },
     { "memset", "memset.cl" },
@@ -937,6 +938,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "types.h",
 #include "./cl_kernels/types.hembed"
+    },
+    {
+        "unpooling_layer.cl",
+#include "./cl_kernels/unpooling_layer.clembed"
     },
     {
         "warp_affine.cl",
