@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #undef CONVERT_SAT
 
-#if defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH) && defined(DATA_LAYOUT_NHWC)
+#if defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH) && defined(DATA_LAYOUT_NHWC) && defined(PAD_TOP)
 
 #define PTR_TO_VALUE(PTR, DATA_TYPE) *((__global DATA_TYPE *)(PTR))
 
@@ -288,134 +288,52 @@ __kernel void direct_convolution9x9_nhwc(
 
     weights_addr += id0 * weights_stride_w;
 
-#if(PAD_TOP == 1)
-    const int coordy = id2 - PAD_TOP;
-    for(volatile int d = 0; d < WEIGHTS_DEPTH; d += STEP_X)
+    const int coordy = (id2 * STRIDE_Y) - PAD_TOP;
+    if(coordy < 0)
     {
-        if(coordy < 0) // special case Z = -1 doesn't exists
+        // Skip first rows containing padding
+        for(volatile int d = 0; d < WEIGHTS_DEPTH; d += STEP_X)
         {
-            //skip first row and load the two next ones
-            CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 8 * (int)src_stride_z), (weights_addr + 8 * (int)weights_stride_z));
+            const int start_z = -coordy;
+            for(int i = start_z; i < 9; ++i)
+            {
+                CONVOLUTION1x9_NHWC(values, (src_addr + i * (int)src_stride_z), (weights_addr + i * (int)weights_stride_z));
+            }
+            src_addr += STEP_X * sizeof(DATA_TYPE);
+            weights_addr += STEP_X * sizeof(DATA_TYPE);
         }
-        else if(coordy == (DST_HEIGHT - PAD_TOP - 1))
-        {
-            // special case when computing the last row of the output we must read the last three rows from the input buffer (including padding) but the
-            // Z axis has no padding at all.
-            CONVOLUTION1x9_NHWC(values, src_addr, weights_addr);
-            CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
-        }
-        else
-        {
-            CONVOLUTION1x9_NHWC(values, src_addr, weights_addr);
-            CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 8 * (int)src_stride_z), (weights_addr + 8 * (int)weights_stride_z));
-        }
-        src_addr += STEP_X * sizeof(DATA_TYPE);
-        weights_addr += STEP_X * sizeof(DATA_TYPE);
     }
-#elif(PAD_TOP == 2) // PAD_TOP == 1
-    const int coordy = id2 * STRIDE_Y;
-    for(volatile int d = 0; d < WEIGHTS_DEPTH; d += STEP_X)
+    else if(coordy > (SRC_HEIGHT - 9))
     {
-        if(coordy == 0) // special case Z = -2 doesn't exists
+        for(volatile int d = 0; d < WEIGHTS_DEPTH; d += STEP_X)
         {
-            //skip first row and load the two next ones
-            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 8 * (int)src_stride_z), (weights_addr + 8 * (int)weights_stride_z));
+            // Avoid loading rows beyond the input height
+            const int end_z = SRC_HEIGHT - coordy;
+            for(int i = 0; i < end_z; ++i)
+            {
+                CONVOLUTION1x9_NHWC(values, (src_addr + i * (int)src_stride_z), (weights_addr + i * (int)weights_stride_z));
+            }
+            src_addr += STEP_X * sizeof(DATA_TYPE);
+            weights_addr += STEP_X * sizeof(DATA_TYPE);
         }
-        else if(coordy == 1) // special case Z = -1 doesn't exists
-        {
-            //skip first row and load the two next ones
-            CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 8 * (int)src_stride_z), (weights_addr + 8 * (int)weights_stride_z));
-        }
-        else if(coordy == (SRC_HEIGHT - 5))
-        {
-            // special case when computing the last row of the output we must read the last three rows from the input buffer (including padding) but the
-            // Z axis has no padding at all.
-            CONVOLUTION1x9_NHWC(values, src_addr, weights_addr);
-            CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-        }
-        else if(coordy == (SRC_HEIGHT - 6))
-        {
-            // special case when computing the last row of the output we must read the last three rows from the input buffer (including padding) but the
-            // Z axis has no padding at all.
-            CONVOLUTION1x9_NHWC(values, src_addr, weights_addr);
-            CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
-        }
-        else
-        {
-            CONVOLUTION1x9_NHWC(values, src_addr, weights_addr);
-            CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
-            CONVOLUTION1x9_NHWC(values, (src_addr + 8 * (int)src_stride_z), (weights_addr + 8 * (int)weights_stride_z));
-        }
-        src_addr += STEP_X * sizeof(DATA_TYPE);
-        weights_addr += STEP_X * sizeof(DATA_TYPE);
     }
-
-#else  // PAD_TOP == 1
-    for(volatile int d = 0; d < WEIGHTS_DEPTH; d += STEP_X)
+    else
     {
-        CONVOLUTION1x9_NHWC(values, src_addr, weights_addr);
-        CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
-        CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
-        CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
-        CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
-        CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
-        CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
-        CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
-        CONVOLUTION1x9_NHWC(values, (src_addr + 8 * (int)src_stride_z), (weights_addr + 8 * (int)weights_stride_z));
-        src_addr += STEP_X * sizeof(DATA_TYPE);
-        weights_addr += STEP_X * sizeof(DATA_TYPE);
+        for(volatile int d = 0; d < WEIGHTS_DEPTH; d += STEP_X)
+        {
+            CONVOLUTION1x9_NHWC(values, src_addr, weights_addr);
+            CONVOLUTION1x9_NHWC(values, (src_addr + 1 * (int)src_stride_z), (weights_addr + 1 * (int)weights_stride_z));
+            CONVOLUTION1x9_NHWC(values, (src_addr + 2 * (int)src_stride_z), (weights_addr + 2 * (int)weights_stride_z));
+            CONVOLUTION1x9_NHWC(values, (src_addr + 3 * (int)src_stride_z), (weights_addr + 3 * (int)weights_stride_z));
+            CONVOLUTION1x9_NHWC(values, (src_addr + 4 * (int)src_stride_z), (weights_addr + 4 * (int)weights_stride_z));
+            CONVOLUTION1x9_NHWC(values, (src_addr + 5 * (int)src_stride_z), (weights_addr + 5 * (int)weights_stride_z));
+            CONVOLUTION1x9_NHWC(values, (src_addr + 6 * (int)src_stride_z), (weights_addr + 6 * (int)weights_stride_z));
+            CONVOLUTION1x9_NHWC(values, (src_addr + 7 * (int)src_stride_z), (weights_addr + 7 * (int)weights_stride_z));
+            CONVOLUTION1x9_NHWC(values, (src_addr + 8 * (int)src_stride_z), (weights_addr + 8 * (int)weights_stride_z));
+            src_addr += STEP_X * sizeof(DATA_TYPE);
+            weights_addr += STEP_X * sizeof(DATA_TYPE);
+        }
     }
-#endif // PAD_TOP == 1
 
 #if defined(VEC_SIZE)
     REDUCE(values.s0, values0);
@@ -443,4 +361,4 @@ __kernel void direct_convolution9x9_nhwc(
     *((__global DATA_TYPE *)(dst.ptr + 7 * dst_stride_y)) = values.s7;
 #undef STEP_X
 }
-#endif // defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH) && defined(DATA_LAYOUT_NHWC)
+#endif // defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH) && defined(DATA_LAYOUT_NHWC) && defined(PAD_TOP)

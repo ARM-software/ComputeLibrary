@@ -66,8 +66,16 @@ const auto data_small    = combine(datasets::SmallDirectConvolutionShapes(), com
 const auto data_small9x9 = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides_small, data_ksize_nine_small));
 
 /** Direct convolution nightly data set. */
-const auto data_nightly     = combine(data, framework::dataset::make("NumKernels", { 1, 4 }));
-const auto data_nightly_9x9 = combine(data9x9, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_nightly         = combine(data, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_nightly_9x9     = combine(data9x9, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_nightly_usecase = combine(framework::dataset::make("InputShape", { TensorShape{ 3U, 800U, 800U } }),
+                                          combine(framework::dataset::make("StrideX", { 1 }),
+                                                  combine(framework::dataset::make("StrideY", { 1 }),
+                                                          combine(framework::dataset::make("PadX", { 4 }),
+                                                                  combine(framework::dataset::make("PadY", { 4 }),
+                                                                          combine(framework::dataset::make("KernelSize", 9),
+                                                                                  framework::dataset::make("NumKernels", { 16 })))))));
+
 /** Direct convolution precommit data set. */
 const auto data_precommit     = combine(data_small, framework::dataset::make("NumKernels", { 1 }));
 const auto data_precommit_9x9 = combine(data_small9x9, framework::dataset::make("NumKernels", { 1 }));
@@ -221,6 +229,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerFixture<float>, fram
                                                                                                                        ActivationFunctionsDataset),
                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })))
 {
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLargeUsecase, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly_usecase, framework::dataset::make("DataType",
+                       DataType::F32)),
+                       framework::dataset::make("ActivationInfo", { ActivationLayerInfo() })),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+{
+    // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 TEST_SUITE_END() // FP32
