@@ -30,27 +30,25 @@
 
 namespace arm_compute
 {
-class ICLTensor;
-
 /** Interface for the elementwise unary operator */
-class CLElementWiseUnaryLayerKernel : public ICLSimpleKernel
+class CLElementWiseUnaryLayerKernel : public ICLKernel
 {
 public:
     /** Initialise the kernel's inputs, output.
      *
-     * @param[in]  input  First tensor input. Data types supported: F16/F32.
-     * @param[out] output Output tensor. Data types supported: Same as @p input.
+     * @param[in]  input  First tensor input info. Data types supported: F16/F32.
+     * @param[out] output Output tensor info. Data types supported: Same as @p input.
      * @param[in]  op     Element wise unary operation to perform.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const ElementWiseUnary &op);
+    void configure(const ITensorInfo *input, ITensorInfo *output, const ElementWiseUnary &op);
     /** Initialise the kernel's inputs, output.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           First tensor input. Data types supported: F16/F32.
-     * @param[out] output          Output tensor. Data types supported: Same as @p input.
+     * @param[in]  input           First tensor input info. Data types supported: F16/F32.
+     * @param[out] output          Output tensor info. Data types supported: Same as @p input.
      * @param[in]  op              Element wise unary operation to perform.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ElementWiseUnary &op);
+    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const ElementWiseUnary &op);
     /** Static function to check if given info will lead to a valid configuration of @ref CLElementWiseUnaryLayerKernel
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.
@@ -62,7 +60,8 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ElementWiseUnary &op);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLELEMENTWISEUNARYLAYERKERNEL_H */
