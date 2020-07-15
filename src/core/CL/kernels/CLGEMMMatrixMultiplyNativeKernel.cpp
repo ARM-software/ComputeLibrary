@@ -155,17 +155,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     num_elems_processed_per_iteration_x = rhs_info.n0;
     num_elems_processed_per_iteration_y = lhs_info.m0;
 
-    // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
-    // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-    const unsigned int m          = reinterpret_output_as_3d ? gemm_info.m : output->dimension(1);
-    const unsigned int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
-
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
     AccessWindowStatic input0_access(input0, 0, 0,
                                      input0->dimension(0),
-                                     input0->dimension(1) + bottom_pad);
+                                     input0->dimension(1));
     AccessWindowStatic input1_access(input1, 0, 0,
                                      ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
                                      input1->dimension(1));
@@ -177,11 +172,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     {
         const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
 
-        const int bias_processed_per_iteration_y = gemm_info.broadcast_bias ? 1 : num_elems_processed_per_iteration_y;
-
         AccessWindowStatic input2_access(input2, 0, 0,
                                          ceil_to_multiple(input2->dimension(0), bias_processed_per_iteration_x),
-                                         ceil_to_multiple(input2->dimension(1), bias_processed_per_iteration_y));
+                                         input2->dimension(1));
 
         window_changed = update_window_and_padding(win, input0_access, input1_access, input2_access) || // window used by the execute_window_loop
                          update_window_and_padding(win_out, output_access);                             // window used to update the padding requirements of output tensor

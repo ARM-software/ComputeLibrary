@@ -210,7 +210,8 @@ bool validate_zero_padding(unsigned int m_value, unsigned int n_value, unsigned 
     CLGEMMMatrixMultiplyNative gemm;
     gemm.configure(&lhs, &rhs, &bias, &dst, 1.0f, 1.0f, lhs_info, rhs_info, kernel_info);
 
-    return dst.info()->padding().empty();
+    // Padding can be added along rhs and bias's X dimension
+    return dst.info()->padding().empty() && lhs.info()->padding().empty() && bias.info()->padding().bottom == 0 && bias.info()->padding().top == 0;
 }
 } // namespace
 
