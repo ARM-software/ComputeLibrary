@@ -40,7 +40,23 @@ namespace wrapper
 
 VCVT_TO_F32_IMPL(float32x4_t, uint32x4_t, vcvtq, f32, u32)
 VCVT_TO_F32_IMPL(float32x4_t, int32x4_t, vcvtq, f32, s32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VCVT_TO_F32_IMPL(float32x4_t, float16x4_t, vcvt, f32, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #undef VCVT_TO_F32_IMPL
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#define VCVT_TO_F16_IMPL(ptype, vtype, prefix, postfix1, postfix2)                       \
+    template <typename T>                                                                \
+    inline typename std::enable_if<std::is_same<T, float16_t>::value, float16x4_t>::type \
+    vcvt(const vtype &a)                                                                 \
+    {                                                                                    \
+        return prefix##_##postfix1##_##postfix2(a);                                      \
+    }
+
+VCVT_TO_F16_IMPL(float16x4_t, float32x4_t, vcvt, f16, f32)
+#undef VCVT_TO_F16_IMPL
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 template <typename T>
 inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint32x4_t>::type
