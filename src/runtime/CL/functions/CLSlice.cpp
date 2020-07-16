@@ -31,12 +31,9 @@
 
 namespace arm_compute
 {
-void CLSlice::configure(const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends)
+namespace experimental
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends);
-}
-
-void CLSlice::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends)
+void CLSlice::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
@@ -62,5 +59,51 @@ Status CLSlice::validate(const ITensorInfo *input, const ITensorInfo *output, co
     const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);
 
     return CLStridedSliceKernel::validate(input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
+}
+
+MemoryRequirements CLSlice::workspace() const
+{
+    return MemoryRequirements{};
+}
+} // namespace experimental
+
+struct CLSlice::Impl
+{
+    const ICLTensor                       *src{ nullptr };
+    ICLTensor                             *dst{ nullptr };
+    std::unique_ptr<experimental::CLSlice> op{ nullptr };
+};
+
+CLSlice::CLSlice()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+CLSlice::CLSlice(CLSlice &&) = default;
+CLSlice &CLSlice::operator=(CLSlice &&) = default;
+CLSlice::~CLSlice()                     = default;
+
+Status CLSlice::validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
+{
+    return experimental::CLSlice::validate(input, output, starts, ends);
+}
+
+void CLSlice::configure(const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends);
+}
+
+void CLSlice::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends)
+{
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLSlice>();
+    _impl->op->configure(compile_context, input->info(), output->info(), starts, ends);
+}
+
+void CLSlice::run()
+{
+    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    _impl->op->run(src, dst, {});
 }
 } // namespace arm_compute
