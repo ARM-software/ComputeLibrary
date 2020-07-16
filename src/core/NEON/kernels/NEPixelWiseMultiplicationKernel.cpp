@@ -141,7 +141,7 @@ template <typename T>
 inline typename std::enable_if<std::is_same<T, int8_t>::value, int8_t>::type
 quantize(float val, const UniformQuantizationInfo &info)
 {
-    int32_t tmp = static_cast<int32_t>(val / info.scale) + info.offset;
+    const int32_t tmp = static_cast<int32_t>(val / info.scale) + info.offset;
 
     T tmp_qua = static_cast<T>(tmp > SCHAR_MAX) ? SCHAR_MAX : ((tmp < SCHAR_MIN) ? SCHAR_MIN : tmp);
     return tmp_qua;
@@ -151,9 +151,9 @@ template <typename T>
 inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8_t>::type
 quantize(float val, const UniformQuantizationInfo &info)
 {
-    int32_t tmp = static_cast<int32_t>(val / info.scale) + info.offset;
+    const int32_t tmp = static_cast<int32_t>(val / info.scale) + info.offset;
 
-    T tmp_qua = static_cast<T>((tmp > UCHAR_MAX) ? UCHAR_MAX : tmp);
+    T tmp_qua = static_cast<T>(tmp > UCHAR_MAX) ? UCHAR_MAX : ((tmp < 0) ? 0 : tmp);
     return tmp_qua;
 }
 
@@ -166,10 +166,6 @@ inline float dequantize(const T *input, const UniformQuantizationInfo &info)
 template <typename T>
 void mul_saturate_quantized_8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale)
 {
-    const UniformQuantizationInfo input1_qua_info = in1->info()->quantization_info().uniform();
-    const UniformQuantizationInfo input2_qua_info = in2->info()->quantization_info().uniform();
-    const UniformQuantizationInfo output_qua_info = out->info()->quantization_info().uniform();
-
     // Create input windows
     Window win        = window;
     Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
@@ -177,63 +173,138 @@ void mul_saturate_quantized_8(const ITensor *in1, const ITensor *in2, ITensor *o
 
     // Clear X Dimension on execution window as we handle manually
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input1(in1, input1_win);
-    Iterator input2(in2, input2_win);
-    Iterator output(out, win);
+    const int  window_step_x         = 16 / sizeof(T);
+    const auto window_start_x        = static_cast<int>(window.x().start());
+    const auto window_end_x          = static_cast<int>(window.x().end());
+    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
 
-    const int  window_step_x  = 16 / sizeof(T);
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
+    const UniformQuantizationInfo output_qua_info = out->info()->quantization_info().uniform();
+    const UniformQuantizationInfo tmp_qua_info    = { output_qua_info.scale / scale, output_qua_info.offset };
 
-    const UniformQuantizationInfo tmp_qua_info = { output_qua_info.scale / scale, output_qua_info.offset };
-
-    execute_window_loop(win, [&](const Coordinates &)
+    if(is_broadcast_across_x)
     {
-        const auto input1_ptr = reinterpret_cast<const T *>(input1.ptr());
-        const auto input2_ptr = reinterpret_cast<const T *>(input2.ptr());
-        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
+        const bool                    is_broadcast_input_2 = input2_win.x().step() == 0;
+        Window                        broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
+        Window                        non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
+        const ITensor                *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
+        const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
+        const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
+        const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
 
-        // Compute window_step_x elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        // Clear X Dimension on execution window as we handle manually
+        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator broadcast_input(broadcast_tensor, broadcast_win);
+        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
+        Iterator output(out, win);
+
+        using ExactTagType = typename wrapper::traits::neon_vector<T, window_step_x>::tag_type;
+
+        execute_window_loop(win, [&](const Coordinates &)
         {
-            const auto input1_q = wrapper::vloadq(input1_ptr + x);
-            const auto input2_q = wrapper::vloadq(input2_ptr + x);
+            const auto non_broadcast_input_ptr = reinterpret_cast<const T *>(non_broadcast_input.ptr());
+            const auto output_ptr              = reinterpret_cast<T *>(output.ptr());
 
-            // Dequantize inputs
-            const float32x4x4_t in1_f32x4x4 = vdequantize(input1_q, input1_qua_info);
-            const float32x4x4_t in2_f32x4x4 = vdequantize(input2_q, input2_qua_info);
+            const auto broadcast_value     = *reinterpret_cast<const T *>(broadcast_input.ptr());
+            const auto broadcast_value_vec = wrapper::vdup_n(broadcast_value, ExactTagType{});
 
-            const float32x4x4_t out_f32x4x4 =
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
-                vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
-                vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
-                vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
-            };
+                const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
 
-            // Quantize output
-            const auto result = vquantize<T>(out_f32x4x4, tmp_qua_info);
-            wrapper::vstore(output_ptr + x, result);
-        }
+                // Dequantize inputs
+                const float32x4x4_t in1_f32x4x4 = vdequantize(non_broadcast_v, non_broadcast_qinfo);
+                const float32x4x4_t in2_f32x4x4 = vdequantize(broadcast_value_vec, broadcast_qinfo);
 
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
+                const float32x4x4_t out_f32x4x4 =
+                {
+                    vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
+                    vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
+                    vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
+                    vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
+                };
+
+                // Quantize output
+                const auto result = vquantize<T>(out_f32x4x4, tmp_qua_info);
+                wrapper::vstore(output_ptr + x, result);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                // Dequantize inputs
+                float tmp_in1 = dequantize(non_broadcast_input_ptr + x, non_broadcast_qinfo);
+                float tmp_in2 = dequantize(&broadcast_value, broadcast_qinfo);
+                float tmp_f   = tmp_in1 * tmp_in2;
+
+                // Quantize output
+                const auto tmp_qua = quantize<T>(tmp_f, tmp_qua_info);
+                *(output_ptr + x)  = tmp_qua;
+            }
+        },
+        broadcast_input, non_broadcast_input, output);
+    }
+    else
+    {
+        const UniformQuantizationInfo input1_qua_info = in1->info()->quantization_info().uniform();
+        const UniformQuantizationInfo input2_qua_info = in2->info()->quantization_info().uniform();
+
+        // Clear X Dimension on execution window as we handle manually
+        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input1(in1, input1_win);
+        Iterator input2(in2, input2_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
         {
-            // Dequantize inputs
-            float tmp_in1 = dequantize(input1_ptr + x, input1_qua_info);
-            float tmp_in2 = dequantize(input2_ptr + x, input2_qua_info);
-            float tmp_f   = tmp_in1 * tmp_in2;
+            const auto input1_ptr = reinterpret_cast<const T *>(input1.ptr());
+            const auto input2_ptr = reinterpret_cast<const T *>(input2.ptr());
+            const auto output_ptr = reinterpret_cast<T *>(output.ptr());
 
-            // Quantize output
-            const auto tmp_qua = quantize<T>(tmp_f, tmp_qua_info);
-            *(output_ptr + x)  = tmp_qua;
-        }
-    },
-    input1, input2, output);
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const auto input1_q = wrapper::vloadq(input1_ptr + x);
+                const auto input2_q = wrapper::vloadq(input2_ptr + x);
+
+                // Dequantize inputs
+                const float32x4x4_t in1_f32x4x4 = vdequantize(input1_q, input1_qua_info);
+                const float32x4x4_t in2_f32x4x4 = vdequantize(input2_q, input2_qua_info);
+
+                const float32x4x4_t out_f32x4x4 =
+                {
+                    vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
+                    vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
+                    vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
+                    vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
+                };
+
+                // Quantize output
+                const auto result = vquantize<T>(out_f32x4x4, tmp_qua_info);
+                wrapper::vstore(output_ptr + x, result);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                // Dequantize inputs
+                float tmp_in1 = dequantize(input1_ptr + x, input1_qua_info);
+                float tmp_in2 = dequantize(input2_ptr + x, input2_qua_info);
+                float tmp_f   = tmp_in1 * tmp_in2;
+
+                // Quantize output
+                const auto tmp_qua = quantize<T>(tmp_f, tmp_qua_info);
+                *(output_ptr + x)  = tmp_qua;
+            }
+        },
+        input1, input2, output);
+    }
 }
 
 void mul_saturate_QSYMM16_QSYMM16_QSYMM16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale)
@@ -676,10 +747,6 @@ void mul_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const
     const auto    window_start_x        = static_cast<int>(window.x().start());
     const auto    window_end_x          = static_cast<int>(window.x().end());
     const bool    is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
-
-    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
-    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
-    Iterator output(out, window);
 
     using ExactTagType = typename wrapper::traits::neon_vector<float, window_step_x>::tag_type;
 

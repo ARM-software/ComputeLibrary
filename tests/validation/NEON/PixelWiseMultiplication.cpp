@@ -113,10 +113,12 @@ using NEPixelWiseMultiplicationToS16Fixture = PixelWiseMultiplicationValidationF
 template <typename T>
 using NEPixelWiseMultiplicationToF16Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, half_float::half>;
 template <typename T>
-using NEPixelWiseMultiplicationToF32Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, float>;
-template <typename T>
-using NEPixelWiseMultiplicationBroadcastFixture = PixelWiseMultiplicationBroadcastValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, float>;
+using NEPixelWiseMultiplicationToF32Fixture     = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, float>;
 using NEPixelWiseMultiplicationU8U8ToS16Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t, int16_t>;
+template <typename T>
+using NEPixelWiseMultiplicationBroadcastFixture              = PixelWiseMultiplicationBroadcastValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, float>;
+using NEPixelWiseMultiplicationBroadcastQASYMM8Fixture       = PixelWiseMultiplicationBroadcastValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t>;
+using NEPixelWiseMultiplicationBroadcastQASYMM8SignedFixture = PixelWiseMultiplicationBroadcastValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, int8_t, int8_t>;
 
 TEST_SUITE(NEON)
 TEST_SUITE(PixelWiseMultiplication)
@@ -317,6 +319,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framew
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // ScaleOther
+TEST_SUITE(Broadcast)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationBroadcastQASYMM8Fixture, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapesBroadcast(),
+                                                                               framework::dataset::make("DataTypeIn1", DataType::QASYMM8)),
+                                                                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8)),
+                                                               framework::dataset::make("DataTypeOut", DataType::QASYMM8)),
+                                                       framework::dataset::make("Scale", { scale_other })),
+                                               PixelWiseMultiplicationPolicySTZDataset),
+                                       PixelWiseMultiplicationQASYMM8QuantDataset),
+                               framework::dataset::make("InPlace", { false })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // Broadcast
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QSYMM16)
 TEST_SUITE(Scale255)

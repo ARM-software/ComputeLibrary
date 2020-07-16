@@ -201,6 +201,19 @@ public:
                                                                                                                    qinfo0, qinfo1, qinfo_out, ActivationLayerInfo(), is_inplace);
     }
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2, typename T3 = T2>
+class PixelWiseMultiplicationBroadcastValidationQuantizedFixture : public PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType dt_in1, DataType dt_in2, DataType dt_out, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy,
+               QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
+    {
+        PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>::setup(shape0, shape1, dt_in1, dt_in2, dt_out, scale, convert_policy, rounding_policy,
+                                                                                                                   qinfo0, qinfo1, qinfo_out, ActivationLayerInfo(), is_inplace);
+    }
+};
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
