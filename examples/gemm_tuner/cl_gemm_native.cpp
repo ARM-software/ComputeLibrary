@@ -166,10 +166,10 @@ public:
         }
 
         // Print gemm parameters and configurations
-        std::cerr << "Gemm parameters:" << std::endl;
-        std::cerr << params << std::endl;
-        std::cerr << "Gemm configurations:" << std::endl;
-        std::cerr << configs << std::endl;
+        std::cout << "Gemm parameters:" << std::endl;
+        std::cout << params << std::endl;
+        std::cout << "Gemm configurations:" << std::endl;
+        std::cout << configs << std::endl;
 
         CLScheduler::get().default_init(&tuner);
 
@@ -193,6 +193,17 @@ public:
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = true;
         kernel_info.activation_info         = act_info;
+
+        // Validate argments
+        Status status{};
+        status = gemm.validate((&lhs)->info(), (&rhs)->info(), (&bias)->info(), (&dst)->info(), alpha, beta, lhs_info, rhs_info, kernel_info);
+        if(!status)
+        {
+            // Unsupported arguments
+            std::cerr << "Unsupported arguments." << std::endl;
+            std::cerr << "Check documentation for supported/unsupported combinations" << std::endl;
+            return false;
+        }
 
         // Configure function
         gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);

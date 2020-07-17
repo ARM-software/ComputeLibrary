@@ -138,6 +138,7 @@ Gemm config file (Strategy reshaped_rhs_only):
   h0 - Number of horizontal blocks of size (k0xn0) stored on the same output row
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
   transpose_rhs - Transpose rhs matrix (1) / Do not transpose rhs matrix (0)
+  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)
 
   Only the following configurations of M0, N0 and K0 are currently supported:
   M0 = 1, 2, 3, 4, 5, 6, 7, 8
@@ -146,8 +147,8 @@ Gemm config file (Strategy reshaped_rhs_only):
   H0 >= 1
 
   An example gemm config file looks like:
-  4,4,4,1,1,1
-  4,4,4,3,1,0
+  4,4,4,1,1,1,0
+  4,4,4,3,1,0,1
   ...
 
 EOF
@@ -179,6 +180,7 @@ Gemm config file (Strategy reshaped):
   interleave_lhs - Interleave lhs matrix (1) / Do not interleave lhs matrix (0)
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
   transpose_rhs - Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do transpose lhs matrix (0)
+  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)
 
   If rhs matrix is transposed only the following configurations are currently supported:
   M0 = 2, 3, 4, 5, 6, 7, 8
@@ -195,8 +197,8 @@ Gemm config file (Strategy reshaped):
   H0 >= 1
 
   An example gemm config file looks like:
-  4,4,4,1,3,1,1,1
-  4,4,4,3,3,1,1,0
+  4,4,4,1,3,1,1,1,0
+  4,4,4,3,3,1,1,0,1
   ...
 
 EOF
@@ -239,6 +241,11 @@ Options:
         -d <data_type>
         Data type option with which to run benchmark examples
         Default: ${DEFAULT_DATA_TYPE}
+        Supported options:
+        Strategy            :    Data Types
+        Native              :    F32
+        Reshaped            :    F16, F32
+        Reshaped RHS Only   :    F16, F32
 
         -o <out_dir>
         Path to output directory that holds output json files

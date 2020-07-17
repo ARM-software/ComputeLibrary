@@ -218,10 +218,10 @@ public:
         }
 
         // Print gemm parameters and configurations
-        std::cerr << "Gemm parameters:" << std::endl;
-        std::cerr << params << std::endl;
-        std::cerr << "Gemm configurations:" << std::endl;
-        std::cerr << configs << std::endl;
+        std::cout << "Gemm parameters:" << std::endl;
+        std::cout << params << std::endl;
+        std::cout << "Gemm configurations:" << std::endl;
+        std::cout << configs << std::endl;
 
         CLScheduler::get().default_init(&tuner);
 
@@ -262,6 +262,26 @@ public:
         if(rhs_info.export_to_cl_image)
         {
             arm_compute::cl_gemm::update_padding_for_cl_image(rhs_reshaped.info());
+        }
+
+        // Validate argments
+        Status status{};
+        status = reshape_lhs.validate((&lhs)->info(), (&lhs_reshaped)->info(), lhs_info, kernel_info.reinterpret_input_as_3d);
+        if(!status)
+        {
+            // Unsupported arguments
+            std::cerr << "Unsupported arguments." << std::endl;
+            std::cerr << "Check documentation for supported/unsupported combinations" << std::endl;
+            return false;
+        }
+
+        status = gemm.validate((&lhs_reshaped)->info(), (&rhs_reshaped)->info(), (&bias)->info(), (&dst)->info(), alpha, beta, lhs_info, rhs_info, kernel_info);
+        if(!status)
+        {
+            // Unsupported arguments
+            std::cerr << "Unsupported arguments." << std::endl;
+            std::cerr << "Check documentation for supported/unsupported combinations" << std::endl;
+            return false;
         }
 
         // Configure reshape lhs function
