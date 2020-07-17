@@ -157,22 +157,16 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, const InputTensorMap &inputs
                              "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
                              or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
 
+    const bool inject_memory = !inputs.empty();
+
     // Tune the kernel if the CLTuner has been provided
     if(_cl_tuner != nullptr)
     {
-        // Tune the OpenCL kernel
-        _cl_tuner->tune_kernel_dynamic(kernel);
+        inject_memory ? _cl_tuner->tune_kernel_dynamic(kernel, inputs, outputs) : _cl_tuner->tune_kernel_dynamic(kernel);
     }
 
     // Run kernel
-    if(inputs.empty())
-    {
-        kernel.run(kernel.window(), _queue);
-    }
-    else
-    {
-        kernel.run_op(inputs, outputs, kernel.window(), _queue);
-    }
+    inject_memory ? kernel.run_op(inputs, outputs, kernel.window(), _queue) : kernel.run(kernel.window(), _queue);
 
     if(flush)
     {

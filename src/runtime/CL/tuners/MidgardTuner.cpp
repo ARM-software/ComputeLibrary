@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,6 +72,11 @@ void MidgardTuner::tune_kernel_static(ICLKernel &kernel)
 void MidgardTuner::tune_kernel_dynamic(ICLKernel &kernel)
 {
     ARM_COMPUTE_UNUSED(kernel);
+}
+
+void MidgardTuner::tune_kernel_dynamic(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs)
+{
+    ARM_COMPUTE_UNUSED(kernel, inputs, outputs);
 }
 } // namespace tuners
 } // namespace arm_compute

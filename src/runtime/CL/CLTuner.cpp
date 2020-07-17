@@ -77,6 +77,11 @@ void CLTuner::tune_kernel_static(ICLKernel &kernel)
 
 void CLTuner::tune_kernel_dynamic(ICLKernel &kernel)
 {
+    tune_kernel_dynamic(kernel, {}, {});
+}
+
+void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs)
+{
     // Get the configuration ID from the kernel and append GPU target name and number of available compute units
     const std::string config_id = kernel.config_id() + "_" + string_from_target(kernel.get_target()) + "_MP" + support::cpp11::to_string(CLKernelLibrary::get().get_num_compute_units());
 
@@ -90,7 +95,7 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel)
             if(_tune_new_kernels)
             {
                 // Find the optimal LWS for the kernel
-                cl::NDRange opt_lws = find_optimal_lws(kernel);
+                cl::NDRange opt_lws = find_optimal_lws(kernel, inputs, outputs);
 
                 // Insert the optimal LWS in the table
                 add_lws_to_table(config_id, opt_lws);
@@ -112,7 +117,7 @@ void CLTuner::add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal
     _lws_table.emplace(kernel_id, optimal_lws);
 }
 
-cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
+cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs)
 {
     // Profiling queue
     cl::CommandQueue queue_profiler;
@@ -167,7 +172,8 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
     cl::NDRange gws = ICLKernel::gws_from_window(kernel.window());
 
     // Run the kernel with default lws to be used as baseline
-    kernel.run(kernel.window(), queue_profiler);
+    const bool inject_memory = !inputs.empty();
+    inject_memory ? kernel.run_op(inputs, outputs, kernel.window(), queue_profiler) : kernel.run(kernel.window(), queue_profiler);
 
     queue_profiler.finish();
 
@@ -178,7 +184,7 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
 
     cl::NDRange opt_lws = cl::NullRange;
 
-    //Construct the list of LWS values to be tested based on the tuner mode.
+    // Construct the list of LWS values to be tested based on the tuner mode.
     auto lws_list = cl_tuner::CLLWSListFactory::get_lws_list(_tuner_mode, gws);
     for(size_t i = 0; i < lws_list->size(); ++i)
     {
@@ -197,7 +203,7 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
         kernel.set_lws_hint(lws_test);
 
         // Run the kernel
-        kernel.run(kernel.window(), queue_profiler);
+        inject_memory ? kernel.run_op(inputs, outputs, kernel.window(), queue_profiler) : kernel.run(kernel.window(), queue_profiler);
 
         queue_profiler.finish();
 

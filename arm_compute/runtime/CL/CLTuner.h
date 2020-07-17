@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,6 +116,7 @@ public:
     // Inherited methods overridden:
     void tune_kernel_static(ICLKernel &kernel) override;
     void tune_kernel_dynamic(ICLKernel &kernel) override;
+    void tune_kernel_dynamic(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs) override;
 
     /** Is the kernel_event set ?
      *
@@ -130,7 +131,7 @@ private:
      *
      * @return The optimal LWS to use
      */
-    cl::NDRange find_optimal_lws(ICLKernel &kernel);
+    cl::NDRange find_optimal_lws(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs);
 
     std::unordered_map<std::string, cl::NDRange> _lws_table;
     cl::Event   _kernel_event;
