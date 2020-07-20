@@ -45,7 +45,7 @@ namespace
 {
 // COMPMID-517 Investigate the mismatch to see whether it is a real bug
 RelativeTolerance<half>              tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
-RelativeTolerance<float>             tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
+RelativeTolerance<float>             tolerance_fp32(0.03f);     /**< Tolerance for floating point tests */
 constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
 
