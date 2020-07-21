@@ -281,7 +281,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<uin
                                                 DataType::QASYMM8)),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
                        QuantizedActivationFunctionsDataset),
-                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
