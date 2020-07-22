@@ -71,7 +71,7 @@ inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *i
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::QASYMM8 && (input1->data_type() != DataType::QASYMM8 || input2->data_type() != DataType::QASYMM8),
                                         "Output can only be QASYMM8 if both inputs are QASYMM8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::QASYMM8_SIGNED && (input1->data_type() != DataType::QASYMM8_SIGNED || input2->data_type() != DataType::QASYMM8_SIGNED),
-                                        "Output can only be QASYMM8 if both inputs are QASYMM8");
+                                        "Output can only be QASYMM8_SIGNED if both inputs are QASYMM8_SIGNED");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::QSYMM16 && (input1->data_type() != DataType::QSYMM16 || input2->data_type() != DataType::QSYMM16),
                                         "Output can only be QSYMM16 if both inputs are QSYMM16");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::S32 && (input1->data_type() != DataType::QSYMM16 || input2->data_type() != DataType::QSYMM16),
@@ -135,32 +135,6 @@ inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8x16_t>::typ
 vquantize(float32x4x4_t val, const UniformQuantizationInfo &info)
 {
     return vquantize(val, info);
-}
-
-template <typename T>
-inline typename std::enable_if<std::is_same<T, int8_t>::value, int8_t>::type
-quantize(float val, const UniformQuantizationInfo &info)
-{
-    const int32_t tmp = static_cast<int32_t>(val / info.scale) + info.offset;
-
-    T tmp_qua = static_cast<T>(tmp > SCHAR_MAX) ? SCHAR_MAX : ((tmp < SCHAR_MIN) ? SCHAR_MIN : tmp);
-    return tmp_qua;
-}
-
-template <typename T>
-inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8_t>::type
-quantize(float val, const UniformQuantizationInfo &info)
-{
-    const int32_t tmp = static_cast<int32_t>(val / info.scale) + info.offset;
-
-    T tmp_qua = static_cast<T>(tmp > UCHAR_MAX) ? UCHAR_MAX : ((tmp < 0) ? 0 : tmp);
-    return tmp_qua;
-}
-
-template <typename T>
-inline float dequantize(const T *input, const UniformQuantizationInfo &info)
-{
-    return static_cast<float>((*input) - info.offset) * info.scale;
 }
 
 template <typename T>
@@ -236,12 +210,13 @@ void mul_saturate_quantized_8(const ITensor *in1, const ITensor *in2, ITensor *o
             for(; x < window_end_x; ++x)
             {
                 // Dequantize inputs
-                float tmp_in1 = dequantize(non_broadcast_input_ptr + x, non_broadcast_qinfo);
-                float tmp_in2 = dequantize(&broadcast_value, broadcast_qinfo);
-                float tmp_f   = tmp_in1 * tmp_in2;
+                const T     in1     = *(non_broadcast_input_ptr + x);
+                const float tmp_in1 = Qasymm8QuantizationHelper<T>::dequantize(in1, non_broadcast_qinfo);
+                const float tmp_in2 = Qasymm8QuantizationHelper<T>::dequantize(broadcast_value, broadcast_qinfo);
+                const float tmp_f   = tmp_in1 * tmp_in2;
 
                 // Quantize output
-                const auto tmp_qua = quantize<T>(tmp_f, tmp_qua_info);
+                const auto tmp_qua = Qasymm8QuantizationHelper<T>::quantize(tmp_f, tmp_qua_info);
                 *(output_ptr + x)  = tmp_qua;
             }
         },
@@ -294,12 +269,14 @@ void mul_saturate_quantized_8(const ITensor *in1, const ITensor *in2, ITensor *o
             for(; x < window_end_x; ++x)
             {
                 // Dequantize inputs
-                float tmp_in1 = dequantize(input1_ptr + x, input1_qua_info);
-                float tmp_in2 = dequantize(input2_ptr + x, input2_qua_info);
-                float tmp_f   = tmp_in1 * tmp_in2;
+                const T     in1     = *(input1_ptr + x);
+                const T     in2     = *(input2_ptr + x);
+                const float tmp_in1 = Qasymm8QuantizationHelper<T>::dequantize(in1, input1_qua_info);
+                const float tmp_in2 = Qasymm8QuantizationHelper<T>::dequantize(in2, input2_qua_info);
+                const float tmp_f   = tmp_in1 * tmp_in2;
 
                 // Quantize output
-                const auto tmp_qua = quantize<T>(tmp_f, tmp_qua_info);
+                const auto tmp_qua = Qasymm8QuantizationHelper<T>::quantize(tmp_f, tmp_qua_info);
                 *(output_ptr + x)  = tmp_qua;
             }
         },
