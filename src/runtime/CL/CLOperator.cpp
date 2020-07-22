@@ -49,5 +49,10 @@ void ICLOperator::prepare(OperatorTensorMap constants)
 {
     ARM_COMPUTE_UNUSED(constants);
 }
+
+MemoryRequirements ICLOperator::workspace() const
+{
+    return {};
+}
 } // namespace experimental
 } // namespace arm_compute

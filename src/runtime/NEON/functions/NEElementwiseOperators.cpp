@@ -34,99 +34,64 @@ namespace arm_compute
 {
 namespace experimental
 {
-void NEElementwiseMax::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
+void NEElementwiseMax::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::MAX, input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::MAX, input1, input2, output);
 }
 
-MemoryRequirements NEElementwiseMax::workspace() const
+void NEElementwiseMin::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    return MemoryRequirements{};
-}
-
-void NEElementwiseMin::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::MIN, input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::MIN, input1, input2, output);
 }
 
-MemoryRequirements NEElementwiseMin::workspace() const
+void NEElementwiseSquaredDiff::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    return MemoryRequirements{};
-}
-
-void NEElementwiseSquaredDiff::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
 }
 
-MemoryRequirements NEElementwiseSquaredDiff::workspace() const
+void NEElementwiseDivision::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    return MemoryRequirements{};
-}
-
-void NEElementwiseDivision::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEDivisionOperationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEDivisionOperationKernel::validate(input1, input2, output);
 }
 
-MemoryRequirements NEElementwiseDivision::workspace() const
+void NEElementwisePower::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    return MemoryRequirements{};
-}
-
-void NEElementwisePower::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEPowerOperationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEPowerOperationKernel::validate(input1, input2, output);
-}
-
-MemoryRequirements NEElementwisePower::workspace() const
-{
-    return MemoryRequirements{};
 }
 
 template <ComparisonOperation COP>
@@ -143,12 +108,6 @@ Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1, c
     return NEComparisonOperationKernel::validate(COP, input1, input2, output);
 }
 
-template <ComparisonOperation COP>
-MemoryRequirements            NEElementwiseComparisonStatic<COP>::workspace() const
-{
-    return MemoryRequirements{};
-}
-
 void NEElementwiseComparison::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ComparisonOperation op)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEComparisonOperationKernel>();
@@ -159,11 +118,6 @@ void NEElementwiseComparison::configure(const ITensorInfo *input1, const ITensor
 Status NEElementwiseComparison::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op)
 {
     return NEComparisonOperationKernel::validate(op, input1, input2, output);
-}
-
-MemoryRequirements NEElementwiseComparison::workspace() const
-{
-    return MemoryRequirements{};
 }
 
 // Supported Specializations
@@ -193,17 +147,18 @@ NEElementwiseMax::~NEElementwiseMax()                              = default;
 
 void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
     _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseMax>();
-    _impl->op->configure(input1->info(), input2->info(), output->info(), act_info);
+    _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwiseMax::validate(input1, input2, output, act_info);
+    return experimental::NEElementwiseMax::validate(input1, input2, output);
 }
 
 void NEElementwiseMax::run()
@@ -231,17 +186,18 @@ NEElementwiseMin::~NEElementwiseMin()                              = default;
 
 void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
     _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseMin>();
-    _impl->op->configure(input1->info(), input2->info(), output->info(), act_info);
+    _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwiseMin::validate(input1, input2, output, act_info);
+    return experimental::NEElementwiseMin::validate(input1, input2, output);
 }
 
 void NEElementwiseMin::run()
@@ -269,17 +225,18 @@ NEElementwiseSquaredDiff::~NEElementwiseSquaredDiff()                           
 
 void NEElementwiseSquaredDiff::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
     _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseSquaredDiff>();
-    _impl->op->configure(input1->info(), input2->info(), output->info(), act_info);
+    _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwiseSquaredDiff::validate(input1, input2, output, act_info);
+    return experimental::NEElementwiseSquaredDiff::validate(input1, input2, output);
 }
 
 void NEElementwiseSquaredDiff::run()
@@ -312,13 +269,13 @@ void NEElementwiseDivision::configure(ITensor *input1, ITensor *input2, ITensor 
     _impl->src_1 = input2;
     _impl->dst   = output;
     _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseDivision>();
-    _impl->op->configure(input1->info(), input2->info(), output->info(), act_info);
+    _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwiseDivision::validate(input1, input2, output, act_info);
+    return experimental::NEElementwiseDivision::validate(input1, input2, output);
 }
 
 void NEElementwiseDivision::run()
@@ -351,13 +308,13 @@ void NEElementwisePower::configure(ITensor *input1, ITensor *input2, ITensor *ou
     _impl->src_1 = input2;
     _impl->dst   = output;
     _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwisePower>();
-    _impl->op->configure(input1->info(), input2->info(), output->info(), act_info);
+    _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwisePower::validate(input1, input2, output, act_info);
+    return experimental::NEElementwisePower::validate(input1, input2, output);
 }
 
 void NEElementwisePower::run()

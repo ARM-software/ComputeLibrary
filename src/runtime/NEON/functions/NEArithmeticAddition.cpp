@@ -45,10 +45,6 @@ Status NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorIn
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticAdditionKernel::validate(input1, input2, output, policy);
 }
-MemoryRequirements NEArithmeticAddition::workspace() const
-{
-    return MemoryRequirements{};
-}
 } // namespace experimental
 
 struct NEArithmeticAddition::Impl

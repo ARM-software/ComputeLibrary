@@ -81,7 +81,7 @@ private:
 namespace experimental
 {
 /** Basic function to run @ref CLReshapeLayerKernel */
-class CLReshapeLayer : public ICLOperator
+class CLReshape : public ICLOperator
 {
 public:
     /** Initialise the kernel's inputs and outputs
@@ -100,10 +100,7 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 } // namespace experimental
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CLRESHAPELAYER_H */

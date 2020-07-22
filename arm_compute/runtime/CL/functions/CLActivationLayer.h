@@ -98,7 +98,7 @@ private:
 namespace experimental
 {
 /** Basic function to run @ref CLActivationLayerKernel */
-class CLActivationLayer : public ICLOperator
+class CLActivation : public ICLOperator
 {
 public:
     /** Set the input and output tensor.
@@ -120,9 +120,6 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 } // namespace experimental
 } // namespace arm_compute

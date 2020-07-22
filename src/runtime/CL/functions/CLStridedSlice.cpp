@@ -47,11 +47,6 @@ Status CLStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *out
 {
     return CLStridedSliceKernel::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
-
-MemoryRequirements CLStridedSlice::workspace() const
-{
-    return MemoryRequirements{};
-}
 } // namespace experimental
 
 struct CLStridedSlice::Impl

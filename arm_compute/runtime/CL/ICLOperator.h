@@ -55,7 +55,8 @@ public:
 
     // Inherited methods overridden:
     void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
-    void prepare(OperatorTensorMap constants) override final;
+    void prepare(OperatorTensorMap constants) override;
+    MemoryRequirements workspace() const override;
 
 protected:
     std::unique_ptr<ICLKernel> _kernel;

@@ -33,30 +33,25 @@ namespace arm_compute
 {
 namespace experimental
 {
-void CLActivationLayer::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info)
+void CLActivation::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>();
     k->configure(compile_context, input, output, act_info);
     _kernel = std::move(k);
 }
 
-Status CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status CLActivation::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     return CLActivationLayerKernel::validate(input, output, act_info);
-}
-
-MemoryRequirements CLActivationLayer::workspace() const
-{
-    return MemoryRequirements{};
 }
 } // namespace experimental
 
 struct CLActivationLayer::Impl
 {
-    const ICLTensor                                 *src{ nullptr };
-    ICLTensor                                       *dst{ nullptr };
-    CLRuntimeContext                                *ctx{ nullptr };
-    std::unique_ptr<experimental::CLActivationLayer> op{ nullptr };
+    const ICLTensor                            *src{ nullptr };
+    ICLTensor                                  *dst{ nullptr };
+    CLRuntimeContext                           *ctx{ nullptr };
+    std::unique_ptr<experimental::CLActivation> op{ nullptr };
 };
 
 CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
@@ -83,13 +78,13 @@ void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTe
     _impl->src = input;
     _impl->dst = output == nullptr ? input : output;
 
-    _impl->op = arm_compute::support::cpp14::make_unique<experimental::CLActivationLayer>();
+    _impl->op = arm_compute::support::cpp14::make_unique<experimental::CLActivation>();
     _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), act_info);
 }
 
 Status CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    return experimental::CLActivationLayer::validate(input, output, act_info);
+    return experimental::CLActivation::validate(input, output, act_info);
 }
 
 void CLActivationLayer::run()

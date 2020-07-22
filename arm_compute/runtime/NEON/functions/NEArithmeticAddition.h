@@ -72,9 +72,6 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 } // namespace experimental
 

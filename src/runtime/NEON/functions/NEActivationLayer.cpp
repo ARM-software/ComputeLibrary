@@ -45,11 +45,6 @@ Status NEActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *
 {
     return NEActivationLayerKernel::validate(input, output, activation_info);
 }
-
-MemoryRequirements NEActivationLayer::workspace() const
-{
-    return MemoryRequirements{};
-}
 } // namespace experimental
 
 struct NEActivationLayer::Impl

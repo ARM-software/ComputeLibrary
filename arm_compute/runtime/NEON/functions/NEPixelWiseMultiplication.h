@@ -102,9 +102,6 @@ public:
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 
 /** Basic function to run @ref NEComplexPixelWiseMultiplicationKernel. */
@@ -129,9 +126,6 @@ public:
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 } // namespace experimental
 

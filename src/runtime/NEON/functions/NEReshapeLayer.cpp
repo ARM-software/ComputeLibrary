@@ -35,29 +35,24 @@ namespace arm_compute
 {
 namespace experimental
 {
-void NEReshapeLayer::configure(const ITensorInfo *input, ITensorInfo *output)
+void NEReshape::configure(const ITensorInfo *input, ITensorInfo *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
 
-Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status NEReshape::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     return arm_compute::NEReshapeLayerKernel::validate(input, output);
-}
-
-MemoryRequirements NEReshapeLayer::workspace() const
-{
-    return MemoryRequirements{};
 }
 } // namespace experimental
 
 struct NEReshapeLayer::Impl
 {
-    const ITensor                                *src{ nullptr };
-    ITensor                                      *dst{ nullptr };
-    std::unique_ptr<experimental::NEReshapeLayer> op{ nullptr };
+    const ITensor                           *src{ nullptr };
+    ITensor                                 *dst{ nullptr };
+    std::unique_ptr<experimental::NEReshape> op{ nullptr };
 };
 
 NEReshapeLayer::NEReshapeLayer()
@@ -75,14 +70,14 @@ void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::NEReshapeLayer>();
+    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::NEReshape>();
     _impl->op->configure(input->info(), output->info());
 }
 
 Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(experimental::NEReshapeLayer::validate(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(experimental::NEReshape::validate(input, output));
 
     return Status{};
 }

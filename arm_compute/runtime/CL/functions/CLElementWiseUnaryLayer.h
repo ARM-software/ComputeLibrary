@@ -356,7 +356,7 @@ private:
 namespace experimental
 {
 /** Basic function to perform inverse square root on an input tensor. */
-class CLRsqrtLayer : public ICLOperator
+class CLRsqrt : public ICLOperator
 {
 public:
     /** Initialize the function
@@ -380,13 +380,10 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 
 /** Basic function to perform exponential on an input tensor. */
-class CLExpLayer : public ICLOperator
+class CLExp : public ICLOperator
 {
 public:
     /** Initialize the function
@@ -410,13 +407,10 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 
 /** Basic function to negate an input tensor. */
-class CLNegLayer : public ICLOperator
+class CLNeg : public ICLOperator
 {
 public:
     /** Initialize the function
@@ -440,13 +434,10 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 
 /** Basic function to calculate sine of an input tensor. */
-class CLSinLayer : public ICLOperator
+class CLSin : public ICLOperator
 {
 public:
     /** Initialize the function
@@ -470,13 +461,10 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 
 /** Basic function to perform elementwise log on an input tensor. */
-class CLLogLayer : public ICLOperator
+class CLLog : public ICLOperator
 {
 public:
     /** Initialize the function
@@ -500,13 +488,10 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 
 /** Basic function to get the absolute value of an input tensor. */
-class CLAbsLayer : public ICLOperator
+class CLAbs : public ICLOperator
 {
 public:
     /** Initialize the function
@@ -530,13 +515,10 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 
 /** Basic function to get the round (to the nearest even) value of an input tensor. */
-class CLRoundLayer : public ICLOperator
+class CLRound : public ICLOperator
 {
 public:
     /** Initialize the function
@@ -560,9 +542,6 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 } // namespace experimental
 } // namespace arm_compute

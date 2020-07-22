@@ -113,11 +113,11 @@ namespace experimental
  * -# @ref CLDepthConcatenateLayerKernel (if underlying concatenation axis is 2).
  * -# @ref CLBatchConcatenateLayerKernel (if underlying concatenation axis is 3).
  */
-class CLConcatenateLayer : public ICLOperator
+class CLConcatenation : public ICLOperator
 {
 public:
     /** Default constructor */
-    CLConcatenateLayer();
+    CLConcatenation();
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
@@ -144,7 +144,6 @@ public:
     static Status validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
 
     // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
     void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
 
 private:

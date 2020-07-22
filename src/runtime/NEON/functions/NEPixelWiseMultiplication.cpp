@@ -48,11 +48,6 @@ Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITen
     return NEPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy);
 }
 
-MemoryRequirements NEPixelWiseMultiplication::workspace() const
-{
-    return MemoryRequirements{};
-}
-
 void NEComplexPixelWiseMultiplication::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
@@ -65,11 +60,6 @@ Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, con
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEComplexPixelWiseMultiplicationKernel::validate(input1, input2, output);
-}
-
-MemoryRequirements NEComplexPixelWiseMultiplication::workspace() const
-{
-    return MemoryRequirements{};
 }
 } // namespace experimental
 

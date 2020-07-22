@@ -103,11 +103,11 @@ namespace experimental
  * -# @ref NEDepthConcatenateLayerKernel (if underlying concatenation axis is 2).
  * -# @ref NEBatchConcatenateLayerKernel (if underlying concatenation axis is 3).
  */
-class NEConcatenateLayer : public INEOperator
+class NEConcatenation : public INEOperator
 {
 public:
     /** Default constructor */
-    NEConcatenateLayer();
+    NEConcatenation();
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
@@ -132,7 +132,6 @@ public:
     static Status validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
 
     // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
     void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
 
 private:

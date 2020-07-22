@@ -41,12 +41,12 @@ namespace arm_compute
 {
 namespace experimental
 {
-NEConcatenateLayer::NEConcatenateLayer()
+NEConcatenation::NEConcatenation()
     : _concat_kernels(), _num_inputs(0), _axis(0)
 {
 }
 
-void NEConcatenateLayer::configure(const std::vector<const ITensorInfo *> &inputs_vector, ITensorInfo *output, size_t axis)
+void NEConcatenation::configure(const std::vector<const ITensorInfo *> &inputs_vector, ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
@@ -100,7 +100,7 @@ void NEConcatenateLayer::configure(const std::vector<const ITensorInfo *> &input
     }
 }
 
-Status NEConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+Status NEConcatenation::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(inputs_vector.size() < 2);
@@ -146,12 +146,7 @@ Status NEConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inpu
     return Status{};
 }
 
-MemoryRequirements NEConcatenateLayer::workspace() const
-{
-    return MemoryRequirements{};
-}
-
-void NEConcatenateLayer::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void NEConcatenation::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
 {
     ARM_COMPUTE_UNUSED(workspace);
 
@@ -177,11 +172,11 @@ void NEConcatenateLayer::run(InputTensorMap inputs, OutputTensorMap outputs, Ope
 
 struct NEConcatenateLayer::Impl
 {
-    std::vector<const ITensor *>                      srcs{};
-    ITensor                                          *dst{ nullptr };
-    unsigned int                                      num_inputs{ 0 };
-    unsigned int                                      axis{ 0 };
-    std::unique_ptr<experimental::NEConcatenateLayer> op{ nullptr };
+    std::vector<const ITensor *>                   srcs{};
+    ITensor                                       *dst{ nullptr };
+    unsigned int                                   num_inputs{ 0 };
+    unsigned int                                   axis{ 0 };
+    std::unique_ptr<experimental::NEConcatenation> op{ nullptr };
 };
 
 NEConcatenateLayer::NEConcatenateLayer()
@@ -203,7 +198,7 @@ void NEConcatenateLayer::configure(std::vector<const ITensor *> inputs_vector, I
     _impl->dst        = output;
     _impl->axis       = axis;
     _impl->num_inputs = inputs_vector.size();
-    _impl->op         = arm_compute::support::cpp14::make_unique<experimental::NEConcatenateLayer>();
+    _impl->op         = arm_compute::support::cpp14::make_unique<experimental::NEConcatenation>();
 
     std::vector<const ITensorInfo *> inputs_vector_info;
     for(unsigned int i = 0; i < inputs_vector.size(); ++i)
@@ -216,7 +211,7 @@ void NEConcatenateLayer::configure(std::vector<const ITensor *> inputs_vector, I
 
 Status NEConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
-    return experimental::NEConcatenateLayer::validate(inputs_vector, output, axis);
+    return experimental::NEConcatenation::validate(inputs_vector, output, axis);
 }
 
 void NEConcatenateLayer::run()

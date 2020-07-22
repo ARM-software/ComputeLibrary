@@ -38,7 +38,7 @@ namespace experimental
  *
  * @note The function implements an activation layer with the PRELU activation function.
  */
-class NEPReluLayer : public INEOperator
+class NEPRelu : public INEOperator
 {
 public:
     /** Set the input and output tensor.
@@ -57,9 +57,6 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 } // namespace experimental
 

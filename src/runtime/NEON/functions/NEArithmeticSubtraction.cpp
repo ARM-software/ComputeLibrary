@@ -46,11 +46,6 @@ Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITenso
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticSubtractionKernel::validate(input1, input2, output, policy);
 }
-
-MemoryRequirements NEArithmeticSubtraction::workspace() const
-{
-    return MemoryRequirements{};
-}
 } // namespace experimental
 
 struct NEArithmeticSubtraction::Impl

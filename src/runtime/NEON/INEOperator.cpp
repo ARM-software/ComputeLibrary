@@ -49,5 +49,10 @@ void INEOperator::prepare(OperatorTensorMap constants)
 {
     ARM_COMPUTE_UNUSED(constants);
 }
+
+MemoryRequirements INEOperator::workspace() const
+{
+    return {};
+}
 } // namespace experimental
 } // namespace arm_compute

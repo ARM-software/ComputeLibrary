@@ -73,9 +73,6 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output,
                            const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                            int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 } // namespace experimental
 

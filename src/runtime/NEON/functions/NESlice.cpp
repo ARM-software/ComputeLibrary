@@ -62,11 +62,6 @@ Status NESlice::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
     return NEStridedSliceKernel::validate(input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
 }
-
-MemoryRequirements NESlice::workspace() const
-{
-    return MemoryRequirements{};
-}
 } // namespace experimental
 
 struct NESlice::Impl

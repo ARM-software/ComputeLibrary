@@ -60,11 +60,6 @@ Status CLSlice::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
     return CLStridedSliceKernel::validate(input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
 }
-
-MemoryRequirements CLSlice::workspace() const
-{
-    return MemoryRequirements{};
-}
 } // namespace experimental
 
 struct CLSlice::Impl

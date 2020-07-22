@@ -78,7 +78,7 @@ private:
 namespace experimental
 {
 /** Basic function to run @ref NEReshapeLayerKernel */
-class NEReshapeLayer : public INEOperator
+class NEReshape : public INEOperator
 {
 public:
     /** Initialise the kernel's inputs and outputs
@@ -96,9 +96,6 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    MemoryRequirements workspace() const override;
 };
 } // namespace experimental
 } // namespace arm_compute

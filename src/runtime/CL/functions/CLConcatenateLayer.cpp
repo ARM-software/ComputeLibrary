@@ -42,14 +42,14 @@ namespace arm_compute
 {
 namespace experimental
 {
-CLConcatenateLayer::CLConcatenateLayer()
+CLConcatenation::CLConcatenation()
     : _concat_kernels(),
       _num_inputs(0),
       _axis(Window::DimX)
 {
 }
 
-void CLConcatenateLayer::configure(const CLCompileContext &compile_context, const std::vector<ITensorInfo *> &inputs_vector, ITensorInfo *output, size_t axis)
+void CLConcatenation::configure(const CLCompileContext &compile_context, const std::vector<ITensorInfo *> &inputs_vector, ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
     _axis       = axis;
@@ -143,7 +143,7 @@ void CLConcatenateLayer::configure(const CLCompileContext &compile_context, cons
     }
 }
 
-Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+Status CLConcatenation::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(output == nullptr);
     const unsigned int num_inputs = inputs_vector.size();
@@ -220,12 +220,7 @@ Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inpu
     return Status{};
 }
 
-MemoryRequirements CLConcatenateLayer::workspace() const
-{
-    return MemoryRequirements{};
-}
-
-void CLConcatenateLayer::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLConcatenation::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
 {
     ARM_COMPUTE_UNUSED(workspace);
 
@@ -259,11 +254,11 @@ void CLConcatenateLayer::run(InputTensorMap inputs, OutputTensorMap outputs, Ope
 
 struct CLConcatenateLayer::Impl
 {
-    std::vector<const ICLTensor *>                    srcs{};
-    ICLTensor                                        *dst{ nullptr };
-    unsigned int                                      num_inputs{ 0 };
-    unsigned int                                      axis{ 0 };
-    std::unique_ptr<experimental::CLConcatenateLayer> op{ nullptr };
+    std::vector<const ICLTensor *>                 srcs{};
+    ICLTensor                                     *dst{ nullptr };
+    unsigned int                                   num_inputs{ 0 };
+    unsigned int                                   axis{ 0 };
+    std::unique_ptr<experimental::CLConcatenation> op{ nullptr };
 };
 
 CLConcatenateLayer::CLConcatenateLayer()
@@ -290,7 +285,7 @@ void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std:
     _impl->dst        = output;
     _impl->axis       = axis;
     _impl->num_inputs = inputs_vector.size();
-    _impl->op         = arm_compute::support::cpp14::make_unique<experimental::CLConcatenateLayer>();
+    _impl->op         = arm_compute::support::cpp14::make_unique<experimental::CLConcatenation>();
 
     std::vector<ITensorInfo *> inputs_vector_info;
     for(unsigned int i = 0; i < inputs_vector.size(); ++i)
@@ -303,7 +298,7 @@ void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std:
 
 Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
-    return experimental::CLConcatenateLayer::validate(inputs_vector, output, axis);
+    return experimental::CLConcatenation::validate(inputs_vector, output, axis);
 }
 
 void CLConcatenateLayer::run()

@@ -47,11 +47,6 @@ Status NEStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *out
 {
     return NEStridedSliceKernel::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
-
-MemoryRequirements NEStridedSlice::workspace() const
-{
-    return MemoryRequirements{};
-}
 } // namespace experimental
 
 struct NEStridedSlice::Impl
