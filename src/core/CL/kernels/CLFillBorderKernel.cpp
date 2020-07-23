@@ -33,6 +33,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -62,10 +63,16 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
 
 void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
-    ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-    ARM_COMPUTE_ERROR_ON(tensor->info()->num_channels() != 1);
+    _tensor = tensor;
+    configure(compile_context, tensor->info(), border_size, border_mode, constant_border_value);
+}
 
-    border_size.limit(tensor->info()->padding());
+void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ITensorInfo *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
+{
+    ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+    ARM_COMPUTE_ERROR_ON(tensor->num_channels() != 1);
+
+    border_size.limit(tensor->padding());
 
     // If there is no border: early exit
     if(border_size.empty() || border_mode == BorderMode::UNDEFINED)
@@ -76,7 +83,7 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ICLT
     // Select appropriate kernel
     std::string kernel_name = "fill_image_borders_" + lower_string(string_from_border_mode(border_mode));
 
-    const DataType dt = tensor->info()->data_type();
+    const DataType dt = tensor->data_type();
 
     // Define build options
     CLBuildOptions build_opts;
@@ -88,16 +95,15 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ICLT
 
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
-    _tensor = tensor;
 
     // Create static kernel arguments
-    const unsigned int valid_width  = tensor->info()->valid_region().shape[0];
-    const unsigned int valid_height = tensor->info()->valid_region().shape[1];
+    const unsigned int valid_width  = tensor->valid_region().shape[0];
+    const unsigned int valid_height = tensor->valid_region().shape[1];
     const cl_int2      valid_region_coords =
     {
         {
-            static_cast<cl_int>(tensor->info()->valid_region().anchor[0]),
-            static_cast<cl_int>(tensor->info()->valid_region().anchor[1]),
+            static_cast<cl_int>(tensor->valid_region().anchor[0]),
+            static_cast<cl_int>(tensor->valid_region().anchor[1]),
         }
     };
     const unsigned int total_valid_width = border_size.left + valid_width + border_size.right;
@@ -149,7 +155,7 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ICLT
     Window win;
     win.set(Window::DimX, Window::Dimension(0, total_valid_width + valid_height));
     win.set(Window::DimY, Window::Dimension(0, 1, 1));
-    win.use_tensor_dimensions(tensor->info()->tensor_shape(), Window::DimZ);
+    win.use_tensor_dimensions(tensor->tensor_shape(), Window::DimZ);
     ICLKernel::configure_internal(win);
 
     // Set config_id for enabling LWS tuning
@@ -157,11 +163,38 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ICLT
     _config_id += "_";
     _config_id += lower_string(string_from_data_type(dt));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(tensor->info()->dimension(0));
+    _config_id += support::cpp11::to_string(tensor->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(tensor->info()->dimension(1));
+    _config_id += support::cpp11::to_string(tensor->dimension(1));
     _config_id += "_";
     _config_id += lower_string(string_from_border_mode(border_mode));
+}
+
+void CLFillBorderKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue)
+{
+    ARM_COMPUTE_UNUSED(outputs);
+
+    // Border mode undefined or border width == 0
+    if(_kernel() == nullptr)
+    {
+        return;
+    }
+
+    const auto tensor = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC));
+
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
+
+    Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window slice     = collapsed.first_slice_window_3D();
+
+    do
+    {
+        unsigned int idx = 0;
+        add_3D_tensor_argument(idx, tensor, slice);
+        enqueue(queue, *this, slice, lws_hint());
+    }
+    while(collapsed.slide_window_slice_3D(slice));
 }
 
 void CLFillBorderKernel::run(const Window &window, cl::CommandQueue &queue)

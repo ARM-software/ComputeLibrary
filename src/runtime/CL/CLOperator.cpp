@@ -37,7 +37,7 @@ void ICLOperator::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTe
 {
     ARM_COMPUTE_UNUSED(workspace);
 
-    if(inputs.empty() || outputs.empty())
+    if(inputs.empty())
     {
         ARM_COMPUTE_ERROR("No inputs provided");
     }
