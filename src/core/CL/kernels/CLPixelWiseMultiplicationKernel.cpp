@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -142,21 +143,21 @@ CLPixelWiseMultiplicationKernel::CLPixelWiseMultiplicationKernel()
 {
 }
 
-void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
+void CLPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale,
                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
 }
 
-void CLPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
+void CLPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale,
                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info(),
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1, input2, output,
                                                   scale, overflow_policy, rounding_policy, act_info));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info());
+    auto win_config = validate_and_configure_window(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     _input1 = input1;
@@ -179,14 +180,14 @@ void CLPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
 
     std::string acc_type;
     // Check if it has float inputs and output
-    if(is_data_type_float(input1->info()->data_type()) || is_data_type_float(input2->info()->data_type()))
+    if(is_data_type_float(input1->data_type()) || is_data_type_float(input2->data_type()))
     {
         scale_int = -1;
-        acc_type  = (input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32) ? "float" : "half";
+        acc_type  = (input1->data_type() == DataType::F32 || input2->data_type() == DataType::F32) ? "float" : "half";
     }
     else
     {
-        if(input1->info()->element_size() == 2 || input2->info()->element_size() == 2)
+        if(input1->element_size() == 2 || input2->element_size() == 2)
         {
             // Use 32-bit accumulator for 16-bit input
             acc_type = "int";
@@ -198,26 +199,26 @@ void CLPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
         }
     }
 
-    const bool is_quantized = is_data_type_quantized(input1->info()->data_type());
+    const bool is_quantized = is_data_type_quantized(input1->data_type());
 
     // Set kernel build options
     std::string    kernel_name = "pixelwise_mul";
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(input1->info()->data_type()));
-    build_opts.add_option("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(input2->info()->data_type()));
-    build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(input1->data_type()));
+    build_opts.add_option("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(input2->data_type()));
+    build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    if(is_quantized && (output->info()->data_type() != DataType::S32))
+    if(is_quantized && (output->data_type() != DataType::S32))
     {
-        const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
-        const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info  = output->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq1_info = input1->quantization_info().uniform();
+        const UniformQuantizationInfo iq2_info = input2->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info  = output->quantization_info().uniform();
 
-        build_opts.add_option_if(is_data_type_quantized_asymmetric(input1->info()->data_type()),
+        build_opts.add_option_if(is_data_type_quantized_asymmetric(input1->data_type()),
                                  "-DOFFSET_IN1=" + support::cpp11::to_string(iq1_info.offset));
-        build_opts.add_option_if(is_data_type_quantized_asymmetric(input2->info()->data_type()),
+        build_opts.add_option_if(is_data_type_quantized_asymmetric(input2->data_type()),
                                  "-DOFFSET_IN2=" + support::cpp11::to_string(iq2_info.offset));
-        build_opts.add_option_if(is_data_type_quantized_asymmetric(output->info()->data_type()),
+        build_opts.add_option_if(is_data_type_quantized_asymmetric(output->data_type()),
                                  "-DOFFSET_OUT=" + support::cpp11::to_string(oq_info.offset));
         build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iq1_info.scale));
         build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(iq2_info.scale));
@@ -227,7 +228,7 @@ void CLPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
     else
     {
         kernel_name += (scale_int >= 0) ? "_int" : "_float";
-        build_opts.add_option_if_else(overflow_policy == ConvertPolicy::WRAP || is_data_type_float(output->info()->data_type()), "-DWRAP", "-DSATURATE");
+        build_opts.add_option_if_else(overflow_policy == ConvertPolicy::WRAP || is_data_type_float(output->data_type()), "-DWRAP", "-DSATURATE");
         build_opts.add_option_if_else(rounding_policy == RoundingPolicy::TO_ZERO, "-DROUND=_rtz", "-DROUND=_rte");
         build_opts.add_option("-DACC_DATA_TYPE=" + acc_type);
         if(act_info.enabled())
@@ -266,14 +267,18 @@ Status CLPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, cons
     return Status{};
 }
 
-void CLPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLPixelWiseMultiplicationKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const TensorShape &in_shape1 = _input1->info()->tensor_shape();
-    const TensorShape &in_shape2 = _input2->info()->tensor_shape();
-    const TensorShape &out_shape = _output->info()->tensor_shape();
+    const auto src_0 = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC_0));
+    const auto src_1 = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC_1));
+    auto       dst   = utils::cast::polymorphic_downcast<ICLTensor *>(outputs.at(TensorType::ACL_DST));
+
+    const TensorShape &in_shape1 = src_0->info()->tensor_shape();
+    const TensorShape &in_shape2 = src_1->info()->tensor_shape();
+    const TensorShape &out_shape = dst->info()->tensor_shape();
 
     bool can_collapse = true;
     if(std::min(in_shape1.total_size(), in_shape2.total_size()) > 1)
@@ -298,9 +303,9 @@ void CLPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input1, slice_input1);
-        add_3D_tensor_argument(idx, _input2, slice_input2);
-        add_3D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, src_0, slice_input1);
+        add_3D_tensor_argument(idx, src_1, slice_input2);
+        add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
 
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
@@ -311,7 +316,7 @@ void CLPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue
 
 BorderSize CLPixelWiseMultiplicationKernel::border_size() const
 {
-    const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
+    const unsigned int replicateSize = _output->dimension(0) - std::min(_input1->dimension(0), _input2->dimension(0));
     const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
     return BorderSize{ 0, border, 0, 0 };
 }
@@ -374,18 +379,18 @@ CLComplexPixelWiseMultiplicationKernel::CLComplexPixelWiseMultiplicationKernel()
 {
 }
 
-void CLComplexPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+void CLComplexPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
 }
 
-void CLComplexPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+void CLComplexPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1->info(), input2->info(), output->info(), act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1, input2, output, act_info));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window_complex(input1->info(), input2->info(), output->info());
+    auto win_config = validate_and_configure_window_complex(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     _input1 = input1;
@@ -415,14 +420,18 @@ Status CLComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *input
     return Status{};
 }
 
-void CLComplexPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLComplexPixelWiseMultiplicationKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const TensorShape &in_shape1 = _input1->info()->tensor_shape();
-    const TensorShape &in_shape2 = _input2->info()->tensor_shape();
-    const TensorShape &out_shape = _output->info()->tensor_shape();
+    const auto src_0 = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC_0));
+    const auto src_1 = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC_1));
+    auto       dst   = utils::cast::polymorphic_downcast<ICLTensor *>(outputs.at(TensorType::ACL_DST));
+
+    const TensorShape &in_shape1 = src_0->info()->tensor_shape();
+    const TensorShape &in_shape2 = src_1->info()->tensor_shape();
+    const TensorShape &out_shape = dst->info()->tensor_shape();
 
     bool can_collapse = true;
     if(std::min(in_shape1.total_size(), in_shape2.total_size()) > 1)
@@ -447,9 +456,9 @@ void CLComplexPixelWiseMultiplicationKernel::run(const Window &window, cl::Comma
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input1, slice_input1);
-        add_3D_tensor_argument(idx, _input2, slice_input2);
-        add_3D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, src_0, slice_input1);
+        add_3D_tensor_argument(idx, src_1, slice_input2);
+        add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
 
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
@@ -460,7 +469,7 @@ void CLComplexPixelWiseMultiplicationKernel::run(const Window &window, cl::Comma
 
 BorderSize CLComplexPixelWiseMultiplicationKernel::border_size() const
 {
-    const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
+    const unsigned int replicateSize = _output->dimension(0) - std::min(_input1->dimension(0), _input2->dimension(0));
     const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration_complex - 1U, replicateSize);
     return BorderSize{ 0, border, 0, 0 };
 }

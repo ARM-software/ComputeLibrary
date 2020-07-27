@@ -26,13 +26,13 @@
 
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
+#include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
 
 #include "arm_compute/runtime/common/LSTMParams.h"
@@ -52,7 +52,7 @@ class ICLTensor;
  * -# @ref CLGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16
  * -# @ref CLGEMMLowpMatrixAReductionKernel                      For precomputing effective biases to use
- * -# @ref CLPixelWiseMultiplicationKernel                       Elementwise multiplication
+ * -# @ref CLPixelWiseMultiplication                       Elementwise multiplication
  * -# @ref CLTranspose                                           Transpose function for reshaping the weights
  * */
 class CLQLSTMLayer : public IFunction
@@ -113,7 +113,7 @@ public:
                    const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                    const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                    const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                   const ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                   ICLTensor *cell_state_in, const ICLTensor *output_state_in,
                    ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
                    const LSTMParams<ICLTensor> &lstm_params);
 
@@ -163,7 +163,7 @@ public:
                    const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                    const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                    const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                   const ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                   ICLTensor *cell_state_in, const ICLTensor *output_state_in,
                    ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
                    const LSTMParams<ICLTensor> &lstm_params);
 
@@ -306,7 +306,7 @@ private:
     CLArithmeticAddition             _projection_bias_add{};
     CLGEMMLowpMatrixMultiplyCore     _mm_input_to_forget{};
     CLGEMMLowpMatrixMultiplyCore     _mm_recurrent_to_forget{};
-    CLPixelWiseMultiplicationKernel  _pixelwise_mul_cell_to_forget{};
+    CLPixelWiseMultiplication        _pixelwise_mul_cell_to_forget{};
     CLGEMMLowpOutputStage            _input_to_forget_outstage{};
     CLGEMMLowpOutputStage            _recurrent_to_forget_outstage{};
     CLGEMMLowpOutputStage            _cell_to_forget_outstage{};
@@ -325,12 +325,12 @@ private:
     CLGEMMLowpMatrixMultiplyCore     _mm_recurrent_to_input{};
     CLGEMMLowpOutputStage            _recurrent_to_input_outstage{};
     CLArithmeticAddition             _accumulate_input_recurrent_input{};
-    CLPixelWiseMultiplicationKernel  _pixelwise_mul_cell_to_input{};
+    CLPixelWiseMultiplication        _pixelwise_mul_cell_to_input{};
     CLGEMMLowpOutputStage            _cell_to_input_outstage{};
     CLArithmeticAddition             _accumulate_cell_input{};
     CLActivationLayer                _input_gate_sigmoid{};
-    CLPixelWiseMultiplicationKernel  _pixelwise_mul_forget_cell{};
-    CLPixelWiseMultiplicationKernel  _pixelwise_mul_input_cell{};
+    CLPixelWiseMultiplication        _pixelwise_mul_forget_cell{};
+    CLPixelWiseMultiplication        _pixelwise_mul_input_cell{};
     CLArithmeticAddition             _add_forget_cell{};
     CLActivationLayer                _cell_clip{};
     CLGEMMLowpMatrixMultiplyCore     _mm_input_to_output{};
@@ -338,12 +338,12 @@ private:
     CLGEMMLowpMatrixMultiplyCore     _mm_recurrent_to_output{};
     CLGEMMLowpOutputStage            _recurrent_to_output_outstage{};
     CLArithmeticAddition             _accumulate_input_recurrent_output{};
-    CLPixelWiseMultiplicationKernel  _pixelwise_mul_cell_to_output{};
+    CLPixelWiseMultiplication        _pixelwise_mul_cell_to_output{};
     CLGEMMLowpOutputStage            _cell_to_output_outstage{};
     CLArithmeticAddition             _accumulate_cell_to_output{};
     CLActivationLayer                _output_gate_sigmoid{};
     CLActivationLayer                _hidden_tanh{};
-    CLPixelWiseMultiplicationKernel  _pixelwise_mul_hidden{};
+    CLPixelWiseMultiplication        _pixelwise_mul_hidden{};
     CLGEMMLowpOutputStage            _hidden_outstage{};
     CLGEMMLowpMatrixMultiplyCore     _mm_projection{};
     CLGEMMLowpOutputStage            _projection_outstage{};

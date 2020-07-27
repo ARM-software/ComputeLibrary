@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,9 +134,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                input_info, input_weights_info, recurrent_weights_info, cell_bias_info, projection_bias_info, cell_state_info, output_info, scratch_info, info, expected)
 {
     LSTMParams<ITensorInfo> lstm_params_info;
-    lstm_params_info.set_peephole_params(&cell_bias_info, &cell_bias_info)
+    auto cell_bias_clone = cell_bias_info.clone();
+    lstm_params_info.set_peephole_params(cell_bias_clone.get(), cell_bias_clone.get())
                     .set_projection_params(&recurrent_weights_info, &projection_bias_info)
-                    .set_cifg_params(&input_weights_info, &recurrent_weights_info, &cell_bias_info, &cell_bias_info);
+                    .set_cifg_params(&input_weights_info, &recurrent_weights_info, cell_bias_clone.get(), cell_bias_clone.get());
 
     ARM_COMPUTE_EXPECT(bool(NELSTMLayer::validate(&input_info.clone()->set_is_resizable(false), &input_weights_info.clone()->set_is_resizable(false), &input_weights_info.clone()->set_is_resizable(false),
                                                   &input_weights_info.clone()->set_is_resizable(false), &recurrent_weights_info.clone()->set_is_resizable(false), &recurrent_weights_info.clone()->set_is_resizable(false),

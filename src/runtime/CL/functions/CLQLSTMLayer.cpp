@@ -113,7 +113,7 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
                              const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                              const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                              const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                             const ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                             ICLTensor *cell_state_in, const ICLTensor *output_state_in,
                              ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
                              const LSTMParams<ICLTensor> &lstm_params)
 {
@@ -126,7 +126,7 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
                              const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                              const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                              const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                             const ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                             ICLTensor *cell_state_in, const ICLTensor *output_state_in,
                              ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
                              const LSTMParams<ICLTensor> &lstm_params)
 {
@@ -382,7 +382,7 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
         input_activation_input->allocator()->allocate();
     }
     // Cell.
-    // TODO(COMPMID-3396): Perform multiplication in the quantized domain in CLPixelWiseMultiplicationKernel
+    // TODO(COMPMID-3396): Perform multiplication in the quantized domain in CLPixelWiseMultiplication
     _pixelwise_mul_forget_cell.configure(compile_context, &_forget_gate, cell_state_in, &_forget_gate, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     const float      cell_gate_scale      = _cell_gate.info()->quantization_info().uniform().scale;
     const float      mul_input_cell_scale = cell_gate_scale * std::pow(2, 15 + cell_shift);
@@ -418,7 +418,7 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
 
     if(_has_peephole)
     {
-        // TODO(COMPMID-3396): Perform multiplication in the quantized domain in CLPixelWiseMultiplicationKernel
+        // TODO(COMPMID-3396): Perform multiplication in the quantized domain in CLPixelWiseMultiplication
         // Here we are not using the output stage because all operations are done in float
         _mul_cell_to_output_res.allocator()->init(TensorInfo(cell_state_out->info()->tensor_shape(), 1, DataType::S32));
         _memory_group.manage(&_mul_cell_to_output_res);
@@ -453,7 +453,7 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
 
     // Hidden.
     _hidden_tanh.configure(compile_context, cell_state_out, &_input_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f));
-    // TODO(COMPMID-3396): Perform multiplication in the quantized domain in CLPixelWiseMultiplicationKernel
+    // TODO(COMPMID-3396): Perform multiplication in the quantized domain in CLPixelWiseMultiplication
     _memory_group.manage(&_hidden_mul_res);
     const TensorInfo hidden_mul_res(_input_gate.info()->tensor_shape(), 1, DataType::S32);
     _hidden_mul_res.allocator()->init(hidden_mul_res);
@@ -696,8 +696,8 @@ Status CLQLSTMLayer::validate(const ITensorInfo *input,
     if(lstm_params.has_peephole_opt())
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lstm_params.cell_to_forget_weights(), 1, DataType::QSYMM16);
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_forget_weights(), &mm_out_info, 1.f, ConvertPolicy::SATURATE,
-                                                                              RoundingPolicy::TO_ZERO));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(cell_state_in, lstm_params.cell_to_forget_weights(), &mm_out_info, 1.f, ConvertPolicy::SATURATE,
+                                                                        RoundingPolicy::TO_ZERO));
         const float cell_to_forget_scale = std::pow(2, cell_shift) * lstm_params.cell_to_forget_weights()->quantization_info().uniform().scale / lstm_params.forget_intermediate_scale();
         ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_forget_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOutputStage::validate(&mm_out_info, nullptr, &forget_outstage_info, gemmlowp_info));
@@ -766,8 +766,8 @@ Status CLQLSTMLayer::validate(const ITensorInfo *input,
 
         if(lstm_params.has_peephole_opt())
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_input_weights(), &mm_out_info, 1.f, ConvertPolicy::SATURATE,
-                                                                                  RoundingPolicy::TO_ZERO));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(cell_state_in, lstm_params.cell_to_input_weights(), &mm_out_info, 1.f, ConvertPolicy::SATURATE,
+                                                                            RoundingPolicy::TO_ZERO));
             const float cell_to_input_scale = std::pow(2, cell_shift) * lstm_params.cell_to_input_weights()->quantization_info().uniform().scale / lstm_params.input_intermediate_scale();
             ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_input_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
             ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOutputStage::validate(&mm_out_info, &eff_bias_info, &input_outstage_info, gemmlowp_info));
@@ -784,8 +784,8 @@ Status CLQLSTMLayer::validate(const ITensorInfo *input,
         ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&input_outstage_info, &input_gate_info, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 1.f, 1.f)));
     }
     // Cell.
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&forget_gate_info, cell_state_in, &forget_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&input_gate_info, cell_state_in, &cell_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&forget_gate_info, cell_state_in, &forget_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&input_gate_info, cell_state_in, &cell_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&forget_gate_info, &cell_gate_info, cell_state_out, ConvertPolicy::SATURATE));
     if(quantized_cell_clip > 0)
     {
@@ -809,8 +809,8 @@ Status CLQLSTMLayer::validate(const ITensorInfo *input,
         // Here we are not using the output stage because all operations are done in float
         // const float cell_to_output_scale = std::pow(2, cell_shift) * lstm_params.cell_to_output_weights()->quantization_info().uniform().scale / lstm_params.output_intermediate_scale();
         // ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_output_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(cell_state_out, lstm_params.cell_to_output_weights(), &output_outstage_info, 1.f, ConvertPolicy::SATURATE,
-                                                                              RoundingPolicy::TO_ZERO));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(cell_state_out, lstm_params.cell_to_output_weights(), &output_outstage_info, 1.f, ConvertPolicy::SATURATE,
+                                                                        RoundingPolicy::TO_ZERO));
         ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
     }
 
@@ -830,7 +830,7 @@ Status CLQLSTMLayer::validate(const ITensorInfo *input,
     const TensorInfo hidden_out_info(TensorShape(num_units, batch_size), 1, DataType::QASYMM8_SIGNED);
 
     ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.hidden_state_scale() == 0);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&output_gate_info, &input_gate_info, &hidden_mul_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&output_gate_info, &input_gate_info, &hidden_mul_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     const float hidden_state_scale = std::pow(2, -15) / lstm_params.hidden_state_scale() * std::pow(2, -15);
     ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(hidden_state_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift, /* ignore_epsilon */ true));
     gemmlowp_info.gemmlowp_offset = lstm_params.hidden_state_zero();
@@ -926,7 +926,7 @@ void CLQLSTMLayer::run()
 
     if(_has_peephole)
     {
-        CLScheduler::get().enqueue(_pixelwise_mul_cell_to_forget);
+        _pixelwise_mul_cell_to_forget.run();
         _cell_to_forget_outstage.run();
         _accumulate_cell_forget.run();
     }
@@ -968,7 +968,7 @@ void CLQLSTMLayer::run()
 
         if(_has_peephole)
         {
-            CLScheduler::get().enqueue(_pixelwise_mul_cell_to_input);
+            _pixelwise_mul_cell_to_input.run();
             _cell_to_input_outstage.run();
             _accumulate_cell_input.run();
         }
@@ -982,8 +982,8 @@ void CLQLSTMLayer::run()
     }
 
     // Cell.
-    CLScheduler::get().enqueue(_pixelwise_mul_forget_cell);
-    CLScheduler::get().enqueue(_pixelwise_mul_input_cell);
+    _pixelwise_mul_forget_cell.run();
+    _pixelwise_mul_input_cell.run();
     _add_forget_cell.run();
     if(_has_cell_clipping)
     {
@@ -998,7 +998,7 @@ void CLQLSTMLayer::run()
     _accumulate_input_recurrent_output.run();
     if(_has_peephole)
     {
-        CLScheduler::get().enqueue(_pixelwise_mul_cell_to_output);
+        _pixelwise_mul_cell_to_output.run();
         _cell_to_output_outstage.run();
         _accumulate_cell_to_output.run();
     }
@@ -1012,7 +1012,7 @@ void CLQLSTMLayer::run()
 
     // Hidden.
     _hidden_tanh.run();
-    CLScheduler::get().enqueue(_pixelwise_mul_hidden);
+    _pixelwise_mul_hidden.run();
     _hidden_outstage.run();
 
     // Projection.

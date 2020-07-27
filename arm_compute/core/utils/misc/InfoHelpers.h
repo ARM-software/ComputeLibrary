@@ -86,7 +86,7 @@ inline void build_lstm_params_tensor_info(const LSTMParams<T>     &lstm_params,
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), lstm_params.input_gate_bias());
 
-        const ITensorInfo *cell_to_input_weights_info = (lstm_params.has_peephole_opt()) ? lstm_params.cell_to_input_weights()->info() : nullptr;
+        ITensorInfo *cell_to_input_weights_info = (lstm_params.has_peephole_opt()) ? lstm_params.cell_to_input_weights()->info() : nullptr;
         lstm_params_info->set_cifg_params(lstm_params.input_to_input_weights()->info(), lstm_params.recurrent_to_input_weights()->info(),
                                           cell_to_input_weights_info, lstm_params.input_gate_bias()->info());
     }
@@ -100,10 +100,10 @@ inline void build_lstm_params_tensor_info(const LSTMParams<T>     &lstm_params,
             ARM_COMPUTE_ERROR_ON_NULLPTR(lstm_params.input_layer_norm_weights());
         }
 
-        const ITensorInfo *forget_info = lstm_params.forget_layer_norm_weights()->info();
-        const ITensorInfo *cell_info   = lstm_params.cell_layer_norm_weights()->info();
-        const ITensorInfo *output_info = lstm_params.output_layer_norm_weights()->info();
-        const ITensorInfo *input_info  = lstm_params.has_cifg_opt() ? nullptr : lstm_params.input_layer_norm_weights()->info();
+        ITensorInfo *forget_info = lstm_params.forget_layer_norm_weights()->info();
+        ITensorInfo *cell_info   = lstm_params.cell_layer_norm_weights()->info();
+        ITensorInfo *output_info = lstm_params.output_layer_norm_weights()->info();
+        ITensorInfo *input_info  = lstm_params.has_cifg_opt() ? nullptr : lstm_params.input_layer_norm_weights()->info();
 
         lstm_params_info->set_layer_normalization_params(input_info, forget_info, cell_info, output_info);
     }
