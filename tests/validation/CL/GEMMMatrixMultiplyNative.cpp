@@ -244,12 +244,13 @@ m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, broadcast_bias
  *     - Partial blocks in y dimension
  *     - Partial blocks in both x and y dimensions
  *     - No blocks in both x and y dimensions, scalar store (N0==1)
+ *     - Special case: partial_n0 == 5 (vstore1 should be invoked instead of vstore_partial_1)
  */
 DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(zip(zip(
-framework::dataset::make("M",                   { 24, 64, 101, 1, 50 }),
-framework::dataset::make("N",                   { 48, 29, 16, 122, 20 })),
-framework::dataset::make("M0",                  { 4, 8, 7, 2, 1 })),
-framework::dataset::make("N0",                  { 4, 4, 16, 3, 1 })),
+framework::dataset::make("M",                   { 24, 64, 101,   1, 50, 256, }),
+framework::dataset::make("N",                   { 48, 29,  16, 122, 20,  21, })),
+framework::dataset::make("M0",                  { 4,   8,   7,   2,  1,   8, })),
+framework::dataset::make("N0",                  { 4,   4,  16,   3,  1,   8, })),
 m_value, n_value, m0_value, n0_value)
 {
     bool status = validate_zero_padding(m_value, n_value, 23, 1, m0_value, n0_value, 4, false, DataType::F32, ActivationLayerInfo());

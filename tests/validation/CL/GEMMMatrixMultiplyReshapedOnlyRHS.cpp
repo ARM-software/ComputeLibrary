@@ -309,13 +309,14 @@ b_value, m0_value, n0_value, k0_value, broadcast_bias, input_as_3d, depth_output
  *     - Partial blocks in x dimension
  *     - Partial blocks in y dimension
  *     - Partial blocks in both x and y dimensions
+ *     - Special case: partial_n0 == 9 (vstore1 should be invoked instead of vstore_partial_1)
  */
 DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(zip(zip(zip(
-framework::dataset::make("M",                   { 24, 64, 101, 1 }),
-framework::dataset::make("N",                   { 48, 29, 16, 122 })),
-framework::dataset::make("M0",                  { 4, 8, 7, 2 })),
-framework::dataset::make("N0",                  { 4, 4, 16, 3 })),
-framework::dataset::make("export_to_cl_image",  { false, true, true, false })),
+framework::dataset::make("M",                   { 24, 64, 101,   1, 100 }),
+framework::dataset::make("N",                   { 48, 29,  16, 122,  41 })),
+framework::dataset::make("M0",                  {  4,  8,   7,   2,   1 })),
+framework::dataset::make("N0",                  {  4,  4,  16,   3,  16 })),
+framework::dataset::make("export_to_cl_image",  { false, true, true, false, false })),
 m_value, n_value, m0_value, n0_value, export_to_cl_image)
 {
     constexpr DataType dt = DataType::F32;

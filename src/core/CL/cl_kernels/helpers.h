@@ -345,7 +345,7 @@
 
 #define vstore_partial_5(DATA, OFFSET, PTR)    \
     vstore_partial_4(DATA.s0123, OFFSET, PTR); \
-    vstore_partial_1(DATA.s4, OFFSET, PTR + 4);
+    vstore1(DATA.s4, OFFSET, PTR + 4);
 
 #define vstore_partial_6(DATA, OFFSET, PTR)    \
     vstore_partial_4(DATA.s0123, OFFSET, PTR); \
@@ -360,7 +360,7 @@
 
 #define vstore_partial_9(DATA, OFFSET, PTR)        \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vstore_partial_1(DATA.s8, OFFSET, PTR + 8);
+    vstore1(DATA.s8, OFFSET, PTR + 8);
 
 #define vstore_partial_10(DATA, OFFSET, PTR)       \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
