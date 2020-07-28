@@ -482,7 +482,9 @@ arr_contains "${STRATEGY_OPTION}" "${ALL_STRATEGY_OPTIONS[@]}" ||
   error_msg "Output directory ${OUT_DIR} already exists!"
 
 # Make output directory
-mkdir ${OUT_DIR}
+echo "Making output directory ${OUT_DIR}" 1>&2
+mkdir -p ${OUT_DIR} || error_msg "Failed to make output directory ${OUT_DIR}"
+date +%s > ${OUT_DIR}/start_time_unix_seconds
 
 # Run selected strategy with all configurations
 # Restart the built-in timer
@@ -490,4 +492,6 @@ SECONDS=0
 [ "${STRATEGY_OPTION}" == "native" ] && run $EXAMPLE_BIN_NATIVE
 [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] && run $EXAMPLE_BIN_RESHAPED_RHS_ONLY
 [ "${STRATEGY_OPTION}" == "reshaped" ] && run $EXAMPLE_BIN_RESHAPED
+
+date +%s > ${OUT_DIR}/end_time_unix_seconds
 # Main: Main script }}}

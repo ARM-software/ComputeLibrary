@@ -50,9 +50,9 @@ class GEMMParam(NamedTuple):
     B: int  # Batch size
     data_type: str  # Data type
 
-    @staticmethod
-    def parse_from_strs(*M_N_K_B, data_type):
-        return GEMMParam(*map(int, M_N_K_B),str(data_type))
+    @classmethod
+    def parse_from_strs(cls, *M_N_K_B, data_type):
+        return cls(*map(int, M_N_K_B), str(data_type))
 
     def __str__(self):
         return ",".join(map(str, self))
@@ -64,10 +64,10 @@ class NativeGEMMConfig(NamedTuple):
     n0: int  # Number of columns processed by the matrix multiplication
     k0: int  # Number of partial accumulations performed by the matrix multiplication
 
-    @staticmethod
-    def parse_from_strs(*args):
+    @classmethod
+    def parse_from_strs(cls, *args):
         (*mnk,) = map(int, args)
-        return NativeGEMMConfig(*mnk)
+        return cls(*mnk)
 
     def __str__(self):
         return ",".join(map(str, self))
@@ -84,13 +84,16 @@ class ReshapedOnlyRHSGEMMConfig(NamedTuple):
     interleave_rhs: bool
     # Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do transpose lhs matrix (0)
     transpose_rhs: bool
+    # Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)
+    export_to_cl_image_rhs: bool
 
-    @staticmethod
-    def parse_from_strs(*args):
-        *mnkh, interleave_rhs, transpose_rhs = map(int, args)
+    @classmethod
+    def parse_from_strs(cls, *args):
+        (*mnkh, interleave_rhs, transpose_rhs, export_to_cl_image_rhs,) = map(int, args)
         interleave_rhs = interleave_rhs == 1
         transpose_rhs = transpose_rhs == 1
-        return ReshapedOnlyRHSGEMMConfig(*mnkh, interleave_rhs, transpose_rhs)
+        export_to_cl_image_rhs = export_to_cl_image_rhs == 1
+        return cls(*mnkh, interleave_rhs, transpose_rhs, export_to_cl_image_rhs)
 
     def __str__(self):
         return ",".join(map(str, self))
@@ -111,14 +114,17 @@ class ReshapedGEMMConfig(NamedTuple):
     interleave_rhs: bool
     # Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do transpose lhs matrix (0)
     transpose_rhs: bool
+    # Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)
+    export_to_cl_image_rhs: bool
 
-    @staticmethod
-    def parse_from_strs(*args):
-        *mnkvh, interleave_lhs, interleave_rhs, transpose_rhs = map(int, args)
+    @classmethod
+    def parse_from_strs(cls, *args):
+        (*mnkvh, interleave_lhs, interleave_rhs, transpose_rhs, export_to_cl_image_rhs,) = map(int, args)
         interleave_lhs = interleave_lhs == 1
         interleave_rhs = interleave_rhs == 1
         transpose_rhs = transpose_rhs == 1
-        return ReshapedGEMMConfig(*mnkvh, interleave_lhs, interleave_rhs, transpose_rhs)
+        export_to_cl_image_rhs = export_to_cl_image_rhs == 1
+        return cls(*mnkvh, interleave_lhs, interleave_rhs, transpose_rhs, export_to_cl_image_rhs)
 
     def __str__(self):
         return ",".join(map(str, self))
@@ -437,9 +443,9 @@ EXAMPLE_FILE_2_STRATEGY = {
 #           GEMMParam + GEMMConfig
 #   in that order.
 # For example, the example args of running a reshaped rhs only example could be:
-#   100,100,100,1, 4, 4, 4, 1,             1,            1
-#   M  ,N  ,K,  B,m0,n0,k0,h0,interleave_rhs,transpose_rhs
-#   <-GEMMParam-><-------------GEMMConfig-------------->
+#   100,100,100,1, 4, 4, 4, 1,             1,            1,                     0
+#   M  ,N  ,K,  B,m0,n0,k0,h0,interleave_rhs,transpose_rhs,export_to_cl_image_rhs
+#   <-GEMMParam-><-------------GEMMConfig--------------------------------------->
 # Note that the test strategy_name == strategy.name is in place to avoid unwanted enum aliases
 GEMM_EXAMPLE_ARGS_FACTORY = {
     # We ignore the data type field from GEMMParam as that is extracted separately
@@ -460,7 +466,7 @@ BENCHMARK_RESULT_JSON_EXTENSION = "gemmtuner_benchmark"
 
 
 def parse_benchmark_commandline(commandline: str) -> Dict[str, str]:
-    """ Parse the benchmark example command-line string into a dictionary of command-line agruments
+    """ Parse the benchmark example command-line string into a dictionary of command-line arguments
     """
     # Separate the data type option from the example_args portion of the string
     commandline = commandline.replace(",--type=", " --type=")
