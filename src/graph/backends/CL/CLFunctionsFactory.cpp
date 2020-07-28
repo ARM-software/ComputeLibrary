@@ -64,6 +64,7 @@ struct CLEltwiseFunctions
     using Addition       = CLArithmeticAddition;
     using Subtraction    = CLArithmeticSubtraction;
     using Multiplication = CLPixelWiseMultiplication;
+    using Maximum        = CLElementwiseMax;
 };
 
 /** Collection of CL unary element-wise functions */

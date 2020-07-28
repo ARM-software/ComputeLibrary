@@ -798,6 +798,12 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
                                         std::string("PixelWiseMultiplication"),
                                         input1, input2, output, 1.f, convert_policy, node.rounding_policy(), act_info);
     }
+    else if(eltwise_op == EltwiseOperation::Max)
+    {
+        std::tie(func, func_name) = create_named_function<typename EltwiseFunctions::Maximum>(
+                                        std::string("ElementwiseMaximum"),
+                                        input1, input2, output, act_info);
+    }
     else
     {
         ARM_COMPUTE_ERROR("Unsupported element-wise operation!");

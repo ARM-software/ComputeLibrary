@@ -44,6 +44,7 @@ struct CLEltwiseLayerFunctions
     using ArithmeticAddition      = CLArithmeticAddition;
     using ArithmeticSubtraction   = CLArithmeticSubtraction;
     using PixelWiseMultiplication = CLPixelWiseMultiplication;
+    using ElementwiseMax          = CLElementwiseMax;
 };
 
 /** Collection of CL unary element-wise functions */

@@ -44,6 +44,7 @@ struct NEEltwiseLayerFunctions
     using ArithmeticAddition      = NEArithmeticAddition;
     using ArithmeticSubtraction   = NEArithmeticSubtraction;
     using PixelWiseMultiplication = NEPixelWiseMultiplication;
+    using ElementwiseMax          = NEElementwiseMax;
 };
 
 /** Collection of NEON unary element-wise functions */

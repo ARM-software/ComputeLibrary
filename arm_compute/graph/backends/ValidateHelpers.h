@@ -616,6 +616,10 @@ Status validate_eltwise_Layer(EltwiseLayerNode &node)
     {
         return EltwiseLayerFunctions::PixelWiseMultiplication::validate(input1, input2, output, scale, convert_policy, round_policy, act_info);
     }
+    else if(eltwise_op == EltwiseOperation::Max)
+    {
+        return EltwiseLayerFunctions::ElementwiseMax::validate(input1, input2, output, act_info);
+    }
     else
     {
         ARM_COMPUTE_ERROR("Unsupported element-wise operation!");
