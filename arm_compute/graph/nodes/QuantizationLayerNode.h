@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,13 @@ public:
      */
     QuantizationLayerNode(QuantizationInfo out_quant_info);
 
+    /** Constructor
+     *
+     * @param[in] out_quant_info Output quantization info
+     * @param[in] out_data_type  Output data type
+     */
+    QuantizationLayerNode(QuantizationInfo out_quant_info, DataType out_data_type);
+
     // Inherited overridden methods:
     NodeType         type() const override;
     bool             forward_descriptors() override;
@@ -50,6 +57,7 @@ public:
 
 private:
     QuantizationInfo _out_quant_info;
+    DataType         _out_data_type;
 };
 } // namespace graph
 } // namespace arm_compute

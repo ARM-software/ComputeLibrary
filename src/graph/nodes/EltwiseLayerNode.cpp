@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/EltwiseLayerNode.h"
 
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
 
@@ -69,7 +70,7 @@ void EltwiseLayerNode::set_fused_activation(ActivationLayerInfo fused_activation
 
 bool EltwiseLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -83,10 +84,18 @@ TensorDescriptor EltwiseLayerNode::configure_output(size_t idx) const
 {
     ARM_COMPUTE_UNUSED(idx);
 
-    const Tensor *src = input(0);
-    ARM_COMPUTE_ERROR_ON(src == nullptr);
+    const Tensor *src1 = input(0);
+    ARM_COMPUTE_ERROR_ON(src1 == nullptr);
 
-    auto output_info = src->desc();
+    const Tensor *src2 = input(1);
+    ARM_COMPUTE_ERROR_ON(src2 == nullptr);
+
+    auto output_info = src1->desc();
+
+    TensorShape out_shape = TensorShape::broadcast_shape(src1->desc().shape, src2->desc().shape);
+    ARM_COMPUTE_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
+
+    output_info.set_shape(out_shape);
 
     if(!descriptor.out_quant_info.empty())
     {
