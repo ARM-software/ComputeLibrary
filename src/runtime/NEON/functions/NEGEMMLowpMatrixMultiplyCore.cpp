@@ -117,8 +117,18 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         {
             if(is_data_type_quantized_asymmetric(a_to_use->info()->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
             {
-                _asm_glue.configure(a_to_use, b, c, output, gemm_info);
-                _fused_assembly_path = _asm_glue.is_configured();
+                // Result shifts < 0 are not supported by asm kernels
+                const std::vector<int32_t> &shifts           = info.gemmlowp_output_stage().gemmlowp_shifts;
+                const bool                  is_asm_supported = info.gemmlowp_output_stage().gemmlowp_shift >= 0
+                                                               && std::all_of(shifts.cbegin(), shifts.cend(), [](int32_t val)
+                {
+                    return val >= 0;
+                });
+                if(is_asm_supported)
+                {
+                    _asm_glue.configure(a_to_use, b, c, output, gemm_info);
+                    _fused_assembly_path = _asm_glue.is_configured();
+                }
             }
             else
             {
@@ -327,22 +337,20 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     // Check if we need to run the optimized assembly kernel
     bool run_optimised             = false;
     bool run_optimised_requantized = false;
-    if(a_to_use->data_type() == DataType::QASYMM8 && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
+    if(is_data_type_quantized_asymmetric(a_to_use->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
     {
-        run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, c, output, gemm_info));
-        run_optimised_requantized = run_optimised;
-
-        const UniformQuantizationInfo a_qinfo      = a_to_use->quantization_info().uniform();
-        const QuantizationInfo        b_qinfo      = b->quantization_info();
-        const UniformQuantizationInfo output_qinfo = output->quantization_info().uniform();
-        for(auto const s : b_qinfo.scale())
+        // Result shifts < 0 are not supported by asm kernels
+        const std::vector<int32_t> &shifts           = info.gemmlowp_output_stage().gemmlowp_shifts;
+        const bool                  is_asm_supported = info.gemmlowp_output_stage().gemmlowp_shift >= 0
+                                                       && std::all_of(shifts.cbegin(), shifts.cend(), [](int32_t val)
         {
-            const float fmultipler = a_qinfo.scale * s / output_qinfo.scale;
-            if(fmultipler > 1.f)
-            {
-                run_optimised_requantized = false;
-                break;
-            }
+            return val >= 0;
+        });
+
+        if(is_asm_supported)
+        {
+            run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, c, output, gemm_info));
+            run_optimised_requantized = run_optimised;
         }
     }
     else
@@ -429,6 +437,9 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         {
             if(!run_optimised)
             {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.reinterpret_input_as_3d(), "NEGEMMLowpMatrixMultiplyKernel cannot reinterpret the input tensor as 3D");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.depth_output_gemm3d() != 0, "NEGEMMLowpMatrixMultiplyKernel cannot reinterpret the output tensor as 3D");
+
                 ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &mm_result_s32_info));
             }
 
@@ -445,6 +456,9 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         {
             if(!run_optimised)
             {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.reinterpret_input_as_3d(), "NEGEMMLowpMatrixMultiplyKernel cannot reinterpret the input tensor as 3D");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.depth_output_gemm3d() != 0, "NEGEMMLowpMatrixMultiplyKernel cannot reinterpret the output tensor as 3D");
+
                 ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output));
             }
             // Validate offset contribution kernel
