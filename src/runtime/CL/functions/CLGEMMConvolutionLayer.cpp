@@ -312,7 +312,6 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
         shape_gemm.set(0, mat_weights_cols);
         shape_gemm.set(1, conv_w * conv_h);
 
-        // TODO(COMPMID-2078): input->clone() doesn't work with subtensors for grouped convolutions.
         TensorInfo info_gemm(shape_gemm, 1, data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
