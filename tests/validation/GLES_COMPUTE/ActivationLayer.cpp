@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,49 +88,6 @@ const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace
 
 TEST_SUITE(GC)
 TEST_SUITE(ActivationLayer)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
-               shape, data_type, in_place)
-{
-    // Create tensors
-    GCTensor src = create_tensor<GCTensor>(shape, data_type, 1);
-    GCTensor dst = create_tensor<GCTensor>(shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    GCActivationLayer act_layer;
-
-    if(in_place)
-    {
-        act_layer.configure(&src, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
-    }
-    else
-    {
-        act_layer.configure(&src, &dst, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
-    }
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-
-    if(!in_place)
-    {
-        validate(dst.info()->valid_region(), valid_region);
-    }
-
-    // Validate padding
-    const int         step    = (arm_compute::data_size_from_type(data_type) == 4 ? 1 : 2);
-    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
-    validate(src.info()->padding(), padding);
-
-    if(!in_place)
-    {
-        validate(dst.info()->padding(), padding);
-    }
-}
-
 template <typename T>
 using GCActivationLayerFixture = ActivationValidationFixture<GCTensor, GCAccessor, GCActivationLayer, T>;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,28 +57,6 @@ template <typename T>
 using NEAbsoluteDifferenceFixture = AbsoluteDifferenceValidationFixture<Tensor, Accessor, NEAbsoluteDifference, T>;
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset),
-               shape, data_type0, data_type1, output_data_type)
-{
-    // Create tensors
-    Tensor ref_src1 = create_tensor<Tensor>(shape, data_type0);
-    Tensor ref_src2 = create_tensor<Tensor>(shape, data_type1);
-    Tensor dst      = create_tensor<Tensor>(shape, output_data_type);
-
-    // Create and Configure function
-    NEAbsoluteDifference abs_diff;
-    abs_diff.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset))
 {
@@ -93,28 +71,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsoluteDifferenceFixture<uint8_t>, framework
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset),
-               shape, data_type0, data_type1, output_data_type)
-{
-    // Create tensors
-    Tensor ref_src1 = create_tensor<Tensor>(shape, data_type0);
-    Tensor ref_src2 = create_tensor<Tensor>(shape, data_type1);
-    Tensor dst      = create_tensor<Tensor>(shape, output_data_type);
-
-    // Create and Configure function
-    NEAbsoluteDifference abs_diff;
-    abs_diff.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset))
 {

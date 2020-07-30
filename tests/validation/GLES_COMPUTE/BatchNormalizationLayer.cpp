@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,37 +66,6 @@ TEST_SUITE(BatchNormalizationLayer)
 
 template <typename T>
 using GCBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixture<GCTensor, GCAccessor, GCBatchNormalizationLayer, T>;
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                   data_GB),
-                                                                           framework::dataset::make("DataType", { DataType::F32 })),
-                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-               shape0, shape1, epsilon, use_beta, use_gamma, dt, data_layout)
-{
-    TensorShape src_dst_shapes = shape0;
-    if(data_layout == DataLayout::NHWC)
-    {
-        permute(src_dst_shapes, PermutationVector(2U, 0U, 1U));
-    }
-
-    // Create tensors
-    GCTensor src   = create_tensor<GCTensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
-    GCTensor dst   = create_tensor<GCTensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
-    GCTensor mean  = create_tensor<GCTensor>(shape1, dt, 1);
-    GCTensor var   = create_tensor<GCTensor>(shape1, dt, 1);
-    GCTensor beta  = create_tensor<GCTensor>(shape1, dt, 1);
-    GCTensor gamma = create_tensor<GCTensor>(shape1, dt, 1);
-
-    // Create and Configure function
-    GCBatchNormalizationLayer norm;
-    GCTensor                 *beta_ptr  = use_beta ? &beta : nullptr;
-    GCTensor                 *gamma_ptr = use_gamma ? &gamma : nullptr;
-    norm.configure(&src, &dst, &mean, &var, beta_ptr, gamma_ptr, epsilon);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(src_dst_shapes);
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)

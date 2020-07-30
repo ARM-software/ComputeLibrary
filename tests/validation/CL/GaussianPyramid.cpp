@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
-*/
+ */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
@@ -69,28 +69,6 @@ inline void validate_gaussian_pyramid(const CLPyramid &target, const std::vector
 TEST_SUITE(CL)
 TEST_SUITE(GaussianPyramid)
 TEST_SUITE(Half)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, large_gaussian_pyramid_levels,
-               shape, border_mode, num_levels)
-{
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
-
-    // Create pyramid
-    PyramidInfo pyramid_info(num_levels, SCALE_PYRAMID_HALF, shape, Format::U8);
-    CLPyramid   dst;
-    dst.init(pyramid_info);
-
-    CLGaussianPyramidHalf gaussian_pyramid_half;
-    gaussian_pyramid_half.configure(&src, &dst, border_mode, 0);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    for(size_t level = 0; level < pyramid_info.num_levels(); ++level)
-    {
-        ARM_COMPUTE_EXPECT(dst.get_pyramid_level(level)->info()->is_resizable(), framework::LogLevel::ERRORS);
-    }
-}
-
 template <typename T>
 using CLGaussianPyramidHalfFixture = GaussianPyramidHalfValidationFixture<CLTensor, CLAccessor, CLGaussianPyramidHalf, T, CLPyramid>;
 

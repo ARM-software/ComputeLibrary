@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,41 +49,6 @@ constexpr BorderSize   border_size(filter_size / 2); /* Border size of the kerne
 
 TEST_SUITE(CL)
 TEST_SUITE(Box3x3)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)),
-                                                                   datasets::BorderModes()),
-               shape, data_type, border_mode)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLBox3x3 box3x3;
-    box3x3.configure(&src, &dst, border_mode);
-
-    // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), border_size);
-    validate(dst.info()->valid_region(), dst_valid_region);
-
-    // Validate padding
-    PaddingCalculator calculator(shape.x(), 8);
-    calculator.set_border_size(1);
-    calculator.set_border_mode(border_mode);
-
-    const PaddingSize dst_padding = calculator.required_padding();
-
-    calculator.set_accessed_elements(16);
-    calculator.set_access_offset(-1);
-
-    const PaddingSize src_padding = calculator.required_padding();
-
-    validate(src.info()->padding(), src_padding);
-    validate(dst.info()->padding(), dst_padding);
-}
 
 template <typename T>
 using CLBox3x3Fixture = Box3x3ValidationFixture<CLTensor, CLAccessor, CLBox3x3, T>;

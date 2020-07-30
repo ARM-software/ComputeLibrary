@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,26 +50,6 @@ RelativeTolerance<float> tolerance_fp16(0.01f);
 
 TEST_SUITE(NEON)
 TEST_SUITE(AbsLayer)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), shape, data_type)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEAbsLayer neg_layer;
-    neg_layer.configure(&src, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-}
-
 template <typename T>
 using NEAbsLayerFixture = AbsValidationFixture<Tensor, Accessor, NEAbsLayer, T>;
 

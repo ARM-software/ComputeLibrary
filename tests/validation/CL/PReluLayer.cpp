@@ -101,29 +101,6 @@ template <typename T>
 using CLPReluLayerFixture = PReluLayerValidationFixture<CLTensor, CLAccessor, CLPReluLayer, T>;
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::U8);
-
-    // Create and Configure function
-    CLPReluLayer prelu;
-    prelu.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), PReluLayerU8Dataset))
 {
     // Validate output
@@ -136,29 +113,6 @@ using CLPReluLayerQuantizedFixture = PReluLayerValidationQuantizedFixture<CLTens
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-
-    // Create and Configure function
-    CLPReluLayer prelu;
-    prelu.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                    PReluLayerQASYMM8Dataset),
                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
@@ -188,29 +142,6 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-               shape, data_type)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, data_type);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::S16);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::S16);
-
-    // Create and Configure function
-    CLPReluLayer prelu;
-    prelu.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), PReluLayerS16Dataset))
 {
     // Validate output
@@ -228,28 +159,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<half>, framework::DatasetMo
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(), shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::F32);
-
-    // Create and Configure function
-    CLPReluLayer prelu;
-    prelu.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), PReluLayerFP32Dataset))
 {
     // Validate output

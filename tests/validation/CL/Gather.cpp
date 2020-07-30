@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,26 +97,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(arm_compute::test::datasets::SmallGatherDataset(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-               input_shape, indices_shape, axis, data_type)
-{
-    const uint32_t actual_axis = wrap_around(axis, static_cast<int>(input_shape.num_dimensions()));
-    CLTensor       src         = create_tensor<CLTensor>(input_shape, data_type);
-    CLTensor       indices     = create_tensor<CLTensor>(indices_shape, DataType::U32);
-    TensorShape    dst_shape   = arm_compute::misc::shape_calculator::compute_gather_shape(input_shape, indices_shape, actual_axis);
-    CLTensor       dst         = create_tensor<CLTensor>(dst_shape, data_type);
-
-    // Create and Configure function
-    CLGather gather;
-    gather.configure(&src, &indices, &dst, axis);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 template <typename T>
 using CLGatherFixture = GatherFixture<CLTensor, CLAccessor, CLGather, T>;

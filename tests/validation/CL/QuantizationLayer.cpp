@@ -74,29 +74,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(QuantizationSmallShapes, framework::dataset::make("DataType", DataType::F32)), shape, data_type)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLQuantizationLayer quant_layer;
-    quant_layer.configure(&src, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(src.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
-
 template <typename T>
 using CLQuantizationLayerQASYMM8Fixture = QuantizationValidationFixture<CLTensor, CLAccessor, CLQuantizationLayer, T, uint8_t>;
 template <typename T>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,25 +69,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(datasets::SmallRandomChannelShuffleLayerDataset(),
-                       framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F32 })),
-               shape, num_groups, data_type)
-{
-    // Create tensors
-    Tensor ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst     = create_tensor<Tensor>(shape, data_type);
-
-    // Create and Configure function
-    NEChannelShuffleLayer channel_shuffle_func;
-    channel_shuffle_func.configure(&ref_src, &dst, num_groups);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 template <typename T>
 using NEChannelShuffleLayerFixture = ChannelShuffleLayerValidationFixture<Tensor, Accessor, NEChannelShuffleLayer, T>;

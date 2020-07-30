@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,44 +44,6 @@ namespace validation
 {
 TEST_SUITE(CL)
 TEST_SUITE(Histogram)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()),
-                                                                   framework::dataset::make("DataType", DataType::U8)),
-               shape, data_type)
-{
-    // Setup Distribution
-    std::mt19937                            gen(library->seed());
-    std::uniform_int_distribution<size_t>   distribution_size_t(1, 30);
-    const size_t                            num_bins = distribution_size_t(gen);
-    std::uniform_int_distribution<int32_t>  distribution_int32_t(0, 125);
-    const size_t                            offset = distribution_int32_t(gen);
-    std::uniform_int_distribution<uint32_t> distribution_uint32_t(1, 255 - offset);
-    const size_t                            range = distribution_uint32_t(gen);
-    CLDistribution1D                        distribution_dst(num_bins, offset, range);
-
-    // Create tensors
-    CLTensor    src = create_tensor<CLTensor>(shape, data_type);
-    TensorShape dst_shape(num_bins);
-    CLTensor    dst = create_tensor<CLTensor>(dst_shape, DataType::U32);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLHistogram histogram;
-    histogram.configure(&src, &distribution_dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    const ValidRegion valid_region_dst = shape_to_valid_region(dst_shape);
-    validate(dst.info()->valid_region(), valid_region_dst);
-
-    // Validate padding
-    const PaddingSize padding;
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 template <typename T>
 using CLHistogramFixture = HistogramValidationFixture<CLTensor, CLAccessor, CLHistogram, T, CLDistribution1D>;

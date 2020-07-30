@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,24 +64,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(arm_compute::test::datasets::SmallStridedSliceDataset(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-               shape, starts, ends, strides, begin_mask, end_mask, shrink_mask, data_type)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst;
-
-    // Create and Configure function
-    CLStridedSlice strided_slice;
-    strided_slice.configure(&src, &dst, starts, ends, strides, begin_mask, end_mask, shrink_mask);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 template <typename T>
 using CLStridedSliceFixture = StridedSliceFixture<CLTensor, CLAccessor, CLStridedSlice, T>;

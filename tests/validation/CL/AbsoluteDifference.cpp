@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,29 +57,6 @@ template <typename T>
 using CLAbsoluteDifferenceFixture = AbsoluteDifferenceValidationFixture<CLTensor, CLAccessor, CLAbsoluteDifference, T>;
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset),
-               shape, data_type0, data_type1, output_data_type)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, data_type0);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, data_type1);
-    CLTensor dst      = create_tensor<CLTensor>(shape, output_data_type);
-
-    // Create and Configure function
-    CLAbsoluteDifference abs_diff;
-    abs_diff.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLAbsoluteDifferenceFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset))
 {
     // Validate output
@@ -93,29 +70,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLAbsoluteDifferenceFixture<uint8_t>, framework
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset),
-               shape, data_type0, data_type1, output_data_type)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, data_type0);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, data_type1);
-    CLTensor dst      = create_tensor<CLTensor>(shape, output_data_type);
-
-    // Create and Configure function
-    CLAbsoluteDifference abs_diff;
-    abs_diff.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLAbsoluteDifferenceFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset))
 {
     // Validate output

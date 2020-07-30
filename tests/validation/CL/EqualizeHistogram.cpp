@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,30 +38,6 @@ namespace validation
 {
 TEST_SUITE(CL)
 TEST_SUITE(EqualizeHistogram)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLEqualizeHistogram equalize_histogram;
-    equalize_histogram.configure(&src, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 8).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 template <typename T>
 using CLEqualizeHistogramFixture = EqualizeHistogramValidationFixture<CLTensor, CLAccessor, CLEqualizeHistogram, T>;

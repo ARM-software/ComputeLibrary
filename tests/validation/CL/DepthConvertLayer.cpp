@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,28 +109,6 @@ template <typename T>
 using CLDepthConvertLayerToF32Fixture = DepthConvertLayerValidationFixture<CLTensor, CLAccessor, CLDepthConvertLayer, T, float>;
 
 TEST_SUITE(U8_to_U16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                   DepthConvertLayerShiftDatasetNightly),
-               shape, policy, shift)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U16, 1);
-
-    // Create and Configure function
-    CLDepthConvertLayer depth_convert;
-    depth_convert.configure(&src, &dst, policy, shift);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToU16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerU8toU16Dataset),
                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                       DepthConvertLayerShiftDatasetPrecommit))
@@ -149,28 +127,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToU16Fixture<uint8_t>, frame
 TEST_SUITE_END() // U8_to_U16
 
 TEST_SUITE(U8_to_S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                   DepthConvertLayerShiftDatasetNightly),
-               shape, policy, shift)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S16, 1);
-
-    // Create and Configure function
-    CLDepthConvertLayer depth_convert;
-    depth_convert.configure(&src, &dst, policy, shift);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToS16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerU8toS16Dataset),
                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                       DepthConvertLayerShiftDatasetPrecommit))
@@ -188,28 +144,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToS16Fixture<uint8_t>, frame
 }
 TEST_SUITE_END() // U8_to_S16
 TEST_SUITE(U8_to_S32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                   DepthConvertLayerShiftDatasetNightly),
-               shape, policy, shift)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S32, 1);
-
-    // Create and Configure function
-    CLDepthConvertLayer depth_convert;
-    depth_convert.configure(&src, &dst, policy, shift);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToS32Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerU8toS32Dataset),
                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                       DepthConvertLayerShiftDatasetPrecommit))
@@ -228,28 +162,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToS32Fixture<uint8_t>, frame
 TEST_SUITE_END() // U8_to_S32
 
 TEST_SUITE(U16_to_U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                   DepthConvertLayerShiftDatasetNightly),
-               shape, policy, shift)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U16, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8, 1);
-
-    // Create and Configure function
-    CLDepthConvertLayer depth_convert;
-    depth_convert.configure(&src, &dst, policy, shift);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToU8Fixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerU16toU8Dataset),
                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                       DepthConvertLayerShiftDatasetPrecommit))
@@ -267,28 +179,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToU8Fixture<uint16_t>, frame
 TEST_SUITE_END() // U16_to_U8
 
 TEST_SUITE(U16_to_U32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                   DepthConvertLayerShiftDatasetNightly),
-               shape, policy, shift)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U16, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U32, 1);
-
-    // Create and Configure function
-    CLDepthConvertLayer depth_convert;
-    depth_convert.configure(&src, &dst, policy, shift);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToU32Fixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerU16toU32Dataset),
                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                        DepthConvertLayerShiftDatasetPrecommit))
@@ -306,28 +196,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToU32Fixture<uint16_t>, fram
 TEST_SUITE_END() // U16_to_U32
 
 TEST_SUITE(S16_to_U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                   DepthConvertLayerShiftDatasetNightly),
-               shape, policy, shift)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::S16, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8, 1);
-
-    // Create and Configure function
-    CLDepthConvertLayer depth_convert;
-    depth_convert.configure(&src, &dst, policy, shift);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToU8Fixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerS16toU8Dataset),
                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                      DepthConvertLayerShiftDatasetPrecommit))
@@ -345,28 +213,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToU8Fixture<int16_t>, framew
 TEST_SUITE_END() // S16_to_U8
 
 TEST_SUITE(S16_to_S32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                   DepthConvertLayerShiftDatasetNightly),
-               shape, policy, shift)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::S16, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S32, 1);
-
-    // Create and Configure function
-    CLDepthConvertLayer depth_convert;
-    depth_convert.configure(&src, &dst, policy, shift);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToS32Fixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerS16toS32Dataset),
                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                       DepthConvertLayerShiftDatasetPrecommit))

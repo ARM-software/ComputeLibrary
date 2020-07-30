@@ -84,28 +84,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-TEST_CASE(Configuration, framework::DatasetMode::ALL)
-{
-    // Create tensors
-    CLTensor src1 = create_tensor<CLTensor>(TensorShape(128U, 32U, 32U), DataType::F32, 1);
-    CLTensor src2 = create_tensor<CLTensor>(TensorShape(32U, 32U, 32U), DataType::F32, 1);
-    CLTensor src3 = create_tensor<CLTensor>(TensorShape(15U, 32U, 32U), DataType::F32, 1);
-    CLTensor dst;
-
-    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(src3.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLConcatenateLayer             concat_layer;
-    std::vector<const ICLTensor *> inputs;
-    inputs.emplace_back(&src1);
-    inputs.emplace_back(&src2);
-    inputs.emplace_back(&src3);
-    concat_layer.configure(inputs, &dst, 0);
-}
-
 template <typename T>
 using CLWidthConcatenateLayerFixture = ConcatenateLayerValidationFixture<CLTensor, ICLTensor, CLAccessor, CLConcatenateLayer, T>;
 

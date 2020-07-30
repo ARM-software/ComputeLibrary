@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,42 +43,6 @@ TEST_SUITE(NEON)
 TEST_SUITE(Derivative)
 
 using NEDerivativeFixture = DerivativeValidationFixture<Tensor, Accessor, NEDerivative, uint8_t, int16_t>;
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                   Format::U8)),
-               shape, border_mode, format)
-{
-    // Generate a random constant value
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<uint8_t> int_dist(0, 255);
-    const uint8_t                          constant_border_value = int_dist(gen);
-
-    // Create tensors
-    Tensor src   = create_tensor<Tensor>(shape, data_type_from_format(format));
-    Tensor dst_x = create_tensor<Tensor>(shape, DataType::S16);
-    Tensor dst_y = create_tensor<Tensor>(shape, DataType::S16);
-
-    src.info()->set_format(format);
-    dst_x.info()->set_format(Format::S16);
-    dst_y.info()->set_format(Format::S16);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst_x.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst_y.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create Derivative configure function
-    NEDerivative derivative;
-    derivative.configure(&src, &dst_x, &dst_y, border_mode, constant_border_value);
-
-    // Validate valid region
-    constexpr BorderSize border_size{ 1 };
-    const ValidRegion    dst_valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size);
-
-    validate(dst_x.info()->valid_region(), dst_valid_region);
-    validate(dst_y.info()->valid_region(), dst_valid_region);
-
-    // TODO(COMPMID-415) Validate padding after fixing x-access input bug in NEON kernel
-}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDerivativeFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
                                                                                                          Format::U8)),

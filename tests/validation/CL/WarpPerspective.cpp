@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,53 +49,6 @@ constexpr float                      tolerance_number = 0.2f;
 
 TEST_SUITE(CL)
 TEST_SUITE(WarpPerspective)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
-                                                                           framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                   datasets::BorderModes()),
-               shape, data_type, policy, border_mode)
-{
-    uint8_t constant_border_value = 0;
-
-    // Generate a random constant value if border_mode is constant
-    if(border_mode == BorderMode::CONSTANT)
-    {
-        std::mt19937                           gen(library->seed());
-        std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
-        constant_border_value = distribution_u8(gen);
-    }
-
-    // Create the matrix
-    std::array<float, 9> matrix = { { 0 } };
-    fill_warp_matrix<9>(matrix);
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLWarpPerspective warp_perspective;
-    warp_perspective.configure(&src, &dst, matrix, policy, border_mode, constant_border_value);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    PaddingCalculator calculator(shape.x(), 4);
-    calculator.set_border_mode(border_mode);
-
-    const PaddingSize read_padding(1);
-    const PaddingSize write_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
-
-    validate(src.info()->padding(), read_padding);
-    validate(dst.info()->padding(), write_padding);
-}
 
 template <typename T>
 using CLWarpPerspectiveFixture = WarpPerspectiveValidationFixture<CLTensor, CLAccessor, CLWarpPerspective, T>;

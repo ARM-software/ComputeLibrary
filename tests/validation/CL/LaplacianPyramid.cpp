@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
-*/
+ */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLPyramid.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -78,39 +78,6 @@ TEST_SUITE(LaplacianPyramid)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(
-                                                           concat(datasets::Medium2DShapes(), datasets::Large2DShapes()),
-                                                           datasets::BorderModes()),
-                                                           large_laplacian_pyramid_levels),
-                                                           shape, border_mode, num_levels)
-{
-    // Create pyramid info
-    PyramidInfo pyramid_info(num_levels, SCALE_PYRAMID_HALF, shape, Format::S16);
-    CLPyramid   dst_pyramid{};
-    dst_pyramid.init(pyramid_info);
-
-    // Create Tensors
-    CLTensor src = create_tensor<CLTensor>(shape, Format::U8);
-
-    // The first two dimensions of the output tensor must match the first two
-    // dimensions of the tensor in the last level of the pyramid
-    TensorShape dst_shape(shape);
-    dst_shape.set(0, dst_pyramid.get_pyramid_level(num_levels - 1)->info()->dimension(0));
-    dst_shape.set(1, dst_pyramid.get_pyramid_level(num_levels - 1)->info()->dimension(1));
-    CLTensor dst = create_tensor<CLTensor>(dst_shape, Format::S16);
-
-    // Create and configure function
-    CLLaplacianPyramid laplacian_pyramid;
-    laplacian_pyramid.configure(&src, &dst_pyramid, &dst, border_mode, 0);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    for(size_t level = 0; level < pyramid_info.num_levels(); ++level)
-    {
-        ARM_COMPUTE_EXPECT(dst_pyramid.get_pyramid_level(level)->info()->is_resizable(), framework::LogLevel::ERRORS);
-    }
-}
 
 using CLLaplacianPyramidFixture = LaplacianPyramidValidationFixture<CLTensor, CLAccessor, CLLaplacianPyramid, uint8_t, int16_t, CLPyramid>;
 

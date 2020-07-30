@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,42 +52,6 @@ const AbsoluteTolerance<float> tolerance(0.5f);
 
 TEST_SUITE(CL)
 TEST_SUITE(FastCorners)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()),
-                                                                                   framework::dataset::make("Format", Format::U8)),
-                                                                           framework::dataset::make("SuppressNonMax", { false, true })),
-                                                                   framework::dataset::make("BorderMode", BorderMode::UNDEFINED)),
-               shape, format, suppress_nonmax, border_mode)
-{
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<uint8_t> int_dist(0, 255);
-    std::uniform_real_distribution<float>  real_dist(0, 255);
-
-    const uint8_t constant_border_value = int_dist(gen);
-    const float   threshold             = real_dist(gen);
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type_from_format(format));
-    src.info()->set_format(format);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    CLKeyPointArray corners;
-    unsigned int    num_corners;
-
-    // Create and configure function
-    CLFastCorners fast_corners;
-    fast_corners.configure(&src, threshold, suppress_nonmax, &corners, &num_corners, border_mode, constant_border_value);
-
-    // Validate padding
-    PaddingCalculator calculator(shape.x(), 1); // elems_processed
-
-    calculator.set_border_size(bresenham_radius);
-    calculator.set_access_offset(-bresenham_radius);
-    calculator.set_accessed_elements(7); // elems_read
-
-    validate(src.info()->padding(), calculator.required_padding());
-}
 
 template <typename T>
 using CLFastCornersFixture = FastCornersValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLFastCorners, T>;

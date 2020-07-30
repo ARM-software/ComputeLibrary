@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,31 +86,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, configure_dataset,
-               shape, data_type)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, data_type);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::U8);
-
-    // Create and Configure function
-    CLComparison compare;
-    compare.configure(&ref_src1, &ref_src2, &dst, ComparisonOperation::Equal);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    const int num_elems_processed_per_iteration = 16 / ref_src1.info()->element_size();
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 template <typename T>
 using CLComparisonFixture = ComparisonValidationFixture<CLTensor, CLAccessor, CLComparison, T>;

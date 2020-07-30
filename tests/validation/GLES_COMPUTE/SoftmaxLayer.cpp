@@ -57,30 +57,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 TEST_SUITE(GC)
 TEST_SUITE(SoftmaxLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SoftmaxLayerSmallShapes(), datasets::SoftmaxLayerLargeShapes()), CNNDataTypes), shape, data_type)
-{
-    // Create tensors
-    GCTensor src = create_tensor<GCTensor>(shape, data_type, 1);
-    GCTensor dst = create_tensor<GCTensor>(shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    GCSoftmaxLayer smx_layer;
-    smx_layer.configure(&src, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 8).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 template <typename T>
 using GCSoftmaxLayerFixture = SoftmaxValidationFixture<GCTensor, GCAccessor, GCSoftmaxLayer, T>;
 

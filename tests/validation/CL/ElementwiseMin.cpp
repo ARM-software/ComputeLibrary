@@ -111,29 +111,6 @@ using CLElementwiseMinFixture = ElementwiseMinValidationFixture<CLTensor, CLAcce
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::U8);
-
-    // Create and Configure function
-    CLElementwiseMin min;
-    min.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMinU8Dataset))
 {
     // Validate output
@@ -142,29 +119,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<uint8_t>, framework::Da
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-               shape, data_type)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, data_type);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::S16);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::S16);
-
-    // Create and Configure function
-    CLElementwiseMin min;
-    min.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMinS16Dataset))
 {
     // Validate output
@@ -178,29 +132,6 @@ using CLElementwiseMinQuantizedFixture = ElementwiseMinValidationQuantizedFixtur
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-
-    // Create and Configure function
-    CLElementwiseMin min;
-    min.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                        ElementwiseMinQASYMM8Dataset),
                                                                                                                        framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
@@ -212,29 +143,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<uint8_t>, fram
 }
 TEST_SUITE_END()
 TEST_SUITE(QASYMM8_SIGNED)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-
-    // Create and Configure function
-    CLElementwiseMin min;
-    min.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                       ElementwiseMinQASYMM8SignedDataset),
                                                                                                                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
@@ -246,29 +154,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<int8_t>, frame
 }
 TEST_SUITE_END()
 TEST_SUITE(QSYMM16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-
-    // Create and Configure function
-    CLElementwiseMin min;
-    min.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                        ElementwiseMinQSYMM16Dataset),
                                                                                                                        framework::dataset::make("SrcQInfo0", { QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) })),
@@ -300,29 +185,6 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMinFloatFixture<half>, fr
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::F32);
-
-    // Create and Configure function
-    CLElementwiseMin min;
-    min.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMinFP32Dataset),
                                                                                                            EmptyActivationFunctionsDataset))
 {

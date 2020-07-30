@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,52 +40,6 @@ namespace validation
 {
 TEST_SUITE(CL)
 TEST_SUITE(NonLinearFilter)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), datasets::NonLinearFilterFunctions()),
-                                                                                   framework::dataset::make("MaskSize", { 3U, 5U })),
-                                                                           datasets::MatrixPatterns()),
-                                                                   datasets::BorderModes()),
-               shape, function, mask_size, pattern, border_mode)
-{
-    std::mt19937                           generator(library->seed());
-    std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
-    const uint8_t                          constant_border_value = distribution_u8(generator);
-
-    // Create the mask
-    std::vector<uint8_t> mask(mask_size * mask_size);
-    fill_mask_from_pattern(mask.data(), mask_size, mask_size, pattern);
-    const auto half_mask_size = static_cast<int>(mask_size / 2);
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLNonLinearFilter filter;
-    filter.configure(&src, &dst, function, mask_size, pattern, mask.data(), border_mode, constant_border_value);
-
-    // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(half_mask_size));
-    validate(dst.info()->valid_region(), dst_valid_region);
-
-    // Validate padding
-    PaddingCalculator calculator(shape.x(), ((MatrixPattern::OTHER == pattern) ? 1 : 8));
-    calculator.set_border_mode(border_mode);
-    calculator.set_border_size(half_mask_size);
-
-    const PaddingSize write_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
-
-    calculator.set_accessed_elements(16);
-    calculator.set_access_offset(-half_mask_size);
-
-    const PaddingSize read_padding = calculator.required_padding(PaddingCalculator::Option::INCLUDE_BORDER);
-
-    validate(src.info()->padding(), read_padding);
-    validate(dst.info()->padding(), write_padding);
-}
 
 template <typename T>
 using CLNonLinearFilterFixture = NonLinearFilterValidationFixture<CLTensor, CLAccessor, CLNonLinearFilter, T>;

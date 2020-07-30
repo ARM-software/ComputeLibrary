@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,27 +44,6 @@ namespace validation
 {
 TEST_SUITE(GC)
 TEST_SUITE(Transpose)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-               shape, data_type)
-{
-    // Make rows the columns of the original shape
-    TensorShape output_shape{ shape[1], shape[0] };
-
-    // Create tensors
-    GCTensor ref_src = create_tensor<GCTensor>(shape, data_type);
-    GCTensor dst     = create_tensor<GCTensor>(output_shape, data_type);
-
-    // Create and Configure function
-    GCTranspose trans;
-    trans.configure(&ref_src, &dst);
-
-    // Validate dst region
-    const ValidRegion valid_region = shape_to_valid_region(output_shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // TODO(bsgcomp): Add padding validation (COMPMID-659)
-}
 
 template <typename T>
 using GCTransposeFixture = TransposeValidationFixture<GCTensor, GCAccessor, GCTranspose, T>;

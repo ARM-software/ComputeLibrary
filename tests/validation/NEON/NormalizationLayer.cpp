@@ -91,41 +91,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)),
-               shape, data_type)
-{
-    NormalizationLayerInfo info(NormType::IN_MAP_1D, 3U, 5.0f, 2.0f, 1.f, false);
-
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NENormalizationLayer norm;
-    norm.configure(&src, &dst, info);
-
-    validate(src.info()->padding(), PaddingSize(0, 0, 0, 0));
-}
-
 template <typename T>
 using NENormalizationLayerFixture = NormalizationValidationFixture<Tensor, Accessor, NENormalizationLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDataset,
-                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
-                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset,
-                                                                                                                     framework::dataset::make("DataType", DataType::F16)),
-                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(NormalizationDataset,
+                                                                                                                 framework::dataset::make("DataType", DataType::F16)),
+                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);

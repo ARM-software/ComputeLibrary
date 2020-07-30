@@ -63,42 +63,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 TEST_SUITE(CL)
 TEST_SUITE(SoftmaxLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(), CNNDataTypes), shape, data_type)
-{
-    const QuantizationInfo quantization_info = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(1.f / 255.f, 0) : QuantizationInfo();
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, quantization_info);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, QuantizationInfo(1.f / 256.f, 0));
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLSoftmaxLayer smx_layer;
-    smx_layer.configure(&src, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // CLLogits1DMaxShiftExpSumKernel configures the paddings only in the 2D case
-    if(shape.num_dimensions() <= 2)
-    {
-        // Get reduction kernel info
-        CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo reduction_info = CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(shape.x());
-
-        // Validate src padding for 2D softmax
-        const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
-        validate(src.info()->padding(), padding_src);
-
-        // Validate dst padding for 2D softmax
-        const PaddingSize padding_dst = PaddingCalculator(shape.x(), 16).required_padding();
-        validate(dst.info()->padding(), padding_dst);
-    }
-}
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(

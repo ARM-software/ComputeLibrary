@@ -195,8 +195,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-//TODO(COMPMID-415): Configuration tests?
-
 template <typename T>
 using NEDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<Tensor, Accessor, NEDirectConvolutionLayer, T>;
 

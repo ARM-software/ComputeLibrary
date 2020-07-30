@@ -163,32 +163,9 @@ using CLArithmeticSubtractionFixture = ArithmeticSubtractionValidationFixture<CL
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::U8);
-
-    // Create and Configure function
-    CLArithmeticSubtraction add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticSubtractionU8Dataset),
-                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                                                                     OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ArithmeticSubtractionU8Dataset),
+                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -196,30 +173,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFixture<uint8_t>, framew
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, data_type, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, data_type);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::S16);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::S16);
-
-    // Create and Configure function
-    CLArithmeticSubtraction add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticSubtractionS16Dataset),
                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                      OutOfPlaceDataSet))
@@ -243,29 +196,6 @@ using CLArithmeticSubtractionQuantizedFixture = ArithmeticSubtractionValidationQ
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-
-    // Create and Configure function
-    CLArithmeticSubtraction add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        ArithmeticSubtractionQASYMM8Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
@@ -279,29 +209,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<uint8_t
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-
-    // Create and Configure function
-    CLArithmeticSubtraction sub;
-    sub.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        ArithmeticSubtractionQASYMM8SignedDataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
@@ -315,29 +222,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<int8_t>
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QSYMM16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-
-    // Create and Configure function
-    CLArithmeticSubtraction sub;
-    sub.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        ArithmeticSubtractionQSYMM16Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
@@ -377,29 +261,6 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLArithmeticSubtractionFloatFixture<ha
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::F32);
-
-    // Create and Configure function
-    CLArithmeticSubtraction add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                         ArithmeticSubtractionFP32Dataset),
                                                                                                                         framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),

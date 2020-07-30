@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,37 +98,6 @@ using CLSelectFixture = SelectValidationFixture<CLTensor, CLAccessor, CLSelect, 
 
 TEST_SUITE(Float)
 TEST_SUITE(F16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, run_small_dataset,
-               shape, same_rank)
-{
-    const DataType dt = DataType::F16;
-
-    // Create tensors
-    CLTensor ref_c = create_tensor<CLTensor>(detail::select_condition_shape(shape, same_rank), DataType::U8);
-    CLTensor ref_x = create_tensor<CLTensor>(shape, dt);
-    CLTensor ref_y = create_tensor<CLTensor>(shape, dt);
-    CLTensor dst   = create_tensor<CLTensor>(shape, dt);
-
-    // Create and Configure function
-    CLSelect select;
-    select.configure(&ref_c, &ref_x, &ref_y, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const int         step    = 16 / arm_compute::data_size_from_type(dt);
-    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
-    if(same_rank)
-    {
-        validate(ref_c.info()->padding(), padding);
-    }
-    validate(ref_x.info()->padding(), padding);
-    validate(ref_y.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSelectFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
@@ -149,37 +118,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 TEST_SUITE_END() // F16
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, run_small_dataset,
-               shape, same_rank)
-{
-    const DataType dt = DataType::F32;
-
-    // Create tensors
-    CLTensor ref_c = create_tensor<CLTensor>(detail::select_condition_shape(shape, same_rank), DataType::U8);
-    CLTensor ref_x = create_tensor<CLTensor>(shape, dt);
-    CLTensor ref_y = create_tensor<CLTensor>(shape, dt);
-    CLTensor dst   = create_tensor<CLTensor>(shape, dt);
-
-    // Create and Configure function
-    CLSelect select;
-    select.configure(&ref_c, &ref_x, &ref_y, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const int         step    = 16 / arm_compute::data_size_from_type(dt);
-    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
-    if(same_rank)
-    {
-        validate(ref_c.info()->padding(), padding);
-    }
-    validate(ref_x.info()->padding(), padding);
-    validate(ref_y.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSelectFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
@@ -202,37 +140,6 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, run_small_dataset,
-               shape, same_rank)
-{
-    const DataType dt = DataType::QASYMM8;
-
-    // Create tensors
-    CLTensor ref_c = create_tensor<CLTensor>(detail::select_condition_shape(shape, same_rank), DataType::U8);
-    CLTensor ref_x = create_tensor<CLTensor>(shape, dt);
-    CLTensor ref_y = create_tensor<CLTensor>(shape, dt);
-    CLTensor dst   = create_tensor<CLTensor>(shape, dt);
-
-    // Create and Configure function
-    CLSelect select;
-    select.configure(&ref_c, &ref_x, &ref_y, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const int         step    = 16 / arm_compute::data_size_from_type(dt);
-    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
-    if(same_rank)
-    {
-        validate(ref_c.info()->padding(), padding);
-    }
-    validate(ref_x.info()->padding(), padding);
-    validate(ref_y.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSelectFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,

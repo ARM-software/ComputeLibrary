@@ -128,48 +128,6 @@ const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace
 TEST_SUITE(NEON)
 TEST_SUITE(ActivationLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
-               shape, data_type, in_place)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type, 1);
-    Tensor dst = create_tensor<Tensor>(shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create context
-    RuntimeContext ctx;
-
-    // Create and configure function
-    NEActivationLayer act_layer(&ctx);
-
-    if(in_place)
-    {
-        act_layer.configure(&src, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
-    }
-    else
-    {
-        act_layer.configure(&src, &dst, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
-    }
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-
-    if(!in_place)
-    {
-        validate(dst.info()->valid_region(), valid_region);
-    }
-
-    // Validate padding
-    validate(src.info()->padding(), PaddingSize());
-    if(!in_place)
-    {
-        validate(dst.info()->padding(), PaddingSize());
-    }
-}
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(

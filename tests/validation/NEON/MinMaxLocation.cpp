@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,34 +43,7 @@ TEST_SUITE(MinMaxLocation)
 template <typename T>
 using NEMinMaxLocationFixture = MinMaxLocationValidationFixture<Tensor, Accessor, Array<Coordinates2D>, ArrayAccessor<Coordinates2D>, NEMinMaxLocation, T>;
 
-void validate_configuration(const Tensor &src, TensorShape shape)
-{
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create output storage
-    int32_t            min{};
-    int32_t            max{};
-    Coordinates2DArray min_loc(shape.total_size());
-    Coordinates2DArray max_loc(shape.total_size());
-
-    // Create and configure function
-    NEMinMaxLocation min_max_loc;
-    min_max_loc.configure(&src, &min, &max, &min_loc, &max_loc);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 1).required_padding();
-    validate(src.info()->padding(), padding);
-}
-
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    src.info()->set_format(Format::U8);
-
-    validate_configuration(src, shape);
-}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
                                                                                                               DataType::U8)))
@@ -87,14 +60,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEMinMaxLocationFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::S16)), shape, data_type)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    src.info()->set_format(Format::S16);
-
-    validate_configuration(src, shape);
-}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
                                                                                                               DataType::S16)))
@@ -111,14 +76,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEMinMaxLocationFixture<int16_t>, framework::Da
 TEST_SUITE_END() // S16
 
 TEST_SUITE(Float)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::F32)), shape, data_type)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    src.info()->set_format(Format::F32);
-
-    validate_configuration(src, shape);
-}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
                                                                                                             DataType::F32)))

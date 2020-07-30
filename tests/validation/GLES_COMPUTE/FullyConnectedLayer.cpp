@@ -63,46 +63,6 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 TEST_SUITE(GC)
 TEST_SUITE(FullyConnectedLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallFullyConnectedLayerDataset(), datasets::LargeFullyConnectedLayerDataset()),
-                                                                           FullyConnectedParameters),
-                                                                   CNNDataTypes),
-               src_shape, weights_shape, bias_shape, dst_shape, transpose_weights, reshape_weights, data_type)
-{
-    TensorShape ws(weights_shape);
-
-    // Transpose weights if not done in the function
-    if(!reshape_weights || !transpose_weights)
-    {
-        const size_t shape_x = ws.x();
-        ws.set(0, ws.y());
-        ws.set(1, shape_x);
-    }
-
-    // Create tensors
-    GCTensor src     = create_tensor<GCTensor>(src_shape, data_type, 1);
-    GCTensor weights = create_tensor<GCTensor>(ws, data_type, 1);
-    GCTensor bias    = create_tensor<GCTensor>(bias_shape, data_type, 1);
-    GCTensor dst     = create_tensor<GCTensor>(dst_shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create Fully Connected layer info
-    FullyConnectedLayerInfo fc_info;
-    fc_info.transpose_weights    = transpose_weights;
-    fc_info.are_weights_reshaped = !reshape_weights;
-
-    // Create and configure function.
-    GCFullyConnectedLayer fc;
-    fc.configure(&src, &weights, &bias, &dst, fc_info);
-
-    // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
-    validate(dst.info()->valid_region(), dst_valid_region);
-}
-
 template <typename T>
 using GCFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<GCTensor, GCAccessor, GCFullyConnectedLayer, T>;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,55 +42,8 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
-inline void validate_configuration(const TensorShape &shape, Format format)
-{
-    const int num_planes = num_planes_from_format(format);
-
-    // Create tensors
-    MultiImage          dst     = create_multi_image<MultiImage>(shape, format);
-    std::vector<Tensor> ref_src = create_tensor_planes<Tensor>(shape, format);
-
-    // Create and configure function
-    NEChannelCombine channel_combine;
-
-    if(num_planes == 1)
-    {
-        const Tensor *tensor_extra = Format::RGBA8888 == format ? &ref_src[3] : nullptr;
-
-        channel_combine.configure(&ref_src[0], &ref_src[1], &ref_src[2], tensor_extra, dst.plane(0));
-    }
-    else
-    {
-        channel_combine.configure(&ref_src[0], &ref_src[1], &ref_src[2], &dst);
-    }
-
-    // TODO(bsgcomp): Add validation for padding and shape (COMPMID-659)
-}
-} // namespace
-
 TEST_SUITE(NEON)
 TEST_SUITE(ChannelCombine)
-
-TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 })),
-               shape, format)
-{
-    validate_configuration(shape, format);
-}
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::YUYV422, Format::UYVY422 })),
-               shape, format)
-{
-    validate_configuration(shape, format);
-}
-
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::IYUV, Format::YUV444, Format::NV12, Format::NV21 })),
-               shape, format)
-{
-    validate_configuration(shape, format);
-}
-TEST_SUITE_END() // Configuration
 
 template <typename T>
 using NEChannelCombineFixture = ChannelCombineValidationFixture<MultiImage, Tensor, Accessor, NEChannelCombine, T>;

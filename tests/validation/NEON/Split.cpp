@@ -91,66 +91,6 @@ DATA_TEST_CASE(ValidateSplitShapes, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(datasets::SmallSplitDataset(), framework::dataset::make("DataType", { DataType::QASYMM8, DataType::F32 })),
-               shape, axis, splits, data_type)
-{
-    // Create tensors
-    Tensor                 src = create_tensor<Tensor>(shape, data_type);
-    std::vector<Tensor>    dsts(splits);
-    std::vector<ITensor *> dsts_ptrs;
-    dsts_ptrs.reserve(splits);
-    for(auto &dst : dsts)
-    {
-        dsts_ptrs.emplace_back(&dst);
-    }
-
-    // Create and Configure function
-    NESplit split;
-    split.configure(&src, dsts_ptrs, axis);
-
-    // Validate valid regions
-    for(auto &dst : dsts)
-    {
-        const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-        validate(dst.info()->valid_region(), valid_region);
-    }
-}
-
-DATA_TEST_CASE(ConfigurationSplitShapes,
-               framework::DatasetMode::ALL,
-               combine(datasets::SmallSplitShapesDataset(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-               shape, axis, split_shapes, data_type)
-{
-    // Create tensors
-    Tensor              src = create_tensor<Tensor>(shape, data_type);
-    std::vector<Tensor> dsts;
-
-    for(const auto &split_shape : split_shapes)
-    {
-        Tensor dst = create_tensor<Tensor>(split_shape, data_type);
-        dsts.push_back(std::move(dst));
-    }
-
-    std::vector<ITensor *> dsts_ptrs;
-    for(auto &dst : dsts)
-    {
-        dsts_ptrs.emplace_back(&dst);
-    }
-
-    // Create and Configure function
-    NESplit split;
-    split.configure(&src, dsts_ptrs, axis);
-
-    // Validate valid regions
-    for(auto &dst : dsts)
-    {
-        const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-        validate(dst.info()->valid_region(), valid_region);
-    }
-}
-
 template <typename T>
 using NESplitFixture = SplitFixture<Tensor, ITensor, Accessor, NESplit, T>;
 

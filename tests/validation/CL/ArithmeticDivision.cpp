@@ -113,29 +113,6 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLArithmeticDivisionFloatFixture<half>
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::F32);
-
-    // Create and Configure function
-    CLArithmeticDivision add;
-    add.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticDivisionFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticDivisionFP32Dataset),
                                                                                                                      EmptyActivationFunctionsDataset))
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,41 +49,6 @@ constexpr float                      tolerance_number = 0.2f;
 
 TEST_SUITE(CL)
 TEST_SUITE(Remap)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                           framework::dataset::make("DataType", DataType::U8)),
-                                                                   framework::dataset::make("BorderModes", { BorderMode::UNDEFINED, BorderMode::CONSTANT })),
-               shape, policy, data_type, border_mode)
-{
-    CLTensor src   = create_tensor<CLTensor>(shape, data_type);
-    CLTensor map_x = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor map_y = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor dst   = create_tensor<CLTensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(map_x.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(map_y.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLRemap remap;
-    remap.configure(&src, &map_x, &map_y, &dst, policy, border_mode);
-
-    // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), dst_valid_region);
-
-    // Validate padding
-    const int total_right  = ceil_to_multiple(shape[0], 4);
-    const int access_right = total_right + (((total_right - shape[0]) == 0) ? 1 : 0);
-
-    const PaddingSize read_padding(1, access_right - shape[0], 1, 1);
-    validate(src.info()->padding(), read_padding);
-
-    PaddingCalculator calculator(shape.x(), 4);
-    validate(dst.info()->padding(), calculator.required_padding());
-}
-
 template <typename T>
 using CLRemapFixture = RemapValidationFixture<CLTensor, CLAccessor, CLRemap, T>;
 

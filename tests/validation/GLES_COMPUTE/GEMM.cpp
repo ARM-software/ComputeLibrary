@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,27 +55,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 
 TEST_SUITE(GC)
 TEST_SUITE(GEMM)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes),
-               shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type)
-{
-    // Create tensors
-    GCTensor a   = create_tensor<GCTensor>(shape_a, data_type, 1);
-    GCTensor b   = create_tensor<GCTensor>(shape_b, data_type, 1);
-    GCTensor c   = create_tensor<GCTensor>(shape_c, data_type, 1);
-    GCTensor dst = create_tensor<GCTensor>(output_shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    GCGEMM gemm;
-    gemm.configure(&a, &b, &c, &dst, alpha, beta);
-
-    //TODO(COMPMID-415): Validate valid region
-}
 
 template <typename T>
 using GCGEMMFixture = GEMMValidationFixture<GCTensor, GCAccessor, GCGEMM, T>;

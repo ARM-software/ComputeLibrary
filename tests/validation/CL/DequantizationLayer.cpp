@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,32 +93,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-               shape, data_type)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::QASYMM8, 1, QuantizationInfo(0.5f, -10));
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLDequantizationLayer dequant_layer;
-    dequant_layer.configure(&src, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(src.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
 
 template <typename T>
 using CLDequantizationLayerFixture = DequantizationValidationFixture<CLTensor, CLAccessor, CLDequantizationLayer, T>;

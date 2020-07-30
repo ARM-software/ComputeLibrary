@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,39 +49,11 @@ AbsoluteTolerance<T> tolerance(MagnitudeType magnitude_type)
 TEST_SUITE(CL)
 TEST_SUITE(Magnitude)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::S16, DataType::S32 })),
-               shape, data_type)
-{
-    // Create tensors
-    CLTensor src1 = create_tensor<CLTensor>(shape, data_type);
-    CLTensor src2 = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst  = create_tensor<CLTensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function (default MagnitudeType::L2NORM)
-    CLMagnitude magnitude;
-    magnitude.configure(&src1, &src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-
-    validate(src1.info()->padding(), padding);
-    validate(src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 template <typename T>
 using CLMagnitudeFixture = MagnitudeValidationFixture<CLTensor, CLAccessor, CLMagnitude, T>;
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::S16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S16)),
                                                                                                          framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
 {
     // Validate output
@@ -97,7 +69,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMagnitudeFixture<int16_t>, framework::Dataset
 TEST_SUITE_END() // S16
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::S32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S32)),
                                                                                                          framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
 {
     // Validate output

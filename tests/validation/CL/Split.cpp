@@ -91,66 +91,6 @@ DATA_TEST_CASE(ValidateSplitShapes, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(datasets::SmallSplitDataset(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-               shape, axis, splits, data_type)
-{
-    // Create tensors
-    CLTensor                 src = create_tensor<CLTensor>(shape, data_type);
-    std::vector<CLTensor>    dsts(splits);
-    std::vector<ICLTensor *> dsts_ptrs;
-    dsts_ptrs.reserve(splits);
-    for(auto &dst : dsts)
-    {
-        dsts_ptrs.emplace_back(&dst);
-    }
-
-    // Create and Configure function
-    CLSplit split;
-    split.configure(&src, dsts_ptrs, axis);
-
-    // Validate valid regions
-    for(auto &dst : dsts)
-    {
-        const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-        validate(dst.info()->valid_region(), valid_region);
-    }
-}
-
-DATA_TEST_CASE(ConfigurationSplitShapes,
-               framework::DatasetMode::ALL,
-               combine(datasets::SmallSplitShapesDataset(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-               shape, axis, split_shapes, data_type)
-{
-    // Create tensors
-    CLTensor              src = create_tensor<CLTensor>(shape, data_type);
-    std::vector<CLTensor> dsts;
-
-    for(const auto &split_shape : split_shapes)
-    {
-        CLTensor dst = create_tensor<CLTensor>(split_shape, data_type);
-        dsts.push_back(std::move(dst));
-    }
-
-    std::vector<ICLTensor *> dsts_ptrs;
-    for(auto &dst : dsts)
-    {
-        dsts_ptrs.emplace_back(&dst);
-    }
-
-    // Create and Configure function
-    CLSplit split;
-    split.configure(&src, dsts_ptrs, axis);
-
-    // Validate valid regions
-    for(auto &dst : dsts)
-    {
-        const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-        validate(dst.info()->valid_region(), valid_region);
-    }
-}
-
 template <typename T>
 using CLSplitFixture = SplitFixture<CLTensor, ICLTensor, CLAccessor, CLSplit, T>;
 
@@ -175,6 +115,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLSplitFixture<half>,
                        framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeSplitDataset(), framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate outputs
+    for(unsigned int i = 0; i < _target.size(); ++i)
+    {
+        validate(CLAccessor(_target[i]), _reference[i]);
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallSplitShapes,
+                       CLSplitShapesFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallSplitShapesDataset(), framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate outputs
     for(unsigned int i = 0; i < _target.size(); ++i)
