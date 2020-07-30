@@ -72,7 +72,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
     ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy));
 
-    const bool will_use_align_corners = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_output_shape(output->tensor_shape(), output->data_layout());
+    const bool will_use_align_corners = info.align_corners;
 
     float wr = 0.f;
     float hr = 0.f;
@@ -177,7 +177,7 @@ void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICL
     _output               = output;
     _interpolation_policy = info.interpolation_policy;
     _data_layout          = input->info()->data_layout();
-    _align_corners        = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_output_shape(output->info()->tensor_shape(), _data_layout);
+    _align_corners        = info.align_corners;
 
     float wr = 0.f;
     float hr = 0.f;

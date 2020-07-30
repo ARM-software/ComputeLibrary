@@ -53,15 +53,6 @@ inline bool is_align_corners_allowed_sampling_policy(SamplingPolicy sampling_pol
 {
     return sampling_policy != SamplingPolicy::CENTER;
 }
-
-/** Returns if aligned corners are allowed for the given output shape
- *
- * @param[in] output_shape The shape of the scaled output tensor
- * @param[in] layout       The data layout of the output tensor
- *
- * @return True if aligned corners are allowed
- */
-bool is_align_corners_allowed_output_shape(const TensorShape &output_shape, DataLayout layout);
 } // namespace scale_utils
 } // namespace arm_compute
 #endif /* UTILS_CORE_SCALEUTILS_H */

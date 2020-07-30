@@ -26,7 +26,7 @@
 
 float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners)
 {
-    const size_t offset = align_corners ? 1 : 0;
+    const size_t offset = (align_corners && output_size > 1) ? 1 : 0;
     const auto   in     = input_size - offset;
     const auto   out    = output_size - offset;
 
@@ -34,11 +34,4 @@ float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t
     ARM_COMPUTE_ERROR_ON(out == 0);
 
     return static_cast<float>(in) / static_cast<float>(out);
-}
-
-bool arm_compute::scale_utils::is_align_corners_allowed_output_shape(const TensorShape &output_shape, DataLayout layout)
-{
-    const size_t idx_width  = get_data_layout_dimension_index(layout, DataLayoutDimension::WIDTH);
-    const size_t idx_height = get_data_layout_dimension_index(layout, DataLayoutDimension::HEIGHT);
-    return (output_shape[idx_width] > 1) && (output_shape[idx_height] > 1);
 }

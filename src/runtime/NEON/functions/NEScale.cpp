@@ -111,8 +111,7 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), info));
 
     _use_padding                     = info.use_padding;
-    const bool is_align_corners_used = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy)
-                                       && arm_compute::scale_utils::is_align_corners_allowed_output_shape(output->info()->tensor_shape(), output->info()->data_layout());
+    const bool is_align_corners_used = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy);
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();

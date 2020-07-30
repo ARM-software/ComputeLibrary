@@ -369,7 +369,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     _border_mode           = info.border_mode;
     _constant_border_value = info.constant_border_value;
     _use_padding           = info.use_padding;
-    _align_corners         = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_output_shape(output->info()->tensor_shape(), data_layout);
+    _align_corners         = info.align_corners;
 
     if(info.sampling_policy == SamplingPolicy::CENTER)
     {

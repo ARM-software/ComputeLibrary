@@ -48,8 +48,6 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
     shape_scaled.set(1, (in.shape()[1] + round_value) * scale_y, /* apply_dim_correction = */ false);
     SimpleTensor<T> out(shape_scaled, in.data_type());
 
-    align_corners = align_corners && arm_compute::scale_utils::is_align_corners_allowed_output_shape(out.shape(), DataLayout::NCHW);
-
     // Compute the ratio between source width/height and destination width/height
     const auto wr = arm_compute::scale_utils::calculate_resize_ratio(in.shape()[0], out.shape()[0], align_corners);
     const auto hr = arm_compute::scale_utils::calculate_resize_ratio(in.shape()[1], out.shape()[1], align_corners);
