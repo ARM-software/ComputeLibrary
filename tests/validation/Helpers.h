@@ -90,7 +90,6 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
         case DataType::F32:
             switch(activation)
             {
-                case ActivationLayerInfo::ActivationFunction::LOGISTIC:
                 case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
                     // Reduce range as exponent overflows
                     bounds = std::make_pair(-40.f, 40.f);
