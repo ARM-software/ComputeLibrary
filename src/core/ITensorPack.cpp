@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,24 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TUNERS_BIFROST_TUNER_H
-#define ARM_COMPUTE_TUNERS_BIFROST_TUNER_H
+#include "arm_compute/core/ITensorPack.h"
 
-#include "arm_compute/runtime/CL/ICLTuner.h"
+#include "arm_compute/core/ITensor.h"
 
 namespace arm_compute
 {
-namespace tuners
+void ITensorPack::add_tensor(int id, ITensor *tensor)
 {
-/** Bifrost based OpenCL tuner implementation */
-class BifrostTuner final : public ICLTuner
+    _pack[id] = PackElement(tensor);
+}
+
+void ITensorPack::add_tensor(int id, const ITensor *tensor)
 {
-public:
-    // Inherited overriden methods
-    void tune_kernel_static(ICLKernel &kernel) override;
-    void tune_kernel_dynamic(ICLKernel &kernel) override;
-    void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors) override;
-};
-} // namespace tuners
+    _pack[id] = PackElement(tensor);
+}
+
+const ITensor *ITensorPack::get_const_tensor(int id) const
+{
+    auto it = _pack.find(id);
+    if(it != _pack.end())
+    {
+        return it->second.ctensor != nullptr ? it->second.ctensor : it->second.tensor;
+    }
+    return nullptr;
+}
+
+ITensor *ITensorPack::get_tensor(int id)
+{
+    auto it = _pack.find(id);
+    return it != _pack.end() ? it->second.tensor : nullptr;
+}
+
+size_t ITensorPack::size() const
+{
+    return _pack.size();
+}
+
+bool ITensorPack::empty() const
+{
+    return _pack.empty();
+}
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_TUNERS_BIFROST_TUNER_H */

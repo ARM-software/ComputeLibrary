@@ -97,9 +97,11 @@ void NEPixelWiseMultiplication::configure(const ITensor *input1, const ITensor *
 
 void NEPixelWiseMultiplication::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct NEComplexPixelWiseMultiplication::Impl
@@ -134,8 +136,10 @@ void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input
 
 void NEComplexPixelWiseMultiplication::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

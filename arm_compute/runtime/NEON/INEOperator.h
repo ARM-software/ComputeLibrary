@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_INEOPERATOR_H
 #define ARM_COMPUTE_INEOPERATOR_H
 
+#include "../../core/ITensor.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/runtime/IOperator.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
@@ -54,8 +55,8 @@ public:
     INEOperator &operator=(INEOperator &&) = default;
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
-    void prepare(OperatorTensorMap constants) override;
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &constants) override;
     MemoryRequirements workspace() const override;
 
 protected:

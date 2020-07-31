@@ -24,13 +24,14 @@
 #ifndef ARM_COMPUTE_EXPERIMENTAL_TYPES_H
 #define ARM_COMPUTE_EXPERIMENTAL_TYPES_H
 
+#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorShape.h"
 
-#include <map>
 #include <vector>
 
 namespace arm_compute
 {
+// Forward declaration
 class ITensor;
 
 /** Memory type */
@@ -50,10 +51,6 @@ enum TensorType : int32_t
     ACL_INT_2   = 52,
     ACL_SRC_VEC = 256,
 };
-
-using InputTensorMap    = std::map<int32_t, const ITensor *>;
-using OutputTensorMap   = std::map<int32_t, ITensor *>;
-using OperatorTensorMap = OutputTensorMap;
 
 namespace experimental
 {

@@ -1265,15 +1265,15 @@ Status NEPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, cons
     return Status{};
 }
 
-void NEPixelWiseMultiplicationKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
+void NEPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    auto input1 = inputs.at(TensorType::ACL_SRC_0);
-    auto input2 = inputs.at(TensorType::ACL_SRC_1);
-    auto output = outputs.at(TensorType::ACL_DST);
+    auto input1 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    auto input2 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    auto output = tensors.get_tensor(TensorType::ACL_DST);
 
     if(_func_quantized != nullptr)
     {
@@ -1363,15 +1363,15 @@ Status NEComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *input
     return Status{};
 }
 
-void NEComplexPixelWiseMultiplicationKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
+void NEComplexPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    auto input1 = inputs.at(TensorType::ACL_SRC_0);
-    auto input2 = inputs.at(TensorType::ACL_SRC_1);
-    auto output = outputs.at(TensorType::ACL_DST);
+    auto input1 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    auto input2 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    auto output = tensors.get_tensor(TensorType::ACL_DST);
 
     Iterator input1_it(input1, window.broadcast_if_dimension_le_one(input1->info()->tensor_shape()));
     Iterator input2_it(input2, window.broadcast_if_dimension_le_one(input2->info()->tensor_shape()));

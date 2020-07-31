@@ -98,7 +98,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     CLFillBorderKernel _border_handler;
@@ -168,7 +168,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     CLFillBorderKernel _border_handler;
@@ -207,7 +207,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     CLFillBorderKernel _border_handler;
@@ -246,7 +246,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     CLFillBorderKernel _border_handler;
@@ -285,7 +285,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     CLFillBorderKernel _border_handler;
@@ -324,7 +324,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     CLFillBorderKernel _border_handler;
@@ -363,7 +363,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     CLFillBorderKernel _border_handler;

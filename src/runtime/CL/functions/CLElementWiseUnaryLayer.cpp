@@ -153,10 +153,10 @@ Status CLRsqrtLayer::validate(const ITensorInfo *input, const ITensorInfo *outpu
 
 void CLRsqrtLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct CLExpLayer::Impl
@@ -195,10 +195,10 @@ Status CLExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLExpLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct CLNegLayer::Impl
@@ -236,10 +236,10 @@ Status CLNegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLNegLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct CLSinLayer::Impl
@@ -277,10 +277,10 @@ Status CLSinLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLSinLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct CLAbsLayer::Impl
@@ -318,10 +318,10 @@ Status CLAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLAbsLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct CLLogLayer::Impl
@@ -359,10 +359,10 @@ Status CLLogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLLogLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct CLRoundLayer::Impl
@@ -400,9 +400,9 @@ Status CLRoundLayer::validate(const ITensorInfo *input, const ITensorInfo *outpu
 
 void CLRoundLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

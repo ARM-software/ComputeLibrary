@@ -64,7 +64,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     CLFillBorderKernel _border_handler;

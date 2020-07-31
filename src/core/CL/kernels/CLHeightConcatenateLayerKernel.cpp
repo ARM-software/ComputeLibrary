@@ -123,14 +123,13 @@ void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_c
     output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 }
 
-void CLHeightConcatenateLayerKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                                            const Window &window, cl::CommandQueue &queue)
+void CLHeightConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(outputs.at(TensorType::ACL_DST));
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     unsigned int idx = 0;
     add_4D_tensor_argument(idx, src, window);

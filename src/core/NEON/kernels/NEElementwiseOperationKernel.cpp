@@ -1157,13 +1157,15 @@ void NEElementwiseOperationKernel::configure_common(const ITensorInfo *input1, c
     INEKernel::configure(win);
 }
 
-void NEElementwiseOperationKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
+void NEElementwiseOperationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info, window);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_function == nullptr);
-    _function(inputs.at(TensorType::ACL_SRC_0), inputs.at(TensorType::ACL_SRC_1), outputs.at(TensorType::ACL_DST), window);
+    _function(tensors.get_const_tensor(TensorType::ACL_SRC_0),
+              tensors.get_const_tensor(TensorType::ACL_SRC_1),
+              tensors.get_tensor(TensorType::ACL_DST), window);
 }
 
 /** Arithmetic operators (min, max, squared_diff) */

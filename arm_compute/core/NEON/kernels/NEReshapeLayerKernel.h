@@ -57,8 +57,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NERESHAPELAYERKERNEL_H */

@@ -97,8 +97,9 @@ void CLSlice::configure(const CLCompileContext &compile_context, const ICLTensor
 
 void CLSlice::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

@@ -54,10 +54,9 @@ public:
      *
      * @param[in] kernel  Kernel to execute.
      * @param[in] hints   Hints for the scheduler.
-     * @param[in] inputs  Vector containing the input tensors.
-     * @param[in] outputs Vector containing the output tensors.
+     * @param[in] tensors Vector containing the tensors to operate on.
      */
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs) override;
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) override;
 
 protected:
     /** Will run the workloads sequentially and in order.

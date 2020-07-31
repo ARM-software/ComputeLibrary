@@ -47,19 +47,21 @@ void configure_border_handler(const CLCompileContext &compile_context, CLFillBor
     }
 }
 
-void select_border_input(InputTensorMap &tensor_map, InputTensorMap &inputs, OutputTensorMap &outputs)
+ITensorPack select_border_input(ITensorPack &tensors)
 {
-    if(outputs.at(TensorType::ACL_DST)->info()->dimension(0) > 1)
+    ITensorPack pack;
+    if(tensors.get_tensor(TensorType::ACL_DST)->info()->dimension(0) > 1)
     {
-        if(inputs.at(TensorType::ACL_SRC_1)->info()->dimension(0) == 1)
+        if(tensors.get_const_tensor(TensorType::ACL_SRC_1)->info()->dimension(0) == 1)
         {
-            tensor_map[TensorType::ACL_SRC] = inputs.at(TensorType::ACL_SRC_1);
+            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(TensorType::ACL_SRC_1));
         }
         else
         {
-            tensor_map[TensorType::ACL_SRC] = inputs.at(TensorType::ACL_SRC_0);
+            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(TensorType::ACL_SRC_0));
         }
     }
+    return pack;
 }
 } // namespace
 
@@ -83,12 +85,11 @@ Status CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorIn
     return CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::ADD, input1, input2, output, policy, act_info);
 }
 
-void CLArithmeticAddition::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLArithmeticAddition::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 
 CLArithmeticSubtraction::CLArithmeticSubtraction()
@@ -110,12 +111,11 @@ Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITenso
     return CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::SUB, input1, input2, output, policy, act_info);
 }
 
-void CLArithmeticSubtraction::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLArithmeticSubtraction::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 
 CLArithmeticDivision::CLArithmeticDivision()
@@ -136,12 +136,11 @@ Status CLArithmeticDivision::validate(const ITensorInfo *input1, const ITensorIn
     return CLArithmeticOperationKernel::validate(ArithmeticOperation::DIV, input1, input2, output, act_info);
 }
 
-void CLArithmeticDivision::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLArithmeticDivision::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 
 CLElementwiseMax::CLElementwiseMax()
@@ -162,12 +161,11 @@ Status CLElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *
     return CLArithmeticOperationKernel::validate(ArithmeticOperation::MAX, input1, input2, output, act_info);
 }
 
-void CLElementwiseMax::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLElementwiseMax::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 
 CLElementwiseMin::CLElementwiseMin()
@@ -188,12 +186,11 @@ Status CLElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *
     return CLArithmeticOperationKernel::validate(ArithmeticOperation::MIN, input1, input2, output, act_info);
 }
 
-void CLElementwiseMin::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLElementwiseMin::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 
 CLElementwiseSquaredDiff::CLElementwiseSquaredDiff()
@@ -214,12 +211,11 @@ Status CLElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITens
     return CLArithmeticOperationKernel::validate(ArithmeticOperation::SQUARED_DIFF, input1, input2, output, act_info);
 }
 
-void CLElementwiseSquaredDiff::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLElementwiseSquaredDiff::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 
 CLElementwisePower::CLElementwisePower()
@@ -240,12 +236,11 @@ Status CLElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo
     return CLArithmeticOperationKernel::validate(ArithmeticOperation::POWER, input1, input2, output, act_info);
 }
 
-void CLElementwisePower::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLElementwisePower::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 } // namespace experimental
 
@@ -287,10 +282,12 @@ Status CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorIn
 
 void CLArithmeticAddition::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 
 struct CLArithmeticSubtraction::Impl
@@ -331,10 +328,12 @@ Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITenso
 
 void CLArithmeticSubtraction::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 
 struct CLArithmeticDivision::Impl
@@ -374,10 +373,12 @@ Status CLArithmeticDivision::validate(const ITensorInfo *input1, const ITensorIn
 
 void CLArithmeticDivision::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 
 struct CLElementwiseMax::Impl
@@ -417,10 +418,12 @@ Status CLElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void CLElementwiseMax::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 
 struct CLElementwiseMin::Impl
@@ -460,10 +463,12 @@ Status CLElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void CLElementwiseMin::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 
 struct CLElementwiseSquaredDiff::Impl
@@ -504,10 +509,12 @@ Status CLElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITens
 
 void CLElementwiseSquaredDiff::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 
 struct CLElementwisePower::Impl
@@ -547,9 +554,11 @@ Status CLElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo
 
 void CLElementwisePower::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

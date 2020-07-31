@@ -84,10 +84,10 @@ Status CLReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 
 void CLReshapeLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute
 /** [CLReshapeLayer snippet] **/

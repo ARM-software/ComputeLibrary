@@ -54,8 +54,7 @@ public:
     ~CLElementwiseOperationKernel() = default;
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue) override;
-
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
 protected:

@@ -166,13 +166,15 @@ Status NEStridedSliceKernel::validate(const ITensorInfo *input, const ITensorInf
     return Status{};
 }
 
-void NEStridedSliceKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
+void NEStridedSliceKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
     // Dispatch kernel
-    strided_slice_generic(inputs.at(TensorType::ACL_SRC_0), outputs.at(TensorType::ACL_DST), _starts_abs, _final_strides, _shrink_mask, window);
+    strided_slice_generic(tensors.get_const_tensor(TensorType::ACL_SRC_0),
+                          tensors.get_tensor(TensorType::ACL_DST),
+                          _starts_abs, _final_strides, _shrink_mask, window);
 }
 } // namespace arm_compute

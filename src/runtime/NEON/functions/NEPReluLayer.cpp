@@ -71,9 +71,11 @@ void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor
 
 void NEPReluLayer::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)

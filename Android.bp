@@ -229,6 +229,7 @@ cc_library_static {
         "src/core/IDistribution1D.cpp",
         "src/core/IKernel.cpp",
         "src/core/ITensor.cpp",
+        "src/core/ITensorPack.cpp",
         "src/core/MultiImageInfo.cpp",
         "src/core/NEON/kernels/NEAbsoluteDifferenceKernel.cpp",
         "src/core/NEON/kernels/NEAccumulateKernel.cpp",

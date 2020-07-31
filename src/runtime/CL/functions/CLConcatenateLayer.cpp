@@ -220,16 +220,14 @@ Status CLConcatenation::validate(const std::vector<const ITensorInfo *> &inputs_
     return Status{};
 }
 
-void CLConcatenation::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLConcatenation::run(ITensorPack &tensors)
 {
-    ARM_COMPUTE_UNUSED(workspace);
-
-    if(inputs.empty() || outputs.empty())
+    if(tensors.empty())
     {
         ARM_COMPUTE_ERROR("No inputs provided");
     }
 
-    if(inputs.size() != _num_inputs)
+    if(static_cast<int>(tensors.size()) - 1 != static_cast<int>(_num_inputs))
     {
         ARM_COMPUTE_ERROR("Configured with different number of inputs");
     }
@@ -237,15 +235,17 @@ void CLConcatenation::run(InputTensorMap inputs, OutputTensorMap outputs, Operat
     if(_axis == Window::DimX && (_num_inputs == 2 || _num_inputs == 4))
     {
         ARM_COMPUTE_ERROR_ON(_concat_kernels.empty());
-        CLScheduler::get().enqueue_op(*_concat_kernels.at(0), inputs, outputs, true);
+        CLScheduler::get().enqueue_op(*_concat_kernels.at(0), tensors, true);
     }
     else
     {
         int i = 0;
         for(auto &k : _concat_kernels)
         {
-            const InputTensorMap input = { { TensorType::ACL_SRC, inputs.at(ACL_SRC_VEC + i) } };
-            CLScheduler::get().enqueue_op(*k, input, outputs, true);
+            ITensorPack pack;
+            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(ACL_SRC_VEC + i));
+            pack.add_tensor(TensorType::ACL_DST, tensors.get_tensor(ACL_DST));
+            CLScheduler::get().enqueue_op(*k, pack, true);
             ++i;
         }
     }
@@ -303,13 +303,13 @@ Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inpu
 
 void CLConcatenateLayer::run()
 {
-    InputTensorMap srcs;
+    ITensorPack pack;
     for(unsigned i = 0; i < _impl->num_inputs; ++i)
     {
-        srcs.insert(std::make_pair(TensorType::ACL_SRC_VEC + i, _impl->srcs.at(i)));
+        pack.add_tensor(TensorType::ACL_SRC_VEC + i, _impl->srcs.at(i));
     }
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(srcs, dst, {});
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

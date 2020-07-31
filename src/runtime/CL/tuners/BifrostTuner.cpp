@@ -316,9 +316,9 @@ void BifrostTuner::tune_kernel_dynamic(ICLKernel &kernel)
     ARM_COMPUTE_UNUSED(kernel);
 }
 
-void BifrostTuner::tune_kernel_dynamic(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs)
+void BifrostTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
 {
-    ARM_COMPUTE_UNUSED(kernel, inputs, outputs);
+    ARM_COMPUTE_UNUSED(kernel, tensors);
 }
 } // namespace tuners
 } // namespace arm_compute

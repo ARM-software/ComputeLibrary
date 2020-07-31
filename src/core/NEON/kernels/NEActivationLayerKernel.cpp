@@ -850,9 +850,7 @@ Status NEActivationLayerKernel::validate(const ITensorInfo *input, const ITensor
     return Status{};
 }
 
-void NEActivationLayerKernel::run_op(const InputTensorMap &inputs,
-                                     const OutputTensorMap &outputs,
-                                     const Window &window, const ThreadInfo &info)
+void NEActivationLayerKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     // Early exit on disabled activation
     if(!_act_info.enabled())
@@ -865,8 +863,10 @@ void NEActivationLayerKernel::run_op(const InputTensorMap &inputs,
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    ARM_COMPUTE_ERROR_ON(inputs.empty() || outputs.empty());
+    ARM_COMPUTE_ERROR_ON(tensors.empty());
 
-    (this->*_func)(inputs.at(TensorType::ACL_SRC), outputs.at(TensorType::ACL_DST), window);
+    (this->*_func)(tensors.get_const_tensor(TensorType::ACL_SRC),
+                   tensors.get_tensor(TensorType::ACL_DST),
+                   window);
 }
 } // namespace arm_compute

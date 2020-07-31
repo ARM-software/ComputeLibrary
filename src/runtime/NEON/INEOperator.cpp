@@ -33,19 +33,17 @@ INEOperator::INEOperator(IRuntimeContext *ctx)
 {
 }
 
-void INEOperator::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void INEOperator::run(ITensorPack &tensors)
 {
-    ARM_COMPUTE_UNUSED(workspace);
-
-    if(inputs.empty() || outputs.empty())
+    if(tensors.empty())
     {
         ARM_COMPUTE_ERROR("No inputs provided");
     }
 
-    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, inputs, outputs);
+    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, tensors);
 }
 
-void INEOperator::prepare(OperatorTensorMap constants)
+void INEOperator::prepare(ITensorPack &constants)
 {
     ARM_COMPUTE_UNUSED(constants);
 }

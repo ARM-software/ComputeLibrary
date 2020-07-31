@@ -71,8 +71,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *input3, const ITensorInfo *input4, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                const Window &window, cl::CommandQueue &queue) override;
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLWIDTHCONCATENATE_4TENSORS_KERNEL_H */

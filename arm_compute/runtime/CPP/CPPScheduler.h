@@ -52,7 +52,7 @@ public:
     void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func) override;
     unsigned int num_threads() const override;
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs) override;
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) override;
 
 protected:
     /** Will run the workloads in parallel using num_threads
@@ -62,7 +62,7 @@ protected:
     void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
-    void schedule_common(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs);
+    void schedule_common(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors);
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

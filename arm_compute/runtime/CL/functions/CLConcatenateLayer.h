@@ -144,7 +144,7 @@ public:
     static Status validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
 
     // Inherited methods overridden:
-    void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) override;
+    void run(ITensorPack &tensors) override;
 
 private:
     std::vector<std::unique_ptr<ICLKernel>> _concat_kernels;

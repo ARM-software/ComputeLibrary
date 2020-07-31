@@ -91,10 +91,10 @@ public:
         _kernels.push_back(std::move(info));
     }
 
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs) override
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) override
     {
         _timer.start();
-        _real_scheduler.schedule_op(kernel, hints, inputs, outputs);
+        _real_scheduler.schedule_op(kernel, hints, tensors);
         _timer.stop();
 
         typename SchedulerClock<output_timestamps>::kernel_info info;

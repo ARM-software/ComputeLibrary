@@ -163,9 +163,11 @@ Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void NEElementwiseMax::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct NEElementwiseMin::Impl
@@ -202,9 +204,11 @@ Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void NEElementwiseMin::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct NEElementwiseSquaredDiff::Impl
@@ -241,9 +245,11 @@ Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITens
 
 void NEElementwiseSquaredDiff::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct NEElementwiseDivision::Impl
@@ -280,9 +286,11 @@ Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorI
 
 void NEElementwiseDivision::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct NEElementwisePower::Impl
@@ -319,9 +327,11 @@ Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo
 
 void NEElementwisePower::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 template <ComparisonOperation COP>
@@ -364,9 +374,11 @@ Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1, c
 template <ComparisonOperation COP>
 void                          NEElementwiseComparisonStatic<COP>::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 struct NEElementwiseComparison::Impl
@@ -401,9 +413,11 @@ Status NEElementwiseComparison::validate(const ITensorInfo *input1, const ITenso
 
 void NEElementwiseComparison::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 // Supported Specializations

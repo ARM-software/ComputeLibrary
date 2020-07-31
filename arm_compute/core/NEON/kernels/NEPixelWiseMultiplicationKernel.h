@@ -111,7 +111,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 
     // Inherited methods overridden
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised multiplication functions with integer scaling factor
@@ -178,7 +178,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 };
 
 } // namespace arm_compute

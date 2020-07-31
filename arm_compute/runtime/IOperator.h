@@ -40,13 +40,10 @@ public:
     virtual ~IOperator() = default;
     /** Run the kernels contained in the function
      *
-     *
-     * @param[in] inputs    Vector that contains the input tensors.
-     * @param[in] outputs   Vector that contains the output tensors.
-     * @param[in] workspace Vector that contains the workspace tensors.
+     * @param[in] tensors Vector that contains the tensors to operate on.
      *
      */
-    virtual void run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace) = 0;
+    virtual void run(ITensorPack &tensors) = 0;
     /** Prepare the function for executing
      *
      * Any one off pre-processing step required by the function is handled here
@@ -55,7 +52,7 @@ public:
      *
      * @note Prepare stage might not need all the function's buffers' backing memory to be available in order to execute
      */
-    virtual void prepare(OperatorTensorMap constants) = 0;
+    virtual void prepare(ITensorPack &constants) = 0;
 
     /** Return the memory requirements required by the workspace
      */

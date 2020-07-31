@@ -37,7 +37,7 @@ public:
     // Inherited overriden methods
     void tune_kernel_static(ICLKernel &kernel) override;
     void tune_kernel_dynamic(ICLKernel &kernel) override;
-    void tune_kernel_dynamic(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs) override;
+    void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors) override;
 };
 } // namespace tuners
 } // namespace arm_compute

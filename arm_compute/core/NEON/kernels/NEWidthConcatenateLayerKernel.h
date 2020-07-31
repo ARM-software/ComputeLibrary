@@ -73,8 +73,7 @@ public:
     static Status validate(const ITensorInfo *input, unsigned int width_offset, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
     unsigned int _width_offset;

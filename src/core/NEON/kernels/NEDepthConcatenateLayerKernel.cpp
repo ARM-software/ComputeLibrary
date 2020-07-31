@@ -189,14 +189,16 @@ Status NEDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *i
     return Status{};
 }
 
-void NEDepthConcatenateLayerKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                                           const Window &window, const ThreadInfo &info)
+void NEDepthConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (*_func)(inputs.at(TensorType::ACL_SRC), outputs.at(TensorType::ACL_DST), _depth_offset, window);
+    (*_func)(tensors.get_const_tensor(TensorType::ACL_SRC),
+             tensors.get_tensor(TensorType::ACL_DST),
+             _depth_offset,
+             window);
 }
 } // namespace arm_compute

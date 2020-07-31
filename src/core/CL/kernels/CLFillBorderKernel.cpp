@@ -170,17 +170,15 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ITen
     _config_id += lower_string(string_from_border_mode(border_mode));
 }
 
-void CLFillBorderKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue)
+void CLFillBorderKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
-    ARM_COMPUTE_UNUSED(outputs);
-
     // Border mode undefined or border width == 0
     if(_kernel() == nullptr)
     {
         return;
     }
 
-    const auto tensor = utils::cast::polymorphic_downcast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC));
+    const auto tensor = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
 
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);

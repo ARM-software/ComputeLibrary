@@ -76,8 +76,7 @@ public:
     static Status validate(const ITensorInfo *input, unsigned int batch_offset, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
     using BatchConcatFunction = void(const ITensor *in, ITensor *out, unsigned int batch_offset, const Window &window);

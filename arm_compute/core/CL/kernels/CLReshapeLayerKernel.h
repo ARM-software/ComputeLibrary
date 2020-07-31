@@ -53,8 +53,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                const Window &window, cl::CommandQueue &queue) override;
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLRESHAPELAYERKERNEL_H */

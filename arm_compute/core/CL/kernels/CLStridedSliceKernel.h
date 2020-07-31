@@ -73,8 +73,7 @@ public:
                            int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                const Window &window, cl::CommandQueue &queue) override;
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CL_STRIDED_SLICE_KERNEL_H */

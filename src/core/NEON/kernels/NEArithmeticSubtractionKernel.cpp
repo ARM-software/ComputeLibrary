@@ -807,12 +807,16 @@ Status NEArithmeticSubtractionKernel::validate(const ITensorInfo *input1, const 
     return Status{};
 }
 
-void NEArithmeticSubtractionKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
+void NEArithmeticSubtractionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     // Dispatch kernel
-    (*_func)(inputs.at(TensorType::ACL_SRC_0), inputs.at(TensorType::ACL_SRC_1), outputs.at(TensorType::ACL_DST), window, (_policy == ConvertPolicy::SATURATE));
+    (*_func)(tensors.get_const_tensor(TensorType::ACL_SRC_0),
+             tensors.get_const_tensor(TensorType::ACL_SRC_1),
+             tensors.get_tensor(TensorType::ACL_DST),
+             window,
+             (_policy == ConvertPolicy::SATURATE));
 }
 } // namespace arm_compute

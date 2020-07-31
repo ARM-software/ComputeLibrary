@@ -76,9 +76,10 @@ void NEStridedSlice::configure(const ITensor *input, ITensor *output,
 
 void NEStridedSlice::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 Status NEStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *output,

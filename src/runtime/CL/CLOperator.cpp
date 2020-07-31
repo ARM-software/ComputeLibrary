@@ -33,19 +33,17 @@ ICLOperator::ICLOperator(IRuntimeContext *ctx)
 {
 }
 
-void ICLOperator::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void ICLOperator::run(ITensorPack &tensors)
 {
-    ARM_COMPUTE_UNUSED(workspace);
-
-    if(inputs.empty())
+    if(tensors.empty())
     {
         ARM_COMPUTE_ERROR("No inputs provided");
     }
 
-    CLScheduler::get().enqueue_op(*_kernel.get(), inputs, outputs, false);
+    CLScheduler::get().enqueue_op(*_kernel.get(), tensors, false);
 }
 
-void ICLOperator::prepare(OperatorTensorMap constants)
+void ICLOperator::prepare(ITensorPack &constants)
 {
     ARM_COMPUTE_UNUSED(constants);
 }

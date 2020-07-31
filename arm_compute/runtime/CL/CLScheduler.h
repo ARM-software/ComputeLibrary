@@ -76,11 +76,10 @@ public:
     /** Schedule the execution of the passed kernel if possible.
      *
      * @param[in] kernel  Kernel to execute.
-     * @param[in] inputs  Vector containing the input tensors.
-     * @param[in] outputs Vector containing the output tensors.
+     * @param[in] tensors Vector containing the tensors to operate on.
      * @param[in] flush   (Optional) Specifies if the command queue will be flushed after running the kernel.
      */
-    void enqueue_op(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs, bool flush = true);
+    void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush = true);
 
     /** Initialises the context and command queue to be used by the scheduler.
      *
@@ -152,7 +151,7 @@ public:
     bool is_initialised() const;
 
 private:
-    void enqueue_common(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs, bool flush);
+    void enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool flush);
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 

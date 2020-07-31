@@ -34,19 +34,21 @@ namespace arm_compute
 {
 namespace
 {
-void select_border_input(InputTensorMap &tensor_map, InputTensorMap &inputs, OutputTensorMap &outputs)
+ITensorPack select_border_input(ITensorPack &tensors)
 {
-    if(outputs.at(TensorType::ACL_DST)->info()->dimension(0) > 1)
+    ITensorPack pack;
+    if(tensors.get_tensor(TensorType::ACL_DST)->info()->dimension(0) > 1)
     {
-        if(inputs.at(TensorType::ACL_SRC_1)->info()->dimension(0) == 1)
+        if(tensors.get_const_tensor(TensorType::ACL_SRC_1)->info()->dimension(0) == 1)
         {
-            tensor_map[TensorType::ACL_SRC] = inputs.at(TensorType::ACL_SRC_1);
+            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(TensorType::ACL_SRC_1));
         }
         else
         {
-            tensor_map[TensorType::ACL_SRC] = inputs.at(TensorType::ACL_SRC_0);
+            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(TensorType::ACL_SRC_0));
         }
     }
+    return pack;
 }
 } // namespace
 
@@ -81,12 +83,11 @@ Status CLPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITen
     return CLPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
 }
 
-void CLPixelWiseMultiplication::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLPixelWiseMultiplication::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 
 CLComplexPixelWiseMultiplication::CLComplexPixelWiseMultiplication()
@@ -116,12 +117,11 @@ Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, con
     return CLComplexPixelWiseMultiplicationKernel::validate(input1, input2, output, act_info);
 }
 
-void CLComplexPixelWiseMultiplication::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
+void CLComplexPixelWiseMultiplication::run(ITensorPack &tensors)
 {
-    InputTensorMap src;
-    select_border_input(src, inputs, outputs);
-    CLScheduler::get().enqueue_op(_border_handler, src, {});
-    ICLOperator::run(inputs, outputs, workspace);
+    auto border_pack = select_border_input(tensors);
+    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    ICLOperator::run(tensors);
 }
 } // namespace experimental
 
@@ -165,10 +165,12 @@ Status CLPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITen
 
 void CLPixelWiseMultiplication::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 
 struct CLComplexPixelWiseMultiplication::Impl
@@ -208,9 +210,11 @@ Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, con
 
 void CLComplexPixelWiseMultiplication::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    _impl->op->run(src, dst, {});
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

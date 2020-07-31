@@ -94,9 +94,10 @@ void NESlice::configure(const ITensor *input, ITensor *output, const Coordinates
 
 void NESlice::run()
 {
-    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
-    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
-    _impl->op->run(src, dst, {});
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 } // namespace arm_compute

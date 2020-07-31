@@ -225,14 +225,13 @@ public:
      *
      * @note The queue is *not* flushed by this method, and therefore the kernel will not have been executed by the time this method returns.
      *
-     * @param[in]     inputs  A vector containing the input tensors.
-     * @param[in]     outputs A vector containing the output tensors.
+     * @param[in]     tensors A vector containing the tensors to operato on.
      * @param[in]     window  Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      * @param[in,out] queue   Command queue on which to enqueue the kernel.
      */
-    virtual void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue)
+    virtual void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
     {
-        ARM_COMPUTE_UNUSED(inputs, outputs, window, queue);
+        ARM_COMPUTE_UNUSED(tensors, window, queue);
     }
     /** Add the passed parameters to the object's kernel's arguments starting from the index idx.
      *

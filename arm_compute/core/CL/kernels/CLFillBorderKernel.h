@@ -85,7 +85,7 @@ public:
     void set_constant_border(unsigned int idx, const PixelValue &constant_border_value);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue) override;
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
     void run(const Window &window, cl::CommandQueue &queue) override;
     bool is_parallelisable() const override;
 

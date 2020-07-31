@@ -83,7 +83,7 @@ void OMPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     }
 }
 
-void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs)
+void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
     ARM_COMPUTE_ERROR_ON_MSG(hints.strategy() == StrategyHint::DYNAMIC,
@@ -97,7 +97,7 @@ void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Inp
     {
         ThreadInfo info;
         info.cpu_info = &_cpu_info;
-        kernel->run_op(inputs, outputs, max_window, info);
+        kernel->run_op(tensors, max_window, info);
     }
     else
     {
@@ -106,11 +106,11 @@ void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Inp
         for(unsigned int t = 0; t < num_windows; t++)
         {
             //Capture 't' by copy, all the other variables by reference:
-            workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &inputs, &outputs](const ThreadInfo & info)
+            workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &tensors](const ThreadInfo & info)
             {
                 Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
                 win.validate();
-                kernel->run_op(inputs, outputs, win, info);
+                kernel->run_op(tensors, win, info);
             };
         }
         run_workloads(workloads);

@@ -79,14 +79,13 @@ public:
      *
      * @note The width of the window has to be a multiple of num_elems_processed_per_iteration().
      *
-     * @param[in] inputs  A vector containing the input tensors.
-     * @param[in] outputs A vector containing the output tensors.
+     * @param[in] tensors A vector containing the tensors to operate on.
      * @param[in] window  Region on which to execute the kernel. (Must be a region of the window returned by window())
      * @param[in] info    Info about executing thread and CPU.
      */
-    virtual void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
+    virtual void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
     {
-        ARM_COMPUTE_UNUSED(inputs, outputs, window, info);
+        ARM_COMPUTE_UNUSED(tensors, window, info);
     }
 
     /** Name of the kernel

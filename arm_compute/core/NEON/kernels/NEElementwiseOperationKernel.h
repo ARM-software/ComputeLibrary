@@ -67,8 +67,7 @@ public:
     using ElementwiseFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
 
     // Inherited methods overridden:
-    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
-                const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 protected:
     /** Validate the argument passed to the kernel

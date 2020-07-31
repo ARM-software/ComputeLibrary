@@ -77,10 +77,11 @@ void CLTuner::tune_kernel_static(ICLKernel &kernel)
 
 void CLTuner::tune_kernel_dynamic(ICLKernel &kernel)
 {
-    tune_kernel_dynamic(kernel, {}, {});
+    ITensorPack pack;
+    tune_kernel_dynamic(kernel, pack);
 }
 
-void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs)
+void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
 {
     // Get the configuration ID from the kernel and append GPU target name and number of available compute units
     const std::string config_id = kernel.config_id() + "_" + string_from_target(kernel.get_target()) + "_MP" + support::cpp11::to_string(CLKernelLibrary::get().get_num_compute_units());
@@ -95,7 +96,7 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, const InputTensorMap &input
             if(_tune_new_kernels)
             {
                 // Find the optimal LWS for the kernel
-                cl::NDRange opt_lws = find_optimal_lws(kernel, inputs, outputs);
+                cl::NDRange opt_lws = find_optimal_lws(kernel, tensors);
 
                 // Insert the optimal LWS in the table
                 add_lws_to_table(config_id, opt_lws);
@@ -117,7 +118,7 @@ void CLTuner::add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal
     _lws_table.emplace(kernel_id, optimal_lws);
 }
 
-cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs)
+cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel, ITensorPack &tensors)
 {
     // Profiling queue
     cl::CommandQueue queue_profiler;
@@ -172,8 +173,8 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel, const InputTensorMap &i
     cl::NDRange gws = ICLKernel::gws_from_window(kernel.window());
 
     // Run the kernel with default lws to be used as baseline
-    const bool inject_memory = !inputs.empty();
-    inject_memory ? kernel.run_op(inputs, outputs, kernel.window(), queue_profiler) : kernel.run(kernel.window(), queue_profiler);
+    const bool inject_memory = !tensors.empty();
+    inject_memory ? kernel.run_op(tensors, kernel.window(), queue_profiler) : kernel.run(kernel.window(), queue_profiler);
 
     queue_profiler.finish();
 
@@ -203,7 +204,7 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel, const InputTensorMap &i
         kernel.set_lws_hint(lws_test);
 
         // Run the kernel
-        inject_memory ? kernel.run_op(inputs, outputs, kernel.window(), queue_profiler) : kernel.run(kernel.window(), queue_profiler);
+        inject_memory ? kernel.run_op(tensors, kernel.window(), queue_profiler) : kernel.run(kernel.window(), queue_profiler);
 
         queue_profiler.finish();
 

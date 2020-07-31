@@ -405,7 +405,7 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 }
 #endif /* DOXYGEN_SKIP_THIS */
 
-void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs)
+void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
@@ -464,13 +464,13 @@ void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const
         {
             ThreadInfo info;
             info.cpu_info = &_cpu_info;
-            if(inputs.empty())
+            if(tensors.empty())
             {
                 kernel->run(max_window, info);
             }
             else
             {
-                kernel->run_op(inputs, outputs, max_window, info);
+                kernel->run_op(tensors, max_window, info);
             }
         }
         else
@@ -495,18 +495,18 @@ void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const
             for(unsigned int t = 0; t < num_windows; t++)
             {
                 //Capture 't' by copy, all the other variables by reference:
-                workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &inputs, &outputs](const ThreadInfo & info)
+                workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &tensors](const ThreadInfo & info)
                 {
                     Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
                     win.validate();
 
-                    if(inputs.empty())
+                    if(tensors.empty())
                     {
                         kernel->run(win, info);
                     }
                     else
                     {
-                        kernel->run_op(inputs, outputs, win, info);
+                        kernel->run_op(tensors, win, info);
                     }
                 };
             }
@@ -515,15 +515,14 @@ void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const
     }
 }
 
-void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs)
+void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
 {
-    schedule_common(kernel, hints, inputs, outputs);
+    schedule_common(kernel, hints, tensors);
 }
 
 void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
-    const InputTensorMap inputs;
-    OutputTensorMap      outputs;
-    schedule_common(kernel, hints, inputs, outputs);
+    ITensorPack tensors;
+    schedule_common(kernel, hints, tensors);
 }
 } // namespace arm_compute
