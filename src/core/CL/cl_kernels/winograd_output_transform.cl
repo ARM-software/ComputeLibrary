@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -157,8 +157,8 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    const const VEC_DATA_TYPE(DATA_TYPE, 2)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 2))(out00, out01), VEC_DATA_TYPE(DATA_TYPE, 2)), A_VAL, B_VAL);
+    const VEC_DATA_TYPE(DATA_TYPE, 2)
+    out0_dt                                            = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 2))(out00, out01), VEC_DATA_TYPE(DATA_TYPE, 2)), A_VAL, B_VAL);
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = out0_dt.s0;
     *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = out0_dt.s1;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -288,7 +288,7 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     // Get output address
     int offset = dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
     VEC_DATA_TYPE(DATA_TYPE, 2)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 2))(out00, out01), VEC_DATA_TYPE(DATA_TYPE, 2)), A_VAL, B_VAL);
+    out0_dt                                                      = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 2))(out00, out01), VEC_DATA_TYPE(DATA_TYPE, 2)), A_VAL, B_VAL);
     *(__global DATA_TYPE *)(dst_ptr + 0 * dst_stride_y + offset) = out0_dt.s0;
     *(__global DATA_TYPE *)(dst_ptr + 1 * dst_stride_y + offset) = out0_dt.s1;
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -599,7 +599,8 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
+    out0_dt                                                = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL,
+                                                                        B_VAL);
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = out0_dt.s0;
     *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = out0_dt.s1;
     *((__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y)) = out0_dt.s2;
@@ -839,7 +840,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 
     // Store the 1x4 output tile
     VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
+    out0_dt                                        = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
     *((__global DATA_TYPE *)(dst_ptr + offset.s0)) = out0_dt.s0;
     *((__global DATA_TYPE *)(dst_ptr + offset.s1)) = out0_dt.s1;
     *((__global DATA_TYPE *)(dst_ptr + offset.s2)) = out0_dt.s2;
@@ -875,7 +876,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     out2_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out20, out21, out22, out23), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
     VEC_DATA_TYPE(DATA_TYPE, 4)
     out3_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out30, out31, out32, out33),
-                                                              VEC_DATA_TYPE(DATA_TYPE, 4)),
+                                                             VEC_DATA_TYPE(DATA_TYPE, 4)),
                          A_VAL, B_VAL);
     *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset.s0)) = out0_dt.s0;
     *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s0)) = out0_dt.s1;
@@ -1011,7 +1012,8 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
+    out0_dt                                                = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL,
+                                                                        B_VAL);
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = out0_dt.s0;
     *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = out0_dt.s1;
     *((__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y)) = out0_dt.s2;
@@ -1239,7 +1241,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     offset = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
 
     VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
+    out0_dt                                      = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
     *(__global DATA_TYPE *)(dst_ptr + offset.s0) = out0_dt.s0;
     *(__global DATA_TYPE *)(dst_ptr + offset.s1) = out0_dt.s1;
     *(__global DATA_TYPE *)(dst_ptr + offset.s2) = out0_dt.s2;
