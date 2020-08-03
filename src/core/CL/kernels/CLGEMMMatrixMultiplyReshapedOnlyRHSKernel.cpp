@@ -263,6 +263,10 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileContext
     const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
     const unsigned int partial_store_n0 = gemm_info.n % rhs_info.n0;
 
+    // Shrink M0 to be always <= M (internal_m) to prevent out-of-bounds reads.
+    // NOTE: This might have implications on heuristics and performance
+    const unsigned int internal_m0 = std::min(internal_m, lhs_info.m0);
+
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
@@ -282,7 +286,7 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileContext
     build_opts.add_option("-DM=" + support::cpp11::to_string(internal_m));
     build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n));
     build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k));
-    build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
+    build_opts.add_option("-DM0=" + support::cpp11::to_string(internal_m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
     build_opts.add_option("-DH0=" + support::cpp11::to_string(rhs_info.h0));

@@ -118,6 +118,28 @@ const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8 });
 /** Broadcast bias from vector to matrix */
 const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { false, true } );
 
+/** Boundary handling cases for testing partial/non-partial (full) block dimensions, resulting from different combinations
+ * of M, M0, N and N0 values.
+ * M0 and N0 are kept constant, while the different test cases need to vary M and N.
+ *
+ * Eg. M = 64 and N = 33 result in a block dimension that has no partial blocks (all full blocks) in Y dimension and
+ * parital blocks in X dimension.
+ */
+const auto boundary_handling_cases = combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                    // Large k to force potential out-of-bound reads on input0
+                                    framework::dataset::make("K", 315),
+                                    // Batch size == 1 to force potential out-of-bound reads on input0
+                                    framework::dataset::make("batch_size", 1)),
+                                    framework::dataset::make("M0", 4)),
+                                    framework::dataset::make("N0", 4)),
+                                    framework::dataset::make("K0", 4)),
+                                    // Only need to test F32 as F16 shares identical boundary handling logics
+                                    framework::dataset::make("DataType", DataType::F32)),
+                                    framework::dataset::make("alpha", -0.75f )),
+                                    framework::dataset::make("beta", -0.35f )),
+                                    broadcast_bias_values),
+                                    framework::dataset::make("Activation", ActivationLayerInfo()));
+
 /** Configuration test */
 void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value, unsigned int m0_value, unsigned int n0_value, unsigned int k0_value, bool broadcast_bias, DataType data_type, const ActivationLayerInfo &act_info)
 {
@@ -255,6 +277,46 @@ m_value, n_value, m0_value, n0_value)
 {
     bool status = validate_zero_padding(m_value, n_value, 23, 1, m0_value, n0_value, 4, false, DataType::F32, ActivationLayerInfo());
     ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingPartialInXPartialInY, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
+                combine(combine(
+                        framework::dataset::make("M", 3),
+                        framework::dataset::make("N", 1)),
+                        boundary_handling_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingPartialInXFullInY, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
+                combine(combine(
+                        framework::dataset::make("M", 64),
+                        framework::dataset::make("N", 51)),
+                        boundary_handling_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingFullInXFullInY, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
+                combine(combine(
+                        framework::dataset::make("M", 64),
+                        framework::dataset::make("N", 32)),
+                        boundary_handling_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingFullInXPartialInY, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
+                combine(combine(
+                        framework::dataset::make("M", 37),
+                        framework::dataset::make("N", 32)),
+                        boundary_handling_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
