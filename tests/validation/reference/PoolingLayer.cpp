@@ -215,7 +215,7 @@ SimpleTensor<half> pooling_layer(const SimpleTensor<half> &src, const PoolingLay
         return pooling_layer_internal<half, float>(src, info, indices, data_layout);
     }
 
-    return pooling_layer_internal<half>(src, info, indices);
+    return pooling_layer_internal<half>(src, info, indices, data_layout);
 }
 
 template SimpleTensor<float> pooling_layer(const SimpleTensor<float> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices, DataLayout data_layout);

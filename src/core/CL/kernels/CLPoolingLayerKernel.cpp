@@ -60,13 +60,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(indices, "Indices not supported in the CL backend.");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type == PoolingType::L2),
                                     "Unsupported combination of parameters!");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(input->data_type()) && !pool_info.exclude_padding && (pool_info.pool_type == PoolingType::AVG) && pool_info.pad_stride_info.has_padding()
                                     && (input->data_layout() == DataLayout::NHWC),
                                     "exclude_padding equal false is not supported for AVG Pooling with padding on quantized types");
+    // Check indices
+    if(indices)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_info.pool_type != PoolingType::MAX, "Pooling indices only supported for MAX pooling method");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_info.pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
+    }
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -80,7 +87,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     return Status{};
 }
 
-std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info)
+std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info, ITensorInfo *indices = nullptr)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -140,7 +147,19 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
             AccessWindowRectangle input_access(input, -pool_pad_left, -pool_pad_top, num_elems_read_per_iteration, pool_size_y,
                                                pool_stride_x, pool_stride_y);
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-            window_changed = update_window_and_padding(win, input_access, output_access);
+
+            // Update indices window
+            if(indices)
+            {
+                AccessWindowHorizontal indices_access(indices, 0, num_elems_processed_per_iteration);
+                window_changed = update_window_and_padding(win, input_access, output_access, indices_access);
+                indices_access.set_valid_region(win, ValidRegion(Coordinates(), indices->tensor_shape()));
+            }
+            else
+            {
+                window_changed = update_window_and_padding(win, input_access, output_access);
+            }
+
             output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
             break;
         }
@@ -153,7 +172,19 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
                                             0, -1,
                                             ceil_to_multiple(input->dimension(0), num_elems_processed_per_iteration), input->dimension(1));
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-            window_changed = update_window_and_padding(win, input_access, output_access);
+
+            // Update indices window
+            if(indices)
+            {
+                AccessWindowHorizontal indices_access(indices, 0, num_elems_processed_per_iteration);
+                window_changed = update_window_and_padding(win, input_access, output_access, indices_access);
+                indices_access.set_valid_region(win, ValidRegion(Coordinates(), indices->tensor_shape()));
+            }
+            else
+            {
+                window_changed = update_window_and_padding(win, input_access, output_access);
+            }
+
             output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
             break;
         }
@@ -207,8 +238,39 @@ void CLPoolingLayerKernel::configure(const CLCompileContext &compile_context, co
 
     // Set build options
     CLBuildOptions build_opts;
+    const DataType data_type = input->info()->data_type();
 
-    if(is_data_type_quantized_asymmetric(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info())
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), output->info(), pool_info, (indices ? indices->info() : nullptr));
+
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config));
+
+    if(_data_layout == DataLayout::NCHW)
+    {
+        CLPoolingConfig pooling_config     = std::get<2>(win_config);
+        _num_elems_processed_per_iteration = pooling_config.first;
+        _border_size                       = pooling_config.second;
+    }
+    else
+    {
+        _border_size                       = BorderSize(1, 0, 0, 0);
+        _num_elems_processed_per_iteration = 8;
+    }
+
+    // Tensor paddings are used to calculate the indicies for MAX pooling
+    if(pool_info.pool_size == Size2D(2, 2) && pool_type == PoolingType::MAX && _indices && is_data_type_float(data_type))
+    {
+        build_opts.add_option("-DPAD_TENSOR_LEFT=" + support::cpp11::to_string(input->info()->padding().left));
+        build_opts.add_option("-DPAD_TENSOR_RIGHT=" + support::cpp11::to_string(input->info()->padding().right));
+        build_opts.add_option("-DPAD_TENSOR_TOP=" + support::cpp11::to_string(input->info()->padding().top));
+        build_opts.add_option("-DPAD_TENSOR_BOTTOM=" + support::cpp11::to_string(input->info()->padding().bottom));
+        build_opts.add_option("-DTENSOR_CHANNEL=" + support::cpp11::to_string(input->info()->dimension(idx_channel)));
+        build_opts.add_option("-DTENSOR_WIDTH=" + support::cpp11::to_string(input->info()->dimension(idx_width)));
+        build_opts.add_option("-DTENSOR_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(idx_height)));
+    }
+
+    if(is_data_type_quantized_asymmetric(data_type) && input->info()->quantization_info() != output->info()->quantization_info())
     {
         const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
@@ -222,8 +284,6 @@ void CLPoolingLayerKernel::configure(const CLCompileContext &compile_context, co
     // Check output dimensions
     auto_init(input->info(), output->info(), pool_info);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr));
-
-    const DataType data_type = input->info()->data_type();
 
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DPOOL_" + string_from_pooling_type(pool_type));
@@ -282,6 +342,20 @@ void CLPoolingLayerKernel::configure(const CLCompileContext &compile_context, co
                                           + support::cpp11::to_string(pool_size_x);
                 _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
             }
+            else if(pool_info.pool_size == Size2D(2, 2) && pool_type == PoolingType::MAX && _indices && is_data_type_float(data_type))
+            {
+                // For max pooling with pool2x2, store indicies which will be used in max unpooling
+                if(data_type == DataType::F32)
+                {
+                    std::string kernel_name = "pooling_layer_2_nchw_indices_fp32";
+                    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
+                }
+                else if(data_type == DataType::F16)
+                {
+                    std::string kernel_name = "pooling_layer_2_nchw_indices_fp16";
+                    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
+                }
+            }
             else // Run general case
             {
                 std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "pooling_layer_MxN_quantized_nchw" : "pooling_layer_MxN_nchw";
@@ -296,30 +370,31 @@ void CLPoolingLayerKernel::configure(const CLCompileContext &compile_context, co
             build_opts.add_option("-DMAX_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(idx_height)));
             build_opts.add_option_if(output->info()->tensor_shape().total_size_upper(3) > 1,
                                      "-DDST_DEPTH=" + support::cpp11::to_string(output->info()->dimension(idx_height)));
-            std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "pooling_layer_MxN_quantized_nhwc" : "pooling_layer_MxN_nhwc";
-            _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
+            build_opts.add_option_if(output->info()->tensor_shape().total_size_upper(3) > 1,
+                                     "-DBATCH_SIZE=" + support::cpp11::to_string(output->info()->tensor_shape().total_size_upper(3)));
+
+            if(pool_info.pool_size == Size2D(2, 2) && pool_type == PoolingType::MAX && _indices && is_data_type_float(data_type))
+            {
+                if(data_type == DataType::F32)
+                {
+                    std::string kernel_name = "pooling_layer_2_nhwc_indices_fp32";
+                    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
+                }
+                else if(data_type == DataType::F16)
+                {
+                    std::string kernel_name = "pooling_layer_2_nhwc_indices_fp16";
+                    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
+                }
+            }
+            else
+            {
+                std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "pooling_layer_MxN_quantized_nhwc" : "pooling_layer_MxN_nhwc";
+                _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
+            }
             break;
         }
         default:
             ARM_COMPUTE_ERROR("Not implemented");
-    }
-
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), pool_info);
-
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-    ICLKernel::configure_internal(std::get<1>(win_config));
-
-    if(_data_layout == DataLayout::NCHW)
-    {
-        CLPoolingConfig pooling_config     = std::get<2>(win_config);
-        _num_elems_processed_per_iteration = pooling_config.first;
-        _border_size                       = pooling_config.second;
-    }
-    else
-    {
-        _border_size                       = BorderSize(1, 0, 0, 0);
-        _num_elems_processed_per_iteration = 8;
     }
 
     // Set config_id for enabling LWS tuning
@@ -377,6 +452,10 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
                 unsigned int idx = 0;
                 add_3D_tensor_argument(idx, _input, in_slice);
                 add_3D_tensor_argument(idx, _output, slice);
+                if(_indices && is_data_type_float(_input->info()->data_type()) && (_pool_info.pool_type == PoolingType::MAX) && (_pool_info.pool_size == Size2D(2, 2)))
+                {
+                    add_3D_tensor_argument(idx, _indices, slice);
+                }
                 enqueue(queue, *this, slice, lws_hint());
             }
             while(window_collapsed.slide_window_slice_3D(slice));
@@ -398,6 +477,10 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
                 unsigned int idx = 0;
                 add_4D_tensor_argument(idx, _input, in_slice);
                 add_4D_tensor_argument(idx, _output, slice);
+                if(_indices && is_data_type_float(_input->info()->data_type()) && (_pool_info.pool_type == PoolingType::MAX) && (_pool_info.pool_size == Size2D(2, 2)))
+                {
+                    add_4D_tensor_argument(idx, _indices, slice);
+                }
                 enqueue(queue, *this, slice, lws_hint());
             }
             while(window.slide_window_slice_4D(slice) && window.slide_window_slice_4D(in_slice));
