@@ -48,7 +48,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_UNUSED(num_groups);
     ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
-                                                            enable_fast_math));
+                                                            enable_fast_math, num_groups));
 
     switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math))
     {
