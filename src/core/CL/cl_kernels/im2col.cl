@@ -862,14 +862,86 @@ __kernel void im2col_generic_padx0_pady0_nchw(
 }
 #endif //defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(VECTOR_SIZE) && defined(WIDTH_MOD_VECTOR_SIZE)
 
-#if defined(CONVOLVED_WIDTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_DEPTH) && defined(PAD_LEFT) && defined(PAD_RIGHT) && defined(PAD_TOP) && defined(PAD_BOTTOM) && defined(PAD_VALUE) && defined(VECTOR_SIZE) && defined(LAST_ACCESSED)
+#if defined(CONVOLVED_WIDTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_DEPTH) && defined(PAD_LEFT) && defined(PAD_RIGHT) && defined(PAD_TOP) && defined(PAD_BOTTOM) && defined(PAD_VALUE) && defined(VECTOR_SIZE) && defined(BOUNDARY_VECTOR_SIZE)
 
 #define VECTOR_N VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
 #define COND_N VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE)
 
+/** Store a 1x9 row or a 3x3 block in a boundary-aware manner to avoid paddings in the channel dimension
+ *  @name IM2COL1X9_NHWC_STORE
+ *
+ *  @note To use this macro for a 3x3 block, @p ROW has to be 0
+ *
+ * @param[in] VECTOR_SIZE          The non-boundary vector width of @p DATA. Supported: 1(scalar), 2, 3, 4, 8, 16
+ * @param[in] BOUNDARY_VECTOR_SIZE The boundary vector width of @p DATA. Supported: 1-16, but has to be <= @p size
+ * @param[in] DATA_TYPE            Data type of @p DATA
+ * @param[in] SRC_DEPTH            Input channel size / depth
+ * @param[in] DATA                 Value variable base name
+ * @param[in] ROW                  The row number to store. Supported: 0-8
+ * @param[in] OUTPUT_PTR           Output pointer
+ * @{
+ */
+#if defined(VECTOR_SIZE) && defined(BOUNDARY_VECTOR_SIZE) && BOUNDARY_VECTOR_SIZE < VECTOR_SIZE
+#define IM2COL1X9_NHWC_STORE(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, DATA, ROW, OUTPUT_PTR)         \
+    const bool at_channel_boundary = get_global_id(0) == 0;                                                          \
+    if(at_channel_boundary)                                                                                          \
+    {                                                                                                                \
+        IM2COL1X9_NHWC_STORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, DATA, ROW, OUTPUT_PTR) \
+    }                                                                                                                \
+    else                                                                                                             \
+    {                                                                                                                \
+        IM2COL1X9_NHWC_STORE_NONPARTIAL(VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, DATA, ROW, OUTPUT_PTR)                    \
+    }
+#else // defined(VECTOR_SIZE) && defined(BOUNDARY_VECTOR_SIZE) && BOUNDARY_VECTOR_SIZE < VECTOR_SIZE
+#define IM2COL1X9_NHWC_STORE(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, DATA, ROW, OUTPUT_PTR) \
+    IM2COL1X9_NHWC_STORE_NONPARTIAL(VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, DATA, ROW, OUTPUT_PTR)
+#endif // defined(VECTOR_SIZE) && defined(BOUNDARY_VECTOR_SIZE) && BOUNDARY_VECTOR_SIZE < VECTOR_SIZE
+
+#define IM2COL1X9_NHWC_STORE_NONPARTIAL(VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, DATA, ROW, OUTPUT_PTR) \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##0, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (0 + ROW * 9) * SRC_DEPTH);                 \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##1, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (1 + ROW * 9) * SRC_DEPTH);                 \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##2, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (2 + ROW * 9) * SRC_DEPTH);                 \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##3, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (3 + ROW * 9) * SRC_DEPTH);                 \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##4, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (4 + ROW * 9) * SRC_DEPTH);                 \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##5, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (5 + ROW * 9) * SRC_DEPTH);                 \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##6, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (6 + ROW * 9) * SRC_DEPTH);                 \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##7, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (7 + ROW * 9) * SRC_DEPTH);                 \
+    VSTORE(VECTOR_SIZE)                                                                           \
+    (DATA##8, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (8 + ROW * 9) * SRC_DEPTH);
+
+#define IM2COL1X9_NHWC_STORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, DATA, ROW, OUTPUT_PTR) \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##0, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (0 + ROW * 9) * SRC_DEPTH);                                    \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##1, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (1 + ROW * 9) * SRC_DEPTH);                                    \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##2, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (2 + ROW * 9) * SRC_DEPTH);                                    \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##3, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (3 + ROW * 9) * SRC_DEPTH);                                    \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##4, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (4 + ROW * 9) * SRC_DEPTH);                                    \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##5, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (5 + ROW * 9) * SRC_DEPTH);                                    \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##6, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (6 + ROW * 9) * SRC_DEPTH);                                    \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##7, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (7 + ROW * 9) * SRC_DEPTH);                                    \
+    VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
+    (DATA##8, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (8 + ROW * 9) * SRC_DEPTH);
+/** @}*/
+
 /** This kernel performs im2col when the kernel size is 3x3 and the data layout is NHWC
  *
  * @note This kernel computes VECTOR_SIZE elements
+ * @note This kernel stores VECTOR_SIZE or BOUNDARY_VECTOR_SIZE (if at boundary) elements
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width of output tensor after matrix multiplication must be passed at compile time using -DCONVOLVED_WIDTH: e.g. -DCONVOLVED_WIDTH=34
  * @note The kernel depth must be passed at compile time using -DSRC_DEPTH: e.g. -DSRC_DEPTH=3
@@ -899,9 +971,11 @@ __kernel void im2col3x3_nhwc(
     uint src_stride_w,
     uint dst_stride_w)
 {
-    const int ch    = min((int)(get_global_id(0) * VECTOR_SIZE), LAST_ACCESSED); // input feature map
-    const int yo    = get_global_id(1);
-    const int batch = get_global_id(2); // batch size
+    // input feature map, boundary-corrected (shift all non-boundary vectors by shift_amount) to avoid padding
+    const int shift_amount = (int)VECTOR_SIZE - (int)BOUNDARY_VECTOR_SIZE;
+    const int ch           = max((int)(get_global_id(0) * VECTOR_SIZE) - shift_amount, 0);
+    const int yo           = get_global_id(1);
+    const int batch        = get_global_id(2); // batch size
 
     // Calculate input indices
     const int xi = (get_global_id(1) % CONVOLVED_WIDTH) * STRIDE_X;
@@ -916,10 +990,11 @@ __kernel void im2col3x3_nhwc(
 
     // Clamp xi
     int3 xi_offset = ((int3)xi + (int3)(0, 1, 2) * DILATION_X - (int3)PAD_LEFT);
-#if PAD_TOP != 0 || PAD_BOTTOM != 0
+#if PAD_LEFT != 0 || PAD_RIGHT != 0
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)
     xi_offset = CLAMP(xi_offset, (int3)0, (int3)(SRC_WIDTH - 1));
-#endif // PAD_TOP != 0 || PAD_BOTTOM != 0
+#endif // PAD_LEFT != 0 || PAD_RIGHT != 0
+    // Multiply by src_stride_y as the width (X) dimension here is the second (y) dimension in src NHWC tensor
     xi_offset *= (int3)src_stride_y;
 
     // Out-of-bound condition for X
@@ -929,6 +1004,9 @@ __kernel void im2col3x3_nhwc(
     // Clamp yi
     // yi_coord is casted to unsigned int in order to use just a min() operation
     // A "-1" 32 bit signed variable converted to unsigned gives 4294967295
+    // This is a trick so that the values loaded in the padding areas are always from the last row (SRC_HEIGHT - 1),
+    // because of the negative yi_coord wrap-around, but it gets overwritten by PAD_VALUE immediately as the wrap-around
+    // also causes y_cond (y padding condition) to be satisfied
     yi_coord = yi - (int)PAD_TOP;
 
     // Clamp only if PAD_TOP or PAD_BOTTOM is not equal to 0
@@ -1002,27 +1080,15 @@ __kernel void im2col3x3_nhwc(
     values8 = select(values8, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s2)));
 #endif // PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
 
-    // Store
-    VSTORE(VECTOR_SIZE)
-    (values0, 0, (__global DATA_TYPE *)(output_ptr) + 0 * SRC_DEPTH);
-    VSTORE(VECTOR_SIZE)
-    (values1, 0, (__global DATA_TYPE *)(output_ptr) + 1 * SRC_DEPTH);
-    VSTORE(VECTOR_SIZE)
-    (values2, 0, (__global DATA_TYPE *)(output_ptr) + 2 * SRC_DEPTH);
-    VSTORE(VECTOR_SIZE)
-    (values3, 0, (__global DATA_TYPE *)(output_ptr) + 3 * SRC_DEPTH);
-    VSTORE(VECTOR_SIZE)
-    (values4, 0, (__global DATA_TYPE *)(output_ptr) + 4 * SRC_DEPTH);
-    VSTORE(VECTOR_SIZE)
-    (values5, 0, (__global DATA_TYPE *)(output_ptr) + 5 * SRC_DEPTH);
-    VSTORE(VECTOR_SIZE)
-    (values6, 0, (__global DATA_TYPE *)(output_ptr) + 6 * SRC_DEPTH);
-    VSTORE(VECTOR_SIZE)
-    (values7, 0, (__global DATA_TYPE *)(output_ptr) + 7 * SRC_DEPTH);
-    VSTORE(VECTOR_SIZE)
-    (values8, 0, (__global DATA_TYPE *)(output_ptr) + 8 * SRC_DEPTH);
+    // Store in a boundary-aware way to avoid padding
+    IM2COL1X9_NHWC_STORE(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, values, 0, output_ptr)
 
 #ifdef HAS_BIAS
+    // We can use VECTOR_SIZE instead of BOUNDARY_VECTOR_SIZE even if it's at the boundary. This is because the bias is
+    // added at the end of the channel, while the boundary vec is at the beginning of the channel.
+    // The only case where the boundary vec is at the end of the channel is when there's only a single boundary vec in
+    // the whole channel dimension, but in that case VECTOR_SIZE is also equal to BOUNDARY_VECTOR_SIZE
+    // See the value of num_elems_processed_per_iteration in configure_opencl_kernel method in CLIm2ColKernel.cpp
     if((ch + VECTOR_SIZE) >= SRC_DEPTH)
     {
         *((__global DATA_TYPE *)(output_ptr) - ch + SRC_DEPTH * 9) = 1.0f;
@@ -1060,68 +1126,35 @@ __kernel void im2col3x3_nhwc(
         values7    = select(values7, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s7))); \
         values8    = select(values8, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond1)));    \
         \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values0, 0, (__global DATA_TYPE *)(output_ptr) + (0 + i * 9) * SRC_DEPTH);                          \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values1, 0, (__global DATA_TYPE *)(output_ptr) + (1 + i * 9) * SRC_DEPTH);                          \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values2, 0, (__global DATA_TYPE *)(output_ptr) + (2 + i * 9) * SRC_DEPTH);                          \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values3, 0, (__global DATA_TYPE *)(output_ptr) + (3 + i * 9) * SRC_DEPTH);                          \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values4, 0, (__global DATA_TYPE *)(output_ptr) + (4 + i * 9) * SRC_DEPTH);                          \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values5, 0, (__global DATA_TYPE *)(output_ptr) + (5 + i * 9) * SRC_DEPTH);                          \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values6, 0, (__global DATA_TYPE *)(output_ptr) + (6 + i * 9) * SRC_DEPTH);                          \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values7, 0, (__global DATA_TYPE *)(output_ptr) + (7 + i * 9) * SRC_DEPTH);                          \
-        VSTORE(VECTOR_SIZE)                                                                                  \
-        (values8, 0, (__global DATA_TYPE *)(output_ptr) + (8 + i * 9) * SRC_DEPTH);                          \
+        IM2COL1X9_NHWC_STORE(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, values, i, output_ptr) \
     })
 #else // PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
-#define IM2COL1x9(i)                                                                              \
-    ({                                                                                            \
-        yi_coord = yi - (int)PAD_TOP + i * DILATION_Y;                                            \
-        yi_coord = min((uint)yi_coord, (uint)(SRC_HEIGHT - 1));                                   \
+#define IM2COL1x9(i)                                                                                         \
+    ({                                                                                                       \
+        yi_coord = yi - (int)PAD_TOP + i * DILATION_Y;                                                       \
+        yi_coord = min((uint)yi_coord, (uint)(SRC_HEIGHT - 1));                                              \
         \
-        offset0 = xi_offset0 + (yi_coord * (int)src_stride_z);                                    \
-        offset1 = xi_offset1 + (yi_coord * (int)src_stride_z);                                    \
+        offset0 = xi_offset0 + (yi_coord * (int)src_stride_z);                                               \
+        offset1 = xi_offset1 + (yi_coord * (int)src_stride_z);                                               \
         \
-        VECTOR_N values0 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s0)); \
-        VECTOR_N values1 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s1)); \
-        VECTOR_N values2 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s2)); \
-        VECTOR_N values3 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s3)); \
-        VECTOR_N values4 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s4)); \
-        VECTOR_N values5 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s5)); \
-        VECTOR_N values6 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s6)); \
-        VECTOR_N values7 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s7)); \
-        VECTOR_N values8 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset1));    \
+        VECTOR_N values0 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s0));            \
+        VECTOR_N values1 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s1));            \
+        VECTOR_N values2 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s2));            \
+        VECTOR_N values3 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s3));            \
+        VECTOR_N values4 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s4));            \
+        VECTOR_N values5 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s5));            \
+        VECTOR_N values6 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s6));            \
+        VECTOR_N values7 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s7));            \
+        VECTOR_N values8 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset1));               \
         \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values0, 0, (__global DATA_TYPE *)(output_ptr) + (0 + i * 9) * SRC_DEPTH);               \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values1, 0, (__global DATA_TYPE *)(output_ptr) + (1 + i * 9) * SRC_DEPTH);               \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values2, 0, (__global DATA_TYPE *)(output_ptr) + (2 + i * 9) * SRC_DEPTH);               \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values3, 0, (__global DATA_TYPE *)(output_ptr) + (3 + i * 9) * SRC_DEPTH);               \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values4, 0, (__global DATA_TYPE *)(output_ptr) + (4 + i * 9) * SRC_DEPTH);               \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values5, 0, (__global DATA_TYPE *)(output_ptr) + (5 + i * 9) * SRC_DEPTH);               \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values6, 0, (__global DATA_TYPE *)(output_ptr) + (6 + i * 9) * SRC_DEPTH);               \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values7, 0, (__global DATA_TYPE *)(output_ptr) + (7 + i * 9) * SRC_DEPTH);               \
-        VSTORE(VECTOR_SIZE)                                                                       \
-        (values8, 0, (__global DATA_TYPE *)(output_ptr) + (8 + i * 9) * SRC_DEPTH);               \
+        IM2COL1X9_NHWC_STORE(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE, DATA_TYPE, SRC_DEPTH, values, i, output_ptr) \
     })
 #endif // PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
 
 /** This kernel performs im2col when the kernel size is 9x9 and the data layout is NHWC
  *
  * @note This kernel computes VECTOR_SIZE elements
+ * @note This kernel stores VECTOR_SIZE or BOUNDARY_VECTOR_SIZE (if at boundary) elements
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width of output tensor after matrix multiplication must be passed at compile time using -DCONVOLVED_WIDTH: e.g. -DCONVOLVED_WIDTH=34
  * @note The kernel depth must be passed at compile time using -DSRC_DEPTH: e.g. -DSRC_DEPTH=3
@@ -1151,9 +1184,11 @@ __kernel void im2col9x9_nhwc(
     uint src_stride_w,
     uint dst_stride_w)
 {
-    const int ch    = min((int)(get_global_id(0) * VECTOR_SIZE), LAST_ACCESSED); // input feature map
-    const int yo    = get_global_id(1);
-    const int batch = get_global_id(2); // batch size
+    // input feature map, boundary-corrected (shift all non-boundary vectors by shift_amount) to avoid padding
+    const int shift_amount = (int)VECTOR_SIZE - (int)BOUNDARY_VECTOR_SIZE;
+    const int ch           = max((int)(get_global_id(0) * VECTOR_SIZE) - shift_amount, 0);
+    const int yo           = get_global_id(1);
+    const int batch        = get_global_id(2); // batch size
 
     // Calculate input indices
     const int xi = (get_global_id(1) % CONVOLVED_WIDTH) * STRIDE_X;
@@ -1171,11 +1206,11 @@ __kernel void im2col9x9_nhwc(
     int8 xi_offset0 = ((int8)xi + (int8)(0, 1, 2, 3, 4, 5, 6, 7) * DILATION_X - (int8)PAD_LEFT);
     int  xi_offset1 = ((int)xi + (int)(8) * DILATION_X - (int)PAD_LEFT);
 
-#if PAD_TOP != 0 || PAD_BOTTOM != 0
+#if PAD_LEFT != 0 || PAD_RIGHT != 0
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)
     xi_offset0 = CLAMP(xi_offset0, (int8)0, (int8)(SRC_WIDTH - 1));
     xi_offset1 = CLAMP(xi_offset1, (int)0, (int)(SRC_WIDTH - 1));
-#endif // PAD_TOP != 0 || PAD_BOTTOM != 0
+#endif // PAD_LEFT != 0 || PAD_RIGHT != 0
     xi_offset0 *= (int8)src_stride_y;
     xi_offset1 *= (int)src_stride_y;
 
@@ -1194,6 +1229,11 @@ __kernel void im2col9x9_nhwc(
     IM2COL1x9(8);
 
 #ifdef HAS_BIAS
+    // We can use VECTOR_SIZE instead of BOUNDARY_VECTOR_SIZE even if it's at the boundary. This is because the bias is
+    // added at the end of the channel, while the boundary vec is at the beginning of the channel.
+    // The only case where the boundary vec is at the end of the channel is when there's only a single boundary vec in
+    // the whole channel dimension, but in that case VECTOR_SIZE is also equal to BOUNDARY_VECTOR_SIZE
+    // See the value of num_elems_processed_per_iteration in configure_opencl_kernel method in CLIm2ColKernel.cpp
     if((ch + VECTOR_SIZE) >= SRC_DEPTH)
     {
         *((__global DATA_TYPE *)(output_ptr) - ch + SRC_DEPTH * 81) = 1.0f;
@@ -1203,6 +1243,8 @@ __kernel void im2col9x9_nhwc(
 
 /** This opencl kernel performs a generic im2col implementation when the data layout is NHWC
  *
+ * @note This kernel computes VECTOR_SIZE elements
+ * @note This kernel stores VECTOR_SIZE or BOUNDARY_VECTOR_SIZE (if at boundary) elements
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width and height of the input tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT: e.g. -DSRC_WIDTH=128 and -DSRC_HEIGHT=128
  * @note The width of output tensor after matrix multiplication must be passed at compile time using -DCONVOLVED_WIDTH: e.g. -DCONVOLVED_WIDTH=34
@@ -1236,9 +1278,11 @@ __kernel void im2col_generic_nhwc(
     uint src_stride_w,
     uint dst_stride_w)
 {
-    const int ch    = min((int)(get_global_id(0) * VECTOR_SIZE), LAST_ACCESSED); // input feature map
-    const int yo    = get_global_id(1);
-    const int batch = get_global_id(2); // batch size
+    // input feature map, boundary-corrected (shift all non-boundary vectors by shift_amount) to avoid padding
+    const int shift_amount = (int)VECTOR_SIZE - (int)BOUNDARY_VECTOR_SIZE;
+    const int ch           = max((int)(get_global_id(0) * VECTOR_SIZE) - shift_amount, 0);
+    const int yo           = get_global_id(1);
+    const int batch        = get_global_id(2); // batch size
 
     // Calculate input indices
     const int xi = (get_global_id(1) % CONVOLVED_WIDTH) * STRIDE_X;
@@ -1271,23 +1315,40 @@ __kernel void im2col_generic_nhwc(
 
             VECTOR_N values0 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset));
 
+#if PAD_LEFT != 0 || PAD_TOP != 0 || PAD_RIGHT != 0 || PAD_BOTTOM != 0
             // Replace with PAD_VALUE if the value is out-of-bound
             values0 = select(values0, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)x_border_condition || (COND_N)(y_border_condition)));
+#endif // PAD_LEFT != 0 || PAD_TOP != 0 || PAD_RIGHT != 0 || PAD_BOTTOM != 0
 
-            // Store
-            VSTORE(VECTOR_SIZE)
-            (values0, 0, (__global DATA_TYPE *)(output_ptr) + i * (int)SRC_DEPTH);
-
+            // Store in a boundary-aware way to avoid padding
+#if BOUNDARY_VECTOR_SIZE != VECTOR_SIZE
+            const bool at_channel_boundary = get_global_id(0) == 0;
+            if(at_channel_boundary)
+            {
+                VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)
+                (values0, 0, (__global DATA_TYPE *)(output_ptr) + i * (int)SRC_DEPTH);
+            }
+            else // at_channel_boundary
+#endif           // BOUNDARY_VECTOR_SIZE != VECTOR_SIZE
+            {
+                VSTORE(VECTOR_SIZE)
+                (values0, 0, (__global DATA_TYPE *)(output_ptr) + i * (int)SRC_DEPTH);
+            }
             i++;
         }
     }
 
 #ifdef HAS_BIAS
+    // We can use VECTOR_SIZE instead of BOUNDARY_VECTOR_SIZE even if it's at the boundary. This is because the bias is
+    // added at the end of the channel, while the boundary vec is at the beginning of the channel.
+    // The only case where the boundary vec is at the end of the channel is when there's only a single boundary vec in
+    // the whole channel dimension, but in that case VECTOR_SIZE is also equal to BOUNDARY_VECTOR_SIZE
+    // See the value of num_elems_processed_per_iteration in configure_opencl_kernel method in CLIm2ColKernel.cpp
     if((ch + VECTOR_SIZE) >= SRC_DEPTH)
     {
         *((__global DATA_TYPE *)(output_ptr) - ch + SRC_DEPTH * KERNEL_WIDTH * KERNEL_HEIGHT) = 1.0f;
     }
 #endif // HAS_BIAS
 }
-#endif // defined(CONVOLVED_WIDTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_DEPTH) && defined(PAD_LEFT) && defined(PAD_RIGHT) && defined(PAD_TOP) && defined(PAD_BOTTOM) && defined(PAD_VALUE) && defined(VECTOR_SIZE) && defined(LAST_ACCESSED)
+#endif // defined(CONVOLVED_WIDTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_DEPTH) && defined(PAD_LEFT) && defined(PAD_RIGHT) && defined(PAD_TOP) && defined(PAD_BOTTOM) && defined(PAD_VALUE) && defined(VECTOR_SIZE) && defined(BOUNDARY_VECTOR_SIZE)
 #endif // defined(DATA_TYPE) && defined(ELEMENT_SIZE)
