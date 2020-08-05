@@ -260,9 +260,10 @@ v20.08 Public major release
  - Deprecated functions / interfaces:
    - Non-descriptor based interfaces for @ref NEThreshold, @ref CLThreshold
    - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer :
-      "axis" has been renamed to "reduce_end_axis", which is the last axis (inclusive) before which all dimensions are reduced/collapsed.
-      The default "axis" (now "reduce_end_axis") value for @ref NESoftmaxLayer and @ref NELogSoftmaxLayer is changed from -1 to 0.
-      The default "axis" (now "reduce_end_axis") value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer is changed from 1 to 0.
+      The default "axis" value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer is changed from 1 to 0.
+      Only axis 0 is supported.
+      The default "axis" value for @ref NESoftmaxLayer, @ref NELogSoftmaxLayer is changed from 1 to 0.
+      Only axis 0 is supported. 
  - The support for quantized data types has been removed from @ref CLLogSoftmaxLayer due to implementation complexity.
 
 v20.05 Public major release

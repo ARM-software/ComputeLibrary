@@ -81,20 +81,20 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const CLCompi
 }
 
 template <bool IS_LOG>
-void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor *output, float beta, size_t reduce_end_axis)
+void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor *output, float beta, size_t axis)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, beta, reduce_end_axis);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, beta, axis);
 }
 
 template <bool IS_LOG>
-void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta, size_t reduce_end_axis)
+void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta, size_t axis)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CLSoftmaxLayerGeneric<IS_LOG>::validate(input->info(), output->info(), beta, reduce_end_axis));
+    ARM_COMPUTE_ERROR_THROW_ON(CLSoftmaxLayerGeneric<IS_LOG>::validate(input->info(), output->info(), beta, axis));
 
     // Convert reduce-before axis (inclusive) to first n axes to reduce
-    size_t first_n_reduce_axes = dim_index_2_num_dims(reduce_end_axis, input->info()->num_dimensions());
+    size_t first_n_reduce_axes = dim_index_2_num_dims(axis, input->info()->num_dimensions());
 
     // We only need flattening when the number of axes to reduce is greater than 1
     _needs_flattening = first_n_reduce_axes > 1;
@@ -171,15 +171,16 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_co
 }
 
 template <bool IS_LOG>
-Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, size_t reduce_end_axis)
+Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Only up to 4 dimensions are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis != 0, "Only axis 0 supported in tensors");
     ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() <= reduce_end_axis);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() <= axis);
 
     // Convert reduce-before axis (inclusive) to first n axes to reduce
-    size_t first_n_reduce_axes = dim_index_2_num_dims(reduce_end_axis, input->num_dimensions());
+    size_t first_n_reduce_axes = dim_index_2_num_dims(axis, input->num_dimensions());
 
     // Create intermediate tensor info
     DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->data_type()) ? DataType::S32 : input->data_type();

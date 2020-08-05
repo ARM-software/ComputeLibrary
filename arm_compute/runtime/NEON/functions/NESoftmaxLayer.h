@@ -48,10 +48,6 @@ class ITensor;
  * -# @ref NEFillBorderKernel
  * -# @ref NELogits1DMaxKernel
  * -# @ref NELogits1DSoftmaxKernel
- * And if the reduce_end_axis is not 0 or -input_num_dimensions, the function will use one of the the following kernels
- * to reshape the input and perform softmax on the reshaped input:
- * -# @ref NEFlattenLayerKernel
- * -# @ref NEReshapeLayerKernel
  */
 template <bool IS_LOG = false>
 class NESoftmaxLayerGeneric : public IFunction
@@ -69,31 +65,24 @@ public:
     NESoftmaxLayerGeneric &operator=(NESoftmaxLayerGeneric &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in,out] input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. If the width is not a
-     *                                multiple of the internal processing block size, @ref NEFillBorderKernel replicates the
-     *                                last value of each row to the nearest multiple.
-     * @param[out]    output          Destination tensor. Data types supported: same as @p input.
-     * @param[in]     beta            (Optional) A scaling factor for the exponent.
-     * @param[in]     reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
-     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
-     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
-     *                   Negative index is used to specify axis from the end (e.g. -1 for the last axis).
-     *                   Must be in range [-input_num_dimensions, input_num_dimensions).
+     * @param[in,out] input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. If the width is not a
+     *                       multiple of the internal processing block size, @ref NEFillBorderKernel replicates the
+     *                       last value of each row to the nearest multiple.
+     * @param[out]    output Destination tensor. Data types supported: same as @p input.
+     * @param[in]     beta   (Optional) A scaling factor for the exponent.
+     * @param[in]     axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
      */
-    void configure(ITensor *input, ITensor *output, float beta = 1.0f, int32_t reduce_end_axis = 0);
+    void configure(ITensor *input, ITensor *output, float beta = 1.0f, int32_t axis = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref NESoftmaxLayer
      *
-     * @param[in] input           Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] output          Destination tensor info. Data types supported: same as @p input
-     * @param[in] beta            (Optional) A scaling factor for the exponent.
-     * @param[in] reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
-     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
-     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
-     *                   Negative index is used to specify axis from the end (e.g. -1 for the last axis).
-     *                   Must be in range [-input_num_dimensions, input_num_dimensions).
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in] output Destination tensor info. Data types supported: same as @p input
+     * @param[in] beta   (Optional) A scaling factor for the exponent.
+     * @param[in] axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
+     *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, int32_t reduce_end_axis = 0);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, int32_t axis = 0);
 
     // Inherited methods overridden:
     void run() override;
@@ -106,15 +95,11 @@ private:
      * it initializes the kernel @p _flatten_kernel and the tensors @p _input_flat and
      * @p _output_flat
      *
-     * @param[in] input           Original source tensor.
-     * @param[in] output          Original destination tensor.
-     * @param[in] reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
-     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
-     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
-     *                   Negative index is used to specify axis from the end (e.g. -1 for the last axis).
-     *                   Must be in range [-input_num_dimensions, input_num_dimensions).
+     * @param[in] input  Original source tensor.
+     * @param[in] output Original destination tensor.
+     * @param[in] axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
      */
-    void configure_reshape_input_kernel(const ITensor *input, const ITensor *output, int32_t reduce_end_axis);
+    void configure_reshape_input_kernel(const ITensor *input, const ITensor *output, int32_t axis);
 
     MemoryGroup                     _memory_group;
     NELogits1DMaxKernel             _max_kernel;

@@ -68,14 +68,14 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ITensor
 }
 
 template <bool IS_LOG>
-void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, float beta, int32_t reduce_end_axis)
+void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, float beta, int32_t axis)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NESoftmaxLayerGeneric::validate(input->info(), output->info(), beta, reduce_end_axis));
+    ARM_COMPUTE_ERROR_THROW_ON(NESoftmaxLayerGeneric::validate(input->info(), output->info(), beta, axis));
 
     // Convert reduce-before axis (inclusive) to first n axes to reduce
-    size_t first_n_reduce_axes = dim_index_2_num_dims(reduce_end_axis, static_cast<int32_t>(input->info()->num_dimensions()));
+    size_t first_n_reduce_axes = dim_index_2_num_dims(axis, static_cast<int32_t>(input->info()->num_dimensions()));
 
     // We only need flattening when the number of axes to reduce is greater than 1
     _needs_flattening = first_n_reduce_axes > 1;
@@ -142,16 +142,17 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
 }
 
 template <bool IS_LOG>
-Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t reduce_end_axis)
+Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Only up to 4 dimensions are supported");
     ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_RETURN_ERROR_ON(reduce_end_axis < static_cast<int32_t>(-input->num_dimensions()) || static_cast<int32_t>(input->num_dimensions()) <= reduce_end_axis);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis != 0, "Only axis 0 supported");
+    ARM_COMPUTE_RETURN_ERROR_ON(axis < static_cast<int32_t>(-input->num_dimensions()) || static_cast<int32_t>(input->num_dimensions()) <= axis);
 
     // Convert reduce-before axis (inclusive) to first n axes to reduce
-    size_t first_n_reduce_axes = dim_index_2_num_dims(reduce_end_axis, static_cast<int32_t>(input->num_dimensions()));
+    size_t first_n_reduce_axes = dim_index_2_num_dims(axis, static_cast<int32_t>(input->num_dimensions()));
 
     // Create intermediate tensor info
     DataType         tmp_data_type = input->data_type();
