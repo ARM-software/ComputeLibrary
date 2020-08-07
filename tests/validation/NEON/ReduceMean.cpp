@@ -160,16 +160,33 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEReduceMeanQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 5) })))
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)),
+                                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.f / 255, 5) })),
+                               framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.f / 255, 5) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);
 }
 
+TEST_SUITE(Requant)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReduceMeanQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), axis_drop),
+                                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.f / 255, 5) })),
+                               framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.f / 200, 16) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_u8);
+}
+TEST_SUITE_END() // Requant
+
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEReduceMeanQuantizedFixture<uint8_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 5) })))
+                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)),
+                                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.f / 255, 5) })),
+                               framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.f / 255, 5) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);
@@ -180,15 +197,32 @@ TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEReduceMeanQuantizedFixture<int8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 127, -10), QuantizationInfo(1.f / 250, -20) })))
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), concat(axis_keep, axis_drop)),
+                                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.f / 127, -10), QuantizationInfo(1.f / 250, -20) })),
+                               framework::dataset::make("QuantizationInfoInputOutput", { QuantizationInfo(1.f / 127, -10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_s8);
 }
+TEST_SUITE(Requant)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReduceMeanQuantizedFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), axis_drop),
+                                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.f / 102, 2) })),
+                               framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.f / 113, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_s8);
+}
+TEST_SUITE_END() // Requant
+
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEReduceMeanQuantizedFixture<int8_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 127, 0) })))
+                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), concat(axis_keep, axis_drop)),
+                                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.f / 127, -10) })),
+                               framework::dataset::make("QuantizationInfoInputOutput", { QuantizationInfo(1.f / 127, -10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_s8);

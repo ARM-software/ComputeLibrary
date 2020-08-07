@@ -83,15 +83,25 @@ Status validate_config(const ITensorInfo *input, const Coordinates &reduction_ax
         }
         const TensorInfo out_info = input->clone()->set_tensor_shape(out_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &out_info);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+        const bool requant = is_data_type_quantized(input->data_type()) && input->quantization_info() != output->quantization_info();
+        if(requant)
+        {
+            TensorInfo input_no_quant(input->clone()->set_data_type(DataType::F32));
+            CLDequantizationLayer::validate(input, &input_no_quant);
+            TensorInfo output_no_quant(output->clone()->set_data_type(DataType::F32));
+            CLQuantizationLayer::validate(&output_no_quant, output);
+        }
     }
     return Status{};
 }
 }
+
 CLReduceMean::CLReduceMean(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _reduction_kernels(), _reduced_outs(), _reshape(), _reduction_ops(), _keep_dims()
+    : _memory_group(std::move(memory_manager)), _reduction_kernels(), _reduced_outs(), _reshape(), _dequant(), _requant(), _reduction_ops(), _keep_dims(), _do_requant(), _input_no_quant(),
+      _output_no_quant()
 {
 }
+
 void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis, bool keep_dims, ICLTensor *output)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, reduction_axis, keep_dims, output);
@@ -102,33 +112,49 @@ void CLReduceMean::configure(const CLCompileContext &compile_context, ICLTensor 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CLReduceMean::validate(input->info(), reduction_axis, keep_dims, output->info()));
     // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_reduce_mean_shape(input, reduction_axis, keep_dims);
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_reduce_mean_shape(input->info(), reduction_axis, keep_dims);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
+    _do_requant    = is_data_type_quantized(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info();
     _reduction_ops = reduction_axis.num_dimensions();
     _reduction_kernels.resize(_reduction_ops);
     _reduced_outs.resize(_reduction_ops - (keep_dims ? 1 : 0));
     _keep_dims = keep_dims;
 
+    ICLTensor *tmp_input  = input;
+    ICLTensor *tmp_output = output;
+    if(_do_requant)
+    {
+        _memory_group.manage(&_input_no_quant);
+        _memory_group.manage(&_output_no_quant);
+        TensorInfo output_no_quant_info = input->info()->clone()->set_tensor_shape(output_shape);
+        output_no_quant_info.set_data_type(DataType::F32);
+        auto_init_if_empty(*_output_no_quant.info(), output_no_quant_info);
+        auto_init_if_empty(*_input_no_quant.info(), input->info()->clone()->set_data_type(DataType::F32));
+        _dequant.configure(compile_context, input, &_input_no_quant);
+        tmp_input  = &_input_no_quant;
+        tmp_output = &_output_no_quant;
+    }
+
     Coordinates axis_local = reduction_axis;
-    const int   input_dims = input->info()->num_dimensions();
+    const int   input_dims = tmp_input->info()->num_dimensions();
 
     convert_negative_axis(axis_local, input_dims);
 
     // Perform reduction for every axis
     for(int i = 0; i < _reduction_ops; ++i)
     {
-        TensorShape out_shape = i == 0 ? input->info()->tensor_shape() : (&_reduced_outs[i - 1])->info()->tensor_shape();
+        TensorShape out_shape = i == 0 ? tmp_input->info()->tensor_shape() : (&_reduced_outs[i - 1])->info()->tensor_shape();
         out_shape.set(axis_local[i], 1);
-        auto in = (i == 0) ? input : (&_reduced_outs[i - 1]);
+        auto in = (i == 0) ? tmp_input : (&_reduced_outs[i - 1]);
 
         if(i == _reduction_ops - 1 && keep_dims)
         {
-            _reduction_kernels[i].configure(compile_context, in, output, axis_local[i], ReductionOperation::MEAN_SUM);
+            _reduction_kernels[i].configure(compile_context, in, tmp_output, axis_local[i], ReductionOperation::MEAN_SUM);
         }
         else
         {
-            _reduced_outs[i].allocator()->init(TensorInfo(out_shape, input->info()->num_channels(), input->info()->data_type(), input->info()->quantization_info()));
+            _reduced_outs[i].allocator()->init(TensorInfo(out_shape, tmp_input->info()->num_channels(), tmp_input->info()->data_type(), tmp_input->info()->quantization_info()));
             _memory_group.manage(&_reduced_outs[i]);
             _reduction_kernels[i].configure(compile_context, in, &_reduced_outs[i], axis_local[i], ReductionOperation::MEAN_SUM);
         }
@@ -141,9 +167,9 @@ void CLReduceMean::configure(const CLCompileContext &compile_context, ICLTensor 
     }
 
     // Configure reshape layer if we want to drop the dimensions
-    if(!keep_dims)
+    if(!_keep_dims)
     {
-        TensorShape out_shape = input->info()->tensor_shape();
+        TensorShape out_shape = tmp_input->info()->tensor_shape();
 
         // We have to sort the reduction axis vectors in order for remove_dimension
         // to work properly
@@ -152,8 +178,14 @@ void CLReduceMean::configure(const CLCompileContext &compile_context, ICLTensor 
         {
             out_shape.remove_dimension(axis_local[i] - i);
         }
-        auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(out_shape));
-        _reshape.configure(compile_context, &_reduced_outs[_reduction_ops - 1], output);
+        auto_init_if_empty(*tmp_output->info(), tmp_input->info()->clone()->set_tensor_shape(out_shape));
+        _reshape.configure(compile_context, &_reduced_outs[_reduction_ops - 1], tmp_output);
+    }
+    if(_do_requant)
+    {
+        _requant.configure(compile_context, &_output_no_quant, output);
+        _input_no_quant.allocator()->allocate();
+        _output_no_quant.allocator()->allocate();
     }
 }
 
@@ -166,14 +198,21 @@ void CLReduceMean::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
 
+    if(_do_requant)
+    {
+        _dequant.run();
+    }
     for(auto &kernel : _reduction_kernels)
     {
         kernel.run();
     }
-
     if(!_keep_dims)
     {
         _reshape.run();
+    }
+    if(_do_requant)
+    {
+        _requant.run();
     }
 }
 } // namespace arm_compute

@@ -47,13 +47,13 @@ namespace shape_calculator
  *
  * @return the calculated shape
  */
-inline TensorShape calculate_reduce_mean_shape(ITensor *input, const Coordinates &reduction_axis, bool keep_dims)
+inline TensorShape calculate_reduce_mean_shape(ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims)
 {
     const int   reduction_ops = reduction_axis.num_dimensions();
     Coordinates axis_local    = reduction_axis;
-    const int   input_dims    = input->info()->num_dimensions();
+    const int   input_dims    = input->num_dimensions();
     convert_negative_axis(axis_local, input_dims);
-    TensorShape out_shape = input->info()->tensor_shape();
+    TensorShape out_shape = input->tensor_shape();
     // Configure reshape layer if we want to drop the dimensions
     if(!keep_dims)
     {
