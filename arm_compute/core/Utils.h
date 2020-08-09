@@ -1084,6 +1084,27 @@ const std::string &string_from_gemmlowp_output_stage(GEMMLowpOutputStageType out
  * @return String representation of the PixelValue through the given data type.
  */
 std::string string_from_pixel_value(const PixelValue &value, const DataType data_type);
+/** Convert a string to DataType
+ *
+ * @param[in] name The name of the data type
+ *
+ * @return DataType
+ */
+DataType data_type_from_name(const std::string &name);
+/** Input Stream operator for @ref DataType
+ *
+ * @param[in]  stream    Stream to parse
+ * @param[out] data_type Output data type
+ *
+ * @return Updated stream
+ */
+inline ::std::istream &operator>>(::std::istream &stream, DataType &data_type)
+{
+    std::string value;
+    stream >> value;
+    data_type = data_type_from_name(value);
+    return stream;
+}
 /** Lower a given string.
  *
  * @param[in] val Given string to lower.

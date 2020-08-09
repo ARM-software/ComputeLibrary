@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #endif /* ARM_COMPUTE_CL */
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -59,40 +60,6 @@ RelativeTolerance<float>            tolerance_f32(0.001f);      /**< F32 Toleran
 RelativeTolerance<half_float::half> tolerance_f16(half(0.2));   /**< F16 Tolerance value for comparing reference's output against implementation's output for floating point data types */
 constexpr float                     tolerance_num_f16 = 0.02f;  /**< F16 Tolerance number */
 
-namespace arm_compute
-{
-DataType data_type_from_name(const std::string &name)
-{
-    static const std::map<std::string, DataType> data_types =
-    {
-        { "f16", DataType::F16 },
-        { "f32", DataType::F32 },
-        { "qasymm8", DataType::QASYMM8 },
-    };
-
-#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
-    try
-    {
-#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
-        return data_types.at(utility::tolower(name));
-
-#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
-    }
-    catch(const std::out_of_range &)
-    {
-        throw std::invalid_argument(name);
-    }
-#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
-}
-
-inline ::std::istream &operator>>(::std::istream &stream, DataType &data_type)
-{
-    std::string value;
-    stream >> value;
-    data_type = data_type_from_name(value);
-    return stream;
-}
-} // namespace arm_compute
 namespace
 {
 class GEMMCommandLineOptions final

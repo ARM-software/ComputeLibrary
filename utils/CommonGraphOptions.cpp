@@ -23,6 +23,7 @@
  */
 #include "CommonGraphOptions.h"
 
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/graph/TypeLoader.h"
 #include "arm_compute/graph/TypePrinter.h"
 

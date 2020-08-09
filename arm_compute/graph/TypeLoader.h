@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,29 +30,6 @@
 
 namespace arm_compute
 {
-/** Converts a string to a strong types enumeration @ref DataType
- *
- * @param[in] name String to convert
- *
- * @return Converted DataType enumeration
- */
-arm_compute::DataType data_type_from_name(const std::string &name);
-
-/** Input Stream operator for @ref DataType
- *
- * @param[in]  stream    Stream to parse
- * @param[out] data_type Output data type
- *
- * @return Updated stream
- */
-inline ::std::istream &operator>>(::std::istream &stream, arm_compute::DataType &data_type)
-{
-    std::string value;
-    stream >> value;
-    data_type = data_type_from_name(value);
-    return stream;
-}
-
 /** Converts a string to a strong types enumeration @ref DataLayout
  *
  * @param[in] name String to convert
