@@ -725,7 +725,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     INEKernel::configure(win_config.second);
 }
 
-template <typename T = float>
+template <typename T>
 inline uint32_t offset_no_padding(uint32_t padded_offset, const Coordinates &id, const ITensorInfo &info, int pool_stride_x, int pool_stride_y)
 {
     const int pad_left    = info.padding().left;
@@ -975,7 +975,7 @@ f16_to_f32(float32x2_t input)
     return input;
 }
 
-template <typename T = float>
+template <typename T>
 void NEPoolingLayerKernel::pooling2_nchw_maxpool_indices(const Window &window_input, const Window &window)
 {
     Iterator  input(_input, window_input);
@@ -2043,7 +2043,7 @@ void NEPoolingLayerKernel::pooling2_f32_nhwc_maxpool_indices(const Window &windo
         // Store result
         vst1q_f32(reinterpret_cast<float *>(output.ptr()), vres);
 
-        const uint32_t   offset_base  = offset_no_padding(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
+        const uint32_t   offset_base  = offset_no_padding<float>(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
         const uint32_t   offset_x0    = (uint32_t)offset_base / sizeof(float);
         const uint32_t   offset_x1    = (uint32_t)offset_x0 + in_stride_y / sizeof(float) - pad_right;
         const uint32_t   offset_x2    = (uint32_t)offset_x0 + in_stride_z / sizeof(float) - pad_right * _input->info()->tensor_shape()[1];
