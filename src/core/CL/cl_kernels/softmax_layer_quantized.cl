@@ -194,7 +194,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
         data_fp                = asymm_rescale(data_fp, 0, EXP_ACCUMULATION_INT_BITS);
         VSTORE(VECTOR_SIZE)
         (data_diff, 0, (__global int *)offset(&dst, i << LOG_VECTOR_SIZE, 0));
-        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
+        sum1D = sum1D + select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
     }
 
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
@@ -208,8 +208,8 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
     VEC_INT widx_          = CONVERT(((VEC_UINT)(width4 << LOG_VECTOR_SIZE) + idx__) < width, VEC_INT);
     VSTORE(VECTOR_SIZE)
     (data_diff, 0, (__global int *)offset(&dst, width4 << LOG_VECTOR_SIZE, 0));
-    data_fp = select(MIN_VALUE, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
-    sum1D   = sum1D + select(MIN_VALUE, data_fp, widx_);
+    data_fp = select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
+    sum1D   = sum1D + select(0, data_fp, widx_);
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 
     // Perform sum reduction
@@ -417,7 +417,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4, 0));
-        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
+        sum1D = sum1D + select(0, data_fp, data_diff >= (int4)(DIFF_MIN));
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
     //TODO: Optimize the calculation (avoid %).
@@ -432,7 +432,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4, 0));
-        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
+        sum1D = sum1D + select(0, data_fp, data_diff >= (int4)(DIFF_MIN));
     }
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
     if(boundary_workitems == 0)
@@ -451,9 +451,10 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         int4 widx           = convert_int4(((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width);
-        data_fp             = select(MIN_VALUE, data_fp, widx);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4 + 4, 0));
-        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
+        data_fp = select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
+        data_fp = select(0, data_fp, widx);
+        sum1D   = sum1D + data_fp;
     }
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 #endif /* NON_MULTIPLE_OF_GRID_SIZE */

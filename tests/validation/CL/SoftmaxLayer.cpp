@@ -51,14 +51,6 @@ RelativeTolerance<float> tolerance_f32(0.001f);
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
 
-/*
- The following tolerance number is used as a workaround for the mismatches
- caused by float computation in reference (and NEON) kernel
- and integer computations in OpenCL kernel.
- COMPMID-2958 is created to investigate this.
-*/
-constexpr float tolerance_number_qasymm8_signed = 0.05f;
-
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
@@ -276,7 +268,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerQuantizedFixture<int8_t>, framewo
                                                                                                               framework::dataset::make("Axis", { 0 })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qasymm8_signed, tolerance_number_qasymm8_signed);
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_signed);
 }
 
 TEST_SUITE_END() // QASYMM8_SIGNED
