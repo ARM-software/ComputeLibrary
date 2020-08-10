@@ -865,6 +865,7 @@ __kernel void im2col_generic_padx0_pady0_nchw(
 #if defined(CONVOLVED_WIDTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_DEPTH) && defined(PAD_LEFT) && defined(PAD_RIGHT) && defined(PAD_TOP) && defined(PAD_BOTTOM) && defined(PAD_VALUE) && defined(VECTOR_SIZE) && defined(LAST_ACCESSED)
 
 #define VECTOR_N VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
+#define COND_N VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE)
 
 /** This kernel performs im2col when the kernel size is 3x3 and the data layout is NHWC
  *
@@ -946,9 +947,9 @@ __kernel void im2col3x3_nhwc(
 #if PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
     // Replace invalid values with PAD_VALUE
     int y_cond = (int)((uint)(yi - (int)PAD_TOP) >= (uint)(SRC_HEIGHT));
-    values0    = select(values0, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s0));
-    values1    = select(values1, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s1));
-    values2    = select(values2, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s2));
+    values0    = select(values0, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s0)));
+    values1    = select(values1, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s1)));
+    values2    = select(values2, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s2)));
 #endif // PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
 
     // yi == 1
@@ -971,9 +972,9 @@ __kernel void im2col3x3_nhwc(
 #if PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
     // Replace invalid values with zeros
     y_cond  = (int)((uint)(yi - (int)PAD_TOP + 1 * DILATION_Y) >= (uint)(SRC_HEIGHT));
-    values3 = select(values3, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s0));
-    values4 = select(values4, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s1));
-    values5 = select(values5, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s2));
+    values3 = select(values3, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s0)));
+    values4 = select(values4, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s1)));
+    values5 = select(values5, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s2)));
 #endif // PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
 
     // yi == 2
@@ -996,9 +997,9 @@ __kernel void im2col3x3_nhwc(
 #if PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
     // Replace invalid values with PAD_VALUE
     y_cond  = (int)((uint)(yi - (int)PAD_TOP + 2 * DILATION_Y) >= (uint)(SRC_HEIGHT));
-    values6 = select(values6, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s0));
-    values7 = select(values7, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s1));
-    values8 = select(values8, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s2));
+    values6 = select(values6, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s0)));
+    values7 = select(values7, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s1)));
+    values8 = select(values8, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond.s2)));
 #endif // PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
 
     // Store
@@ -1030,53 +1031,53 @@ __kernel void im2col3x3_nhwc(
 }
 
 #if PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
-#define IM2COL1x9(i)                                                                                                                                                       \
-    ({                                                                                                                                                                     \
-        yi_coord = yi - (int)PAD_TOP + i * DILATION_Y;                                                                                                                     \
-        yi_coord = min((uint)yi_coord, (uint)(SRC_HEIGHT - 1));                                                                                                            \
+#define IM2COL1x9(i)                                                                                         \
+    ({                                                                                                       \
+        yi_coord = yi - (int)PAD_TOP + i * DILATION_Y;                                                       \
+        yi_coord = min((uint)yi_coord, (uint)(SRC_HEIGHT - 1));                                              \
         \
-        offset0 = xi_offset0 + (yi_coord * (int)src_stride_z);                                                                                                             \
-        offset1 = xi_offset1 + (yi_coord * (int)src_stride_z);                                                                                                             \
+        offset0 = xi_offset0 + (yi_coord * (int)src_stride_z);                                               \
+        offset1 = xi_offset1 + (yi_coord * (int)src_stride_z);                                               \
         \
-        VECTOR_N values0 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s0));                                                                          \
-        VECTOR_N values1 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s1));                                                                          \
-        VECTOR_N values2 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s2));                                                                          \
-        VECTOR_N values3 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s3));                                                                          \
-        VECTOR_N values4 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s4));                                                                          \
-        VECTOR_N values5 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s5));                                                                          \
-        VECTOR_N values6 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s6));                                                                          \
-        VECTOR_N values7 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s7));                                                                          \
-        VECTOR_N values8 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset1));                                                                             \
+        VECTOR_N values0 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s0));            \
+        VECTOR_N values1 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s1));            \
+        VECTOR_N values2 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s2));            \
+        VECTOR_N values3 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s3));            \
+        VECTOR_N values4 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s4));            \
+        VECTOR_N values5 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s5));            \
+        VECTOR_N values6 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s6));            \
+        VECTOR_N values7 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset0.s7));            \
+        VECTOR_N values8 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset1));               \
         \
-        int y_cond = (int)((uint)(yi - (int)PAD_TOP + i * DILATION_Y) >= (uint)(SRC_HEIGHT));                                                                              \
-        values0    = select(values0, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond0.s0)); \
-        values1    = select(values1, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond0.s1)); \
-        values2    = select(values2, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond0.s2)); \
-        values3    = select(values3, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond0.s3)); \
-        values4    = select(values4, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond0.s4)); \
-        values5    = select(values5, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond0.s5)); \
-        values6    = select(values6, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond0.s6)); \
-        values7    = select(values7, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond0.s7)); \
-        values8    = select(values8, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond1));    \
+        int y_cond = (int)((uint)(yi - (int)PAD_TOP + i * DILATION_Y) >= (uint)(SRC_HEIGHT));                \
+        values0    = select(values0, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s0))); \
+        values1    = select(values1, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s1))); \
+        values2    = select(values2, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s2))); \
+        values3    = select(values3, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s3))); \
+        values4    = select(values4, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s4))); \
+        values5    = select(values5, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s5))); \
+        values6    = select(values6, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s6))); \
+        values7    = select(values7, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond0.s7))); \
+        values8    = select(values8, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)y_cond || (COND_N)(x_cond1)));    \
         \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values0, 0, (__global DATA_TYPE *)(output_ptr) + (0 + i * 9) * SRC_DEPTH);                                                                                        \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values1, 0, (__global DATA_TYPE *)(output_ptr) + (1 + i * 9) * SRC_DEPTH);                                                                                        \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values2, 0, (__global DATA_TYPE *)(output_ptr) + (2 + i * 9) * SRC_DEPTH);                                                                                        \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values3, 0, (__global DATA_TYPE *)(output_ptr) + (3 + i * 9) * SRC_DEPTH);                                                                                        \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values4, 0, (__global DATA_TYPE *)(output_ptr) + (4 + i * 9) * SRC_DEPTH);                                                                                        \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values5, 0, (__global DATA_TYPE *)(output_ptr) + (5 + i * 9) * SRC_DEPTH);                                                                                        \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values6, 0, (__global DATA_TYPE *)(output_ptr) + (6 + i * 9) * SRC_DEPTH);                                                                                        \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values7, 0, (__global DATA_TYPE *)(output_ptr) + (7 + i * 9) * SRC_DEPTH);                                                                                        \
-        VSTORE(VECTOR_SIZE)                                                                                                                                                \
-        (values8, 0, (__global DATA_TYPE *)(output_ptr) + (8 + i * 9) * SRC_DEPTH);                                                                                        \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values0, 0, (__global DATA_TYPE *)(output_ptr) + (0 + i * 9) * SRC_DEPTH);                          \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values1, 0, (__global DATA_TYPE *)(output_ptr) + (1 + i * 9) * SRC_DEPTH);                          \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values2, 0, (__global DATA_TYPE *)(output_ptr) + (2 + i * 9) * SRC_DEPTH);                          \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values3, 0, (__global DATA_TYPE *)(output_ptr) + (3 + i * 9) * SRC_DEPTH);                          \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values4, 0, (__global DATA_TYPE *)(output_ptr) + (4 + i * 9) * SRC_DEPTH);                          \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values5, 0, (__global DATA_TYPE *)(output_ptr) + (5 + i * 9) * SRC_DEPTH);                          \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values6, 0, (__global DATA_TYPE *)(output_ptr) + (6 + i * 9) * SRC_DEPTH);                          \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values7, 0, (__global DATA_TYPE *)(output_ptr) + (7 + i * 9) * SRC_DEPTH);                          \
+        VSTORE(VECTOR_SIZE)                                                                                  \
+        (values8, 0, (__global DATA_TYPE *)(output_ptr) + (8 + i * 9) * SRC_DEPTH);                          \
     })
 #else // PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
 #define IM2COL1x9(i)                                                                              \
@@ -1271,7 +1272,7 @@ __kernel void im2col_generic_nhwc(
             VECTOR_N values0 = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + offset));
 
             // Replace with PAD_VALUE if the value is out-of-bound
-            values0 = select(values0, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))x_border_condition || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(y_border_condition));
+            values0 = select(values0, (VECTOR_N)PAD_VALUE, (COND_N)((COND_N)x_border_condition || (COND_N)(y_border_condition)));
 
             // Store
             VSTORE(VECTOR_SIZE)
