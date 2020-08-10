@@ -182,8 +182,8 @@ public:
       *
       * @return A tuple with the pointers to the shift and multiplier data respectively
       */
-    std::tuple<const int32_t *, const int32_t *> set_requantize_data(const std::vector<int32_t> &shifts,
-                                                                     const std::vector<int32_t> &multipliers);
+    std::tuple<bool, const int32_t *, const int32_t *, const int32_t *> set_requantize_data(const std::vector<int32_t> &shifts,
+                                                                                            const std::vector<int32_t> &multipliers);
 
     // Inherited methods overridden:
     void run() override;
@@ -235,18 +235,29 @@ private:
     arm_gemm::KernelDescription _kernel_info{};
     /** Per channel quantization shifts */
     std::vector<int32_t> _shifts{};
+    std::vector<int32_t> right_shifts{};
+    std::vector<int32_t> left_shifts{};
     /** Per channel quantization multipliers */
     std::vector<int32_t> _multipliers{};
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
-std::tuple<const int32_t *, const int32_t *> Fallback<TypeInput, TypeOutput, OutputStage>::set_requantize_data(const std::vector<int32_t> &shifts,
-                                                                                                               const std::vector<int32_t> &multipliers)
+std::tuple<bool, const int32_t *, const int32_t *, const int32_t *> Fallback<TypeInput, TypeOutput, OutputStage>::set_requantize_data(const std::vector<int32_t> &shifts,
+        const std::vector<int32_t> &multipliers)
 {
-    _multipliers = multipliers;
-    _shifts      = shifts;
-    std::transform(_shifts.begin(), _shifts.end(), _shifts.begin(), std::negate<int32_t>());
-    return std::make_tuple(_shifts.data(), _multipliers.data());
+    _multipliers   = multipliers;
+    _shifts        = shifts;
+    bool need_left = false;
+    for(const auto s : _shifts)
+    {
+        left_shifts.push_back(std::max(-s, int32_t(0)));
+        right_shifts.push_back(std::min(-s, int32_t(0)));
+        if(s > 0 && !need_left)
+        {
+            need_left = true;
+        }
+    }
+    return std::make_tuple(need_left, left_shifts.data(), right_shifts.data(), _multipliers.data());
 }
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -498,7 +509,9 @@ void create_arm_gemm_quant(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &a
         const auto requantize_data = fallback->set_requantize_data(os_info.gemmlowp_shifts, os_info.gemmlowp_multipliers);
         gemm_requant_info          = arm_gemm::Requantize32(nullptr, 0,
                                                             a_offset, b_offset, os_info.gemmlowp_offset,
-                                                            std::get<0>(requantize_data), std::get<1>(requantize_data),
+                                                            (std::get<0>(requantize_data)) ? std::get<1>(requantize_data) : nullptr,
+                                                            std::get<2>(requantize_data),
+                                                            std::get<3>(requantize_data),
                                                             os_info.gemmlowp_min_bound, os_info.gemmlowp_max_bound);
     }
     else

@@ -117,18 +117,8 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         {
             if(is_data_type_quantized_asymmetric(a_to_use->info()->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
             {
-                // Result shifts < 0 are not supported by asm kernels
-                const std::vector<int32_t> &shifts           = info.gemmlowp_output_stage().gemmlowp_shifts;
-                const bool                  is_asm_supported = info.gemmlowp_output_stage().gemmlowp_shift >= 0
-                                                               && std::all_of(shifts.cbegin(), shifts.cend(), [](int32_t val)
-                {
-                    return val >= 0;
-                });
-                if(is_asm_supported)
-                {
-                    _asm_glue.configure(a_to_use, b, c, output, gemm_info);
-                    _fused_assembly_path = _asm_glue.is_configured();
-                }
+                _asm_glue.configure(a_to_use, b, c, output, gemm_info);
+                _fused_assembly_path = _asm_glue.is_configured();
             }
             else
             {
@@ -339,19 +329,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     bool run_optimised_requantized = false;
     if(is_data_type_quantized_asymmetric(a_to_use->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
     {
-        // Result shifts < 0 are not supported by asm kernels
-        const std::vector<int32_t> &shifts           = info.gemmlowp_output_stage().gemmlowp_shifts;
-        const bool                  is_asm_supported = info.gemmlowp_output_stage().gemmlowp_shift >= 0
-                                                       && std::all_of(shifts.cbegin(), shifts.cend(), [](int32_t val)
-        {
-            return val >= 0;
-        });
-
-        if(is_asm_supported)
-        {
-            run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, c, output, gemm_info));
-            run_optimised_requantized = run_optimised;
-        }
+        run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, c, output, gemm_info));
+        run_optimised_requantized = run_optimised;
     }
     else
     {
