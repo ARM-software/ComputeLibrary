@@ -24,7 +24,7 @@
 #include "gemm_helpers.h"
 #include "repeat.h"
 
-#if defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE) && defined(SRC_WIDTH)
+#if defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(PARTIAL_LOAD_M0) && defined(PARTIAL_LOAD_K0)
 #define INC2 (VEC_DATA_TYPE(uint, 2))(0, 1)
 #define INC3 (VEC_DATA_TYPE(uint, 3))(0, 1, 2)
 #define INC4 (VEC_DATA_TYPE(uint, 4))(0, 1, 2, 3)
@@ -43,13 +43,42 @@
     ({})
 #endif // (SRC_WIDTH % K0)
 
+#define LOAD_TENSOR_BOUNDARY_AWARE_M0XK0(M0, K0, DATA_TYPE, a, input_ptr, src_stride_y, zin)                     \
+    ({                                                                                                           \
+        if(y * M0 + M0 >= SRC_HEIGHT && PARTIAL_LOAD_M0 != 0)                                                    \
+        {                                                                                                        \
+            if(x * K0 + K0 >= SRC_WIDTH && (PARTIAL_LOAD_K0 != 0))                                               \
+            {                                                                                                    \
+                LOAD_TENSOR_M0XN0(PARTIAL_LOAD_M0, PARTIAL_LOAD_K0, DATA_TYPE, a, input_ptr, src_stride_y, zin); \
+            }                                                                                                    \
+            else                                                                                                 \
+            {                                                                                                    \
+                LOAD_TENSOR_M0XN0(PARTIAL_LOAD_M0, K0, DATA_TYPE, a, input_ptr, src_stride_y, zin);              \
+            }                                                                                                    \
+        }                                                                                                        \
+        else                                                                                                     \
+        {                                                                                                        \
+            if(x * K0 + K0 >= SRC_WIDTH && (PARTIAL_LOAD_K0 != 0))                                               \
+            {                                                                                                    \
+                LOAD_TENSOR_M0XN0(M0, PARTIAL_LOAD_K0, DATA_TYPE, a, input_ptr, src_stride_y, zin);              \
+            }                                                                                                    \
+            else                                                                                                 \
+            {                                                                                                    \
+                LOAD_TENSOR_M0XN0(M0, K0, DATA_TYPE, a, input_ptr, src_stride_y, zin);                           \
+            }                                                                                                    \
+        }                                                                                                        \
+    })
+
 /** This OpenCL kernel reshapes the lhs input matrix. The kernel splits the input matrix in blocks of size M0xK0 and stores each one (not transposed) in
  *  the output matrix unrolling the values.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The width of the input tensor must be passed at compile time using -DSRC_WIDTH (e.g. -DSRC_WIDTH=16)
+ * @note The height of the input tensor must be passed at compile time using -DSRC_HEIGHT (e.g. -DSRC_HEIGHT=16)
  * @note The block's dimensions (M0 and K0) must be passed at compile time using -DM0 and -DK0 (e.g. -DM0=2, -DK0=2).
  * @note The number of M0xK0 vertical blocks to store on the same output row must be passed at compile time using -DV0 (e.g. -DV0=2)
+ * @note The size of the partial load block in y must be passed at compile time using -DPARTIAL_LOAD_M0 (e.g. -DPARTIAL_LOAD_M0=1)
+ * @note The size of the partial load block in x must be passed at compile time using -DPARTIAL_LOAD_K0 (e.g. -DPARTIAL_LOAD_K0=1)
  * @note Only the following values for M0, K0 and V0 are supported:
  *                                      M0: 2,3,4,5,6,7,8
  *                                      K0: 2,3,4,8,16
@@ -141,29 +170,10 @@ __kernel void gemm_reshape_lhs_matrix_nt(TENSOR3D_DECLARATION(src),
 
     // ---------------------------Load input values --------------------------------
     // Load values from the LHS matrix
-    LOAD_BLOCK(M0, K0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
-    BOUNDARY_CONDITION_X(x, a0);
-#if M0 > 1
-    BOUNDARY_CONDITION_X(x, a1);
-#endif // M0 > 1
-#if M0 > 2
-    BOUNDARY_CONDITION_X(x, a2);
-#endif // M0 > 2
-#if M0 > 3
-    BOUNDARY_CONDITION_X(x, a3);
-#endif // M0 > 3
-#if M0 > 4
-    BOUNDARY_CONDITION_X(x, a4);
-#endif // M0 > 4
-#if M0 > 5
-    BOUNDARY_CONDITION_X(x, a5);
-#endif // M0 > 5
-#if M0 > 6
-    BOUNDARY_CONDITION_X(x, a6);
-#endif // M0 > 6
-#if M0 > 7
-    BOUNDARY_CONDITION_X(x, a7);
-#endif // M0 > 7
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, K0), a, 0);
+
+    LOAD_TENSOR_BOUNDARY_AWARE_M0XK0(M0, K0, DATA_TYPE, a, input_ptr, src_stride_y, zin);
+
     // ---------------------------Store output values ------------------------------
     REPEAT_VAR_INIT_TO_CONST(16, uint, zout, 0);
     STORE_BLOCK(M0, K0, DATA_TYPE, a, output_ptr, OUTPUT_STEP_X * sizeof(DATA_TYPE), zout);
@@ -248,8 +258,11 @@ __kernel void gemm_reshape_lhs_matrix_nt(TENSOR3D_DECLARATION(src),
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The width of the input tensor must be passed at compile time using -DSRC_WIDTH (e.g. -DSRC_WIDTH=16)
+ * @note The height of the input tensor must be passed at compile time using -DSRC_HEIGHT (e.g. -DSRC_HEIGHT=16)
  * @note The block's dimensions (M0 and K0) must be passed at compile time using -DM0 and -DK0 (e.g. -DM0=2, -DK0=2).
  * @note The number of M0xK0 vertical blocks to store on the same output row must be passed at compile time using -DV0 (e.g. -DV0=2)
+ * @note The size of the partial load block in y must be passed at compile time using -DPARTIAL_LOAD_M0 (e.g. -DPARTIAL_LOAD_M0=1)
+ * @note The size of the partial load block in x must be passed at compile time using -DPARTIAL_LOAD_K0 (e.g. -DPARTIAL_LOAD_K0=1)
  * @note Only the following values for M0, K0 and V0 are supported:
  *                                      M0: 2,3,4,5,6,7,8
  *                                      K0: 2,3,4,8,16
@@ -340,31 +353,10 @@ __kernel void gemm_reshape_lhs_matrix_t(TENSOR3D_DECLARATION(src),
     output_ptr += z * (uint)dst_stride_z;
 
     // ---------------------------Load input values --------------------------------
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, K0), a, 0);
 
-    // Load values from the LHS matrix
-    LOAD_BLOCK(M0, K0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
-    BOUNDARY_CONDITION_X(x, a0);
-#if M0 > 1
-    BOUNDARY_CONDITION_X(x, a1);
-#endif // M0 > 1
-#if M0 > 2
-    BOUNDARY_CONDITION_X(x, a2);
-#endif // M0 > 2
-#if M0 > 3
-    BOUNDARY_CONDITION_X(x, a3);
-#endif // M0 > 3
-#if M0 > 4
-    BOUNDARY_CONDITION_X(x, a4);
-#endif // M0 > 4
-#if M0 > 5
-    BOUNDARY_CONDITION_X(x, a5);
-#endif // M0 > 5
-#if M0 > 6
-    BOUNDARY_CONDITION_X(x, a6);
-#endif // M0 > 6
-#if M0 > 7
-    BOUNDARY_CONDITION_X(x, a7);
-#endif // M0 > 7
+    LOAD_TENSOR_BOUNDARY_AWARE_M0XK0(M0, K0, DATA_TYPE, a, input_ptr, src_stride_y, zin);
+
     // ---------------------------Transpose and store block -----------------------
 
     TRANSPOSE_COLUMN_AND_STORE(output_ptr, OUTPUT_STEP_X, 0);
@@ -396,7 +388,7 @@ __kernel void gemm_reshape_lhs_matrix_t(TENSOR3D_DECLARATION(src),
 #undef OUTPUT_OFFSET_X
 #undef OUTPUT_STEP_X
 }
-#endif // defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE) && defined(SRC_WIDTH)
+#endif // defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(PARTIAL_LOAD_M0) && defined(PARTIAL_LOAD_K0)
 
 #if defined(K0) && defined(N0) && defined(H0) && defined(DATA_TYPE) && defined(SRC_HEIGHT)
 /** This OpenCL kernel reshapes the rhs input matrix. The kernel splits the input matrix in blocks of size K0xN0 and stores each one (not transposed) in

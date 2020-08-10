@@ -24,10 +24,268 @@
 #include "activation_float_helpers.h"
 #include "helpers.h"
 
+/** Utility macro to access a vector with the scalar positions
+ *
+ * Supported cases are: Offset can only be of the same size of the OpenCL vector (2,3,4,8,16)
+ *
+ * @param[in] offset The offset within the vector. Offset can only be of the same size of the OpenCL vector (2,3,4,8,16)
+ * @param[in] n0     The number of consecutive columns to access. n0 + offset must be <= 16
+ * @param[in] x      Vector to access
+ * @{
+ */
+#define SCALAR_ACCESS_STR(offset, n0, x) scalar_access_##offset##_##n0(x)
+#define SCALAR_ACCESS(offset, n0, x) SCALAR_ACCESS_STR(offset, n0, x)
+
+// offset == 0
+#define scalar_access_0_1(x) ((x).s0)
+#define scalar_access_0_2(x) ((x).s01)
+#define scalar_access_0_3(x) ((x).s012)
+#define scalar_access_0_4(x) ((x).s0123)
+#define scalar_access_0_8(x) ((x).s01234567)
+#define scalar_access_0_16(x) ((x).s0123456789ABCDEF)
+
+// offset == 1
+#define scalar_access_1_1(x) ((x).s1)
+#define scalar_access_1_2(x) ((x).s12)
+#define scalar_access_1_3(x) ((x).s123)
+#define scalar_access_1_4(x) ((x).s1234)
+#define scalar_access_1_8(x) ((x).s12345678)
+
+// offset == 2
+#define scalar_access_2_1(x) ((x).s2)
+#define scalar_access_2_2(x) ((x).s23)
+#define scalar_access_2_3(x) ((x).s234)
+#define scalar_access_2_4(x) ((x).s2345)
+#define scalar_access_2_8(x) ((x).s23456789)
+
+// offset == 3
+#define scalar_access_3_1(x) ((x).s3)
+#define scalar_access_3_2(x) ((x).s34)
+#define scalar_access_3_3(x) ((x).s345)
+#define scalar_access_3_4(x) ((x).s3456)
+#define scalar_access_3_8(x) ((x).s3456789A)
+
+// offset == 4
+#define scalar_access_4_1(x) ((x).s4)
+#define scalar_access_4_2(x) ((x).s45)
+#define scalar_access_4_3(x) ((x).s456)
+#define scalar_access_4_4(x) ((x).s4567)
+#define scalar_access_4_8(x) ((x).s456789AB)
+
+// offset == 8
+#define scalar_access_8_1(x) ((x).s8)
+#define scalar_access_8_2(x) ((x).s89)
+#define scalar_access_8_3(x) ((x).s89A)
+#define scalar_access_8_4(x) ((x).s89AB)
+#define scalar_access_8_8(x) ((x).s89ABCDEF)
+
+// offset == 12
+#define scalar_access_12_1(x) ((x).sC)
+#define scalar_access_12_2(x) ((x).sCD)
+#define scalar_access_12_3(x) ((x).sCDE)
+#define scalar_access_12_4(x) ((x).sCDEF)
+
+// offset == 16
+#define scalar_access_16_1(x) ((x).sF)
+
+/** Loads the rows from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1) without allocating variables.
+ * @name LOAD_TENSOR_ROW_n
+ *
+ * @param[in] N0         The number of columns to load
+ * @param[in] DATA_TYPE  The data type of variables
+ * @param[in] BASENAME   The basename of the destination variables for the loaded rows
+ * @param[in] PTR        The base pointer
+ * @param[in] COL_OFFSET The column vector offset. COL_OFFSET + N0 must be <= 16
+ * @param[in] STRIDE_Y   The stride value in y-axis direction
+ * @param[in] Z          The z-axis offset vector
+ * @{
+ */
+#define LOAD_TENSOR_ROW_0(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    ({})
+
+#define LOAD_TENSOR_ROW_1(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##0) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 0 * STRIDE_Y + Z##0));
+
+#define LOAD_TENSOR_ROW_2(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_1(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##1) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 1 * STRIDE_Y + Z##1));
+
+#define LOAD_TENSOR_ROW_3(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_2(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##2) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 2 * STRIDE_Y + Z##2));
+
+#define LOAD_TENSOR_ROW_4(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_3(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##3) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 3 * STRIDE_Y + Z##3));
+
+#define LOAD_TENSOR_ROW_5(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_4(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##4) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 4 * STRIDE_Y + Z##4));
+
+#define LOAD_TENSOR_ROW_6(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_5(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##5) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 5 * STRIDE_Y + Z##5));
+
+#define LOAD_TENSOR_ROW_7(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_6(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##6) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 6 * STRIDE_Y + Z##6));
+
+#define LOAD_TENSOR_ROW_8(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_7(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##7) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 7 * STRIDE_Y + Z##7));
+
+#define LOAD_TENSOR_ROW_9(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_8(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##8) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 8 * STRIDE_Y + Z##8));
+
+#define LOAD_TENSOR_ROW_10(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_9(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)      \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##9) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 9 * STRIDE_Y + Z##9));
+
+#define LOAD_TENSOR_ROW_11(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_10(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##A) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 10 * STRIDE_Y + Z##A));
+
+#define LOAD_TENSOR_ROW_12(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_11(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##B) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 11 * STRIDE_Y + Z##B));
+
+#define LOAD_TENSOR_ROW_13(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_12(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##C) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 12 * STRIDE_Y + Z##C));
+
+#define LOAD_TENSOR_ROW_14(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_13(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##D) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 13 * STRIDE_Y + Z##D));
+
+#define LOAD_TENSOR_ROW_15(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_14(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##E) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 14 * STRIDE_Y + Z##E));
+
+#define LOAD_TENSOR_ROW_16(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_15(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)     \
+    SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##F) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 15 * STRIDE_Y + Z##F));
+/** @}*/ // end of group LOAD_TENSOR_ROW_n
+
+/** Load tensor (consecutive rows and columns) with Z offset.
+ * @name LOAD_TENSOR
+ *
+ * Supported cases are M0=1,2,3,...,16 and N0=1,2,3,4,8,16
+ * The data to load is expected to have consecutive names for each row.
+ * E.g., for M0=3, and BASENAME=c, the expected data is c0, c1 and c2.
+ * The Z offset is expected to have consecutive names.
+ * E.g., for M0=3, and Z=zin, the expected Z offsets are zin0, zin1 and zin2.
+ *
+ * @param[in] M0         The number of consecutive rows
+ * @param[in] N0         The number of consecutive columns
+ * @param[in] DATA_TYPE  The data type of the target
+ * @param[in] BASENAME   The basename of the result variables
+ * @param[in] PTR        The base pointer for the data
+ * @param[in] COL_OFFSET The column vector offset. COL_OFFSET + N0 must be <= 16
+ * @param[in] STRIDE_Y   The stride in y-axis direction
+ * @param[in] Z          The z-axis offset vector
+ * @{
+ */
+#define LOAD_TENSOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) LOAD_TENSOR_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)
+#define LOAD_TENSOR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) LOAD_TENSOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)
+/** @} */ // end of group LOAD_TENSOR
+
+/** Load 2D tensor (consecutive rows and columns) with Z offset.
+ * @name LOAD_TENSOR_M0Xn
+ *
+ * @param[in] M0        The number of rows to load [0-16]
+ * @param[in] N0        The number of columns to load [0-16]
+ * @param[in] DATA_TYPE The data type of variables
+ * @param[in] BASENAME  The basename of the destination variables for the loaded rows
+ * @param[in] PTR       The base pointer
+ * @param[in] STRIDE_Y  The stride value in y-axis direction
+ * @param[in] Z         The z-axis offset vector
+ * @{
+ */
+#define LOAD_TENSOR_M0X0(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    ({})
+
+#define LOAD_TENSOR_M0X1(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, N0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X2(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, N0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X3(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, N0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X4(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, N0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X5(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, 4, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);       \
+    LOAD_TENSOR(M0, 1, DATA_TYPE, a, input_ptr + 4 * sizeof(DATA_TYPE), 4, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X6(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, 4, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);       \
+    LOAD_TENSOR(M0, 2, DATA_TYPE, a, input_ptr + 4 * sizeof(DATA_TYPE), 4, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X7(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, 4, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);       \
+    LOAD_TENSOR(M0, 3, DATA_TYPE, a, input_ptr + 4 * sizeof(DATA_TYPE), 4, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X8(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, N0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X9(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, 8, DATA_TYPE, a, input_ptr 0, src_stride_y, zin);        \
+    LOAD_TENSOR(M0, 1, DATA_TYPE, a, input_ptr + 8 * sizeof(DATA_TYPE), 8, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X10(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, 8, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);        \
+    LOAD_TENSOR(M0, 2, DATA_TYPE, a, input_ptr + 8 * sizeof(DATA_TYPE), 8, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X11(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, 8, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);        \
+    LOAD_TENSOR(M0, 3, DATA_TYPE, a, input_ptr + 8 * sizeof(DATA_TYPE), 8, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X12(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, 8, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);        \
+    LOAD_TENSOR(M0, 4, DATA_TYPE, a, input_ptr + 8 * sizeof(DATA_TYPE), 8, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X13(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin)                  \
+    LOAD_TENSOR(M0, 8, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);                         \
+    LOAD_TENSOR(M0, 4, DATA_TYPE, a, input_ptr + 8 * sizeof(DATA_TYPE), 8, src_stride_y, zin); \
+    LOAD_TENSOR(M0, 1, DATA_TYPE, a, input_ptr + 12 * sizeof(DATA_TYPE), 12, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X14(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin)                  \
+    LOAD_TENSOR(M0, 8, DATA_TYPE, a, input_ptr 0, src_stride_y, zin);                          \
+    LOAD_TENSOR(M0, 4, DATA_TYPE, a, input_ptr + 8 * sizeof(DATA_TYPE), 8, src_stride_y, zin); \
+    LOAD_TENSOR(M0, 2, DATA_TYPE, a, input_ptr + 12 * sizeof(DATA_TYPE), 12, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X15(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin)                  \
+    LOAD_TENSOR(M0, 8, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);                         \
+    LOAD_TENSOR(M0, 4, DATA_TYPE, a, input_ptr + 8 * sizeof(DATA_TYPE), 8, src_stride_y, zin); \
+    LOAD_TENSOR(M0, 3, DATA_TYPE, a, input_ptr + 12 * sizeof(DATA_TYPE), 12, src_stride_y, zin);
+
+#define LOAD_TENSOR_M0X16(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
+    LOAD_TENSOR(M0, N0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
+/** @}*/ // end of group LOAD_TENSOR_M0Xn
+
+/** Load 2D tensor (consecutive rows and columns) with Z offset.
+ * @name LOAD_TENSOR_M0XN0
+ *
+ * @param[in] M0        The number of consecutive rows [0-16]
+ * @param[in] N0        The number of consecutive columns [0-16]
+ * @param[in] DATA_TYPE The data type of the target
+ * @param[in] BASENAME  The basename of the result variables
+ * @param[in] PTR       The base pointer for the data
+ * @param[in] STRIDE_Y  The stride in y-axis direction
+ * @param[in] Z         The z-axis offset vector
+ * @{
+ */
+#define LOAD_TENSOR_M0XN0_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) LOAD_TENSOR_M0X##N0(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define LOAD_TENSOR_M0XN0(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) LOAD_TENSOR_M0XN0_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+
 /** Loads the rows from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
  * @name LOAD_ROW_n
  *
- * @param[in] N0        The number of rows to load
+ * @param[in] N0        The number of columns to load
  * @param[in] DATA_TYPE The data type of variables
  * @param[in] BASENAME  The basename of the destination variables for the loaded rows
  * @param[in] PTR       The base pointer

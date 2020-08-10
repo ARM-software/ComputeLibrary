@@ -88,17 +88,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_lhs_reshaped_shape(*input, lhs_info, reinterpret_input_as_3d)));
 
     // Configure window
-    // Note: bottom paddings are calculated manually as the input can be reinterpreted as 3D tensor
-    // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-    const int m          = reinterpret_input_as_3d ? input->tensor_shape()[1] * input->tensor_shape()[2] : input->tensor_shape()[1];
-    const int bottom_pad = ceil_to_multiple(m, num_elems_processed_per_iteration_y) - m;
-
     Window win    = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     Window win_in = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
     AccessWindowStatic input_access(input, 0, 0,
-                                    ceil_to_multiple(input->dimension(0), num_elems_processed_per_iteration_x),
-                                    input->dimension(1) + bottom_pad);
+                                    input->dimension(0),
+                                    input->dimension(1));
     AccessWindowStatic output_access(output, 0, 0, output->dimension(0), output->dimension(1));
 
     window_changed = update_window_and_padding(win_in, input_access) || // window used by the execute_window_loop
@@ -135,17 +130,25 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const CLCompileContext &compile_con
     _output                  = output;
     _reinterpret_input_as_3d = reinterpret_input_as_3d;
 
+    const unsigned int src_w           = input->info()->dimension(0);
+    const unsigned int src_h           = _reinterpret_input_as_3d ? input->info()->dimension(1) * input->info()->dimension(2) : input->info()->dimension(1);
+    const unsigned int partial_load_m0 = src_h % lhs_info.m0;
+    const unsigned int partial_load_k0 = src_w % lhs_info.k0;
+
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(lhs_info.k0));
     build_opts.add_option("-DV0=" + support::cpp11::to_string(lhs_info.v0));
-    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src_w));
+    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src_h));
     build_opts.add_option_if(lhs_info.interleave, "-DINTERLEAVE");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(input->info()->dimension(1)));
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(input->info()->dimension(2)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
+    build_opts.add_option("-DPARTIAL_LOAD_M0=" + support::cpp11::to_string(partial_load_m0));
+    build_opts.add_option("-DPARTIAL_LOAD_K0=" + support::cpp11::to_string(partial_load_k0));
 
     std::string kernel_name("gemm_reshape_lhs_matrix_");
     kernel_name += lhs_info.transpose ? "t" : "nt";
