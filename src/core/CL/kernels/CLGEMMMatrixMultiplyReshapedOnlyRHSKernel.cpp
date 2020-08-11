@@ -162,7 +162,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
                                      input0->dimension(0),
                                      input0->dimension(1));
     AccessWindowStatic input1_access(input1, 0, 0,
-                                     ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
+                                     input1->dimension(0),
                                      input1->dimension(1));
     AccessWindowStatic output_access(output, 0, 0,
                                      output->dimension(0),

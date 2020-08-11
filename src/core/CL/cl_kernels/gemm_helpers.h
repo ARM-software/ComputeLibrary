@@ -1050,27 +1050,25 @@
  * @param[in] PARTIAL_STORE_M0 The partial size in y, for partial blocks. Supported range: [1, @p M0)
  * @param[in] PARTIAL_STORE_N0 The partial size in x, for partial blocks. Supported range: [1, @p N0)
  * @param[in] N                Total number of columns. Used to detect if current block is at the boundary in x.
- * @param[in] y                Global id of current block in y. Used to detect if current block is at the boundary in y.
- * @param[in] x                Global id of current block in x. Used to detect if current block is at the boundary in x.
+ * @param[in] PARTIAL_COND_Y   Condition on the y axis to perform the partial store Y. True to use PARTIAL_STORE_M0 rather than M0.
+ * @param[in] PARTIAL_COND_X   Condition on the x axis to perform the partial store X. True to use PARTIAL_STORE_N0 rather than N0.
  */
-#define STORE_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x) \
-    bool at_y_boundary = y == 0;                                                                                                   \
-    bool at_x_boundary = (x + 1) * N0 >= N;                                                                                        \
-    if(!at_y_boundary && !at_x_boundary)                                                                                           \
-    {                                                                                                                              \
-        STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                                    \
-    }                                                                                                                              \
-    else if(at_y_boundary && !at_x_boundary)                                                                                       \
-    {                                                                                                                              \
-        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                      \
-    }                                                                                                                              \
-    else if(!at_y_boundary && at_x_boundary)                                                                                       \
-    {                                                                                                                              \
-        STORE_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                      \
-    }                                                                                                                              \
-    else                                                                                                                           \
-    {                                                                                                                              \
-        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                        \
+#define STORE_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, PARTIAL_COND_Y, PARTIAL_COND_X) \
+    if(!(PARTIAL_COND_X) && !(PARTIAL_COND_Y))                                                                                                               \
+    {                                                                                                                                        \
+        STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                                              \
+    }                                                                                                                                        \
+    else if((PARTIAL_COND_Y) && !(PARTIAL_COND_X))                                                                                                           \
+    {                                                                                                                                        \
+        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                                \
+    }                                                                                                                                        \
+    else if(!(PARTIAL_COND_Y) && (PARTIAL_COND_X))                                                                                                           \
+    {                                                                                                                                        \
+        STORE_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                                \
+    }                                                                                                                                        \
+    else                                                                                                                                     \
+    {                                                                                                                                        \
+        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                  \
     }
 /** Store a block that can only be partial in x but not y.
  *
@@ -1090,17 +1088,16 @@
  * @param[in] Z                The offset in z-axis direction
  * @param[in] PARTIAL_STORE_N0 The partial size in x, for partial blocks. Supported range: [1, @p N0)
  * @param[in] N                Total number of columns. Used to detect if current block is at the boundary in x.
- * @param[in] x                Global id of current block in x. Used to detect if current block is at the boundary in x.
+ * @param[in] PARTIAL_COND_X   Condition on the x axis to perform the partial store X. True to use PARTIAL_STORE_N0 rather than N0.
  */
-#define STORE_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_N0, N, x) \
-    bool at_x_boundary = (x + 1) * N0 >= N;                                                             \
-    if(!at_x_boundary)                                                                                  \
-    {                                                                                                   \
-        STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                         \
-    }                                                                                                   \
-    else                                                                                                \
-    {                                                                                                   \
-        STORE_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);           \
+#define STORE_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_N0, N, PARTIAL_COND_X) \
+    if(!(PARTIAL_COND_X))                                                                                            \
+    {                                                                                                        \
+        STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                              \
+    }                                                                                                        \
+    else                                                                                                     \
+    {                                                                                                        \
+        STORE_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                \
     }
 /** Store a block that can only be partial in y but not x.
  *
@@ -1119,17 +1116,16 @@
  * @param[in] STRIDE_Y         The stride value in y-axis direction
  * @param[in] Z                The offset in z-axis direction
  * @param[in] PARTIAL_STORE_M0 The partial size in y, for partial blocks. Supported range: [1, @p M0)
- * @param[in] y                Global id of current block in y. Used to detect if current block is at the boundary in y.
+ * @param[in] PARTIAL_COND_Y   Condition on the y axis to perform the partial store Y. True to use PARTIAL_STORE_M0 rather than M0.
  */
-#define STORE_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, y) \
-    bool at_y_boundary = y == 0;                                                                     \
-    if(!at_y_boundary)                                                                               \
-    {                                                                                                \
-        STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                      \
-    }                                                                                                \
-    else                                                                                             \
-    {                                                                                                \
-        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);        \
+#define STORE_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_COND_Y) \
+    if(!(PARTIAL_COND_Y))                                                                                         \
+    {                                                                                                     \
+        STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                           \
+    }                                                                                                     \
+    else                                                                                                  \
+    {                                                                                                     \
+        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);             \
     }
 /** @} */ // end of group STORE_BLOCK_PARTIAL
 
@@ -1788,35 +1784,35 @@
  * @param[in] PARTIAL_STORE_M0 The partial size in y, for partial blocks. Supported: [0, @p M0)
  * @param[in] PARTIAL_STORE_N0 The partial size in x, for partial blocks. Supported: [0, @p N0)
  * @param[in] N                Total number of columns. Used to detect if current block is at the boundary in x.
- * @param[in] y                Global id of current block in y. Used to detect if current block is at the boundary in y.
- * @param[in] x                Global id of current block in x. Used to detect if current block is at the boundary in x.
+ * @param[in] PARTIAL_COND_Y   Condition on the y axis to perform the partial store Y. True to use PARTIAL_STORE_M0 rather than M0.
+ * @param[in] PARTIAL_COND_X   Condition on the x axis to perform the partial store X. True to use PARTIAL_STORE_N0 rather than N0.
  * @{
  */
 #if PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 // Case1: No partial blocks in either x or y
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x) \
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, PARTIAL_COND_Y, PARTIAL_COND_X) \
     STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 
 #elif PARTIAL_STORE_M0 > 0 && PARTIAL_STORE_N0 == 0
 // Case2: Partial blocks in y
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x) \
-    STORE_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, y)
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, PARTIAL_COND_Y, PARTIAL_COND_X) \
+    STORE_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_COND_Y)
 
 #elif PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 > 0
 // Case3: Partial blocks in x
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x) \
-    STORE_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_N0, N, x)
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, PARTIAL_COND_Y, PARTIAL_COND_X) \
+    STORE_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_N0, N, PARTIAL_COND_X)
 
 #else // PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 // Case4: Partial blocks in both x and y
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x) \
-    STORE_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x)
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, PARTIAL_COND_Y, PARTIAL_COND_X) \
+    STORE_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, PARTIAL_COND_Y, PARTIAL_COND_X)
 
 #endif // PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 
 #else // defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x) \
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, PARTIAL_COND_Y, PARTIAL_COND_X) \
     STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 
 #endif    // defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)

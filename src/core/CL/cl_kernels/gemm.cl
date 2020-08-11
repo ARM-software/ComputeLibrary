@@ -1278,8 +1278,11 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
     // Store output block
-    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -1621,8 +1624,11 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
     // Store output block
-    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -2014,8 +2020,11 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
     // Store output block
-    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -2320,8 +2329,11 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
     // Store output block
-    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -2519,6 +2531,8 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note If the M0xK0 blocks in the reshaped LHS matrix have been interleaved, the option -DLHS_INTERLEAVE must passed at compile time.
  * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 2, 3, 4, 8, 16
@@ -2755,11 +2769,15 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
     // Store output block
 #if defined(MIXED_PRECISION)
-    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    CONVERT_BLOCK(M0, N0, DATA_TYPE, c, c_lp);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 #else  // defined(MIXED_PRECISION)
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 #endif // defined(MIXED_PRECISION)
 
 #undef LHS_BLOCK_SIZE
@@ -2791,6 +2809,8 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note If the M0xK0 blocks in the reshaped LHS matrix have been interleaved, the option -DLHS_INTERLEAVE must passed at compile time.
  * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 4, 8, 16
@@ -3019,11 +3039,15 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
     // Store output block
 #if defined(MIXED_PRECISION)
-    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    CONVERT_BLOCK(M0, N0, DATA_TYPE, c, c_lp);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 #else  // defined(MIXED_PRECISION)
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 #endif // defined(MIXED_PRECISION)
 
 #undef LHS_BLOCK_SIZE
@@ -3160,6 +3184,8 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note If the M0xK0 blocks in the reshaped LHS matrix have been interleaved, the option -DLHS_INTERLEAVE must passed at compile time.
  * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 2, 3, 4, 8
  *  - N0 = 2, 3, 4, 8, 16
@@ -3480,7 +3506,8 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(MIXED_PRECISION)
 
 #else // defined(BROADCAST_BIAS)
-    __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (y * (uint)M0 * bias_stride_y) + z * bias_stride_z;
+    __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
+                                    2) * bias_stride_z;
 
     LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
 
@@ -3506,11 +3533,15 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
     // Store output block
 #if defined(MIXED_PRECISION)
-    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    CONVERT_BLOCK(M0, N0, DATA_TYPE, c, c_lp);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 #else  // defined(MIXED_PRECISION)
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 #endif // defined(MIXED_PRECISION)
 
 #undef LHS_BLOCK_SIZE
@@ -3538,6 +3569,8 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note If the M0xK0 blocks in the reshaped LHS matrix have been interleaved, the option -DLHS_INTERLEAVE must passed at compile time.
  * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 2, 3, 4, 8
  *  - N0 = 4, 8, 16
@@ -3867,11 +3900,15 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
     // Store output block
 #if defined(MIXED_PRECISION)
-    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    CONVERT_BLOCK(M0, N0, DATA_TYPE, c, c_lp);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 #else  // defined(MIXED_PRECISION)
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 #endif // defined(MIXED_PRECISION)
 
 #undef LHS_BLOCK_SIZE
@@ -4246,8 +4283,11 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
     // Store output block
-    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, y, x);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
