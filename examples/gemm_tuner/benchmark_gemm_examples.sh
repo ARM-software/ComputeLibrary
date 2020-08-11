@@ -59,10 +59,7 @@ NUM_ITERATION=5
 function help_gemm_shape_file() {
   cat >&2 << EOF
 Gemm shape file:
-  Gemm shape file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
-  around each field).
-
-  Note also comments and extraneous empty lines are not permitted.
+  Gemm shape file is a headerless csv file with fields separated by commas
 
   A gemm shape is a list of 4 positive integers <M, N, K, B> describing the shapes of the two matrices (LHS and RHS)
   with:
@@ -91,10 +88,7 @@ EOF
 function help_gemm_config_file_native() {
   cat >&2 << EOF
 Gemm config file (Strategy native):
-  Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
-  around each field).
-
-  Note also comments and extraneous empty lines are not permitted.
+  Gemm config file is a headerless csv file with fields separated by commas
 
   A gemm config is a list of 3 positive integers <m0, n0, k0>, with:
   m0 - Number of rows processed by the matrix multiplication
@@ -126,19 +120,20 @@ EOF
 function help_gemm_config_file_reshaped_rhs_only() {
   cat >&2 << EOF
 Gemm config file (Strategy reshaped_rhs_only):
-  Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
-  around each field).
+  Gemm config file is a headerless csv file with fields separated by commas.
 
   Note also comments and extraneous empty lines are not permitted.
 
-  A gemm config is a list of 4 positive integers <m0, n0, k0, h0> and 2 boolean values interleave_rhs and transpose_rhs, with:
+  A gemm config is a list of 4 positive integers <m0, n0, k0, h0> and 3 boolean values:
   m0 - Number of rows processed by the matrix multiplication
   n0 - Number of columns processed by the matrix multiplication
   k0 - Number of partial accumulations performed by the matrix multiplication
   h0 - Number of horizontal blocks of size (k0xn0) stored on the same output row
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
   transpose_rhs - Transpose rhs matrix (1) / Do not transpose rhs matrix (0)
-  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)
+  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0). Can only be true
+                           with certain combinations of the GEMMParams and other configs. Please refer to CLGEMMReshapeRHSMatrixKernel
+                           for more details
 
   Only the following configurations of M0, N0 and K0 are currently supported:
   M0 = 1, 2, 3, 4, 5, 6, 7, 8
@@ -166,12 +161,9 @@ EOF
 function help_gemm_config_file_reshaped() {
   cat >&2 << EOF
 Gemm config file (Strategy reshaped):
-  Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
-  around each field).
+  Gemm config file is a headerless csv file with fields separated by commas
 
-  Note also comments and extraneous empty lines are not permitted.
-
-  A gemm config is a list of 5 positive integers <m0, n0, k0, v0, h0> and 3 boolean values interleave_lhs, interleave_rhs and transpose_rhs, with:
+  A gemm config is a list of 5 positive integers <m0, n0, k0, v0, h0> and 4 boolean values:
   m0 - Number of rows processed by the matrix multiplication
   n0 - Number of columns processed by the matrix multiplication
   k0 - Number of partial accumulations performed by the matrix multiplication
@@ -180,7 +172,9 @@ Gemm config file (Strategy reshaped):
   interleave_lhs - Interleave lhs matrix (1) / Do not interleave lhs matrix (0)
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
   transpose_rhs - Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do transpose lhs matrix (0)
-  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)
+  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0). Can only be true
+                           with certain combinations of the GEMMParams and other configs. Please refer to CLGEMMReshapeRHSMatrixKernel
+                           for more details
 
   If rhs matrix is transposed only the following configurations are currently supported:
   M0 = 2, 3, 4, 5, 6, 7, 8
@@ -218,7 +212,7 @@ function usage() {
 Run gemm examples of a selected strategy, over provided tunable configurationsa and gemm shapes.
 Save the benchmark results to json files in an output directory.
 
-Usage: ${CMD} [-h] -s <strategy> -e <example_binary_dir> -g <gemm_shape_file> -c <gemm_config_file> [-o <out_dir>]
+Usage: ${CMD} [-h] -s <strategy> -e <example_binary_dir> -g <gemm_shape_file> -c <gemm_config_file> [-d <data_type>] [-o <out_dir>]
 
 Options:
         -h

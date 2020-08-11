@@ -257,6 +257,11 @@ v20.08 Public major release
    - graph_yolov3_output_detector
  - Removed padding from:
    - @ref NEPixelWiseMultiplicationKernel
+ - GEMMTuner improvements:
+     - Added fp16 support
+     - Output json files for easier integration
+     - Enabled tuning for export_to_cl_image_rhs option for RHS tensors
+     - More robust script for running benchmarks
  - Deprecated functions / interfaces:
    - Non-descriptor based interfaces for @ref NEThreshold, @ref CLThreshold
    - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer :
