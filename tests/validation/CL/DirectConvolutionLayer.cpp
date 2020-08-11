@@ -43,11 +43,11 @@ namespace validation
 {
 namespace
 {
-// COMPMID-517 Investigate the mismatch to see whether it is a real bug
-RelativeTolerance<half>              tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
-RelativeTolerance<float>             tolerance_fp32(0.03f);     /**< Tolerance for floating point tests */
-constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
+RelativeTolerance<half>              tolerance_fp16(half(0.2));   /**< Tolerance for floating point tests */
+RelativeTolerance<float>             tolerance_fp32(0.05f);       /**< Tolerance for floating point tests */
+AbsoluteTolerance<float>             tolerance_fp32_abs(0.0003f); /**< Absolute Tolerance for floating point tests */
+constexpr float                      tolerance_num = 0.07f;       /**< Tolerance number */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);        /**< Tolerance for quantized tests */
 
 const auto data_strides          = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
 const auto data_strides_small    = combine(framework::dataset::make("StrideX", 1), framework::dataset::make("StrideY", 1));
@@ -87,8 +87,6 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 
 TEST_SUITE(CL)
 TEST_SUITE(DirectConvolutionLayer)
-
-//TODO(COMPMID-415): Configuration tests?
 
 // *INDENT-OFF*
 // clang-format off
@@ -238,7 +236,7 @@ FIXTURE_DATA_TEST_CASE(RunLargeUsecase, CLDirectConvolutionLayerFixture<float>, 
                        framework::dataset::make("DataLayout", { DataLayout::NHWC })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.f, tolerance_fp32_abs);
 }
 TEST_SUITE_END() // FP32
 
