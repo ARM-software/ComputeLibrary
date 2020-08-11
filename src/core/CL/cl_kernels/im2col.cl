@@ -942,6 +942,8 @@ __kernel void im2col_generic_padx0_pady0_nchw(
  *
  * @note This kernel computes VECTOR_SIZE elements
  * @note This kernel stores VECTOR_SIZE or BOUNDARY_VECTOR_SIZE (if at boundary) elements
+ * @note The vector size must be passed at compile time using -DVECTOR_SIZE: e.g. -DVECTOR_SIZE=2
+ * @note The boundary vector size must be passed at compile time using -DBOUNDARY_VECTOR_SIZE: e.g. -DBOUNDARY_VECTOR_SIZE=1
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width of output tensor after matrix multiplication must be passed at compile time using -DCONVOLVED_WIDTH: e.g. -DCONVOLVED_WIDTH=34
  * @note The kernel depth must be passed at compile time using -DSRC_DEPTH: e.g. -DSRC_DEPTH=3
@@ -1155,6 +1157,8 @@ __kernel void im2col3x3_nhwc(
  *
  * @note This kernel computes VECTOR_SIZE elements
  * @note This kernel stores VECTOR_SIZE or BOUNDARY_VECTOR_SIZE (if at boundary) elements
+ * @note The vector size must be passed at compile time using -DVECTOR_SIZE: e.g. -DVECTOR_SIZE=2
+ * @note The boundary vector size must be passed at compile time using -DBOUNDARY_VECTOR_SIZE: e.g. -DBOUNDARY_VECTOR_SIZE=1
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width of output tensor after matrix multiplication must be passed at compile time using -DCONVOLVED_WIDTH: e.g. -DCONVOLVED_WIDTH=34
  * @note The kernel depth must be passed at compile time using -DSRC_DEPTH: e.g. -DSRC_DEPTH=3
@@ -1245,6 +1249,8 @@ __kernel void im2col9x9_nhwc(
  *
  * @note This kernel computes VECTOR_SIZE elements
  * @note This kernel stores VECTOR_SIZE or BOUNDARY_VECTOR_SIZE (if at boundary) elements
+ * @note The vector size must be passed at compile time using -DVECTOR_SIZE: e.g. -DVECTOR_SIZE=2
+ * @note The boundary vector size must be passed at compile time using -DBOUNDARY_VECTOR_SIZE: e.g. -DBOUNDARY_VECTOR_SIZE=1
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width and height of the input tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT: e.g. -DSRC_WIDTH=128 and -DSRC_HEIGHT=128
  * @note The width of output tensor after matrix multiplication must be passed at compile time using -DCONVOLVED_WIDTH: e.g. -DCONVOLVED_WIDTH=34
