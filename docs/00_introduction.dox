@@ -270,6 +270,14 @@ v20.08 Public major release
       The default "axis" value for @ref NESoftmaxLayer, @ref NELogSoftmaxLayer is changed from 1 to 0.
       Only axis 0 is supported. 
  - The support for quantized data types has been removed from @ref CLLogSoftmaxLayer due to implementation complexity.
+ - Removed padding requirement for the input (e.g. LHS of GEMM) and output in @ref CLGEMMMatrixMultiplyNativeKernel, @ref CLGEMMMatrixMultiplyReshapedKernel, @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel and @ref CLIm2ColKernel (NHWC only)
+    - This change allows to use @ref CLGEMMConvolutionLayer without extra padding for the input and output.
+    - Only the weights/bias of @ref CLGEMMConvolutionLayer could require padding for the computation.
+    - Only on Arm Mali Midgard GPUs, @ref CLGEMMConvolutionLayer could require padding since @ref CLGEMMMatrixMultiplyKernel is called and currently requires padding.
+ - Added support for exporting the OpenCL buffer object to the OpenCL image object in @ref CLGEMMMatrixMultiplyReshapedKernel and @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.
+    - This support allows to export the OpenCL buffer used for the reshaped RHS matrix to the OpenCL image object.
+    - The padding requirement for the OpenCL image object is considered into the @ref CLGEMMReshapeRHSMatrixKernel.
+    - The reshaped RHS matrix stores the weights when GEMM is used to accelerate @ref CLGEMMConvolutionLayer.
 
 v20.05 Public major release
  - Various bug fixes.
