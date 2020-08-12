@@ -341,11 +341,11 @@ function run() {
   local total_num_experiment
   local num_params
   local num_configs
-  #local match_expression="^(?:\s*\d+\s*,)+\s*\d+\s*$"
-  local match_expression="^(\s*[0-9]+\s*,)+\s*[0-9]\s*$"
+  local match_expression_shape="^([^,]*,){3}[^,]*$"
+  local match_expression_config="^(\s*[0-9]+\s*,)+\s*[0-9]\s*$"
   # Don't count empty lines and lines starting with # (comments)
-  num_params=$( grep -E "$match_expression" "${GEMM_SHAPES_FILE}" | wc -l  | cut -d " " -f 1)
-  num_configs=$( grep -E "$match_expression" "${GEMM_CONFIGS_FILE}" | wc -l  | cut -d " " -f 1)
+  num_params=$( grep -E "$match_expression_shape" "${GEMM_SHAPES_FILE}" | wc -l  | cut -d " " -f 1)
+  num_configs=$( grep -E "$match_expression_config" "${GEMM_CONFIGS_FILE}" | wc -l  | cut -d " " -f 1)
   (( total_num_experiment=${num_params} * ${num_configs} ))
   # Time elapsed since the beginning in seconds
   local time_elapsed_s
@@ -358,7 +358,7 @@ function run() {
     while read gemm_config
     do
       # Ignore empty lines and lines starting with # (comments)
-      if echo "$gemm_shape" | grep -Eq "$match_expression" && echo "$gemm_config" | grep -Eq "$match_expression";then
+      if echo "$gemm_shape" | grep -Eq "$match_expression_shape" && echo "$gemm_config" | grep -Eq "$match_expression_config";then
         echo "Running..." 1>&2
         example_args="${gemm_shape},${gemm_config},--type=${DATA_TYPE}"
         # Run experiment
