@@ -104,6 +104,8 @@ Status NENodeValidator::validate(INode *node)
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ROIAlignLayer");
         case NodeType::SliceLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : SliceLayer");
+        case NodeType::StridedSliceLayer:
+            return detail::validate_strided_slice_layer<NEStridedSlice>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
         case NodeType::UpsampleLayer:
             return detail::validate_upsample_layer<NEUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
         case NodeType::YOLOLayer:

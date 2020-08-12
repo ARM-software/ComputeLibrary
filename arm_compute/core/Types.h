@@ -1690,6 +1690,44 @@ private:
     bool     _is_scaled;
 };
 
+class StridedSliceLayerInfo
+{
+public:
+    /** Default Constructor
+     *
+     * @param[in] begin_mask       (Optional) If the ith bit of begin_mask is set, starts[i] is ignored and the fullest possible range in that dimension is used instead.
+     * @param[in] end_mask         (Optional) If the ith bit of end_mask is set, ends[i] is ignored and the fullest possible range in that dimension is used instead.
+     * @param[in] shrink_axis_mask (Optional) If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
+     */
+    StridedSliceLayerInfo(int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0)
+        : _begin_mask(begin_mask), _end_mask(end_mask), _shrink_axis_mask(shrink_axis_mask)
+    {
+    }
+
+    /* Get the begin mask value */
+    int32_t begin_mask() const
+    {
+        return _begin_mask;
+    }
+
+    /* Get the end mask value */
+    int32_t end_mask() const
+    {
+        return _end_mask;
+    }
+
+    /* Get the shrink axis mask value */
+    int32_t shrink_axis_mask() const
+    {
+        return _shrink_axis_mask;
+    }
+
+private:
+    int32_t _begin_mask;
+    int32_t _end_mask;
+    int32_t _shrink_axis_mask;
+};
+
 /** Convolution Layer Weights Information class. This class stores the necessary information to compute convolution layer when the weights are already reshaped */
 class WeightsInfo
 {

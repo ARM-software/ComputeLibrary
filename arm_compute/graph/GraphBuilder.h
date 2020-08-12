@@ -520,6 +520,19 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_stack_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, int axis);
+    /** Adds a strided slice node to the graph
+     *
+     * @param[in] g       Graph to add the node to
+     * @param[in] params  Common node parameters
+     * @param[in] input   Input to the strided slice layer node as a NodeID-Index pair
+     * @param[in] starts  The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] ends    The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] strides The strides of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] info    Contains masks for the starts, ends and strides
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_strided_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends, BiStrides &strides, StridedSliceLayerInfo info);
     /** Adds an upsample layer to the graph
      *
      * @param[in] g                 Graph to add the node to

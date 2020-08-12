@@ -69,6 +69,7 @@ class SoftmaxLayerNode;
 class SliceLayerNode;
 class SplitLayerNode;
 class StackLayerNode;
+class StridedSliceLayerNode;
 class UpsampleLayerNode;
 class YOLOLayerNode;
 } // namespace graph

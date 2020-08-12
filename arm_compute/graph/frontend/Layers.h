@@ -1333,6 +1333,36 @@ private:
     int                                     _axis;
 };
 
+/** StridedSlice Layer */
+class StridedSliceLayer final : public ILayer
+{
+public:
+    /** Construct a strided slice layer.
+     *
+     * @param[in] starts             The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] ends               The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] strides            The strides of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] strided_slice_info Contains masks for the starts, ends and strides
+     */
+    StridedSliceLayer(Coordinates &starts, Coordinates &ends, BiStrides &strides, StridedSliceLayerInfo strided_slice_info)
+        : _starts(starts), _ends(ends), _strides(strides), _info(strided_slice_info)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_strided_slice_node(s.graph(), common_params, input, _starts, _ends, _strides, _info);
+    }
+
+private:
+    Coordinates           _starts;
+    Coordinates           _ends;
+    BiStrides             _strides;
+    StridedSliceLayerInfo _info;
+};
+
 /** Upsample Layer */
 class UpsampleLayer final : public ILayer
 {

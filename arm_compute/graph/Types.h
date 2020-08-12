@@ -175,6 +175,7 @@ enum class NodeType
     SliceLayer,
     SplitLayer,
     StackLayer,
+    StridedSliceLayer,
     UpsampleLayer,
     UnaryEltwiseLayer,
     YOLOLayer,

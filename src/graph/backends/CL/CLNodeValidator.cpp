@@ -104,6 +104,8 @@ Status CLNodeValidator::validate(INode *node)
             return detail::validate_roi_align_layer<CLROIAlignLayer>(*polymorphic_downcast<ROIAlignLayerNode *>(node));
         case NodeType::SliceLayer:
             return detail::validate_slice_layer<CLSlice>(*polymorphic_downcast<SliceLayerNode *>(node));
+        case NodeType::StridedSliceLayer:
+            return detail::validate_strided_slice_layer<CLStridedSlice>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
         case NodeType::UpsampleLayer:
             return detail::validate_upsample_layer<CLUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
         case NodeType::YOLOLayer:
