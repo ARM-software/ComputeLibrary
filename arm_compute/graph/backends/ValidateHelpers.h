@@ -601,7 +601,6 @@ Status validate_eltwise_Layer(EltwiseLayerNode &node)
     const RoundingPolicy            round_policy   = node.rounding_policy();
     const ActivationLayerInfo       act_info       = node.fused_activation();
     const QuantizationInfo          quant_info     = node.output_quant_info();
-    const float                     scale          = (quant_info.scale().empty()) ? 1.0f : quant_info.scale()[0];
 
     // Validate function
     if(eltwise_op == EltwiseOperation::Add)
@@ -614,7 +613,7 @@ Status validate_eltwise_Layer(EltwiseLayerNode &node)
     }
     else if(eltwise_op == EltwiseOperation::Mul)
     {
-        return EltwiseLayerFunctions::PixelWiseMultiplication::validate(input1, input2, output, scale, convert_policy, round_policy, act_info);
+        return EltwiseLayerFunctions::PixelWiseMultiplication::validate(input1, input2, output, 1.0f, convert_policy, round_policy, act_info);
     }
     else if(eltwise_op == EltwiseOperation::Max)
     {
