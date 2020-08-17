@@ -257,6 +257,11 @@ v20.08 Public major release
    - graph_yolov3_output_detector
  - Removed padding from:
    - @ref NEPixelWiseMultiplicationKernel
+ - Removedd OpenCL kernels / functions:
+     - CLGEMMLowpQuantizeDownInt32ToUint8Scale
+     - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
+ - Removed NEON kernels / functions:
+     - NEGEMMLowpQuantizeDownInt32ToUint8Scale
  - GEMMTuner improvements:
      - Added fp16 support
      - Output json files for easier integration
