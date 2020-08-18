@@ -1741,11 +1741,11 @@ public:
     }
 
 private:
-    const bool         _are_reshaped;
-    const unsigned int _kernel_width;
-    const unsigned int _kernel_height;
-    const unsigned int _num_kernels;
-    const bool         _retain_internal_weights;
+    bool         _are_reshaped;
+    unsigned int _kernel_width;
+    unsigned int _kernel_height;
+    unsigned int _num_kernels;
+    bool         _retain_internal_weights;
 };
 
 /** GEMM reshape information class. This class stores the necessary information about matrix A and matrix B reshape.
@@ -1852,14 +1852,14 @@ public:
     };
 
 private:
-    const int  _m;
-    const int  _n;
-    const int  _k;
-    const int  _mult_transpose1xW_width;
-    const int  _mult_interleave4x4_height;
-    const int  _depth_output_gemm3d;
-    const bool _reinterpret_input_as_3d;
-    const bool _broadcast_bias;
+    int  _m;
+    int  _n;
+    int  _k;
+    int  _mult_transpose1xW_width;
+    int  _mult_interleave4x4_height;
+    int  _depth_output_gemm3d;
+    bool _reinterpret_input_as_3d;
+    bool _broadcast_bias;
 };
 
 struct DepthwiseConvolutionReshapeInfo
