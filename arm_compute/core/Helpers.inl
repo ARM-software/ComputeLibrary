@@ -158,7 +158,7 @@ inline Iterator::Iterator(const ITensor *tensor, const Window &win)
     for(unsigned int n = 0; n < info->num_dimensions(); ++n)
     {
         _dims[n]._stride = win[n].step() * strides[n];
-        std::get<0>(_dims)._dim_start += strides[n] * win[n].start();
+        std::get<0>(_dims)._dim_start += static_cast<size_t>(strides[n]) * win[n].start();
     }
 
     //Copy the starting point to all the dimensions:
@@ -182,7 +182,7 @@ inline void Iterator::increment(const size_t dimension)
     }
 }
 
-inline constexpr int Iterator::offset() const
+inline constexpr size_t Iterator::offset() const
 {
     return _dims.at(0)._dim_start;
 }

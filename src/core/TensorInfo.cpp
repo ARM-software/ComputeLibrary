@@ -268,7 +268,7 @@ std::tuple<Strides, size_t, size_t> TensorInfo::calculate_padding_requirements(c
 
             const unsigned int idx_last_dimension = _tensor_shape.num_dimensions() - 1;
 
-            required_total_size = _tensor_shape[idx_last_dimension] * required_strides[idx_last_dimension];
+            required_total_size = static_cast<size_t>(_tensor_shape[idx_last_dimension]) * required_strides[idx_last_dimension];
             break;
         }
     }
@@ -360,7 +360,7 @@ ITensorInfo &TensorInfo::set_tensor_shape(const TensorShape &shape)
     else
     {
         const unsigned int idx_last_dimension = _tensor_shape.num_dimensions() - 1;
-        _total_size                           = _tensor_shape[idx_last_dimension] * _strides_in_bytes[idx_last_dimension];
+        _total_size                           = static_cast<size_t>(_tensor_shape[idx_last_dimension]) * _strides_in_bytes[idx_last_dimension];
     }
 
     std::tie(_strides_in_bytes, _offset_first_element_in_bytes, _total_size) = calculate_padding_requirements(_padding);

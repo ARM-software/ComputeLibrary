@@ -376,7 +376,7 @@ public:
      *
      * @return The current position of the iterator in bytes relative to the first element.
      */
-    constexpr int offset() const;
+    constexpr size_t offset() const;
 
     /** Return a pointer to the current pixel.
      *
@@ -403,8 +403,8 @@ private:
         {
         }
 
-        int _dim_start;
-        int _stride;
+        size_t _dim_start;
+        size_t _stride;
     };
 
     std::array<Dimension, Coordinates::num_max_dimensions> _dims;
