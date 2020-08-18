@@ -292,6 +292,7 @@ v20.08 Public major release
    - NEGEMMMatrixAccumulateBiasesKernel
  - Deprecated functions / interfaces:
    - Non-descriptor based interfaces for @ref NEThreshold, @ref CLThreshold
+   - Non-descriptor based interfaces for @ref NEScale, @ref CLScale and @ref GCScale
    - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer :
       The default "axis" value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer is changed from 1 to 0.
       Only axis 0 is supported.

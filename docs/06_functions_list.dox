@@ -159,6 +159,7 @@ namespace arm_compute
     - @ref NELSTMLayer
     - @ref NELSTMLayerQuantized
     - @ref NEQLSTMLayer
+    - @ref NEMaxUnpoolingLayer
     - @ref NEMeanStdDev
     - @ref NEMinMaxLocation
     - @ref NENormalizationLayer
@@ -233,6 +234,7 @@ namespace arm_compute
     - @ref CLLSTMLayer
     - @ref CLLSTMLayerQuantized
     - @ref CLQLSTMLayer
+    - @ref CLMaxUnpoolingLayer
     - @ref CLMeanStdDev
     - @ref CLMinMaxLocation
     - @ref CLNormalizationLayer
