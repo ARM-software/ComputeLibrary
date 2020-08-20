@@ -205,6 +205,8 @@ protected:
     virtual void run_workloads(std::vector<Workload> &workloads) = 0;
     CPUInfo _cpu_info;
 
+    void schedule_common(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors);
+
 private:
     unsigned int _num_threads_hint = {};
 };

@@ -751,6 +751,7 @@ cc_library_static {
         "src/runtime/RuntimeContext.cpp",
         "src/runtime/Scheduler.cpp",
         "src/runtime/SchedulerFactory.cpp",
+        "src/runtime/SchedulerUtils.cpp",
         "src/runtime/SubTensor.cpp",
         "src/runtime/Tensor.cpp",
         "src/runtime/TensorAllocator.cpp",
