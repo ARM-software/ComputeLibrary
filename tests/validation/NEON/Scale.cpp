@@ -79,7 +79,7 @@ const auto QuantizationInfoSet = framework::dataset::make("QuantizationInfo",
 /** Tolerance */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
-RelativeTolerance<float>             tolerance_f32(0.01);
+RelativeTolerance<float>             tolerance_f32(0.05);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 RelativeTolerance<half> tolerance_f16(half(0.1));
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
