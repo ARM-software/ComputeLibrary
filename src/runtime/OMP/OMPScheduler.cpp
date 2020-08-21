@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,6 +83,39 @@ void OMPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     }
 }
 
+void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
+    ARM_COMPUTE_ERROR_ON_MSG(hints.strategy() == StrategyHint::DYNAMIC,
+                             "Dynamic scheduling is not supported in OMPScheduler");
+
+    const Window      &max_window     = kernel->window();
+    const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
+    const unsigned int num_threads    = std::min(num_iterations, _num_threads);
+
+    if(!kernel->is_parallelisable() || num_threads == 1)
+    {
+        ThreadInfo info;
+        info.cpu_info = &_cpu_info;
+        kernel->run_op(tensors, max_window, info);
+    }
+    else
+    {
+        const unsigned int                num_windows = num_threads;
+        std::vector<IScheduler::Workload> workloads(num_windows);
+        for(unsigned int t = 0; t < num_windows; t++)
+        {
+            //Capture 't' by copy, all the other variables by reference:
+            workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &tensors](const ThreadInfo & info)
+            {
+                Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
+                win.validate();
+                kernel->run_op(tensors, win, info);
+            };
+        }
+        run_workloads(workloads);
+    }
+}
 #ifndef DOXYGEN_SKIP_THIS
 void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> &workloads)
 {

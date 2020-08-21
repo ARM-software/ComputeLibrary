@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in]  input               Source tensor. Data type supported: U16/S16/U32/S32/F16/F32. Data layouts supported: NHWC.
+     * @param[in]  input               Source tensor. Data type supported: All. Data layouts supported: NHWC.
      * @param[out] output              Destination tensor. Data type supported: F32
      * @param[in]  start               Coordinates of where to start cropping the image.
      * @param[in]  end                 Coordinates of where to end cropping the image.
@@ -63,7 +63,7 @@ public:
      * @note Supported tensor rank: up to 4
      *
      * @param[in]  compile_context     The compile context to be used.
-     * @param[in]  input               Source tensor. Data type supported: U16/S16/U32/S32/F16/F32. Data layouts supported: NHWC.
+     * @param[in]  input               Source tensor. Data type supported: All. Data layouts supported: NHWC.
      * @param[out] output              Destination tensor. Data type supported: F32
      * @param[in]  start               Coordinates of where to start cropping the image.
      * @param[in]  end                 Coordinates of where to end cropping the image.
@@ -78,7 +78,7 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in] input               Source tensor info. Data type supported: U16/S16/U32/S32/F16/F32. Data layouts supported: NHWC.
+     * @param[in] input               Source tensor info. Data type supported: All. Data layouts supported: NHWC.
      * @param[in] output              Destination tensor info. Data type supported: F32
      * @param[in] start               Coordinates of where to start cropping the image.
      * @param[in] end                 Coordinates of where to end cropping the image.

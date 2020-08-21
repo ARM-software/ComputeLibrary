@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,7 +79,7 @@ struct TensorDescriptor;
 /** Graph configuration structure */
 struct GraphConfig
 {
-    bool        use_function_memory_manager{ true };   /**< Use a memory manager to manage per-funcion auxilary memory */
+    bool        use_function_memory_manager{ true };   /**< Use a memory manager to manage per-function auxilary memory */
     bool        use_function_weights_manager{ true };  /**< Use a weights manager to manage transformed weights */
     bool        use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
     bool        use_tuner{ false };                    /**< Use a tuner in tunable backends */
@@ -103,7 +103,13 @@ enum class EltwiseOperation
 {
     Add, /**< Arithmetic addition */
     Sub, /**< Arithmetic subtraction */
-    Mul  /**< Arithmetic multiplication */
+    Mul, /**< Arithmetic multiplication */
+};
+
+/** Supported Unary Element-wise operations */
+enum class UnaryEltwiseOperation
+{
+    Exp /**< Exp */
 };
 
 /** Supported Convolution layer methods */
@@ -168,6 +174,7 @@ enum class NodeType
     SplitLayer,
     StackLayer,
     UpsampleLayer,
+    UnaryEltwiseLayer,
     YOLOLayer,
 
     Input,

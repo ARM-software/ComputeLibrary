@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,11 @@ public:
         _real_scheduler.set_num_threads(num_threads);
     }
 
+    void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func) override
+    {
+        _real_scheduler.set_num_threads_with_affinity(num_threads, func);
+    }
+
     unsigned int num_threads() const override
     {
         return _real_scheduler.num_threads();
@@ -77,6 +82,19 @@ public:
     {
         _timer.start();
         _real_scheduler.schedule(kernel, hints);
+        _timer.stop();
+
+        typename SchedulerClock<output_timestamps>::kernel_info info;
+        info.name         = kernel->name();
+        info.prefix       = _prefix;
+        info.measurements = _timer.measurements();
+        _kernels.push_back(std::move(info));
+    }
+
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) override
+    {
+        _timer.start();
+        _real_scheduler.schedule_op(kernel, hints, tensors);
         _timer.stop();
 
         typename SchedulerClock<output_timestamps>::kernel_info info;

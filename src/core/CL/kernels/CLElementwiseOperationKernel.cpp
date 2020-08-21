@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 #include "support/StringSupport.h"
 #include <map>
 
@@ -93,9 +94,13 @@ Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &inp
 Status validate_arguments_with_arithmetic_rules(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input2);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S32, DataType::F32);
 
     const bool is_quantized = is_data_type_quantized(input1.data_type()) || is_data_type_quantized(input2.data_type());
     if(is_quantized)
@@ -119,7 +124,9 @@ Status validate_arguments_with_arithmetic_rules(const ITensorInfo &input1, const
     if(output.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                             DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                             DataType::S32, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((output.data_type() == DataType::U8) && ((input1.data_type() != DataType::U8) || (input2.data_type() != DataType::U8)),
                                         "Output can only be U8 if both inputs are U8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),
@@ -235,18 +242,15 @@ CLElementwiseOperationKernel::CLElementwiseOperationKernel()
 {
 }
 
-void CLElementwiseOperationKernel::configure_common(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLElementwiseOperationKernel::configure_common(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
     configure_common(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
 }
 
-void CLElementwiseOperationKernel::configure_common(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLElementwiseOperationKernel::configure_common(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
-
     // Configure kernel window
-    auto win_config = validate_and_configure_window(*input1->info(), *input2->info(), *output->info());
+    auto win_config = validate_and_configure_window(*input1, *input2, *output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     _input1 = input1;
@@ -254,13 +258,13 @@ void CLElementwiseOperationKernel::configure_common(const CLCompileContext &comp
     _output = output;
 
     std::string kernel_name = "elementwise_operation_" + name();
-    if(is_data_type_quantized(input1->info()->data_type()))
+    if(is_data_type_quantized(input1->data_type()))
     {
         kernel_name += "_quantized";
     }
 
     // Set kernel build options
-    CLBuildOptions build_opts = generate_build_options(*input1->info(), *input2->info(), *output->info());
+    CLBuildOptions build_opts = generate_build_options(*input1, *input2, *output);
     if(_act_info.enabled())
     {
         build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(_act_info.activation())));
@@ -273,17 +277,21 @@ void CLElementwiseOperationKernel::configure_common(const CLCompileContext &comp
 
     ICLKernel::configure_internal(win_config.second);
 
-    _config_id = generate_id_for_tuning(kernel_name, *input1->info(), *output->info());
+    _config_id = generate_id_for_tuning(kernel_name, *input1, *output);
 }
 
-void CLElementwiseOperationKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLElementwiseOperationKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const TensorShape &in_shape1 = _input1->info()->tensor_shape();
-    const TensorShape &in_shape2 = _input2->info()->tensor_shape();
-    const TensorShape &out_shape = _output->info()->tensor_shape();
+    const auto src_0 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const auto src_1 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    auto       dst   = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+
+    const TensorShape &in_shape1 = src_0->info()->tensor_shape();
+    const TensorShape &in_shape2 = src_1->info()->tensor_shape();
+    const TensorShape &out_shape = dst->info()->tensor_shape();
 
     bool       can_collapse = true;
     const bool is_vector    = in_shape1.num_dimensions() == 1 || in_shape2.num_dimensions() == 1;
@@ -310,9 +318,9 @@ void CLElementwiseOperationKernel::run(const Window &window, cl::CommandQueue &q
     {
         unsigned int idx = 0;
 
-        add_3D_tensor_argument(idx, _input1, slice_input1);
-        add_3D_tensor_argument(idx, _input2, slice_input2);
-        add_3D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, src_0, slice_input1);
+        add_3D_tensor_argument(idx, src_1, slice_input2);
+        add_3D_tensor_argument(idx, dst, slice);
 
         enqueue(queue, *this, slice, lws_hint());
 
@@ -324,23 +332,26 @@ void CLElementwiseOperationKernel::run(const Window &window, cl::CommandQueue &q
 
 BorderSize CLElementwiseOperationKernel::border_size() const
 {
-    const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
+    const unsigned int replicateSize = _output->dimension(0) - std::min(_input1->dimension(0), _input2->dimension(0));
     const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
     return BorderSize{ 0, border, 0, 0 };
 }
 
 /** Arithmetic operations with saturation*/
 
-void CLSaturatedArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy,
+void CLSaturatedArithmeticOperationKernel::configure(ArithmeticOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ConvertPolicy &policy,
                                                      const ActivationLayerInfo &act_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), op, input1, input2, output, policy, act_info);
 }
 
-void CLSaturatedArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+void CLSaturatedArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output,
                                                      const ConvertPolicy       &policy,
                                                      const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_ERROR_THROW_ON(CLSaturatedArithmeticOperationKernel::validate(op, input1, input2, output, policy, act_info));
+
     _policy   = policy;
     _op       = op;
     _act_info = act_info;
@@ -362,11 +373,6 @@ Status CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation op, co
 std::pair<Status, Window> CLSaturatedArithmeticOperationKernel::validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
     return validate_and_configure_window_for_arithmetic_operators(input1, input2, output);
-}
-
-Status CLSaturatedArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
-{
-    return validate_arguments_with_arithmetic_rules(input1, input2, output);
 }
 
 CLBuildOptions CLSaturatedArithmeticOperationKernel::generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
@@ -391,14 +397,17 @@ std::string CLSaturatedArithmeticOperationKernel::name()
 
 /** Arithmetic operations*/
 
-void CLArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+void CLArithmeticOperationKernel::configure(ArithmeticOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), op, input1, input2, output, act_info);
 }
 
-void CLArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+void CLArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output,
                                             const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_ERROR_THROW_ON(CLArithmeticOperationKernel::validate(op, input1, input2, output, act_info));
+
     _op       = op;
     _act_info = act_info;
     configure_common(compile_context, input1, input2, output);
@@ -432,18 +441,6 @@ std::pair<Status, Window> CLArithmeticOperationKernel::validate_and_configure_wi
     else
     {
         return validate_and_configure_window_for_arithmetic_operators(input1, input2, output);
-    }
-}
-Status CLArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
-{
-    if(_op == ArithmeticOperation::DIV || _op == ArithmeticOperation::POWER)
-    {
-        // Division and Power operators don't support integer arithmetic
-        return validate_arguments_with_float_only_supported_rules(input1, input2, output);
-    }
-    else
-    {
-        return validate_arguments_with_arithmetic_rules(input1, input2, output);
     }
 }
 

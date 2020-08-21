@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ARM Limited.
+ * Copyright (c) 2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,4 +30,3 @@ namespace arm_gemm {
 using bfloat16 = arm_compute::bfloat16;
 
 } // namespace arm_gemm
-

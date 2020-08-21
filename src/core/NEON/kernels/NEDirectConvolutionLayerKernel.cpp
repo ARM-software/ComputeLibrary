@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -979,7 +979,7 @@ public:
         //  |__________________|
         //  |     pad_bottom   |
         //  |******************|
-        const int max_offset = input_stride_z * input_depth - (input->info()->padding().bottom + input->info()->padding().top) * input_stride_y;
+        const int64_t max_offset = input_stride_z * input_depth - (input->info()->padding().bottom + input->info()->padding().top) * input_stride_y;
         execute_window_loop(window_k, [&](const Coordinates & id_k) // loop on the batch size
         {
 
@@ -1002,34 +1002,34 @@ public:
                 for(int x = 0; x < input_width; x += num_elems_read_per_iteration)
                 {
                     // z == 0
-                    auto in_z   = static_cast<int>(id.z() * conv_stride_y - conv_pad_top);
+                    auto in_z   = static_cast<int64_t>(id.z() * conv_stride_y - conv_pad_top);
                     in_z        = std::min(static_cast<unsigned int>(in_z), static_cast<unsigned int>(input_depth));
                     auto offset = y_offset + in_z * input_stride_z;
                     offset      = std::min(offset, max_offset);
                     convolve_row1x9_nhwc(in_ptr + offset + x, weights_ptr + 0 * kernel_stride_z + x, input_stride_y, kernel_stride_y, out0, out1, out2, out3);
 
                     // z == 1
-                    in_z   = static_cast<int>(id.z() * conv_stride_y - conv_pad_top + 1);
+                    in_z   = static_cast<int64_t>(id.z() * conv_stride_y - conv_pad_top + 1);
                     in_z   = std::min(static_cast<unsigned int>(in_z), static_cast<unsigned int>(input_depth));
                     offset = y_offset + in_z * input_stride_z;
                     offset = std::min(offset, max_offset);
                     convolve_row1x9_nhwc(in_ptr + offset + x, weights_ptr + 1 * kernel_stride_z + x, input_stride_y, kernel_stride_y, out0, out1, out2, out3);
 
                     // z == 2
-                    in_z   = static_cast<int>(id.z() * conv_stride_y - conv_pad_top + 2);
+                    in_z   = static_cast<int64_t>(id.z() * conv_stride_y - conv_pad_top + 2);
                     in_z   = std::min(static_cast<unsigned int>(in_z), static_cast<unsigned int>(input_depth));
                     offset = y_offset + in_z * input_stride_z;
                     offset = std::min(offset, max_offset);
                     convolve_row1x9_nhwc(in_ptr + offset + x, weights_ptr + 2 * kernel_stride_z + x, input_stride_y, kernel_stride_y, out0, out1, out2, out3);
 
                     // z == 3
-                    in_z   = static_cast<int>(id.z() * conv_stride_y - conv_pad_top + 3);
+                    in_z   = static_cast<int64_t>(id.z() * conv_stride_y - conv_pad_top + 3);
                     offset = y_offset + in_z * input_stride_z;
                     offset = std::min(offset, max_offset);
                     convolve_row1x9_nhwc(in_ptr + offset + x, weights_ptr + 3 * kernel_stride_z + x, input_stride_y, kernel_stride_y, out0, out1, out2, out3);
 
                     // z == 4
-                    in_z   = static_cast<int>(id.z() * conv_stride_y - conv_pad_top + 4);
+                    in_z   = static_cast<int64_t>(id.z() * conv_stride_y - conv_pad_top + 4);
                     offset = y_offset + in_z * input_stride_z;
                     convolve_row1x9_nhwc(in_ptr + offset + x, weights_ptr + 4 * kernel_stride_z + x, input_stride_y, kernel_stride_y, out0, out1, out2, out3);
 

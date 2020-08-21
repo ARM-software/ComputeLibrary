@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,9 +51,9 @@ public:
      *
      * @note At least one of output1 or output2 must be set.
      *
-     * @param[in]  gx         The input gradient X tensor. Data types supported: S16.
-     * @param[in]  gy         The input gradient Y tensor. Data types supported: S16.
-     * @param[out] magnitude  (Optional) The output tensor - Magnitude. Data types supported: S16.
+     * @param[in]  gx         The input gradient X tensor. Data types supported: S16/S32.
+     * @param[in]  gy         The input gradient Y tensor. Data types supported: S16/S32.
+     * @param[out] magnitude  (Optional) The output tensor - Magnitude. Data types supported: S16/S32.
      * @param[out] phase      (Optional) The output tensor - Phase. Data types supported: U8.
      * @param[in]  mag_type   (Optional) Magnitude calculation type. Default: L2NORM.
      * @param[in]  phase_type (Optional) Phase calculation type. Default: SIGNED.
@@ -65,9 +65,9 @@ public:
      * @note At least one of output1 or output2 must be set.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  gx              The input gradient X tensor. Data types supported: S16.
-     * @param[in]  gy              The input gradient Y tensor. Data types supported: S16.
-     * @param[out] magnitude       (Optional) The output tensor - Magnitude. Data types supported: S16.
+     * @param[in]  gx              The input gradient X tensor. Data types supported: S16/S32.
+     * @param[in]  gy              The input gradient Y tensor. Data types supported: S16/S32.
+     * @param[out] magnitude       (Optional) The output tensor - Magnitude. Data types supported: S16/S32.
      * @param[out] phase           (Optional) The output tensor - Phase. Data types supported: U8.
      * @param[in]  mag_type        (Optional) Magnitude calculation type. Default: L2NORM.
      * @param[in]  phase_type      (Optional) Phase calculation type. Default: SIGNED.

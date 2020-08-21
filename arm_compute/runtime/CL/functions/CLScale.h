@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CLSCALE_H
 #define ARM_COMPUTE_CLSCALE_H
 
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -39,6 +40,23 @@ class CLScale : public ICLSimpleFunction
 public:
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
+     * @param[in,out] input  Source tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]    output Destination tensor. Data types supported: Same as @p input
+     *                       All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in]     info   @ref ScaleKernelInfo descriptor to be used to configure
+     */
+    void configure(ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info);
+    /** Initialize the function's source, destination, interpolation type and border_mode.
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] input           Source tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]    output          Destination tensor. Data types supported: Same as @p input
+     *                                All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in]     info            @ref ScaleKernelInfo descriptor to be used to configure
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info);
+    /** Initialize the function's source, destination, interpolation type and border_mode.
+     *
      * @param[in,out] input                 Source tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
      * @param[out]    output                Destination tensor. Data types supported: Same as @p input
      *                                      All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
@@ -49,6 +67,7 @@ public:
      * @param[in]     use_padding           (Optional) Is padding in use or not. Defaults to true.
      * @param[in]     align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.08)
     void configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
                    SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
     /** Initialize the function's source, destination, interpolation type and border_mode.
@@ -64,9 +83,20 @@ public:
      * @param[in]     use_padding           (Optional) Is padding in use or not. Defaults to true.
      * @param[in]     align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.08)
     void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
                    SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
 
+    /** Static function to check if given info will lead to a valid configuration of @ref CLScale
+     *
+     * @param[in] input  Source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32.
+     * @param[in] output Output tensor info. Data type supported: Same as @p input
+     *                   All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in] info   @ref ScaleKernelInfo descriptor to be used to validate
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLScale
      *
      * @param[in] input                 Source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32.
@@ -81,6 +111,7 @@ public:
      *
      * @return a status
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.08)
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
                            SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
 };

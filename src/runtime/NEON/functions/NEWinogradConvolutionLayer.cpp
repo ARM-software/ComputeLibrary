@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,16 +25,16 @@
 
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+#include "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 #include "support/MemorySupport.h"
 
 #include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd.hpp"
+#include "src/core/NEON/kernels/convolution/winograd/winograd.hpp"
 
 namespace arm_compute
 {
@@ -62,7 +62,7 @@ inline Status validate_kernel_3x3(const Size2D input_dims, const ITensorInfo *in
         }
     }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    else if(input->data_type() == DataType::F32)
+    else if(input->data_type() == DataType::F16)
     {
         ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<__fp16, 4, 4, 3, 3>::validate(input, input0, winograd_info)));
         ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<__fp16, 4, 4, 3, 3>::validate(weights, input1, winograd_info)));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
     DataType::F16,
 });
 
-/** Align corners, this functionality is supported only by NEON */
+/** Aligned corners, this functionality is supported only by NEON and OpenCL backends */
 const auto AlignCorners = framework::dataset::make("AlignCorners",
 {
     false,
@@ -90,7 +90,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Create and configure function
     GCScale gcscale;
-    gcscale.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy);
+    gcscale.configure(&src, &dst, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy });
 
     // Get border size depending on border mode
     const BorderSize border_size(border_mode == BorderMode::UNDEFINED ? 0 : 1);

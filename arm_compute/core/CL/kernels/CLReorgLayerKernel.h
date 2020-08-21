@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ public:
     CLReorgLayerKernel &operator=(CLReorgLayerKernel &&) = default;
     /** Initialize the kernel's input, output.
      *
-     * @param[in]  input  Source tensor. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input  Source tensor. Data types supported: All.
      * @param[out] output Destination tensor with tensor shape:
      *                    [width_input / stride, height_input / stride, channels_input * stride * stride, batch_size]. This means the output has
      *                    the same number of input elements. Data types supported: same as @p input.
@@ -58,7 +58,7 @@ public:
     /** Initialize the kernel's input, output.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input           Source tensor. Data types supported: All.
      * @param[out] output          Destination tensor with tensor shape:
      *                             [width_input / stride, height_input / stride, channels_input * stride * stride, batch_size]. This means the output has
      *                             the same number of input elements. Data types supported: same as @p input.

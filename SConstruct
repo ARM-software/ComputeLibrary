@@ -1,4 +1,4 @@
-# Copyright (c) 2016, 2017 ARM Limited.
+# Copyright (c) 2016, 2017 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -204,7 +204,7 @@ elif 'v8' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8-a'])
 
     if 'v8.6-a' in env['arch']:
-        env.Append(CPPDEFINES = ['V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
+        env.Append(CPPDEFINES = ['MMLA_INT8', 'MMLA_FP32', 'V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
 
 elif 'x86' in env['arch']:
     if env['estate'] == '32':

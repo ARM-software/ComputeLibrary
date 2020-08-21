@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "arm_compute/runtime/CL/functions/CLArgMinMaxLayer.h"
 
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -34,13 +35,15 @@
 namespace arm_compute
 {
 CLArgMinMaxLayer::CLArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _results_vector(), _not_reshaped_output(), _reduction_kernels_vector(), _reshape_kernel(), _num_of_stages(), _reduction_axis()
+    : _memory_group(std::move(memory_manager)), _results_vector(), _not_reshaped_output(), _reduction_kernels_vector(), _reshape(), _num_of_stages(), _reduction_axis()
 {
 }
 
 Status CLArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN, "Invalid reduction operation");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= static_cast<int>(TensorShape::num_max_dimensions), "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
@@ -100,7 +103,7 @@ Status CLArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITen
         const unsigned int last_stage = num_of_stages - 1;
         ARM_COMPUTE_RETURN_ON_ERROR(CLArgMinMaxLayerKernel::validate(input, &sums_vector[last_stage - 1], &not_reshaped_output, axis, op));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(&not_reshaped_output, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayer::validate(&not_reshaped_output, output));
     return Status{};
 }
 
@@ -155,7 +158,7 @@ void CLArgMinMaxLayer::configure(const CLCompileContext &compile_context, const 
         _reduction_kernels_vector[last_stage].configure(compile_context, input, &_results_vector[last_stage - 1], &_not_reshaped_output, axis, op);
         _results_vector[last_stage - 1].allocator()->allocate();
     }
-    _reshape_kernel.configure(compile_context, &_not_reshaped_output, output);
+    _reshape.configure(compile_context, &_not_reshaped_output, output);
     _not_reshaped_output.allocator()->allocate();
 }
 
@@ -167,6 +170,6 @@ void CLArgMinMaxLayer::run()
     {
         CLScheduler::get().enqueue(_reduction_kernels_vector[i], false);
     }
-    CLScheduler::get().enqueue(_reshape_kernel, false);
+    _reshape.run();
 }
 } // namespace arm_compute

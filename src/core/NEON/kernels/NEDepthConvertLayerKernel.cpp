@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -849,7 +849,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const float16_t   scale_s = 1 << _shift;
                     const float16x8_t scale   = vdupq_n_f16(scale_s);
 
-                    /* Up-conversion F16 -> QASYMM8_SIGNED */
+                    /* Down-conversion F16 -> QASYMM8_SIGNED (Always saturating) */
                     execute_window_loop(win, [&](const Coordinates &)
                     {
                         const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
@@ -872,7 +872,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                         // Compute left-over elements
                         for(; x < window_end_x; ++x)
                         {
-                            *(output_ptr + x) = static_cast<int8_t>(*(input_ptr + x) * scale_s);
+                            *(output_ptr + x) = utils::cast::saturate_cast<int8_t>(*(input_ptr + x) * scale_s);
                         }
                     },
                     input, output);
@@ -884,7 +884,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const float16_t   scale_s = 1 << _shift;
                     const float16x8_t scale   = vdupq_n_f16(scale_s);
 
-                    /* Up-conversion F16 -> U8 */
+                    /* Down-conversion F16 -> QASYMM8/U8 (Always saturating) */
                     execute_window_loop(win, [&](const Coordinates &)
                     {
                         const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
@@ -907,7 +907,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                         // Compute left-over elements
                         for(; x < window_end_x; ++x)
                         {
-                            *(output_ptr + x) = static_cast<uint8_t>(*(input_ptr + x) * scale_s);
+                            *(output_ptr + x) = utils::cast::saturate_cast<uint8_t>(*(input_ptr + x) * scale_s);
                         }
 
                     },
@@ -1215,7 +1215,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                         // Compute left-over elements
                         for(; x < window_end_x; ++x)
                         {
-                            *(output_ptr + x) = static_cast<int8_t>(*(input_ptr + x) * scale_s);
+                            *(output_ptr + x) = static_cast<float16_t>(*(input_ptr + x) * scale_s);
                         }
                     },
                     input, output);

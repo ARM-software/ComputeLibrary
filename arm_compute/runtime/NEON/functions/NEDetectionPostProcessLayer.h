@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,9 +55,9 @@ public:
     NEDetectionPostProcessLayer &operator=(const NEDetectionPostProcessLayer &) = delete;
     /** Configure the detection output layer NE function
      *
-     * @param[in]  input_box_encoding The bounding box input tensor. Data types supported: F32, QASYMM8.
-     * @param[in]  input_score        The class prediction input tensor. Data types supported: Same as @p input_box_encoding.
-     * @param[in]  input_anchors      The anchors input tensor. Data types supported: Same as @p input_box_encoding.
+     * @param[in]  input_box_encoding The bounding box input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F32.
+     * @param[in]  input_score        The class prediction input tensor. Data types supported: same as @p input_box_encoding.
+     * @param[in]  input_anchors      The anchors input tensor. Data types supported: same as @p input_box_encoding.
      * @param[out] output_boxes       The boxes output tensor. Data types supported: F32.
      * @param[out] output_classes     The classes output tensor. Data types supported: Same as @p output_boxes.
      * @param[out] output_scores      The scores output tensor. Data types supported: Same as @p output_boxes.
@@ -70,14 +70,14 @@ public:
                    ITensor *output_boxes, ITensor *output_classes, ITensor *output_scores, ITensor *num_detection, DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEDetectionPostProcessLayer
      *
-     * @param[in]  input_box_encoding The bounding box input tensor info. Data types supported: F32, QASYMM8.
-     * @param[in]  input_class_score  The class prediction input tensor info. Data types supported: F32, QASYMM8.
-     * @param[in]  input_anchors      The anchors input tensor. Data types supported: F32, QASYMM8.
-     * @param[out] output_boxes       The output tensor. Data types supported: F32.
-     * @param[out] output_classes     The output tensor. Data types supported: Same as @p output_boxes.
-     * @param[out] output_scores      The output tensor. Data types supported: Same as @p output_boxes.
-     * @param[out] num_detection      The number of output detection. Data types supported: Same as @p output_boxes.
-     * @param[in]  info               (Optional) DetectionPostProcessLayerInfo information.
+     * @param[in] input_box_encoding The bounding box input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F32.
+     * @param[in] input_class_score  The class prediction input tensor info. Data types supported: same as @p input_box_encoding.
+     * @param[in] input_anchors      The anchors input tensor info. Data types supported: same as @p input_box_encoding.
+     * @param[in] output_boxes       The output tensor info. Data types supported: F32.
+     * @param[in] output_classes     The output tensor info. Data types supported: Same as @p output_boxes.
+     * @param[in] output_scores      The output tensor info. Data types supported: Same as @p output_boxes.
+     * @param[in] num_detection      The number of output detection tensor info. Data types supported: Same as @p output_boxes.
+     * @param[in] info               (Optional) DetectionPostProcessLayerInfo information.
      *
      * @return a status
      */

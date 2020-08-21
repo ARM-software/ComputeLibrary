@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input             Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  input             Source tensor. Data types supported: All.
      * @param[out] output            Destination tensor. Data types supported: same as @p input.
      * @param[in]  info              Contains stride information described in @ref Size2D.
      * @param[in]  upsampling_policy Defines the policy to fill the intermediate pixels.
@@ -58,7 +58,7 @@ public:
     /** Initialise the kernel's input and output.
      *
      * @param[in]  compile_context   The compile context to be used.
-     * @param[in]  input             Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  input             Source tensor. Data types supported: All.
      * @param[out] output            Destination tensor. Data types supported: same as @p input.
      * @param[in]  info              Contains stride information described in @ref Size2D.
      * @param[in]  upsampling_policy Defines the policy to fill the intermediate pixels.
@@ -66,7 +66,7 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &info, const InterpolationPolicy upsampling_policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLUpsampleLayerKernel
      *
-     * @param[in] input             Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in] input             Source tensor info. Data types supported: All.
      * @param[in] output            Destination tensor info. Data types supported: same as @p input.
      * @param[in] info              Contains  stride information described in @ref Size2D.
      * @param[in] upsampling_policy Defines the policy to fill the intermediate pixels.

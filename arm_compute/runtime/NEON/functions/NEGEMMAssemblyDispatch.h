@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,14 +24,11 @@
 #ifndef ARM_COMPUTE_NEGEMMASSEMBLYDISPATCH_H
 #define ARM_COMPUTE_NEGEMMASSEMBLYDISPATCH_H
 
-#include "arm_compute/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
-
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
 
 namespace arm_compute
 {

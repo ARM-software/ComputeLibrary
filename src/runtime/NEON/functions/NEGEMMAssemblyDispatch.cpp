@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,13 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 
+#include "src/core/NEON/kernels/assembly/arm_gemm.hpp"
+
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NESimpleAssemblyFunction.h"
+
+#include "src/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
 
 #include <arm_neon.h>
 
@@ -280,7 +284,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensor *a, c
     //if we disable this code below in brackets then ConvLayer deadlocks when threads > 1 and
     //the shapes are In=1x1x1024 Weights=1x1x1024x1001 Biases=1001 Out=1x1x1001
     {
-        const unsigned int window_size = get_total_window_size(*_gemm_kernel_asm);
+        const unsigned int window_size = _gemm_kernel_asm->get_window_size().total_size();
         if(window_size < static_cast<unsigned int>(args._maxthreads))
         {
             _gemm_kernel_asm->set_nthreads(window_size);
@@ -404,7 +408,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
     if(_workspace.buffer() != nullptr)
     {
         _gemm_kernel_asm->set_working_space(reinterpret_cast<void *>(_workspace.buffer()));
-        const unsigned int window_size = get_total_window_size(*_gemm_kernel_asm);
+        const unsigned int window_size = _gemm_kernel_asm->get_window_size().total_size();
         unsigned int       num_threads = NEScheduler::get().num_threads();
         if(window_size < num_threads)
         {
@@ -433,11 +437,17 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
     {
         const int granule_threshold = 200;
         scheduling_hint             = IScheduler::Hints(Window::DimX, IScheduler::StrategyHint::DYNAMIC, granule_threshold);
-
     }
-    else if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED_2D && _d->info()->data_type() == DataType::F32)
+    else if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED_2D && (_d->info()->data_type() == DataType::F32 || _d->info()->data_type() == DataType::F16
+                                                                                 || _d->info()->data_type() == DataType::U8 || _d->info()->data_type() == DataType::S8))
     {
         //GEMM_INTERLEAVED supports 2D parallelism, IScheduler::split_dimensions_all signals to parallelise over all window dimensions
+        const int granule_threshold = 200;
+        scheduling_hint             = IScheduler::Hints(IScheduler::split_dimensions_all, IScheduler::StrategyHint::STATIC, granule_threshold);
+    }
+    else if(_kernel_info.method == arm_gemm::GemmMethod::QUANTIZE_WRAPPER_2D && (_d->info()->data_type() == DataType::QASYMM8 || _d->info()->data_type() == DataType::QASYMM8_SIGNED))
+    {
+        //special case for QASYMM8 to support 2D parallelism, scheduler here may be tweaked differently compared to FP32 case
         const int granule_threshold = 200;
         scheduling_hint             = IScheduler::Hints(IScheduler::split_dimensions_all, IScheduler::StrategyHint::STATIC, granule_threshold);
     }
@@ -454,7 +464,7 @@ void create_arm_gemm(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &arm_gem
     const CPUInfo               &ci          = NEScheduler::get().cpu_info();
     unsigned int                 num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.batches, p.multis, false, false, activation, num_threads, gemm_info.pretranpose_B());
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.batches, p.multis, activation, num_threads);
 
     // Create arm_gemm fallback
     auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput>>();
@@ -467,11 +477,12 @@ void create_arm_gemm_quant(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &a
                            const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, arm_gemm::Activation activation, const GEMMInfo &gemm_info,
                            IWeightsManager *weights_manager)
 {
+    ARM_COMPUTE_UNUSED(activation);
     INEGEMMWrapperKernel::Params p           = INEGEMMWrapperKernel::extract_parameters(a, b, d, gemm_info);
     const CPUInfo               &ci          = NEScheduler::get().cpu_info();
     unsigned int                 num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.batches, p.multis, false, false, activation, num_threads, gemm_info.pretranpose_B());
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.batches, p.multis, activation, num_threads);
 
     // Create arm_gemm fallback
     auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();
@@ -512,10 +523,12 @@ NEGEMMAssemblyDispatch::NEGEMMAssemblyDispatch(std::shared_ptr<IMemoryManager> m
 
 Status NEGEMMAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const GEMMInfo &gemm_info)
 {
-    ARM_COMPUTE_UNUSED(gemm_info, c);
+    ARM_COMPUTE_UNUSED(c);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(a);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(!gemm_info.pretranpose_B());
 #ifndef __aarch64__
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->element_size() == 1, "8bit integer types only supported for aarch64");
 #endif /* __aarch64__ */

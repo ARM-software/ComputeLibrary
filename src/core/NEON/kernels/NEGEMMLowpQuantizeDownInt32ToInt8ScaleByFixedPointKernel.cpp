@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -140,7 +140,7 @@ void NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::run(const Window 
                 in_s32.val[3] = vaddq_s32(in_s32.val[3], bias_s32.val[3]);
 
                 vst1q_s8(reinterpret_cast<int8_t *>(out.ptr() + x),
-                         finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_s8, max_s8));
+                         finalize_quantization(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_s8, max_s8, is_bounded_relu));
             }
 
             // Compute left-over elements
@@ -152,8 +152,8 @@ void NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::run(const Window 
                 // Add bias
                 in_value += bias_value;
                 // Finalize and store the result
-                *reinterpret_cast<int8_t *>(out.ptr() + x) = finalize_quantization<is_bounded_relu>(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift,
-                                                                                                    static_cast<int8_t>(_min), static_cast<int8_t>(_max));
+                *reinterpret_cast<int8_t *>(out.ptr() + x) = finalize_quantization(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift,
+                                                                                   static_cast<int8_t>(_min), static_cast<int8_t>(_max), is_bounded_relu);
             }
         },
         in, out, bias);
@@ -177,7 +177,7 @@ void NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::run(const Window 
                 };
 
                 vst1q_s8(reinterpret_cast<int8_t *>(out.ptr() + x),
-                         finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_s8, max_s8));
+                         finalize_quantization(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_s8, max_s8, is_bounded_relu));
             }
 
             // Compute left-over elements
@@ -186,8 +186,8 @@ void NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::run(const Window 
                 const int32_t in_value = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
 
                 // Finalize and store the result
-                *reinterpret_cast<int8_t *>(out.ptr() + x) = finalize_quantization<is_bounded_relu>(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift,
-                                                                                                    static_cast<int8_t>(_min), static_cast<int8_t>(_max));
+                *reinterpret_cast<int8_t *>(out.ptr() + x) = finalize_quantization(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift,
+                                                                                   static_cast<int8_t>(_min), static_cast<int8_t>(_max), is_bounded_relu);
             }
         },
         in, out);

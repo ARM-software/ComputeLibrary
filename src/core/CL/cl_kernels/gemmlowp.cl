@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -835,11 +835,6 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
     // Convert result of matrix multiplication to S32
     REPEAT_VAR_INIT_CONVERT_SAT(M0, VEC_DATA_TYPE(int, N0), c, c_int);
 
-    int batch_id = z;
-#if defined(DEPTH_GEMM3D)
-    batch_id /= (int)DEPTH_GEMM3D;
-#endif // defined(DEPTH_GEMM3D)
-
     // Offset contribution: c += (A_OFFSET * sum_col) + (B_OFFSET * sum_row) +  K_OFFSET;
     REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(int, N0), offset_s32_, K_OFFSET);
 
@@ -859,11 +854,11 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
 
 #if defined(B_OFFSET)
     // Compute the offset contribution due to B_OFFSET
+    // Note: The sum_row tensor is generated through CLGEMMLowpMatrixAReductionKernel which
+    // does not introduce paddings. For this reason is safe to access the tensor in this manner
+    // without considering that the coordinate "y" could come from an input 3D tensor
     __global uchar *sum_row_addr = sum_row_ptr + sum_row_offset_first_element_in_bytes + (y * (uint)M0) * sizeof(int) + z * sum_row_stride_y;
 
-#if defined(HEIGHT_GEMM3D) && defined(DEPTH_GEMM3D)
-    sum_row_addr += (batch_id % (int)DEPTH_GEMM3D) * (int)HEIGHT_GEMM3D * sizeof(int);
-#endif // defined(HEIGHT_GEMM3D) && defined(DEPTH_GEMM3D)
     LOAD_SCALAR_AS_VECTOR(M0, N0, int, b_offset_s32_, sum_row_addr, 0, sum_row_stride_x);
 
     REPEAT_MLA_VAR_WITH_CONST_VEC(M0, offset_s32_, b_offset_s32_, (VEC_DATA_TYPE(int, N0))B_OFFSET);
@@ -1115,7 +1110,7 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
  * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note In case of scaling the scalar value must be passed at compile time using -DSCALAR (e.g. -DSCALAR=3)
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED/QSYMM8
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -1180,7 +1175,7 @@ __kernel void gemmlowp_matrix_a_reduction(TENSOR3D_DECLARATION(src),
  * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note In case of scaling the scalar value must be passed at compile time using -DSCALAR (e.g. -DSCALAR=3)
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED/QSYMM8
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -1253,7 +1248,7 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
  * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note In case of scaling the scalar value must be passed at compile time using -DSCALAR (i.e. -DSCALAR=3)
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

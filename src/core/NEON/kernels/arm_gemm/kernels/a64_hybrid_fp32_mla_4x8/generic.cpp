@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
 
 namespace arm_gemm {
 
-void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, int ldc, int M, int N, int K, const float *bias, Activation act, bool append) {
+void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, int ldc, int M, int N, int K, const float *bias, Activation act, bool accumulate) {
     const int K_stride = K;
     const long loops_count = ((K + 4) / 8) - 1;
     K -= loops_count * 8;
@@ -40,7 +40,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
     K -= (regs_count + 1) * 4;
     const long blocks_count = K / 1;
     float nullbias[4];
-    if (!append && !bias) {
+    if (!accumulate && !bias) {
         memset(nullbias, 0, (4 * sizeof(float)));
     }
     float minval = - static_cast<float>(std::numeric_limits<float>::infinity());
@@ -61,11 +61,22 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
             break;
     }
 
-    for (int y=0; y<M; y+=8) {
+    int rows_to_compute;
+
+    for (int y=0; y<M; y+=rows_to_compute) {
         const float * const a_ptr0_base = A + (y * lda);
         const unsigned long ldab = lda * sizeof(float);
 
         float *c_ptr0 = C + (y * ldc);
+
+        rows_to_compute = M-y;
+        if (rows_to_compute > 8) {
+            if (rows_to_compute % 8) {
+                rows_to_compute = 8 - 1;
+            } else {
+                rows_to_compute = 8;
+            }
+        }
 
         for (int x0=0; x0<N; x0+=4ul) {
             const long width = std::min((unsigned long)N-x0, 4ul);
@@ -78,7 +89,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
             float result_buffer[32];
             const unsigned long ldcb = (use_result_buffer ? 4 : ldc) * sizeof(float);
             float *c_ptr_real = c_ptr0;
-            if (use_result_buffer && append) {
+            if (use_result_buffer && accumulate) {
                 for(int cy=0; cy<std::min(M-y, 8); cy++) {
                     for(unsigned int cx=0; cx<width; cx++) {
                         result_buffer[cy * 4 + cx] = c_ptr_real[cy * ldc + cx];
@@ -90,7 +101,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
             }
             const float *biasptr = bias ? bias+x0 : nullbias;
 
-            switch(M-y) {
+            switch(rows_to_compute) {
                 case 1:
                     __asm __volatile (
                         "ldr q24, [%[biasptr]]\n"
@@ -168,7 +179,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
                         "str q24, [%[c_ptr0]]\n"
                         "add %[c_ptr0], %[c_ptr0], #0x10\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
                         : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "cc", "memory"
                     );
                     break;
@@ -291,7 +302,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
                         ".unreq a_ptr1\n"
                         ".unreq c_ptr1\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
                         : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x0", "x1", "cc", "memory"
                     );
                     break;
@@ -456,7 +467,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
                         ".unreq c_ptr1\n"
                         ".unreq c_ptr2\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
                         : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x0", "x1", "x2", "x3", "cc", "memory"
                     );
                     break;
@@ -663,7 +674,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
                         ".unreq c_ptr2\n"
                         ".unreq c_ptr3\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
                         : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x0", "x1", "x2", "x3", "x4", "x5", "cc", "memory"
                     );
                     break;
@@ -911,7 +922,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
                         ".unreq c_ptr3\n"
                         ".unreq c_ptr4\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
                         : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "cc", "memory"
                     );
                     break;
@@ -1200,7 +1211,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
                         ".unreq c_ptr4\n"
                         ".unreq c_ptr5\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
                         : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "cc", "memory"
                     );
                     break;
@@ -1530,7 +1541,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
                         ".unreq c_ptr5\n"
                         ".unreq c_ptr6\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
                         : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "cc", "memory"
                     );
                     break;
@@ -1902,7 +1913,7 @@ void a64_hybrid_fp32_mla_4x8(const float *A, int lda, const float *B, float *C, 
                         ".unreq c_ptr6\n"
                         ".unreq c_ptr7\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr)
                         : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "cc", "memory"
                     );
                     break;

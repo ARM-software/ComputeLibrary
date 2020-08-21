@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ public:
 
     kern_type kernel = a64_gemm_s16_asimd_12x8;
 
-    gemm_s16_12x8(const CPUInfo *ci) { UNUSED(ci); }
+    gemm_s16_12x8(const CPUInfo *) { }
 };
 
 } // namespace arm_gemm

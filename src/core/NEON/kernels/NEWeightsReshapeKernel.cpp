@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,15 +23,11 @@
  */
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 
-#include "arm_compute/core/Dimensions.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 TensorShape get_output_shape(const ITensorInfo *input, bool has_bias)
@@ -48,11 +44,9 @@ TensorShape get_output_shape(const ITensorInfo *input, bool has_bias)
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1,
-                                                         DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL,
-                                                         DataType::BFLOAT16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     if(biases != nullptr)
     {
@@ -179,3 +173,4 @@ void NEWeightsReshapeKernel::run(const Window &window, const ThreadInfo &info)
     },
     in);
 }
+} // namespace arm_compute

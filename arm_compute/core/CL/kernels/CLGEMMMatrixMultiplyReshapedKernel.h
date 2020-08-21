@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,19 +55,30 @@ public:
      *       Mixed precision combines different floating precisions during the computation, in particular, F32 for the accumulations and F16 for the
      *       multiplications. i.e. float c = (half)a * (half)b
      *
-     * @param[in]  input0    Input tensor containing the LHS reshaped matrix. Data type supported: F16/F32. The number of dimensions for the LHS matrix must be less or equal than 4
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will fetch the RHS data using the OpenCL read_image built-in function.
+     *       Reading from the OpenCL image object can increase the performance. However, since the OpenCL image object is created importing the OpenCL buffer,
+     *       the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# The stride Y for the input1 should satisfy the OpenCL pitch alignment requirement
+     *       -# input1 width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# input1 (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *
+     * @param[in]  input0    Input tensor containing the LHS reshaped matrix. Data type supported: F16/F32 (only F32 if rhs_info.export_to_cl_image = true). The number of dimensions for the LHS matrix must be less or equal than 4
      * @param[in]  input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3
      * @param[in]  input2    Input tensor containing the bias matrix. Data type supported: same as @p input0.
      * @param[out] output    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in]  alpha     Weight of the matrix product
      * @param[in]  beta      Weight of the matrix bias
-     * @param[in]  lhs_info  LHS matrix information used for reshaping the input0 tensor.  Only the following values are supported:
+     * @param[in]  lhs_info  LHS matrix information used for reshaping the input0 tensor. Only the following values are supported:
      *                       lhs_info.m0: 2,3,4,5,6,7,8
      *                       lhs_info.k0: 2,3,4,8,16
      *                       lhs_info.transpose: false
      * @param[in]  rhs_info  RHS matrix information used for reshaping the input1 tensor.  Only the following values are supported:
-     *                       rhs_info.n0: 2,3,4,8,16
-     *                       rhs_info.k0: 2,3,4,8,16
+     *                       rhs_info.n0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image = true)
+     *                       rhs_info.k0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image = true)
      *                       rhs_info.transpose: true
      * @param[in]  gemm_info GEMM information used to retrieve the original dimensions of the input matrices
      *
@@ -82,8 +93,19 @@ public:
      *       Mixed precision combines different floating precisions during the computation, in particular, F32 for the accumulations and F16 for the
      *       multiplications. i.e. float c = (half)a * (half)b
      *
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will fetch the RHS data using the OpenCL read_image built-in function.
+     *       Reading from the OpenCL image object can increase the performance. However, since the OpenCL image object is created importing the OpenCL buffer,
+     *       the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# The stride Y for the input1 should satisfy the OpenCL pitch alignment requirement
+     *       -# input1 width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# input1 (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input0          Input tensor containing the LHS reshaped matrix. Data type supported: F16/F32. The number of dimensions for the LHS matrix must be less or equal than 4
+     * @param[in]  input0          Input tensor containing the LHS reshaped matrix. Data type supported: F16/F32  (only F32 if rhs_info.export_to_cl_image = true). The number of dimensions for the LHS matrix must be less or equal than 4
      * @param[in]  input1          Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3
      * @param[in]  input2          Input tensor containing the bias matrix. Data type supported: same as @p input0.
      * @param[out] output          Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
@@ -94,8 +116,8 @@ public:
      *                             lhs_info.k0: 2,3,4,8,16
      *                             lhs_info.transpose: false
      * @param[in]  rhs_info        RHS matrix information used for reshaping the input1 tensor.  Only the following values are supported:
-     *                             rhs_info.n0: 2,3,4,8,16
-     *                             rhs_info.k0: 2,3,4,8,16
+     *                             rhs_info.n0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image = true)
+     *                             rhs_info.k0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image = true)
      *                             rhs_info.transpose: true
      * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
      *
@@ -107,7 +129,22 @@ public:
                    const GEMMKernelInfo    &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyReshapedKernel
      *
-     * @param[in] input0    Input tensor containing the LHS reshaped matrix. Data type supported: F16/F32. The number of dimensions for the LHS matrix must be less or equal than 4
+     * @note The F16 computation also supports mixed precision through the gemm_info.fp_mixed_precision flag.
+     *       Mixed precision combines different floating precisions during the computation, in particular, F32 for the accumulations and F16 for the
+     *       multiplications. i.e. float c = (half)a * (half)b
+     *
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will fetch the RHS data using the OpenCL read_image built-in function.
+     *       Reading from the OpenCL image object can increase the performance. However, since the OpenCL image object is created importing the OpenCL buffer,
+     *       the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# The stride Y for the input1 should satisfy the OpenCL pitch alignment requirement
+     *       -# input1 width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# input1 (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *
+     * @param[in] input0    Input tensor containing the LHS reshaped matrix. Data type supported: F16/F32  (only F32 if rhs_info.export_to_cl_image = true). The number of dimensions for the LHS matrix must be less or equal than 4
      * @param[in] input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3
      * @param[in] input2    Input tensor info containing the bias matrix. Data type supported: same as @p input0.
      * @param[in] output    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
@@ -118,8 +155,8 @@ public:
      *                      lhs_info.k0: 2,3,4,8,16
      *                      lhs_info.transpose: false
      * @param[in] rhs_info  RHS matrix information used for reshaping the input1 tensor.  Only the following values are supported:
-     *                      rhs_info.n0: 2,3,4,8,16
-     *                      rhs_info.k0: 2,3,4,8,16
+     *                      rhs_info.n0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image = true)
+     *                      rhs_info.k0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image = true)
      *                      rhs_info.transpose: true
      * @param[in] gemm_info GEMM information used to retrieve the original dimensions of the input matrices
      *
@@ -141,10 +178,11 @@ private:
     ICLTensor       *_output;
     bool             _slide_matrix_b;
     bool             _reinterpret_output_as_3d;
-    unsigned int     _k;
     bool             _use_dummy_work_items;
     bool             _add_bias;
     bool             _broadcast_bias;
+    bool             _export_to_cl_image;
+    unsigned int     _k;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMMATRIXMULTIPLYRESHAPEDKERNEL_H*/

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,18 +23,13 @@
  */
 #include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "support/ToolchainSupport.h"
 
 #include <cfloat>
-#include <cmath>
 
 namespace arm_compute
 {
@@ -53,7 +48,7 @@ void NEROIPoolingLayerKernel::configure(const ITensor *input, const ITensor *roi
     ARM_COMPUTE_ERROR_ON(rois->info()->dimension(0) != 5);
     ARM_COMPUTE_ERROR_ON(rois->info()->num_dimensions() > 2);
     ARM_COMPUTE_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 
     if(output->info()->total_size() != 0)
@@ -82,15 +77,10 @@ void NEROIPoolingLayerKernel::configure(const ITensor *input, const ITensor *roi
     window.set(Window::DimX, Window::Dimension(0, rois->info()->dimension(1)));
     window.set(Window::DimY, Window::Dimension(0, 1));
 
-    AccessWindowStatic input_access(input->info(),
-                                    input->info()->valid_region().start(0),
-                                    input->info()->valid_region().start(1),
-                                    input->info()->valid_region().end(0),
-                                    input->info()->valid_region().end(1));
-    AccessWindowStatic output_access(output->info(), 0, 0, pool_info.pooled_width(), pool_info.pooled_height());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
-    ARM_COMPUTE_UNUSED(update_window_and_padding(window, input_access, output_access));
-    output_access.set_valid_region(window, ValidRegion(Coordinates(), output->info()->tensor_shape()));
     INEKernel::configure(window);
 }
 

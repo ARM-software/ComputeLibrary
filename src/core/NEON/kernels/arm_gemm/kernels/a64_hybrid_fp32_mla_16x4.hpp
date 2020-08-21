@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #ifdef __aarch64__
 
-
+#include "../performance_parameters.hpp"
 #include "../std_transforms_fixed.hpp"
 
 namespace arm_gemm
@@ -34,6 +34,7 @@ namespace arm_gemm
 // Actual kernel implementations
 void a64_hybrid_fp32_mla_16x4(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 void a64_hybrid_fp32_mla_16x4_a55(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
+void a64_hybrid_fp32_mla_16x4_x1(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
 class hybrid_fp32_mla_16x4
 {
@@ -59,7 +60,7 @@ public:
         return 1;
     }
 
-    static constexpr bool supports_append()
+    static constexpr bool supports_accumulate()
     {
         return true;
     }
@@ -74,6 +75,22 @@ public:
         return true;
     }
 
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
+        switch (ci->get_cpu_model()) {
+            case CPUModel::A55r1:
+                return { 2.866 };
+
+            case CPUModel::A53:
+                return { 1.419 };
+
+            case CPUModel::A73:
+                return { 2.551 };
+
+            default:
+                return { 6.25 };
+        }
+    }
+
     StdTransformsFixed<operand_type, result_type, 4, 16, 1> transforms = {};
 
     // Default to the generic kernel
@@ -83,6 +100,8 @@ public:
     {
         if (ci->get_cpu_model() == CPUModel::A55r1) {
             kernel = a64_hybrid_fp32_mla_16x4_a55;
+        } else if (ci->get_cpu_model() == CPUModel::X1) {
+            kernel = a64_hybrid_fp32_mla_16x4_x1;
         }
     }
 };

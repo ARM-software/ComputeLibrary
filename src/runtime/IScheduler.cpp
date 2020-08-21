@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,12 @@ IScheduler::IScheduler()
 CPUInfo &IScheduler::cpu_info()
 {
     return _cpu_info;
+}
+
+void IScheduler::set_num_threads_with_affinity(unsigned int num_threads, BindFunc func)
+{
+    ARM_COMPUTE_UNUSED(num_threads, func);
+    ARM_COMPUTE_ERROR("Feature for affinity setting is not implemented");
 }
 
 unsigned int IScheduler::num_threads_hint() const

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,9 @@
 #define ARM_COMPUTE_CLARGMINMAXLAYER_H
 
 #include "arm_compute/core/CL/kernels/CLArgMinMaxLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -55,7 +55,7 @@ public:
     CLArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Input source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Input source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in]  axis   Axis to find max/min index.
      * @param[out] output Output source tensor. Data types supported: U32/S32.
      * @param[in]  op     Reduction operation to perform. Operations supported: ARG_IDX_MAX, ARG_IDX_MIN
@@ -64,7 +64,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Input source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input           Input source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in]  axis            Axis to find max/min index.
      * @param[out] output          Output source tensor. Data types supported: U32/S32.
      * @param[in]  op              Reduction operation to perform. Operations supported: ARG_IDX_MAX, ARG_IDX_MIN
@@ -72,7 +72,7 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op);
     /** Static function to check if given info will lead to a valid configuration of @ref CLArgMinMaxLayer
      *
-     * @param[in] input  Input source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Input source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in] axis   Axis to find max/min index.
      * @param[in] output Output source tensor info. Data types supported: U32/S32.
      * @param[in] op     Reduction operation to perform. Operations supported: ARG_IDX_MAX, ARG_IDX_MIN
@@ -89,7 +89,7 @@ private:
     std::vector<CLTensor>               _results_vector;
     CLTensor                            _not_reshaped_output;
     std::vector<CLArgMinMaxLayerKernel> _reduction_kernels_vector;
-    CLReshapeLayerKernel                _reshape_kernel;
+    CLReshapeLayer                      _reshape;
     unsigned int                        _num_of_stages;
     unsigned int                        _reduction_axis;
 };

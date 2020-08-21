@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,6 +112,7 @@ __kernel void softmax_layer_norm(
     VEC_DATA_TYPE(DATA_TYPE, 16)
     data = vload16(0, (__global DATA_TYPE *)offset(&src, 0, 0));
 #ifdef LOG_SOFTMAX
+    sum_val = log(sum_val);
     vstore16(SUB_OP(data, sum_val, DATA_TYPE, 16), 0, (__global DATA_TYPE *)offset(&dst, 0, 0));
 #else  /* LOG_SOFTMAX */
     vstore16(DIV_OP(data, sum_val, DATA_TYPE, 16), 0, (__global DATA_TYPE *)offset(&dst, 0, 0));

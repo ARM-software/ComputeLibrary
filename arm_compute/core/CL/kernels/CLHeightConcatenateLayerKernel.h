@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,6 @@
 
 namespace arm_compute
 {
-class ICLTensor;
-
 /** Interface for the height concatenate kernel.
  *  The input tensor will be concatenated into the output tensor.
  */
@@ -52,21 +50,13 @@ public:
     ~CLHeightConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]  input         Input tensor. Data types supported: All.
-     * @param[in]  height_offset The starting offset on the Y axis for the output tensor.
-     * @param[out] output        Output tensor. Data types supported: Same as @p input.
-     *
-     */
-    void configure(const ICLTensor *input, unsigned int height_offset, ICLTensor *output);
-    /** Initialise the kernel's inputs and output
-     *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Input tensor. Data types supported: All.
      * @param[in]  height_offset   The starting offset on the Y axis for the output tensor.
      * @param[out] output          Output tensor. Data types supported: Same as @p input.
      *
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int height_offset, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, ITensorInfo *input, unsigned int height_offset, ITensorInfo *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLHeightConcatenateLayerKernel
      *
      * @param[in] input         Input tensor info. Data types supported: All.
@@ -78,13 +68,11 @@ public:
     static Status validate(const ITensorInfo *input, unsigned int height_offset, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    const ICLTensor *_input;
-    ICLTensor       *_output;
-    unsigned int     _height_offset;
-    unsigned int     _num_elems_processed_per_iteration;
+    unsigned int _height_offset;
+    unsigned int _num_elems_processed_per_iteration;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHEIGHTCONCATENATELAYERKERNEL_H */

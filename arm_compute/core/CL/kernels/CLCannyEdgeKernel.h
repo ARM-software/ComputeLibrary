@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,6 @@
 #define ARM_COMPUTE_CLCANNYEDGEKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
-
-#include <cstdint>
 
 namespace arm_compute
 {
@@ -136,7 +134,7 @@ public:
     CLEdgeTraceKernel &operator=(const CLEdgeTraceKernel &) = delete;
     /** Initialise the kernel's source, destination and border mode.
      *
-     * @param[in]     input            Source tensor. Data types supported: U8.
+     * @param[in]     input            Source tensor. Data types supported: U16/U32.
      * @param[out]    output           Destination tensor. Data types supported: U8.
      * @param[in]     upper_thr        Upper threshold used for the hysteresis
      * @param[in]     lower_thr        Lower threshold used for the hysteresis
@@ -154,7 +152,7 @@ public:
     /** Initialise the kernel's source, destination and border mode.
      *
      * @param[in]     compile_context  The compile context to be used.
-     * @param[in]     input            Source tensor. Data types supported: U8.
+     * @param[in]     input            Source tensor. Data types supported: U16/U32.
      * @param[out]    output           Destination tensor. Data types supported: U8.
      * @param[in]     upper_thr        Upper threshold used for the hysteresis
      * @param[in]     lower_thr        Lower threshold used for the hysteresis

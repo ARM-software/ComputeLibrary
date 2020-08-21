@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -133,6 +133,7 @@ bool CLSymbols::load(const std::string &library)
     LOAD_FUNCTION_PTR(clEnqueueSVMUnmap, handle);
     LOAD_FUNCTION_PTR(clEnqueueMarker, handle);
     LOAD_FUNCTION_PTR(clWaitForEvents, handle);
+    LOAD_FUNCTION_PTR(clCreateImage, handle);
 
     // Third-party extensions
     LOAD_FUNCTION_PTR(clImportMemoryARM, handle);
@@ -934,6 +935,30 @@ clGetEventProfilingInfo(cl_event          event,
     else
     {
         return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_mem
+clCreateImage(cl_context             context,
+              cl_mem_flags           flags,
+              const cl_image_format *image_format,
+              const cl_image_desc   *image_desc,
+              void                  *host_ptr,
+              cl_int                *errcode_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clCreateImage_ptr;
+    if(func != nullptr)
+    {
+        return func(context, flags, image_format, image_desc, host_ptr, errcode_ret);
+    }
+    else
+    {
+        if(errcode_ret != nullptr)
+        {
+            *errcode_ret = CL_OUT_OF_RESOURCES;
+        }
+        return nullptr;
     }
 }
 

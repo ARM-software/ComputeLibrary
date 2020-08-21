@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1912,15 +1912,16 @@ struct GEMMLHSMatrixInfo
 struct GEMMRHSMatrixInfo
 {
     GEMMRHSMatrixInfo() = default;
-    GEMMRHSMatrixInfo(unsigned int n, unsigned int k, unsigned int h, bool trans, bool inter)
-        : n0(n), k0(k), h0(h), transpose(trans), interleave(inter)
+    GEMMRHSMatrixInfo(unsigned int n, unsigned int k, unsigned int h, bool trans, bool inter, bool export_to_cl_img)
+        : n0(n), k0(k), h0(h), transpose(trans), interleave(inter), export_to_cl_image(export_to_cl_img)
     {
     }
-    unsigned int n0{ 1 };            /**< Number of columns processed by the matrix multiplication */
-    unsigned int k0{ 1 };            /**< Number of partial accumulations performed by the matrix multiplication */
-    unsigned int h0{ 1 };            /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
-    bool         transpose{ true };  /**< True if the (k0xn0) block has to be transposed before been stored */
-    bool         interleave{ true }; /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
+    unsigned int n0{ 1 };                     /**< Number of columns processed by the matrix multiplication */
+    unsigned int k0{ 1 };                     /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int h0{ 1 };                     /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool         transpose{ true };           /**< True if the (k0xn0) block has to be transposed before been stored */
+    bool         interleave{ true };          /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
+    bool         export_to_cl_image{ false }; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
 };
 
 /** GEMM information class. This class stores the necessary information to compute GEMM functions

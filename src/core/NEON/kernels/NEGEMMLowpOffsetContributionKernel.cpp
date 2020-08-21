@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,10 +123,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, 
     return std::make_pair(err, win);
 }
 
-template <bool is_gemm3d>
 void run_offset_contribution(const Window &window,
                              ITensor *mm_result, const ITensor *vector_sum_col, const ITensor *vector_sum_row,
-                             int32_t a_offset, int32_t b_offset, int32_t k_offset, bool slide_vector_sum_col)
+                             int32_t a_offset, int32_t b_offset, int32_t k_offset, bool slide_vector_sum_col, bool is_gemm3d)
 {
     Window collapsed_window = window.collapse_if_possible(window, Window::DimZ);
 
@@ -398,12 +397,5 @@ void NEGEMMLowpOffsetContributionKernel::run(const Window &window, const ThreadI
                                    && _mm_result->info()->num_dimensions() > 1
                                    && _mm_result->info()->tensor_shape().y() != _vector_sum_row->info()->tensor_shape().x();
 
-    if(reinterpret_as_3d)
-    {
-        run_offset_contribution<true>(window, _mm_result, _vector_sum_col, _vector_sum_row, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col);
-    }
-    else
-    {
-        run_offset_contribution<false>(window, _mm_result, _vector_sum_col, _vector_sum_row, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col);
-    }
+    run_offset_contribution(window, _mm_result, _vector_sum_col, _vector_sum_row, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, reinterpret_as_3d);
 }

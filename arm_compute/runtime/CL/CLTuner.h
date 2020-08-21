@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,6 +116,7 @@ public:
     // Inherited methods overridden:
     void tune_kernel_static(ICLKernel &kernel) override;
     void tune_kernel_dynamic(ICLKernel &kernel) override;
+    void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors) override;
 
     /** Is the kernel_event set ?
      *
@@ -126,11 +127,12 @@ public:
 private:
     /** Find optimal LWS using brute-force approach
      *
-     * @param[in] kernel OpenCL kernel to be tuned with LWS
+     * @param[in]     kernel  OpenCL kernel to be tuned with LWS
+     * @param[in,out] tensors Tensors for the kernel to operate on
      *
      * @return The optimal LWS to use
      */
-    cl::NDRange find_optimal_lws(ICLKernel &kernel);
+    cl::NDRange find_optimal_lws(ICLKernel &kernel, ITensorPack &tensors);
 
     std::unordered_map<std::string, cl::NDRange> _lws_table;
     cl::Event   _kernel_event;

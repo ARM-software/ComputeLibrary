@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,14 +42,14 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "smallK_hybrid_s8s32_dot_1VLx8",
-    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize<=64 && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize<=64; },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_s8s32_dot_1VLx8, int8_t, int8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "hybrid_s8s32_dot_4VLx4",
-    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize>=16 && !args._trA && !args._trB && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize>=16; },
     [](const GemmArgs &args, const Requantize32 &) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_s8s32_dot_4VLx4, int8_t, int8_t>(args, qp); }
 },
@@ -57,23 +57,31 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "smallK_hybrid_s8s32_dot_4x8",
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32); },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_s8s32_dot_4x8, int8_t, int8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "smallK_hybrid_s8s32_dot_4x6",
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64); },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_s8s32_dot_4x6, int8_t, int8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "hybrid_s8s32_dot_16x4",
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && args._Ksize>=16 && !args._trA && !args._trB && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && args._Ksize>=16; },
     [](const GemmArgs &args, const Requantize32 &) { return args._Nsize<=256 && args._Ksize>128; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_s8s32_dot_16x4, int8_t, int8_t>(args, qp); }
+},
+/** QUANTIZE_WRAPPER_2D enables 2D parallelisation hint for IScheduler in NEGEMMAssemblyDispatch */
+{
+    GemmMethod::QUANTIZE_WRAPPER_2D,
+    "quantized_wrapper_2d",
+    nullptr,
+    [](const GemmArgs &args, const Requantize32 &) { return (args._maxthreads >= 8) && (args._Msize >= 8) && (args._Nsize >= 8);},
+    [](const GemmArgs &args, const Requantize32 &qp) { return new QuantizeWrapper<int8_t, int8_t, int32_t>(args, qp); }
 },
 {
     GemmMethod::QUANTIZE_WRAPPER,

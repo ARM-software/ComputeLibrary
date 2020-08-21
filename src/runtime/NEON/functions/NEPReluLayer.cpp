@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,15 +29,57 @@
 
 namespace arm_compute
 {
-void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor *output)
+namespace experimental
+{
+void NEPRelu::configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::PRELU, input, alpha, output);
     _kernel = std::move(k);
 }
 
-Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
+Status NEPRelu::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
 {
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::PRELU, input, alpha, output);
+}
+} // nsamespace experimental
+
+struct NEPReluLayer::Impl
+{
+    const ITensor                         *src_0{ nullptr };
+    const ITensor                         *src_1{ nullptr };
+    ITensor                               *dst{ nullptr };
+    std::unique_ptr<experimental::NEPRelu> op{ nullptr };
+};
+
+NEPReluLayer::NEPReluLayer()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+NEPReluLayer::NEPReluLayer(NEPReluLayer &&) = default;
+NEPReluLayer &NEPReluLayer::operator=(NEPReluLayer &&) = default;
+NEPReluLayer::~NEPReluLayer()                          = default;
+
+void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor *output)
+{
+    _impl->src_0 = input;
+    _impl->src_1 = alpha;
+    _impl->dst   = output;
+    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEPRelu>();
+    _impl->op->configure(input->info(), alpha->info(), output->info());
+}
+
+void NEPReluLayer::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
+}
+
+Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
+{
+    return experimental::NEPRelu::validate(input, alpha, output);
 }
 } // namespace arm_compute

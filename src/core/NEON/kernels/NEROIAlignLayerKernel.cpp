@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,34 +72,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, ITe
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = compute_roi_align_shape(*input, *rois, pool_info);
-    auto_init_if_empty((*output), output_shape, 1, input->data_type());
-    output->set_data_layout(input->data_layout());
-
-    const unsigned int num_rois = rois->dimension(1);
-    Window             window;
-    window.set(Window::DimX, Window::Dimension(0, num_rois));
-    window.set(Window::DimY, Window::Dimension(0, 1));
-
-    AccessWindowStatic input_access(input,
-                                    input->valid_region().start(0),
-                                    input->valid_region().start(1),
-                                    input->valid_region().end(0),
-                                    input->valid_region().end(1));
-    AccessWindowStatic output_access(output, 0, 0, pool_info.pooled_width(), pool_info.pooled_height());
-
-    const bool window_changed = update_window_and_padding(window, input_access, output_access);
-    output_access.set_valid_region(window, ValidRegion(Coordinates(), output->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, window);
-}
 } // namespace
 
 NEROIAlignLayerKernel::NEROIAlignLayerKernel()
@@ -111,9 +83,20 @@ void NEROIAlignLayerKernel::configure(const ITensor *input, const ITensor *rois,
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, rois);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->info(), output->info(), pool_info));
+    // Output auto inizialitation if not yet initialized
+    const TensorShape output_shape = compute_roi_align_shape(*input->info(), *rois->info(), pool_info);
+    auto_init_if_empty((*output->info()), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
+    output->info()->set_data_layout(input->info()->data_layout());
+
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), rois->info(), output->info(), pool_info);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    const unsigned int num_rois = rois->info()->dimension(1);
+    Window             window;
+    window.set(Window::DimX, Window::Dimension(0, num_rois));
+    window.set(Window::DimY, Window::Dimension(0, 1));
+
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     // Set instance variables
     _input     = input;
@@ -121,7 +104,7 @@ void NEROIAlignLayerKernel::configure(const ITensor *input, const ITensor *rois,
     _output    = output;
     _pool_info = pool_info;
 
-    INEKernel::configure(win_config.second);
+    INEKernel::configure(window);
 }
 
 Status NEROIAlignLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)

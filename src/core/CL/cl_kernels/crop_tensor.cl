@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
 
 /** Performs a copy of input tensor to the output tensor.
  *
- * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: U16/S16/F16/U32/S32/F32
+ * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  in_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -35,7 +35,7 @@
  * @param[in]  in_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  in_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: same as @p in_ptr
+ * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: F32
  * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  out_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination tensor in Y dimension (in bytes)

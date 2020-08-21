@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -144,7 +144,7 @@
 
 /** This function computes the depthwise convolution quantized.
  *
- * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in] src_stride_x                                     Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                       src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                                     Stride of the source tensor in Y dimension (in bytes)
@@ -152,7 +152,7 @@
  * @param[in] src_stride_z                                     Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                                       src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] src_offset_first_element_in_bytes                The offset of the first element in the source tensor
- * @param[in] dst_ptr                                          Pointer to the destination tensor. Supported data types: QASYMM8
+ * @param[in] dst_ptr                                          Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in] dst_stride_x                                     Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                                       dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] dst_stride_y                                     Stride of the destination tensor in Y dimension (in bytes)
@@ -160,7 +160,7 @@
  * @param[in] dst_stride_z                                     Stride of the destination tensor in Z dimension (in bytes)
  * @param[in] dst_step_z                                       dst_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes                The offset of the first element in the destination tensor
- * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QSYMM8_PER_CHANNEL
+ * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL
  * @param[in] weights_stride_x                                 Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                                   weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                                 Stride of the weights tensor in Y dimension (in bytes)
@@ -461,9 +461,7 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 #endif /*DILATION_X==1*/
 /** This function computes the depthwise convolution quantized using dot product when the data layout is NCHW.
  *
- * @note Per-channel quantization is not supported by this kernel.
- *
- * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in] src_stride_x                                     Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                       src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                                     Stride of the source tensor in Y dimension (in bytes)
@@ -471,7 +469,7 @@ __kernel void dwc_3x3_native_quantized8_nchw(
  * @param[in] src_stride_z                                     Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                                       src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] src_offset_first_element_in_bytes                The offset of the first element in the source tensor
- * @param[in] dst_ptr                                          Pointer to the destination tensor. Supported data types: QASYMM8
+ * @param[in] dst_ptr                                          Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in] dst_stride_x                                     Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                                       dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] dst_stride_y                                     Stride of the destination tensor in Y dimension (in bytes)
@@ -479,7 +477,7 @@ __kernel void dwc_3x3_native_quantized8_nchw(
  * @param[in] dst_stride_z                                     Stride of the destination tensor in Z dimension (in bytes)
  * @param[in] dst_step_z                                       dst_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes                The offset of the first element in the destination tensor
- * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QSYMM8_PER_CHANNEL
+ * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL
  * @param[in] weights_stride_x                                 Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                                   weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                                 Stride of the weights tensor in Y dimension (in bytes)
@@ -789,7 +787,7 @@ __kernel void dwc_3x3_native_quantized8_dot8_nchw(
  * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
  * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
  *
- * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in] src_stride_x                                     Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                       src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                                     Stride of the source tensor in Y dimension (in bytes)
@@ -809,7 +807,7 @@ __kernel void dwc_3x3_native_quantized8_dot8_nchw(
  * @param[in] dst_stride_w                                     Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                                       dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes                The offset of the first element in the destination tensor
- * @param[in] weights_ptr                                      Pointer to the weights tensor reshaped. Supported data types: QASYMM8/QSYMM8_PER_CHANNEL
+ * @param[in] weights_ptr                                      Pointer to the weights tensor reshaped. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL
  * @param[in] weights_stride_x                                 Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                                   weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                                 Stride of the weights tensor in Y dimension (in bytes)
@@ -1028,7 +1026,7 @@ __kernel void dwc_3x3_reshaped_quantized8_nhwc(
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_TOP (e.g. -DCONV_PAD_TOP=1)
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1).
  *
- * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in] src_stride_x                                     Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                       src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                                     Stride of the source tensor in Y dimension (in bytes)
@@ -1048,7 +1046,7 @@ __kernel void dwc_3x3_reshaped_quantized8_nhwc(
  * @param[in] dst_stride_w                                     Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                                       dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes                The offset of the first element in the destination tensor
- * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QSYMM8_PER_CHANNEL
+ * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL
  * @param[in] weights_stride_x                                 Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                                   weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                                 Stride of the weights tensor in Y dimension (in bytes)
@@ -1378,7 +1376,7 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
  * @note If REAL_MULTIPLIER is passed at compile time (i.e. -DREAL_MULTIPLIER=1.355f), the final quantization is performed using a floating point multiplication.
  *       If not, the quantization will be performed using a fixed point multiplication
  *
- * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in] src_stride_x                                     Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                       src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                                     Stride of the source tensor in Y dimension (in bytes)

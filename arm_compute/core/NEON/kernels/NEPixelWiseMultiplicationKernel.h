@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,42 +53,54 @@ public:
     ~NEPixelWiseMultiplicationKernel() = default;
     /** Initialise the kernel's input, output and border mode.
      *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                         -> U8
+     *   - (U8,U8)                         -> S16
+     *   - (U8,S16)                        -> S16
+     *   - (S16,U8)                        -> S16
+     *   - (S16,S16)                       -> S16
+     *   - (F16,F16)                       -> F16
+     *   - (F32,F32)                       -> F32
+     *   - (QASYMM8,QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16
+     *   - (QSYMM16,QSYMM16)               -> S32
+     *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in]  input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in]  input2          An input tensor. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, QSYMM16 (only if @p input1 is QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
-     * @param[out] output          Output tensor. Data types supported:
-     *                             - U8, only if both inputs are U8.
-     *                             - QASYMM8, only if both inputs are QASYMM8.
-     *                             - QASYMM8_SIGNED, only if @p input1 is QASYMM8_SIGNED.
-     *                             - S16.
-     *                             - QSYMM16, only if both inputs are QSYMM16.
-     *                             - S32, only if both inputs are QSYMM16.
-     *                             - F16, only if @p input1 is F16.
-     *                             - F32, only if both inputs are F32.
+     * @param[in]  input1          First input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in]  input2          Second input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[out] output          Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      * @param[in]  scale           Scale to apply after multiplication.
      *                             Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]  overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8, QASYMM8_SIGNED or QSYMM16.
      * @param[in]  rounding_policy Rounding policy.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+    void configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEPixelWiseMultiplicationKernel
+     *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                         -> U8
+     *   - (U8,U8)                         -> S16
+     *   - (U8,S16)                        -> S16
+     *   - (S16,U8)                        -> S16
+     *   - (S16,S16)                       -> S16
+     *   - (F16,F16)                       -> F16
+     *   - (F32,F32)                       -> F32
+     *   - (QASYMM8,QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16
+     *   - (QSYMM16,QSYMM16)               -> S32
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[in] input2          An input tensor info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, QSYMM16 (only if @p input1 is QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
-     * @param[in] output          Output tensor info. Data types supported:
-     *                            - U8, only if both inputs are U8.
-     *                            - QASYMM8, only if both inputs are QASYMM8.
-     *                            - QASYMM8_SIGNED, only if @p input1 is QASYMM8_SIGNED.
-     *                            - S16.
-     *                            - QSYMM16, only if both inputs are QSYMM16.
-     *                            - S32, only if both inputs are QSYMM16.
-     *                            - F16, only if @p input1 is F16.
-     *                            - F32, only if both inputs are F32.
+     * @param[in] input1          First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in] input2          Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in] output          Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      * @param[in] scale           Scale to apply after multiplication.
      *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in] overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8, QASYMM8_SIGNED or QSYMM16.
@@ -98,52 +110,46 @@ public:
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 
-    // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
+    // Inherited methods overridden
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised multiplication functions with integer scaling factor
      *
-     * @param[in]  input1_ptr Pointer to the first input tensor.
-     * @param[in]  input2_ptr Pointer to the second input tensor.
-     * @param[out] output_ptr Pointer to the output tensor.
-     * @param[in]  scale      Integer scale factor.
+     * @param[in]  in1    Input1 tensor object.
+     * @param[in]  in2    Input2 tensor object.
+     * @param[out] out    Output tensor object.
+     * @param[in]  window Region on which to execute the kernel
+     * @param[in]  scale  Integer scale factor.
      */
-    using MulFunctionInt = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int scale);
+    using MulFunctionInt = void(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int scale);
     /** Common signature for all the specialised multiplication functions with float scaling factor
      *
-     * @param[in]  input1_ptr Pointer to the first input tensor.
-     * @param[in]  input2_ptr Pointer to the second input tensor.
-     * @param[out] output_ptr Pointer to the output tensor.
-     * @param[in]  scale      Float scale factor.
+     * @param[in]  in1    Input1 tensor object.
+     * @param[in]  in2    Input2 tensor object.
+     * @param[out] out    Output tensor object.
+     * @param[in]  window Region on which to execute the kernel
+     * @param[in]  scale  Float scale factor.
      */
-    using MulFunctionFloat = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale);
+    using MulFunctionFloat = void(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale);
     /** Common signature for all the specialised QASYMM8 multiplication functions with float scaling factor
      *
-     * @param[in]  input1_ptr      Pointer to the first input tensor.
-     * @param[in]  input2_ptr      Pointer to the second input tensor.
-     * @param[out] output_ptr      Pointer to the output tensor.
-     * @param[in]  scale           Float scale factor.
-     * @param[in]  input1_qua_info Quantization Info of tensor input1.
-     * @param[in]  input2_qua_info Quantization Info of tensor input2.
-     * @param[in]  output_qua_info Quantization Info of tensor output.
+     * @param[in]  in1    Input1 tensor object.
+     * @param[in]  in2    Input2 tensor object.
+     * @param[out] out    Output tensor object.
+     * @param[in]  window Region on which to execute the kernel
+     * @param[in]  scale  Float scale factor.
      *
      */
-    using MulFunctionQuantized = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
-                                      const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info, const UniformQuantizationInfo &output_qua_info);
+    using MulFunctionQuantized = void(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale);
 
     MulFunctionFloat     *_func_float;
     MulFunctionInt       *_func_int;
     MulFunctionQuantized *_func_quantized;
 
 private:
-    const ITensor *_input1;
-    const ITensor *_input2;
-    ITensor       *_output;
-    float          _scale;
-    int            _scale_exponent;
-    bool           _run_optimized_qasymm8;
+    float _scale;
+    int   _scale_exponent;
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */
@@ -154,23 +160,13 @@ public:
     {
         return "NEComplexPixelWiseMultiplicationKernel";
     }
-    /** Default constructor.*/
-    NEComplexPixelWiseMultiplicationKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEComplexPixelWiseMultiplicationKernel(const NEComplexPixelWiseMultiplicationKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEComplexPixelWiseMultiplicationKernel &operator=(const NEComplexPixelWiseMultiplicationKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEComplexPixelWiseMultiplicationKernel(NEComplexPixelWiseMultiplicationKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEComplexPixelWiseMultiplicationKernel &operator=(NEComplexPixelWiseMultiplicationKernel &&) = default;
     /** Initialise the kernel's input, output and border mode.
      *
      * @param[in]  input1 An input tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
      * @param[in]  input2 An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[out] output The output tensor, Data types supported: same as @p input1.  Number of channels supported: same as @p input1.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output);
+    void configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEComplexPixelWiseMultiplicationKernel
      *
      * @param[in] input1 An input tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
@@ -182,13 +178,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
-
-private:
-    const ITensor *_input1;
-    const ITensor *_input2;
-    ITensor       *_output;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 };
 
 } // namespace arm_compute

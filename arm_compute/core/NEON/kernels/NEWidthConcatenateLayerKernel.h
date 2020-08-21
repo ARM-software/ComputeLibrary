@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,12 +57,11 @@ public:
     ~NEWidthConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: All
+     * @param[in]     input        Input tensor info. Data types supported: All
      * @param[in]     width_offset The offset on the X axis.
-     * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
-     *
+     * @param[in,out] output       Output tensor info. Data types supported: Same as @p input.
      */
-    void configure(const ITensor *input, unsigned int width_offset, ITensor *output);
+    void configure(const ITensorInfo *input, unsigned int width_offset, ITensorInfo *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEWidthConcatenateLayerKernel
      *
      * @param[in] input        Input tensor info. Data types supported: All
@@ -74,12 +73,10 @@ public:
     static Status validate(const ITensorInfo *input, unsigned int width_offset, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
-    const ITensor *_input;
-    ITensor       *_output;
-    unsigned int   _width_offset;
+    unsigned int _width_offset;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,13 +29,12 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-#include <utility>
-
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 CLRNNLayer::CLRNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation_kernel(), _fully_connected_kernel(), _copy_kernel(), _fully_connected_out(), _gemm_output(), _add_output(),
+    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected_kernel(), _copy_kernel(), _fully_connected_out(), _gemm_output(), _add_output(),
       _is_prepared(false)
 {
 }
@@ -43,9 +42,13 @@ CLRNNLayer::CLRNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
 Status CLRNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *recurrent_weights, const ITensorInfo *bias, const ITensorInfo *hidden_state,
                             const ITensorInfo *output, const ActivationLayerInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, recurrent_weights, bias, hidden_state, output);
+
     const int idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const int idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
+
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_width) != weights->dimension(idx_width));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_height) != recurrent_weights->dimension(idx_width));
     ARM_COMPUTE_RETURN_ERROR_ON(recurrent_weights->dimension(idx_width) != recurrent_weights->dimension(1));
@@ -59,8 +62,8 @@ Status CLRNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, weights, bias, &shape_info));
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(hidden_state, recurrent_weights, nullptr, &shape_info, 1.f, 0.f));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::ADD, &shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&shape_info, &shape_info, info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&shape_info, &shape_info, info));
 
     return Status{};
 }
@@ -96,12 +99,12 @@ void CLRNNLayer::configure(const CLCompileContext &compile_context, const ICLTen
     _add_output.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
     _memory_group.manage(&_add_output);
 
-    _add_kernel.configure(compile_context, ArithmeticOperation::ADD, &_fully_connected_out, &_gemm_output, &_add_output, ConvertPolicy::SATURATE);
+    _add_kernel.configure(compile_context, &_fully_connected_out, &_gemm_output, &_add_output, ConvertPolicy::SATURATE);
 
     _fully_connected_out.allocator()->allocate();
     _gemm_output.allocator()->allocate();
 
-    _activation_kernel.configure(compile_context, &_add_output, hidden_state, info);
+    _activation.configure(compile_context, &_add_output, hidden_state, info);
     _add_output.allocator()->allocate();
 
     _copy_kernel.configure(compile_context, hidden_state, output);
@@ -115,8 +118,8 @@ void CLRNNLayer::run()
 
     _fully_connected_kernel.run();
     _gemm_state_f.run();
-    CLScheduler::get().enqueue(_add_kernel);
-    CLScheduler::get().enqueue(_activation_kernel);
+    _add_kernel.run();
+    _activation.run();
 
     // copy hidden out to output
     CLScheduler::get().enqueue(_copy_kernel);
@@ -132,3 +135,4 @@ void CLRNNLayer::prepare()
         _is_prepared = true;
     }
 }
+} // namespace arm_compute

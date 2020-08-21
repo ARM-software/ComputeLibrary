@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,23 +23,10 @@
  */
 #include "arm_compute/core/NEON/kernels/NEReverseKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
-#include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-
-#include <arm_neon.h>
-#include <array>
-#include <cmath>
-#include <map>
 
 namespace arm_compute
 {
@@ -48,7 +35,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, axis);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(axis, 1, DataType::U32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->num_dimensions() > 1, "Axis must be a 1D tensor");
@@ -159,28 +146,19 @@ void NEReverseKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    switch(_input->info()->data_type())
+    switch(_input->info()->element_size())
     {
-        case DataType::F32:
-        case DataType::U32:
-        case DataType::S32:
+        case 4:
             run_reverse<uint32_t>(window, _input, _axis, _output);
             break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::S16:
-        case DataType::U16:
+        case 2:
             run_reverse<uint16_t>(window, _input, _axis, _output);
             break;
-        case DataType::QASYMM8:
-        case DataType::QASYMM8_SIGNED:
-        case DataType::U8:
-        case DataType::S8:
+        case 1:
             run_reverse<uint8_t>(window, _input, _axis, _output);
             break;
         default:
-            ARM_COMPUTE_ERROR("Data type not supported");
+            ARM_COMPUTE_ERROR("Element size not supported");
     }
 }
 } // namespace arm_compute

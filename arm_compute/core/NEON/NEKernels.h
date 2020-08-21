@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,7 +70,6 @@
 #include "arm_compute/core/NEON/kernels/NEFastCornersKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillArrayKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillInnerBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFloorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFuseBatchNormalizationKernel.h"
@@ -84,10 +83,8 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMMatrixAccumulateBiasesKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGatherKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGaussian3x3Kernel.h"
@@ -106,6 +103,7 @@
 #include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"
 #include "arm_compute/core/NEON/kernels/NELocallyConnectedMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEMagnitudePhaseKernel.h"
+#include "arm_compute/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEMeanStdDevKernel.h"
 #include "arm_compute/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEMedian3x3Kernel.h"
@@ -149,7 +147,6 @@
 #include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEYOLOLayerKernel.h"
 
 #endif /* ARM_COMPUTE_NEKERNELS_H */

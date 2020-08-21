@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,10 +132,9 @@ public:
     bool do_setup(int argc, char **argv) override
     {
         // Default parameters
-        const DataType            data_type = DataType::F32;
-        const float               alpha     = 1.0f;
-        const float               beta      = 0.0f;
-        const ActivationLayerInfo act_info  = ActivationLayerInfo();
+        const float               alpha    = 1.0f;
+        const float               beta     = 0.0f;
+        const ActivationLayerInfo act_info = ActivationLayerInfo();
         CommonGemmExampleParams   params;
         GemmConfigs               configs;
 
@@ -167,16 +166,16 @@ public:
         }
 
         // Print gemm parameters and configurations
-        std::cerr << "Gemm parameters:" << std::endl;
-        std::cerr << params << std::endl;
-        std::cerr << "Gemm configurations:" << std::endl;
-        std::cerr << configs << std::endl;
+        std::cout << "Gemm parameters:" << std::endl;
+        std::cout << params << std::endl;
+        std::cout << "Gemm configurations:" << std::endl;
+        std::cout << configs << std::endl;
 
         CLScheduler::get().default_init(&tuner);
 
-        lhs.allocator()->init(TensorInfo(TensorShape(params.K, params.M, params.B), 1, data_type));
-        rhs.allocator()->init(TensorInfo(TensorShape(params.N, params.K, params.B), 1, data_type));
-        bias.allocator()->init(TensorInfo(TensorShape(params.N, 1, params.B), 1, data_type));
+        lhs.allocator()->init(TensorInfo(TensorShape(params.K, params.M, params.B), 1, params.data_type));
+        rhs.allocator()->init(TensorInfo(TensorShape(params.N, params.K, params.B), 1, params.data_type));
+        bias.allocator()->init(TensorInfo(TensorShape(params.N, 1, params.B), 1, params.data_type));
 
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = configs.m0;
@@ -194,6 +193,17 @@ public:
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = true;
         kernel_info.activation_info         = act_info;
+
+        // Validate argments
+        Status status{};
+        status = gemm.validate((&lhs)->info(), (&rhs)->info(), (&bias)->info(), (&dst)->info(), alpha, beta, lhs_info, rhs_info, kernel_info);
+        if(!status)
+        {
+            // Unsupported arguments
+            std::cerr << "Unsupported arguments." << std::endl;
+            std::cerr << "Check documentation for supported/unsupported combinations" << std::endl;
+            return false;
+        }
 
         // Configure function
         gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);

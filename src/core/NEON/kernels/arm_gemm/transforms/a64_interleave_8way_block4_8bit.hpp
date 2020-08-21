@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ inline void TransformImpl<8, 4, false, 1, 1, false>::Transform(T *out, const T *
         }
     };
 
-    uint8_t zerobuff[64]; // 32 for asm loop plus up to 31 for overflow loop
+    uint8_t zerobuff[64] = { 0 }; // 32 for asm loop plus up to 31 for overflow loop
 
     for (int y=y0; y<ymax; y+=8) {
         const uint8_t *inptr0 = inptr + y * ldin + k0;
@@ -87,7 +87,6 @@ inline void TransformImpl<8, 4, false, 1, 1, false>::Transform(T *out, const T *
             /* 'first' forces this to always run at least once, needed if the total size is <=32. */
             if ((y + 7) >= ymax) {
                 switch ((y + 7) - ymax) {
-                    /* Everything falls through in here */
                     case 6:
                         inptr1 = zerobuff;
                         // fall through

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
+#include "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
@@ -34,6 +34,8 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/MemorySupport.h"
+
+#include "src/core/NEON/kernels/convolution/winograd/winograd_layer.hpp"
 
 namespace arm_compute
 {

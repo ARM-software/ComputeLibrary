@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,11 +43,11 @@ namespace validation
 {
 namespace
 {
-// COMPMID-517 Investigate the mismatch to see whether it is a real bug
-RelativeTolerance<half>              tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
-RelativeTolerance<float>             tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
-constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
+RelativeTolerance<half>              tolerance_fp16(half(0.2));   /**< Tolerance for floating point tests */
+RelativeTolerance<float>             tolerance_fp32(0.05f);       /**< Tolerance for floating point tests */
+AbsoluteTolerance<float>             tolerance_fp32_abs(0.0003f); /**< Absolute Tolerance for floating point tests */
+constexpr float                      tolerance_num = 0.07f;       /**< Tolerance number */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);        /**< Tolerance for quantized tests */
 
 const auto data_strides          = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
 const auto data_strides_small    = combine(framework::dataset::make("StrideX", 1), framework::dataset::make("StrideY", 1));
@@ -66,8 +66,16 @@ const auto data_small    = combine(datasets::SmallDirectConvolutionShapes(), com
 const auto data_small9x9 = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides_small, data_ksize_nine_small));
 
 /** Direct convolution nightly data set. */
-const auto data_nightly     = combine(data, framework::dataset::make("NumKernels", { 1, 4 }));
-const auto data_nightly_9x9 = combine(data9x9, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_nightly         = combine(data, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_nightly_9x9     = combine(data9x9, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_nightly_usecase = combine(framework::dataset::make("InputShape", { TensorShape{ 3U, 800U, 800U } }),
+                                          combine(framework::dataset::make("StrideX", { 1 }),
+                                                  combine(framework::dataset::make("StrideY", { 1 }),
+                                                          combine(framework::dataset::make("PadX", { 4 }),
+                                                                  combine(framework::dataset::make("PadY", { 4 }),
+                                                                          combine(framework::dataset::make("KernelSize", 9),
+                                                                                  framework::dataset::make("NumKernels", { 16 })))))));
+
 /** Direct convolution precommit data set. */
 const auto data_precommit     = combine(data_small, framework::dataset::make("NumKernels", { 1 }));
 const auto data_precommit_9x9 = combine(data_small9x9, framework::dataset::make("NumKernels", { 1 }));
@@ -79,8 +87,6 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 
 TEST_SUITE(CL)
 TEST_SUITE(DirectConvolutionLayer)
-
-//TODO(COMPMID-415): Configuration tests?
 
 // *INDENT-OFF*
 // clang-format off
@@ -223,6 +229,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerFixture<float>, fram
 {
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
+
+FIXTURE_DATA_TEST_CASE(RunLargeUsecase, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly_usecase, framework::dataset::make("DataType",
+                       DataType::F32)),
+                       framework::dataset::make("ActivationInfo", { ActivationLayerInfo() })),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.f, tolerance_fp32_abs);
+}
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP32_CustomDataset)
@@ -264,7 +279,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<uin
                                                 DataType::QASYMM8)),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
                        QuantizedActivationFunctionsDataset),
-                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

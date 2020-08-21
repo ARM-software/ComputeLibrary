@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CLTHRESHOLD_H
 #define ARM_COMPUTE_CLTHRESHOLD_H
 
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -31,6 +32,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ICLTensor;
 
 /** Basic function to run @ref CLThresholdKernel */
@@ -47,23 +49,25 @@ public:
      * @param[in]  type        Thresholding type. Can either be BINARY or RANGE.
      * @param[in]  upper       Upper threshold. Only used with RANGE thresholding
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.08)
     void configure(const ICLTensor *input, ICLTensor *output, uint8_t threshold,
                    uint8_t false_value = 0, uint8_t true_value = 0,
                    ThresholdType type = ThresholdType::BINARY, uint8_t upper = 0);
     /** Initialise the function's source, destination, thresholds and threshold type
      *
+     * @param[in]  input  First tensor input. Data types supported: U8.
+     * @param[out] output Output tensor. Data types supported: U8.
+     * @param[in]  info   Threshold  descriptor
+     */
+    void configure(const ICLTensor *input, ICLTensor *output, const ThresholdKernelInfo &info);
+    /** Initialise the function's source, destination, thresholds and threshold type
+     *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           First tensor input. Data types supported: U8.
      * @param[out] output          Output tensor. Data types supported: U8.
-     * @param[in]  threshold       Threshold. If upper threshold is specified, this will be used as the lower threshold.
-     * @param[in]  false_value     Value to assign when the condition is false.
-     * @param[in]  true_value      value to assign when the condition is true.
-     * @param[in]  type            Thresholding type. Can either be BINARY or RANGE.
-     * @param[in]  upper           Upper threshold. Only used with RANGE thresholding
+     * @param[in]  info            Threshold descriptor
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold,
-                   uint8_t false_value = 0, uint8_t true_value = 0,
-                   ThresholdType type = ThresholdType::BINARY, uint8_t upper = 0);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ThresholdKernelInfo &info);
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CLTHRESHOLD_H */

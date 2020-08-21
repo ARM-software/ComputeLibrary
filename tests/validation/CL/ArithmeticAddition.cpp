@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,6 @@ namespace validation
 {
 namespace
 {
-constexpr unsigned int num_elems_processed_per_iteration = 16;
 /** Input data sets **/
 const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
                                                  DataType::U8));
@@ -103,34 +102,36 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+/** Validate fused activation expecting the following behaviours:
+ *
+ * - Fused activation with float data type should succeed
+ * - Fused activation with quantized data type should fail
+ *
+ */
+TEST_CASE(FusedActivation, framework::DatasetMode::ALL)
+{
+    auto   input  = TensorInfo{ TensorShape(2U, 2U), 1, DataType::F32 };
+    auto   output = TensorInfo{ TensorShape(2U, 2U), 1, DataType::F32 };
+    Status result{};
+
+    const auto act_info = ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU);
+
+    // Fused-activation float type
+    result = CLArithmeticAddition::validate(&input, &input, &output, ConvertPolicy::WRAP, act_info);
+    ARM_COMPUTE_EXPECT(bool(result) == true, framework::LogLevel::ERRORS);
+
+    // Fused-activation quantized type
+    input.set_data_type(DataType::QASYMM8);
+    output.set_data_type(DataType::QASYMM8);
+    result = CLArithmeticAddition::validate(&input, &input, &output, ConvertPolicy::WRAP, act_info);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
 template <typename T>
 using CLArithmeticAdditionFixture = ArithmeticAdditionValidationFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::U8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::U8);
-
-    // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),
                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
@@ -140,30 +141,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<uint8_t>, framework
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, data_type, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, data_type);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::S16);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::S16);
-
-    // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionS16Dataset),
                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
@@ -185,29 +162,6 @@ using CLArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantiz
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-
-    // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        ArithmeticAdditionQASYMM8Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
@@ -220,29 +174,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<uint8_t>, 
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
-
-    // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        ArithmeticAdditionQASYMM8SignedDataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
@@ -255,29 +186,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<int8_t>, f
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QSYMM16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QSYMM16);
-
-    // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        ArithmeticAdditionQSYMM16Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
@@ -313,29 +221,6 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLArithmeticAdditionFloatFixture<half>
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::F32);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::F32);
-
-    // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP32Dataset),
                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                      EmptyActivationFunctionsDataset))

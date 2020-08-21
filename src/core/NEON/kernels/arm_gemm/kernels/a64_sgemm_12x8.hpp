@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2018 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@ void a64_sgemm_asimd_12x8(const float *, const float *, float *, int, int, int);
 void a64_sgemm_asimd_12x8_a53(const float *, const float *, float *, int, int, int);
 void a64_sgemm_asimd_12x8_a55(const float *, const float *, float *, int, int, int);
 void a64_sgemm_asimd_12x8_a55r1(const float *, const float *, float *, int, int, int);
+void a64_sgemm_asimd_12x8_x1(const float *, const float *, float *, int, int, int);
 
 // 12x8 SGEMM "strategy" class.
 //
@@ -66,6 +67,22 @@ public:
     // Use the standard fixed size transforms.
     StdTransformsFixed<operand_type, result_type, 8, 12> transforms = {};
 
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
+        switch (ci->get_cpu_model()) {
+            case CPUModel::A55r1:
+                return { 3.724, 1.416, 1.113 };
+
+            case CPUModel::A53:
+                return { 2.777, 0.987, 0.898 };
+
+            case CPUModel::A73:
+                return { 2.885, 1.429, 1.163 };
+
+            default:
+                return { 6.949, 4.149, 2.826 };
+        }
+    }
+
     kern_type kernel=a64_sgemm_asimd_12x8;
 
     sgemm_12x8(const CPUInfo *ci) {
@@ -81,6 +98,10 @@ public:
 
             case CPUModel::A55r1:
                 kernel = a64_sgemm_asimd_12x8_a55r1;
+                break;
+
+            case CPUModel::X1:
+                kernel = a64_sgemm_asimd_12x8_x1;
                 break;
 
             default:

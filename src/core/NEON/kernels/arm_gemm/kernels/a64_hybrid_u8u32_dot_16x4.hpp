@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,7 @@ public:
         return 4;
     }
 
-    static constexpr bool supports_append()
+    static constexpr bool supports_accumulate()
     {
         return true;
     }

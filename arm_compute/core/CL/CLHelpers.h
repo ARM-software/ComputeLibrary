@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,14 +97,6 @@ std::string get_cl_dot8_acc_type_from_data_type(const DataType &dt);
  */
 std::string get_data_size_from_data_type(const DataType &dt);
 
-/** Translates fixed point tensor data type to the underlying OpenCL type.
- *
- * @param[in] dt @ref DataType to be translated to OpenCL type.
- *
- * @return The string specifying the underlying OpenCL type to be used.
- */
-std::string get_underlying_cl_type_from_data_type(const DataType &dt);
-
 /** Helper function to get the GPU target from CL device
  *
  * @param[in] device A CL device
@@ -120,6 +112,14 @@ GPUTarget get_target_from_device(const cl::Device &device);
  * @return the highest OpenCL version supported
  */
 CLVersion get_cl_version(const cl::Device &device);
+
+/** Helper function to get the cl_image pitch alignment in pixels
+ *
+ * @param[in] device A CL device
+ *
+ * @return the cl_image pitch alignment in pixels. If an error occurs, the function will return 0
+ */
+size_t get_cl_image_pitch_alignment(const cl::Device &device);
 
 /** Helper function to check whether a given extension is supported
  *
@@ -187,6 +187,14 @@ size_t preferred_vector_width(const cl::Device &device, DataType dt);
  * @return True if dummy work-items should be preferred to dispatch the NDRange
  */
 bool preferred_dummy_work_items_support(const cl::Device &device);
+
+/** Helper function to check whether the cl_khr_image2d_from_buffer extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool image2d_from_buffer_supported(const cl::Device &device);
 
 /** Creates an opencl kernel
  *

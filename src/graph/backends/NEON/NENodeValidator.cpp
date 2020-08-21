@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,20 @@ namespace graph
 {
 namespace backends
 {
+/** Collection of NEON element-wise functions */
+struct NEEltwiseLayerFunctions
+{
+    using ArithmeticAddition      = NEArithmeticAddition;
+    using ArithmeticSubtraction   = NEArithmeticSubtraction;
+    using PixelWiseMultiplication = NEPixelWiseMultiplication;
+};
+
+/** Collection of NEON unary element-wise functions */
+struct NEUnaryEltwiseLayerFunctions
+{
+    using ExpLayer = NEExpLayer;
+};
+
 Status NENodeValidator::validate(INode *node)
 {
     if(node == nullptr)
@@ -91,6 +105,10 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_upsample_layer<NEUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
         case NodeType::YOLOLayer:
             return detail::validate_yolo_layer<NEYOLOLayer>(*polymorphic_downcast<YOLOLayerNode *>(node));
+        case NodeType::EltwiseLayer:
+            return detail::validate_eltwise_Layer<NEEltwiseLayerFunctions>(*polymorphic_downcast<EltwiseLayerNode *>(node));
+        case NodeType::UnaryEltwiseLayer:
+            return detail::validate_unary_eltwise_layer<NEUnaryEltwiseLayerFunctions>(*polymorphic_downcast<UnaryEltwiseLayerNode *>(node));
         default:
             return Status{};
     }

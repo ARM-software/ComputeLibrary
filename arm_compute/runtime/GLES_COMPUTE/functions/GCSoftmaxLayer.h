@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,16 +50,17 @@ public:
     GCSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F16/F32
-     * @param[out] output Destination tensor. Data types supported: same as @p input
-     * @param[in]  beta   (Optional) A scaling factor for the exponent. Only beta = 1 is supported
-     * @param[in]  axis   (Optional) Reduction axis. It has the purpose of squashing the first @p axis
-     *                    dimensions together. For instance, given a [4x4x4x4] image,
-     *                    when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in]  input           Source tensor. Data types supported: F16/F32
+     * @param[out] output          Destination tensor. Data types supported: same as @p input
+     * @param[in]  beta            (Optional) A scaling factor for the exponent. Only beta = 1 is supported
+     * @param[in]  reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
+     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
+     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
+     *                   Must be in range [0, input_num_dimensions).
      *
-     * @note The value of @p axis must be always 1 for GLES
+     * @note The value of @p reduce_end_axis must be always 0 for GLES
      */
-    void configure(const IGCTensor *input, IGCTensor *output, float beta = 1.0f, size_t axis = 1);
+    void configure(const IGCTensor *input, IGCTensor *output, float beta = 1.0f, size_t reduce_end_axis = 0);
 
     // Inherited methods overridden:
     void run() override;

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, 2017 ARM Limited.
+# Copyright (c) 2016, 2017 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -24,9 +24,9 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v20.05"
-LIBRARY_VERSION_MAJOR = 19
-LIBRARY_VERSION_MINOR =  1
+VERSION = "v20.08"
+LIBRARY_VERSION_MAJOR = 20
+LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
 
@@ -178,6 +178,7 @@ arm_compute_env.Append(LIBS = ['dl'])
 core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
 core_files += Glob('src/core/CPP/kernels/*.cpp')
+core_files += Glob('src/core/utils/*.cpp')
 core_files += Glob('src/core/utils/helpers/*.cpp')
 core_files += Glob('src/core/utils/io/*.cpp')
 core_files += Glob('src/core/utils/quantization/*.cpp')
@@ -230,6 +231,8 @@ if env['neon']:
     arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/convolution/common/",
                                       "arm_compute/core/NEON/kernels/convolution/winograd/",
                                       "arm_compute/core/NEON/kernels/convolution/depthwise/",
+                                      "src/core/NEON/kernels/assembly/",
+                                      "src/core/NEON/kernels/convolution/winograd/",
                                       "arm_compute/core/NEON/kernels/assembly/"])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')

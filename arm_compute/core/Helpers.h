@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -800,6 +800,16 @@ inline T wrap_around(T x, T m)
 {
     return x >= 0 ? x % m : (x % m + m) % m;
 }
+
+/** Convert a dimension axis to the number of dimensions in the range [0, @p dim_axis]
+ * Handle negative axis, negative axis is used to specify axis from the end (e.g. -1 for the last axis).
+ *
+ * @param[in] dim_axis The last axis (inclusive) in the range [0, @p dim_axis]
+ * @param[in] num_dims The total number of dimensions
+ *
+ * @return The number of dimensions in the range [0, @p dim_axis]
+ */
+inline size_t dim_index_2_num_dims(int32_t dim_axis, int32_t num_dims);
 
 /** Convert negative coordinates to positive in the range [0, num_dims_input]
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,7 @@ public:
     // Inherited overriden methods
     void tune_kernel_static(ICLKernel &kernel) override;
     void tune_kernel_dynamic(ICLKernel &kernel) override;
+    void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors) override;
 };
 } // namespace tuners
 } // namespace arm_compute

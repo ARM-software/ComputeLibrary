@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,26 +26,22 @@
 #include "gemm_hybrid.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
-#include "gemm_interleaved_2d.hpp"
 #include "gemm_interleaved_pretransposed_2d.hpp"
-#include "gemm_native.hpp"
 #include "gemv_batched.hpp"
-#include "gemv_native_transposed.hpp"
 #include "gemv_pretransposed.hpp"
 
 #include "kernels/a32_sgemm_8x6.hpp"
 #include "kernels/a64_hybrid_fp32_mla_16x4.hpp"
 #include "kernels/a64_hybrid_fp32_mla_4x8.hpp"
-#include "kernels/a64_native_fp32_mla_16x4.hpp"
 #include "kernels/a64_smallK_hybrid_fp32_mla_4x6.hpp"
 #include "kernels/a64_smallK_hybrid_fp32_mla_4x8.hpp"
 #include "kernels/a64_sgemm_12x8.hpp"
 #include "kernels/a64_sgemv_pretransposed.hpp"
-#include "kernels/a64_sgemv_trans.hpp"
 
 #include "kernels/sve_hybrid_fp32_mla_4VLx4.hpp"
+#include "kernels/sve_hybrid_fp32_mmla_4VLx4.hpp"
 #include "kernels/sve_interleaved_fp32_mla_3VLx8.hpp"
-#include "kernels/sve_native_fp32_mla_4VLx4.hpp"
+#include "kernels/sve_interleaved_fp32_mmla_3VLx8.hpp"
 #include "kernels/sve_smallK_hybrid_fp32_mla_1VLx8.hpp"
 
 namespace arm_gemm {
@@ -63,79 +59,74 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 {
     GemmMethod::GEMV_PRETRANSPOSED,
     "sgemv_pretransposed",
-    [](const GemmArgs &args) { return (args._Msize==1 && args._pretransposed_hint && args._nbatches==1); },
+    [](const GemmArgs &args) { return (args._Msize==1 && args._nbatches==1); },
     nullptr,
     [](const GemmArgs &args) { return new GemvPretransposed<sgemv_pretransposed, float, float>(args); }
 },
+#if defined(__ARM_FEATURE_SVE) && defined(MMLA_FP32)
 {
-    GemmMethod::GEMV_NATIVE_TRANSPOSED,
-    "sgemv_trans",
-    [](const GemmArgs &args) { return (args._Msize==1 && !args._trA && !args._trB && args._nbatches==1); },
-    nullptr,
-    [](const GemmArgs &args) { return new GemvNativeTransposed<sgemv_trans, float, float>(args); }
+    GemmMethod::GEMM_HYBRID,
+    "hybrid_fp32_mmla_4VLx4",
+    [](const GemmArgs &args) { return (args._Ksize >= 4); },
+    [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mmla_4VLx4, float, float>(args); }
 },
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "interleaved_fp32_mmla_3VLx8",
+    [](const GemmArgs &args) { return (args._Ksize>4); },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_fp32_mmla_3VLx8, float, float>(args); }
+},
+#endif // __ARM_FEATURE_SVE && MMLA_FP32
 
 #ifdef __ARM_FEATURE_SVE
-// SVE smallk / native / hybrid methods
+// SVE smallk /  hybrid methods
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_fp32_mla_1VLx8",
-    [](const GemmArgs &args) { return (args._Ksize <= 24) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return (args._Ksize <= 24); },
     nullptr,
     [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_fp32_mla_1VLx8, float, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_fp32_mla_4VLx4",
-    [](const GemmArgs &args) { return (args._Ksize >= 4) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return (args._Ksize >= 4); },
     [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mla_4VLx4, float, float>(args); }
 },
-{
-    GemmMethod::GEMM_NATIVE,
-    "native_fp32_mla_4VLx4",
-    [](const GemmArgs &args) { return (args._Ksize>4 && !args._trA && !args._trB); },
-    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
-    [](const GemmArgs &args) { return new GemmNative<native_fp32_mla_4VLx4, float, float>(args); }
-},
 #endif // __ARM_FEATURE_SVE
 
-// NEON native / hybrid methods
+// NEON hybrid methods
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_fp32_mla_4x8",
-    [](const GemmArgs &args) { return (args._Ksize <= 8) && (args._Nsize % 4)==0 && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return (args._Ksize <= 8) && (args._Nsize % 4)==0; },
     nullptr,
     [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_fp32_mla_4x8, float, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_fp32_mla_4x6",
-    [](const GemmArgs &args) { return (args._Ksize > 8) && (args._Ksize <= 16) && (args._Nsize % 4)==0 && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return (args._Ksize > 8) && (args._Ksize <= 16) && (args._Nsize % 4)==0; },
     nullptr,
     [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_fp32_mla_4x6, float, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_fp32_mla_4x8_normal",
-    [](const GemmArgs &args) { return (args._Ksize >= 4) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return (args._Ksize >= 4); },
     [](const GemmArgs &args) { return (args._Nsize < 12); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mla_4x8, float, float>(args); }
 },
-{
+GemmImplementation<float, float>::with_estimate(
     GemmMethod::GEMM_HYBRID,
-    "hybrid_fp32_mla_16x4_normal",
-    [](const GemmArgs &args) { return (args._Ksize >= 4) && !args._trA && args._pretransposed_hint; },
-    [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || (args._Msize < 16) || (args._nmulti > 1); },
+    "hybrid_fp32_mla_16x4",
+    [](const GemmArgs &args) { return (args._Ksize >= 4); },
+    [](const GemmArgs &args) { return GemmHybrid<hybrid_fp32_mla_16x4, float, float>::estimate_cycles(args, hybrid_fp32_mla_16x4::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mla_16x4, float, float>(args); }
-},
-{
-    GemmMethod::GEMM_NATIVE,
-    "native_fp32_mla_16x4",
-    [](const GemmArgs &args) { return (args._Ksize>4 && (args._Nsize % 16)==0 && !args._trA && !args._trB); },
-    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
-    [](const GemmArgs &args) { return new GemmNative<native_fp32_mla_16x4, float, float>(args); }
-},
+),
 
 #ifdef __ARM_FEATURE_SVE
 {
@@ -146,31 +137,22 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs &args) { return new GemmInterleaved<interleaved_fp32_mla_3VLx8, float, float>(args); }
 },
 #endif // __ARM_FEATURE_SVE
-//Pretranpose, 2D split
-{
+// Pretranposed, 2D split
+GemmImplementation<float, float>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED_2D,
-    "sgemm_12x8",
-    [](const GemmArgs &args) { return args._pretransposed_hint; },
-    [](const GemmArgs &args) { return args._pretransposed_hint; },
+    "sgemm_12x8_2d",
+    nullptr,
+    [](const GemmArgs &args) { return GemmInterleavedPretransposed2d<sgemm_12x8, float, float>::estimate_cycles(args, sgemm_12x8::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<sgemm_12x8, float, float>(args); }
-},
-//Tranpose, 2D split, no blockmanager
-{
-    GemmMethod::GEMM_INTERLEAVED_2D,
-    "sgemm_12x8",
-    [](const GemmArgs &args) { return (!args._pretransposed_hint) && args._maxthreads >= 8; },
-    [](const GemmArgs &args) { return (!args._pretransposed_hint) && args._maxthreads >= 8; },
-    [](const GemmArgs &args) { return new GemmInterleaved2d<sgemm_12x8, float, float>(args); }
-},
-//Tranpose, 1D split, with blockmanager
-{
+),
+// 1D split (with pretransposed or not)
+GemmImplementation<float, float>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
-    "sgemm_12x8",
-    [](const GemmArgs &args) { return (!args._pretransposed_hint); },
-    [](const GemmArgs &args) { return (!args._pretransposed_hint); },
+    "sgemm_12x8_1d",
+    nullptr,
+    [](const GemmArgs &args) { return GemmInterleaved<sgemm_12x8, float, float>::estimate_cycles(args, sgemm_12x8::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args) { return new GemmInterleaved<sgemm_12x8, float, float>(args); }
-},
-
+),
 #endif // __aarch64__
 
 #ifdef __arm__

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,7 +74,7 @@ public:
 
     /** Configures the @ref CLGEMMReshapeRHSMatrixKernel kernel
      *
-     * @param[in] input Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input Input tensor. Data types supported: All
      * @param[in] info  RHS matrix information to be used for reshaping.
      */
     void configure(const ICLTensor *input, GEMMRHSMatrixInfo info)
@@ -85,7 +85,7 @@ public:
     /** Configures the @ref CLGEMMReshapeRHSMatrixKernel kernel
      *
      * @param[in] compile_context The compile context to be used.
-     * @param[in] input           Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input           Input tensor. Data types supported: All
      * @param[in] info            RHS matrix information to be used for reshaping.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, GEMMRHSMatrixInfo info)

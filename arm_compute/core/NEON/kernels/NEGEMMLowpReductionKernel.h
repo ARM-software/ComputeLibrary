@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  input  Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[out] output Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
      * @param[in]  info   Kernel metadata:
      *                    - k            Number of matrix columns/rows depending on the type of reduction.
@@ -82,7 +82,7 @@ public:
     }
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[out] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      * @param[in]  info           Kernel metadata:
      *                            - k            (num_mtx_a_cols) Number of matrix A columns
@@ -93,7 +93,7 @@ public:
     void configure(const ITensor *mtx_a, ITensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixAReductionKernel
      *
-     * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[in] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      * @param[in] info           Kernel metadata:
      *                           - k            (num_mtx_a_cols) Number of matrix A columns
@@ -131,7 +131,7 @@ public:
     }
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[out] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      * @param[in]  info           Kernel metadata:
      *                            - k            (num_mtx_b_rows) Number of matrix B rows.
@@ -142,7 +142,7 @@ public:
     void configure(const ITensor *mtx_b, ITensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixBReductionKernel
      *
-     * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[in] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      * @param[in] info           Kernel metadata:
      *                           - k            (num_mtx_b_rows) Number of matrix B rows.

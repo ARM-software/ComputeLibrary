@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -255,7 +255,7 @@ void tune_scale_kernel(CLScaleKernel &k)
     cl::NDRange               lws_hint      = k.lws_hint();
     const GPUTarget           gpu_target    = k.get_target();
     const DataType            dt            = k.input()->info()->data_type();
-    const InterpolationPolicy interpolation = k._interpolationPolicy;
+    const InterpolationPolicy interpolation = k.get_interpolation_policy();
 
     // Configure the local work size for Bifrost, interpolation (bilinear) and datatype F32.
     // The value are obtained via exhaustive autotuning.
@@ -314,6 +314,11 @@ void BifrostTuner::tune_kernel_static(ICLKernel &kernel)
 void BifrostTuner::tune_kernel_dynamic(ICLKernel &kernel)
 {
     ARM_COMPUTE_UNUSED(kernel);
+}
+
+void BifrostTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
+{
+    ARM_COMPUTE_UNUSED(kernel, tensors);
 }
 } // namespace tuners
 } // namespace arm_compute

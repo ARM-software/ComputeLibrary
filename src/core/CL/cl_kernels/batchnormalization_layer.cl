@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -346,9 +346,9 @@ __kernel void fuse_batchnormalization_layer(TENSOR3D_DECLARATION(w),
     int c0 = z % DIM2;
     int c1 = z / DIM2;
 #else // ! defined(DIM2)
-    int c0 = 0;
+    int c0                                                                                    = 0;
 #if defined(NHWC)
-    int c1 = x;
+    int c1                                                                                    = x;
 #else  // defined(NHWC)
     int c1 = z;
 #endif // defined(NHWC)
@@ -386,7 +386,7 @@ __kernel void fuse_batchnormalization_layer(TENSOR3D_DECLARATION(w),
     // Compute bias
 #if !defined(DIM2) && defined(NHWC)
     if(z == 0 && y == 0)
-#else !defined(DIM2) && defined(NHWC)
+#else  // !defined(DIM2) && defined(NHWC)
     if(x == 0 && y == 0 && c0 == 0)
 #endif // !defined(DIM2) && defined(NHWC)
     {

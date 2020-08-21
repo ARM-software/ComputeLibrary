@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ARM Limited.
+ * Copyright (c) 2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -189,6 +189,10 @@ void NEQLSTMLayer::configure(const ITensor *input,
     if(_has_projection)
     {
         _projection_reduction.configure(_projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
+        if(_projection_bias != nullptr)
+        {
+            _projection_bias_add.configure(_projection_bias, &_projection_eff_bias, &_projection_eff_bias, ConvertPolicy::SATURATE);
+        }
     }
 
     // Pre-transpose weights to be used in GEMM.
@@ -353,7 +357,7 @@ void NEQLSTMLayer::configure(const ITensor *input,
         input_activation_input->allocator()->allocate();
     }
     // Cell.
-    // TODO(COMPMID-3395): Perform multiplication in the quantized domain in NEPixelWiseMultiplicationKernel
+    // TODO(COMPMID-3395): Perform multiplication in the quantized domain in NEPixelWiseMultiplication
     _pixelwise_mul_forget_cell.configure(&_forget_gate, cell_state_in, &_forget_gate, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     const float      cell_gate_scale      = _cell_gate.info()->quantization_info().uniform().scale;
     const float      mul_input_cell_scale = cell_gate_scale * std::pow(2, 15 + cell_shift);
@@ -388,7 +392,7 @@ void NEQLSTMLayer::configure(const ITensor *input,
 
     if(_has_peephole)
     {
-        // TODO(COMPMID-3395): Perform multiplication in the quantized domain in NEPixelWiseMultiplicationKernel
+        // TODO(COMPMID-3395): Perform multiplication in the quantized domain in NEPixelWiseMultiplication
         // Here we are not using the output stage because all operations are done in float
         _mul_cell_to_output_res.allocator()->init(TensorInfo(cell_state_out->info()->tensor_shape(), 1, DataType::S32));
         _memory_group.manage(&_mul_cell_to_output_res);
@@ -422,7 +426,7 @@ void NEQLSTMLayer::configure(const ITensor *input,
 
     // Hidden.
     _hidden_tanh.configure(cell_state_out, &_input_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f));
-    // TODO(COMPMID-3395): Perform multiplication in the quantized domain in NEPixelWiseMultiplicationKernel
+    // TODO(COMPMID-3395): Perform multiplication in the quantized domain in NEPixelWiseMultiplication
     _memory_group.manage(&_hidden_mul_res);
     const TensorInfo hidden_mul_res(_input_gate.info()->tensor_shape(), 1, DataType::S32);
     _hidden_mul_res.allocator()->init(hidden_mul_res);
@@ -612,6 +616,11 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(lstm_params.projection_weights(), &projection_eff_bias_info, GEMMLowpReductionKernelInfo(output_size, false,
                                                                                lstm_params.hidden_state_zero(),
                                                                                true)));
+        if(lstm_params.projection_bias() != nullptr)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lstm_params.projection_bias(), 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(lstm_params.projection_bias(), &projection_eff_bias_info, &projection_eff_bias_info, ConvertPolicy::SATURATE));
+        }
     }
 
     const TensorInfo input_weights_transposed(TensorShape(num_units, input_size), 1, input_to_forget_weights->data_type(), input_to_forget_weights->quantization_info());
@@ -644,6 +653,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const bool has_layer_norm = lstm_params.use_layer_norm();
 
     // Forget gate.
+    ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.forget_intermediate_scale() == 0);
     const TensorInfo forget_outstage_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.forget_intermediate_scale(), 0));
     const TensorInfo mm_out_info(TensorShape(num_units, batch_size), 1, DataType::S32);
     const float      input_to_forget_scale = input_to_forget_weights->quantization_info().uniform().scale * qinput.scale / lstm_params.forget_intermediate_scale();
@@ -652,17 +662,17 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const float recurrent_to_forget_scale = recurrent_to_forget_weights->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.forget_intermediate_scale();
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, output_state_in, &recurrent_weights_transposed, &eff_bias_info, recurrent_to_forget_scale, &mm_out_info, &forget_outstage_info));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&forget_outstage_info, &forget_outstage_info, &forget_outstage_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_outstage_info, &forget_outstage_info, &forget_outstage_info, ConvertPolicy::SATURATE));
 
     if(lstm_params.has_peephole_opt())
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lstm_params.cell_to_forget_weights(), 1, DataType::QSYMM16);
-        ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_forget_weights(), &mm_out_info, 1.f, ConvertPolicy::SATURATE,
-                                                                              RoundingPolicy::TO_ZERO));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(cell_state_in, lstm_params.cell_to_forget_weights(), &mm_out_info, 1.f, ConvertPolicy::SATURATE,
+                                                                        RoundingPolicy::TO_ZERO));
         const float cell_to_forget_scale = std::pow(2, cell_shift) * lstm_params.cell_to_forget_weights()->quantization_info().uniform().scale / lstm_params.forget_intermediate_scale();
         ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_forget_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOutputStage::validate(&mm_out_info, nullptr, &forget_outstage_info, gemmlowp_info));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&forget_outstage_info, &forget_outstage_info, &forget_outstage_info, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_outstage_info, &forget_outstage_info, &forget_outstage_info, ConvertPolicy::SATURATE));
     }
 
     if(has_layer_norm)
@@ -679,6 +689,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&forget_outstage_info, &forget_gate_info, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
 
     // Modulation gate.
+    ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.cell_intermediate_scale() == 0);
     const TensorInfo cell_outstage_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.cell_intermediate_scale(), 0));
     const float      input_to_cell_scale = input_to_cell_weights->quantization_info().uniform().scale * qinput.scale / lstm_params.cell_intermediate_scale();
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, input, &input_weights_transposed, &eff_bias_info, input_to_cell_scale, &mm_out_info, &cell_outstage_info));
@@ -686,7 +697,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const float recurrent_to_cell_scale = recurrent_to_cell_weights->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.cell_intermediate_scale();
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, output_state_in, &recurrent_weights_transposed, &eff_bias_info, recurrent_to_cell_scale, &mm_out_info, &cell_outstage_info));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&cell_outstage_info, &cell_outstage_info, &cell_outstage_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&cell_outstage_info, &cell_outstage_info, &cell_outstage_info, ConvertPolicy::SATURATE));
 
     if(has_layer_norm)
     {
@@ -703,7 +714,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     if(lstm_params.has_cifg_opt())
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(lstm_params.input_gate_bias() != nullptr, "Input gate bias must not be present when CIFG is used");
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticSubtractionKernel::validate(&input_gate_info, &forget_gate_info, &forget_gate_info, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticSubtraction::validate(&input_gate_info, &forget_gate_info, &forget_gate_info, ConvertPolicy::SATURATE));
     }
     else
     {
@@ -714,6 +725,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(forget_gate_bias, lstm_params.input_gate_bias());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(forget_gate_bias, lstm_params.input_gate_bias());
 
+        ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.input_intermediate_scale() == 0);
         const TensorInfo input_outstage_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.input_intermediate_scale(), 0));
         const float      input_to_input_scale = lstm_params.input_to_input_weights()->quantization_info().uniform().scale * qinput.scale / lstm_params.input_intermediate_scale();
         ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, input, &input_weights_transposed, &eff_bias_info, input_to_input_scale, &mm_out_info, &input_outstage_info));
@@ -721,16 +733,16 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         const float recurrent_to_input_scale = lstm_params.recurrent_to_input_weights()->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.input_intermediate_scale();
         ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, output_state_in, &recurrent_weights_transposed, &eff_bias_info, recurrent_to_input_scale, &mm_out_info, &input_outstage_info));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&input_outstage_info, &input_outstage_info, &input_outstage_info, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&input_outstage_info, &input_outstage_info, &input_outstage_info, ConvertPolicy::SATURATE));
 
         if(lstm_params.has_peephole_opt())
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_input_weights(), &mm_out_info, 1.f, ConvertPolicy::SATURATE,
-                                                                                  RoundingPolicy::TO_ZERO));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(cell_state_in, lstm_params.cell_to_input_weights(), &mm_out_info, 1.f, ConvertPolicy::SATURATE,
+                                                                            RoundingPolicy::TO_ZERO));
             const float cell_to_input_scale = std::pow(2, cell_shift) * lstm_params.cell_to_input_weights()->quantization_info().uniform().scale / lstm_params.input_intermediate_scale();
             ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_input_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
             ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOutputStage::validate(&mm_out_info, &eff_bias_info, &input_outstage_info, gemmlowp_info));
-            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&input_outstage_info, &input_outstage_info, &input_outstage_info, ConvertPolicy::SATURATE));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&input_outstage_info, &input_outstage_info, &input_outstage_info, ConvertPolicy::SATURATE));
         }
 
         if(has_layer_norm)
@@ -743,15 +755,16 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&input_outstage_info, &input_gate_info, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f)));
     }
     // Cell.
-    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&forget_gate_info, cell_state_in, &forget_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&input_gate_info, cell_state_in, &cell_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&forget_gate_info, &cell_gate_info, cell_state_out, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(&forget_gate_info, cell_state_in, &forget_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(&input_gate_info, cell_state_in, &cell_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_gate_info, &cell_gate_info, cell_state_out, ConvertPolicy::SATURATE));
     if(quantized_cell_clip > 0)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(cell_state_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -quantized_cell_clip,
                                                                                                              quantized_cell_clip)));
     }
     // Output gate.
+    ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.output_intermediate_scale() == 0);
     const TensorInfo output_outstage_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.output_intermediate_scale(), 0));
     const float      input_to_output_scale = input_to_output_weights->quantization_info().uniform().scale * qinput.scale / lstm_params.output_intermediate_scale();
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, input, &input_weights_transposed, &eff_bias_info, input_to_output_scale, &mm_out_info, &output_outstage_info));
@@ -759,17 +772,17 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const float recurrent_to_output_scale = recurrent_to_output_weights->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.output_intermediate_scale();
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, output_state_in, &recurrent_weights_transposed, &eff_bias_info, recurrent_to_output_scale, &mm_out_info, &output_outstage_info));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
     if(lstm_params.has_peephole_opt())
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lstm_params.cell_to_output_weights(), 1, DataType::QSYMM16);
-        // TODO(COMPMID-3395): Perform multiplication in the quantized domain in NEPixelWiseMultiplicationKernel
+        // TODO(COMPMID-3395): Perform multiplication in the quantized domain in NEPixelWiseMultiplication
         // Here we are not using the output stage because all operations are done in float
         // const float cell_to_output_scale = std::pow(2, cell_shift) * lstm_params.cell_to_output_weights()->quantization_info().uniform().scale / lstm_params.output_intermediate_scale();
         // ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_output_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(cell_state_out, lstm_params.cell_to_output_weights(), &output_outstage_info, 1.f, ConvertPolicy::SATURATE,
-                                                                              RoundingPolicy::TO_ZERO));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(cell_state_out, lstm_params.cell_to_output_weights(), &output_outstage_info, 1.f, ConvertPolicy::SATURATE,
+                                                                        RoundingPolicy::TO_ZERO));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
     }
 
     if(has_layer_norm)
@@ -786,7 +799,9 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(cell_state_out, &input_gate_info, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f)));
     const TensorInfo hidden_mul_res(TensorShape(num_units, batch_size), 1, DataType::S32);
     const TensorInfo hidden_out_info(TensorShape(num_units, batch_size), 1, DataType::QASYMM8_SIGNED);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&output_gate_info, &input_gate_info, &hidden_mul_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(&output_gate_info, &input_gate_info, &hidden_mul_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+
+    ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.hidden_state_scale() == 0);
     const float hidden_state_scale = std::pow(2, -15) / lstm_params.hidden_state_scale() * std::pow(2, -15);
     ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(hidden_state_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift, /* ignore_epsilon */ true));
     gemmlowp_info.gemmlowp_offset = lstm_params.hidden_state_zero();
@@ -798,7 +813,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     if(lstm_params.has_projection())
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(recurrent_to_forget_weights, lstm_params.projection_weights());
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(forget_gate_bias, lstm_params.projection_bias());
+        ARM_COMPUTE_RETURN_ERROR_ON(qoutput_state_in.scale == 0);
 
         const UniformQuantizationInfo qprojection      = lstm_params.projection_weights()->quantization_info().uniform();
         const float                   projection_scale = qprojection.scale * lstm_params.hidden_state_scale() / qoutput_state_in.scale;
@@ -822,7 +837,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
             ARM_COMPUTE_RETURN_ON_ERROR(NEQLSTMLayer::TensorCopyKernel::validate(*output_state_out, projection_outstage_info));
         }
 
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(output_state_out, output_state_out, output_state_out, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(output_state_out, output_state_out, output_state_out, ConvertPolicy::SATURATE));
 
         if(projection_tensor_copy_required)
         {
@@ -878,13 +893,13 @@ void NEQLSTMLayer::run()
 
     _mm_recurrent_to_forget.run();
     _recurrent_to_forget_outstage.run();
-    NEScheduler::get().schedule(&_accumulate_input_recurrent_forget, Window::DimY);
+    _accumulate_input_recurrent_forget.run();
 
     if(_has_peephole)
     {
-        NEScheduler::get().schedule(&_pixelwise_mul_cell_to_forget, Window::DimY);
+        _pixelwise_mul_cell_to_forget.run();
         _cell_to_forget_outstage.run();
-        NEScheduler::get().schedule(&_accumulate_cell_forget, Window::DimY);
+        _accumulate_cell_forget.run();
     }
 
     if(_has_layer_norm)
@@ -900,7 +915,7 @@ void NEQLSTMLayer::run()
 
     _mm_recurrent_to_cell.run();
     _recurrent_to_cell_outstage.run();
-    NEScheduler::get().schedule(&_accumulate_input_recurrent_modulation, Window::DimY);
+    _accumulate_input_recurrent_modulation.run();
 
     if(_has_layer_norm)
     {
@@ -912,7 +927,7 @@ void NEQLSTMLayer::run()
     // Input gate
     if(_has_cifg)
     {
-        NEScheduler::get().schedule(&_input_gate_sub, Window::DimY);
+        _input_gate_sub.run();
     }
     else
     {
@@ -920,13 +935,13 @@ void NEQLSTMLayer::run()
         _input_to_input_outstage.run();
         _mm_recurrent_to_input.run();
         _recurrent_to_input_outstage.run();
-        NEScheduler::get().schedule(&_accumulate_input_recurrent_input, Window::DimY);
+        _accumulate_input_recurrent_input.run();
 
         if(_has_peephole)
         {
-            NEScheduler::get().schedule(&_pixelwise_mul_cell_to_input, Window::DimY);
+            _pixelwise_mul_cell_to_input.run();
             _cell_to_input_outstage.run();
-            NEScheduler::get().schedule(&_accumulate_cell_input, Window::DimY);
+            _accumulate_cell_input.run();
         }
 
         if(_has_layer_norm)
@@ -938,9 +953,10 @@ void NEQLSTMLayer::run()
     }
 
     // Cell.
-    NEScheduler::get().schedule(&_pixelwise_mul_forget_cell, Window::DimY);
-    NEScheduler::get().schedule(&_pixelwise_mul_input_cell, Window::DimY);
-    NEScheduler::get().schedule(&_add_forget_cell, Window::DimY);
+    _pixelwise_mul_forget_cell.run();
+    _pixelwise_mul_input_cell.run();
+    _add_forget_cell.run();
+
     if(_has_cell_clipping)
     {
         _cell_clip.run();
@@ -951,12 +967,12 @@ void NEQLSTMLayer::run()
     _input_to_output_outstage.run();
     _mm_recurrent_to_output.run();
     _recurrent_to_output_outstage.run();
-    NEScheduler::get().schedule(&_accumulate_input_recurrent_output, Window::DimY);
+    _accumulate_input_recurrent_output.run();
     if(_has_peephole)
     {
-        NEScheduler::get().schedule(&_pixelwise_mul_cell_to_output, Window::DimY);
+        _pixelwise_mul_cell_to_output.run();
         _cell_to_output_outstage.run();
-        NEScheduler::get().schedule(&_accumulate_cell_to_output, Window::DimY);
+        _accumulate_cell_to_output.run();
     }
 
     if(_has_layer_norm)
@@ -968,7 +984,7 @@ void NEQLSTMLayer::run()
 
     // Hidden.
     _hidden_tanh.run();
-    NEScheduler::get().schedule(&_pixelwise_mul_hidden, Window::DimY);
+    _pixelwise_mul_hidden.run();
     _hidden_outstage.run();
 
     // Projection.
@@ -982,7 +998,7 @@ void NEQLSTMLayer::run()
             _projection_output_to_accumulate_copy.run();
         }
 
-        NEScheduler::get().schedule(&_accumulate_projection, Window::DimY);
+        _accumulate_projection.run();
 
         if(_projection_tensor_copy_required)
         {
@@ -1058,10 +1074,11 @@ void NEQLSTMLayer::prepare()
 
         if(_has_projection)
         {
+            _projection_eff_bias.allocator()->allocate();
+            NEScheduler::get().schedule(&_projection_reduction, Window::DimY);
             if(_projection_bias != nullptr)
             {
-                _projection_eff_bias.allocator()->allocate();
-                NEScheduler::get().schedule(&_projection_reduction, Window::DimY);
+                _projection_bias_add.run();
                 _projection_bias->mark_as_unused();
             }
 

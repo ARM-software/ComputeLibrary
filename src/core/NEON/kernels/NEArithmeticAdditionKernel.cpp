@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,33 +26,20 @@
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
-#include <algorithm>
-#include <arm_neon.h>
-#include <cstdint>
 #include <map>
 #include <string>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 namespace
 {
-template <typename T, bool is_sat>
-void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolicy policy, const Window &window)
+template <typename T>
+void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, const ConvertPolicy policy, const Window &window)
 {
-    ARM_COMPUTE_UNUSED(policy);
-
     /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
@@ -97,7 +84,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
-                const auto res             = is_sat ? wrapper::vqadd(broadcast_value_vec, non_broadcast_v) : wrapper::vadd(broadcast_value_vec, non_broadcast_v);
+                const auto res             = (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(broadcast_value_vec, non_broadcast_v) : wrapper::vadd(broadcast_value_vec, non_broadcast_v);
                 wrapper::vstore(output_ptr + x, res);
             }
 
@@ -105,7 +92,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
             for(; x < window_end_x; ++x)
             {
                 const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
-                *(output_ptr + x)          = is_sat ? wrapper::add_sat(broadcast_value, non_broadcast_v) : broadcast_value + non_broadcast_v;
+                *(output_ptr + x)          = (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(broadcast_value, non_broadcast_v) : broadcast_value + non_broadcast_v;
             }
         },
         broadcast_input, non_broadcast_input, output);
@@ -132,7 +119,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
             {
                 const auto val1 = wrapper::vloadq(input1_ptr + x);
                 const auto val2 = wrapper::vloadq(input2_ptr + x);
-                const auto res  = is_sat ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
+                const auto res  = (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                 wrapper::vstore(output_ptr + x, res);
             }
 
@@ -141,7 +128,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
             {
                 const auto val1   = *(input1_ptr + x);
                 const auto val2   = *(input2_ptr + x);
-                *(output_ptr + x) = is_sat ? wrapper::add_sat(val1, val2) : val1 + val2;
+                *(output_ptr + x) = (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
             }
         },
         input1, input2, output);
@@ -169,11 +156,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
     const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
 
-    const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
-    const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
     const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
-    const int32x4_t   voffset1   = vdupq_n_s32(iq1_info.offset);
-    const int32x4_t   voffset2   = vdupq_n_s32(iq2_info.offset);
     const float32x4_t voffseto   = vdupq_n_f32(oq_info.offset);
 
     if(is_broadcast_across_x)
@@ -185,6 +168,11 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
         const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
         const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
         const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
+
+        const float32x4_t vscale1  = is_broadcast_input_2 ? vdupq_n_f32(iq1_info.scale) : vdupq_n_f32(iq2_info.scale);
+        const float32x4_t vscale2  = is_broadcast_input_2 ? vdupq_n_f32(iq2_info.scale) : vdupq_n_f32(iq1_info.scale);
+        const int32x4_t   voffset1 = is_broadcast_input_2 ? vdupq_n_s32(iq1_info.offset) : vdupq_n_s32(iq2_info.offset);
+        const int32x4_t   voffset2 = is_broadcast_input_2 ? vdupq_n_s32(iq2_info.offset) : vdupq_n_s32(iq1_info.offset);
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -267,6 +255,11 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
         Iterator input1(in1, input1_win);
         Iterator input2(in2, input2_win);
         Iterator output(out, win);
+
+        const float32x4_t vscale1  = vdupq_n_f32(iq1_info.scale);
+        const float32x4_t vscale2  = vdupq_n_f32(iq2_info.scale);
+        const int32x4_t   voffset1 = vdupq_n_s32(iq1_info.offset);
+        const int32x4_t   voffset2 = vdupq_n_s32(iq2_info.offset);
 
         execute_window_loop(win, [&](const Coordinates &)
         {
@@ -356,11 +349,7 @@ void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const 
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
     const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
 
-    const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
-    const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
     const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
-    const int32x4_t   voffset1   = vdupq_n_s32(iq1_info.offset);
-    const int32x4_t   voffset2   = vdupq_n_s32(iq2_info.offset);
     const float32x4_t voffseto   = vdupq_n_f32(oq_info.offset);
 
     if(is_broadcast_across_x)
@@ -372,6 +361,11 @@ void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const 
         const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
         const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
         const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
+
+        const float32x4_t vscale1  = is_broadcast_input_2 ? vdupq_n_f32(iq1_info.scale) : vdupq_n_f32(iq2_info.scale);
+        const float32x4_t vscale2  = is_broadcast_input_2 ? vdupq_n_f32(iq2_info.scale) : vdupq_n_f32(iq1_info.scale);
+        const int32x4_t   voffset1 = is_broadcast_input_2 ? vdupq_n_s32(iq1_info.offset) : vdupq_n_s32(iq2_info.offset);
+        const int32x4_t   voffset2 = is_broadcast_input_2 ? vdupq_n_s32(iq2_info.offset) : vdupq_n_s32(iq1_info.offset);
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -455,6 +449,10 @@ void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const 
         Iterator input2(in2, input2_win);
         Iterator output(out, win);
 
+        const float32x4_t vscale1  = vdupq_n_f32(iq1_info.scale);
+        const float32x4_t vscale2  = vdupq_n_f32(iq2_info.scale);
+        const int32x4_t   voffset1 = vdupq_n_s32(iq1_info.offset);
+        const int32x4_t   voffset2 = vdupq_n_s32(iq2_info.offset);
         execute_window_loop(win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const int8_t *>(input1.ptr());
@@ -828,8 +826,12 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
     ARM_COMPUTE_UNUSED(policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S32, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
 
@@ -847,6 +849,7 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
+            && !(input1.data_type() == DataType::S32 && input2.data_type() == DataType::S32 && output.data_type() == DataType::S32)
             && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32 && output.data_type() == DataType::F32)
             && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16 && output.data_type() == DataType::F16)
             && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8)
@@ -861,7 +864,7 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
+std::pair<Status, Window> validate_and_configure_window(const ITensorInfo &input1, const ITensorInfo &input2, ITensorInfo &output)
 {
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input1, input2);
     const TensorShape &out_shape    = broadcast_pair.first;
@@ -874,6 +877,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
         if(input1.data_type() == DataType::S16 || input2.data_type() == DataType::S16)
         {
             set_format_if_unknown(output, Format::S16);
+        }
+        if(input1.data_type() == DataType::S32 || input2.data_type() == DataType::S32)
+        {
+            set_format_if_unknown(output, Format::S32);
         }
         else if(input1.data_type() == DataType::F16 || input2.data_type() == DataType::F16)
         {
@@ -908,17 +915,17 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
 } // namespace
 
 NEArithmeticAdditionKernel::NEArithmeticAdditionKernel()
-    : _func(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _policy()
+    : _func(nullptr), _policy()
 {
 }
 
-void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy)
+void NEArithmeticAdditionKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info(), policy));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output, policy));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(*input1->info(), *input2->info(), *output->info());
+    auto win_config = validate_and_configure_window(*input1, *input2, *output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     static std::map<std::string, AddFunction *> map_function =
@@ -929,34 +936,33 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
         { "add_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED },
         { "add_wrap_QSYMM16_QSYMM16_QSYMM16", &add_QSYMM16_QSYMM16_QSYMM16 },
         { "add_saturate_QSYMM16_QSYMM16_QSYMM16", &add_QSYMM16_QSYMM16_QSYMM16 },
-        { "add_wrap_U8_U8_U8", &add_same<uint8_t, false> },
-        { "add_saturate_U8_U8_U8", &add_same<uint8_t, true> },
+        { "add_wrap_U8_U8_U8", &add_same<uint8_t> },
+        { "add_saturate_U8_U8_U8", &add_same<uint8_t> },
         { "add_wrap_S16_U8_S16", &add_S16_U8_S16 },
         { "add_saturate_S16_U8_S16", &add_S16_U8_S16 },
         { "add_wrap_U8_S16_S16", &add_U8_S16_S16 },
         { "add_saturate_U8_S16_S16", &add_U8_S16_S16 },
         { "add_wrap_U8_U8_S16", &add_U8_U8_S16 },
         { "add_saturate_U8_U8_S16", &add_U8_U8_S16 },
-        { "add_wrap_S16_S16_S16", &add_same<int16_t, false> },
-        { "add_saturate_S16_S16_S16", &add_same<int16_t, true> },
-        { "add_wrap_F32_F32_F32", &add_same<float, false> },
-        { "add_saturate_F32_F32_F32", &add_same<float, false> },
+        { "add_wrap_S16_S16_S16", &add_same<int16_t> },
+        { "add_saturate_S16_S16_S16", &add_same<int16_t> },
+        { "add_wrap_S32_S32_S32", &add_same<int32_t> },
+        { "add_saturate_S32_S32_S32", &add_same<int32_t> },
+        { "add_wrap_F32_F32_F32", &add_same<float> },
+        { "add_saturate_F32_F32_F32", &add_same<float> },
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        { "add_wrap_F16_F16_F16", &add_same<float16_t, false> },
-        { "add_saturate_F16_F16_F16", &add_same<float16_t, false> },
+        { "add_wrap_F16_F16_F16", &add_same<float16_t> },
+        { "add_saturate_F16_F16_F16", &add_same<float16_t> },
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     };
 
-    _input1 = input1;
-    _input2 = input2;
-    _output = output;
     _policy = policy;
 
     std::string function_to_call("add_");
     function_to_call += policy == ConvertPolicy::WRAP ? "wrap_" : "saturate_";
-    function_to_call += string_from_data_type(input1->info()->data_type()) + "_";
-    function_to_call += string_from_data_type(input2->info()->data_type()) + "_";
-    function_to_call += string_from_data_type(output->info()->data_type());
+    function_to_call += string_from_data_type(input1->data_type()) + "_";
+    function_to_call += string_from_data_type(input2->data_type()) + "_";
+    function_to_call += string_from_data_type(output->data_type());
 
     auto it = map_function.find(function_to_call);
 
@@ -978,12 +984,16 @@ Status NEArithmeticAdditionKernel::validate(const ITensorInfo *input1, const ITe
     return Status{};
 }
 
-void NEArithmeticAdditionKernel::run(const Window &window, const ThreadInfo &info)
+void NEArithmeticAdditionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr);
-
-    (*_func)(_input1, _input2, _output, _policy, window);
+    // Dispatch kernel
+    (*_func)(tensors.get_const_tensor(TensorType::ACL_SRC_0),
+             tensors.get_const_tensor(TensorType::ACL_SRC_1),
+             tensors.get_tensor(TensorType::ACL_DST),
+             _policy,
+             window);
 }
+} // namespace arm_compute

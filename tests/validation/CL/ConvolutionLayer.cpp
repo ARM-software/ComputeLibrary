@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -261,6 +261,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<int8_t>,
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QSYMM8_PER_CHANNEL)
+
+FIXTURE_DATA_TEST_CASE(RunSmallSigned, CLGEMMConvolutionLayerQuantizedPerChannelFixture<int8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                                               framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })),
+                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                               QuantizationData),
+                                       QuantizedActivationFunctionsSmallDataset),
+                               framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),

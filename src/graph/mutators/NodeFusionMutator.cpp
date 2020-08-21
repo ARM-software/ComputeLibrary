@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -222,6 +222,12 @@ void fuse_node_with_activation(Graph &g, const Edge *output_edge, const std::set
 
     // Check if activation is supported for fusion
     if(supported_fused_activations.count(act_node->activation_info().activation()) == 0)
+    {
+        return;
+    }
+
+    // EltwiseLayerNode can only be fused when dataype is float
+    if(n_node->type() == NodeType::EltwiseLayer && !is_data_type_float(n_node->output(0)->desc().data_type))
     {
         return;
     }

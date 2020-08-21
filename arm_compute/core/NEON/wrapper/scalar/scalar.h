@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,5 +25,6 @@
 #define ARM_COMPUTE_WRAPPER_SCALAR_H
 
 #include "arm_compute/core/NEON/wrapper/scalar/add.h"
+#include "arm_compute/core/NEON/wrapper/scalar/sub.h"
 
 #endif /* ARM_COMPUTE_WRAPPER_SCALAR_H */

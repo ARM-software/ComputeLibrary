@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -175,7 +175,7 @@ void CLGaussianPyramidOrb::configure(const CLCompileContext &compile_context, IC
             _gauss5x5[i].configure(compile_context, _pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode, constant_border_value);
 
             /* Configure scale image kernel */
-            _scale_nearest[i].configure(compile_context, _tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, SamplingPolicy::CENTER);
+            _scale_nearest[i].configure(compile_context, _tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), ScaleKernelInfo{ InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, PixelValue(), SamplingPolicy::CENTER });
         }
 
         _tmp.allocate();

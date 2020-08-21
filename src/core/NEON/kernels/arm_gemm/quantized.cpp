@@ -24,6 +24,7 @@
 #ifdef __aarch64__
 
 #include "arm_gemm.hpp"
+#include "utils.hpp"
 
 #include <arm_neon.h>
 
@@ -57,7 +58,7 @@ namespace {
 template<bool do_shift_correction, bool per_channel>
 void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigned int height,
                              const int32_t *input, unsigned int in_stride, int8_t *output, unsigned int out_stride,
-                             const int32_t *row_bias, const int32_t *col_bias) {
+                             const int32_t *row_bias, const int32_t *col_bias, const unsigned int start_col) {
     const int32x4_t v_mul      = vdupq_n_s32(qp.per_layer_mul);
     const int32x4_t v_shift    = vdupq_n_s32(qp.per_layer_shift);
     const int32x4_t v_minval   = vdupq_n_s32(qp.minval);
@@ -76,8 +77,8 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
         unsigned int odds=(width % 4);
 
         const int32_t *colptr = col_bias;
-        const int32_t *perch_mul_ptr   = qp.per_channel_muls;
-        const int32_t *perch_shift_ptr = qp.per_channel_shifts;
+        const int32_t *perch_mul_ptr   = qp.per_channel_muls + start_col;
+        const int32_t *perch_shift_ptr = qp.per_channel_shifts + start_col;
 
         const int32_t *in_ptr = input + (row * in_stride);
         int8_t *out_ptr = output + (row * out_stride);
@@ -283,7 +284,6 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
                 v_mul0=v_mul;
                 v_shf0=v_shift;
             }
-
             // Load column pointers
             int32x4_t v_col0 = vld1q_s32(colptr);
             colptr += 4;
@@ -461,33 +461,33 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
 template<typename Tin, typename Tout>
 void requantize_block_32(const Requantize32 &qp, unsigned int width, unsigned int height,
                          const Tin *input, unsigned int in_stride, Tout *output, unsigned int out_stride,
-                         const int32_t *row_bias, const int32_t *col_bias) {
+                         const int32_t *row_bias, const int32_t *col_bias, unsigned int start_col) {
     if (qp.per_channel_requant) {
         if (qp.minval >= qp.c_offset) {
             requantize_block_32_int<false, true>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias);
+                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
         } else {
             requantize_block_32_int<true, true>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias);
+                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
         }
     } else {
         if (qp.minval >= qp.c_offset) {
             requantize_block_32_int<false, false>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias);
+                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
         } else {
             requantize_block_32_int<true, false>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias);
+                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
         }
     }
 }
 
 template void requantize_block_32(const Requantize32 &qp, unsigned int width, unsigned int height,
                          const int32_t *input, unsigned int in_stride, int8_t *output, unsigned int out_stride,
-                         const int32_t *row_bias, const int32_t *col_bias);
+                         const int32_t *row_bias, const int32_t *col_bias, unsigned int start_col);
 
 template void requantize_block_32(const Requantize32 &qp, unsigned int width, unsigned int height,
                          const uint32_t *input, unsigned int in_stride, uint8_t *output, unsigned int out_stride,
-                         const int32_t *row_bias, const int32_t *col_bias);
+                         const int32_t *row_bias, const int32_t *col_bias, unsigned int start_col);
 
 /*
  * Routine (and helpers) to compute row sums needed for offset correction.
@@ -604,7 +604,6 @@ namespace {
              * that the terms can simply be added in the requantize code.
              * */
             switch (rows) {
-                default:
                 case 1:
                     /* If we only have one output, just use ADDV.  Multiply
                      * the offset into all four components separately so it
@@ -646,6 +645,9 @@ namespace {
 
                     vst1q_s32(row_bias, t0);
                     break;
+
+                default:
+                    UNREACHABLE("Impossible.");
             }
         }
 
@@ -836,7 +838,6 @@ void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int h
 
                 if (numcols==16) {
                     switch(numrows) {
-                        default:
                         case 1:
                             add_block<1>(input + row * in_stride + col, in_stride, col_bias + col);
                             break;
@@ -852,6 +853,9 @@ void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int h
                         case 4:
                             add_block<4>(input + row * in_stride + col, in_stride, col_bias + col);
                             break;
+
+                        default:
+                            UNREACHABLE("Impossible.");
                     }
                 } else {
                     for (; col<width; col++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,8 @@
 #include <cstring>
 #include <limits>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void ITensor::copy_from(const ITensor &src)
 {
     if(&src == this)
@@ -64,7 +64,8 @@ void ITensor::copy_from(const ITensor &src)
 
     const size_t line_size = src_info->element_size() * src_info->dimension(0);
 
-    execute_window_loop(win_src, [&](const Coordinates &)
+    execute_window_loop(
+        win_src, [&](const Coordinates &)
     {
         memcpy(dst_it.ptr(), src_it.ptr(), line_size);
     },
@@ -168,3 +169,4 @@ void ITensor::mark_as_unused() const
 {
     _is_used = false;
 }
+} // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,7 @@ public:
         return 4;
     }
 
-    static constexpr bool supports_append()
+    static constexpr bool supports_accumulate()
     {
         return true;
     }
@@ -78,7 +78,10 @@ public:
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_bf16fp32_mmla_6VLx2;
 
-    hybrid_bf16fp32_mmla_6VLx2(const CPUInfo *ci) { UNUSED(ci); }
+    hybrid_bf16fp32_mmla_6VLx2(const CPUInfo *)
+    {
+
+    }
 };
 
 } // namespace arm_gemm

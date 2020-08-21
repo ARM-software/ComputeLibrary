@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@
  * @param[in]  in1_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  in1_step_z                        in1_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in1_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in]  in2_ptr                           Pointer to the source tensor. Supported data types: U8/S16/F16/F32
+ * @param[in]  in2_ptr                           Pointer to the source tensor. Supported data types: same as @p in1_ptr
  * @param[in]  in2_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in2_step_x                        in2_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in2_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -59,7 +59,7 @@
  * @param[in]  in2_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  in2_step_z                        in2_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in2_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8 (only if both inputs are U8), S16/F16/F32
+ * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8
  * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
@@ -115,7 +115,7 @@ __kernel void DEFINE_KERNEL(OP_NAME)(
  * @param[in]  in2_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  in2_step_z                        in2_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in2_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: same as @p in1_ptr
+ * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8
  * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination tensor in Y dimension (in bytes)

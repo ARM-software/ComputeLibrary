@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ public:
     /** Default destructor */
     ~NEArithmeticSubtractionKernel() = default;
 
-    /** Initialise the kernel's input, output and border mode.
+    /** Initialise the kernel's input and output.
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
@@ -71,8 +71,20 @@ public:
      * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32.
      * @param[in]  policy Overflow policy. Convert policy cannot be WRAP if datatype is quantized.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
+    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticSubtractionKernel
+     *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                          -> U8
+     *   - (U8,U8)                          -> S16
+     *   - (QASYMM8, QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (S16,U8)                         -> S16
+     *   - (U8,S16)                         -> S16
+     *   - (S16,S16)                        -> S16
+     *   - (F16,F16)                        -> F16
+     *   - (F32,F32)                        -> F32
      *
      * @note Convert policy cannot be WRAP if datatype is QASYMM8
      *
@@ -86,8 +98,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised sub functions
@@ -96,13 +107,12 @@ private:
      * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
      * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32.
      * @param[in]  window Region on which to execute the kernel.
+     * @param[in]  is_sat Flag to indicate if the policy is SATURATE.
      */
-    using SubFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
+    using SubFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window, bool is_sat);
     /** Sub function to use for the particular tensor types passed to configure() */
-    SubFunction   *_func;
-    const ITensor *_input1;
-    const ITensor *_input2;
-    ITensor       *_output;
+    SubFunction *_func;
+    ConvertPolicy _policy;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H */

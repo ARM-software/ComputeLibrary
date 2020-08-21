@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,13 +47,14 @@ namespace backends
 struct NETargetInfo
 {
     using TensorType         = arm_compute::ITensor;
+    using SrcTensorType      = const arm_compute::ITensor;
     using TensorConcreteType = arm_compute::Tensor;
     static Target TargetType;
 };
 
 Target NETargetInfo::TargetType = Target::NEON;
 
-/** Collection of CL convolution functions */
+/** Collection of NEON convolution functions */
 struct NEConvolutionLayerFunctions
 {
     using GenericConvolutionLayer  = NEConvolutionLayer;
@@ -62,12 +63,18 @@ struct NEConvolutionLayerFunctions
     using WinogradConvolutionLayer = NEWinogradConvolutionLayer;
 };
 
-/** Collection of CL element-wise functions */
+/** Collection of NEON element-wise functions */
 struct NEEltwiseFunctions
 {
     using Addition       = NEArithmeticAddition;
     using Subtraction    = NEArithmeticSubtraction;
     using Multiplication = NEPixelWiseMultiplication;
+};
+
+/** Collection of NEON unary element-wise functions */
+struct NEUnaryEltwiseFunctions
+{
+    using Exp = NEExpLayer;
 };
 
 /** Function and tensor types to be used inside a NEON fused convolution/batch normalization layer */
@@ -143,6 +150,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_detection_post_process_layer<NEDetectionPostProcessLayer, NETargetInfo>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::EltwiseLayer:
             return detail::create_eltwise_layer<NEEltwiseFunctions, NETargetInfo>(*polymorphic_downcast<EltwiseLayerNode *>(node));
+        case NodeType::UnaryEltwiseLayer:
+            return detail::create_unary_eltwise_layer<NEUnaryEltwiseFunctions, NETargetInfo>(*polymorphic_downcast<UnaryEltwiseLayerNode *>(node));
         case NodeType::FlattenLayer:
             return detail::create_flatten_layer<NEFlattenLayer, NETargetInfo>(*polymorphic_downcast<FlattenLayerNode *>(node));
         case NodeType::FullyConnectedLayer:

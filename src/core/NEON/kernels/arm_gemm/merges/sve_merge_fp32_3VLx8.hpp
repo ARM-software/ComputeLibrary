@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1010,11 +1010,7 @@ void MergeResults<3, 8, true>(float *out, const float *in, const int ldout, cons
             }
             else
             {
-                const float *biasptr = nullbias;
-                if (bias)
-                {
-                    biasptr = bias + i;
-                }
+                const float *biasptr = bias ? bias + i : nullbias;
 
                 switch(height)
                 {

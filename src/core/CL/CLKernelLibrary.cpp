@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -203,7 +203,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gather", "gather.cl" },
     { "gaussian1x5_sub_x", "gaussian_pyramid.cl" },
     { "gaussian5x1_sub_y", "gaussian_pyramid.cl" },
-    { "gemm_accumulate_biases", "gemm.cl" },
     { "gemm_ma_f16", "gemm.cl" },
     { "gemm_ma_f32", "gemm.cl" },
     { "gemm_mv", "gemv.cl" },
@@ -220,9 +219,13 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_mm_floating_point_f32_bifrost_1000", "gemm.cl" },
     { "gemm_mm_native", "gemm.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t", "gemm.cl" },
+    { "gemm_mm_reshaped_lhs_nt_rhs_t_texture", "gemm.cl" },
     { "gemm_mm_reshaped_lhs_t_rhs_nt", "gemm.cl" },
+    { "gemm_mm_reshaped_lhs_t_rhs_nt_texture", "gemm.cl" },
     { "gemm_mm_reshaped_only_rhs_nt", "gemm.cl" },
+    { "gemm_mm_reshaped_only_rhs_nt_texture", "gemm.cl" },
     { "gemm_mm_reshaped_only_rhs_t", "gemm.cl" },
+    { "gemm_mm_reshaped_only_rhs_t_texture", "gemm.cl" },
     { "gemm_lc_vm_f32", "gemm.cl" },
     { "gemm_reshape_lhs_matrix_nt", "gemm.cl" },
     { "gemm_reshape_lhs_matrix_t", "gemm.cl" },
@@ -280,6 +283,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "lktracker_stage0", "optical_flow_pyramid_lk.cl" },
     { "lktracker_stage1", "optical_flow_pyramid_lk.cl" },
     { "magnitude_phase", "magnitude_phase.cl" },
+    { "max_unpooling_layer_2", "unpooling_layer.cl" },
     { "mean_stddev_accumulate", "mean_stddev.cl" },
     { "mean_stddev_normalization", "mean_stddev_normalization.cl" },
     { "memset", "memset.cl" },
@@ -322,6 +326,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pooling_layer_7", "pooling_layer.cl" },
     { "pooling_layer_MxN_nchw", "pooling_layer.cl" },
     { "pooling_layer_MxN_nhwc", "pooling_layer.cl" },
+    { "pooling_layer_2_nhwc_indices_fp32", "pooling_layer.cl" },
+    { "pooling_layer_2_nhwc_indices_fp16", "pooling_layer.cl" },
+    { "pooling_layer_2_nchw_indices_fp32", "pooling_layer.cl" },
+    { "pooling_layer_2_nchw_indices_fp16", "pooling_layer.cl" },
     { "pooling_layer_MxN_quantized_nhwc", "pooling_layer_quantized.cl" },
     { "pooling_layer_MxN_quantized_nchw", "pooling_layer_quantized.cl" },
     { "prior_box_layer_nchw", "prior_box_layer.cl" },
@@ -930,6 +938,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "types.h",
 #include "./cl_kernels/types.hembed"
+    },
+    {
+        "unpooling_layer.cl",
+#include "./cl_kernels/unpooling_layer.clembed"
     },
     {
         "warp_affine.cl",

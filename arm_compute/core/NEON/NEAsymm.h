@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,24 +67,23 @@ int8x16_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x4_t vs, float32x4
 
 /** Performs final quantization step on 16 elements
  *
- * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
- *
- * @param in_s32                        Input to be quantized.
- * @param result_fixedpoint_multiplier  Result multiplier parameter
- * @param result_shift                  Result shift parameter
- * @param result_offset_after_shift_s32 Result offset parameter
- * @param min_u8                        Relu lower bound
- * @param max_u8                        Relu upper bound
+ * @param[in] in_s32                        Input to be quantized.
+ * @param[in] result_fixedpoint_multiplier  Result multiplier parameter
+ * @param[in] result_shift                  Result shift parameter
+ * @param[in] result_offset_after_shift_s32 Result offset parameter
+ * @param[in] min_u8                        Relu lower bound
+ * @param[in] max_u8                        Relu upper bound
+ * @param[in] is_bounded_relu               Specified if a fused bounded relu should be applied
  *
  * @return Quantized values
  */
-template <bool is_bounded_relu>
-uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
-                                 int          result_fixedpoint_multiplier,
-                                 int32_t      result_shift,
-                                 int32x4_t    result_offset_after_shift_s32,
-                                 uint8x16_t   min_u8,
-                                 uint8x16_t   max_u8)
+inline uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
+                                        int          result_fixedpoint_multiplier,
+                                        int32_t      result_shift,
+                                        int32x4_t    result_offset_after_shift_s32,
+                                        uint8x16_t   min_u8,
+                                        uint8x16_t   max_u8,
+                                        bool         is_bounded_relu)
 {
     const static int32x4_t zero_s32 = vdupq_n_s32(0);
 
@@ -150,24 +149,23 @@ uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
 
 /** Performs final quantization step on 16 elements
  *
- * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
- *
- * @param in_s32                        Input to be quantized.
- * @param result_fixedpoint_multiplier  Result multiplier parameter
- * @param result_shift                  Result shift parameter
- * @param result_offset_after_shift_s32 Result offset parameter
- * @param min_s8                        Relu lower bound
- * @param max_s8                        Relu upper bound
+ * @param[in] in_s32                        Input to be quantized.
+ * @param[in] result_fixedpoint_multiplier  Result multiplier parameter
+ * @param[in] result_shift                  Result shift parameter
+ * @param[in] result_offset_after_shift_s32 Result offset parameter
+ * @param[in] min_s8                        Relu lower bound
+ * @param[in] max_s8                        Relu upper bound
+ * @param[in] is_bounded_relu               Specified if a fused bounded relu should be applied
  *
  * @return Quantized values
  */
-template <bool is_bounded_relu>
-int8x16_t finalize_quantization(int32x4x4_t &in_s32,
-                                int          result_fixedpoint_multiplier,
-                                int32_t      result_shift,
-                                int32x4_t    result_offset_after_shift_s32,
-                                int8x16_t    min_s8,
-                                int8x16_t    max_s8)
+inline int8x16_t finalize_quantization(int32x4x4_t &in_s32,
+                                       int          result_fixedpoint_multiplier,
+                                       int32_t      result_shift,
+                                       int32x4_t    result_offset_after_shift_s32,
+                                       int8x16_t    min_s8,
+                                       int8x16_t    max_s8,
+                                       bool         is_bounded_relu)
 {
     if(result_shift < 0)
     {
@@ -225,24 +223,23 @@ int8x16_t finalize_quantization(int32x4x4_t &in_s32,
 
 /** Performs final quantization step on 16 elements for symmetric quantization
  *
- * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
- *
- * @param in_s32                        Input to be quantized.
- * @param result_fixedpoint_multiplier  Result multiplier parameter
- * @param result_shift                  Result shift parameter
- * @param result_offset_after_shift_s32 Result offset parameter
- * @param min_s8                        Relu lower bound
- * @param max_s8                        Relu upper bound
+ * @param[in] in_s32                        Input to be quantized.
+ * @param[in] result_fixedpoint_multiplier  Result multiplier parameter
+ * @param[in] result_shift                  Result shift parameter
+ * @param[in] result_offset_after_shift_s32 Result offset parameter
+ * @param[in] min_s8                        Relu lower bound
+ * @param[in] max_s8                        Relu upper bound
+ * @param[in] is_bounded_relu               Specified if a fused bounded relu should be applied
  *
  * @return Quantized values
  */
-template <bool   is_bounded_relu>
 inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
                                             const int32x4x4_t &result_fixedpoint_multiplier,
                                             const int32x4x4_t &result_shift,
                                             const int32x4_t   &result_offset_after_shift_s32,
                                             const int8x16_t   &min_s8,
-                                            const int8x16_t   &max_s8)
+                                            const int8x16_t   &max_s8,
+                                            const bool         is_bounded_relu)
 {
     const static int32x4_t one_s32 = vdupq_n_s32(1);
 
@@ -322,21 +319,19 @@ inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
 
 /** Performs final quantization step on single element
  *
- * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
- *
  * @param[in] in_value                      Input to be quantized.
  * @param[in] result_fixedpoint_multiplier  Result multiplier parameter
  * @param[in] result_shift                  Result shift parameter
  * @param[in] result_offset_after_shift_s32 Result offset parameter
  * @param[in] min_u8                        Relu lower bound
  * @param[in] max_u8                        Relu upper bound
+ * @param[in] is_bounded_relu               Specified if a fused bounded relu should be applied
  *
  * @return Quantized value
  */
-template <bool is_bounded_relu>
 inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_multiplier,
                                      int32_t result_shift, int32_t result_offset_after_shift_s32,
-                                     uint8_t min_u8, uint8_t max_u8)
+                                     uint8_t min_u8, uint8_t max_u8, bool is_bounded_relu)
 {
     int32x4_t in_s32 = vdupq_n_s32(in_value);
 
@@ -367,21 +362,19 @@ inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_mul
 
 /** Performs final quantization step on single element
  *
- * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
- *
  * @param[in] in_value                      Input to be quantized.
  * @param[in] result_fixedpoint_multiplier  Result multiplier parameter
  * @param[in] result_shift                  Result shift parameter
  * @param[in] result_offset_after_shift_s32 Result offset parameter
  * @param[in] min_s8                        Relu lower bound
  * @param[in] max_s8                        Relu upper bound
+ * @param[in] is_bounded_relu               Specified if a fused bounded relu should be applied
  *
  * @return Quantized value
  */
-template <bool is_bounded_relu>
 inline int8_t finalize_quantization(int32_t in_value, int result_fixedpoint_multiplier,
                                     int32_t result_shift, int32_t result_offset_after_shift_s32,
-                                    int8_t min_s8, int8_t max_s8)
+                                    int8_t min_s8, int8_t max_s8, bool is_bounded_relu)
 {
     int32x4_t in_s32 = vdupq_n_s32(in_value);
 

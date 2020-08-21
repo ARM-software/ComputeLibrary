@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,7 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input       Source tensor. Data types supported: S32/F16/F32.
+     * @param[in]  input       Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in]  prev_output Destination tensor of the previous iterations of @ref CLArgMinMaxLayerKernel. Data types supported: U32/S32
      *                         Has to be nullptr for the first iteration
      * @param[out] output      Destination tensor. Data types supported: U32/S32
@@ -68,7 +68,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data types supported: S32/F16/F32.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in]  prev_output     Destination tensor of the previous iterations of @ref CLArgMinMaxLayerKernel. Data types supported: U32/S32
      *                             Has to be nullptr for the first iteration
      * @param[out] output          Destination tensor. Data types supported: U32/S32
@@ -80,7 +80,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLArgMinMaxLayerKernel.
      *
-     * @param[in] input       Source tensor info. Data types supported: S32/F16/F32.
+     * @param[in] input       Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in] prev_output Destination tensor info of the previous iterations. Data types supported: U32/S32
      *                        Has to be nullptr for the first iteration
      * @param[in] output      Destination tensor info. Data types supported: U32/S32

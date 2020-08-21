@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,12 +57,12 @@ public:
     ~NEHeightConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input         Input tensor. Data types supported: All
+     * @param[in]     input         Input tensor info. Data types supported: All
      * @param[in]     height_offset The starting offset on the Y axis for the output tensor.
-     * @param[in,out] output        Output tensor. Data types supported: Same as @p input.
+     * @param[in,out] output        Output tensor info. Data types supported: Same as @p input.
      *
      */
-    void configure(const ITensor *input, unsigned int height_offset, ITensor *output);
+    void configure(const ITensorInfo *input, unsigned int height_offset, ITensorInfo *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEHeightConcatenateLayerKernel
      *
      * @param[in] input         Input tensor info. Data types supported: All
@@ -74,12 +74,10 @@ public:
     static Status validate(const ITensorInfo *input, unsigned int height_offset, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
-    const ITensor *_input;
-    ITensor       *_output;
-    unsigned int   _height_offset;
+    unsigned int _height_offset;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEHEIGHTCONCATENATELAYERKERNEL_H */

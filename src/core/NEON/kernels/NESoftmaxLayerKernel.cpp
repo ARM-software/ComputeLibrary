@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -368,6 +368,10 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
             {
                 sum_inversed = 256.f / sum;
             }
+            else
+            {
+                sum = std::log(sum);
+            }
         }
 
         /* Normalize exponentials */
@@ -515,6 +519,10 @@ void logits_1d_softmax_float(const ITensor &in, const ITensor &max, void *const 
             if(!is_log)
             {
                 sum_inversed = T(1) / sum;
+            }
+            else
+            {
+                sum = static_cast<T>(std::log(sum));
             }
         }
 

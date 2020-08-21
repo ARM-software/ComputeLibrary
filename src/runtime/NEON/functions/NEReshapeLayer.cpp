@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,24 +25,68 @@
 
 #include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/Types.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
+namespace experimental
+{
+void NEReshape::configure(const ITensorInfo *input, ITensorInfo *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
 
+Status NEReshape::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return arm_compute::NEReshapeLayerKernel::validate(input, output);
+}
+} // namespace experimental
+
+struct NEReshapeLayer::Impl
+{
+    const ITensor                           *src{ nullptr };
+    ITensor                                 *dst{ nullptr };
+    std::unique_ptr<experimental::NEReshape> op{ nullptr };
+};
+
+NEReshapeLayer::NEReshapeLayer()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+
+NEReshapeLayer::NEReshapeLayer(NEReshapeLayer &&) = default;
+
+NEReshapeLayer &NEReshapeLayer::operator=(NEReshapeLayer &&) = default;
+
+NEReshapeLayer::~NEReshapeLayer() = default;
+
+void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
+{
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::NEReshape>();
+    _impl->op->configure(input->info(), output->info());
+}
+
 Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(experimental::NEReshape::validate(input, output));
 
     return Status{};
+}
+
+void NEReshapeLayer::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

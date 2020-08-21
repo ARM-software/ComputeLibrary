@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -291,8 +291,16 @@ void CLGEMM::configure_reshaped_only_rhs(const CLCompileContext &compile_context
     std::unique_ptr<ICLGEMMKernelConfiguration> gemm_config = CLGEMMReshapedOnlyRHSKernelConfigurationFactory::create(gpu_target);
     ARM_COMPUTE_ERROR_ON_NULLPTR(gemm_config.get());
 
+    unsigned int m_internal = m;
+    unsigned int b_internal = batch_size;
+    if(reinterpret_input_as_3d)
+    {
+        m_internal = a->info()->dimension(1);
+        b_internal = a->info()->dimension(2);
+    }
+
     // Configure lhs_info and rhs_info
-    std::tie(lhs_info, rhs_info) = gemm_config->configure(m, n, k, batch_size, data_type);
+    std::tie(lhs_info, rhs_info) = gemm_config->configure(m_internal, n, k, b_internal, data_type);
 
     ICLTensor *reshaped_rhs = &_tmp_b;
     if(_weights_manager && _weights_manager->are_weights_managed(b))

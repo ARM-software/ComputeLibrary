@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,7 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data type supported: S8
+     * @param[in]  input  Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8.
      * @param[out] output Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
      * @param[in]  info   Kernel metadata:
      *                    - k            Number of matrix columns/rows depending on the type of reduction.
@@ -60,7 +60,7 @@ public:
     /** Initialise the kernel's input and output.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Input tensor. Data type supported: S8
+     * @param[in]  input           Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8.
      * @param[out] output          Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
      * @param[in]  info            Kernel metadata:
      *                             - k            Number of matrix columns/rows depending on the type of reduction.
@@ -85,7 +85,7 @@ class CLGEMMLowpMatrixAReductionKernel : public ICLGEMMLowpReductionKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8.
      * @param[out] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      * @param[in]  info           Kernel metadata:
      *                            - k            Number of matrix columns/rows depending on the type of reduction.
@@ -97,7 +97,7 @@ public:
     /** Initialise the kernel's input and output.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  mtx_a           Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  mtx_a           Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8.
      * @param[out] vector_sum_row  Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      * @param[in]  info            Kernel metadata:
      *                             - k            Number of matrix columns/rows depending on the type of reduction.
@@ -108,7 +108,7 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixAReductionKernel
      *
-     * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8.
      * @param[in] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      * @param[in] info           Kernel metadata:
      *                           - k            Number of matrix columns/rows depending on the type of reduction.
@@ -134,7 +134,7 @@ class CLGEMMLowpMatrixBReductionKernel : public ICLGEMMLowpReductionKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL.
      * @param[out] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      * @param[in]  info           Kernel metadata:
      *                            - k            Number of matrix columns/rows depending on the type of reduction.
@@ -146,7 +146,7 @@ public:
     /** Initialise the kernel's input and output.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  mtx_b           Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  mtx_b           Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL.
      * @param[out] vector_sum_col  Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      * @param[in]  info            Kernel metadata:
      *                             - k            Number of matrix columns/rows depending on the type of reduction.
@@ -157,7 +157,7 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixBReductionKernel
      *
-     * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL.
      * @param[in] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      * @param[in] info           Kernel metadata:
      *                           - k            Number of matrix columns/rows depending on the type of reduction.

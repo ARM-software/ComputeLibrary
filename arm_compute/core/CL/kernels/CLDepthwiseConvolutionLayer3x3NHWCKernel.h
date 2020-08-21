@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ public:
     /** Default move assignment operator. */
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in]  input              Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED.
+     * @param[in]  input              Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights            Weights tensor. A 3D tensor with dimensions [IFM, 3, 3].
      *                                Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
      * @param[in]  biases             Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
@@ -61,7 +61,7 @@ public:
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in]  compile_context    The compile context to be used.
-     * @param[in]  input              Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED.
+     * @param[in]  input              Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights            Weights tensor. A 3D tensor with dimensions [IFM, 3, 3].
      *                                Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
      * @param[in]  biases             Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
@@ -81,7 +81,7 @@ public:
                    const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
      *
-     * @param[in] input              Source tensor info. DataType supported: QASYMM8/QASYMM8_SIGNED.
+     * @param[in] input              Source tensor info. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] weights            Weights tensor info. A 3D tensor with dimensions [IFM, 3, 3].
      *                               Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] biases             Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.

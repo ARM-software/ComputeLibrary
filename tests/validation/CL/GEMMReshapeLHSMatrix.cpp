@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,10 +81,69 @@ const auto i_values = framework::dataset::make("interleave", { true, false });
 
 /** Transpose values to test */
 const auto t_values = framework::dataset::make("transpose", { true, false });
+
+/** Zero padding test */
+bool validate_zero_padding(unsigned int m_value, unsigned int k_value, unsigned int b_value, unsigned int m0_value, unsigned int k0_value, unsigned int v0_value,
+                            bool i_value_lhs, bool t_value_lhs, bool input_as_3d, DataType dt)
+{
+    const unsigned int M = m_value;
+    const unsigned int K = k_value;
+    const unsigned int B = b_value;
+
+    GEMMLHSMatrixInfo lhs_info;
+    lhs_info.m0 = m0_value;
+    lhs_info.k0 = k0_value;
+    lhs_info.v0 = v0_value;
+    lhs_info.interleave = i_value_lhs;
+    lhs_info.transpose = t_value_lhs;
+
+    const TensorShape lhs_shape(K, M, B);
+    const TensorShape lhs_shape_reshaped = compute_lhs_reshaped_shape(TensorInfo(lhs_shape, 1, dt), lhs_info, input_as_3d);
+
+    // Create tensors
+    CLTensor lhs = create_tensor<CLTensor>(lhs_shape, dt);
+    CLTensor dst = create_tensor<CLTensor>(lhs_shape_reshaped, dt);
+
+    ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Validate zero-padding
+    CLGEMMReshapeLHSMatrixKernel lhs_reshape;
+
+    lhs_reshape.configure(&lhs, &dst, lhs_info, input_as_3d);
+
+    return lhs.info()->padding().empty();
+}
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMMReshapeLHSMatrix)
+
+/** Validate zero padding tests for the LHS input tensor
+ *
+ * A series of validation tests to test the zero padding requirement
+ *
+ * Checks performed in order:
+ *     - Case where M and K are smaller than M0 and K0
+ *     - Generic test case with batch size = 1
+ *     - Generic test case with batch size = 4
+ *     - Generic test case with input_as_3d_value = true
+ */
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+framework::dataset::make("M",                   { 1, 23, 63, 101 }),
+framework::dataset::make("K",                   { 1, 47, 29,  27 })),
+framework::dataset::make("B",                   { 1, 1, 4, 7 })),
+framework::dataset::make("M0",                  { 4, 2, 4, 8 })),
+framework::dataset::make("K0",                  { 2, 2, 4, 8 })),
+framework::dataset::make("input_as_3d",         { false, false, false, true })),
+m_value, k_value, b_value, m0_value, k0_value, input_as_3d_value)
+{
+    constexpr DataType dt = DataType::F32;
+
+    bool status = validate_zero_padding(m_value, k_value, b_value, m0_value, k0_value, 2, false, false, input_as_3d_value, dt);
+    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
+
 FIXTURE_DATA_TEST_CASE(S32, CLGEMMReshapeLHSMatrixFixture<int>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),

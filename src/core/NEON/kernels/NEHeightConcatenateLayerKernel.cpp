@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,24 +58,23 @@ Status validate_arguments(const ITensorInfo *input, unsigned int height_offset, 
 } // namespace
 
 NEHeightConcatenateLayerKernel::NEHeightConcatenateLayerKernel()
-    : _input(nullptr), _output(nullptr), _height_offset(0)
+    : _height_offset(0)
 {
 }
 
-void NEHeightConcatenateLayerKernel::configure(const ITensor *input, unsigned int height_offset, ITensor *output)
+void NEHeightConcatenateLayerKernel::configure(const ITensorInfo *input, unsigned int height_offset, ITensorInfo *output)
 {
+    ARM_COMPUTE_UNUSED(input);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), height_offset, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, height_offset, output));
 
-    _input         = input;
-    _output        = output;
     _height_offset = height_offset;
 
     // Configure kernel window
-    Window      win = calculate_max_window(*output->info(), Steps());
+    Window      win = calculate_max_window(*output, Steps());
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
     INEKernel::configure(win);
 }
 
@@ -85,30 +84,33 @@ Status NEHeightConcatenateLayerKernel::validate(const ITensorInfo *input, unsign
     return Status{};
 }
 
-void NEHeightConcatenateLayerKernel::run(const Window &window, const ThreadInfo &info)
+void NEHeightConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
+    const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto       dst = tensors.get_tensor(TensorType::ACL_DST);
+
     // Offset output pointer to the correct position
-    uint8_t *output_ptr = _output->buffer() + _output->info()->offset_first_element_in_bytes() + _height_offset * _output->info()->strides_in_bytes()[Window::DimY];
+    uint8_t *output_ptr = dst->buffer() + dst->info()->offset_first_element_in_bytes() + _height_offset * dst->info()->strides_in_bytes()[Window::DimY];
 
     const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end()) * static_cast<int>(_output->info()->element_size()); 
-    const int window_step_x = 16;
+    const auto window_end_x   = static_cast<int>(window.x().end()) * static_cast<int>(dst->info()->element_size());
+    const int  window_step_x  = 16;
 
     Window win{ window };
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    win.set(Window::DimY, Window::Dimension(0, _input->info()->tensor_shape().y(), 1));
+    win.set(Window::DimY, Window::Dimension(0, src->info()->tensor_shape().y(), 1));
 
     // Create iterators
-    Iterator input(_input, win);
-    Iterator output(_output, win);
+    Iterator input(src, win);
+    Iterator output(dst, win);
 
-    const DataType                 dt           = _input->info()->data_type();
-    const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
+    const DataType                 dt           = src->info()->data_type();
+    const UniformQuantizationInfo &input_qinfo  = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &output_qinfo = dst->info()->quantization_info().uniform();
     if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
         execute_window_loop(win, [&](const Coordinates &)

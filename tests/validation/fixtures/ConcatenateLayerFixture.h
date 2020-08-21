@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,9 +43,12 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T, bool CI = true>
 class ConcatenateLayerValidationFixture : public framework::Fixture
 {
+private:
+    using SrcITensorType = typename std::conditional<CI, const ITensorType, ITensorType>::type;
+
 public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type, unsigned int axis)
@@ -95,8 +98,8 @@ protected:
 
     TensorType compute_target(const std::vector<TensorShape> &shapes, const std::vector<QuantizationInfo> &qinfo, DataType data_type, unsigned int axis)
     {
-        std::vector<TensorType>    srcs;
-        std::vector<ITensorType *> src_ptrs;
+        std::vector<TensorType>       srcs;
+        std::vector<SrcITensorType *> src_ptrs;
 
         // Create tensors
         srcs.reserve(shapes.size());

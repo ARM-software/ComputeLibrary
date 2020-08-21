@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,19 @@ public:
     CLGEMMMatrixMultiplyReshapedOnlyRHSKernel &operator=(CLGEMMMatrixMultiplyReshapedOnlyRHSKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input0    Input tensor containing the LHS matrix. Data type supported: F16/F32. The number of dimensions for the LHS matrix must be less or equal than 4.
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will fetch the RHS data using the OpenCL read_image built-in function.
+     *       Reading from the OpenCL image object can increase the performance. However, since the OpenCL image object is created importing the OpenCL buffer,
+     *       the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# The stride Y for the input1 should satisfy the OpenCL pitch alignment requirement
+     *       -# input1 width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# input1 (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *
+     * @param[in]  input0    Input tensor containing the LHS matrix. Data type supported: F16/F32 (only F32 if rhs_info.export_to_cl_image = true).
+     *                       The number of dimensions for the LHS matrix must be less or equal than 4.
      * @param[in]  input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3.
      * @param[in]  input2    Input tensor containing the bias matrix. Data type supported: same as @p input0.
      * @param[out] output    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
@@ -70,8 +82,20 @@ public:
                    const GEMMKernelInfo    &gemm_info);
     /** Initialise the kernel's input and output.
      *
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will fetch the RHS data using the OpenCL read_image built-in function.
+     *       Reading from the OpenCL image object can increase the performance. However, since the OpenCL image object is created importing the OpenCL buffer,
+     *       the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# The stride Y for the input1 should satisfy the OpenCL pitch alignment requirement
+     *       -# input1 width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# input1 (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input0          Input tensor containing the LHS matrix. Data type supported: F16/F32. The number of dimensions for the LHS matrix must be less or equal than 4.
+     * @param[in]  input0          Input tensor containing the LHS matrix. Data type supported: F16/F32 (only F32 if rhs_info.export_to_cl_image = true).
+     *                             The number of dimensions for the LHS matrix must be less or equal than 4.
      * @param[in]  input1          Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3.
      * @param[in]  input2          Input tensor containing the bias matrix. Data type supported: same as @p input0.
      * @param[out] output          Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
@@ -91,7 +115,19 @@ public:
                    const GEMMKernelInfo    &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
      *
-     * @param[in] input0    Input tensor info for the LHS matrix. Data type supported: F16/F32. The number of dimensions for the LHS matrix must be less or equal than 4.
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will fetch the RHS data using the OpenCL read_image built-in function.
+     *       Reading from the OpenCL image object can increase the performance. However, since the OpenCL image object is created importing the OpenCL buffer,
+     *       the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# The stride Y for the input1 should satisfy the OpenCL pitch alignment requirement
+     *       -# input1 width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# input1 (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *
+     * @param[in] input0    Input tensor info for the LHS matrix. Data type supported: F16/F32 (only F32 if rhs_info.export_to_cl_image = true).
+     *                      The number of dimensions for the LHS matrix must be less or equal than 4.
      * @param[in] input1    Input tensor info for the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3.
      * @param[in] input2    Input tensor info containing the bias matrix. Data type supported: same as @p input0.
      * @param[in] output    Output tensor info. Data type supported: same as @p input0
@@ -125,6 +161,7 @@ private:
     bool             _use_dummy_work_items;
     bool             _add_bias;
     bool             _broadcast_bias;
+    bool             _export_to_cl_image;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMMATRIXMULTIPLYRESHAPEDONLYRHSKERNEL_H*/

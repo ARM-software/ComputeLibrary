@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CLRESHAPELAYER_H
 #define ARM_COMPUTE_CLRESHAPELAYER_H
 
+#include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
@@ -31,9 +32,21 @@ namespace arm_compute
 class ICLTensor;
 
 /** Basic function to run @ref CLReshapeLayerKernel */
-class CLReshapeLayer : public ICLSimpleFunction
+class CLReshapeLayer : public IFunction
 {
 public:
+    /** Default Constructor */
+    CLReshapeLayer();
+    /** Default Destructor */
+    ~CLReshapeLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLReshapeLayer(const CLReshapeLayer &) = delete;
+    /** Default move constructor */
+    CLReshapeLayer(CLReshapeLayer &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLReshapeLayer &operator=(const CLReshapeLayer &) = delete;
+    /** Default move assignment operator */
+    CLReshapeLayer &operator=(CLReshapeLayer &&);
     /** Initialise the kernel's inputs and outputs
      *
      * @param[in]  input  First tensor input. Data type supported: All
@@ -56,6 +69,38 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
-}
+
+namespace experimental
+{
+/** Basic function to run @ref CLReshapeLayerKernel */
+class CLReshape : public ICLOperator
+{
+public:
+    /** Initialise the kernel's inputs and outputs
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor info. Data type supported: All
+     * @param[out] output          Output info. Data type supported: Same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayer
+     *
+     * @param[in] input  Input tensor info. Data type supported: All
+     * @param[in] output Output tensor info. Data type supported: Same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
+} // namespace experimental
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CLRESHAPELAYER_H */

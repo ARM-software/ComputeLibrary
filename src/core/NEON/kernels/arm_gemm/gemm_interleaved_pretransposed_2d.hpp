@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ARM Limited.
+ * Copyright (c) 2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 // Some macros used to decide how much working space to allocate.
 // Round allocations up to the next cache line.
@@ -61,9 +62,6 @@ class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
 
     const unsigned int _nbatches;
     const unsigned int _nmulti;
-
-    const bool _trA;
-    const bool _trB;
 
     const Activation _act;
 
@@ -173,15 +171,12 @@ class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
 
     // Internal execute function.
     // This supports both the "pretransposed" and "standard" interfaces via the template parameter.
-    void execute_pretranspose(unsigned int m_start, unsigned int m_end, unsigned int n_start, unsigned int n_end, int threadid, int mthreadid, int nthreadid) {
+    void execute_pretranspose(unsigned int m_start, unsigned int m_end, unsigned int n_start, unsigned int n_end, int threadid, int, int) {
         /* Make sure we've been set up correctly. */
         assert(_B_transposed);
         assert(_working_space);
         assert(this->_Aptr);
         assert(this->_Cptr);
-
-        UNUSED(mthreadid);
-        UNUSED(nthreadid);
 
 #ifdef CYCLE_PROFILING
         profiler prof;
@@ -255,8 +250,7 @@ class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
                         first_m,
                         last_m,
                         current.k0(),
-                        current.kmax(),
-                        _trA);
+                        current.kmax());
                 }
             }
 
@@ -308,6 +302,36 @@ class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
         }
     }
 
+    static unsigned int get_k_block_size(const GemmArgs &args) {
+        // Work out blocking parameters, or override from provided GemmConfig
+        if (args._cfg && args._cfg->inner_block_size) {
+            return args._cfg->inner_block_size;
+        }
+
+        const unsigned int L1_size = args._ci->get_L1_cache_size();
+        unsigned int k_block;
+
+        // k_block: Find out how much of the larger array can be loaded into half the cache.
+        // This should account for associative caches.
+        k_block = (L1_size / 2) / (sizeof(Toi) * (std::max(strategy::out_width(), strategy::out_height())));
+
+        // Needs to be (at least a single) multiple of the K unroll level.
+        k_block /= strategy::k_unroll();
+        k_block = std::max(k_block, 1U) * strategy::k_unroll();
+
+        // Now tune to presented problem size; this is how many blocks we need.
+        unsigned int numk_blocks = iceildiv(args._Ksize, k_block);
+
+        // So divide the space equally into that many blocks.
+        k_block = iceildiv(args._Ksize, numk_blocks);
+
+        // And round UP to the K unroll level required.
+        k_block = iceildiv(k_block, strategy::k_unroll());
+        k_block *= strategy::k_unroll();
+
+        return k_block;
+    }
+
 public:
     GemmInterleavedPretransposed2d(GemmInterleavedPretransposed2d &) = delete;
     GemmInterleavedPretransposed2d & operator= (GemmInterleavedPretransposed2d &) = delete;
@@ -320,12 +344,10 @@ public:
     ,    _Ksize(args._Ksize)
     ,    _nbatches(args._nbatches)
     ,    _nmulti(args._nmulti)
-    ,    _trA(args._trA)
-    ,    _trB(args._trB)
     ,    _act(args._act)
     ,    _maxthreads(args._maxthreads)
-    ,    _nthreads(args._maxthreads) 
-
+    ,    _nthreads(args._maxthreads)
+    ,    _k_block(get_k_block_size(args))
     // Work out the rounded size of M - needed for some buffers.
     ,    _Mround_div ( iceildiv(_Msize, strategy::out_height()) )
     ,    _Mround     ( _Mround_div * strategy::out_height()     )
@@ -333,35 +355,9 @@ public:
     ,    _Nround_div ( iceildiv(_Nsize, strategy::out_width()) )
     ,    _Nround     ( _Nround_div * strategy::out_width()     )
     {
-
-        assert(args._pretransposed_hint);
         assert(_maxthreads > 0);
 
-        const unsigned int L1_size = _ci->get_L1_cache_size();
         const unsigned int L2_size = _ci->get_L2_cache_size();
-
-        // Work out blocking parameters, or override from provided GemmConfig
-        if (args._cfg && args._cfg->inner_block_size) {
-            _k_block = args._cfg->inner_block_size;
-        } else {
-            // k_block: Find out how much of the larger array can be loaded into half the cache.
-            // This should account for associative caches.
-            _k_block = (L1_size / 2) / (sizeof(Toi) * (std::max(strategy::out_width(), strategy::out_height())));
-
-            // Needs to be (at least a single) multiple of the K unroll level.
-            _k_block /= strategy::k_unroll();
-            _k_block = std::max(_k_block, 1U) * strategy::k_unroll();
-
-            // Now tune to presented problem size; this is how many blocks we need.
-            unsigned int num_k_blocks = iceildiv(_Ksize, _k_block);
-
-            // So divide the space equally into that many blocks.
-            _k_block = iceildiv(_Ksize, num_k_blocks);
-
-            // And round UP to the K unroll level required.
-            _k_block = iceildiv(_k_block, strategy::k_unroll());
-            _k_block *= strategy::k_unroll();
-        }
 
         if (args._cfg && args._cfg->outer_block_size) {
             _x_block = args._cfg->outer_block_size;
@@ -389,7 +385,11 @@ public:
         unsigned m = (_Mround / strategy::out_height()) * _nbatches;
         unsigned n = _Nround_div;
 
-        return { m, n, 1u, 1u, 1u, 1u };
+        return { m, n };
+    }
+
+    bool supports_dynamic_scheduling() const override {
+        return true;
     }
 
     // set_nthreads: pass on to buffer manager to avoid it waiting for non-existant threads.
@@ -401,8 +401,6 @@ public:
         /* This particular GEMM implementation can only be broken up over the M & N
          * dimensions, we inform the frame work of this limitation via the get_window_size function
          */
-        assert(ndrange_popcount(work_range) <= 2);
-
         const auto m_start = work_range.get_position(0);
         const auto n_start = work_range.get_position(1);
         const auto m_size  = work_range.get_size(0);
@@ -416,7 +414,7 @@ public:
         execute_pretranspose(m_start, m_end, n_start, n_end, threadid, m_threadid, n_threadid);
     }
 
-    std::size_t get_working_size()const override {
+    std::size_t get_working_size() const override {
         /* Because we do not know how schedular will break up
          * the task, we need to ensure that alloc enough
          * space to be able to handle the case where every thread
@@ -498,7 +496,7 @@ public:
             k_size *= strategy::k_unroll();
 
             strat.transforms.PrepareB(buffer, B + (current.multi() * B_multi_stride), ldb,
-                                      current.x0(), current.xmax(), current.k0(), current.kmax(), _trB);
+                                      current.x0(), current.xmax(), current.k0(), current.kmax());
 
             buffer += (x_size * k_size);
         } while (current.advance());
@@ -508,7 +506,60 @@ public:
         _B_transposed = reinterpret_cast<Toi *>(in_buffer);
     }
 
-    ~GemmInterleavedPretransposed2d() override { }
+    // Estimate cycles for given problem given provided parameters
+    static uint64_t estimate_cycles(const GemmArgs &args, const PerformanceParameters &params) {
+        unsigned int k_blocks = iceildiv(args._Ksize, get_k_block_size(args));
+        unsigned int m_blocks = iceildiv(args._Msize, strategy::out_height()) * args._nbatches;
+        unsigned int n_blocks = iceildiv(args._Nsize, strategy::out_width());
+
+        uint64_t total_macs    = static_cast<uint64_t>(args._nbatches) * args._nmulti * roundup(args._Msize, strategy::out_height()) * roundup(args._Nsize, strategy::out_width()) * roundup(args._Ksize, strategy::k_unroll());
+        uint64_t prepare_bytes = static_cast<uint64_t>(args._nbatches) * args._nmulti * roundup(args._Msize, strategy::out_height()) * roundup(args._Ksize, strategy::k_unroll()) * sizeof(Toi);
+        uint64_t merge_bytes   = static_cast<uint64_t>(args._nbatches) * args._nmulti * k_blocks * roundup(args._Msize, strategy::out_height()) * roundup(args._Nsize, strategy::out_width()) * sizeof(Tr);
+
+        // Wide problems incur extra preparation cost, as it is done per thread.
+        // Duplicate the logic the scheduler will later use to figure out how much that will affect us
+        float ratio = m_blocks / static_cast<float>(n_blocks);
+
+        unsigned int ideal_height = static_cast<unsigned int>(std::sqrt(args._maxthreads * ratio) + 0.5);
+        unsigned int height = 1;
+
+        if (ideal_height == 0) {
+            height = 1;
+        } else {
+            for (unsigned int adj=0; adj<ideal_height; adj++) {
+                const unsigned int round_down = ideal_height - adj;
+                if (args._maxthreads % round_down == 0) {
+                    height = round_down;
+                    break;
+                }
+
+                const unsigned int round_up = ideal_height + adj;
+                if (args._maxthreads % round_up == 0) {
+                    height = round_up;
+                    break;
+                }
+            }
+        }
+
+        // We've computed the height here - we need to multiply the amount of preparation effort by the width (which is total threads / height)
+        prepare_bytes *= (args._maxthreads / height);
+
+        float mac_cycles     = static_cast<float>(total_macs) / params.kernel_macs_cycle;
+        float prepare_cycles = static_cast<float>(prepare_bytes) / params.prepare_bytes_cycle;
+        float merge_cycles   = static_cast<float>(merge_bytes) / params.merge_bytes_cycle;
+
+        float total_cycles = mac_cycles + prepare_cycles + merge_cycles;
+
+        // We can't thread over multis, which might be a problem in some
+        // threaded cases.  Penalize that here.
+        float parallelism_available = static_cast<float>(iceildiv(args._Msize, strategy::out_height()) * args._nbatches * iceildiv(args._Nsize, strategy::out_width())) * 0.9;
+
+        if (parallelism_available < args._maxthreads) {
+            total_cycles *= (static_cast<float>(args._maxthreads) / parallelism_available);
+        }
+
+        return static_cast<uint64_t>(total_cycles);
+    }
 };
 
 } // namespace arm_gemm

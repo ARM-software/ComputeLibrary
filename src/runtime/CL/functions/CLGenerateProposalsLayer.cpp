@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,9 +31,9 @@ namespace arm_compute
 CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager),
       _permute_deltas_kernel(),
-      _flatten_deltas_kernel(),
+      _flatten_deltas(),
       _permute_scores_kernel(),
-      _flatten_scores_kernel(),
+      _flatten_scores(),
       _compute_anchors_kernel(),
       _bounding_box_kernel(),
       _pad_kernel(),
@@ -102,12 +102,12 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
     {
         _memory_group.manage(&_deltas_permuted);
         _permute_deltas_kernel.configure(compile_context, deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
-        _flatten_deltas_kernel.configure(compile_context, &_deltas_permuted, &_deltas_flattened);
+        _flatten_deltas.configure(compile_context, &_deltas_permuted, &_deltas_flattened);
         _deltas_permuted.allocator()->allocate();
     }
     else
     {
-        _flatten_deltas_kernel.configure(compile_context, deltas, &_deltas_flattened);
+        _flatten_deltas.configure(compile_context, deltas, &_deltas_flattened);
     }
 
     const TensorShape flatten_shape_scores(1, total_num_anchors);
@@ -119,12 +119,12 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
     {
         _memory_group.manage(&_scores_permuted);
         _permute_scores_kernel.configure(compile_context, scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
-        _flatten_scores_kernel.configure(compile_context, &_scores_permuted, &_scores_flattened);
+        _flatten_scores.configure(compile_context, &_scores_permuted, &_scores_flattened);
         _scores_permuted.allocator()->allocate();
     }
     else
     {
-        _flatten_scores_kernel.configure(compile_context, scores, &_scores_flattened);
+        _flatten_scores.configure(compile_context, scores, &_scores_flattened);
     }
 
     CLTensor *anchors_to_use = &_all_anchors;
@@ -240,12 +240,12 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     }
 
     TensorInfo deltas_flattened_info(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(&deltas_permuted_info, &deltas_flattened_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayer::validate(&deltas_permuted_info, &deltas_flattened_info));
 
     TensorInfo scores_flattened_info(scores->clone()->set_tensor_shape(TensorShape(1, total_num_anchors)).set_is_resizable(true));
     TensorInfo proposals_4_roi_values(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(&scores_permuted_info, &scores_flattened_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayer::validate(&scores_permuted_info, &scores_flattened_info));
 
     TensorInfo *proposals_4_roi_values_to_use = &proposals_4_roi_values;
     TensorInfo  proposals_4_roi_values_quantized(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
@@ -350,8 +350,8 @@ void CLGenerateProposalsLayer::run()
         CLScheduler::get().enqueue(_permute_deltas_kernel, false);
         CLScheduler::get().enqueue(_permute_scores_kernel, false);
     }
-    CLScheduler::get().enqueue(_flatten_deltas_kernel, false);
-    CLScheduler::get().enqueue(_flatten_scores_kernel, false);
+    _flatten_deltas.run();
+    _flatten_scores.run();
 
     if(_is_qasymm8)
     {

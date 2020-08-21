@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,7 +84,6 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyNativeKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
@@ -109,6 +108,7 @@
 #include "arm_compute/core/CL/kernels/CLLKTrackerKernel.h"
 #include "arm_compute/core/CL/kernels/CLLocallyConnectedMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLMagnitudePhaseKernel.h"
+#include "arm_compute/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
 #include "arm_compute/core/CL/kernels/CLMeanStdDevNormalizationKernel.h"
 #include "arm_compute/core/CL/kernels/CLMedian3x3Kernel.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,11 @@ namespace
 /** Tolerance for float operations */
 AbsoluteTolerance<float> tolerance_f32(0.0015f);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-AbsoluteTolerance<float> tolerance_f16(0.5f);
+// This precision is chosen based on the precision float16_t can provide
+// for the decimal numbers between 16 and 32 and decided based on multiple
+// times of execution of tests. Although, with randomly generated numbers
+// there is no gaurantee that this tolerance will be always large enough.
+AbsoluteTolerance<half> tolerance_f16(static_cast<half>(0.015625f));
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 } // namespace
 

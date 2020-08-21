@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_NERESHAPELAYERKERNEL_H
 #define ARM_COMPUTE_NERESHAPELAYERKERNEL_H
 
+#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/NEON/INESimpleKernel.h"
 
 namespace arm_compute
@@ -32,19 +33,19 @@ namespace arm_compute
 class ITensor;
 
 /** Interface for the kernel to perform tensor reshaping */
-class NEReshapeLayerKernel : public INESimpleKernel
+class NEReshapeLayerKernel : public INEKernel
 {
 public:
     const char *name() const override
     {
         return "NEReshapeLayerKernel";
     }
-    /** Set the input and output of the kernel
+    /** Set the input and output info of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: All
-     * @param[out] output Destination tensor. Data type supported: Same as @p input
+     * @param[in]  input  Source tensor info. Data type supported: All
+     * @param[out] output Destination tensor info. Data type supported: Same as @p input
      */
-    void configure(const ITensor *input, ITensor *output);
+    void configure(const ITensorInfo *input, ITensorInfo *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReshapeLayerKernel
      *
@@ -56,7 +57,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NERESHAPELAYERKERNEL_H */

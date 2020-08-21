@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,18 +24,15 @@
 #ifndef ARM_COMPUTE_NETHRESHOLDKERNEL_H
 #define ARM_COMPUTE_NETHRESHOLDKERNEL_H
 
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
-
-#include <cstdint>
 
 namespace arm_compute
 {
 class ITensor;
 
-/** Interface for the thresholding kernel
- *
- */
+/** Interface for the thresholding kernel */
 class NEThresholdKernel : public INEKernel
 {
 public:
@@ -53,15 +50,20 @@ public:
     NEThresholdKernel &operator=(const NEThresholdKernel &) = delete;
     /** Initialise the kernel's input, output and threshold parameters.
      *
-     * @param[in]  input       An input tensor. Data type supported: U8
-     * @param[out] output      The output tensor. Data type supported: U8.
-     * @param[in]  threshold   Threshold. When the threhold type is RANGE, this is used as the lower threshold.
-     * @param[in]  false_value value to set when the condition is not respected.
-     * @param[in]  true_value  value to set when the condition is respected.
-     * @param[in]  type        Thresholding type. Either RANGE or BINARY.
-     * @param[in]  upper       Upper threshold. Only used when the thresholding type is RANGE.
+     * @param[in]  input  An input tensor. Data type supported: U8
+     * @param[out] output The output tensor. Data type supported: U8.
+     * @param[in]  info   Threshold kernel descriptor
      */
-    void configure(const ITensor *input, ITensor *output, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper);
+    void configure(const ITensor *input, ITensor *output, const ThresholdKernelInfo &info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEThresholdKernel
+     *
+     * @param[in] input  Input tensor info. Data type supported: U8
+     * @param[in] output Output tensor info. Data type supported: U8
+     * @param[in] info   Threshold kernel descriptor
+     *
+     * @return A status containing an error code in case of failure
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ThresholdKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -74,12 +76,9 @@ private:
 
     void (NEThresholdKernel::*_func)(const Window &window);
 
-    const ITensor *_input;  /**< Input */
-    ITensor       *_output; /**< Output */
-    uint8_t        _threshold;
-    uint8_t        _false_value;
-    uint8_t        _true_value;
-    uint8_t        _upper;
+    const ITensor      *_input;  /**< Input */
+    ITensor            *_output; /**< Output */
+    ThresholdKernelInfo _info;   /**< Threshold descriptor */
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NETHRESHOLDKERNEL_H */

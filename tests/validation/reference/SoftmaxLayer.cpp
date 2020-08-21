@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "SoftmaxLayer.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -34,32 +35,21 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, int32_t axis, bool is_log)
+SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, int32_t reduce_end_axis, bool is_log)
 {
     // Create reference
     SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
 
-    // Negative index is used to specify axis from the end (e.g. -1 for the last axis).
-    if(axis < 0)
-    {
-        axis += src.shape().num_dimensions();
-    }
+    // Convert reduce-before axis (inclusive) to first n axes to reduce
+    const size_t first_n_reduce_axes = dim_index_2_num_dims(reduce_end_axis, static_cast<int32_t>(src.shape().num_dimensions()));
 
     // Compute reference. Lower dims are the collapsing of the first axis
     // dimensions (i.e., the flattened dimension of each batch). The upper dims are
     // instead the batches we want to normalize
 
-    int lower_dims = 1;
-    for(size_t i = 0; i < static_cast<size_t>(axis); ++i)
-    {
-        lower_dims *= src.shape()[i];
-    }
+    const int lower_dims = src.shape().total_size_lower(first_n_reduce_axes);
 
-    int upper_dims = 1;
-    for(size_t i = static_cast<size_t>(axis); i < TensorShape::num_max_dimensions; ++i)
-    {
-        upper_dims *= src.shape()[i];
-    }
+    const int upper_dims = src.shape().total_size_upper(first_n_reduce_axes);
 
 #if defined(_OPENMP)
     #pragma omp parallel for
@@ -95,7 +85,7 @@ SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, in
         {
             if(is_log)
             {
-                return val - sum;
+                return val - static_cast<T>(std::log(sum));
             }
             else
             {
@@ -107,30 +97,30 @@ SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, in
     return dst;
 }
 
-template SimpleTensor<float> softmax_layer_generic(const SimpleTensor<float> &src, float beta, int32_t axis, bool is_log);
-template SimpleTensor<half> softmax_layer_generic(const SimpleTensor<half> &src, float beta, int32_t axis, bool is_log);
+template SimpleTensor<float> softmax_layer_generic(const SimpleTensor<float> &src, float beta, int32_t reduce_end_axis, bool is_log);
+template SimpleTensor<half> softmax_layer_generic(const SimpleTensor<half> &src, float beta, int32_t reduce_end_axis, bool is_log);
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis)
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t reduce_end_axis)
 {
-    return softmax_layer_generic<T>(src, beta, axis, false);
+    return softmax_layer_generic<T>(src, beta, reduce_end_axis, false);
 }
 
 template < typename T, typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int >::type >
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis)
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t reduce_end_axis)
 {
     const QuantizationInfo output_quantization_info = arm_compute::get_softmax_output_quantization_info(src.data_type(), false);
 
     SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float> dst_tmp = softmax_layer<float>(src_tmp, beta, axis);
+    SimpleTensor<float> dst_tmp = softmax_layer<float>(src_tmp, beta, reduce_end_axis);
     SimpleTensor<T>     dst     = convert_to_asymmetric<T>(dst_tmp, output_quantization_info);
     return dst;
 }
 
-template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float beta, int32_t axis);
-template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta, int32_t axis);
-template SimpleTensor<uint8_t> softmax_layer(const SimpleTensor<uint8_t> &src, float beta, int32_t axis);
-template SimpleTensor<int8_t> softmax_layer(const SimpleTensor<int8_t> &src, float beta, int32_t axis);
+template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float beta, int32_t reduce_end_axis);
+template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta, int32_t reduce_end_axis);
+template SimpleTensor<uint8_t> softmax_layer(const SimpleTensor<uint8_t> &src, float beta, int32_t reduce_end_axis);
+template SimpleTensor<int8_t> softmax_layer(const SimpleTensor<int8_t> &src, float beta, int32_t reduce_end_axis);
 } // namespace reference
 } // namespace validation
 } // namespace test

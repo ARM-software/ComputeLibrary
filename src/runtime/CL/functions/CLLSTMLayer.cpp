@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
                             const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                             const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                             const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                            const ICLTensor *output_state_in, const ICLTensor *cell_state_in,
+                            const ICLTensor *output_state_in, ICLTensor *cell_state_in,
                             ICLTensor *scratch_buffer, ICLTensor *output_state_out, ICLTensor *cell_state_out, ICLTensor *output,
                             const LSTMParams<ICLTensor> &lstm_params, const ActivationLayerInfo &activation_info, float cell_threshold, float projection_threshold)
 {
@@ -68,7 +68,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
                             const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                             const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                             const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                            const ICLTensor *output_state_in, const ICLTensor *cell_state_in,
+                            const ICLTensor *output_state_in, ICLTensor *cell_state_in,
                             ICLTensor *scratch_buffer, ICLTensor *output_state_out, ICLTensor *cell_state_out, ICLTensor *output,
                             const LSTMParams<ICLTensor> &lstm_params, const ActivationLayerInfo &activation_info, float cell_threshold, float projection_threshold)
 {
@@ -110,7 +110,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     _forget_gate_out2.allocator()->init(TensorInfo(concat_shape, 1, input->info()->data_type()));
 
     _memory_group.manage(&_forget_gate_out2);
-    _concat_inputs_forget_gate.configure(compile_context, input, output_state_in, &_forget_gate_out2);
+    _concat_inputs_forget_gate.configure(compile_context, inputs_vector, &_forget_gate_out2, Window::DimX);
 
     std::vector<const ICLTensor *> weights_vector;
 
@@ -119,7 +119,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     const TensorShape weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(weights_vector, 0);
     _forget_gate_out6.allocator()->init(TensorInfo(weights_concat_shape, 1, input->info()->data_type()));
 
-    _concat_weights_forget_gate.configure(compile_context, input_to_forget_weights, recurrent_to_forget_weights, &_forget_gate_out6);
+    _concat_weights_forget_gate.configure(compile_context, weights_vector, &_forget_gate_out6, Window::DimX);
 
     _memory_group.manage(&_forget_gate_out5);
     _fully_connected_forget_gate.configure(compile_context, &_forget_gate_out2, &_forget_gate_out6, (_is_layer_norm_lstm) ? nullptr : forget_gate_bias, &_forget_gate_out5);
@@ -155,7 +155,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
                                                    RoundingPolicy::TO_NEAREST_EVEN);
         // forget_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
         forget_gate_out->allocator()->allocate();
-        _accum_forget_gate_bias.configure(compile_context, ArithmeticOperation::ADD, &_forget_layer_norm_out1, forget_gate_bias, &_forget_layer_norm_out2, ConvertPolicy::SATURATE);
+        _accum_forget_gate_bias.configure(compile_context, &_forget_layer_norm_out1, forget_gate_bias, &_forget_layer_norm_out2, ConvertPolicy::SATURATE);
         _forget_layer_norm_out1.allocator()->allocate();
         forget_gate_out = &_forget_layer_norm_out2;
     }
@@ -173,7 +173,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
         _memory_group.manage(&_input_gate_out1);
         _ones.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
         _ones_memset_kernel.configure(compile_context, &_ones, PixelValue(1, _ones.info()->data_type()));
-        _subtract_input_gate.configure(compile_context, ArithmeticOperation::SUB, &_ones, forget_gate_out, &_input_gate_out1, ConvertPolicy::SATURATE);
+        _subtract_input_gate.configure(compile_context, &_ones, forget_gate_out, &_input_gate_out1, ConvertPolicy::SATURATE);
         _ones.allocator()->allocate();
         _run_cifg_opt = true;
     }
@@ -188,7 +188,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
         TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(lstm_weights, 0);
         _input_gate_out2.allocator()->init(TensorInfo(lstm_weights_concat_shape, 1, input->info()->data_type()));
 
-        _concat_weights_input_gate.configure(compile_context, lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), &_input_gate_out2);
+        _concat_weights_input_gate.configure(compile_context, lstm_weights, &_input_gate_out2, Window::DimX);
 
         _memory_group.manage(&_input_gate_out1);
 
@@ -222,7 +222,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
                                                       RoundingPolicy::TO_NEAREST_EVEN);
             // input_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
             input_gate_out->allocator()->allocate();
-            _accum_input_gate_bias.configure(compile_context, ArithmeticOperation::ADD, &_input_layer_norm_out1, lstm_params.input_gate_bias(), &_input_layer_norm_out2, ConvertPolicy::SATURATE);
+            _accum_input_gate_bias.configure(compile_context, &_input_layer_norm_out1, lstm_params.input_gate_bias(), &_input_layer_norm_out2, ConvertPolicy::SATURATE);
             _input_layer_norm_out1.allocator()->allocate();
             input_gate_out = &_input_layer_norm_out2;
         }
@@ -246,7 +246,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     _gemm_cell_state1.configure(compile_context, output_state_in, &_cell_state_out2, nullptr, &_cell_state_out3, 1.f, 0.f);
     _cell_state_out2.allocator()->allocate();
     _memory_group.manage(&_cell_state_out4);
-    _accum_cell_state1.configure(compile_context, ArithmeticOperation::ADD, &_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
+    _accum_cell_state1.configure(compile_context, &_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
     CLTensor *cell_state_out_ptr = &_cell_state_out4;
     if(_is_layer_norm_lstm)
     {
@@ -259,7 +259,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
                                                  RoundingPolicy::TO_NEAREST_EVEN);
         // cell_state_out_ptr is going to be reassigned, so allocate the tensor that it was assigned to before
         cell_state_out_ptr->allocator()->allocate();
-        _accum_cell_gate_bias.configure(compile_context, ArithmeticOperation::ADD, &_cell_layer_norm_out1, cell_bias, &_cell_layer_norm_out2, ConvertPolicy::SATURATE);
+        _accum_cell_gate_bias.configure(compile_context, &_cell_layer_norm_out1, cell_bias, &_cell_layer_norm_out2, ConvertPolicy::SATURATE);
         _cell_layer_norm_out1.allocator()->allocate();
         cell_state_out_ptr = &_cell_layer_norm_out2;
     }
@@ -268,7 +268,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     _pixelwise_mul_cell_state1.configure(compile_context, cell_state_out_ptr, input_gate_out, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     cell_state_out_ptr->allocator()->allocate();
     _pixelwise_mul_cell_state2.configure(compile_context, forget_gate_out, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
-    _accum_cell_state2.configure(compile_context, ArithmeticOperation::ADD, &_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
+    _accum_cell_state2.configure(compile_context, &_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
     _cell_state_out3.allocator()->allocate();
     _cell_state_out5.allocator()->allocate();
     // Perform clipping
@@ -290,7 +290,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(in_out_weights, 0);
     _output2.allocator()->init(TensorInfo(in_out_weights_concat_shape, 1, input->info()->data_type()));
 
-    _concat_weights_output.configure(compile_context, input_to_output_weights, recurrent_to_output_weights, &_output2);
+    _concat_weights_output.configure(compile_context, in_out_weights, &_output2, Window::DimX);
 
     _memory_group.manage(&_output1);
     _memory_group.manage(&_output4);
@@ -329,7 +329,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
                                                    RoundingPolicy::TO_NEAREST_EVEN);
         // output_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
         output_gate_out->allocator()->allocate();
-        _accum_output_gate_bias.configure(compile_context, ArithmeticOperation::ADD, &_output_layer_norm_out1, output_gate_bias, &_output_layer_norm_out2, ConvertPolicy::SATURATE);
+        _accum_output_gate_bias.configure(compile_context, &_output_layer_norm_out1, output_gate_bias, &_output_layer_norm_out2, ConvertPolicy::SATURATE);
         _output_layer_norm_out1.allocator()->allocate();
         output_gate_out = &_output_layer_norm_out2;
     }
@@ -371,7 +371,7 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     _copy_output.configure(compile_context, output_state_out, output);
 
     // Vector for holding the tensors to store in scratch buffer
-    std::vector<ICLTensor *> scratch_inputs;
+    std::vector<const ICLTensor *> scratch_inputs;
     if(!lstm_params.has_cifg_opt())
     {
         scratch_inputs.emplace_back(input_gate_out);
@@ -485,21 +485,21 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     const TensorShape concat_shape       = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, 0);
     TensorInfo        forget_gate_concat = TensorInfo(concat_shape, 1, input->data_type());
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(input, output_state_in, &forget_gate_concat));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConcatenateLayer::validate(inputs_vector, &forget_gate_concat, Window::DimX));
 
     if(lstm_params.has_peephole_opt())
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_forget_weights(), &forget_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(cell_state_in, lstm_params.cell_to_forget_weights(), &forget_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
         ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
     }
     if(lstm_params.use_layer_norm())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLMeanStdDevNormalizationLayer::validate(&forget_gate));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&forget_gate, lstm_params.forget_layer_norm_weights(), &forget_gate, 1, ConvertPolicy::SATURATE,
-                                                                              RoundingPolicy::TO_NEAREST_EVEN));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&forget_gate, lstm_params.forget_layer_norm_weights(), &forget_gate, 1, ConvertPolicy::SATURATE,
+                                                                        RoundingPolicy::TO_NEAREST_EVEN));
         ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&forget_gate, forget_gate_bias, &forget_gate, ConvertPolicy::SATURATE));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&forget_gate, &forget_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&forget_gate, &forget_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
 
     // Validate input gate
     if(!lstm_params.has_cifg_opt())
@@ -516,7 +516,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
         lstm_weights.emplace_back(lstm_params.recurrent_to_input_weights());
         TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(lstm_weights, 0);
         TensorInfo  lstm_gate_concat          = TensorInfo(lstm_weights_concat_shape, 1, input->data_type());
-        ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), &lstm_gate_concat));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLConcatenateLayer::validate(lstm_weights, &lstm_gate_concat, Window::DimX));
 
         ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, lstm_params.input_to_input_weights(), (lstm_params.use_layer_norm()) ? nullptr : lstm_params.input_gate_bias(), &input_gate));
 
@@ -524,21 +524,21 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
         {
             ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lstm_params.cell_to_input_weights());
             ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.cell_to_input_weights()->num_dimensions() > 1);
-            ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_input_weights(), &input_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(cell_state_in, lstm_params.cell_to_input_weights(), &input_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
             ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&input_gate, &input_gate, &input_gate, ConvertPolicy::SATURATE));
         }
 
         if(lstm_params.use_layer_norm())
         {
             ARM_COMPUTE_RETURN_ON_ERROR(CLMeanStdDevNormalizationLayer::validate(&input_gate));
-            ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&input_gate, lstm_params.input_layer_norm_weights(), &input_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&input_gate, lstm_params.input_layer_norm_weights(), &input_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
             ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&input_gate, lstm_params.input_gate_bias(), &input_gate, ConvertPolicy::SATURATE));
         }
-        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&input_gate, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&input_gate, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::SUB, &forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticSubtraction::validate(&forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
     }
 
     // Validate cell state
@@ -548,18 +548,18 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     if(lstm_params.use_layer_norm())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLMeanStdDevNormalizationLayer::validate(&cell_state_tmp));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&cell_state_tmp, lstm_params.cell_layer_norm_weights(), &cell_state_tmp, 1, ConvertPolicy::SATURATE,
-                                                                              RoundingPolicy::TO_NEAREST_EVEN));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&cell_state_tmp, lstm_params.cell_layer_norm_weights(), &cell_state_tmp, 1, ConvertPolicy::SATURATE,
+                                                                        RoundingPolicy::TO_NEAREST_EVEN));
         ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&cell_state_tmp, cell_bias, &cell_state_tmp, ConvertPolicy::SATURATE));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&cell_state_tmp, nullptr, activation_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&cell_state_tmp, &input_gate, &cell_state_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&cell_state_tmp, &forget_gate, &cell_state_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&cell_state_tmp, nullptr, activation_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&cell_state_tmp, &input_gate, &cell_state_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&cell_state_tmp, &forget_gate, &cell_state_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
     ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&cell_state_tmp, &cell_state_tmp, &cell_state_tmp, ConvertPolicy::SATURATE));
     if(cell_threshold != 0.f)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&cell_state_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -cell_threshold,
-                                                                                                                    cell_threshold)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&cell_state_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -cell_threshold,
+                                                                                                              cell_threshold)));
     }
 
     std::vector<const ITensorInfo *> in_out_weights;
@@ -567,35 +567,35 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     in_out_weights.emplace_back(recurrent_to_output_weights);
     TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(in_out_weights, 0);
     TensorInfo  in_out_gate_concat          = TensorInfo(in_out_weights_concat_shape, 1, input->data_type());
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(input_to_output_weights, recurrent_to_output_weights, &in_out_gate_concat));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConcatenateLayer::validate(in_out_weights, &in_out_gate_concat, Window::DimX));
     // Validate output gate tmp
     ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, input_to_output_weights, (lstm_params.use_layer_norm()) ? nullptr : output_gate_bias, &output_gate_tmp));
 
     if(lstm_params.has_peephole_opt())
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&cell_state_tmp, lstm_params.cell_to_output_weights(), &output_gate_tmp, 1, ConvertPolicy::SATURATE,
-                                                                              RoundingPolicy::TO_NEAREST_EVEN));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&cell_state_tmp, lstm_params.cell_to_output_weights(), &output_gate_tmp, 1, ConvertPolicy::SATURATE,
+                                                                        RoundingPolicy::TO_NEAREST_EVEN));
         ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&output_gate_tmp, &output_gate_tmp, &output_gate_tmp, ConvertPolicy::SATURATE));
     }
     if(lstm_params.use_layer_norm())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLMeanStdDevNormalizationLayer::validate(&output_gate_tmp));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&output_gate_tmp, lstm_params.output_layer_norm_weights(), &output_gate_tmp, 1, ConvertPolicy::SATURATE,
-                                                                              RoundingPolicy::TO_NEAREST_EVEN));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&output_gate_tmp, lstm_params.output_layer_norm_weights(), &output_gate_tmp, 1, ConvertPolicy::SATURATE,
+                                                                        RoundingPolicy::TO_NEAREST_EVEN));
         ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&output_gate_tmp, output_gate_bias, &output_gate_tmp, ConvertPolicy::SATURATE));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&output_gate_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&output_gate_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
 
     // Validate output state
-    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&cell_state_tmp, &cell_state_tmp, activation_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(&cell_state_tmp, &output_gate_tmp, &output_gate_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&cell_state_tmp, &cell_state_tmp, activation_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&cell_state_tmp, &output_gate_tmp, &output_gate_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
     if(lstm_params.has_projection())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(&output_gate_tmp, lstm_params.projection_weights(), lstm_params.projection_bias(), output_state_out));
         if(projection_threshold != 0.f)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(output_state_out, output_state_out,
-                                                                          ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -projection_threshold, projection_threshold)));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output_state_out, output_state_out,
+                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -projection_threshold, projection_threshold)));
         }
     }
 
@@ -604,7 +604,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(output_state_out, output));
 
     // Validate scratch concatenation
-    std::vector<ITensorInfo *> inputs_vector_info_raw;
+    std::vector<const ITensorInfo *> inputs_vector_info_raw;
     if(!lstm_params.has_cifg_opt())
     {
         inputs_vector_info_raw.push_back(&input_gate);
@@ -623,27 +623,27 @@ void CLLSTMLayer::run()
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    CLScheduler::get().enqueue(_concat_inputs_forget_gate);
+    _concat_inputs_forget_gate.run();
 
     _fully_connected_forget_gate.run();
 
     if(_run_peephole_opt)
     {
-        CLScheduler::get().enqueue(_pixelwise_mul_forget_gate);
+        _pixelwise_mul_forget_gate.run();
         _accum_forget_gate1.run();
     }
     if(_is_layer_norm_lstm)
     {
         _mean_std_norm_forget_gate.run();
-        CLScheduler::get().enqueue(_pixelwise_mul_forget_gate_coeff);
-        CLScheduler::get().enqueue(_accum_forget_gate_bias);
+        _pixelwise_mul_forget_gate_coeff.run();
+        _accum_forget_gate_bias.run();
     }
-    CLScheduler::get().enqueue(_activation_forget_gate);
+    _activation_forget_gate.run();
 
     if(_run_cifg_opt)
     {
         CLScheduler::get().enqueue(_ones_memset_kernel);
-        CLScheduler::get().enqueue(_subtract_input_gate);
+        _subtract_input_gate.run();
     }
     else
     {
@@ -651,63 +651,63 @@ void CLLSTMLayer::run()
 
         if(_run_peephole_opt)
         {
-            CLScheduler::get().enqueue(_pixelwise_mul_input_gate);
+            _pixelwise_mul_input_gate.run();
             _accum_input_gate1.run();
         }
 
         if(_is_layer_norm_lstm)
         {
             _mean_std_norm_input_gate.run();
-            CLScheduler::get().enqueue(_pixelwise_mul_input_gate_coeff);
-            CLScheduler::get().enqueue(_accum_input_gate_bias);
+            _pixelwise_mul_input_gate_coeff.run();
+            _accum_input_gate_bias.run();
         }
-        CLScheduler::get().enqueue(_activation_input_gate);
+        _activation_input_gate.run();
     }
 
     _fully_connected_cell_state.run();
     CLScheduler::get().enqueue(_transpose_cell_state);
     _gemm_cell_state1.run();
-    CLScheduler::get().enqueue(_accum_cell_state1);
+    _accum_cell_state1.run();
     if(_is_layer_norm_lstm)
     {
         _mean_std_norm_cell_gate.run();
-        CLScheduler::get().enqueue(_pixelwise_mul_cell_gate_coeff);
-        CLScheduler::get().enqueue(_accum_cell_gate_bias);
+        _pixelwise_mul_cell_gate_coeff.run();
+        _accum_cell_gate_bias.run();
     }
-    CLScheduler::get().enqueue(_activation_cell_state);
-    CLScheduler::get().enqueue(_pixelwise_mul_cell_state1);
-    CLScheduler::get().enqueue(_pixelwise_mul_cell_state2);
-    CLScheduler::get().enqueue(_accum_cell_state2);
+    _activation_cell_state.run();
+    _pixelwise_mul_cell_state1.run();
+    _pixelwise_mul_cell_state2.run();
+    _accum_cell_state2.run();
 
     if(_perform_cell_clipping)
     {
-        CLScheduler::get().enqueue(_cell_clip);
+        _cell_clip.run();
     }
 
     _fully_connected_output.run();
 
     if(_run_peephole_opt)
     {
-        CLScheduler::get().enqueue(_pixelwise_mul_output_state1);
+        _pixelwise_mul_output_state1.run();
         _accum_output1.run();
     }
     if(_is_layer_norm_lstm)
     {
         _mean_std_norm_output_gate.run();
-        CLScheduler::get().enqueue(_pixelwise_mul_output_gate_coeff);
-        CLScheduler::get().enqueue(_accum_output_gate_bias);
+        _pixelwise_mul_output_gate_coeff.run();
+        _accum_output_gate_bias.run();
     }
-    CLScheduler::get().enqueue(_activation_output);
+    _activation_output.run();
 
-    CLScheduler::get().enqueue(_activation_output_state);
-    CLScheduler::get().enqueue(_pixelwise_mul_output_state2);
+    _activation_output_state.run();
+    _pixelwise_mul_output_state2.run();
 
     if(_has_projection_weights)
     {
         _fully_connected_output_state.run();
         if(_perform_projection_clipping)
         {
-            CLScheduler::get().enqueue(_projection_clip);
+            _projection_clip.run();
         }
     }
 
@@ -721,12 +721,12 @@ void CLLSTMLayer::prepare()
 {
     if(!_is_prepared)
     {
-        CLScheduler::get().enqueue(_concat_weights_forget_gate);
+        _concat_weights_forget_gate.run();
         if(!_run_cifg_opt)
         {
-            CLScheduler::get().enqueue(_concat_weights_input_gate);
+            _concat_weights_input_gate.run();
         }
-        CLScheduler::get().enqueue(_concat_weights_output);
+        _concat_weights_output.run();
         _is_prepared = true;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,11 +25,11 @@
 #define ARM_COMPUTE_NESOFTMAXLAYER_H
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -39,10 +39,10 @@ class ITensor;
 /** Basic function to compute a SoftmaxLayer and a Log SoftmaxLayer.
  *
  * Softmax is calculated by :
- * @f[ out = \frac{e^{x - max(x)}}{\sum{e^{x - max(x)}}} @f]
+ * @f[ out = exp((x - max(x)) * beta) / sum(exp((x - max(x)) * beta)) @f]
  *
  * Log Softmax is calculated by :
- * @f[ out = (x - max(x)) - \sum{e^{x - max(x)}} @f]
+ * @f[ out = (x - max(x) * beta) - log(\sum{e^{x - max(x) * beta}}) @f]
  *
  * This function runs the following kernels:
  * -# @ref NEFillBorderKernel
@@ -70,25 +70,19 @@ public:
      *                       last value of each row to the nearest multiple.
      * @param[out]    output Destination tensor. Data types supported: same as @p input.
      * @param[in]     beta   (Optional) A scaling factor for the exponent.
-     * @param[in]     axis   (Optional) Reduction axis. Defaults to -1.
-     *                       Negative index is used to specify axis from the end (e.g. -1 for the last axis).Must be in range [-input_num_dimensions, input_num_dimensions).
-     *                       It has the purpose of squashing the first @p axis dimensions together. For instance, given a [4x4x4x4] image,
-     *                       when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in]     axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
      */
-    void configure(ITensor *input, ITensor *output, float beta = 1.0f, int32_t axis = -1);
+    void configure(ITensor *input, ITensor *output, float beta = 1.0f, int32_t axis = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref NESoftmaxLayer
      *
      * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output Destination tensor info. Data types supported: same as @p input
      * @param[in] beta   (Optional) A scaling factor for the exponent.
-     * @param[in] axis   (Optional) Reduction axis. Defaults to -1.
-     *                   Negative index is used to specify axis from the end (e.g. -1 for the last axis).Must be in range [-input_num_dimensions, input_num_dimensions).
-     *                   It has the purpose of squashing the first @p axis dimensions together. For instance, given a [4x4x4x4] image,
-     *                   when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in] axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, int32_t axis = -1);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, int32_t axis = 0);
 
     // Inherited methods overridden:
     void run() override;
@@ -103,19 +97,16 @@ private:
      *
      * @param[in] input  Original source tensor.
      * @param[in] output Original destination tensor.
-     * @param[in] axis   (Optional) Reduction axis. Defaults to -1.
-     *                   Negative index is used to specify axis from the end (e.g. -1 for the last axis).Must be in range [-input_num_dimensions, input_num_dimensions).
-     *                   It has the purpose of squashing the first @p axis dimensions together. For instance, given a [4x4x4x4] image,
-     *                   when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in] axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
      */
     void configure_reshape_input_kernel(const ITensor *input, const ITensor *output, int32_t axis);
 
     MemoryGroup                     _memory_group;
     NELogits1DMaxKernel             _max_kernel;
     NELogits1DSoftmaxKernel<IS_LOG> _softmax_kernel;
-    std::unique_ptr<INEKernel>      _flat_or_reshape_kernel_ptr;
+    std::unique_ptr<IFunction>      _flat_or_reshape_ptr;
     NEFillBorderKernel              _fill_border_kernel;
-    NEReshapeLayerKernel            _reshape_kernel;
+    NEReshapeLayer                  _reshape;
     Tensor                          _max;
     Tensor                          _tmp;
     Tensor                          _input_flattened;

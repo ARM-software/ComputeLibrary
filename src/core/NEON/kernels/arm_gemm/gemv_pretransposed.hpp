@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,8 +51,6 @@ class GemvPretransposed : public GemmCommon<To, Tr> {
 
     const unsigned int _nmultis;
 
-    const bool _trB;
-
     const Activation _act;
 
     const CPUInfo * const _ci;
@@ -69,7 +67,7 @@ public:
     GemvPretransposed & operator= (GemvPretransposed &) = delete;
 
     GemvPretransposed(const GemmArgs &args)
-                      : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _trB(args._trB), _act(args._act), _ci(args._ci),
+                      : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _act(args._act), _ci(args._ci),
                         _buffer_per_multi(_Ksize * iceildiv(_Nsize, strategy::A_interleave()) * strategy::A_interleave()) {
         /* For now don't do any blocking. TODO: figure out if we should. */
         if (args._cfg && args._cfg->inner_block_size) {
@@ -87,15 +85,18 @@ public:
 
     // Window is number of out_width blocks, times number of multis.
     ndrange_t get_window_size() const override {
-        return { iceildiv(_Nsize, strategy::out_width()) * _nmultis, 1u, 1u, 1u, 1u, 1u };
+        return { iceildiv(_Nsize, strategy::out_width()) * _nmultis };
     }
 
     // Actually execute the GEMV.
-    void execute_1d(unsigned int start, unsigned int end, int) {
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
         strategy strat(_ci);
+
+        const auto start = work_range.get_position(0);
+        const auto end   = work_range.get_position_end(0);
 
         /* Break the window values down into multis of interest... */
         const unsigned int window_per_multi = iceildiv(_Nsize, strategy::out_width());
@@ -145,17 +146,6 @@ public:
         }
     }
 
-    // Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
-
-        const auto start = work_range.get_position(0);
-        const auto size  = work_range.get_size(0);
-        const auto stop  = start + size;
-
-        execute_1d(start, stop, threadid);
-    }
-
     /* Pretransposed interface implementation */
     bool B_is_pretransposed() const override {
         return true;
@@ -177,7 +167,7 @@ public:
             /* Reverse sense here as we are dealing with B rather than A.  So if
              * strategy::A_transpose is false and _trB is false, we still
              * transpose.  */
-            if (_trB ^ strategy::A_transpose()) {
+            if (strategy::A_transpose()) {
                 Transform<strategy::A_interleave(), strategy::A_block(), false>(A_buffer + (multi * _buffer_per_multi), B + (multi * B_multi_stride), ldb, 0, _Nsize, 0, _Ksize);
             } else {
                 Transform<strategy::A_interleave(), strategy::A_block(), true>(A_buffer + (multi * _buffer_per_multi), B + (multi * B_multi_stride), ldb, 0, _Nsize, 0, _Ksize);

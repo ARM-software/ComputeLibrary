@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -193,7 +193,7 @@ inline DATA_TYPE_OUTPUT arg_idx_max(__global const DATA_TYPE *input, const int x
  * @note The arg_max flag must be passed at compile time using -DARG_MAX if we want to compute the ArgMax
  * @note The arg_min flag must be passed at compile time using -DARG_MIN if we want to compute the ArgMin
  *
- * @param[in] src_ptr                                   Pointer to the source tensor. Supported data types: S32/F16/F32
+ * @param[in] src_ptr                                   Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
  * @param[in] src_stride_x                              Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                              Stride of the source tensor in Y dimension (in bytes)
@@ -262,7 +262,7 @@ __kernel void arg_min_max_x(
         // Perform parallel reduction
         for(unsigned int i = middle; i > 0; i >>= 1)
         {
-            if( lid < i && lid + i < lsize)
+            if(lid < i && lid + i < lsize)
             {
                 DATA_TYPE tmp0 = *(src_in_row + local_results[lid]);
                 DATA_TYPE tmp1 = *(src_in_row + local_results[lid + i]);
@@ -297,7 +297,7 @@ __kernel void arg_min_max_x(
  * @note The data type of the select results must be passed at compile time using -DDATA_TYPE_SELECT: e.g. -DDATA_TYPE_SELECT=int
  * @note The height size must be passed at compile time using -DHEIGHT e.g. -DHEIGHT=128
  *
- * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: S32/F16/F32
+ * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
  * @param[in] src_stride_x                         Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                         Stride of the source tensor in Y dimension (in bytes)
@@ -345,7 +345,7 @@ __kernel void arg_min_max_y(
  * @note The data type of the select results must be passed at compile time using -DDATA_TYPE_SELECT: e.g. -DDATA_TYPE_SELECT=int
  * @note The depth size must be passed at compile time using -DDEPTH e.g. -DDEPTH=128
  *
- * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: S32/F16/F32
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
  * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -398,7 +398,7 @@ __kernel void arg_min_max_z(
  * @note The batch size must be passed at compile time using -DBATCH e.g. -DBATCH=128
  * @note The depth size must be passed at compile time using -DBATCH e.g. -DDEPTH=128
  *
- * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: S32/F16/F32
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
  * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)

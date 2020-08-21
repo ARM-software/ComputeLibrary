@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEInstanceNormalizationLayer.h"
 
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 namespace arm_compute
@@ -35,7 +36,8 @@ NEInstanceNormalizationLayer::NEInstanceNormalizationLayer(std::shared_ptr<IMemo
 
 void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, float gamma, float beta, float epsilon)
 {
-    const DataLayout data_layout = input->info()->data_layout();
+    const DataLayout data_layout       = input->info()->data_layout();
+    const auto       kernel_descriptor = InstanceNormalizationLayerKernelInfo{ gamma, beta, epsilon, true };
 
     // Configure Kernels
     _is_nchw = data_layout == DataLayout::NCHW;
@@ -49,7 +51,7 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
         _permute_input.configure(input, &_permuted_input, PermutationVector(1U, 2U, 0U));
         _permuted_input.info()->set_data_layout(DataLayout::NCHW);
 
-        _normalization_kernel.configure(&_permuted_input, &_permuted_output, gamma, beta, epsilon);
+        _normalization_kernel.configure(&_permuted_input, &_permuted_output, kernel_descriptor);
         _permuted_output.info()->set_data_layout(DataLayout::NCHW);
 
         _permute_output.configure(&_permuted_output, output != nullptr ? output : input, PermutationVector(2U, 0U, 1U));
@@ -58,13 +60,15 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
     }
     else
     {
-        _normalization_kernel.configure(input, output, gamma, beta, epsilon);
+        _normalization_kernel.configure(input, output, kernel_descriptor);
     }
 }
 
 Status NEInstanceNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon)
 {
-    return NEInstanceNormalizationLayerKernel::validate(&input->clone()->set_data_layout(DataLayout::NCHW), &output->clone()->set_data_layout(DataLayout::NCHW), gamma, beta, epsilon);
+    return NEInstanceNormalizationLayerKernel::validate(&input->clone()->set_data_layout(DataLayout::NCHW),
+                                                        &output->clone()->set_data_layout(DataLayout::NCHW),
+                                                        InstanceNormalizationLayerKernelInfo{ gamma, beta, epsilon, true });
 }
 
 void NEInstanceNormalizationLayer::run()

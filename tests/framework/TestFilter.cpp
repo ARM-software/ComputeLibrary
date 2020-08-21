@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,7 @@ bool TestFilter::is_selected(const TestInfo &info) const
     {
         bool found = false;
 
-        for(const auto range : _id_filter)
+        for(const auto &range : _id_filter)
         {
             if(range.first <= info.id && info.id <= range.second)
             {

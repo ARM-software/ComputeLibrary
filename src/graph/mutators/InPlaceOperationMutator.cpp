@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,47 @@ namespace arm_compute
 {
 namespace graph
 {
+namespace
+{
+// Check if the output edges of the parent node are separate tensors. If not,
+// it means the same output is connected to multiple nodes and computations on
+// these nodes cannot be done in-place.
+bool output_edges_are_separate_tensors(Graph &g, const Edge *input_edge)
+{
+    const auto parent_node   = input_edge->producer();
+    const auto input_tensor  = input_edge->tensor();
+    const auto input_edge_id = input_edge->id();
+
+    if(parent_node == nullptr)
+    {
+        return false;
+    }
+
+    const auto output_edges = parent_node->output_edges();
+
+    // If the output is connected to only one edge, then computations can
+    // be done in-place.
+    if(output_edges.size() == 1)
+    {
+        return true;
+    }
+
+    return std::all_of(output_edges.begin(),
+                       output_edges.end(),
+                       [&](const EdgeID & edge_id)
+    {
+        // Skip check on current input edge
+        if(edge_id == input_edge_id)
+        {
+            return true;
+        }
+
+        auto edge = g.edge(edge_id);
+        return edge->tensor() != input_tensor;
+    });
+}
+} // namespace
+
 const char *InPlaceOperationMutator::name()
 {
     return "InPlaceOperationMutator";
@@ -42,7 +83,14 @@ IGraphMutator::MutationType InPlaceOperationMutator::type() const
 
 void InPlaceOperationMutator::mutate(Graph &g)
 {
-    std::set<NodeType> in_place_nodes = { NodeType::BatchNormalizationLayer, NodeType::ActivationLayer, NodeType::PrintLayer };
+    std::set<NodeType> in_place_nodes =
+    {
+        NodeType::ActivationLayer,
+        NodeType::BatchNormalizationLayer,
+        NodeType::EltwiseLayer,
+        NodeType::UnaryEltwiseLayer,
+        NodeType::PrintLayer
+    };
 
     // Not interested in the order of nodes
     for(auto &node : g.nodes())
@@ -53,7 +101,7 @@ void InPlaceOperationMutator::mutate(Graph &g)
             Edge *input_edge = node->input_edge(0);
 
             // Check if parent has a single output if yes then force in place calculation else not
-            if((input_edge != nullptr) && (input_edge->producer() != nullptr) && (input_edge->producer()->output_edges().size() == 1))
+            if((input_edge != nullptr) && output_edges_are_separate_tensors(g, input_edge))
             {
                 // Get current and new output tensors
                 auto current_output_tensor = node->output(0);

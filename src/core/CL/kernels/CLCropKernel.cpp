@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,7 +99,7 @@ Status CLCropKernel::validate(const ITensorInfo *input, const ITensorInfo *outpu
 {
     ARM_COMPUTE_UNUSED(extrapolation_value, output_window);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U16, DataType::S16, DataType::F16, DataType::U32, DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape().num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(start.x < 0 || start.y < 0 || end.x < 0 || end.y < 0);

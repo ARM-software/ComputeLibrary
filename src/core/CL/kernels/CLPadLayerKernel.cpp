@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/StringSupport.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,8 @@
 #include <algorithm>
 
 #include "arm_gemm.hpp"
+#include "ndrange.hpp"
 #include "utils.hpp"
-
-#include "arm_compute/core/NEON/kernels/arm_gemm/ndrange.hpp"
 
 #include "mergeresults.hpp"
 #include "transform.hpp"
@@ -56,8 +55,6 @@ class GemmHybridQuantized : public GemmCommon<To, Tr> {
 
     const unsigned int _nbatches;
     const unsigned int _nmulti;
-
-    const bool _trB;
 
     /* Blocking info */
     const unsigned int _k_block;
@@ -143,7 +140,7 @@ public:
     /* Constructor */
     GemmHybridQuantized(const GemmArgs &args, const Requantize32 &qp)
               : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
-                _nbatches(args._nbatches), _nmulti(args._nmulti), _trB(args._trB),
+                _nbatches(args._nbatches), _nmulti(args._nmulti),
                 _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmulti),
@@ -151,7 +148,7 @@ public:
 
     // Interface implementation - Compulsory functions
     ndrange_t get_window_size() const override {
-        return { _window_range.total_size(), 1u, 1u, 1u, 1u, 1u };
+        return { _window_range.total_size() };
     }
 
     // This kernel can always be dynamically scheduled.
@@ -159,7 +156,8 @@ public:
         return true;
     }
 
-    void execute_1d(unsigned int start, unsigned int end, int threadid) {
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int threadid) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -180,7 +178,7 @@ public:
             unsigned int kmax   = std::min(k0 + _k_block, _Ksize);
             unsigned int kern_k = roundup(kmax-k0, strategy::k_unroll());
 
-            auto p = _window_range.iterator(start, end);
+            auto p = _window_range.iterator(work_range.get_position(0), work_range.get_position_end(0));
 
             if (p.done()) {
                 return;
@@ -228,21 +226,10 @@ public:
 
                     requantize_block_32(_qp, (nmax - n0), (m_end - m_start), result_buffer, (nmax - n0),
                                         this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
-                                        local_row_sums, col_bias + (multi * _Nsize) + n0);
+                                        local_row_sums, col_bias + (multi * _Nsize) + n0, n0);
                 }
             } while (p.next_dim0());
         }
-    }
-
-    // Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
-
-        const auto start = work_range.get_position(0);
-        const auto size  = work_range.get_size(0);
-        const auto stop  = start + size;
-
-        execute_1d(start, stop, threadid);
     }
 
     // Working space needed for intermediate result buffers.
@@ -290,7 +277,7 @@ public:
                     const unsigned int size = roundup(xmax-x0, strategy::out_width()) * k_size;
 
                     strat.transforms.PrepareB( buffer, B + (multi * B_multi_stride), ldb,
-                                               x0, xmax, k0, kmax, _trB);
+                                               x0, xmax, k0, kmax);
 
                     buffer += size;
                 }

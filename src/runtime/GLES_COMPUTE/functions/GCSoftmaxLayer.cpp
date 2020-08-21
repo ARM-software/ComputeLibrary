@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,20 +27,20 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 GCSoftmaxLayer::GCSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp()
 {
 }
 
-void GCSoftmaxLayer::configure(const IGCTensor *input, IGCTensor *output, float beta, size_t axis)
+void GCSoftmaxLayer::configure(const IGCTensor *input, IGCTensor *output, float beta, size_t reduce_end_axis)
 {
-    ARM_COMPUTE_UNUSED(beta, axis);
+    ARM_COMPUTE_UNUSED(beta, reduce_end_axis);
 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON(beta != 1.0f);
-    ARM_COMPUTE_ERROR_ON_MSG(axis != 1, "Axis must be 1 for GLES");
+    ARM_COMPUTE_ERROR_ON_MSG(reduce_end_axis != 0, "Reduce_end_axis must be 0 for GLES");
 
     // Create intermediate tensors shapes
     _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type()));
@@ -77,3 +77,5 @@ void GCSoftmaxLayer::run()
     GCScheduler::get().memory_barrier();
     GCScheduler::get().dispatch(_norm_kernel);
 }
+
+} // namespace arm_compute

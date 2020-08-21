@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -143,7 +143,7 @@ SimpleTensor<int> non_max_suppression(const SimpleTensor<float> &bboxes, const S
     const size_t                    output_size       = std::min(static_cast<size_t>(max_output_size), num_boxes);
     const std::vector<CandidateBox> candidates_vector = get_candidates(scores, score_threshold);
     std::vector<int>                selected;
-    for(const auto c : candidates_vector)
+    for(const auto &c : candidates_vector)
     {
         if(selected.size() == output_size)
         {

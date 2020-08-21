@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,10 +28,10 @@
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NENormalizationLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -42,7 +42,7 @@ class ITensor;
 
 /** Basic function to compute a normalization layer. This function calls the following NEON kernels:
  *
- * -# @ref NEPixelWiseMultiplicationKernel
+ * -# @ref NEPixelWiseMultiplication
  * -# @ref NEFillBorderKernel
  * -# @ref NENormalizationLayerKernel
  *
@@ -75,11 +75,10 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                     _memory_group;    /**< Function memory group */
-    NENormalizationLayerKernel      _norm_kernel;     /**< Normalization layer kernel */
-    NEPixelWiseMultiplicationKernel _multiply_kernel; /**< Pixel multiplication kernel */
-    NEFillBorderKernel              _border_handler;  /**< Kernel to handle  borders */
-    Tensor                          _input_squared;   /**< The intermediate buffer which stores results of squaring input */
+    MemoryGroup                _memory_group;  /**< Function memory group */
+    NENormalizationLayerKernel _norm_kernel;   /**< Normalization layer kernel */
+    NEPixelWiseMultiplication  _multiply_f;    /**< Pixel multiplication function */
+    Tensor                     _input_squared; /**< The intermediate buffer which stores results of squaring input */
 };
 }
 #endif /* ARM_COMPUTE_NENORMALIZATIONLAYER_H */

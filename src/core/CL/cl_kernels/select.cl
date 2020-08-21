@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@
  * @param[in]  c_stride_z                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  c_step_z                          c_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  c_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[in]  x_ptr                             Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[in]  x_ptr                             Pointer to the source tensor. Supported data types: All
  * @param[in]  x_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  x_step_x                          x_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  x_stride_y                        Stride of the source tensor in Y dimension (in bytes)
@@ -46,7 +46,7 @@
  * @param[in]  x_stride_z                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  x_step_z                          x_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  x_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[in]  y_ptr                             Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[in]  y_ptr                             Pointer to the source tensor. Supported data types: same as @p x_ptr
  * @param[in]  y_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  y_step_x                          y_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  y_stride_y                        Stride of the source tensor in Y dimension (in bytes)
@@ -54,7 +54,7 @@
  * @param[in]  y_stride_z                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  y_step_z                          y_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  y_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: same as @p x_ptr
  * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
@@ -98,7 +98,7 @@ __kernel void select_same_rank(
  * @param[in]  c_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  c_step_x                          c_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  c_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[in]  x_ptr                             Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[in]  x_ptr                             Pointer to the source tensor. Supported data types: All
  * @param[in]  x_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  x_step_x                          x_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  x_stride_y                        Stride of the source tensor in Y dimension (in bytes)
@@ -106,7 +106,7 @@ __kernel void select_same_rank(
  * @param[in]  x_stride_z                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  x_step_z                          x_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  x_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[in]  y_ptr                             Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[in]  y_ptr                             Pointer to the source tensor. Supported data types: same as @p x_ptr
  * @param[in]  y_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  y_step_x                          y_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  y_stride_y                        Stride of the source tensor in Y dimension (in bytes)
@@ -114,7 +114,7 @@ __kernel void select_same_rank(
  * @param[in]  y_stride_z                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  y_step_z                          y_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  y_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: same as @p x_ptr
  * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
@@ -162,7 +162,7 @@ __kernel void select_different_rank_2(
  * @param[in]  c_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  c_step_x                          c_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  c_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[in]  x_ptr                             Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[in]  x_ptr                             Pointer to the source tensor. Supported data types: All
  * @param[in]  x_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  x_step_x                          x_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  x_stride_y                        Stride of the source tensor in Y dimension (in bytes)
@@ -170,7 +170,7 @@ __kernel void select_different_rank_2(
  * @param[in]  x_stride_z                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  x_step_z                          x_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  x_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[in]  y_ptr                             Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[in]  y_ptr                             Pointer to the source tensor. Supported data types: same as @p x_ptr
  * @param[in]  y_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  y_step_x                          y_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  y_stride_y                        Stride of the source tensor in Y dimension (in bytes)
@@ -178,7 +178,7 @@ __kernel void select_different_rank_2(
  * @param[in]  y_stride_z                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  y_step_z                          y_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  y_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+ * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: same as @p x_ptr
  * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination tensor in Y dimension (in bytes)

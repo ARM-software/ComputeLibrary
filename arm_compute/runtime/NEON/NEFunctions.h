@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,7 @@
 #include "arm_compute/runtime/NEON/functions/NELaplacianReconstruct.h"
 #include "arm_compute/runtime/NEON/functions/NELocallyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEMagnitude.h"
+#include "arm_compute/runtime/NEON/functions/NEMaxUnpoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDev.h"
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEMedian3x3.h"

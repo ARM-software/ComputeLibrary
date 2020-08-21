@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ protected:
 
         // Create and configure function
         FunctionType thrsh;
-        thrsh.configure(&src, &dst, threshold, false_value, true_value, type, upper);
+        thrsh.configure(&src, &dst, ThresholdKernelInfo(threshold, false_value, true_value, type, upper));
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);

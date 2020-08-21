@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_CLRNN_LAYER_H
 #define ARM_COMPUTE_CLRNN_LAYER_H
 
-#include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 
@@ -85,16 +85,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                          _memory_group;
-    CLGEMM                               _gemm_state_f;
-    CLSaturatedArithmeticOperationKernel _add_kernel;
-    CLActivationLayerKernel              _activation_kernel;
-    CLFullyConnectedLayer                _fully_connected_kernel;
-    CLCopyKernel                         _copy_kernel;
-    CLTensor                             _fully_connected_out;
-    CLTensor                             _gemm_output;
-    CLTensor                             _add_output;
-    bool                                 _is_prepared;
+    MemoryGroup           _memory_group;
+    CLGEMM                _gemm_state_f;
+    CLArithmeticAddition  _add_kernel;
+    CLActivationLayer     _activation;
+    CLFullyConnectedLayer _fully_connected_kernel;
+    CLCopyKernel          _copy_kernel;
+    CLTensor              _fully_connected_out;
+    CLTensor              _gemm_output;
+    CLTensor              _add_output;
+    bool                  _is_prepared;
 };
 }
 #endif /* ARM_COMPUTE_CLRNN_LAYER_H */

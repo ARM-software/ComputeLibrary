@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,7 +73,7 @@ inline VEC_QUANT requantize(VEC_QUANT input, float in_offset, float out_offset, 
  * @note Tensor depth should be given as a preprocessor argument using -DDEPTH=size. e.g. -DDEPTH=16
  * @note First input tensor width should be given as a preprocessor argument using -DINPUT1_WIDTH=width. e.g. -DINPUT1_WIDTH=8
  *
- * @param[in]  src1_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/F32
+ * @param[in]  src1_ptr                           Pointer to the source tensor. Supported data types: All.
  * @param[in]  src1_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -155,7 +155,7 @@ __kernel void concatenate_width_x2(
  * @note Second input tensor width should be given as a preprocessor argument using -DINPUT2_WIDTH=width. e.g. -DINPUT2_WIDTH=8
  * @note Third input tensor width should be given as a preprocessor argument using -DINPUT3_WIDTH=width. e.g. -DINPUT3_WIDTH=8
  *
- * @param[in]  src1_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/F32
+ * @param[in]  src1_ptr                           Pointer to the source tensor. Supported data types: All
  * @param[in]  src1_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -388,7 +388,7 @@ __kernel void concatenate_height(
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
  * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16, F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

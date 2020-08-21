@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,7 +117,7 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
     _output                      = output;
 
     _convert_to_qasymm8 = is_data_type_quantized_per_channel(b->info()->data_type()) && is_data_type_quantized_symmetric(b->info()->data_type())
-                          && is_data_type_quantized_asymmetric(a->info()->data_type());
+                          && a->info()->data_type() == DataType::QASYMM8;
     _b_offset = _convert_to_qasymm8 ? -128 : b->info()->quantization_info().uniform().offset;
 
     // Get the GPU target

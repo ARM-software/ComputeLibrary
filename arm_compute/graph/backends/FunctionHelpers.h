@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -383,7 +383,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
     }
 
     // Extract IO and info
-    std::vector<typename TargetInfo::TensorType *> inputs;
+    std::vector<typename TargetInfo::SrcTensorType *> inputs;
     for(unsigned int i = 0; i < node.num_inputs(); ++i)
     {
         inputs.push_back(get_backing_tensor<TargetInfo>(node.input(i)));
@@ -811,6 +811,54 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
                                << " Operation: " << func_name
                                << " Data Type: " << input1->info()->data_type()
                                << " Shape: " << input1->info()->tensor_shape()
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
+/** Create a backend unary element-wise operation layer function
+ *
+ * @tparam UnaryEltwiseFunctions Backend unary element-wise function
+ * @tparam TargetInfo       Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend unary element-wise operation layer function
+ */
+template <typename UnaryEltwiseFunctions, typename TargetInfo>
+std::unique_ptr<IFunction> create_unary_eltwise_layer(UnaryEltwiseLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input      = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output     = get_backing_tensor<TargetInfo>(node.output(0));
+    const UnaryEltwiseOperation      eltwise_op = node.eltwise_descriptor().op;
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    std::unique_ptr<IFunction> func = nullptr;
+    std::string                func_name;
+    if(eltwise_op == UnaryEltwiseOperation::Exp)
+    {
+        std::tie(func, func_name) = create_named_function<typename UnaryEltwiseFunctions::Exp>(
+                                        std::string("Exp"),
+                                        input, output);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Unsupported unary element-wise operation!");
+    }
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Operation: " << func_name
+                               << " Data Type: " << input->info()->data_type()
+                               << " Shape: " << input->info()->tensor_shape()
                                << std::endl);
 
     return RETURN_UNIQUE_PTR(func);
@@ -1401,7 +1449,7 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
 
     // Create and configure function
     auto func = support::cpp14::make_unique<ResizeLayerFunction>();
-    func->configure(input, output, policy, BorderMode::CONSTANT);
+    func->configure(input, output, ScaleKernelInfo{ policy, BorderMode::CONSTANT });
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "

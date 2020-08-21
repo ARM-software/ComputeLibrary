@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,21 +64,21 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                     Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
+     *                     Data type supported: All.
      * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                     Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED, FP32 if @p weights is BFLOAT16
-     * @param[out] output  Destination tensor.
-     *                     Data types supported: Same as @p weights, FP32 if @p weights is BFLOAT16
+     *                     Data type supported: same as @p weights.
+     *                     @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
+     * @param[out] output  Destination tensor. Data types supported: same as @p weights.
      */
     void configure(const ITensor *weights, const ITensor *biases, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayerReshapeWeights
      *
      * @param[in] weights Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                    Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
+     *                    Data type supported: All.
      * @param[in] biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                    Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED, FP32 if @p weights is BFLOAT16
-     * @param[in] output  Destination tensor.
-     *                    Data types supported: Same as @p weights FP32 if @p weights is BFLOAT16
+     *                    Data type supported: same as @p weights.
+     *                    @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
+     * @param[in] output  Destination tensor. Data types supported: same as @p weights.
      *
      * @return an error status
      */

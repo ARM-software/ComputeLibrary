@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,7 @@ VSUB_IMPL(float16x8_t, float16x8_t, vsubq, f16)
 
 #undef VSUB_IMPL
 
+// VQSUB: Vector saturating sub (No notion of saturation for floating point)
 #define VQSUB_IMPL(stype, vtype, prefix, postfix)      \
     inline vtype vqsub(const vtype &a, const vtype &b) \
     {                                                  \
@@ -78,6 +79,10 @@ VQSUB_IMPL(uint32x2_t, uint32x2_t, vqsub, u32)
 VQSUB_IMPL(int32x2_t, int32x2_t, vqsub, s32)
 VQSUB_IMPL(uint64x1_t, uint64x1_t, vqsub, u64)
 VQSUB_IMPL(int64x1_t, int64x1_t, vqsub, s64)
+VQSUB_IMPL(float32x2_t, float32x2_t, vsub, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VQSUB_IMPL(float16x4_t, float16x4_t, vsub, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 VQSUB_IMPL(uint8x16_t, uint8x16_t, vqsubq, u8)
 VQSUB_IMPL(int8x16_t, int8x16_t, vqsubq, s8)
@@ -87,8 +92,12 @@ VQSUB_IMPL(uint32x4_t, uint32x4_t, vqsubq, u32)
 VQSUB_IMPL(int32x4_t, int32x4_t, vqsubq, s32)
 VQSUB_IMPL(uint64x2_t, uint64x2_t, vqsubq, u64)
 VQSUB_IMPL(int64x2_t, int64x2_t, vqsubq, s64)
-
+VQSUB_IMPL(float32x4_t, float32x4_t, vsubq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VQSUB_IMPL(float16x8_t, float16x8_t, vsubq, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #undef VQSUB_IMPL
+
 } // namespace wrapper
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_WRAPPER_SUB_H */

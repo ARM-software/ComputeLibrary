@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,6 +97,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::EltwiseLayer:
             os << "EltwiseLayer";
+            break;
+        case NodeType::UnaryEltwiseLayer:
+            os << "UnaryEltwiseLayer";
             break;
         case NodeType::FlattenLayer:
             os << "FlattenLayer";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,16 +26,12 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
-#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-
-#include <cstdint>
 
 namespace arm_compute
 {
@@ -145,21 +141,19 @@ Status validate_arguments(const ITensorInfo *input, unsigned int batch_offset, c
 } // namespace
 
 NEBatchConcatenateLayerKernel::NEBatchConcatenateLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _batch_offset(0)
+    : _func(nullptr), _batch_offset(0)
 {
 }
 
-void NEBatchConcatenateLayerKernel::configure(const ITensor *input, unsigned int batch_offset, ITensor *output)
+void NEBatchConcatenateLayerKernel::configure(const ITensorInfo *input, unsigned int batch_offset, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), batch_offset, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, batch_offset, output));
 
     _func         = nullptr;
-    _input        = input;
-    _output       = output;
     _batch_offset = batch_offset;
 
-    switch(input->info()->data_type())
+    switch(input->data_type())
     {
         case DataType::S8:
         case DataType::U8:
@@ -182,10 +176,10 @@ void NEBatchConcatenateLayerKernel::configure(const ITensor *input, unsigned int
     }
 
     // Configure kernel window
-    Window      win = calculate_max_window(*output->info(), Steps());
+    Window      win = calculate_max_window(*output, Steps());
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
     INEKernel::configure(win);
 }
 
@@ -197,13 +191,16 @@ Status NEBatchConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *i
     return Status{};
 }
 
-void NEBatchConcatenateLayerKernel::run(const Window &window, const ThreadInfo &info)
+void NEBatchConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (*_func)(_input, _output, _batch_offset, window);
+    (*_func)(tensors.get_const_tensor(TensorType::ACL_SRC),
+             tensors.get_tensor(TensorType::ACL_DST),
+             _batch_offset,
+             window);
 }
 } // namespace arm_compute

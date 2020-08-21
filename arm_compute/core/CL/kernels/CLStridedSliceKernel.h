@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,49 +31,17 @@
 
 namespace arm_compute
 {
-// Forward declarations
-class ICLTensor;
-
 /** Interface for the kernel to perform tensor strided slicing */
 class CLStridedSliceKernel : public ICLKernel
 {
 public:
-    /** Default constructor */
-    CLStridedSliceKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLStridedSliceKernel(const CLStridedSliceKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLStridedSliceKernel &operator=(const CLStridedSliceKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    CLStridedSliceKernel(CLStridedSliceKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    CLStridedSliceKernel &operator=(CLStridedSliceKernel &&) = default;
-    /** Default destructor */
-    ~CLStridedSliceKernel() = default;
-    /** Configure kernel
-     *
-     * @note Supported tensor rank: up to 4
-     *
-     * @param[in]  input            Source tensor. Data type supported: All.
-     * @param[out] output           Destination tensor. Data type supported: Same as @p input
-     * @param[in]  starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
-     * @param[in]  ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
-     * @param[in]  strides          The strides of the dimensions of the input tensor to be sliced. The length must be of rank(input).
-     * @param[in]  begin_mask       If the ith bit of begin_mask is set, starts[i] is ignored and the fullest possible range in that dimension is used instead.
-     * @param[in]  end_mask         If the ith bit of end_mask is set, ends[i] is ignored and the fullest possible range in that dimension is used instead.
-     * @param[in]  shrink_axis_mask If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
-     *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
-     */
-    void configure(const ICLTensor *input, ICLTensor *output,
-                   const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                   int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
     /** Configure kernel
      *
      * @note Supported tensor rank: up to 4
      *
      * @param[in]  compile_context  The compile context to be used.
-     * @param[in]  input            Source tensor. Data type supported: All.
-     * @param[out] output           Destination tensor. Data type supported: Same as @p input
+     * @param[in]  input            Source tensor info. Data type supported: All.
+     * @param[out] output           Destination tensor info. Data type supported: Same as @p input
      * @param[in]  starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  strides          The strides of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -82,7 +50,7 @@ public:
      * @param[in]  shrink_axis_mask If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output,
                    const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                    int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
 
@@ -105,11 +73,7 @@ public:
                            int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
-
-private:
-    const ICLTensor *_input;  /**< Source tensor */
-    ICLTensor       *_output; /**< Destination tensor */
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CL_STRIDED_SLICE_KERNEL_H */

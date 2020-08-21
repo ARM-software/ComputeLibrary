@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,7 +111,7 @@ void NECropResize::run()
         NEScheduler::get().schedule(_crop[i].get(), Window::DimZ);
 
         // Scale the cropped image.
-        _scale[i]->configure(_crop_results[i].get(), _scaled_results[i].get(), _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT, false);
+        _scale[i]->configure(_crop_results[i].get(), _scaled_results[i].get(), ScaleKernelInfo{ _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT, false });
         _scaled_results[i]->allocator()->allocate();
         _scale[i]->run();
 

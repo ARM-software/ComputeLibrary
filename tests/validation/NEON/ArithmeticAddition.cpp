@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,8 @@ const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::mak
                                                  DataType::U8));
 const auto ArithmeticAdditionS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
                                                   framework::dataset::make("DataType", DataType::S16));
+const auto ArithmeticAdditionS32Dataset = combine(combine(framework::dataset::make("DataType", { DataType::S32 }), framework::dataset::make("DataType", DataType::S32)),
+                                                  framework::dataset::make("DataType", DataType::S32));
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto ArithmeticAdditionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
                                                    framework::dataset::make("DataType", DataType::F16));
@@ -61,7 +63,7 @@ const auto ArithmeticAdditionFP32Dataset = combine(combine(framework::dataset::m
 const auto ArithmeticAdditionQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
                                                       framework::dataset::make("DataType", DataType::QASYMM8));
 const auto ArithmeticAdditionQASYMM8SIGNEDDataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+                                                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
 const auto ArithmeticAdditionQSYMM16Dataset = combine(combine(framework::dataset::make("DataType", DataType::QSYMM16), framework::dataset::make("DataType", DataType::QSYMM16)),
                                                       framework::dataset::make("DataType", DataType::QSYMM16));
 } // namespace
@@ -105,6 +107,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+TEST_CASE(NoPaddingAdded, framework::DatasetMode::PRECOMMIT)
+{
+    // NEArithmeticAddition doesn't use padding, so make sure this is the case.
+    Tensor input1 = create_tensor<Tensor>(TensorShape(15U, 15U), DataType::F32);
+    Tensor input2 = create_tensor<Tensor>(TensorShape(15U, 1U), DataType::F32);
+    Tensor output = create_tensor<Tensor>(TensorShape(15U, 15U), DataType::F32);
+
+    NEArithmeticAddition add;
+    add.configure(&input1, &input2, &output, ConvertPolicy::WRAP);
+
+    // Validate padding is zero
+    validate(input1.info()->padding(), PaddingSize());
+    validate(input2.info()->padding(), PaddingSize());
+    validate(output.info()->padding(), PaddingSize());
+}
+
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),
@@ -130,6 +148,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<int16_t>, framework
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END() // S16
+
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<int32_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticAdditionS32Dataset),
+                                                                                                            framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // S32
 TEST_SUITE_END() // Integer
 
 TEST_SUITE(Float)
@@ -183,6 +210,9 @@ TEST_SUITE_END() // Float
 template <typename T>
 using NEArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticAddition, T>;
 
+template <typename T>
+using NEArithmeticAdditionQuantizedBroadcastFixture = ArithmeticAdditionValidationQuantizedBroadcastFixture<Tensor, Accessor, NEArithmeticAddition, T>;
+
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
@@ -212,6 +242,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                                framework::dataset::make("Src0QInfo", { QuantizationInfo(0.5f, 20) })),
                                        framework::dataset::make("Src1QInfo", { QuantizationInfo(0.5f, 10) })),
                                framework::dataset::make("OutQInfo", { QuantizationInfo(0.5f, 5) })))
+{
+    // Validate output
+#ifdef __aarch64__
+    validate(Accessor(_target), _reference);
+#else  //__aarch64__
+    validate(Accessor(_target), _reference, tolerance_quant);
+#endif //__aarch64__
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticAdditionQuantizedBroadcastFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(
+                           datasets::SmallShapesBroadcast(), ArithmeticAdditionQASYMM8SIGNEDDataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(0.5f, 20) })),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(0.5f, 10) })),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(0.5f, 5) })))
 {
     // Validate output
 #ifdef __aarch64__

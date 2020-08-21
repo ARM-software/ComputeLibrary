@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,10 +37,19 @@ namespace wrapper
         return prefix##_##postfix(a);     \
     }
 
+#define VLOG_IMPL_INT(vtype, prefix, postfix) \
+    inline vtype vlog(const vtype &a)         \
+    {                                         \
+        ARM_COMPUTE_UNUSED(a);                \
+        ARM_COMPUTE_ERROR("Not supported");   \
+    }
+
 VLOG_IMPL(float32x4_t, vlogq, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 VLOG_IMPL(float16x8_t, vlogq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VLOG_IMPL_INT(int32x4_t, vlogq, s32)
+
 #undef VLOG_IMPL
 } // namespace wrapper
 } // namespace arm_compute

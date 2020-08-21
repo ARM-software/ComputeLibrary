@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,29 +33,6 @@
 
 namespace arm_compute
 {
-void NEGEMMLowpQuantizeDownInt32ToUint8Scale::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min, int max)
-{
-    GEMMLowpOutputStageInfo info = GEMMLowpOutputStageInfo();
-    info.gemmlowp_offset         = result_offset;
-    info.gemmlowp_multiplier     = result_mult_int;
-    info.gemmlowp_shift          = result_shift;
-    info.gemmlowp_min_bound      = min;
-    info.gemmlowp_max_bound      = max;
-
-    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ScaleKernel>();
-    k->configure(input, bias, output, &info);
-    _kernel = std::move(k);
-}
-
-Status NEGEMMLowpQuantizeDownInt32ToUint8Scale::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
-{
-    GEMMLowpOutputStageInfo info = GEMMLowpOutputStageInfo();
-    info.gemmlowp_min_bound      = min;
-    info.gemmlowp_max_bound      = max;
-
-    return NEGEMMLowpQuantizeDownInt32ScaleKernel::validate(input, bias, output, &info);
-}
-
 void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
                                                                     int result_offset_after_shift, int min, int max)
 {

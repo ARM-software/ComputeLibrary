@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,6 +74,12 @@ template <>
 inline float32x4_t load_as_f32(uint16_t *ptr)
 {
     return vcvtq_f32_u32(vmovl_u16(wrapper::vload(ptr)));
+}
+
+template <>
+inline float32x4_t load_as_f32(uint8_t *ptr)
+{
+    return vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8(wrapper::vload(ptr)))));
 }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -267,6 +273,9 @@ void NECropKernel::configure(const ITensor *input, const ITensor *crop_boxes, co
         case DataType::S16:
             _in_bounds_crop_function = &in_bounds_crop_window<int16_t>;
             break;
+        case DataType::U8:
+            _in_bounds_crop_function = &in_bounds_crop_window<uint8_t>;
+            break;
         default:
             ARM_COMPUTE_ERROR("Datatype not supported");
     }
@@ -276,7 +285,7 @@ Status NECropKernel::validate(const ITensorInfo *input, const ITensorInfo *crop_
 {
     ARM_COMPUTE_UNUSED(extrapolation_value);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U16, DataType::S16, DataType::F16, DataType::U32, DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::U16, DataType::S16, DataType::F16, DataType::U32, DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape().num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(crop_boxes->tensor_shape()[0] != 4);

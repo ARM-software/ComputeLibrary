@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,9 @@ enum class CPUModel
     GENERIC_FP16_DOT,
     A53,
     A55r0,
-    A55r1
+    A55r1,
+    X1,
+    A73
 };
 
 /** Global memory policy.
@@ -93,6 +95,14 @@ inline std::string cpu_model_to_string(CPUModel val)
         case CPUModel::A55r1:
         {
             return std::string("A55r1");
+        }
+        case CPUModel::X1:
+        {
+            return std::string("X1");
+        }
+        case CPUModel::A73:
+        {
+            return std::string("A73");
         }
         default:
         {

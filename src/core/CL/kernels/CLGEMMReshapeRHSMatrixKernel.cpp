@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -54,6 +55,12 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.n0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON((rhs_info.k0 == 1) && (rhs_info.transpose));
+
+    if(rhs_info.export_to_cl_image)
+    {
+        const TensorInfo tensor_reshaped_info(compute_rhs_reshaped_shape(*input, rhs_info), 1, DataType::F32);
+        ARM_COMPUTE_RETURN_ON_ERROR(cl_gemm::validate_image2d_support_on_rhs(tensor_reshaped_info, rhs_info));
+    }
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
@@ -85,6 +92,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     window_changed = update_window_and_padding(win, input_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+
+    if(rhs_info.export_to_cl_image)
+    {
+        arm_compute::cl_gemm::update_padding_for_cl_image(output);
+    }
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS

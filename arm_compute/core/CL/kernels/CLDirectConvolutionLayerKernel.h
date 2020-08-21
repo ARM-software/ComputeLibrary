@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ public:
      *        1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3
      *        3x3 convolution with stride_x = 1/2, stride_y = 1/2
      *        5x5 convolution with stride_x = 1/2, stride_y = 1/2
-     *        9x9 convolution with stride_x = 1/2, stride_y = 1/2, data_layout=NHWC
+     *        9x9 convolution with stride_x = 1/2, stride_y = 1/2
      *
      * @param[in]  input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
      *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8_SIGNED/QASYMM8/F16/F32.
@@ -74,7 +74,7 @@ public:
      *        1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3
      *        3x3 convolution with stride_x = 1/2, stride_y = 1/2
      *        5x5 convolution with stride_x = 1/2, stride_y = 1/2
-     *        9x9 convolution with stride_x = 1/2, stride_y = 1/2, data_layout=NHWC
+     *        9x9 convolution with stride_x = 1/2, stride_y = 1/2
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],

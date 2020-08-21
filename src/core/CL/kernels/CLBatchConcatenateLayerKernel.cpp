@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,20 +27,15 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 
 #include "support/StringSupport.h"
 
-#include <map>
-
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int batch_offset, ITensorInfo *output)
@@ -80,34 +75,27 @@ Status validate_arguments(const ITensorInfo *input, unsigned int batch_offset, c
 } // namespace
 
 CLBatchConcatenateLayerKernel::CLBatchConcatenateLayerKernel()
-    : _input(nullptr), _output(nullptr), _batch_offset(0)
+    : _batch_offset(0)
 {
 }
 
-void CLBatchConcatenateLayerKernel::configure(const ICLTensor *input, unsigned int batch_offset, ICLTensor *output)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, batch_offset, output);
-}
-
-void CLBatchConcatenateLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int batch_offset, ICLTensor *output)
+void CLBatchConcatenateLayerKernel::configure(const CLCompileContext &compile_context, ITensorInfo *input, unsigned int batch_offset, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), batch_offset, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, batch_offset, output));
 
-    _input        = input;
-    _output       = output;
     _batch_offset = batch_offset;
 
-    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
+    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
 
     // Add build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    if(is_data_type_quantized_asymmetric(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info())
+    if(is_data_type_quantized_asymmetric(input->data_type()) && input->quantization_info() != output->quantization_info())
     {
-        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
 
         build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iq_info.offset));
         build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oq_info.offset));
@@ -119,13 +107,13 @@ void CLBatchConcatenateLayerKernel::configure(const CLCompileContext &compile_co
     _kernel = create_kernel(compile_context, "concatenate", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), batch_offset, output->info());
+    auto win_config = validate_and_configure_window(input, batch_offset, output);
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     ICLKernel::configure_internal(std::get<1>(win_config));
 
     // Set output valid region
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     // Set config_id for enabling LWS tuning
     _config_id = "concatenate_";
@@ -133,13 +121,13 @@ void CLBatchConcatenateLayerKernel::configure(const CLCompileContext &compile_co
     _config_id += "_";
     _config_id += support::cpp11::to_string(batch_offset);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += support::cpp11::to_string(input->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += support::cpp11::to_string(input->dimension(1));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(2));
+    _config_id += support::cpp11::to_string(input->dimension(2));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(3));
+    _config_id += support::cpp11::to_string(input->dimension(3));
 }
 
 Status CLBatchConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,
@@ -151,14 +139,17 @@ Status CLBatchConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *i
     return Status{};
 }
 
-void CLBatchConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLBatchConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+
     Window slice = window.first_slice_window_3D();
 
-    const int offset_to_first_elements_in_bytes = _batch_offset * _output->info()->strides_in_bytes()[3];
+    const int offset_to_first_elements_in_bytes = _batch_offset * dst->info()->strides_in_bytes()[3];
 
     unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
     _kernel.setArg<cl_int>(idx, offset_to_first_elements_in_bytes);
@@ -166,9 +157,10 @@ void CLBatchConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, src, slice);
+        add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

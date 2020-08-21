@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,7 +96,7 @@ int4 mult_by_quantized_multiplier_parallel(int4 data)
  * @note Quantized beta can be optionally passed at compile time using -DINPUT_BETA_MULTIPLIER and -DINPUT_BETA_LEFT_SHIFT (if undefined, assume beta equals 1.0)
  * @note -DDIFF_MIN must be passed at compile time. It is threshold difference between maximum value of input data and current processed value, it defines whether the value will be taken into account or not.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QASYMM8
+ * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -194,7 +194,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
         data_fp                = asymm_rescale(data_fp, 0, EXP_ACCUMULATION_INT_BITS);
         VSTORE(VECTOR_SIZE)
         (data_diff, 0, (__global int *)offset(&dst, i << LOG_VECTOR_SIZE, 0));
-        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
+        sum1D = sum1D + select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
     }
 
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
@@ -208,8 +208,8 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
     VEC_INT widx_          = CONVERT(((VEC_UINT)(width4 << LOG_VECTOR_SIZE) + idx__) < width, VEC_INT);
     VSTORE(VECTOR_SIZE)
     (data_diff, 0, (__global int *)offset(&dst, width4 << LOG_VECTOR_SIZE, 0));
-    data_fp = select(MIN_VALUE, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
-    sum1D   = sum1D + select(MIN_VALUE, data_fp, widx_);
+    data_fp = select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
+    sum1D   = sum1D + select(0, data_fp, widx_);
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 
     // Perform sum reduction
@@ -417,7 +417,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4, 0));
-        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
+        sum1D = sum1D + select(0, data_fp, data_diff >= (int4)(DIFF_MIN));
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
     //TODO: Optimize the calculation (avoid %).
@@ -432,7 +432,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4, 0));
-        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
+        sum1D = sum1D + select(0, data_fp, data_diff >= (int4)(DIFF_MIN));
     }
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
     if(boundary_workitems == 0)
@@ -451,9 +451,10 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         int4 widx           = convert_int4(((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width);
-        data_fp             = select(MIN_VALUE, data_fp, widx);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4 + 4, 0));
-        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
+        data_fp = select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
+        data_fp = select(0, data_fp, widx);
+        sum1D   = sum1D + data_fp;
     }
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 #endif /* NON_MULTIPLE_OF_GRID_SIZE */
@@ -548,7 +549,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
  * @param[in]  sum_stride_z                      Stride of the sum values tensor in Z dimension (in bytes)
  * @param[in]  sum_step_z                        sum_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  sum_offset_first_element_in_bytes The offset of the first element in the sum values tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor slice. Supported data types: QASYMM8
+ * @param[out] dst_ptr                           Pointer to the destination tensor slice. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
@@ -570,14 +571,12 @@ __kernel void softmax_layer_norm_quantized(
     int sum_val = *((__global int *)offset(&sum, 0, get_global_id(1)));
 
     // It will be better to calculate this in prev layer and pass here as parameter
-#ifndef LOG_SOFTMAX
     uint  sum_val_u               = convert_uint(sum_val);
     int   headroom_plus_one       = clz(sum_val_u);
     int   num_bits_over_unit      = EXP_ACCUMULATION_INT_BITS - headroom_plus_one;
     int   shifted_sum_minus_one_1 = convert_int((sum_val_u << headroom_plus_one) - (1u << 31));
     int16 shifted_sum_minus_one   = shifted_sum_minus_one_1;
     int16 shifted_scale           = ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1(shifted_sum_minus_one, 16);
-#endif /* LOG_SOFTMAX */
 
     // It was already calculated in prev layer, should be stored into tmp output and reused
     int16 data_diff      = vload16(0, (__global int *)offset(&src, 0, 0));
@@ -589,18 +588,13 @@ __kernel void softmax_layer_norm_quantized(
     }
 #endif /* defined(INPUT_BETA_MULTIPLIER) && defined(INPUT_BETA_LEFT_SHIFT) */
 
-#ifdef LOG_SOFTMAX
-    long16 data = SUB_OP(convert_long16(data_diff_mult), (long16)(sum_val), long, 16);
-    data        = select(0L, data, convert_long16(data_diff) >= (long16)(DIFF_MIN));
-#else /* LOG_SOFTMAX */
     int16 data = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 16);
     data       = ASYMM_MULT(shifted_scale, data, 16);
     data       = ASYMM_ROUNDING_DIVIDE_BY_POW2(data, num_bits_over_unit + 31 - 8, 16);
 #ifdef QASYMM8_SIGNED
-    data       = ADD_OP(data, (int16)(MIN_VALUE), int, 16);
+    data = ADD_OP(data, (int16)(MIN_VALUE), int, 16);
 #endif /* QASYMM8_SIGNED */
-    data       = select(MIN_VALUE, data, data_diff >= (int16)(DIFF_MIN));
-#endif /* LOG_SOFTMAX */
+    data = select(MIN_VALUE, data, data_diff >= (int16)(DIFF_MIN));
     vstore16(CONVERT_SAT(data, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)offset(&dst, 0, 0));
 }
 

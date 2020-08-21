@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,6 +71,12 @@ framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(5, 7) })),
 framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
 framework::dataset::make("ExcludePadding", { true }));
 
+const auto PoolingLayerDatasetFPIndicesSmall = combine(combine(combine(framework::dataset::make("PoolingType",
+{ PoolingType::MAX }),
+framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 2, 0, 0) })),
+framework::dataset::make("ExcludePadding", { true, false }));
+
 constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f);  /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
 constexpr AbsoluteTolerance<float>   tolerance_f16(0.01f);   /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);   /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
@@ -134,6 +140,9 @@ using CLSpecialPoolingLayerFixture = SpecialPoolingLayerValidationFixture<CLTens
 template <typename T>
 using CLMixedPrecesionPoolingLayerFixture = PoolingLayerValidationMixedPrecisionFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
 
+template <typename T>
+using CLPoolingLayerIndicesFixture = PoolingLayerIndicesValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSpecial, CLSpecialPoolingLayerFixture<float>, framework::DatasetMode::ALL, datasets::PoolingLayerDatasetSpecial() * framework::dataset::make("DataType", DataType::F32))
@@ -157,6 +166,17 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<float>, framework::Datase
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+
+FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPIndicesSmall,
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::F32))),
+                                                                                                                        pool_data_layout_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target_indices), _ref_indices);
+}
+
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
@@ -175,6 +195,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMixedPrecesionPoolingLayerFixture<half>, fram
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPIndicesSmall,
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::F16))),
+                                                                                                                       pool_data_layout_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target_indices), _ref_indices);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float

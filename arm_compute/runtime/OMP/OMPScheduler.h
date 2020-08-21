@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,18 @@ public:
      * @param[in] hints  Hints for the scheduler.
      */
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
+
+    /** Multithread the execution of the passed kernel if possible.
+     *
+     * The kernel will run on a single thread if any of these conditions is true:
+     * - ICPPKernel::is_parallelisable() returns false
+     * - The scheduler has been initialized with only one thread.
+     *
+     * @param[in] kernel  Kernel to execute.
+     * @param[in] hints   Hints for the scheduler.
+     * @param[in] tensors Vector containing the tensors to operate on.
+     */
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) override;
 
 protected:
     /** Execute all the passed workloads

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,7 @@ public:
      * @param[out] classes          The classes output tensor of size [N]. Data types supported: Same as @p scores_in
      * @param[out] batch_splits_out (Optional) The batch splits output tensor. Data types supported: Same as @p scores_in
      * @param[out] keeps            (Optional) The keeps output tensor of size [N]. Data types supported: Same as @p scores_in
-     * @param[in]  keeps_size       (Optional) Number of filtered indices per class tensor of size [num_classes]. Data types supported: Same as @p scores_in
+     * @param[in]  keeps_size       (Optional) Number of filtered indices per class tensor of size [num_classes]. Data types supported: U32.
      * @param[in]  info             (Optional) BoxNMSLimitInfo information.
      */
     void configure(const ITensor *scores_in, const ITensor *boxes_in, const ITensor *batch_splits_in, ITensor *scores_out, ITensor *boxes_out, ITensor *classes,
@@ -76,7 +76,7 @@ public:
      * @param[in] classes          The classes output tensor of size [N]. Data types supported: Same as @p scores_in
      * @param[in] batch_splits_out (Optional) The batch splits output tensor. Data types supported: Same as @p scores_in
      * @param[in] keeps            (Optional) The keeps output tensor of size [N]. Data types supported: Same as @p scores_in
-     * @param[in] keeps_size       (Optional) Number of filtered indices per class tensor of size [num_classes]. Data types supported: Same as @p scores_in
+     * @param[in] keeps_size       (Optional) Number of filtered indices per class tensor of size [num_classes]. Data types supported: U32.
      * @param[in] info             (Optional) BoxNMSLimitInfo information.
      *
      * @return a status

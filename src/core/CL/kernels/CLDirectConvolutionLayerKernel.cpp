@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,20 +60,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
                                     "Weights feature map dimension should match the respective input's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 4, "Weights can be at most 4 dimensional");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 3 || weights->dimension(width_idx) == 5) && std::get<0>(conv_info.stride()) > 2,
-                                    "Strides larger than 2 not supported for 3x3 convolution.");
-
-    const auto data_type = input->data_type();
-
-    if(weights->dimension(width_idx) == 9)
-    {
-        const auto supported_data_layout = is_data_type_quantized(data_type) ? DataLayout::NCHW : DataLayout::NHWC;
-        const auto error_message         = std::string("Only " + string_from_data_layout(supported_data_layout) + " layout is supported for 9x9 convolution with " + string_from_data_type(
-                                                           data_type)
-                                                       + " type");
-
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((supported_data_layout != data_layout), error_message.c_str());
-    }
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 3 || weights->dimension(width_idx) == 5 || weights->dimension(width_idx) == 9)
+                                    && std::get<0>(conv_info.stride()) > 2,
+                                    "Strides larger than 2 not supported for 3x3, 5x5, 9x9 convolution.");
 
     if(biases != nullptr)
     {
@@ -99,6 +88,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
+    const auto data_type = input->data_type();
     if(is_data_type_quantized(data_type))
     {
         const UniformQuantizationInfo iqinfo = input->quantization_info().uniform();
@@ -358,7 +348,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
 
     // Output auto inizialitation if not yet initialized
-    // TODO(COMPMID-2078): input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output, output_shape,
                        1,
                        input->data_type(),
@@ -443,7 +432,6 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
     TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input->info(), *weights->info(), conv_info);
 
     // Output auto inizialitation if not yet initialized
-    // TODO(COMPMID-2078): input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output->info(),
                        output_shape,
                        1,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,15 +32,9 @@
 #include "arm_compute/core/Validate.h"
 
 #include <arm_neon.h>
-#include <cstdint>
-
-using namespace arm_compute;
 
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 namespace
 {
 void abs_diff_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
@@ -140,7 +134,7 @@ void NEAbsoluteDifferenceKernel::configure(const ITensor *input1, const ITensor 
     {
         set_format_if_unknown(*output->info(), Format::S16);
     }
-    else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
+    else if(input1->info()->data_type() == DataType::U8 || input2->info()->data_type() == DataType::U8)
     {
         set_format_if_unknown(*output->info(), Format::U8);
     }
@@ -210,3 +204,4 @@ void NEAbsoluteDifferenceKernel::run(const Window &window, const ThreadInfo &inf
 
     _func(_input1, _input2, _output, window);
 }
+} // namespace arm_compute

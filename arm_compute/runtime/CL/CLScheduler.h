@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
 
 namespace arm_compute
@@ -72,6 +73,13 @@ public:
      * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
      */
     void enqueue(ICLKernel &kernel, bool flush = true);
+    /** Schedule the execution of the passed kernel if possible.
+     *
+     * @param[in] kernel  Kernel to execute.
+     * @param[in] tensors Vector containing the tensors to operate on.
+     * @param[in] flush   (Optional) Specifies if the command queue will be flushed after running the kernel.
+     */
+    void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush = true);
 
     /** Initialises the context and command queue to be used by the scheduler.
      *
@@ -143,6 +151,7 @@ public:
     bool is_initialised() const;
 
 private:
+    void enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool flush);
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,7 @@ public:
      * @note Supported tensor rank: up to 4
      * @note Padding not supported.
      *
-     * @param[in]  input               Source tensor. Data type supported: U16/S16/U32/S32/F16/F32. Data layouts supported: NHWC.
+     * @param[in]  input               Source tensor. Data type supported: U8/U16/S16/U32/S32/F16/F32. Data layouts supported: NHWC.
      * @param[in]  crop_boxes          Tensor containing all possible boxes used to crop the image, each represented by 4 normalized values.
      *                                 Data type supported: F32
      * @param[in]  box_ind             One dimensional tensor mapping the @p crop_box_ind to the index of the 3D image in @p input.
@@ -74,7 +74,7 @@ public:
      * @note Supported tensor rank: up to 4
      * @note Padding not supported.
      *
-     * @param[in] input               Source tensor info. Data type supported: U16/S16/U32/S32/F16/F32. Data layouts supported: NHWC.
+     * @param[in] input               Source tensor info. Data type supported: U8/U16/S16/U32/S32/F16/F32. Data layouts supported: NHWC.
      * @param[in] crop_boxes          Tensor info for tensor containing all possible boxes used to crop the image. Data type supported: F32
      * @param[in] box_ind             Tensor info for the one dimensional tensor mapping the @p crop_box_ind to the index of the 3D image
      *                                in @p input. Data type supported: F32

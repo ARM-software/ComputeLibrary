@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,16 +27,14 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/helpers/float_ops.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 #include "support/StringSupport.h"
 
-#include <cmath>
 #include <set>
 
 namespace arm_compute
@@ -46,7 +44,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::F16, DataType::F32);
 
     static std::set<ActivationLayerInfo::ActivationFunction> quantized_supported_activations =
     {
@@ -116,16 +114,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLActivationLayerKernel::CLActivationLayerKernel()
-    : _input(nullptr), _output(nullptr), _run_in_place(false)
+    : _run_in_place(false)
 {
 }
 
-void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
-}
-
-void CLActivationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+void CLActivationLayerKernel::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
@@ -134,14 +127,13 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     if(output != nullptr)
     {
         // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output->info(),
-                           *input->info()->clone());
+        auto_init_if_empty(*output, *input->clone());
     }
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, (output != nullptr) ? output : nullptr, act_info));
 
-    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
-    const DataType     dt                                = input->info()->data_type();
+    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
+    const DataType     dt                                = input->data_type();
     float              a_const                           = act_info.a();
     float              b_const                           = act_info.b();
 
@@ -163,7 +155,7 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     // Set quantization info build options
     if(is_quantized)
     {
-        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
 
         if(!perform_activation_in_float)
         {
@@ -214,7 +206,7 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
         // Set scale and offset of the input and output if they have different quantization info
         if(output != nullptr)
         {
-            const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+            const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
 
             if(iq_info != oq_info)
             {
@@ -233,12 +225,8 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
-    // Make sure _kernel is initialized before calling the parent's configure
-    _input  = input;
-    _output = output;
-
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (_run_in_place) ? nullptr : output->info());
+    auto win_config = validate_and_configure_window(input, (_run_in_place) ? nullptr : output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
@@ -246,9 +234,9 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     _config_id = "activation_layer_";
     _config_id += lower_string(string_from_data_type(dt));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += support::cpp11::to_string(input->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += support::cpp11::to_string(input->dimension(1));
 }
 
 Status CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -260,10 +248,14 @@ Status CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensor
     return Status{};
 }
 
-void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLActivationLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    ARM_COMPUTE_ERROR_ON(_run_in_place && src != dst);
 
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice     = collapsed.first_slice_window_3D();
@@ -271,10 +263,10 @@ void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
+        add_3D_tensor_argument(idx, src, slice);
         if(!_run_in_place)
         {
-            add_3D_tensor_argument(idx, _output, slice);
+            add_3D_tensor_argument(idx, dst, slice);
         }
         enqueue(queue, *this, slice, lws_hint());
     }

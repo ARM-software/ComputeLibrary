@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,27 +31,59 @@
 
 namespace arm_compute
 {
-void NEArithmeticSubtraction::configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+namespace experimental
+{
+void NEArithmeticSubtraction::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticSubtractionKernel>();
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
-
-    if(output->info()->dimension(0) > 1)
-    {
-        ITensor *broadcasted_info = (input1->info()->dimension(0) == 1) ? input1 : input2;
-
-        if(broadcasted_info->info()->dimension(0) == 1)
-        {
-            _border_handler.configure(broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
-        }
-    }
 }
 
 Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticSubtractionKernel::validate(input1, input2, output, policy);
+}
+} // namespace experimental
+
+struct NEArithmeticSubtraction::Impl
+{
+    const ITensor                                         *src_0{ nullptr };
+    const ITensor                                         *src_1{ nullptr };
+    ITensor                                               *dst{ nullptr };
+    std::unique_ptr<experimental::NEArithmeticSubtraction> op{ nullptr };
+};
+
+NEArithmeticSubtraction::NEArithmeticSubtraction()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+NEArithmeticSubtraction::NEArithmeticSubtraction(NEArithmeticSubtraction &&) = default;
+NEArithmeticSubtraction &NEArithmeticSubtraction::operator=(NEArithmeticSubtraction &&) = default;
+NEArithmeticSubtraction::~NEArithmeticSubtraction()                                     = default;
+
+Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+{
+    return experimental::NEArithmeticSubtraction::validate(input1, input2, output, policy, act_info);
+}
+
+void NEArithmeticSubtraction::configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+{
+    _impl->src_0 = input1;
+    _impl->src_1 = input2;
+    _impl->dst   = output;
+    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEArithmeticSubtraction>();
+    _impl->op->configure(input1->info(), input2->info(), output->info(), policy, act_info);
+}
+
+void NEArithmeticSubtraction::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

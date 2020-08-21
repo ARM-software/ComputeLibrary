@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,8 +61,6 @@ const auto NormalizationDatasetFP32 = combine(combine(combine(datasets::Normaliz
 TEST_SUITE(NEON)
 TEST_SUITE(NormalizationLayer)
 
-//TODO(COMPMID-415): Missing configuration?
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
@@ -70,12 +68,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Even normalization
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Non implemented IN_MAP_2D
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                           }),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
@@ -84,10 +80,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                             NormalizationLayerInfo(NormType::IN_MAP_1D, 4),
                                             NormalizationLayerInfo(NormType::IN_MAP_2D, 5),
-                                            NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                             NormalizationLayerInfo(NormType::CROSS_MAP, 1),
                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, false, true })),
+    framework::dataset::make("Expected", { false, false, false, true, true })),
     input_info, output_info, norm_info, expected)
 {
     bool is_valid = bool(NENormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), norm_info));
@@ -95,6 +90,25 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)),
+               shape, data_type)
+{
+    NormalizationLayerInfo info(NormType::IN_MAP_1D, 3U, 5.0f, 2.0f, 1.f, false);
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    Tensor dst = create_tensor<Tensor>(shape, data_type);
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NENormalizationLayer norm;
+    norm.configure(&src, &dst, info);
+
+    validate(src.info()->padding(), PaddingSize(0, 0, 0, 0));
+}
 
 template <typename T>
 using NENormalizationLayerFixture = NormalizationValidationFixture<Tensor, Accessor, NENormalizationLayer, T>;

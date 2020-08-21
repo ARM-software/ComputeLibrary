@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -142,21 +142,19 @@ Status validate_arguments(const ITensorInfo *input, unsigned int depth_offset, c
 } // namespace
 
 NEDepthConcatenateLayerKernel::NEDepthConcatenateLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _depth_offset(0)
+    : _func(nullptr), _depth_offset(0)
 {
 }
 
-void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int depth_offset, ITensor *output)
+void NEDepthConcatenateLayerKernel::configure(const ITensorInfo *input, unsigned int depth_offset, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), depth_offset, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, depth_offset, output));
 
     _func         = nullptr;
-    _input        = input;
-    _output       = output;
     _depth_offset = depth_offset;
 
-    switch(input->info()->data_type())
+    switch(input->data_type())
     {
         case DataType::QASYMM8:
             _func = &depth_concat<uint8_t>;
@@ -175,11 +173,11 @@ void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int
     }
 
     // Configure kernel window
-    Window      win = calculate_max_window(*output->info(), Steps());
+    Window      win = calculate_max_window(*output, Steps());
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
+    coord.set_num_dimensions(output->num_dimensions());
 
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
     INEKernel::configure(win);
 }
 
@@ -191,13 +189,16 @@ Status NEDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *i
     return Status{};
 }
 
-void NEDepthConcatenateLayerKernel::run(const Window &window, const ThreadInfo &info)
+void NEDepthConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (*_func)(_input, _output, _depth_offset, window);
+    (*_func)(tensors.get_const_tensor(TensorType::ACL_SRC),
+             tensors.get_tensor(TensorType::ACL_DST),
+             _depth_offset,
+             window);
 }
 } // namespace arm_compute

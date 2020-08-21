@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -176,16 +176,12 @@ arm_compute::Status arm_compute::error_on_unconfigured_kernel(const char *functi
 arm_compute::Status arm_compute::error_on_invalid_subtensor(const char *function, const char *file, const int line,
                                                             const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape)
 {
-    // Subtensor should not index in x, y dimensions.
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC(((coords.x() != 0) || (coords.y() != 0)), function, file, line);
-    // Subtensor shape should match parent tensor in x, y dimensions.
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC(((parent_shape.x() != shape.x()) || (parent_shape.y() != shape.y())), function, file, line);
-
     // Check dimensions
     for(unsigned int i = 0; i < TensorShape::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_LOC(((coords[i] >= static_cast<int>(parent_shape[i])) || (coords[i] + static_cast<int>(shape[i]) > static_cast<int>(parent_shape[i]))),
-                                        function, file, line);
+        const bool invalid_idx        = coords[i] >= static_cast<int>(parent_shape[i]);
+        const bool out_of_bounds_size = coords[i] + static_cast<int>(shape[i]) > static_cast<int>(parent_shape[i]);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(invalid_idx || out_of_bounds_size, function, file, line);
     }
     return arm_compute::Status{};
 }

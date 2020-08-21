@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_NESCALEKERNEL_H
 #define ARM_COMPUTE_NESCALEKERNEL_H
 
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
@@ -57,41 +57,29 @@ public:
      * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
      * @note Using @p policy Area only supports data layout NCHW and input data type U8.
      *
-     * @param[in]  input                 Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32.
-     * @param[in]  dx                    Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
-     * @param[in]  dy                    Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
-     * @param[in]  offsets               Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
-     * @param[out] output                Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in]  policy                Interpolation type to use
-     * @param[in]  border_mode           Border mode policy
-     * @param[in]  constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT and use_padding is set to false.
-     * @param[in]  sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
-     * @param[in]  use_padding           (Optional) Is padding in use or not. Defaults to true.
-     * @param[in]  align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
+     * @param[in]  input   Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32.
+     * @param[in]  dx      Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
+     * @param[in]  dy      Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
+     * @param[in]  offsets Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
+     * @param[out] output  Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in]  info    @ref ScaleKernelInfo to use for configuration
      */
     void configure(const ITensor *input, const ITensor *dx, const ITensor *dy, const ITensor *offsets, ITensor *output,
-                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
-                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
+                   const ScaleKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEScaleKernel
      *
      * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
      * @note Using @p policy Area only supports data layout NCHW and input data type U8.
      *
-     * @param[in] input                 Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32.
-     * @param[in] dx                    Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
-     * @param[in] dy                    Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
-     * @param[in] offsets               Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
-     * @param[in] output                Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in] policy                Interpolation type to use
-     * @param[in] border_mode           Border mode policy
-     * @param[in] constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT and use_padding is set to false.
-     * @param[in] sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
-     * @param[in] use_padding           (Optional) Is padding in use or not. Defaults to true.
-     * @param[in] align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
+     * @param[in] input   Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32.
+     * @param[in] dx      Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
+     * @param[in] dy      Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
+     * @param[in] offsets Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
+     * @param[in] output  Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in] info    @ref ScaleKernelInfo to use for validation
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy, const ITensorInfo *offsets, ITensorInfo *output,
-                           InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
-                           SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
+                           const ScaleKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

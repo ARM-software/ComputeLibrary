@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2020 ARM Limited.
+/// Copyright (c) 2017-2020 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -237,6 +237,77 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v20.08 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - Added new data type QASYMM8_SIGNED support for:
+   - @ref CLArgMinMaxLayer
+   - @ref CLArgMinMaxLayerKernel
+ - Added new data type U8 support for:
+   - @ref NECropKernel
+   - @ref CLCropKernel
+ - Added aligh_corner support for nearest neighbor interpolation in:
+   - @ref NEScaleKernel
+   - @ref CLScaleKernel
+ - New OpenCL kernels / functions:
+   - @ref CLMaxUnpoolingLayerKernel
+ - New NEON kernels / functions:
+   - @ref NEMaxUnpoolingLayerKernel
+ - New graph example:
+   - graph_yolov3_output_detector
+ - GEMMTuner improvements:
+   - Added fp16 support
+   - Output json files for easier integration
+   - Enabled tuning for export_to_cl_image_rhs option for RHS tensors
+   - More robust script for running benchmarks
+ - Removed padding from:
+   - @ref NEPixelWiseMultiplicationKernel
+   - @ref NEHeightConcatenateLayerKernel
+   - @ref NEThresholdKernel
+   - @ref NEBatchConcatenateLayerKernel
+   - @ref NETransposeKernel
+   - @ref NEBatchNormalizationLayerKernel
+   - @ref NEArithmeticSubtractionKernel
+   - @ref NEBoundingBoxTransformKernel
+   - @ref NELogits1DMaxKernel
+   - @ref NELogits1DSoftmaxKernel
+   - @ref NEROIPoolingLayerKernel
+   - @ref NEROIAlignLayerKernel
+   - @ref NEYOLOLayerKernel
+   - @ref NEUpsampleLayerKernel
+   - @ref NEFloorKernel
+   - @ref NEWidthConcatenateLayerKernel
+   - @ref NEDepthConcatenateLayerKernel
+   - @ref NENormalizationLayerKernel
+   - @ref NEL2NormalizeLayerKernel
+   - @ref NEFillArrayKernel
+   - @ref NEDepthConvertLayerKernel
+   - @ref NERangeKernel
+   - @ref NEPriorBoxLayer
+ - Removedd OpenCL kernels / functions:
+   - CLGEMMLowpQuantizeDownInt32ToUint8Scale
+   - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
+ - Removed NEON kernels / functions:
+   - NEGEMMLowpQuantizeDownInt32ToUint8Scale
+   - NEGEMMMatrixAccumulateBiasesKernel
+ - Deprecated functions / interfaces:
+   - Non-descriptor based interfaces for @ref NEThreshold, @ref CLThreshold
+   - Non-descriptor based interfaces for @ref NEScale, @ref CLScale and @ref GCScale
+   - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer :
+      The default "axis" value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer is changed from 1 to 0.
+      Only axis 0 is supported.
+      The default "axis" value for @ref NESoftmaxLayer, @ref NELogSoftmaxLayer is changed from 1 to 0.
+      Only axis 0 is supported.
+ - The support for quantized data types has been removed from @ref CLLogSoftmaxLayer due to implementation complexity.
+ - Removed padding requirement for the input (e.g. LHS of GEMM) and output in @ref CLGEMMMatrixMultiplyNativeKernel, @ref CLGEMMMatrixMultiplyReshapedKernel, @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel and @ref CLIm2ColKernel (NHWC only)
+   - This change allows to use @ref CLGEMMConvolutionLayer without extra padding for the input and output.
+   - Only the weights/bias of @ref CLGEMMConvolutionLayer could require padding for the computation.
+   - Only on Arm Mali Midgard GPUs, @ref CLGEMMConvolutionLayer could require padding since @ref CLGEMMMatrixMultiplyKernel is called and currently requires padding.
+ - Added support for exporting the OpenCL buffer object to the OpenCL image object in @ref CLGEMMMatrixMultiplyReshapedKernel and @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.
+   - This support allows to export the OpenCL buffer used for the reshaped RHS matrix to the OpenCL image object.
+   - The padding requirement for the OpenCL image object is considered into the @ref CLGEMMReshapeRHSMatrixKernel.
+   - The reshaped RHS matrix stores the weights when GEMM is used to accelerate @ref CLGEMMConvolutionLayer.
+
 v20.05 Public major release
  - Various bug fixes.
  - Various optimisations.
@@ -330,7 +401,7 @@ v20.02 Public major release
      - @ref NEElementwiseMin
      - @ref NEElementwiseSquaredDiff
      - @ref NEFullyConnectedLayer
-     - @ref NEGEMMMatrixVectorMultiplyKernel
+     - NEGEMMMatrixVectorMultiplyKernel
      - @ref NEPixelWiseMultiplication
      - @ref NEPoolingLayer
      - @ref NEPReluLayer
@@ -902,7 +973,7 @@ v17.12 Public major release
  - New NEON kernels / functions
     - arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
     - arm_compute::NEHGEMMAArch64FP16Kernel
-    - @ref NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
     - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - NEWinogradLayer / NEWinogradLayerKernel
@@ -1024,14 +1095,14 @@ v17.03.1 First Major public release of the sources
    - @ref NETransposeKernel / @ref NETranspose
    - @ref NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
    - @ref NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
-   - @ref NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
+   - NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
    - @ref NEGEMMLowpMatrixMultiplyKernel / NEGEMMLowp
 
 v17.03 Sources preview
  - New OpenCL kernels / functions:
    - @ref CLGradientKernel, @ref CLEdgeNonMaxSuppressionKernel, @ref CLEdgeTraceKernel / @ref CLCannyEdge
    - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, CLGEMMMatrixAdditionKernel / @ref CLGEMM
-   - @ref CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
+   - CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
    - @ref CLTransposeKernel / @ref CLTranspose
    - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / @ref CLOpticalFlow
    - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
@@ -1043,7 +1114,7 @@ v17.03 Sources preview
 
 v17.02.1 Sources preview
  - New OpenCL kernels / functions:
-   - @ref CLLogits1DMaxKernel, @ref CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
+   - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
    - @ref CLPoolingLayerKernel / @ref CLPoolingLayer
    - @ref CLIm2ColKernel, @ref CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / @ref CLConvolutionLayer
    - @ref CLRemapKernel / @ref CLRemap
@@ -1327,13 +1398,13 @@ i.e. to natively compile the "graph_lenet" example for Linux 32bit:
 
 i.e. to natively compile the "graph_lenet" example for Linux 64bit:
 
-	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option)
 
 @note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
 
-@note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L
+@note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L (e.g. -Llib/linux-arm64-v8a-neon-cl-asserts/)
 @note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was built with OpenCL enabled.
 
 To run the built executable simply run:

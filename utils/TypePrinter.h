@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -2291,6 +2291,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const CPUModel &cpu_model)
             break;
         case CPUModel::A55r1:
             os << "A55r1";
+            break;
+        case CPUModel::A73:
+            os << "A73";
+            break;
+        case CPUModel::X1:
+            os << "X1";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");

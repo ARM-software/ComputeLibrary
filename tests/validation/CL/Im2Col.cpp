@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,6 +122,16 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const auto status    = CLIm2ColKernel::validate(&input, &output, conv_size, PadStrideInfo(), has_bias);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
+
+    // Kernel dimensions are too big
+    {
+        const auto input     = TensorInfo(TensorShape(1U, 9U, 5U, 2U), 1, DataType::F32, DataLayout::NHWC);
+        const auto output    = TensorInfo(TensorShape(1U, 1U, 1U, 2U), 1, DataType::F32, DataLayout::NHWC);
+        const auto conv_size = Size2D(9, 9);
+        const bool has_bias  = false;
+        const auto status    = CLIm2ColKernel::validate(&input, &output, conv_size, PadStrideInfo(), has_bias);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
 }
 
 template <typename T>
@@ -129,6 +139,45 @@ using CLIm2ColFixture = Im2ColValidationFixture<CLTensor, CLAccessor, CLIm2Col, 
 
 TEST_SUITE(NHWC)
 
+/** Test that there's no padding added to input or output as part of configure
+ *
+ * @note 2 elements processed per iteration
+ *
+ * Three tests will be run:
+ *  - Channels are multiple of elements processed
+ *  - Channels larger and non multiple of elements used
+ *  - Channels smaller and not multiple of elements used
+ *
+ */
+DATA_TEST_CASE(ValidateZeroPaddingNumElemsPerIterEqual2, framework::DatasetMode::ALL,
+               combine(combine(combine(combine(combine(
+                                                   framework::dataset::make("InputChannel",
+{
+    2, 9, 1,
+}),
+framework::dataset::make("DataType", { DataType::F32 })),
+framework::dataset::make("Kernel", { Size2D(3, 4) })),
+framework::dataset::make("PadStride", { PadStrideInfo(2, 1, 1, 2) })),
+framework::dataset::make("QInfo", { QuantizationInfo() })),
+framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+input_channel, data_type, conv_size, pad_stride_info, qinfo, data_layout)
+{
+    TensorShape input_shape(input_channel, 10U, 30U, 3U);
+    const bool  has_bias = false;
+
+    const auto input_info   = TensorInfo(input_shape, 1, data_type, data_layout);
+    const auto output_shape = compute_im2col_conv_shape(&input_info, conv_size, pad_stride_info, has_bias, Size2D(1U, 1U), true);
+
+    CLTensor input  = create_tensor<CLTensor>(input_shape, data_type, 1, qinfo, data_layout);
+    CLTensor output = create_tensor<CLTensor>(output_shape, data_type, 1, qinfo, data_layout);
+
+    CLIm2ColKernel im2col;
+    im2col.configure(&input, &output, conv_size, pad_stride_info, has_bias);
+
+    // Ensure there're no paddings added at all
+    const bool no_padding = input.info()->padding().empty() && output.info()->padding().empty();
+    ARM_COMPUTE_EXPECT(no_padding, framework::LogLevel::ERRORS);
+}
 /** Test special kernel used for NHWC for 3x3 kernels
  *
  * @note 2 elements processed per iteration
@@ -150,7 +199,7 @@ FIXTURE_DATA_TEST_CASE(W3x3,
 }),
 framework::dataset::make("DataType", DataType::F32)),
 framework::dataset::make("Kernel", Size2D(3, 3))),
-framework::dataset::make("PadStride", PadStrideInfo(1, 2, 1, 2))),
+framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) })),
 framework::dataset::make("QInfo", QuantizationInfo())),
 framework::dataset::make("DataLayout", DataLayout::NHWC)),
 framework::dataset::make("Groups", 1)))
@@ -176,11 +225,41 @@ FIXTURE_DATA_TEST_CASE(W9x9,
                        combine(combine(combine(combine(combine(combine(
                                                                    framework::dataset::make("InputShape",
 {
-    TensorShape(2U, 13U, 15U, 2U), TensorShape(3U, 15U, 12U, 2U), TensorShape(1U, 1U, 2U, 2U),
+    TensorShape(2U, 13U, 15U, 2U), TensorShape(3U, 15U, 12U, 2U), TensorShape(1U, 13U, 22U, 2U),
 }),
 framework::dataset::make("DataType", DataType::F32)),
 framework::dataset::make("Kernel", Size2D(9, 9))),
-framework::dataset::make("PadStride", PadStrideInfo(2, 2, 1, 2))),
+framework::dataset::make("PadStride", { PadStrideInfo(2, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) })),
+framework::dataset::make("QInfo", QuantizationInfo())),
+framework::dataset::make("DataLayout", DataLayout::NHWC)),
+framework::dataset::make("Groups", 1)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+/** Test generic kernel used for NHWC
+ *
+ * @note 2 elements processed per iteration
+ *
+ * Three tests will be run:
+ *  - Channels are multiple of elements processed
+ *  - Channels larger and non multiple of elements used
+ *  - Channels smaller and not multiple of elements used
+ *
+ *  Kernel tested im2col_generic_nhwc
+ */
+FIXTURE_DATA_TEST_CASE(Generic,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape",
+{
+    TensorShape(4U, 13U, 15U, 2U), TensorShape(7U, 15U, 12U, 1U), TensorShape(1U, 5U, 3U, 1U),
+}),
+framework::dataset::make("DataType", DataType::F32)),
+framework::dataset::make("Kernel", Size2D(5, 3))),
+framework::dataset::make("PadStride", { PadStrideInfo(2, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) })),
 framework::dataset::make("QInfo", QuantizationInfo())),
 framework::dataset::make("DataLayout", DataLayout::NHWC)),
 framework::dataset::make("Groups", 1)))
@@ -331,7 +410,7 @@ FIXTURE_DATA_TEST_CASE(Generic,
                        CLIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(combine(
-                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
+                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 5U, 2U)),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                framework::dataset::make("Kernel", { Size2D(3, 2), Size2D(3, 5) })),
                                                        framework::dataset::make("PadStride", PadStrideInfo(2, 1, 2, 1))),
@@ -357,7 +436,7 @@ FIXTURE_DATA_TEST_CASE(Quantized,
                        CLIm2ColFixture<uint8_t>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(combine(
-                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
+                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 11U, 2U)),
                                                                    framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                framework::dataset::make("Kernel", { Size2D(1, 1), Size2D(3, 3), Size2D(5, 5), Size2D(3, 5), Size2D(9, 9) })),
                                                        framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
@@ -383,7 +462,7 @@ FIXTURE_DATA_TEST_CASE(FP16,
                        CLIm2ColFixture<half>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(combine(
-                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
+                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 11U, 2U)),
                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                framework::dataset::make("Kernel", { Size2D(1, 1), Size2D(3, 3), Size2D(5, 5), Size2D(3, 5), Size2D(9, 9) })),
                                                        framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),

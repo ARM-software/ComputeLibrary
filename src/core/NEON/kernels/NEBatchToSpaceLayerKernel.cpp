@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,12 +25,9 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include <arm_neon.h>
-#include <cstdint>
 
 using namespace arm_compute::misc::shape_calculator;
 

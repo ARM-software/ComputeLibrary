@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_CLSCALEKERNEL_H
 
 #include "arm_compute/core/CL/ICLSimple2DKernel.h"
-#include "arm_compute/core/Types.h"
+#include "arm_compute/core/KernelDescriptors.h"
 
 namespace arm_compute
 {
@@ -37,43 +37,32 @@ class CLScaleKernel : public ICLSimple2DKernel
 public:
     /** Initialise the kernel's inputs, output and interpolation policy
      *
-     * @param[in]  input           Source tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[out] output          Destination tensor. Data types supported: Same as @p input
-     *                             All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in]  policy          Interpolation type to use
-     * @param[in]  border_mode     Selected border mode.
-     * @param[in]  sampling_policy (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
-     * @param[in]  align_corners   (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
+     * @param[in]  input  Source tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
+     * @param[out] output Destination tensor. Data types supported: Same as @p input
+     *                    All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in]  info   @ref ScaleKernelInfo Kernel descriptor to be used to configure.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool align_corners = false);
+    void configure(const ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info);
     /** Initialise the kernel's inputs, output and interpolation policy
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Source tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
      * @param[out] output          Destination tensor. Data types supported: Same as @p input
      *                             All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in]  policy          Interpolation type to use
-     * @param[in]  border_mode     Selected border mode.
-     * @param[in]  sampling_policy (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
-     * @param[in]  align_corners   (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
+     * @param[in]  info            @ref ScaleKernelInfo Kernel descriptor to be used to configure.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode,
-                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool align_corners = false);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLScaleKernel
      *
-     * @param[in] input           Source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in] output          Destination tensor info. Data types supported: Same as @p input
-     *                            All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in] policy          Interpolation type to use
-     * @param[in] border_mode     Selected border mode.
-     * @param[in] sampling_policy (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
-     * @param[in] align_corners   (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
+     * @param[in] input  Source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
+     * @param[in] output Destination tensor info. Data types supported: Same as @p input
+     *                   All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in] info   @ref ScaleKernelInfo Kernel descriptor to be used to validate
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER,
-                           bool align_corners = false);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info);
     /** Input tensor accessor.
      *
      * @return Pointer to input tensor.
@@ -89,10 +78,16 @@ public:
     BorderSize border_size() const override;
     void run(const Window &window, cl::CommandQueue &queue) override;
 
-public:
-    InterpolationPolicy _interpolationPolicy = InterpolationPolicy::BILINEAR;
-    DataLayout          _data_layout         = DataLayout::UNKNOWN;
-    bool                _align_corners       = false;
+    // Getter for interpolation policy
+    InterpolationPolicy get_interpolation_policy() const
+    {
+        return _interpolation_policy;
+    }
+
+private:
+    InterpolationPolicy _interpolation_policy = InterpolationPolicy::BILINEAR;
+    DataLayout          _data_layout          = DataLayout::UNKNOWN;
+    bool                _align_corners        = false;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLSCALEKERNEL_H */

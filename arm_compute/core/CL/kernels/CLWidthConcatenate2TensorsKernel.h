@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,6 @@
 
 namespace arm_compute
 {
-class ICLTensor;
-
 /** Interface for the width concatenate kernel of 2 tensors.
  *  The input1 and input2 tensors will be concatenated into the output tensor.
  */
@@ -39,7 +37,7 @@ class CLWidthConcatenate2TensorsKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    CLWidthConcatenate2TensorsKernel();
+    CLWidthConcatenate2TensorsKernel() = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLWidthConcatenate2TensorsKernel(const CLWidthConcatenate2TensorsKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -52,19 +50,12 @@ public:
     ~CLWidthConcatenate2TensorsKernel() = default;
     /** Initialise the kernel's input1s and output
      *
-     * @param[in]  input1 First input tensor. Data types supported: All.
-     * @param[in]  input2 Second input tensor. Data types supported: same as @p input1
-     * @param[out] output Output tensor. Data types supported: Same as @p input1.
-     */
-    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
-    /** Initialise the kernel's input1s and output
-     *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input1          First input tensor. Data types supported: All.
      * @param[in]  input2          Second input tensor. Data types supported: same as @p input1
      * @param[out] output          Output tensor. Data types supported: Same as @p input1.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLWidthConcatenate2TensorsKernel
      *
      * @param[in] input1 First tensor info. Data types supported: All.
@@ -76,12 +67,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
-
-private:
-    const ICLTensor *_input1;
-    const ICLTensor *_input2;
-    ICLTensor       *_output;
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLWIDTHCONCATENATE_2TENSORS_KERNEL_H */

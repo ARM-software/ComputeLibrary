@@ -1,4 +1,4 @@
-# Copyright (c) 2019 ARM Limited.
+# Copyright (c) 2019 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -36,6 +36,9 @@ EXAMPLE_BIN_NATIVE="benchmark_cl_gemm_native"
 EXAMPLE_BIN_RESHAPED_RHS_ONLY="benchmark_cl_gemm_reshaped_rhs_only"
 EXAMPLE_BIN_RESHAPED="benchmark_cl_gemm_reshaped"
 
+# Default data type
+DEFAULT_DATA_TYPE="F32"
+
 # Default output directory
 DEFAULT_OUT_DIR="out"
 
@@ -56,10 +59,7 @@ NUM_ITERATION=5
 function help_gemm_shape_file() {
   cat >&2 << EOF
 Gemm shape file:
-  Gemm shape file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
-  around each field).
-
-  Note also comments and extraneous empty lines are not permitted.
+  Gemm shape file is a headerless csv file with fields separated by commas
 
   A gemm shape is a list of 4 positive integers <M, N, K, B> describing the shapes of the two matrices (LHS and RHS)
   with:
@@ -88,10 +88,7 @@ EOF
 function help_gemm_config_file_native() {
   cat >&2 << EOF
 Gemm config file (Strategy native):
-  Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
-  around each field).
-
-  Note also comments and extraneous empty lines are not permitted.
+  Gemm config file is a headerless csv file with fields separated by commas
 
   A gemm config is a list of 3 positive integers <m0, n0, k0>, with:
   m0 - Number of rows processed by the matrix multiplication
@@ -123,18 +120,20 @@ EOF
 function help_gemm_config_file_reshaped_rhs_only() {
   cat >&2 << EOF
 Gemm config file (Strategy reshaped_rhs_only):
-  Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
-  around each field).
+  Gemm config file is a headerless csv file with fields separated by commas.
 
   Note also comments and extraneous empty lines are not permitted.
 
-  A gemm config is a list of 4 positive integers <m0, n0, k0, h0> and 2 boolean values interleave_rhs and transpose_rhs, with:
+  A gemm config is a list of 4 positive integers <m0, n0, k0, h0> and 3 boolean values:
   m0 - Number of rows processed by the matrix multiplication
   n0 - Number of columns processed by the matrix multiplication
   k0 - Number of partial accumulations performed by the matrix multiplication
   h0 - Number of horizontal blocks of size (k0xn0) stored on the same output row
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
   transpose_rhs - Transpose rhs matrix (1) / Do not transpose rhs matrix (0)
+  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0). Can only be true
+                           with certain combinations of the GEMMParams and other configs. Please refer to CLGEMMReshapeRHSMatrixKernel
+                           for more details
 
   Only the following configurations of M0, N0 and K0 are currently supported:
   M0 = 1, 2, 3, 4, 5, 6, 7, 8
@@ -143,8 +142,8 @@ Gemm config file (Strategy reshaped_rhs_only):
   H0 >= 1
 
   An example gemm config file looks like:
-  4,4,4,1,1,1
-  4,4,4,3,1,0
+  4,4,4,1,1,1,0
+  4,4,4,3,1,0,1
   ...
 
 EOF
@@ -162,12 +161,9 @@ EOF
 function help_gemm_config_file_reshaped() {
   cat >&2 << EOF
 Gemm config file (Strategy reshaped):
-  Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
-  around each field).
+  Gemm config file is a headerless csv file with fields separated by commas
 
-  Note also comments and extraneous empty lines are not permitted.
-
-  A gemm config is a list of 5 positive integers <m0, n0, k0, v0, h0> and 3 boolean values interleave_lhs, interleave_rhs and transpose_rhs, with:
+  A gemm config is a list of 5 positive integers <m0, n0, k0, v0, h0> and 4 boolean values:
   m0 - Number of rows processed by the matrix multiplication
   n0 - Number of columns processed by the matrix multiplication
   k0 - Number of partial accumulations performed by the matrix multiplication
@@ -176,6 +172,9 @@ Gemm config file (Strategy reshaped):
   interleave_lhs - Interleave lhs matrix (1) / Do not interleave lhs matrix (0)
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
   transpose_rhs - Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do transpose lhs matrix (0)
+  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0). Can only be true
+                           with certain combinations of the GEMMParams and other configs. Please refer to CLGEMMReshapeRHSMatrixKernel
+                           for more details
 
   If rhs matrix is transposed only the following configurations are currently supported:
   M0 = 2, 3, 4, 5, 6, 7, 8
@@ -192,8 +191,8 @@ Gemm config file (Strategy reshaped):
   H0 >= 1
 
   An example gemm config file looks like:
-  4,4,4,1,3,1,1,1
-  4,4,4,3,3,1,1,0
+  4,4,4,1,3,1,1,1,0
+  4,4,4,3,3,1,1,0,1
   ...
 
 EOF
@@ -213,7 +212,7 @@ function usage() {
 Run gemm examples of a selected strategy, over provided tunable configurationsa and gemm shapes.
 Save the benchmark results to json files in an output directory.
 
-Usage: ${CMD} [-h] -s <strategy> -e <example_binary_dir> -g <gemm_shape_file> -c <gemm_config_file> [-o <out_dir>]
+Usage: ${CMD} [-h] -s <strategy> -e <example_binary_dir> -g <gemm_shape_file> -c <gemm_config_file> [-d <data_type>] [-o <out_dir>]
 
 Options:
         -h
@@ -232,6 +231,15 @@ Options:
 
         -c <gemm_config_file>
         Path to gemm config csv file
+
+        -d <data_type>
+        Data type option with which to run benchmark examples
+        Default: ${DEFAULT_DATA_TYPE}
+        Supported options:
+        Strategy            :    Data Types
+        Native              :    F32
+        Reshaped            :    F16, F32
+        Reshaped RHS Only   :    F16, F32
 
         -o <out_dir>
         Path to output directory that holds output json files
@@ -333,8 +341,11 @@ function run() {
   local total_num_experiment
   local num_params
   local num_configs
-  num_params=$( wc -l ${GEMM_SHAPES_FILE} | cut -d " " -f 1)
-  num_configs=$( wc -l ${GEMM_CONFIGS_FILE} | cut -d " " -f 1 )
+  local match_expression_shape="^([^,]*,){3}[^,]*$"
+  local match_expression_config="^(\s*[0-9]+\s*,)+\s*[0-9]\s*$"
+  # Don't count empty lines and lines starting with # (comments)
+  num_params=$( grep -E "$match_expression_shape" "${GEMM_SHAPES_FILE}" | wc -l  | cut -d " " -f 1)
+  num_configs=$( grep -E "$match_expression_config" "${GEMM_CONFIGS_FILE}" | wc -l  | cut -d " " -f 1)
   (( total_num_experiment=${num_params} * ${num_configs} ))
   # Time elapsed since the beginning in seconds
   local time_elapsed_s
@@ -346,19 +357,22 @@ function run() {
   do
     while read gemm_config
     do
-      echo "Running..." 1>&2
-      example_args="${gemm_shape},${gemm_config}"
-      # Run experiment
-      ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${expr_count}.${OUT_EXTENSION} --instruments=OPENCL_TIMER_MS
-      # Print progress
-      print_progress ${expr_count} ${total_num_experiment}
-      # Print time statistics
-      time_elapsed_s=$SECONDS
-      echo "Time elapsed since beginning: $(( $time_elapsed_s / 60 ))m $(( $time_elapsed_s % 60 ))s" 1>&2
-      (( time_est_s=(${total_num_experiment} - ${expr_count}) * ${time_elapsed_s} / ${expr_count} ))
-      echo "Time estimated to finish: $(( $time_est_s / 60 ))m $(( $time_est_s % 60 ))s" 1>&2
-      (( expr_count++ ))
-      echo "Done." 1>&2
+      # Ignore empty lines and lines starting with # (comments)
+      if echo "$gemm_shape" | grep -Eq "$match_expression_shape" && echo "$gemm_config" | grep -Eq "$match_expression_config";then
+        echo "Running..." 1>&2
+        example_args="${gemm_shape},${gemm_config},--type=${DATA_TYPE}"
+        # Run experiment
+        ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${expr_count}.${OUT_EXTENSION} --instruments=OPENCL_TIMER_MS
+        # Print progress
+        print_progress ${expr_count} ${total_num_experiment}
+        # Print time statistics
+        time_elapsed_s=$SECONDS
+        echo "Time elapsed since beginning: $(( $time_elapsed_s / 60 ))m $(( $time_elapsed_s % 60 ))s" 1>&2
+        (( time_est_s=(${total_num_experiment} - ${expr_count}) * ${time_elapsed_s} / ${expr_count} ))
+        echo "Time estimated to finish: $(( $time_est_s / 60 ))m $(( $time_est_s % 60 ))s" 1>&2
+        (( expr_count++ ))
+        echo "Done." 1>&2
+      fi
     done < "${GEMM_CONFIGS_FILE}"
   done < "${GEMM_SHAPES_FILE}"
   echo "Finished running all configs for ${example_bin}" 1>&2
@@ -405,6 +419,8 @@ GEMM_SHAPES_FILE=""
 # Path to gemm configs file
 GEMM_CONFIGS_FILE=""
 STRATEGY_OPTION=""
+# Data type to use
+DATA_TYPE=${DEFAULT_DATA_TYPE}
 # Path to output directory
 OUT_DIR=${DEFAULT_OUT_DIR}
 # Output benchmark result file extension
@@ -413,13 +429,14 @@ OUT_EXTENSION="gemmtuner_benchmark"
 HELP=false
 
 # Obtain options
-while getopts "hs:e:g:c:o:" opt; do
+while getopts "hs:e:g:c:d:o:" opt; do
   case "$opt" in
     h) HELP=true ;;
     s) STRATEGY_OPTION=$(to_lower "${OPTARG}");;
     e) EXAMPLE_BIN_DIR="${OPTARG}";;
     g) GEMM_SHAPES_FILE="${OPTARG}";;
     c) GEMM_CONFIGS_FILE="${OPTARG}";;
+    d) DATA_TYPE="${OPTARG}";;
     o) OUT_DIR="${OPTARG}";;
   esac
 done
@@ -459,7 +476,9 @@ arr_contains "${STRATEGY_OPTION}" "${ALL_STRATEGY_OPTIONS[@]}" ||
   error_msg "Output directory ${OUT_DIR} already exists!"
 
 # Make output directory
-mkdir ${OUT_DIR}
+echo "Making output directory ${OUT_DIR}" 1>&2
+mkdir -p ${OUT_DIR} || error_msg "Failed to make output directory ${OUT_DIR}"
+date +%s > ${OUT_DIR}/start_time_unix_seconds
 
 # Run selected strategy with all configurations
 # Restart the built-in timer
@@ -467,4 +486,6 @@ SECONDS=0
 [ "${STRATEGY_OPTION}" == "native" ] && run $EXAMPLE_BIN_NATIVE
 [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] && run $EXAMPLE_BIN_RESHAPED_RHS_ONLY
 [ "${STRATEGY_OPTION}" == "reshaped" ] && run $EXAMPLE_BIN_RESHAPED
+
+date +%s > ${OUT_DIR}/end_time_unix_seconds
 # Main: Main script }}}

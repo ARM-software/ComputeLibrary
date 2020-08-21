@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/ceq.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/cge.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/cgt.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/cle.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/clt.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/combine.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/cvt.h"
@@ -58,6 +59,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/pmax.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pmin.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pow.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/qmov.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/qmovun.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/reinterpret.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/rev64.h"

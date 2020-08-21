@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,20 @@ namespace graph
 {
 namespace backends
 {
+/** Collection of CL element-wise functions */
+struct CLEltwiseLayerFunctions
+{
+    using ArithmeticAddition      = CLArithmeticAddition;
+    using ArithmeticSubtraction   = CLArithmeticSubtraction;
+    using PixelWiseMultiplication = CLPixelWiseMultiplication;
+};
+
+/** Collection of CL unary element-wise functions */
+struct CLUnaryEltwiseLayerFunctions
+{
+    using ExpLayer = CLExpLayer;
+};
+
 Status CLNodeValidator::validate(INode *node)
 {
     if(node == nullptr)
@@ -91,6 +105,10 @@ Status CLNodeValidator::validate(INode *node)
             return detail::validate_upsample_layer<CLUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
         case NodeType::YOLOLayer:
             return detail::validate_yolo_layer<CLYOLOLayer>(*polymorphic_downcast<YOLOLayerNode *>(node));
+        case NodeType::EltwiseLayer:
+            return detail::validate_eltwise_Layer<CLEltwiseLayerFunctions>(*polymorphic_downcast<EltwiseLayerNode *>(node));
+        case NodeType::UnaryEltwiseLayer:
+            return detail::validate_unary_eltwise_layer<CLUnaryEltwiseLayerFunctions>(*polymorphic_downcast<UnaryEltwiseLayerNode *>(node));
         default:
             return Status{};
     }

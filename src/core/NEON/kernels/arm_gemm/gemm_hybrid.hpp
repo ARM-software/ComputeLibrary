@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,18 +23,15 @@
  */
 #pragma once
 
-#include <assert.h>
-
 #include <algorithm>
+#include <cassert>
 
 #include "arm_gemm.hpp"
 #include "bias_adder.hpp"
-#include "utils.hpp"
-
-#include "arm_compute/core/NEON/kernels/arm_gemm/ndrange.hpp"
-
-#include "mergeresults.hpp"
+#include "ndrange.hpp"
+#include "performance_parameters.hpp"
 #include "transform.hpp"
+#include "utils.hpp"
 
 #ifdef CYCLE_PROFILING
 #include "profiler.hpp"
@@ -58,8 +55,6 @@ class GemmHybrid : public GemmCommon<To, Tr> {
     const unsigned int _nbatches;
     const unsigned int _nmulti;
 
-    const bool _trB;
-
     const Activation _act;
 
     /* Blocking info */
@@ -73,8 +68,8 @@ class GemmHybrid : public GemmCommon<To, Tr> {
     const NDRange<4> _window_range;
 
     static unsigned int compute_k_block(const GemmArgs &args) {
-        // Some kernels don't support append mode - these can't do K blocking at all.
-        if (!strategy::supports_append()) {
+        // Some kernels don't support accumulate mode - these can't do K blocking at all.
+        if (!strategy::supports_accumulate()) {
             return args._Ksize;
         }
 
@@ -136,7 +131,7 @@ public:
     /* Constructor */
     GemmHybrid(const GemmArgs &args)
               : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
-                _nbatches(args._nbatches), _nmulti(args._nmulti), _trB(args._trB),
+                _nbatches(args._nbatches), _nmulti(args._nmulti),
                 _act(args._act),
                 _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
@@ -144,7 +139,7 @@ public:
 
     // Interface implementation - Compulsory functions
     ndrange_t get_window_size() const override {
-        return { _window_range.total_size(), 1u, 1u, 1u, 1u, 1u };
+        return { _window_range.total_size() };
     }
 
     // This kernel can always be dynamically scheduled.
@@ -152,8 +147,8 @@ public:
         return true;
     }
 
-    void execute_1d(unsigned int start, unsigned int end, int threadid) {
-        UNUSED(threadid);
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -174,7 +169,7 @@ public:
             const bool first_pass = (k0 == 0);
             const bool last_pass = (kmax == _Ksize);
 
-            auto p = _window_range.iterator(start, end);
+            auto p = _window_range.iterator(work_range.get_position(0), work_range.get_position_end(0));
 
             if (p.done()) {
                 return;
@@ -194,7 +189,7 @@ public:
                                      (n0 * kern_k);
 
 #ifdef CYCLE_PROFILING
-                auto p = prof.ScopedProfiler(PROFILE_KERNEL, (m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
+                auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)(m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
 #endif
 
                 strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda) + k0, this->_lda,
@@ -213,17 +208,6 @@ public:
 
             } while (p.next_dim1());
         }
-    }
-
-    // Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
-
-        const auto start = work_range.get_position(0);
-        const auto size  = work_range.get_size(0);
-        const auto stop  = start + size;
-
-        execute_1d(start, stop, threadid);
     }
 
     // Interface implementation - pretransposed
@@ -255,7 +239,7 @@ public:
                     const unsigned int size = roundup(xmax-x0, strategy::out_width()) * k_size;
 
                     strat.transforms.PrepareB( buffer, B + (multi * B_multi_stride), ldb,
-                                               x0, xmax, k0, kmax, _trB);
+                                               x0, xmax, k0, kmax);
 
                     buffer += size;
                 }
@@ -265,6 +249,28 @@ public:
 
     void set_pretransposed_B_data(void *in_buffer) override {
         _B_transposed = reinterpret_cast<Toi *>(in_buffer);
+    }
+
+    // Estimate cycles for given problem given provided parameters
+    static uint64_t estimate_cycles(const GemmArgs &args, const PerformanceParameters &params) {
+        // Note: Current hybrid kernels don't actually round up height (they
+        // have paths for each possible height).  Might need to make this
+        // configurable in future.
+        uint64_t total_macs = static_cast<uint64_t>(args._nbatches) * args._nmulti * args._Msize * roundup(args._Nsize, strategy::out_width()) * roundup(args._Ksize, strategy::k_unroll());
+
+        float mac_cycles = static_cast<float>(total_macs) / params.kernel_macs_cycle;
+
+        // TODO: A bit of a kludge here: current hybrid kernels incur extra
+        // overhead where the width is not a multiple of kernel width.  It's
+        // most noticable where the overall width is quite low, so add 15%
+        // penalty for such widths.
+        if ((args._Nsize < strategy::out_width()) || (args._Nsize > strategy::out_width() && args._Nsize < 2*strategy::out_width())) {
+            mac_cycles *= 1.15f;
+        }
+
+        uint64_t total_cycles = mac_cycles;
+
+        return total_cycles;
     }
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,10 +37,18 @@ namespace wrapper
         return prefix##_##postfix(a);                \
     }
 
+#define VINVSQRT_IMPL_INT(stype, vtype, prefix, postfix) \
+    inline vtype vinvsqrt(const vtype &a)                \
+    {                                                    \
+        ARM_COMPUTE_UNUSED(a);                           \
+        ARM_COMPUTE_ERROR("Not supported");              \
+    }
+
 VINVSQRT_IMPL(float, float32x2_t, vinvsqrt, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 VINVSQRT_IMPL(float16_t, float16x4_t, vinvsqrt, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VINVSQRT_IMPL_INT(int, int32x4_t, vinvsqrt, s32)
 
 VINVSQRT_IMPL(float, float32x4_t, vinvsqrtq, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -168,7 +168,7 @@ void NEGaussianPyramidOrb::configure(const ITensor *input, IPyramid *pyramid, Bo
             _gaus5x5[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode, constant_border_value);
 
             /* Configure scale */
-            _scale_nearest[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED);
+            _scale_nearest[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), ScaleKernelInfo{ InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED });
         }
 
         _tmp.allocate();

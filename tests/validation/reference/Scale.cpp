@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,9 @@
 #include "Scale.h"
 
 #include "Utils.h"
+#include "arm_compute/core/utils/misc/Rounding.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+#include "src/core/utils/ScaleUtils.h"
 
 namespace arm_compute
 {
@@ -42,17 +44,13 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
     // Add 1 if ceil_policy_scale is true
     const size_t round_value = ceil_policy_scale ? 1U : 0U;
     TensorShape  shape_scaled(in.shape());
-    shape_scaled.set(0, (in.shape()[0] + round_value) * scale_x);
-    shape_scaled.set(1, (in.shape()[1] + round_value) * scale_y);
+    shape_scaled.set(0, (in.shape()[0] + round_value) * scale_x, /* apply_dim_correction = */ false);
+    shape_scaled.set(1, (in.shape()[1] + round_value) * scale_y, /* apply_dim_correction = */ false);
     SimpleTensor<T> out(shape_scaled, in.data_type());
 
-    const auto needs_align_corners = policy == InterpolationPolicy::BILINEAR
-                                     && sampling_policy == SamplingPolicy::TOP_LEFT
-                                     && align_corners;
-
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = arm_compute::calculate_resize_ratio(in.shape()[0], out.shape()[0], needs_align_corners);
-    const auto hr = arm_compute::calculate_resize_ratio(in.shape()[1], out.shape()[1], needs_align_corners);
+    const auto wr = arm_compute::scale_utils::calculate_resize_ratio(in.shape()[0], out.shape()[0], align_corners);
+    const auto hr = arm_compute::scale_utils::calculate_resize_ratio(in.shape()[1], out.shape()[1], align_corners);
 
     const auto width  = static_cast<int>(in.shape().x());
     const auto height = static_cast<int>(in.shape().y());
@@ -82,8 +80,8 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
                 switch(sampling_policy)
                 {
                     case SamplingPolicy::TOP_LEFT:
-                        x_src = std::floor(idx * wr);
-                        y_src = std::floor(idy * hr);
+                        x_src = align_corners ? arm_compute::utils::rounding::round_half_away_from_zero(idx * wr) : std::floor(idx * wr);
+                        y_src = align_corners ? arm_compute::utils::rounding::round_half_away_from_zero(idy * hr) : std::floor(idy * hr);
                         break;
                     case SamplingPolicy::CENTER:
                         //Calculate the source coords without -0.5f is equivalent to round the x_scr/y_src coords

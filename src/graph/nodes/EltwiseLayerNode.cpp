@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,11 @@ ActivationLayerInfo EltwiseLayerNode::fused_activation() const
     return descriptor.fused_activation;
 }
 
+QuantizationInfo EltwiseLayerNode::output_quant_info() const
+{
+    return descriptor.out_quant_info;
+}
+
 void EltwiseLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)
 {
     descriptor.fused_activation = fused_activation;
@@ -100,5 +105,62 @@ void EltwiseLayerNode::accept(INodeVisitor &v)
 {
     v.visit(*this);
 }
+
+UnaryEltwiseLayerNode::UnaryEltwiseLayerNode(const descriptors::UnaryEltwiseLayerDescriptor &descriptor)
+    : descriptor(descriptor)
+{
+    _input_edges.resize(1, EmptyEdgeID);
+    _outputs.resize(1, NullTensorID);
+}
+
+descriptors::UnaryEltwiseLayerDescriptor UnaryEltwiseLayerNode::eltwise_descriptor() const
+{
+    return descriptor;
+}
+
+void UnaryEltwiseLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)
+{
+    descriptor.fused_activation = fused_activation;
+}
+
+bool UnaryEltwiseLayerNode::forward_descriptors()
+{
+    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    {
+        Tensor *dst = output(0);
+        ARM_COMPUTE_ERROR_ON(dst == nullptr);
+        dst->desc() = configure_output(0);
+        return true;
+    }
+    return false;
+}
+
+TensorDescriptor UnaryEltwiseLayerNode::configure_output(size_t idx) const
+{
+    ARM_COMPUTE_UNUSED(idx);
+
+    const Tensor *src = input(0);
+    ARM_COMPUTE_ERROR_ON(src == nullptr);
+
+    auto output_info = src->desc();
+
+    if(!descriptor.out_quant_info.empty())
+    {
+        output_info.set_quantization_info(descriptor.out_quant_info);
+    }
+
+    return output_info;
+}
+
+NodeType UnaryEltwiseLayerNode::type() const
+{
+    return NodeType::UnaryEltwiseLayer;
+}
+
+void UnaryEltwiseLayerNode::accept(INodeVisitor &v)
+{
+    v.visit(*this);
+}
+
 } // namespace graph
 } // namespace arm_compute

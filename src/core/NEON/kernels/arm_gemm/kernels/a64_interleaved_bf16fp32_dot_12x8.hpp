@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@ namespace arm_gemm {
 
 // Actual kernel implementations
 void a64_interleaved_bf16fp32_dot_12x8(const bfloat16 *, const bfloat16 *, float *, int, int, int);
+void a64_interleaved_bf16fp32_dot_12x8_x1(const bfloat16 *, const bfloat16 *, float *, int, int, int);
 
 class interleaved_bf16fp32_dot_12x8 {
 public:
@@ -61,7 +62,12 @@ public:
 
     kern_type kernel=a64_interleaved_bf16fp32_dot_12x8;
 
-    interleaved_bf16fp32_dot_12x8(const CPUInfo *ci) { UNUSED(ci); }
+    interleaved_bf16fp32_dot_12x8(const CPUInfo *ci)
+    {
+        if (ci->get_cpu_model() == CPUModel::X1) {
+            kernel = a64_interleaved_bf16fp32_dot_12x8_x1;
+        }
+    }
 };
 
 } // namespace arm_gemm

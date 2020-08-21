@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2018 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@ namespace arm_gemm {
 // Load the actual kernel
 void a64_gemm_s8_12x8(const int8_t *, const int8_t *, int32_t *, int, int, int);
 void a64_gemm_s8_12x8_a55r1(const int8_t *, const int8_t *, int32_t *, int, int, int);
+void a64_gemm_s8_12x8_x1(const int8_t *, const int8_t *, int32_t *, int, int, int);
 
 class gemm_s8_12x8 {
 public:
@@ -65,6 +66,8 @@ public:
 
         if (mod == CPUModel::A55r1) {
             kernel = a64_gemm_s8_12x8_a55r1;
+        } else if (mod == CPUModel::X1) {
+            kernel = a64_gemm_s8_12x8_x1;
         }
     }
 };

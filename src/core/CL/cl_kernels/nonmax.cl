@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,13 @@
 
 /** This function performs Non maxima suppression over a 3x3 window on a given image.
  *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: U8/F32
  * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: F32
+ * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: same as @p scr_ptr
  * @param[in]  dst_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination image in Y dimension (in bytes)

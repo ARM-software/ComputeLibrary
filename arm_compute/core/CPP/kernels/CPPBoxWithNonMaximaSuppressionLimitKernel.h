@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_CPPBOXWITHNONMAXIMASUPPRESSIONLIMITKERNEL_H
 #define ARM_COMPUTE_CPPBOXWITHNONMAXIMASUPPRESSIONLIMITKERNEL_H
 
-#include "arm_compute/core/IArray.h"
-#include "arm_compute/core/IHOG.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 
@@ -62,7 +60,7 @@ public:
      * @param[out] classes          The classes output tensor of size [N]. Data types supported: Same as @p scores_in
      * @param[out] batch_splits_out (Optional) The batch splits output tensor [batch_size]. Data types supported: Same as @p scores_in
      * @param[out] keeps            (Optional) The keeps output tensor of size [N]. Data types supported: Same as@p scores_in
-     * @param[out] keeps_size       (Optional) Number of filtered indices per class tensor of size [num_classes]. Data types supported: Same as @p scores_in
+     * @param[out] keeps_size       (Optional) Number of filtered indices per class tensor of size [num_classes]. Data types supported: U32
      * @param[in]  info             (Optional) BoxNMSLimitInfo information.
      */
     void configure(const ITensor *scores_in, const ITensor *boxes_in, const ITensor *batch_splits_in, ITensor *scores_out, ITensor *boxes_out, ITensor *classes,

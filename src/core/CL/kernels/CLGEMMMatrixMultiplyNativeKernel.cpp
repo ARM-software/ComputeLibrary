@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,7 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
                                     && (!gemm_info.broadcast_bias),
                                     "Bias addition only supported with broadcast mode in case the input or output has to be reinterpreted as 3D");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.fp_mixed_precision, "Mixed precision not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image, "Export to CLImage not supported for GEMM native");
 
     const unsigned int m = gemm_info.m;
     const unsigned int n = gemm_info.n;
@@ -154,33 +155,26 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     num_elems_processed_per_iteration_x = rhs_info.n0;
     num_elems_processed_per_iteration_y = lhs_info.m0;
 
-    // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
-    // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-    const unsigned int m          = reinterpret_output_as_3d ? gemm_info.m : output->dimension(1);
-    const unsigned int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
-
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
     AccessWindowStatic input0_access(input0, 0, 0,
                                      input0->dimension(0),
-                                     input0->dimension(1) + bottom_pad);
+                                     input0->dimension(1));
     AccessWindowStatic input1_access(input1, 0, 0,
                                      ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
                                      input1->dimension(1));
     AccessWindowStatic output_access(output, 0, 0,
-                                     ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
-                                     output->dimension(1) + bottom_pad);
+                                     output->dimension(0),
+                                     output->dimension(1));
 
     if(input2 != nullptr)
     {
         const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
 
-        const int bias_processed_per_iteration_y = gemm_info.broadcast_bias ? 1 : num_elems_processed_per_iteration_y;
-
         AccessWindowStatic input2_access(input2, 0, 0,
                                          ceil_to_multiple(input2->dimension(0), bias_processed_per_iteration_x),
-                                         ceil_to_multiple(input2->dimension(1), bias_processed_per_iteration_y));
+                                         input2->dimension(1));
 
         window_changed = update_window_and_padding(win, input0_access, input1_access, input2_access) || // window used by the execute_window_loop
                          update_window_and_padding(win_out, output_access);                             // window used to update the padding requirements of output tensor
@@ -263,6 +257,14 @@ void CLGEMMMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile
     const unsigned int h_gemm_3d = _reinterpret_output_as_3d ? output->info()->dimension(1) : input0->info()->dimension(1);
     const unsigned int d_gemm_3d = _reinterpret_output_as_3d ? output->info()->dimension(2) : input0->info()->dimension(2);
 
+    // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
+    const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
+    const unsigned int partial_store_n0 = gemm_info.n % rhs_info.n0;
+
+    // Shrink M0 to be always <= M (internal_m) to prevent out-of-bounds reads.
+    // NOTE: This might have implications on heuristics and performance
+    const unsigned int internal_m0 = std::min(internal_m, lhs_info.m0);
+
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
@@ -279,9 +281,11 @@ void CLGEMMMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile
     build_opts.add_option("-DM=" + support::cpp11::to_string(internal_m));
     build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n));
     build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k));
-    build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
+    build_opts.add_option("-DM0=" + support::cpp11::to_string(internal_m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
+    build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
+    build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
     build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(gemm_info.activation_info.activation())));
     build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.a()));
     build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.b()));

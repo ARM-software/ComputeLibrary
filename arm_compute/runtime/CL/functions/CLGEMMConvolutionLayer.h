@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,8 +98,8 @@ class CLConvolutionLayerReshapeWeightsTransform : public ITransformWeights
 public:
     /** Configures the @ref CLConvolutionLayerReshapeWeights function
      *
-     * @param[in] input      Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] biases     Biases tensor. Data type supported: Same as @p input.
+     * @param[in] input      Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
+     * @param[in] biases     Biases tensor. Data type supported: same as @p input, S32 if @p input is quantized.
      * @param[in] num_groups Number of groups when performing a grouped convolution.
      */
     void configure(const ICLTensor *input, const ICLTensor *biases, unsigned int num_groups)
@@ -109,8 +109,8 @@ public:
     /** Configures the @ref CLConvolutionLayerReshapeWeights function
      *
      * @param[in] compile_context The compile context to be used.
-     * @param[in] input           Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] biases          Biases tensor. Data type supported: Same as @p input.
+     * @param[in] input           Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
+     * @param[in] biases          Biases tensor. Data type supported: same as @p input, S32 if @p input is quantized.
      * @param[in] num_groups      Number of groups when performing a grouped convolution.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *biases, unsigned int num_groups)
@@ -183,11 +183,11 @@ public:
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QASYMM8/F16/F32.
+     *                          Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                          Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                          Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8 or QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8_SIGNED.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
+     *                          Data type supported: Should match @p input data type, except for input of quantized type where biases should be of S32 type.
      * @param[out] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                          Data types supported: Same as @p input.
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
@@ -204,11 +204,11 @@ public:
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                             while every optional dimension from 4 and above represent a batch of inputs.
-     *                             Data types supported: QASYMM8/F16/F32.
+     *                             Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights         Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8 or QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8_SIGNED.
      * @param[in]  biases          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                             Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
+     *                             Data type supported: Should match @p input data type, except for input of quantized type where biases should be of S32 type.
      * @param[out] output          Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                             Data types supported: Same as @p input.
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
@@ -225,11 +225,11 @@ public:
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QASYMM8/F16/F32.
+     *                          Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                          Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                          Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8 or QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8_SIGNED.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
+     *                          Data type supported: Should match @p input data type, except for input of quantized type where biases should be of S32 type.
      * @param[out] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                          Data types supported: Same as @p input.
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
@@ -252,12 +252,12 @@ private:
     /** Configures the appropriate matrix multiply routine
      *
      * @param[in]      compile_context       The compile context to be used.
-     * @param[in]      input                 Input tensor. Data types supported: QASYMM8/F16/F32.
-     * @param[in]      weights               Weights tensor. Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     * @param[in]      input                 Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]      weights               Weights tensor. Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8 or
+     *                                       QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8_SIGNED.
      * @param[in]      biases                Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                                       Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
-     * @param[in, out] output                Output tensor. Data types supported: Same as @p input,
-     *                                       except for input of QASYMM8 type where output should be of S32 type.
+     *                                       Data type supported: Should match @p input data type, except for input of quantized type where biases should be of S32 type.
+     * @param[in, out] output                Output tensor. Data types supported: same as @p input.
      * @param[in]      gemmlowp_output_stage GEMMLowp output stage info
      * @param[in]      gemm_3d_depth         Depth of GEMM 3D
      * @param[in]      act_info              Activation to apply after the matrix multiplication
@@ -267,12 +267,12 @@ private:
                       int gemm_3d_depth, const ActivationLayerInfo &act_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
      *
-     * @param[in] input                 Input tensor info. Data types supported: QASYMM8/F16/F32.
-     * @param[in] weights               Weights tensor info. Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     * @param[in] input                 Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in] weights               Weights tensor info. Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8 or
+     *                                  QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8_SIGNED.
      * @param[in] biases                Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                                  Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
-     * @param[in] output                Output tensor info. Data types supported: Same as @p input,
-     *                                  except for input of QASYMM8 type where output should be of S32 type.
+     *                                  Data type supported: Should match @p input data type, except for input of quantized type where biases should be of S32 type.
+     * @param[in] output                Output tensor info. Data types supported: same as @p input.
      * @param[in] gemmlowp_output_stage GEMMLowp output stage info
      * @param[in] gemm_3d_depth         Depth of GEMM 3D
      * @param[in] skip_im2col           Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout.

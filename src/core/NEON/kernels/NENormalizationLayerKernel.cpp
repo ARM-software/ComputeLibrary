@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,8 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *input_squared, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
@@ -60,56 +60,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *input_squ
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *input_squared, ITensorInfo *output, const NormalizationLayerInfo &norm_info)
-{
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, *input->clone());
-
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-
-    const unsigned int norm_idx              = get_normalization_dimension_index(input->data_layout(), norm_info);
-    const bool         is_norm_accross_width = norm_idx == 0;
-
-    const unsigned int border_width = is_norm_accross_width ? num_elems_processed_per_iteration - 1 : 0;
-    const BorderSize   border_size  = BorderSize(0, border_width);
-
-    // Configure window
-    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    bool   window_changed = false;
-
-    if(is_norm_accross_width)
-    {
-        AccessWindowStatic input_access(input, -border_size.left, 0, input->dimension(0) + border_size.right, 0);
-        AccessWindowStatic input_squared_access(input_squared, -border_size.left, 0, input->dimension(0) + border_size.right, 0);
-        window_changed = window_changed || update_window_and_padding(win, input_access, input_squared_access);
-    }
-    else
-    {
-        AccessWindowHorizontal input_access(input, -border_size.left, num_elems_processed_per_iteration);
-        AccessWindowHorizontal input_squared_access(input_squared, -border_size.left, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, input_access, input_squared_access);
-    }
-
-    if(output->total_size() != 0)
-    {
-        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, output_access);
-        output_access.set_valid_region(win, input->valid_region());
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 NENormalizationLayerKernel::NENormalizationLayerKernel()
-    : _func(nullptr), _input(nullptr), _input_squared(nullptr), _output(nullptr), _norm_info(NormType::IN_MAP_1D), _border_size()
+    : _func(nullptr), _input(nullptr), _input_squared(nullptr), _output(nullptr), _norm_info(NormType::IN_MAP_1D)
 {
-}
-
-BorderSize NENormalizationLayerKernel::border_size() const
-{
-    return _border_size;
 }
 
 void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *input_squared, ITensor *output, NormalizationLayerInfo norm_info)
@@ -121,17 +76,12 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), input_squared->info(), output->info(), norm_info));
 
-    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
-
-    const unsigned int norm_idx              = get_normalization_dimension_index(input->info()->data_layout(), norm_info);
-    const bool         is_norm_accross_width = norm_idx == 0;
-    const unsigned int border_width          = is_norm_accross_width ? num_elems_processed_per_iteration - 1 : 0;
+    const unsigned int norm_idx = get_normalization_dimension_index(input->info()->data_layout(), norm_info);
 
     _input         = input;
     _input_squared = input_squared;
     _output        = output;
     _norm_info     = norm_info;
-    _border_size   = BorderSize(0, border_width);
 
     switch(_input->info()->data_type())
     {
@@ -210,9 +160,11 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), input_squared->info(), output->info(), norm_info);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Window      win = calculate_max_window(*input->info(), Steps());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    INEKernel::configure(win);
 }
 
 template <typename T, unsigned int S, unsigned int dim, bool do_2D_norm>
@@ -221,15 +173,23 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
     /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
-    Iterator input(_input, window);
-    Iterator input_squared(_input_squared, window);
-    Iterator output(_output, window);
+    Window win(window);
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    const int dim_y                = _input->info()->data_layout() == DataLayout::NCHW ? 1 : 2;
-    const int radius               = _norm_info.norm_size() / 2;
-    const int input_squared_stride = _input_squared->info()->strides_in_bytes()[dim];
-    // We account padding across X only and we iterate over rows
-    const int min_left   = (dim == 2) ? 0 : -static_cast<int>(border_size().left);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int  window_step_x  = S;
+
+    Iterator input(_input, win);
+    Iterator input_squared(_input_squared, win);
+    Iterator output(_output, win);
+
+    const int dim_y                      = _input->info()->data_layout() == DataLayout::NCHW ? 1 : 2;
+    const int radius                     = _norm_info.norm_size() / 2;
+    const int input_squared_stride_x     = _input_squared->info()->strides_in_bytes()[0];
+    const int input_squared_stride_slice = _input_squared->info()->strides_in_bytes()[dim];
+    const int input_squared_stride_row   = _input_squared->info()->strides_in_bytes()[dim_y];
+
     const int max_right  = _input->info()->dimension(dim) - 1;
     const int max_bottom = _input->info()->dimension(dim_y) - 1;
 
@@ -237,33 +197,80 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
     const auto beta_vec  = wrapper::vdup_n(static_cast<T>(_norm_info.beta()), ExactTagType{});
     const auto kappa_vec = wrapper::vdup_n(static_cast<T>(_norm_info.kappa()), ExactTagType{});
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    auto sequential_normalization = [&](const int x, const Coordinates & id, const int current_row, const int first_row, const int last_row, const T * input_ptr, const uint8_t *input_squared_start_ptr,
+                                        T * output_ptr)
     {
-        // Get range to normalize
-        const int current_row   = do_2D_norm ? id[dim_y] : 0;
-        const int current_slice = id[dim];
-        const int first_row     = do_2D_norm ? std::max(current_row - radius, 0) : 0;
-        const int last_row      = do_2D_norm ? std::min(current_row + radius, max_bottom) : 0;
-        const int first_slice   = std::max(current_slice - radius, min_left);
+        const int current_slice = dim == 0 ? x : id[dim];
+        const int first_slice   = std::max(current_slice - radius, 0);
         const int last_slice    = std::min(current_slice + radius, max_right);
 
+        const uint8_t *const input_squared_x_ptr = input_squared_start_ptr + x * input_squared_stride_x;
         // Accumulate 2D In-Map values
-        auto accu = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
-        for(int j = first_row; j <= last_row; j++)
+        auto accu = static_cast<T>(0.f);
+        for(int j = first_row; j <= last_row; ++j)
         {
             // Compute row displacement
-            const int            row               = (j - current_row) * _input_squared->info()->strides_in_bytes()[dim_y];
-            const uint8_t *const input_squared_ptr = input_squared.ptr() + row - (current_slice * input_squared_stride);
+            const uint8_t *const input_squared_ptr = input_squared_x_ptr + (j - current_row) * input_squared_stride_row;
             for(int i = first_slice; i <= last_slice; ++i)
             {
-                accu = wrapper::vadd(accu, wrapper::vloadq(reinterpret_cast<const T *>(input_squared_ptr + i * input_squared_stride)));
+                accu += *reinterpret_cast<const T *>(input_squared_ptr + (i - current_slice) * input_squared_stride_slice);
             }
         }
 
         // Normalize
-        const auto normalized       = wrapper::vpow(wrapper::vmla(kappa_vec, coeff_vec, accu), beta_vec);
-        const auto normalized_pixel = wrapper::vmul(wrapper::vloadq(reinterpret_cast<const T *>(input.ptr())), wrapper::vinv(normalized));
-        wrapper::vstore(reinterpret_cast<T *>(output.ptr()), normalized_pixel);
+        const auto normalized       = std::pow(accu * static_cast<T>(_norm_info.scale_coeff()) + static_cast<T>(_norm_info.kappa()), _norm_info.beta());
+        const auto normalized_pixel = (*(input_ptr + x)) / normalized;
+        *(output_ptr + x)           = normalized_pixel;
+    };
+
+    execute_window_loop(win, [&](const Coordinates & id)
+    {
+        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
+        auto       output_ptr = reinterpret_cast<T *>(output.ptr());
+
+        // Get range to normalize
+        const int current_row = do_2D_norm ? id[dim_y] : 0;
+        const int first_row   = do_2D_norm ? std::max(current_row - radius, 0) : 0;
+        const int last_row    = do_2D_norm ? std::min(current_row + radius, max_bottom) : 0;
+
+        int x = window_start_x;
+        // Compute serially starting elements for the case x dimension is width
+        for(; x < radius && x < window_end_x && dim == 0; ++x)
+        {
+            sequential_normalization(x, id, current_row, first_row, last_row, input_ptr, input_squared.ptr(), output_ptr);
+        }
+
+        // Compute vectorized
+        for(; x <= window_end_x - window_step_x - radius; x += window_step_x)
+        {
+            const int current_slice = dim == 0 ? x : id[dim];
+            const int first_slice   = std::max(current_slice - radius, 0);
+            const int last_slice    = std::min(current_slice + radius, max_right);
+
+            const uint8_t *const input_squared_x_ptr = input_squared.ptr() + x * input_squared_stride_x;
+            // Accumulate 2D In-Map values
+            auto accu = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
+            for(int j = first_row; j <= last_row; ++j)
+            {
+                // Compute row displacement
+                const uint8_t *const input_squared_ptr = input_squared_x_ptr + (j - current_row) * input_squared_stride_row;
+                for(int i = first_slice; i <= last_slice; ++i)
+                {
+                    accu = wrapper::vadd(accu, wrapper::vloadq(reinterpret_cast<const T *>(input_squared_ptr + (i - current_slice) * input_squared_stride_slice)));
+                }
+            }
+
+            // Normalize
+            const auto normalized       = wrapper::vpow(wrapper::vmla(kappa_vec, coeff_vec, accu), beta_vec);
+            const auto normalized_pixel = wrapper::vmul(wrapper::vloadq(input_ptr + x), wrapper::vinv(normalized));
+            wrapper::vstore(reinterpret_cast<T *>(output_ptr + x), normalized_pixel);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            sequential_normalization(x, id, current_row, first_row, last_row, input_ptr, input_squared.ptr(), output_ptr);
+        }
     },
     input, input_squared, output);
 }
@@ -271,7 +278,6 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
 Status NENormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *input_squared, const ITensorInfo *output, const NormalizationLayerInfo norm_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, input_squared, output, norm_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), input_squared->clone().get(), output->clone().get(), norm_info).first);
 
     return Status{};
 }
@@ -286,3 +292,4 @@ void NENormalizationLayerKernel::run(const Window &window, const ThreadInfo &inf
     // Run function
     (this->*_func)(window);
 }
+} // namespace arm_compute

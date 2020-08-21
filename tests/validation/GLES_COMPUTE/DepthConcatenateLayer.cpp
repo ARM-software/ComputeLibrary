@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ TEST_SUITE(GC)
 TEST_SUITE(DepthConcatenateLayer)
 
 template <typename T>
-using GCDepthConcatenateLayerFixture = ConcatenateLayerValidationFixture<GCTensor, IGCTensor, GCAccessor, GCConcatenateLayer, T>;
+using GCDepthConcatenateLayerFixture = ConcatenateLayerValidationFixture<GCTensor, IGCTensor, GCAccessor, GCConcatenateLayer, T, false>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)

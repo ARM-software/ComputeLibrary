@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,13 +22,12 @@
  * SOFTWARE.
  */
 #include "arm_gemm.hpp"
+#include "bfloat.hpp"
 #include "gemm_common.hpp"
 #include "gemm_hybrid.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
-#include "gemm_native.hpp"
 #include "gemv_batched.hpp"
-#include "gemv_native_transposed.hpp"
 #include "gemv_pretransposed.hpp"
 
 #include "kernels/a64_interleaved_bf16fp32_dot_12x8.hpp"
@@ -37,16 +36,12 @@
 #include "kernels/a32_sgemm_8x6.hpp"
 #include "kernels/sve_interleaved_bf16fp32_dot_3VLx8.hpp"
 #include "kernels/sve_interleaved_bf16fp32_mmla_3VLx8.hpp"
-#include "kernels/sve_native_bf16fp32_dot_4VLx4.hpp"
 #include "kernels/sve_hybrid_bf16fp32_dot_4VLx4.hpp"
 #include "kernels/sve_hybrid_bf16fp32_mmla_4VLx4.hpp"
 #include "kernels/sve_hybrid_bf16fp32_mmla_6VLx2.hpp"
 #include "kernels/sve_hybrid_bf16fp32_mmla_8VLx2.hpp"
 
-#include "bfloat.hpp"
-
 namespace arm_gemm {
-
 
 static const GemmImplementation<bfloat16, float> gemm_bf16_methods[] =
 {
@@ -55,37 +50,30 @@ static const GemmImplementation<bfloat16, float> gemm_bf16_methods[] =
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_bf16fp32_mmla_6VLx2",
-    [](const GemmArgs &args) { return (args._Ksize>=8 && !args._trA && args._pretransposed_hint); },
+    [](const GemmArgs &args) { return (args._Ksize>=8); },
     [](const GemmArgs &args) { return ((args._Msize <= 4) && (args._Nsize <= hybrid_bf16fp32_mmla_6VLx2::out_width())); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_bf16fp32_mmla_6VLx2, bfloat16, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_bf16fp32_mmla_8VLx2",
-    [](const GemmArgs &args) { return (args._Ksize>=8 && !args._trA && args._pretransposed_hint); },
+    [](const GemmArgs &args) { return (args._Ksize>=8); },
     [](const GemmArgs &args) { return (args._Msize <= 4); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_bf16fp32_mmla_8VLx2, bfloat16, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_bf16fp32_mmla_4VLx4",
-    [](const GemmArgs &args) { return (args._Ksize>=8 && !args._trA && args._pretransposed_hint); },
+    [](const GemmArgs &args) { return (args._Ksize>=8); },
     [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_bf16fp32_mmla_4VLx4, bfloat16, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_bf16fp32_dot_4VLx4",
-    [](const GemmArgs &args) { return (args._Ksize>=8 && !args._trA && args._pretransposed_hint); },
+    [](const GemmArgs &args) { return (args._Ksize>=8); },
     [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_bf16fp32_dot_4VLx4, bfloat16, float>(args); }
-},
-{ // gemm_bf16_native
-    GemmMethod::GEMM_NATIVE,
-    "native_bf16fp32_dot_4VLx4",
-    [](const GemmArgs &args) { return (args._Ksize>=8 && !args._trA && !args._trB); },
-    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)); },
-    [](const GemmArgs &args) { return new GemmNative<native_bf16fp32_dot_4VLx4, bfloat16, float>(args); }
 },
 { // gemm_bf16_interleaved
     GemmMethod::GEMM_INTERLEAVED,

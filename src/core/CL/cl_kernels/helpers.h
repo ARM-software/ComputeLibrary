@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 ARM Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -194,6 +194,49 @@
 #define VLOAD_STR(size) vload##size
 #define VLOAD(size) VLOAD_STR(size)
 
+#define PIXEL_UNIT4 1
+#define PIXEL_UNIT8 2
+#define PIXEL_UNIT16 4
+
+/** Utility macro to convert a vector size in pixel unit.
+ *
+ * @name CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT
+ *
+ * @param[in] vec_size Vector size. Only 4,8 and 16 is supported
+ *
+ * @return The pixel unit (number of pixels)
+ * @{
+ */
+#define CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT_STR(vec_size) PIXEL_UNIT##vec_size
+#define CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(vec_size) CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT_STR(vec_size)
+/** @} */ // end of group CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT
+
+#define read_image2d_floatx1(img, x_coord, y_coord) (float4)(read_imagef(img, (int2)(x_coord, y_coord)));
+#define read_image2d_floatx2(img, x_coord, y_coord) (float8)(read_imagef(img, (int2)(x_coord, y_coord)), read_imagef(img, (int2)(x_coord + 1, y_coord)));
+#define read_image2d_floatx4(img, x_coord, y_coord) (float16)(read_imagef(img, (int2)(x_coord, y_coord)), read_imagef(img, (int2)(x_coord + 1, y_coord)), read_imagef(img, (int2)(x_coord + 2, y_coord)), read_imagef(img, (int2)(x_coord + 3, y_coord)));
+
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
+#define read_image2d_halfx1(img, x_coord, y_coord) (half4)(read_imageh(img, (int2)(x_coord, y_coord)));
+#define read_image2d_halfx2(img, x_coord, y_coord) (half8)(read_imageh(img, (int2)(x_coord, y_coord)), read_imageh(img, (int2)(x_coord + 1, y_coord)));
+#define read_image2d_halfx4(img, x_coord, y_coord) (half16)(read_imageh(img, (int2)(x_coord, y_coord)), read_imageh(img, (int2)(x_coord + 1, y_coord)), read_imageh(img, (int2)(x_coord + 2, y_coord)), read_imageh(img, (int2)(x_coord + 3, y_coord)));
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
+
+/** Utility macro to read a 2D OpenCL image object.
+ *
+ * @note Coordinates are not normalized
+ *
+ * @param[in] data_type Data type
+ * @param[in] n0        Number of pixel to read. Only 1,2 and 4 is supported
+ * @param[in] img       OpenCL image object
+ * @param[in] x_coord   The x coordinate for the top-left pixel
+ * @param[in] y_coord   The y coordinate for the top-left pixel
+ *
+ * @return Pixels from the 2D OpenCL image object
+ * @{
+ */
+#define READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord) read_image2d_##data_type##x##n0(img, x_coord, y_coord)
+#define READ_IMAGE2D(data_type, n0, img, x_coord, y_coord) READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord)
+
 #define VSTORE_STR(size) vstore##size
 #define VSTORE(size) VSTORE_STR(size)
 
@@ -211,6 +254,142 @@
 
 #define vload1(OFFSET, PTR) *(OFFSET + PTR)
 #define vstore1(DATA, OFFSET, PTR) *(OFFSET + PTR) = DATA
+
+/** Extended partial vstore that correctly handles scalar values as well.
+ * Store the **lower** 0 to (n-1)th elements of the given vector while minimising the amount of vstore ops
+ * @name VSTORE_PARTIAL
+ *
+ * @note With this macro, the passed data can be both a vector and a scalar
+ * @note @p store_size needs to be <= @p size
+ * eg 1: Valid
+ * VSTORE_PARTIAL(16, 15) ...;
+ * eg 2: Invalid
+ * VSTORE_PARTIAL(4, 7) ...;
+ *
+ * @param[in] size       The width of @p DATA. Supported values: 1(scalar), 2, 3, 4, 8, 16
+ * @param[in] store_size The number of lower elements to store. Supported values: 1-16, but has to be <= @p size
+ * @{
+ */
+#define VSTORE_PARTIAL_STR(size, store_size) vstore_partial_##size##_##store_size
+#define VSTORE_PARTIAL(size, store_size) VSTORE_PARTIAL_STR(size, store_size)
+
+// Size == 1 (scalar)
+#define vstore_partial_1_1 vstore1
+// Size == 2
+#define vstore_partial_2_1 vstore_partial_1
+#define vstore_partial_2_2 vstore_partial_2
+// Size == 3
+#define vstore_partial_3_1 vstore_partial_1
+#define vstore_partial_3_2 vstore_partial_2
+#define vstore_partial_3_3 vstore_partial_3
+// Size == 4
+#define vstore_partial_4_1 vstore_partial_1
+#define vstore_partial_4_2 vstore_partial_2
+#define vstore_partial_4_3 vstore_partial_3
+#define vstore_partial_4_4 vstore_partial_4
+// Size == 8
+#define vstore_partial_8_1 vstore_partial_1
+#define vstore_partial_8_2 vstore_partial_2
+#define vstore_partial_8_3 vstore_partial_3
+#define vstore_partial_8_4 vstore_partial_4
+#define vstore_partial_8_5 vstore_partial_5
+#define vstore_partial_8_6 vstore_partial_6
+#define vstore_partial_8_7 vstore_partial_7
+#define vstore_partial_8_8 vstore_partial_8
+// Size == 16
+#define vstore_partial_16_1 vstore_partial_1
+#define vstore_partial_16_2 vstore_partial_2
+#define vstore_partial_16_3 vstore_partial_3
+#define vstore_partial_16_4 vstore_partial_4
+#define vstore_partial_16_5 vstore_partial_5
+#define vstore_partial_16_6 vstore_partial_6
+#define vstore_partial_16_7 vstore_partial_7
+#define vstore_partial_16_8 vstore_partial_8
+#define vstore_partial_16_9 vstore_partial_9
+#define vstore_partial_16_10 vstore_partial_10
+#define vstore_partial_16_11 vstore_partial_11
+#define vstore_partial_16_12 vstore_partial_12
+#define vstore_partial_16_13 vstore_partial_13
+#define vstore_partial_16_14 vstore_partial_14
+#define vstore_partial_16_15 vstore_partial_15
+#define vstore_partial_16_16 vstore_partial_16
+
+/** Partial vstore. Store the **lower** 0 to (n-1)th elements of the given vector while minimising the amount of vstore ops
+ * @name vstore_partial_n
+ *
+ * @note @p DATA needs to be a vector not a scalar
+ * @note n needs to be <= the vector width of the input variable @p DATA
+ * eg 1: Valid
+ * vstore_partial_15(var:float16, 0, 0xabcd);
+ * eg 2: Invalid
+ * vstore_partial_7(var:float4, 0, 0xabcd);
+ *
+ * @note in cases n == 1, 2, 3, 4, 8, 16, no extra vstore is invoked, thus there's no performance penalty.
+ *
+ * @param[in] DATA   The name of the variable
+ * @param[in] OFFSET Offset in n
+ * @param[in] PTR    The base pointer
+ * @{
+ */
+#define vstore_partial_1(DATA, OFFSET, PTR) \
+    vstore1(DATA.s0, OFFSET, PTR);
+
+#define vstore_partial_2(DATA, OFFSET, PTR) \
+    vstore2(DATA.s01, OFFSET, PTR);
+
+#define vstore_partial_3(DATA, OFFSET, PTR) \
+    vstore3(DATA.s012, OFFSET, PTR);
+
+#define vstore_partial_4(DATA, OFFSET, PTR) \
+    vstore4(DATA.s0123, OFFSET, PTR);
+
+#define vstore_partial_5(DATA, OFFSET, PTR)    \
+    vstore_partial_4(DATA.s0123, OFFSET, PTR); \
+    vstore1(DATA.s4, OFFSET, PTR + 4);
+
+#define vstore_partial_6(DATA, OFFSET, PTR)    \
+    vstore_partial_4(DATA.s0123, OFFSET, PTR); \
+    vstore_partial_2(DATA.s45, OFFSET, PTR + 4);
+
+#define vstore_partial_7(DATA, OFFSET, PTR)    \
+    vstore_partial_4(DATA.s0123, OFFSET, PTR); \
+    vstore_partial_3(DATA.s456, OFFSET, PTR + 4);
+
+#define vstore_partial_8(DATA, OFFSET, PTR) \
+    vstore8(DATA.s01234567, OFFSET, PTR);
+
+#define vstore_partial_9(DATA, OFFSET, PTR)        \
+    vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vstore1(DATA.s8, OFFSET, PTR + 8);
+
+#define vstore_partial_10(DATA, OFFSET, PTR)       \
+    vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vstore_partial_2(DATA.s89, OFFSET, PTR + 8);
+
+#define vstore_partial_11(DATA, OFFSET, PTR)       \
+    vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vstore_partial_3(DATA.s89a, OFFSET, PTR + 8);
+
+#define vstore_partial_12(DATA, OFFSET, PTR)       \
+    vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vstore_partial_4(DATA.s89ab, OFFSET, PTR + 8);
+
+#define vstore_partial_13(DATA, OFFSET, PTR)       \
+    vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vstore_partial_5(DATA.s89abc, OFFSET, PTR + 8);
+
+#define vstore_partial_14(DATA, OFFSET, PTR)       \
+    vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vstore_partial_6(DATA.s89abcd, OFFSET, PTR + 8);
+
+#define vstore_partial_15(DATA, OFFSET, PTR)       \
+    vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vstore_partial_7(DATA.s89abcde, OFFSET, PTR + 8);
+
+#define vstore_partial_16(DATA, OFFSET, PTR) \
+    vstore16(DATA, OFFSET, PTR);
+/** @} */ // end of groupd vstore_partial_n
+/** @} */ // end of groupd VSTORE_PARTIAL
 
 // Convert built-in functions with _sat modifier are not supported in floating point so we create defines
 // without _sat to overcome this issue
@@ -336,6 +515,10 @@
 
 #define CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(name, mod_size) \
     update_tensor4D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, name##_stride_y, 0, name##_stride_z, 0, name##_stride_w, 0, mod_size)
+
+#define CONVERT_TO_TENSOR3D_STRUCT_NO_UPDATE_PTR(name)                                                                                       \
+    tensor3D_ptr_no_update(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \
+                           name##_stride_z, name##_step_z)
 
 /** Structure to hold Vector information */
 typedef struct Vector
@@ -473,6 +656,32 @@ inline Tensor3D update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_fi
     return tensor;
 }
 
+/** Wrap 3D tensor information into an tensor structure.
+ *
+ * @param[in] ptr                           Pointer to the starting postion of the buffer
+ * @param[in] offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[in] stride_x                      Stride of the image in X dimension (in bytes)
+ * @param[in] step_x                        stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] stride_y                      Stride of the image in Y dimension (in bytes)
+ * @param[in] step_y                        stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] stride_z                      Stride of the image in Z dimension (in bytes)
+ * @param[in] step_z                        stride_z * number of elements along Z processed per workitem(in bytes)
+ *
+ * @return A 3D tensor object
+ */
+inline Tensor3D tensor3D_ptr_no_update(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)
+{
+    Tensor3D tensor =
+    {
+        .ptr                           = ptr,
+        .offset_first_element_in_bytes = offset_first_element_in_bytes,
+        .stride_x                      = stride_x,
+        .stride_y                      = stride_y,
+        .stride_z                      = stride_z
+    };
+    return tensor;
+}
+
 inline Tensor4D update_tensor4D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z, uint stride_w,
                                              uint step_w,
                                              uint mod_size)
@@ -535,6 +744,31 @@ inline __global const uchar *tensor3D_offset(const Tensor3D *tensor, int x, int 
 inline __global const uchar *tensor4D_offset(const Tensor4D *tensor, int x, int y, int z, int w)
 {
     return tensor->ptr + x * tensor->stride_x + y * tensor->stride_y + z * tensor->stride_z + w * tensor->stride_w;
+}
+
+/** Get the offset for a given linear index of a Tensor3D
+ *
+ * @param[in] tensor Pointer to the starting position of the buffer
+ * @param[in] width  Width of the input tensor
+ * @param[in] height Height of the input tensor
+ * @param[in] depth  Depth of the input tensor
+ * @param[in] index  Linear index
+ */
+inline __global const uchar *tensor3D_index2ptr(const Tensor3D *tensor, uint width, uint height, uint depth, uint index)
+{
+    uint num_elements = width * height;
+
+    const uint z = index / num_elements;
+
+    index %= num_elements;
+
+    const uint y = index / width;
+
+    index %= width;
+
+    const uint x = index;
+
+    return tensor->ptr + x * tensor->stride_x + y * tensor->stride_y + z * tensor->stride_z + tensor->offset_first_element_in_bytes;
 }
 
 #endif // _HELPER_H

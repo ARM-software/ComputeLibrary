@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,12 +48,23 @@ public:
     CLGEMMReshapeRHSMatrixKernel &operator=(CLGEMMReshapeRHSMatrixKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will guarantee the OpenCL pitch alignment for the output tensor,
+     *       required to create a OpenCL image object from buffer in @ref CLGEMMMatrixMultiplyReshapedKernel and in @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+     *       Since the OpenCL image object is created importing the OpenCL buffer, the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# output width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# output (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *       -# The output tensor should be only consumed by @ref CLGEMMMatrixMultiplyReshapedKernel or @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+     *
      * @param[in]  input    Input tensor. Data types supported: All
      * @param[out] output   Output tensor. Data type supported: same as @p input
      * @param[in]  rhs_info RHS matrix information to be used for reshaping. This object contains all the necessary
      *                      information to reshape the input tensor. Only the following values are supported:
-     *                      rhs_info.n0: 2,3,4,8,16
-     *                      rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
+     *                      rhs_info.n0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image == true)
+     *                      rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false), (only 4, 8 and 16 if rhs_info.export_to_cl_image == true)
      *                      rhs_info.h0: greater than 0
      *                      rhs_info.transpose: true, false
      *                      rhs_info.interleave: true, false
@@ -61,13 +72,24 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info);
     /** Initialise the kernel's input and output.
      *
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will guarantee the OpenCL pitch alignment for the output tensor,
+     *       required to create a OpenCL image object from buffer in @ref CLGEMMMatrixMultiplyReshapedKernel and in @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+     *       Since the OpenCL image object is created importing the OpenCL buffer, the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# output width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# output (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *       -# The output tensor should be only consumed by @ref CLGEMMMatrixMultiplyReshapedKernel or @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+     *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Input tensor. Data types supported: All
      * @param[out] output          Output tensor. Data type supported: same as @p input
      * @param[in]  rhs_info        RHS matrix information to be used for reshaping. This object contains all the necessary
      *                             information to reshape the input tensor. Only the following values are supported:
-     *                             rhs_info.n0: 2,3,4,8,16
-     *                             rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
+     *                             rhs_info.n0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image == true)
+     *                             rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false), (only 4, 8 and 16 if rhs_info.export_to_cl_image == true)
      *                             rhs_info.h0: greater than 0
      *                             rhs_info.transpose: true, false
      *                             rhs_info.interleave: true, false
@@ -75,12 +97,23 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMReshapeRHSMatrixKernel
      *
+     * @note If rhs_info.export_to_cl_image = true, this OpenCL kernel will guarantee the OpenCL pitch alignment for the output tensor,
+     *       required to create a OpenCL image object from buffer in @ref CLGEMMMatrixMultiplyReshapedKernel and in @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+     *       Since the OpenCL image object is created importing the OpenCL buffer, the following conditions are required:
+     *       -# rhs_info.n0 can only be 4, 8 and 16
+     *       -# rhs_info.k0 can only be 4, 8 and 16
+     *       -# Data type can only be F32
+     *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
+     *       -# output width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
+     *       -# output (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
+     *       -# The output tensor should be only consumed by @ref CLGEMMMatrixMultiplyReshapedKernel or @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+     *
      * @param[in] input    Input tensor info. Data types supported: All
      * @param[in] output   Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
      * @param[in] rhs_info RHS matrix information to be used for reshaping. This object contains all the necessary
      *                     information to reshape the input tensor. Only the following values are supported:
-     *                     rhs_info.n0: 2,3,4,8,16
-     *                     rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
+     *                     rhs_info.n0: 2,3,4,8,16 (only 4, 8 and 16 if rhs_info.export_to_cl_image == true)
+     *                     rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false),(only 4, 8 and 16 if rhs_info.export_to_cl_image == true)
      *                     rhs_info.h0: greater than 0
      *                     rhs_info.transpose: true, false
      *                     rhs_info.interleave: true, false

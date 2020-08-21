@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,59 +37,6 @@
 namespace arm_compute
 {
 class ITensor;
-
-/** Basic function to execute NEGEMMLowpQuantizeDownInt32ToUint8Scale on NEON.
- *
- *  NEGEMMLowpQuantizeDownInt32ToUint8Scale depends on 3 parameters: result_offset, result_mult_int, result_shift
- *  The final result is:
- *
- *  ((input[i][k] + result_offset) * result_mult_int) >> result_shift
- *
- * In case the bias tensor is provided, the final result is:
- *
- *  ((input[i][k] + bias[k] + result_offset) * result_mult_int) >> result_shift
- *
- *  This function calls the following NEON kernels:
- *
- * -# @ref NEGEMMLowpQuantizeDownInt32ScaleKernel
- *
- * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
- *       after the result is shifted right by result_shift
-*/
-class NEGEMMLowpQuantizeDownInt32ToUint8Scale : public INESimpleFunctionNoBorder
-{
-public:
-    /** Initialise the kernel's inputs, output
-     *
-     * @param[in]  input           Input tensor. It is the output of @ref NEGEMMLowpMatrixMultiplyCore function. Data type supported: S32
-     * @param[in]  bias            Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-     *                             Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output          Output tensor. Data type supported: Data type supported: QASYMM8
-     * @param[in]  result_offset   Offset to be added to each element of the input matrix
-     * @param[in]  result_mult_int Value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]  result_shift    Number of bits to shift right the result before converting back to QASYMM8
-     * @param[in]  min             (Optional) Min value used to saturate down the output result before converting back to QASYMM8. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in]  max             (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-     *                             Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     */
-    ARM_COMPUTE_DEPRECATED_REL(20.05)
-    void configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min = std::numeric_limits<int32_t>::lowest(),
-                   int max = std::numeric_limits<int32_t>::max());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
-     *
-     * @param[in] input  Input tensor. It is the output of @ref NEGEMMLowpMatrixMultiplyCore function. Data type supported: S32
-     * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-     *                   Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[in] output Output tensor. Data type supported: Data type supported: QASYMM8
-     * @param[in] min    (Optional) Min value used to saturate down the output result before converting back to QASYMM8. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-     *                   Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     *
-     * @return a status
-     */
-    ARM_COMPUTE_DEPRECATED_REL(20.05)
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-};
 
 /** Basic function to execute NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint on NEON.
  *

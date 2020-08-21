@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 #define ARM_COMPUTE_ISCHEDULER_H
 
 #include "arm_compute/core/CPP/CPPTypes.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/Types.h"
 
 #include <functional>
 #include <limits>
@@ -32,6 +34,7 @@
 namespace arm_compute
 {
 class ICPPKernel;
+class ITensor;
 
 /** Scheduler interface to run kernels */
 class IScheduler
@@ -43,6 +46,13 @@ public:
         STATIC,  /**< Split the workload evenly among the threads */
         DYNAMIC, /**< Split the workload dynamically using a bucket system */
     };
+
+    /** Function to be used and map a given thread id to a logical core id
+     *
+     * Mapping function expects the thread index and total number of cores as input,
+     * and returns the logical core index to bind against
+     */
+    using BindFunc = std::function<int(int, int)>;
 
     /** When arm_compute::ISchedular::Hints::_split_dimension is initialized with this value
      * then the schedular is free to break down the problem space over as many dimensions
@@ -134,6 +144,13 @@ public:
      */
     virtual void set_num_threads(unsigned int num_threads) = 0;
 
+    /** Sets the number of threads the scheduler will use to run the kernels but also using a binding function to pin the threads to given logical cores
+     *
+     * @param[in] num_threads If set to 0, then one thread per CPU core available on the system will be used, otherwise the number of threads specified.
+     * @param[in] func        Binding function to use.
+     */
+    virtual void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func);
+
     /** Returns the number of threads that the SingleThreadScheduler has in his pool.
      *
      * @return Number of threads available in SingleThreadScheduler.
@@ -146,6 +163,14 @@ public:
      * @param[in] hints  Hints for the scheduler.
      */
     virtual void schedule(ICPPKernel *kernel, const Hints &hints) = 0;
+
+    /** Runs the kernel in the same thread as the caller synchronously.
+     *
+     * @param[in] kernel  Kernel to execute.
+     * @param[in] hints   Hints for the scheduler.
+     * @param[in] tensors Vector containing the tensors to operate on.
+     */
+    virtual void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) = 0;
 
     /** Execute all the passed workloads
      *

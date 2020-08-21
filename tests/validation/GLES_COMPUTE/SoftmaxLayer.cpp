@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,7 +89,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
                                                                                                                      framework::dataset::make("Beta", 1.0f)),
-                                                                                                                     framework::dataset::make("Axis", 1)))
+                                                                                                                     framework::dataset::make("ReduceEndAxis", 0)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);
@@ -97,7 +97,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<half_float::half>, framew
 FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                                                                    framework::dataset::make("Beta", 1.0f)),
-                                                                                                                   framework::dataset::make("Axis", 1)))
+                                                                                                                   framework::dataset::make("ReduceEndAxis", 0)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);
@@ -108,7 +108,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
                                                                                                                   framework::dataset::make("Beta", 1.0f)),
-                                                                                                          framework::dataset::make("Axis", 1)))
+                                                                                                          framework::dataset::make("ReduceEndAxis", 0)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
@@ -116,7 +116,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<float>, framework::Datase
 FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                                                                                 framework::dataset::make("Beta", 1.0f)),
-                                                                                                        framework::dataset::make("Axis", 1)))
+                                                                                                        framework::dataset::make("ReduceEndAxis", 0)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);

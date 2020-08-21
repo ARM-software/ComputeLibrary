@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -312,7 +312,6 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
         shape_gemm.set(0, mat_weights_cols);
         shape_gemm.set(1, conv_w * conv_h);
 
-        // TODO(COMPMID-2078): input->clone() doesn't work with subtensors for grouped convolutions.
         TensorInfo info_gemm(shape_gemm, 1, data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
@@ -418,11 +417,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights->data_type());
 
-    if(is_quantized_per_channel)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() != DataType::QASYMM8, "Input data type not compatible with Weights");
-    }
-    else
+    if(!is_quantized_per_channel)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     }

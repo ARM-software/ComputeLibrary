@@ -8,6 +8,8 @@ def get_list_includes():
            "arm_compute/core/NEON/kernels/convolution/common " \
            "arm_compute/core/NEON/kernels/convolution/depthwise " \
            "arm_compute/core/NEON/kernels/convolution/winograd " \
+           "src/core/NEON/kernels/assembly " \
+           "src/core/NEON/kernels/convolution/winograd " \
            "include/linux include " \
            ". " \
            "3rdparty/include kernels".split()

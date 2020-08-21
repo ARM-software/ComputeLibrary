@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,9 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/GPUTarget.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <map>
 #include <utility>
@@ -35,6 +38,8 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
+using namespace arm_compute::misc::shape_calculator;
+
 CLGEMMReshapedKernelConfigurationBifrost::CLGEMMReshapedKernelConfigurationBifrost(GPUTarget gpu)
     : ICLGEMMKernelConfiguration(gpu)
 {
@@ -153,13 +158,48 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
 
+    GEMMLHSMatrixInfo lhs_info_buf;
+    GEMMRHSMatrixInfo rhs_info_buf;
+    GEMMLHSMatrixInfo lhs_info_img;
+    GEMMRHSMatrixInfo rhs_info_img;
+
+    // Get lhs_info/rhs_info in case of OpenCL buffer
     if(n <= 4)
     {
-        return configure_lhs_rhs_info(m, n, 4, 2, 8, 16, 16, true, false, false, true);
+        std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 2, 8, 16, 16, true, false, false, true);
     }
     else
     {
-        return configure_lhs_rhs_info(m, n, 4, 4, 2, 8, 16, false, false, false, true);
+        std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 2, 8, 16, false, false, false, true);
+    }
+
+    // Get lhs_info/rhs_info in case of OpenCL image
+    // Condition on the GPU workload
+    if((m / 4) * (n / 4) >= 2560)
+    {
+        // Big workload
+        std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 8, true, true, true, false, true);
+    }
+    else
+    {
+        // Small workload
+        std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 2, 4, 4, 1, 1, true, true, true, false, true);
+    }
+
+    const TensorInfo  tensor_rhs_info(TensorShape(n, k, b), 1, DataType::F32);
+    const TensorShape shape = compute_rhs_reshaped_shape(tensor_rhs_info, rhs_info_img);
+    const TensorInfo  tensor_reshaped_info(shape, 1, DataType::F32);
+
+    // In case of vector by matrix with few work-items, we use the OpenCL buffer rather than the OpenCL image2d
+    const bool use_cl_image2d = (n <= 4) ? false : true;
+
+    if(bool(validate_image2d_support_on_rhs(tensor_reshaped_info, rhs_info_img)) && use_cl_image2d)
+    {
+        return std::make_pair(lhs_info_img, rhs_info_img);
+    }
+    else
+    {
+        return std::make_pair(lhs_info_buf, rhs_info_buf);
     }
 }
 
