@@ -89,7 +89,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
                                                                                                                      framework::dataset::make("Beta", 1.0f)),
-                                                                                                                     framework::dataset::make("ReduceEndAxis", 0)))
+                                                                                                                     framework::dataset::make("Axis", 0)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);
@@ -97,18 +97,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<half_float::half>, framew
 FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                                                                    framework::dataset::make("Beta", 1.0f)),
-                                                                                                                   framework::dataset::make("ReduceEndAxis", 0)))
+                                                                                                                   framework::dataset::make("Axis", 0)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
                                                                                                                   framework::dataset::make("Beta", 1.0f)),
-                                                                                                          framework::dataset::make("ReduceEndAxis", 0)))
+                                                                                                          framework::dataset::make("Axis", 0)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
@@ -116,16 +116,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<float>, framework::Datase
 FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                                                                                 framework::dataset::make("Beta", 1.0f)),
-                                                                                                        framework::dataset::make("ReduceEndAxis", 0)))
+                                                                                                        framework::dataset::make("Axis", 0)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // SoftmaxLayer
+TEST_SUITE_END() // GC
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

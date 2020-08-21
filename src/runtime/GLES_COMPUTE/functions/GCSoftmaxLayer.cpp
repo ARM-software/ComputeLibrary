@@ -34,13 +34,13 @@ GCSoftmaxLayer::GCSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
 {
 }
 
-void GCSoftmaxLayer::configure(const IGCTensor *input, IGCTensor *output, float beta, size_t reduce_end_axis)
+void GCSoftmaxLayer::configure(const IGCTensor *input, IGCTensor *output, float beta, int32_t axis)
 {
-    ARM_COMPUTE_UNUSED(beta, reduce_end_axis);
+    ARM_COMPUTE_UNUSED(beta, axis);
 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON(beta != 1.0f);
-    ARM_COMPUTE_ERROR_ON_MSG(reduce_end_axis != 0, "Reduce_end_axis must be 0 for GLES");
+    ARM_COMPUTE_ERROR_ON_MSG(axis != 0, "axis must be 0 for GLES");
 
     // Create intermediate tensors shapes
     _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type()));

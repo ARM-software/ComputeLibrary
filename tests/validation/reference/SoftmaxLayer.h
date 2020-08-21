@@ -36,13 +36,13 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, int32_t reduce_end_axis, bool is_log = false);
+SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, int32_t axis, bool is_log = false);
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t reduce_end_axis = 0);
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis = 0, bool is_log = false);
 
 template < typename T, typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int >::type = 0 >
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t reduce_end_axis = 0);
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis = 0, bool is_log = false);
 } // namespace reference
 } // namespace validation
 } // namespace test

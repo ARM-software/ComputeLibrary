@@ -36,96 +36,45 @@ namespace arm_compute
 {
 template <bool IS_LOG>
 CLSoftmaxLayerGeneric<IS_LOG>::CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _max_shift_exp_sum_kernel(), _norm_kernel(), _flatten_ptr(), _reshape(), _max(), _sum(), _tmp(), _input_flattened(), _output_flattened(),
-      _needs_flattening(false)
+    : _memory_group(std::move(memory_manager)), _permute_input(), _permute_output(), _max_shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp(), _input_permuted(), _output_permuted(),
+      _needs_permute()
 {
 }
 
 template <bool IS_LOG>
-void CLSoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ICLTensor *input, const ICLTensor *output, size_t first_n_reduce_axes)
-{
-    configure_reshape_input_kernel(CLKernelLibrary::get().get_compile_context(), input, output, first_n_reduce_axes);
-}
-
-template <bool IS_LOG>
-void CLSoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *output, size_t first_n_reduce_axes)
-{
-    // Flatten the input
-    const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input->info(), first_n_reduce_axes);
-
-    // Initialize the flat input
-    _input_flattened.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_flatten));
-
-    // If we need to flatten the input, we can use CLFlattenKernel or CLReshapeKernel
-    // If the number of reduced axes is 3 (max dimension), which means collapsing all axes except the batch axis, we use CLFlattenKernel.
-    // In all other cases we have to use CLReshapeKernel
-    // Note that the "other cases" include both:
-    //   1. first_n_reduce_axes < 3: Reduce the first 1 (no need to reduce) or 2 dimensions (inclusive)
-    //   2. first_n_reduce_axes == 4: Reduce all 4 dimensions. This can only be handled by CLReshapeKernel instead of CLFlattenKernel.
-    if(first_n_reduce_axes == 3)
-    {
-        auto flatten = support::cpp14::make_unique<CLFlattenLayer>();
-        flatten->configure(compile_context, input, &_input_flattened);
-        _flatten_ptr = std::move(flatten);
-    }
-    else
-    {
-        auto reshape_ptr = support::cpp14::make_unique<CLReshapeLayer>();
-        reshape_ptr->configure(compile_context, input, &_input_flattened);
-        _flatten_ptr = std::move(reshape_ptr);
-    }
-
-    // We need to init the output tensor here. Indeed, the reshape kernel expects
-    // both tensors to be already initialized
-    auto_init_if_empty(*output->info(), *input->info()->clone());
-}
-
-template <bool IS_LOG>
-void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor *output, float beta, size_t axis)
+void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor *output, float beta, int32_t axis)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, beta, axis);
 }
 
 template <bool IS_LOG>
-void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta, size_t axis)
+void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta, int32_t axis)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLSoftmaxLayerGeneric<IS_LOG>::validate(input->info(), output->info(), beta, axis));
 
-    // Convert reduce-before axis (inclusive) to first n axes to reduce
-    size_t first_n_reduce_axes = dim_index_2_num_dims(axis, input->info()->num_dimensions());
+    const size_t actual_axis = static_cast<size_t>(wrap_around(axis, static_cast<int32_t>(input->info()->num_dimensions())));
 
-    // We only need flattening when the number of axes to reduce is greater than 1
-    _needs_flattening = first_n_reduce_axes > 1;
-
-    // If we are dealing with a 4D tensor, we will:
-    // - Flatten the input, so that we end up with a [width*height*depth] * batches 2D tensor
-    // - Execute all the pipeline (reduction + normalization) on the flattened tensor
-    // - Reshape the flattened output into the real output
-    if(_needs_flattening)
+    _needs_permute              = actual_axis != 0;
+    ICLTensor       *tmp_output = output;
+    const ICLTensor *tmp_input  = _needs_permute ? &_input_permuted : input;
+    if(_needs_permute)
     {
-        // Add to the memory manager _input_flattened
-        _memory_group.manage(&_input_flattened);
-
-        // Cofigure _flatten_kernel and _input_flattened
-        configure_reshape_input_kernel(input, output, first_n_reduce_axes);
+        _memory_group.manage(&_input_permuted);
+        _memory_group.manage(&_output_permuted);
+        _permute_input.configure(compile_context, input, &_input_permuted, get_permutation_vector_from_softmax_axis(actual_axis));
+        tmp_output = &_output_permuted;
     }
 
-    // We want to deal with a 2D input. Either it is the flattened version of the original input (4D case)
-    // or it is the original input case (2D case)
-    const ICLTensor *input_2D = (_needs_flattening ? &_input_flattened : input);
-
-    // Create intermediate tensors shapes
-    TensorInfo input_info    = input_2D->info()->clone()->reset_padding().set_is_resizable(true);
-    DataType   tmp_data_type = is_data_type_quantized_asymmetric(input_2D->info()->data_type()) ? DataType::S32 : input_2D->info()->data_type();
-    TensorInfo tensor_info_tmp(input_info.clone()->set_data_type(tmp_data_type));
+    // Create intermediate tensors
+    DataType   tmp_data_type = is_data_type_quantized_asymmetric(tmp_input->info()->data_type()) ? DataType::S32 : tmp_input->info()->data_type();
+    TensorInfo tensor_info_tmp(tmp_input->info()->clone()->set_data_type(tmp_data_type));
     _tmp.allocator()->init(tensor_info_tmp);
-
-    TensorShape max_sum_shape = input_2D->info()->tensor_shape();
+    TensorShape max_sum_shape = tmp_input->info()->tensor_shape();
     max_sum_shape.set(0, 1);
-    _max.allocator()->init(input_info.clone()->set_tensor_shape(max_sum_shape));
-    _sum.allocator()->init(input_info.clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type));
+    _max.allocator()->init(tmp_input->info()->clone()->set_tensor_shape(max_sum_shape));
+    _sum.allocator()->init(tmp_input->info()->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type));
 
     // Set GPU target to kernels
     _max_shift_exp_sum_kernel.set_target(CLScheduler::get().target());
@@ -138,49 +87,43 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_co
     SoftmaxKernelInfo softmax_info;
     softmax_info.beta            = beta;
     softmax_info.is_log          = IS_LOG;
-    softmax_info.input_data_type = input_2D->info()->data_type();
+    softmax_info.input_data_type = tmp_input->info()->data_type();
 
     // Configure kernels
-    _max_shift_exp_sum_kernel.configure(compile_context, input_2D, &_max, &_tmp, &_sum, softmax_info);
-
-    if(_needs_flattening)
-    {
-        // Add to the memory manager _output_flattened
-        _memory_group.manage(&_output_flattened);
-
-        // The normalization kernel stores the result in a flat output tensor
-        _norm_kernel.configure(compile_context, &_tmp, &_sum, &_output_flattened, softmax_info);
-
-        // Reshape the flat output into a the requested (4D) output
-        _reshape.configure(compile_context, &_output_flattened, output);
-
-        // Allocate the intermediate flat tensors
-        _input_flattened.allocator()->allocate();
-        _output_flattened.allocator()->allocate();
-    }
-    else
-    {
-        // Softmax 2D case
-        _norm_kernel.configure(compile_context, &_tmp, &_sum, output, softmax_info);
-    }
+    _max_shift_exp_sum_kernel.configure(compile_context, tmp_input, &_max, &_tmp, &_sum, softmax_info);
+    _norm_kernel.configure(compile_context, &_tmp, &_sum, tmp_output, softmax_info);
 
     // Allocate intermediate buffers
     _tmp.allocator()->allocate();
     _max.allocator()->allocate();
     _sum.allocator()->allocate();
+    if(_needs_permute)
+    {
+        _permute_output.configure(compile_context, &_output_permuted, output, get_permutation_vector_from_softmax_axis(actual_axis));
+        _input_permuted.allocator()->allocate();
+        _output_permuted.allocator()->allocate();
+    }
 }
 
 template <bool IS_LOG>
-Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, size_t axis)
+Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Only up to 4 dimensions are supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis != 0, "Only axis 0 supported in tensors");
     ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() <= axis);
+    ARM_COMPUTE_RETURN_ERROR_ON(axis < static_cast<int32_t>(-input->num_dimensions()) || static_cast<int32_t>(input->num_dimensions()) <= axis);
 
-    // Convert reduce-before axis (inclusive) to first n axes to reduce
-    size_t first_n_reduce_axes = dim_index_2_num_dims(axis, input->num_dimensions());
+    const size_t actual_axis   = static_cast<size_t>(wrap_around(axis, static_cast<int32_t>(input->num_dimensions())));
+    const bool   needs_permute = actual_axis != 0;
+    if(needs_permute)
+    {
+        const PermutationVector permutation_vector = get_permutation_vector_from_softmax_axis(actual_axis);
+        const TensorShape       permuted_shape     = misc::shape_calculator::compute_permutation_output_shape(*input, permutation_vector);
+        TensorInfo              input_permuted(input->clone()->set_tensor_shape(permuted_shape));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(input, &input_permuted, permutation_vector));
+        TensorInfo output_permuted(output->clone()->set_tensor_shape(permuted_shape));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(&output_permuted, output, permutation_vector));
+    }
 
     // Create intermediate tensor info
     DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->data_type()) ? DataType::S32 : input->data_type();
@@ -191,23 +134,6 @@ Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
     TensorInfo tensor_info_max(input->clone()->set_tensor_shape(max_sum_shape).set_is_resizable(true));
     TensorInfo tensor_info_sum(input->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(QuantizationInfo()).set_is_resizable(true));
 
-    const bool needs_flattening = (first_n_reduce_axes > 1);
-
-    if(needs_flattening)
-    {
-        const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input, first_n_reduce_axes);
-        TensorInfo        tensor_info_flat(input->clone()->set_tensor_shape(shape_flatten).set_is_resizable(true));
-
-        if(first_n_reduce_axes == 3)
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLFlattenLayer::validate(input, &tensor_info_flat));
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayer::validate(input, &tensor_info_flat));
-        }
-    }
-
     SoftmaxKernelInfo softmax_info;
     softmax_info.beta            = beta;
     softmax_info.is_log          = IS_LOG;
@@ -215,12 +141,6 @@ Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
     ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DNormKernel::validate(&tensor_info_tmp, &tensor_info_sum, output, softmax_info));
-
-    if(needs_flattening)
-    {
-        const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input);
-        TensorInfo        tensor_info_flat(input->clone()->set_tensor_shape(shape_flatten).set_is_resizable(true));
-    }
 
     return Status{};
 }
@@ -230,17 +150,17 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    if(_needs_flattening)
+    if(_needs_permute)
     {
-        _flatten_ptr->run();
+        _permute_input.run();
     }
 
     CLScheduler::get().enqueue(_max_shift_exp_sum_kernel, false);
-    CLScheduler::get().enqueue(_norm_kernel, !_needs_flattening);
+    CLScheduler::get().enqueue(_norm_kernel, !_needs_permute);
 
-    if(_needs_flattening)
+    if(_needs_permute)
     {
-        _reshape.run();
+        _permute_output.run();
     }
 }
 

@@ -59,7 +59,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLLogSoftmaxLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                      framework::dataset::make("Axis", { 0 })))
+                                                                                                      framework::dataset::make("Axis", { 0, -1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -75,7 +75,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLLogSoftmaxLayerFixture<half>, framework::Data
 FIXTURE_DATA_TEST_CASE(Run4D, CLLogSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                       framework::dataset::make("Axis", { 0 })))
+                                                                                                       framework::dataset::make("Axis", { 0, -3, 2 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -86,7 +86,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLLogSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                       framework::dataset::make("Axis", { 0 })))
+                                                                                                       framework::dataset::make("Axis", { 0, 1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -99,10 +99,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLLogSoftmaxLayerFixture<float>, framework::Dat
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(Run4D, CLLogSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
-                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                        framework::dataset::make("Axis", { 0 })))
+FIXTURE_DATA_TEST_CASE(Run4D, CLLogSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
+                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
+                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.0f })),
+                                                                                                    framework::dataset::make("Axis", { 0, -4, 3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,9 @@
  */
 #include "arm_compute/core/Helpers.h"
 
-using namespace arm_compute;
-
-Window arm_compute::calculate_max_window(const ValidRegion &valid_region, const Steps &steps, bool skip_border, BorderSize border_size)
+namespace arm_compute
+{
+Window calculate_max_window(const ValidRegion &valid_region, const Steps &steps, bool skip_border, BorderSize border_size)
 {
     if(!skip_border)
     {
@@ -79,7 +79,7 @@ Window arm_compute::calculate_max_window(const ValidRegion &valid_region, const 
     return window;
 }
 
-Window arm_compute::calculate_max_enlarged_window(const ValidRegion &valid_region, const Steps &steps, BorderSize border_size)
+Window calculate_max_enlarged_window(const ValidRegion &valid_region, const Steps &steps, BorderSize border_size)
 {
     const Coordinates &anchor = valid_region.anchor;
     const TensorShape &shape  = valid_region.shape;
@@ -128,7 +128,7 @@ Window arm_compute::calculate_max_enlarged_window(const ValidRegion &valid_regio
     return window;
 }
 
-Window arm_compute::calculate_max_window_horizontal(const ValidRegion &valid_region, const Steps &steps, bool skip_border, BorderSize border_size)
+Window calculate_max_window_horizontal(const ValidRegion &valid_region, const Steps &steps, bool skip_border, BorderSize border_size)
 {
     if(skip_border)
     {
@@ -181,8 +181,8 @@ Window arm_compute::calculate_max_window_horizontal(const ValidRegion &valid_reg
     return window;
 }
 
-ValidRegion arm_compute::calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
-                                                      InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined)
+ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
+                                         InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined)
 {
     const DataLayout data_layout = src_info.data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -256,3 +256,19 @@ ValidRegion arm_compute::calculate_valid_region_scale(const ITensorInfo &src_inf
 
     return valid_region;
 }
+
+PermutationVector get_permutation_vector_from_softmax_axis(size_t actual_axis)
+{
+    switch(actual_axis)
+    {
+        case 1:
+            return PermutationVector(1U, 0U, 2U, 3U);
+        case 2:
+            return PermutationVector(2U, 1U, 0U, 3U);
+        case 3:
+            return PermutationVector(3U, 1U, 2U, 0U);
+        default:
+            ARM_COMPUTE_ERROR("Axis not supported");
+    }
+}
+} // namespace arm_compute

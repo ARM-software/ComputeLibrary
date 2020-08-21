@@ -26,8 +26,7 @@
 
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
-#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -47,7 +46,10 @@ class ICLTensor;
  * @f[ out = (x - max(x) * beta) - log(\sum{e^{x - max(x) * beta}}) @f]
  *
  * This function runs the following kernels:
+ * -# If axis is not 0:
+ * -#   @ref CLPermute
  * -# @ref CLLogits1DNormKernel
+ * -# @ref CLLogits1DMaxShiftExpSumKernel
  */
 template <bool IS_LOG = false>
 class CLSoftmaxLayerGeneric : public IFunction
@@ -60,70 +62,47 @@ public:
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32 for Softmax and F16/F32 for Log Softmax
      * @param[out] output Destination tensor. Data types supported: same as @p input
      * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
-     * @param[in]  axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
+     * @param[in]  axis   (Optional) The dimension in which to apply the function. E.g. for input of shape 4x5x6 and
+     *                       axis=1, softmax will be applied to 4x6=24 vectors of size 5. Defaults to 0
      */
-    void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f, size_t axis = 0);
+    void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f, int32_t axis = 0);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32 for Softmax and F16/F32 for Log Softmax
      * @param[out] output          Destination tensor. Data types supported: same as @p input
      * @param[in]  beta            (Optional) A scaling factor for the exponent. Defaults to 1.f
-     * @param[in]  axis            (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
+     * @param[in]  axis            (Optional) The dimension in which to apply the function. E.g. for input of shape 4x5x6 and
+     *                       axis=1, softmax will be applied to 4x6=24 vectors of size 5. Defaults to 0
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta = 1.0f, size_t axis = 0);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta = 1.0f, int32_t axis = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSoftmaxLayer
      *
      * @param[in] input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32 for Softmax and F16/F32 for Log Softmax
      * @param[in] output Destination tensor. Data types supported: same as @p input
      * @param[in] beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
-     * @param[in] axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
+     * @param[in] axis   (Optional) The dimension in which to apply the function. E.g. for input of shape 4x5x6 and
+     *                       axis=1, softmax will be applied to 4x6=24 vectors of size 5. Defaults to 0
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, size_t axis = 0);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, int32_t axis = 0);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    /** Utility method to configure the kernels needed to flatten the input
-     * tensor.
-     *
-     * @note This function changes the internal state of this class. In particular,
-     * it initializes the kernel @p _flatten_kernel and the tensors @p _input_flat and
-     * @p _output_flat
-     *
-     * @param[in] input  Original source tensor.
-     * @param[in] output Original destination tensor.
-     * @param[in] axis   (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
-     */
-    void configure_reshape_input_kernel(const ICLTensor *input, const ICLTensor *output, size_t axis);
-    /** Utility method to configure the kernels needed to flatten the input
-     * tensor.
-     *
-     * @note This function changes the internal state of this class. In particular,
-     * it initializes the kernel @p _flatten_kernel and the tensors @p _input_flat and
-     * @p _output_flat
-     *
-     * @param[in] compile_context The compile context to be used.
-     * @param[in] input           Original source tensor.
-     * @param[in] output          Original destination tensor.
-     * @param[in] axis            (Optional) The last axis of the first n dimensions (inclusive)to reduce. Only supports axis 0.
-     */
-    void configure_reshape_input_kernel(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *output, size_t axis);
-
     MemoryGroup                    _memory_group;
+    CLPermute                      _permute_input;
+    CLPermute                      _permute_output;
     CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;
     CLLogits1DNormKernel           _norm_kernel;
-    std::unique_ptr<IFunction>     _flatten_ptr;
-    CLReshapeLayer                 _reshape;
     CLTensor                       _max;
     CLTensor                       _sum;
     CLTensor                       _tmp;
-    CLTensor                       _input_flattened;
-    CLTensor                       _output_flattened;
-    bool                           _needs_flattening;
+    CLTensor                       _input_permuted;
+    CLTensor                       _output_permuted;
+    bool                           _needs_permute;
 };
 
 using CLSoftmaxLayer    = CLSoftmaxLayerGeneric<false>;

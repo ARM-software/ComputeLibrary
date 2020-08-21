@@ -801,16 +801,6 @@ inline T wrap_around(T x, T m)
     return x >= 0 ? x % m : (x % m + m) % m;
 }
 
-/** Convert a dimension axis to the number of dimensions in the range [0, @p dim_axis]
- * Handle negative axis, negative axis is used to specify axis from the end (e.g. -1 for the last axis).
- *
- * @param[in] dim_axis The last axis (inclusive) in the range [0, @p dim_axis]
- * @param[in] num_dims The total number of dimensions
- *
- * @return The number of dimensions in the range [0, @p dim_axis]
- */
-inline size_t dim_index_2_num_dims(int32_t dim_axis, int32_t num_dims);
-
 /** Convert negative coordinates to positive in the range [0, num_dims_input]
  *
  * @param[out] coords    Array of coordinates to be converted.
@@ -852,6 +842,21 @@ inline unsigned int get_next_power_two(unsigned int x)
 
     return x;
 }
+
+/** Given a softmax axis, this function returns the permutation vector required to put the axis to the front
+ *
+ * @note This function assumes a tensor rank <= 4
+ *
+ * Axis selects the dimension on which softmax is performed.
+ * E.g. For input of shape 4x5x6 and axis=1, softmax will be applied to 4x6=24 vectors of size 5.
+ * Interally softmax kernels is always performed on the first dimension (front dimension), therefore permutation is
+ * required to put the dimension specified by @p axis to the first dimension.
+ *
+ * @param[in] axis Axis on which to perform softmax. Supported: 1, 2, 3 (0 implies no permutation needed)
+ *
+ * @return the permutation vector
+ */
+PermutationVector get_permutation_vector_from_softmax_axis(size_t axis);
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

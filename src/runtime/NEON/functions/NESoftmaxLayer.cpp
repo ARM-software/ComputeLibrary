@@ -32,39 +32,9 @@ namespace arm_compute
 {
 template <bool IS_LOG>
 NESoftmaxLayerGeneric<IS_LOG>::NESoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _max_kernel(), _softmax_kernel(), _flat_or_reshape_ptr(nullptr), _fill_border_kernel(), _reshape(), _max(), _tmp(), _input_flattened(), _output_flattened(),
-      _needs_flattening(false)
+    : _memory_group(std::move(memory_manager)), _permute_input(), _permute_output(), _max_kernel(), _softmax_kernel(), _fill_border_kernel(), _max(), _tmp(), _input_permuted(), _output_permuted(),
+      _needs_permute(false)
 {
-}
-
-template <bool IS_LOG>
-void NESoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ITensor *input, const ITensor *output, int32_t first_n_reduce_axes)
-{
-    // Flatten the input
-    const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input->info(), first_n_reduce_axes);
-
-    // Initialize the flat input
-    _input_flattened.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_flatten));
-
-    // Note that the "other cases" include both:
-    //   1. first_n_reduce_axes < 3: Reduce the first 1 (no need to reduce) or 2 dimensions (inclusive)
-    //   2. first_n_reduce_axes == 4: Reduce all 4 dimensions. This can only be handled by NEReshapeKernel instead of NEFlattenKernel.
-    if(first_n_reduce_axes == 3)
-    {
-        auto flatten_kernel_ptr = support::cpp14::make_unique<NEFlattenLayer>();
-        flatten_kernel_ptr->configure(input, &_input_flattened);
-        _flat_or_reshape_ptr = std::move(flatten_kernel_ptr);
-    }
-    else
-    {
-        auto reshape_kernel_ptr = support::cpp14::make_unique<NEReshapeLayer>();
-        reshape_kernel_ptr->configure(input, &_input_flattened);
-        _flat_or_reshape_ptr = std::move(reshape_kernel_ptr);
-    }
-
-    // We need to init the output tensor here. Indeed, the reshape kernel expects
-    // both tensors to be already initialized
-    auto_init_if_empty(*output->info(), *input->info()->clone());
 }
 
 template <bool IS_LOG>
@@ -74,36 +44,29 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NESoftmaxLayerGeneric::validate(input->info(), output->info(), beta, axis));
 
-    // Convert reduce-before axis (inclusive) to first n axes to reduce
-    size_t first_n_reduce_axes = dim_index_2_num_dims(axis, static_cast<int32_t>(input->info()->num_dimensions()));
+    const unsigned int actual_axis = static_cast<unsigned int>(wrap_around(axis, static_cast<int32_t>(input->info()->num_dimensions())));
 
-    // We only need flattening when the number of axes to reduce is greater than 1
-    _needs_flattening = first_n_reduce_axes > 1;
+    _needs_permute = actual_axis > 0;
 
-    // If we are dealing with a 4D tensor, we will:
-    // - Flatten the input, so that we end up with a [width*height*depth] * batches 2D tensor
-    // - Execute all the pipeline (reduction + normalization) on the flattened tensor
-    // - Reshape the flattened output into the real output
-    if(_needs_flattening)
+    if(_needs_permute)
     {
-        // Add to the memory manager _input_flattened
-        _memory_group.manage(&_input_flattened);
+        // Add to the memory manager _input_permuted
+        _memory_group.manage(&_input_permuted);
 
-        // Configure  _flatten_kernel and _input_flattened
-        configure_reshape_input_kernel(input, output, first_n_reduce_axes);
+        _permute_input.configure(input, &_input_permuted, get_permutation_vector_from_softmax_axis(actual_axis));
     }
 
-    // We want to deal with a 2D input. Either it is the flattened version of the original input (4D case)
+    // We want to deal with a 2D input. Either it is the permuted version of the original input (4D case)
     // or it is the original input case (2D case)
-    ITensor *input_2D = (_needs_flattening ? &_input_flattened : input);
+    ITensor *tmp_input = (_needs_permute ? &_input_permuted : input);
 
     // Create intermediate tensors shapes
-    const TensorInfo input_info    = input_2D->info()->clone()->reset_padding().set_is_resizable(true);
-    DataType         tmp_data_type = is_data_type_quantized_asymmetric(input_2D->info()->data_type()) ? DataType::F32 : input_2D->info()->data_type();
+    const TensorInfo input_info    = tmp_input->info()->clone()->reset_padding().set_is_resizable(true);
+    DataType         tmp_data_type = is_data_type_quantized_asymmetric(tmp_input->info()->data_type()) ? DataType::F32 : tmp_input->info()->data_type();
     TensorInfo       tensor_info_tmp(input_info.clone()->set_data_type(tmp_data_type));
 
     // Init intermediate tensors
-    TensorShape max_sum_shape = input_2D->info()->tensor_shape();
+    TensorShape max_sum_shape = tmp_input->info()->tensor_shape();
     max_sum_shape.set(0, 1);
     _max.allocator()->init(input_info.clone()->set_tensor_shape(max_sum_shape));
     _tmp.allocator()->init(tensor_info_tmp);
@@ -113,27 +76,27 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
     _memory_group.manage(&_tmp);
 
     // Configure Kernels
-    _max_kernel.configure(input_2D, &_max);
-    if(_needs_flattening)
+    _max_kernel.configure(tmp_input, &_max);
+    if(_needs_permute)
     {
-        // Add to the memory manager _output_flattened
-        _memory_group.manage(&_output_flattened);
+        // Add to the memory manager _output_permuted
+        _memory_group.manage(&_output_permuted);
 
-        // The normalization kernel stores the result in a flat output tensor
-        _softmax_kernel.configure(input_2D, &_max, &_output_flattened, beta, &_tmp);
-        _input_flattened.allocator()->allocate();
+        // The normalization kernel stores the result in a permuted output tensor
+        _softmax_kernel.configure(tmp_input, &_max, &_output_permuted, beta, &_tmp);
+        _input_permuted.allocator()->allocate();
 
-        // Reshape the flat output into the requested (4D) output
-        _reshape.configure(&_output_flattened, output);
+        // Re-permute the permuted output into the requested (4D) output
+        _permute_output.configure(&_output_permuted, output, get_permutation_vector_from_softmax_axis(actual_axis));
 
-        // Allocate the intermediate flat tensors
-        _output_flattened.allocator()->allocate();
+        // Allocate the intermediate permuted tensors
+        _output_permuted.allocator()->allocate();
     }
     else
     {
         // Softmax 2D case
-        _fill_border_kernel.configure(input_2D, _max_kernel.border_size(), BorderMode::REPLICATE);
-        _softmax_kernel.configure(input_2D, &_max, output, beta, &_tmp);
+        _fill_border_kernel.configure(tmp_input, _max_kernel.border_size(), BorderMode::REPLICATE);
+        _softmax_kernel.configure(tmp_input, &_max, output, beta, &_tmp);
     }
 
     // Allocate intermediate buffers
@@ -148,11 +111,7 @@ Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Only up to 4 dimensions are supported");
     ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis != 0, "Only axis 0 supported");
     ARM_COMPUTE_RETURN_ERROR_ON(axis < static_cast<int32_t>(-input->num_dimensions()) || static_cast<int32_t>(input->num_dimensions()) <= axis);
-
-    // Convert reduce-before axis (inclusive) to first n axes to reduce
-    size_t first_n_reduce_axes = dim_index_2_num_dims(axis, static_cast<int32_t>(input->num_dimensions()));
 
     // Create intermediate tensor info
     DataType         tmp_data_type = input->data_type();
@@ -163,21 +122,18 @@ Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
     const TensorInfo tensor_info_max_sum(input->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(input->quantization_info()).set_is_resizable(true));
     const TensorInfo dont_care;
 
-    const bool needs_flattening = (first_n_reduce_axes > 1);
+    const unsigned int actual_axis = static_cast<unsigned int>(wrap_around(axis, static_cast<int32_t>(input->num_dimensions())));
 
-    if(needs_flattening)
+    const bool needs_permute = actual_axis > 0;
+
+    if(needs_permute)
     {
-        const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input, first_n_reduce_axes);
-        TensorInfo        tensor_info_flat(input->clone()->set_tensor_shape(shape_flatten).set_is_resizable(true));
-
-        if(first_n_reduce_axes == 3)
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEFlattenLayer::validate(input, &tensor_info_flat));
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayer::validate(input, &tensor_info_flat));
-        }
+        const PermutationVector permutation_vector = get_permutation_vector_from_softmax_axis(actual_axis);
+        const TensorShape       permuted_shape     = misc::shape_calculator::compute_permutation_output_shape(*input, permutation_vector);
+        TensorInfo              input_permuted(input->clone()->set_tensor_shape(permuted_shape));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEPermute::validate(input, &input_permuted, permutation_vector));
+        TensorInfo output_permuted(output->clone()->set_tensor_shape(permuted_shape));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEPermute::validate(&output_permuted, output, permutation_vector));
     }
 
     ARM_COMPUTE_RETURN_ON_ERROR(NELogits1DMaxKernel::validate(input, &tensor_info_max_sum));
@@ -191,18 +147,18 @@ void           NESoftmaxLayerGeneric<IS_LOG>::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    if(_needs_flattening)
+    if(_needs_permute)
     {
-        _flat_or_reshape_ptr->run();
+        _permute_input.run();
     }
 
     NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
     NEScheduler::get().schedule(&_max_kernel, Window::DimY);
     NEScheduler::get().schedule(&_softmax_kernel, Window::DimY);
 
-    if(_needs_flattening)
+    if(_needs_permute)
     {
-        _reshape.run();
+        _permute_output.run();
     }
 }
 
