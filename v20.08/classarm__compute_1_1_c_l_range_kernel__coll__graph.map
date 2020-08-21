@@ -1,0 +1,5 @@
+<map id="CLRangeKernel" name="CLRangeKernel">
+<area shape="rect" id="node1" title="Kernel class for Range." alt="" coords="5,155,123,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="24,80,104,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="32,5,96,32"/>
+</map>

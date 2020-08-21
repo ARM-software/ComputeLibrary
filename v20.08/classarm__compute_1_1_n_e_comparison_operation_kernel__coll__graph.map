@@ -1,0 +1,6 @@
+<map id="NEComparisonOperationKernel" name="NEComparisonOperationKernel">
+<area shape="rect" id="node1" title=" " alt="" coords="7,229,226,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_n_e_elementwise_operation_kernel.xhtml" title="Interface for an element&#45;wise operation kernel." alt="" coords="5,155,228,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="75,80,158,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="85,5,149,32"/>
+</map>

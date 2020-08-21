@@ -1,0 +1,5 @@
+<map id="UnaryEltwiseLayerDescriptor" name="UnaryEltwiseLayerDescriptor">
+<area shape="rect" id="node1" title="Unary Elementwise layer descriptor." alt="" coords="45,95,249,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_quantization_info.xhtml" title="Quantization information." alt="" coords="5,5,132,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_activation_layer_info.xhtml" title="Activation Layer Information class." alt="" coords="156,5,299,32"/>
+</map>

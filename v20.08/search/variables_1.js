@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['a11',['A11',['../structarm__compute_1_1_c_l_coefficient_table.xhtml#adde8ad2311dc11f75f5571a764c6af97',1,'arm_compute::CLCoefficientTable']]],
+  ['a12',['A12',['../structarm__compute_1_1_c_l_coefficient_table.xhtml#a380c8116f7d47ce2367992bb986f9876',1,'arm_compute::CLCoefficientTable']]],
+  ['a22',['A22',['../structarm__compute_1_1_c_l_coefficient_table.xhtml#a20800b3d0475448767d2b30c530e1e29',1,'arm_compute::CLCoefficientTable']]],
+  ['a_5foffset',['a_offset',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#a3d53b60fe918402342090da9651ee092',1,'arm_compute::GEMMKernelInfo']]],
+  ['abs_5fdiff',['abs_diff',['../namespacearm__compute_1_1test_1_1validation.xhtml#af25a92263ec1a123d1377e01792ef461',1,'arm_compute::test::validation']]],
+  ['absolute_5ftolerance',['absolute_tolerance',['../structarm__compute_1_1utils_1_1_verification_params.xhtml#a391ce7e414170c2816119402b217397f',1,'arm_compute::utils::VerificationParams::absolute_tolerance()'],['../classarm__compute_1_1utils_1_1_common_graph_validate_options.xhtml#ae34b3428ac86441ca6ecab0ea1b24290',1,'arm_compute::utils::CommonGraphValidateOptions::absolute_tolerance()']]],
+  ['accum_5fsquare',['accum_square',['../namespacearm__compute_1_1test_1_1validation.xhtml#a15a5f52bac449d7f04e57c59f331e085',1,'arm_compute::test::validation']]],
+  ['accum_5fweight',['accum_weight',['../namespacearm__compute_1_1test_1_1validation.xhtml#ad70dd3678501cef96cadd2251870d924',1,'arm_compute::test::validation']]],
+  ['action',['action',['../namespace_gemm_tuner.xhtml#a2f4ab7bf743142dae2e459aa18f9f1d4',1,'GemmTuner']]],
+  ['activation_5finfo',['activation_info',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#ad5f55d98fbe268b4eb6225aca14a2403',1,'arm_compute::GEMMKernelInfo::activation_info()'],['../structarm__compute_1_1_d_w_c_kernel_info.xhtml#ad5f55d98fbe268b4eb6225aca14a2403',1,'arm_compute::DWCKernelInfo::activation_info()'],['../structarm__compute_1_1_fully_connected_layer_info.xhtml#ad5f55d98fbe268b4eb6225aca14a2403',1,'arm_compute::FullyConnectedLayerInfo::activation_info()']]],
+  ['add',['add',['../namespacearm__compute_1_1test_1_1validation.xhtml#acb58b6d1d2220b217478eb206de180c8',1,'arm_compute::test::validation']]],
+  ['align_5fcolumns',['align_columns',['../structarm__compute_1_1_i_o_format_info.xhtml#a1d81fe110d5dcac79dd73a532015bb94',1,'arm_compute::IOFormatInfo']]],
+  ['align_5fcorners',['align_corners',['../structarm__compute_1_1_scale_kernel_info.xhtml#ae4b9452a8d98cec5e781396d27006c73',1,'arm_compute::ScaleKernelInfo']]],
+  ['alignment',['alignment',['../structarm__compute_1_1experimental_1_1_memory_info.xhtml#a3afda29223eeda35afd21a6c5e121ba2',1,'arm_compute::experimental::MemoryInfo::alignment()'],['../structarm__compute_1_1_blob_info.xhtml#a3afda29223eeda35afd21a6c5e121ba2',1,'arm_compute::BlobInfo::alignment()']]],
+  ['allocator',['allocator',['../structarm__compute_1_1graph_1_1_memory_manager_context.xhtml#a8725ea3110284d80b57a98c2cdf7a995',1,'arm_compute::graph::MemoryManagerContext']]],
+  ['alpha',['alpha',['../structarm__compute_1_1detail_1_1linear.xhtml#a59101c0482fb40b207bcaf599771d223',1,'arm_compute::detail::linear::alpha()'],['../structarm__compute_1_1detail_1_1brelu.xhtml#a59101c0482fb40b207bcaf599771d223',1,'arm_compute::detail::brelu::alpha()'],['../structarm__compute_1_1detail_1_1lubrelu.xhtml#a59101c0482fb40b207bcaf599771d223',1,'arm_compute::detail::lubrelu::alpha()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b',1,'arm_compute::test::validation::alpha()']]],
+  ['anchor',['anchor',['../structarm__compute_1_1_valid_region.xhtml#a55a69b397082accd94221dd10b722cf7',1,'arm_compute::ValidRegion']]],
+  ['are_5fweights_5freshaped',['are_weights_reshaped',['../structarm__compute_1_1_fully_connected_layer_info.xhtml#a146a7be9d813ad80abb72a0bf6566cbc',1,'arm_compute::FullyConnectedLayerInfo']]],
+  ['args',['args',['../namespace_gemm_tuner.xhtml#a8187411843a6284ffb964ef3fb9fcab3',1,'GemmTuner']]],
+  ['axis',['axis',['../structarm__compute_1_1_f_f_t_digit_reverse_kernel_info.xhtml#a6f637817d19a0cca1f1d984f26958c79',1,'arm_compute::FFTDigitReverseKernelInfo::axis()'],['../structarm__compute_1_1_f_f_t_radix_stage_kernel_info.xhtml#a6f637817d19a0cca1f1d984f26958c79',1,'arm_compute::FFTRadixStageKernelInfo::axis()'],['../structarm__compute_1_1graph_1_1descriptors_1_1_concat_layer_descriptor.xhtml#a96ae1e009deb669b33e5683acd5345ca',1,'arm_compute::graph::descriptors::ConcatLayerDescriptor::axis()'],['../structarm__compute_1_1_f_f_t1_d_info.xhtml#a6f637817d19a0cca1f1d984f26958c79',1,'arm_compute::FFT1DInfo::axis()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#accc088009d44c521706aa98d6387ee21',1,'arm_compute::test::validation::axis()']]],
+  ['axis0',['axis0',['../structarm__compute_1_1_f_f_t2_d_info.xhtml#a550adc8fff3e35dbddb75954a94d37a3',1,'arm_compute::FFT2DInfo']]],
+  ['axis1',['axis1',['../structarm__compute_1_1_f_f_t2_d_info.xhtml#a1ee9cfff4083ed9249b7f8051e91ba08',1,'arm_compute::FFT2DInfo']]]
+];

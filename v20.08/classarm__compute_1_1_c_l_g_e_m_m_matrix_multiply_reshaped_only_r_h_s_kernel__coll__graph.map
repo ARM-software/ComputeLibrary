@@ -1,0 +1,5 @@
+<map id="CLGEMMMatrixMultiplyReshapedOnlyRHSKernel" name="CLGEMMMatrixMultiplyReshapedOnlyRHSKernel">
+<area shape="rect" id="node1" title="OpenCL kernel to multiply matrices when only the input matrix RHS (input1) has been reshaped." alt="" coords="5,155,232,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="79,80,159,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="87,5,151,32"/>
+</map>

@@ -1,0 +1,44 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1experimental_1_1_i_operator.xhtml" title="Base class for all async functions." alt="" coords="5,1027,88,1053"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1experimental_1_1_i_c_l_operator.xhtml" title="Basic interface for functions which have a single async CL kernel." alt="" coords="137,563,235,589"/>
+<area shape="rect" id="node25" href="$classarm__compute_1_1experimental_1_1_i_n_e_operator.xhtml" title="Basic interface for functions which have a single async NEON kernel." alt="" coords="136,1516,236,1543"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1experimental_1_1_c_l_abs.xhtml" title="Basic function to get the absolute value of an input tensor." alt="" coords="371,5,434,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1experimental_1_1_c_l_activation.xhtml" title="Basic function to run CLActivationLayerKernel." alt="" coords="352,56,453,83"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1experimental_1_1_c_l_arithmetic_addition.xhtml" title="Basic function to run CLSaturatedArithmeticOperationKernel for addition." alt="" coords="325,107,481,133"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1experimental_1_1_c_l_arithmetic_division.xhtml" title="Basic function to run CLSaturatedArithmeticOperationKernel for division." alt="" coords="326,157,479,184"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1experimental_1_1_c_l_arithmetic_subtraction.xhtml" title="Basic function to run CLSaturatedArithmeticOperationKernel for subtraction." alt="" coords="313,208,492,235"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1experimental_1_1_c_l_complex_pixel_wise_multiplication.xhtml" title="Basic function to run CLComplexPixelWiseMultiplicationKernel." alt="" coords="285,259,520,285"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1experimental_1_1_c_l_concatenation.xhtml" title="Basic function to execute concatenate tensors along a given axis." alt="" coords="337,309,468,336"/>
+<area shape="rect" id="node10" href="$classarm__compute_1_1experimental_1_1_c_l_elementwise_max.xhtml" title="Basic function to run CLArithmeticOperationKernel for max." alt="" coords="331,360,475,387"/>
+<area shape="rect" id="node11" href="$classarm__compute_1_1experimental_1_1_c_l_elementwise_min.xhtml" title="Basic function to run CLArithmeticOperationKernel for min." alt="" coords="333,411,473,437"/>
+<area shape="rect" id="node12" href="$classarm__compute_1_1experimental_1_1_c_l_elementwise_power.xhtml" title="Basic function to run CLArithmeticOperationKernel for power." alt="" coords="325,461,481,488"/>
+<area shape="rect" id="node13" href="$classarm__compute_1_1experimental_1_1_c_l_elementwise_squared_diff.xhtml" title="Basic function to run CLArithmeticOperationKernel for squared difference." alt="" coords="306,512,499,539"/>
+<area shape="rect" id="node14" href="$classarm__compute_1_1experimental_1_1_c_l_exp.xhtml" title="Basic function to perform exponential on an input tensor." alt="" coords="372,563,433,589"/>
+<area shape="rect" id="node15" href="$classarm__compute_1_1experimental_1_1_c_l_log.xhtml" title="Basic function to perform elementwise log on an input tensor." alt="" coords="372,613,433,640"/>
+<area shape="rect" id="node16" href="$classarm__compute_1_1experimental_1_1_c_l_neg.xhtml" title="Basic function to negate an input tensor." alt="" coords="371,664,435,691"/>
+<area shape="rect" id="node17" href="$classarm__compute_1_1experimental_1_1_c_l_pixel_wise_multiplication.xhtml" title="Basic function to run CLPixelWiseMultiplicationKernel." alt="" coords="313,715,492,741"/>
+<area shape="rect" id="node18" href="$classarm__compute_1_1experimental_1_1_c_l_p_relu_layer.xhtml" title="Basic function to run CLArithmeticOperationKernel for PRELU." alt="" coords="349,765,456,792"/>
+<area shape="rect" id="node19" href="$classarm__compute_1_1experimental_1_1_c_l_reshape.xhtml" title="Basic function to run CLReshapeLayerKernel." alt="" coords="357,816,449,843"/>
+<area shape="rect" id="node20" href="$classarm__compute_1_1experimental_1_1_c_l_round.xhtml" title="Basic function to get the round (to the nearest even) value of an input tensor." alt="" coords="364,867,441,893"/>
+<area shape="rect" id="node21" href="$classarm__compute_1_1experimental_1_1_c_l_rsqrt.xhtml" title="Basic function to perform inverse square root on an input tensor." alt="" coords="367,917,438,944"/>
+<area shape="rect" id="node22" href="$classarm__compute_1_1experimental_1_1_c_l_sin.xhtml" title="Basic function to calculate sine of an input tensor." alt="" coords="373,968,432,995"/>
+<area shape="rect" id="node23" href="$classarm__compute_1_1experimental_1_1_c_l_slice.xhtml" title="Basic function to perform tensor slicing." alt="" coords="369,1019,437,1045"/>
+<area shape="rect" id="node24" href="$classarm__compute_1_1experimental_1_1_c_l_strided_slice.xhtml" title="Basic function to run CLStridedSliceKernel." alt="" coords="345,1069,460,1096"/>
+<area shape="rect" id="node26" href="$classarm__compute_1_1experimental_1_1_n_e_activation_layer.xhtml" title="Basic function to run NEActivationLayerKernel." alt="" coords="333,1120,472,1147"/>
+<area shape="rect" id="node27" href="$classarm__compute_1_1experimental_1_1_n_e_arithmetic_addition.xhtml" title="Basic function to run NEArithmeticAdditionKernel." alt="" coords="323,1171,482,1197"/>
+<area shape="rect" id="node28" href="$classarm__compute_1_1experimental_1_1_n_e_arithmetic_subtraction.xhtml" title="Basic function to run NEArithmeticSubtractionKernel." alt="" coords="313,1221,493,1248"/>
+<area shape="rect" id="node29" href="$classarm__compute_1_1experimental_1_1_n_e_complex_pixel_wise_multiplication.xhtml" title="Basic function to run NEComplexPixelWiseMultiplicationKernel." alt="" coords="284,1272,521,1299"/>
+<area shape="rect" id="node30" href="$classarm__compute_1_1experimental_1_1_n_e_concatenation.xhtml" title="Basic function to execute concatenate tensors along a given axis." alt="" coords="336,1323,469,1349"/>
+<area shape="rect" id="node31" href="$classarm__compute_1_1experimental_1_1_n_e_elementwise_comparison.xhtml" title="Basic function to run NEComparisonOperationKernel." alt="" coords="304,1373,501,1400"/>
+<area shape="rect" id="node32" href="$classarm__compute_1_1experimental_1_1_n_e_elementwise_comparison_static.xhtml" title="Basic function to run NEComparisonOperationKernel." alt="" coords="285,1425,520,1466"/>
+<area shape="rect" id="node33" href="$classarm__compute_1_1experimental_1_1_n_e_elementwise_division.xhtml" title="Basic function to run NEArithmeticOperationKernel for division." alt="" coords="318,1491,487,1517"/>
+<area shape="rect" id="node34" href="$classarm__compute_1_1experimental_1_1_n_e_elementwise_max.xhtml" title="Basic function to run NEArithmeticOperationKernel for max." alt="" coords="329,1541,476,1568"/>
+<area shape="rect" id="node35" href="$classarm__compute_1_1experimental_1_1_n_e_elementwise_min.xhtml" title="Basic function to run NEArithmeticOperationKernel for min." alt="" coords="331,1592,474,1619"/>
+<area shape="rect" id="node36" href="$classarm__compute_1_1experimental_1_1_n_e_elementwise_power.xhtml" title="Basic function to run NEArithmeticOperationKernel for power." alt="" coords="323,1643,482,1669"/>
+<area shape="rect" id="node37" href="$classarm__compute_1_1experimental_1_1_n_e_elementwise_squared_diff.xhtml" title="Basic function to run NEArithmeticOperationKernel for squared difference." alt="" coords="305,1693,500,1720"/>
+<area shape="rect" id="node38" href="$classarm__compute_1_1experimental_1_1_n_e_pixel_wise_multiplication.xhtml" title="Basic function to run NEPixelWiseMultiplicationKernel." alt="" coords="312,1744,493,1771"/>
+<area shape="rect" id="node39" href="$classarm__compute_1_1experimental_1_1_n_e_p_relu.xhtml" title="Basic function to run NEArithmeticOperationKernel for PRELU." alt="" coords="365,1795,440,1821"/>
+<area shape="rect" id="node40" href="$classarm__compute_1_1experimental_1_1_n_e_reshape.xhtml" title="Basic function to run NEReshapeLayerKernel." alt="" coords="355,1845,450,1872"/>
+<area shape="rect" id="node41" href="$classarm__compute_1_1experimental_1_1_n_e_slice.xhtml" title="Basic function to perform tensor slicing." alt="" coords="367,1896,438,1923"/>
+<area shape="rect" id="node42" href="$classarm__compute_1_1experimental_1_1_n_e_strided_slice.xhtml" title="Basic function to run NEStridedSliceKernel." alt="" coords="345,1947,461,1973"/>
+</map>
