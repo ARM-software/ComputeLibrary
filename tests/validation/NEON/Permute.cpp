@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,11 @@ namespace validation
 {
 namespace
 {
+const auto PermuteVectors2 = framework::dataset::make("PermutationVector",
+{
+    PermutationVector(0U, 1U),
+    PermutationVector(1U, 0U),
+});
 const auto PermuteVectors3 = framework::dataset::make("PermutationVector",
 {
     PermutationVector(2U, 0U, 1U),
@@ -61,7 +66,7 @@ const auto PermuteVectors4 = framework::dataset::make("PermutationVector",
     PermutationVector(3U, 0U, 2U, 1U),
     PermutationVector(0U, 3U, 2U, 1U)
 });
-const auto PermuteVectors         = concat(PermuteVectors3, PermuteVectors4);
+const auto PermuteVectors         = concat(concat(PermuteVectors2, PermuteVectors3), PermuteVectors4);
 const auto PermuteParametersSmall = concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()) * PermuteVectors;
 const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteVectors;
 } // namespace
@@ -71,7 +76,7 @@ TEST_SUITE(Permute)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-                                                framework::dataset::make("InputInfo",{  
+                                                framework::dataset::make("InputInfo",{
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
@@ -85,26 +90,26 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                                         TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32)  // permutation not supported
 
                                                                                     }),
-                                                framework::dataset::make("OutputInfo", { 
-                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),     
-                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     
+                                                framework::dataset::make("OutputInfo", {
+                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),
                                                                                         TensorInfo(TensorShape(5U, 7U), 1, DataType::U8),
-                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16), 
-                                                                                        TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),  
-                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16), 
-                                                                                        TensorInfo(TensorShape(3U, 5U, 7U, 7U), 1, DataType::S16), 
-                                                                                        TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),  
+                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
+                                                                                        TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),
+                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
+                                                                                        TensorInfo(TensorShape(3U, 5U, 7U, 7U), 1, DataType::S16),
+                                                                                        TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32)
 
                                                                                     })),
-                                                framework::dataset::make("PermutationVector", { 
+                                                framework::dataset::make("PermutationVector", {
                                                                                                 PermutationVector(2U, 1U, 0U),
                                                                                                 PermutationVector(2U, 2U, 1U),
                                                                                                 PermutationVector(1U, 1U, 1U),
                                                                                                 PermutationVector(2U, 0U, 1U),
-                                                                                                PermutationVector(2U, 0U, 1U), 
+                                                                                                PermutationVector(2U, 0U, 1U),
                                                                                                 PermutationVector(1U, 2U, 0U),
                                                                                                 PermutationVector(3U, 2U, 0U, 1U),
                                                                                                 PermutationVector(3U, 2U, 0U, 1U),

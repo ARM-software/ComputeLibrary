@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,15 +36,19 @@ namespace
 #include "arm_compute/core/NEON/kernels/convolution/common/shims.hpp"
 } // namespace
 
-#include <cstddef>
-#include <cstdint>
-
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 inline bool is_permutation_supported(const PermutationVector &v)
 {
+    static const std::array<PermutationVector, 2> permutations2 =
+    {
+        {
+            PermutationVector(0U, 1U),
+            PermutationVector(1U, 0U),
+        }
+    };
     static const std::array<PermutationVector, 6> permutations3 =
     {
         {
@@ -86,7 +90,8 @@ inline bool is_permutation_supported(const PermutationVector &v)
         }
     };
 
-    return (permutations3.end() != std::find(permutations3.begin(), permutations3.end(), v)) || (permutations4.end() != std::find(permutations4.begin(), permutations4.end(), v));
+    return (permutations2.end() != std::find(permutations2.begin(), permutations2.end(), v)) || (permutations3.end() != std::find(permutations3.begin(), permutations3.end(), v))
+           || (permutations4.end() != std::find(permutations4.begin(), permutations4.end(), v));
 }
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
@@ -129,7 +134,7 @@ void NEPermuteKernel::run_permute(const Window &window)
     // Output window
     Window                  window_out(window);
     const Window::Dimension zero_window = Window::Dimension(0, 0, 0);
-    for(size_t d = 0; d <= _perm.num_dimensions(); ++d)
+    for(size_t d = 0; d <= _output->info()->num_dimensions(); ++d)
     {
         window_out.set(d, zero_window);
     }
@@ -292,3 +297,4 @@ void NEPermuteKernel::run(const Window &window, const ThreadInfo &info)
         (this->*_func)(window);
     }
 }
+} // namespace arm_compute
