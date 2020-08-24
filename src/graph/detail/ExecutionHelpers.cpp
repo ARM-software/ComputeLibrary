@@ -196,9 +196,12 @@ void call_all_const_node_accessors(Graph &g)
 
     for(auto &node : nodes)
     {
-        if(node != nullptr && node->type() == NodeType::Const)
+        if(node != nullptr && node->type() == NodeType::Const && node->num_outputs())
         {
-            call_tensor_accessor(node->output(0));
+            if(!node->output(0)->bound_edges().empty())
+            {
+                call_tensor_accessor(node->output(0));
+            }
         }
     }
 }

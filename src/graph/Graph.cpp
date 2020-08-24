@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,9 +51,9 @@ bool Graph::remove_node(NodeID nid)
 
         // Remove output connections
         std::set<EdgeID> output_edges_copy = node->output_edges();
-        for(auto &outpud_eid : output_edges_copy)
+        for(auto &output_eid : output_edges_copy)
         {
-            remove_connection(outpud_eid);
+            remove_connection(output_eid);
         }
 
         // Remove nid from tagged nodes
