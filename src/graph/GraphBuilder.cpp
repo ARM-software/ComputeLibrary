@@ -139,6 +139,12 @@ NodeID GraphBuilder::add_activation_node(Graph &g, NodeParams params, NodeIdxPai
     return create_simple_single_input_output_node<ActivationLayerNode>(g, params, input, act_info, out_quant_info);
 }
 
+NodeID GraphBuilder::add_arg_min_max_node(Graph &g, NodeParams params, NodeIdxPair input, ReductionOperation op, unsigned int axis,
+                                          DataType out_data_type, const QuantizationInfo &out_quant_info)
+{
+    return create_simple_single_input_output_node<ArgMinMaxLayerNode>(g, params, input, op, axis, out_data_type, out_quant_info);
+}
+
 NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, float epsilon,
                                                   ITensorAccessorUPtr mean_accessor, ITensorAccessorUPtr var_accessor,
                                                   ITensorAccessorUPtr beta_accessor, ITensorAccessorUPtr gamma_accessor)

@@ -238,6 +238,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
     {
         case NodeType::ActivationLayer:
             return detail::create_activation_layer<CLActivationLayer, CLTargetInfo>(*polymorphic_downcast<ActivationLayerNode *>(node));
+        case NodeType::ArgMinMaxLayer:
+            return detail::create_arg_min_max_layer<CLArgMinMaxLayer, CLTargetInfo>(*polymorphic_downcast<ArgMinMaxLayerNode *>(node));
         case NodeType::BatchNormalizationLayer:
             return detail::create_batch_normalization_layer<CLBatchNormalizationLayer, CLTargetInfo>(*polymorphic_downcast<BatchNormalizationLayerNode *>(node));
         case NodeType::BoundingBoxTransformLayer:

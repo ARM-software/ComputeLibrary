@@ -131,6 +131,43 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
     return RETURN_UNIQUE_PTR(func);
 }
 
+/** Creates a backend argminmax layer function
+ *
+ * @tparam ArgMinMaxLayerFunction Backend activation function
+ * @tparam TargetInfo             Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend argminmax layer function
+ */
+template <typename ArgMinMaxLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_arg_min_max_layer(ArgMinMaxLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    const ReductionOperation         op     = node.reduction_operation();
+    unsigned int                     axis   = node.axis();
+
+    // Create function
+    auto func = support::cpp14::make_unique<ArgMinMaxLayerFunction>();
+    func->configure(input, axis, output, op);
+
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Shape: " << input->info()->tensor_shape()
+                               << " Reduction Operation: " << op
+                               << " axis: " << axis
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
 /** Create a backend batch normalization layer function
  *
  * @tparam BatchNormalizationLayerFunction Backend batch normalization function

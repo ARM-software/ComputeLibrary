@@ -31,6 +31,7 @@ namespace graph
 // Forward declarations
 class INode;
 class ActivationLayerNode;
+class ArgMinMaxLayerNode;
 class BatchNormalizationLayerNode;
 class BoundingBoxTransformLayerNode;
 class ChannelShuffleLayerNode;

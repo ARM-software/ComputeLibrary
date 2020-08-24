@@ -63,6 +63,8 @@ Status NENodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::ArgMinMaxLayer:
+            return detail::validate_arg_min_max_layer<NEArgMinMaxLayer>(*polymorphic_downcast<ArgMinMaxLayerNode *>(node));
         case NodeType::BoundingBoxTransformLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : BoundingBoxTransformLayer");
         case NodeType::ChannelShuffleLayer:

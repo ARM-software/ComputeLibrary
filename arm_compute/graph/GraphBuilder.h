@@ -84,6 +84,21 @@ public:
      */
     static NodeID add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
                                       const QuantizationInfo &out_quant_info = QuantizationInfo());
+    /** Adds an activation layer node to the graph
+     *
+     * @param[in] g              Graph to add the node to
+     * @param[in] params         Common node parameters
+     * @param[in] input          Input to the activation layer node as a NodeID-Index pair
+     * @param[in] op             Reduction Operation: min or max
+     * @param[in] axis           Axis to perform reduction operation across
+     * @param[in] out_data_type  (Optional) Output data type
+     * @param[in] out_quant_info (Optional) Output quantization info
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_arg_min_max_node(Graph &g, NodeParams params, NodeIdxPair input, ReductionOperation op, unsigned int axis,
+                                       DataType                out_data_type  = DataType::UNKNOWN,
+                                       const QuantizationInfo &out_quant_info = QuantizationInfo());
     /** Adds a batch normalization layer node to the graph
      *
      * @param[in] g              Graph to add the node to

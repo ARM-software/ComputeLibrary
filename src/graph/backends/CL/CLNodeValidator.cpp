@@ -63,6 +63,8 @@ Status CLNodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::ArgMinMaxLayer:
+            return detail::validate_arg_min_max_layer<CLArgMinMaxLayer>(*polymorphic_downcast<ArgMinMaxLayerNode *>(node));
         case NodeType::BoundingBoxTransformLayer:
             return detail::validate_bounding_box_transform_layer<CLBoundingBoxTransform>(*polymorphic_downcast<BoundingBoxTransformLayerNode *>(node));
         case NodeType::ChannelShuffleLayer:

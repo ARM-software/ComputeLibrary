@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_GRAPH_NODES_H
 
 #include "arm_compute/graph/nodes/ActivationLayerNode.h"
+#include "arm_compute/graph/nodes/ArgMinMaxLayerNode.h"
 #include "arm_compute/graph/nodes/BatchNormalizationLayerNode.h"
 #include "arm_compute/graph/nodes/BoundingBoxTransformLayerNode.h"
 #include "arm_compute/graph/nodes/ChannelShuffleLayerNode.h"

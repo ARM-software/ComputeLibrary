@@ -65,6 +65,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::ActivationLayer:
             os << "ActivationLayer";
             break;
+        case NodeType::ArgMinMaxLayer:
+            os << "ArgMinMaxLayer";
+            break;
         case NodeType::BatchNormalizationLayer:
             os << "BatchNormalizationLayer";
             break;
