@@ -122,17 +122,25 @@ static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
     [](const GemmArgs &args) { return new GemmInterleaved<gemm_s8_12x8, int8_t, int32_t>(args); }
 },
 {
-    GemmMethod::GEMM_INTERLEAVED,
-    "gemm_s16_12x8",
+    GemmMethod::GEMM_INTERLEAVED_2D,
+    "gemm_s16_12x8_2d",
     nullptr,
-    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53; },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53 && args._Msize > 4 && (args._Msize / args._maxthreads) < 8; },
+    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<gemm_s16_12x8, int8_t, int32_t>(args); },
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "gemm_s16_12x8_1d",
+    nullptr,
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53 && args._Msize > 4; },
     [](const GemmArgs &args) { return new GemmInterleaved<gemm_s16_12x8, int8_t, int32_t>(args); },
 },
 {
     GemmMethod::GEMM_INTERLEAVED_2D,
     "gemm_s8_4x4_2d",
     nullptr,
-    [](const GemmArgs &args) { return (args._maxthreads >= 8) && (args._Msize >= 8) && (args._Nsize >= 8); },
+    [](const GemmArgs &args) { return ((args._maxthreads >= 8) && (args._Msize >= 8) && (args._Nsize >= 8)) ||
+                                       ((args._Msize / args._maxthreads) < 4); },
     [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<gemm_s8_4x4, int8_t, int32_t>(args); }
 },
 {

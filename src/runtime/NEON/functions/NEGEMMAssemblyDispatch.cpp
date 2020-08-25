@@ -415,34 +415,6 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
         in1_ptr        = reinterpret_cast<const TypeInput *>(_b->buffer() + _b->info()->offset_first_element_in_bytes());
     }
 
-    // Set workspace if needed and reset number of threads as buffer manager gets re-created with max_threads
-    if(_workspace.buffer() != nullptr)
-    {
-        _gemm_kernel_asm->set_working_space(reinterpret_cast<void *>(_workspace.buffer()));
-        const unsigned int window_size = _gemm_kernel_asm->get_window_size().total_size();
-        unsigned int       num_threads = NEScheduler::get().num_threads();
-        if(window_size < num_threads)
-        {
-            num_threads = window_size;
-            _gemm_kernel_asm->set_nthreads(num_threads);
-        }
-    }
-
-    // Prepare assembly kernel
-    prepare();
-
-    TypeOutput *bias = nullptr;
-    // Setup up matrix bias in the assembly kernel, it's just a pointer to matrix C.
-    if(_c && _c->info()->data_type() != DataType::S32)
-    {
-        bias = reinterpret_cast<TypeOutput *>(_c->buffer() + _c->info()->offset_first_element_in_bytes());
-    }
-    // Set gemm parameters
-    _gemm_kernel_asm->set_arrays(in0_ptr, lda, batch_stride_a, multi_stride_a,
-                                 in1_ptr, ldb, multi_stride_b,
-                                 out_ptr, ldd, batch_stride_d, multi_stride_d,
-                                 bias, 0);
-    // Schedule assembly kernel
     IScheduler::Hints scheduling_hint = IScheduler::Hints(Window::DimX);
     if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED && _d->info()->data_type() == DataType::F32)
     {
@@ -463,6 +435,41 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
         scheduling_hint             = IScheduler::Hints(IScheduler::split_dimensions_all, IScheduler::StrategyHint::STATIC, granule_threshold);
     }
 
+    // Set workspace if needed and reset number of threads as buffer manager gets re-created with max_threads
+    if(_workspace.buffer() != nullptr)
+    {
+        _gemm_kernel_asm->set_working_space(reinterpret_cast<void *>(_workspace.buffer()));
+        const unsigned int split_dim   = scheduling_hint.split_dimension();
+        const unsigned int window_size = _gemm_kernel_asm->get_window_size().total_size();
+        unsigned int       num_threads = NEScheduler::get().num_threads();
+        if(window_size < num_threads)
+        {
+            num_threads = window_size;
+        }
+        if(split_dim != IScheduler::split_dimensions_all)
+        {
+            // Make sure the kernel does not expect more threads than we can actually spawn
+            const unsigned int num_iterations = _optimised_kernel.get()->window().num_iterations(split_dim);
+            num_threads                       = std::min(num_iterations, num_threads);
+        }
+        _gemm_kernel_asm->set_nthreads(num_threads);
+    }
+
+    // Prepare assembly kernel
+    prepare();
+
+    TypeOutput *bias = nullptr;
+    // Setup up matrix bias in the assembly kernel, it's just a pointer to matrix C.
+    if(_c && _c->info()->data_type() != DataType::S32)
+    {
+        bias = reinterpret_cast<TypeOutput *>(_c->buffer() + _c->info()->offset_first_element_in_bytes());
+    }
+    // Set gemm parameters
+    _gemm_kernel_asm->set_arrays(in0_ptr, lda, batch_stride_a, multi_stride_a,
+                                 in1_ptr, ldb, multi_stride_b,
+                                 out_ptr, ldd, batch_stride_d, multi_stride_d,
+                                 bias, 0);
+    // Schedule assembly kernel
     NEScheduler::get().schedule(_optimised_kernel.get(), scheduling_hint);
 }
 
