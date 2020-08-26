@@ -295,7 +295,7 @@ TEST_SUITE(GEMMMatrixMultiplyReshapedOnlyRHS)
  *     - Incorrect input0 dimension when input is reinterpreted as 3D: input0->dimension(1) * input0->dimension(2) != m
  *     - Correct support for creating an OpenCL image object from buffer
  *     - Incorrect support for creating an OpenCL image object from buffer. N0 is 2 but it can only be 4,8 and 16
- *     - Incorrect support for creating an OpenCL image object from buffer. Data type is F16 but it can only be F32
+ *     - Correct F16 support for creating an OpenCL image object from buffer.
  */
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
 framework::dataset::make("batch_size",          { 1, 1, 1, 1, 1, 1, 2, 1, 1, 1 }),
@@ -311,7 +311,7 @@ framework::dataset::make("data_type_input1",    { DataType::F32, DataType::F32, 
 framework::dataset::make("data_type_input2",    { DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F16})),
 framework::dataset::make("data_type_output",    { DataType::F16, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F16})),
 framework::dataset::make("Beta",                { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f , 1.0f})),
-framework::dataset::make("Expected",            { false, false, false, false, false, false, false, true, false, false })),
+framework::dataset::make("Expected",            { false, false, false, false, false, false, false, true, false, true })),
 b_value, m0_value, n0_value, k0_value, broadcast_bias, input_as_3d, depth_output_gemm3d, export_to_cl_image, dt_input0, dt_intpu1, dt_input2, dt_output, beta, expected)
 {
     bool expected_value = expected;

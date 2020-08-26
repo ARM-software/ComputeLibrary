@@ -65,7 +65,7 @@ Status validate_image2d_support_on_rhs(const ITensorInfo &tensor_reshaped_info, 
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.n0 == 2) || (rhs_info.n0 == 3), "Export to cl_image only supported with n0 = 4, 8 or 16");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.k0 == 2) || (rhs_info.k0 == 3), "Export to cl_image only supported with k0 = 4, 8 or 16");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(tensor_reshaped_info.data_type() != DataType::F32, "Export to cl_image only supported with F32 data type");
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(&tensor_reshaped_info, DataType::F32, DataType::F16);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()), "The extension cl_khr_image2d_from_buffer is not supported on the target platform");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0, "Impossible to retrieve the cl_image pitch alignment");
 

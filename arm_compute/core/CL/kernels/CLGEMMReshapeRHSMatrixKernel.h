@@ -53,7 +53,7 @@ public:
      *       Since the OpenCL image object is created importing the OpenCL buffer, the following conditions are required:
      *       -# rhs_info.n0 can only be 4, 8 and 16
      *       -# rhs_info.k0 can only be 4, 8 and 16
-     *       -# Data type can only be F32
+     *       -# Data type can only be F32, F16
      *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
      *       -# output width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
      *       -# output (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
@@ -77,7 +77,7 @@ public:
      *       Since the OpenCL image object is created importing the OpenCL buffer, the following conditions are required:
      *       -# rhs_info.n0 can only be 4, 8 and 16
      *       -# rhs_info.k0 can only be 4, 8 and 16
-     *       -# Data type can only be F32
+     *       -# Data type can only be F32, F16
      *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
      *       -# output width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
      *       -# output (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
@@ -102,7 +102,7 @@ public:
      *       Since the OpenCL image object is created importing the OpenCL buffer, the following conditions are required:
      *       -# rhs_info.n0 can only be 4, 8 and 16
      *       -# rhs_info.k0 can only be 4, 8 and 16
-     *       -# Data type can only be F32
+     *       -# Data type can only be F32, F16
      *       -# The platform should support the OpenCL cl_khr_image2d_from_buffer extension
      *       -# output width should be less or equal to (CL_DEVICE_IMAGE2D_MAX_WIDTH * 4)
      *       -# output (height * depth) should be less or equal to CL_DEVICE_IMAGE2D_MAX_HEIGHT
