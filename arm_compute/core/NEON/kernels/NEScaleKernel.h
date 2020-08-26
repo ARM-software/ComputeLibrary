@@ -83,34 +83,44 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
-    /** function to perform scale using nearest interpolation on the given window */
-    void scale_nearest_nchw(const Window &window);
-    /** function to perform scale using bilinear interpolation on the given window */
-    void scale_bilinear_nchw(const Window &window);
     /** function to perform scale using area interpolation on the given window
      *
      *  @note Used only in case down-sampling.
      */
-    void scale_area_nchw(const Window &window);
-    /** function to perform scale on the given window */
-    void scale_nhwc(const Window &window);
-    /** Scale function to use for the particular interpolation type passed to configure() */
-    void (NEScaleKernel::*_func)(const Window &window);
+    void scale_area_nchw_u8(const Window &window);
 
+    /** function to perform scale using bilinear interpolation on the given window */
+    template <typename T>
+    void scale_bilinear_nchw(const Window &window);
+    /** function to perform scale using bilinear interpolation on the given window */
+    template <typename T>
+    void scale_bilinear_nhwc(const Window &window);
+    /** function to perform scale using bilinear interpolation on the given window */
+    template <typename T>
+    void scale_bilinear_qasymm(const Window &window);
+
+    /** function to perform scale using nearest neighbour on the given window */
+    template <typename T>
+    void scale_nearest_nchw(const Window &window);
+    /** function to perform scale using nearest neighbour on the given window */
+    template <typename T>
+    void scale_nearest_nhwc(const Window &window);
+
+    /** Scale function to use for the particular function to use */
+    using ScaleFunctionPtr = void (NEScaleKernel::*)(const Window &window);
+
+    ScaleFunctionPtr    _func;
     const ITensor      *_offsets;
     const ITensor      *_dx;
     const ITensor      *_dy;
     const ITensor      *_input;
     ITensor            *_output;
     InterpolationPolicy _policy;
-    BorderSize          _border_size;
     BorderMode          _border_mode;
     PixelValue          _constant_border_value;
     float               _sampling_offset;
-    bool                _use_padding;
     bool                _align_corners;
 };
 } // namespace arm_compute

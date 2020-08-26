@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,6 @@
 
 #include "arm_compute/core/Types.h"
 #include "tests/framework/datasets/ContainerDataset.h"
-
-#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
