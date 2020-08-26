@@ -102,6 +102,27 @@ private:
     GraphEdsr model{};
 };
 
+/** Internal implementation of UINT8 EDSR with some modifications from the paper.
+ * The sub-pixel convolution has been replaced with a deconvolution layer. This
+ * operation is mathematically the same.
+ *
+ * Convolution replaced by deconvolution:
+ *      https://arxiv.org/abs/1609.07009
+ *      "Is the deconvolution layer the same as a convolutional layer?"
+ *      Wenzhe Shi, Jose Caballero, Lucas Theis, Ferenc Huszar, Andrew Aitken, Christian Ledig, Zehan Wang
+ *
+ * Original model is:
+ *      https://arxiv.org/abs/1707.02921
+ *      "Enhanced Deep Residual Networks for Single Image Super-Resolution"
+ *      Bee Lim, Sanghyun Son, Heewon Kim, Seungjun Nah, Kyoung Mu Lee
+ *
+ * @note To list all the possible arguments execute the binary appended with the --help option
+ *
+ * @param[in] argc Number of arguments
+ * @param[in] argv Arguments
+ *
+ * @return Return code
+ */
 int main(int argc, char **argv)
 {
     return run_example<GraphEdsrExample>(argc, argv);
