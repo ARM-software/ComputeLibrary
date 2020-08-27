@@ -70,6 +70,10 @@ const auto ArithmeticSubtractionU8Dataset = combine(combine(framework::dataset::
 const auto ArithmeticSubtractionS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }),
                                                              framework::dataset::make("DataType", DataType::S16)),
                                                      framework::dataset::make("DataType", DataType::S16));
+
+const auto ArithmeticSubtractionS32Dataset = combine(combine(framework::dataset::make("DataType", DataType::S32),
+                                                             framework::dataset::make("DataType", DataType::S32)),
+                                                     framework::dataset::make("DataType", DataType::S32));
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto ArithmeticSubtractionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16),
                                                               framework::dataset::make("DataType", DataType::F16)),
@@ -120,10 +124,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
         })),
         framework::dataset::make("ConvertPolicy",{ ConvertPolicy::WRAP,
                                                 ConvertPolicy::SATURATE,
                                                 ConvertPolicy::SATURATE,
+                                                ConvertPolicy::WRAP,
                                                 ConvertPolicy::WRAP,
                                                 ConvertPolicy::WRAP,
         })),
@@ -269,6 +275,24 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticSubtractionFixture<int16_t>, framew
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END() // S16
+
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticSubtractionS32Dataset),
+                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                     OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticSubtractionFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ArithmeticSubtractionS32Dataset),
+                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                   OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // S32
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

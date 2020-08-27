@@ -44,6 +44,13 @@ inline int16_t sub_sat(const int16_t &a, const int16_t &b)
     return vget_lane_s16(vqsub_s16(va, vb), 0);
 }
 
+inline int32_t sub_sat(const int32_t &a, const int32_t &b)
+{
+    const int32x2_t va = { a, 0 };
+    const int32x2_t vb = { b, 0 };
+    return vget_lane_s32(vqsub_s32(va, vb), 0);
+}
+
 inline float sub_sat(const float &a, const float &b)
 {
     // No notion of saturation exists in floating point

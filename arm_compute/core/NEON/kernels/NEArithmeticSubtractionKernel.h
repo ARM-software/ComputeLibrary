@@ -63,12 +63,13 @@ public:
      *   - (S16,U8)                         -> S16
      *   - (U8,S16)                         -> S16
      *   - (S16,S16)                        -> S16
+     *   - (S32,S32)                        -> S32
      *   - (F16,F16)                        -> F16
      *   - (F32,F32)                        -> F32
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32.
+     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32.
      * @param[in]  policy Overflow policy. Convert policy cannot be WRAP if datatype is quantized.
      */
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy);
@@ -83,14 +84,13 @@ public:
      *   - (S16,U8)                         -> S16
      *   - (U8,S16)                         -> S16
      *   - (S16,S16)                        -> S16
+     *   - (S32,S32)                        -> S32
      *   - (F16,F16)                        -> F16
      *   - (F32,F32)                        -> F32
      *
-     * @note Convert policy cannot be WRAP if datatype is QASYMM8
-     *
-     * @param[in] input1 An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[in] input2 An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[in] output The output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32.
+     * @param[in] input1 An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[in] input2 An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[in] output The output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32.
      * @param[in] policy Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
      *
      * @return a status
@@ -103,9 +103,9 @@ public:
 private:
     /** Common signature for all the specialised sub functions
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32.
+     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32.
      * @param[in]  window Region on which to execute the kernel.
      * @param[in]  is_sat Flag to indicate if the policy is SATURATE.
      */
