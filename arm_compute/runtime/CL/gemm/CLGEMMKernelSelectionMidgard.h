@@ -44,9 +44,9 @@ public:
     CLGEMMKernelType select_kernel(const CLGEMMKernelSelectionParams &params) override;
 
 private:
-    CLGEMMKernelType default_f32(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant);
-    CLGEMMKernelType default_f16(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant);
-    CLGEMMKernelType default_q8(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant);
+    CLGEMMKernelType default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 };
 } // namespace cl_gemm
 } // namespace arm_compute

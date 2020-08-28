@@ -45,7 +45,7 @@ CLGEMMKernelType CLGEMMKernelSelectionMidgard::select_kernel(const CLGEMMKernelS
     // _target could be used in the future to have a dedicated heuristic for each GPU IP
     ARM_COMPUTE_UNUSED(_target);
 
-    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMKernelSelectionMidgard::*)(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant);
+    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMKernelSelectionMidgard::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 
     // Configurations for Midgard architectures
     static std::map<DataType, FunctionExecutorPtr> gemm_configs =
@@ -62,31 +62,31 @@ CLGEMMKernelType CLGEMMKernelSelectionMidgard::select_kernel(const CLGEMMKernelS
 
     if(gemm_configs.find(data_type) != gemm_configs.end())
     {
-        return (this->*gemm_configs[data_type])(params.m, params.n, params.k, params.is_rhs_constant);
+        return (this->*gemm_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
     }
 
     ARM_COMPUTE_ERROR("Not supported data type");
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionMidgard::default_f32(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMKernelSelectionMidgard::default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
-    ARM_COMPUTE_UNUSED(n, k);
+    ARM_COMPUTE_UNUSED(n, k, b);
 
     // We reshape the matrices only if we do not have the vector-by-matrix case and we reshape the matrix B only once
     return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED_V1 : CLGEMMKernelType::NATIVE_V1;
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionMidgard::default_f16(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMKernelSelectionMidgard::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
-    ARM_COMPUTE_UNUSED(n, k);
+    ARM_COMPUTE_UNUSED(n, k, b);
 
     // We reshape the matrices only if we do not have the vector-by-matrix case and we reshape the matrix B only once
     return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED_V1 : CLGEMMKernelType::NATIVE_V1;
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMKernelSelectionMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
-    ARM_COMPUTE_UNUSED(m, n, k, is_rhs_constant);
+    ARM_COMPUTE_UNUSED(m, n, k, b, is_rhs_constant);
 
     return CLGEMMKernelType::NATIVE;
 }
