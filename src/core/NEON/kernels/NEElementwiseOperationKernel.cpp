@@ -446,6 +446,21 @@ inline int elementwise_arithm_op_quantized_signed_broadcast_loop(int window_star
 }
 
 template <ComparisonOperation op, typename InputScalarType, typename InputVectorType>
+inline int elementwise_comp_op_8_loop(int window_start_x, int window_end_x, int window_step_x,
+                                      const InputScalarType *input1_ptr, const InputScalarType *input2_ptr, uint8_t *output_ptr)
+{
+    int x = window_start_x;
+    for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    {
+        const auto a   = wrapper::vloadq(input1_ptr + x);
+        const auto b   = wrapper::vloadq(input2_ptr + x);
+        const auto res = elementwise_comp_op<op, InputVectorType, uint8x16_t>(a, b);
+        wrapper::vstore(output_ptr + x, res);
+    }
+    return x;
+}
+
+template <ComparisonOperation op, typename InputScalarType, typename InputVectorType>
 inline int elementwise_comp_op_16_loop(int window_start_x, int window_end_x, int window_step_x,
                                        const InputScalarType *input1_ptr, const InputScalarType *input2_ptr, uint8_t *output_ptr)
 {
@@ -521,6 +536,19 @@ inline int elementwise_comp_op_quantized_signed_loop(int window_start_x, int win
         const float32x4x4_t bf = load_quantized_signed(input2_ptr + x, voffset2, vscale2);
         const uint32x4x4_t  rf = elementwise_comp_op<op>(af, bf);
         store_quantized(output_ptr + x, rf);
+    }
+    return x;
+}
+
+template <ComparisonOperation op, typename InputScalarType, typename InputVectorType>
+inline int elementwise_comp_op_broadcast_8_loop(int window_start_x, int window_end_x, int window_step_x,
+                                                const InputScalarType *non_broadcast_input_ptr, const InputScalarType &broadcast_value, uint8_t *output_ptr, const bool reorder)
+{
+    int x = window_start_x;
+    for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    {
+        const auto a = elementwise_comp_op_broadcast<op, InputScalarType, InputVectorType, uint8x16_t>(wrapper::vloadq((non_broadcast_input_ptr + x)), broadcast_value, reorder);
+        wrapper::vstore(output_ptr + x, a);
     }
     return x;
 }
@@ -995,6 +1023,15 @@ void elementwise_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITe
 }
 
 template <ComparisonOperation op, typename InputScalarType, typename InputVectorType>
+void elementwise_comp_op_8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+    elementwise_op<InputScalarType, uint8_t, InputVectorType>(in1, in2, out, window,
+                                                              &elementwise_comp_op_scalar<op, InputScalarType>,
+                                                              &elementwise_comp_op_broadcast_8_loop<op, InputScalarType, InputVectorType>,
+                                                              &elementwise_comp_op_8_loop<op, InputScalarType, InputVectorType>);
+}
+
+template <ComparisonOperation op, typename InputScalarType, typename InputVectorType>
 void elementwise_comp_op_16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     elementwise_op<InputScalarType, uint8_t, InputVectorType>(in1, in2, out, window,
@@ -1101,6 +1138,7 @@ configure_comp_func(const ITensorInfo *input1, const ITensorInfo *input2, ITenso
 {
     static std::map<std::string, NEElementwiseOperationKernel::ElementwiseFunction *> map_function =
     {
+        { "op_U8_U8_U8", &elementwise_comp_op_8<op, uint8_t, uint8x16_t> },
         { "op_F32_F32_U8", &elementwise_comp_op_32<op, float, float32x4_t> },
         { "op_S16_S16_U8", &elementwise_comp_op_16<op, int16_t, int16x8_t> },
         { "op_S32_S32_U8", &elementwise_comp_op_32<op, int32_t, int32x4_t> },
@@ -1122,7 +1160,6 @@ NEElementwiseOperationKernel::NEElementwiseOperationKernel()
 
 Status NEElementwiseOperationKernel::validate_arguments_common(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &input2);
 
@@ -1194,6 +1231,7 @@ void NEArithmeticOperationKernel::configure(ArithmeticOperation op, const ITenso
 
 Status NEArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::S32, DataType::F32);
     // Validate in case of configured output
     if(output.total_size() > 0)
     {
@@ -1285,6 +1323,7 @@ void NEComparisonOperationKernel::configure(ComparisonOperation op, const ITenso
 
 Status NEComparisonOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::S32, DataType::F32);
     // Validate in case of configured output
     if(output.total_size() > 0)
     {

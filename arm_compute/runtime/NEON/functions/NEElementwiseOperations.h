@@ -270,7 +270,7 @@ private:
 
 /** Basic function to run @ref NEComparisonOperationKernel.
  *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+ * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a comparison operation between two tensors.
  */
 class NEElementwiseComparison : public IFunction
@@ -290,7 +290,7 @@ public:
     NEElementwiseComparison &operator=(NEElementwiseComparison &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] input1 First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[out]     output Output tensor. Data types supported: U8.
      * @param[in]      op     Comparison Operation to be performed.
@@ -298,7 +298,7 @@ public:
     void configure(ITensor *input1, ITensor *input2, ITensor *output, ComparisonOperation op);
     /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: U8.
      * @param[in] op     Comparison Operation to be performed.
@@ -317,7 +317,7 @@ private:
 
 /** Basic function to run @ref NEComparisonOperationKernel
  *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+ * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a comparison operation between two tensors.
  */
 template <ComparisonOperation op>
@@ -338,14 +338,14 @@ public:
     NEElementwiseComparisonStatic &operator=(NEElementwiseComparisonStatic &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] input1 First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[out]     output Output tensor. Data types supported: U16/U32.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: U16/U32.
      *
