@@ -1340,7 +1340,7 @@ or simply remove the build parameter as build=cross_compile is the default value
 
 The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.
 
-@note The following command lines assume the arm_compute binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
+@note The following command lines assume the arm_compute libraries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built libraries with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
 
 To cross compile a NEON example for Linux 32bit:
 
@@ -1445,9 +1445,9 @@ For Android, the library was successfully built and tested using Google's standa
 
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
-- Download the NDK r18b from here: https://developer.android.com/ndk/downloads/index.html
+- Download the NDK r18b from here: https://developer.android.com/ndk/downloads/index.html to directory $NDK
 - Make sure you have Python 2.7 installed on your machine.
-- Generate the 32 and/or 64 toolchains by running the following commands:
+- Generate the 32 and/or 64 toolchains by running the following commands to your toolchain dirctory $MY_TOOLCHAINS:
 
 
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r18b --stl libc++ --api 21
@@ -1477,7 +1477,7 @@ To cross-compile the library in asserts mode, with GLES_COMPUTE only support, fo
 
 The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.
 
-@note The following command lines assume the arm_compute binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
+@note The following command lines assume the arm_compute libraries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built libraries with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
 
 Once you've got your Android standalone toolchain built and added to your path you can do the following:
 
