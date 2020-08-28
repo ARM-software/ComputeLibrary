@@ -55,27 +55,27 @@ public:
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
-     *   - (U8,U8)                         -> U8
-     *   - (U8,U8)                         -> S16
+     *   - (U8,U8)                         -> U8, S16
      *   - (U8,S16)                        -> S16
      *   - (S16,U8)                        -> S16
      *   - (S16,S16)                       -> S16
+     *   - (S32,S32)                       -> S32
      *   - (F16,F16)                       -> F16
      *   - (F32,F32)                       -> F32
      *   - (QASYMM8,QASYMM8)               -> QASYMM8
      *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16)               -> QSYMM16
-     *   - (QSYMM16,QSYMM16)               -> S32
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16, S32
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in]  input1          First input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in]  input2          Second input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[out] output          Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
+     * @param[in]  input1          First input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
+     * @param[in]  input2          Second input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
+     * @param[out] output          Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
      * @param[in]  scale           Scale to apply after multiplication.
      *                             Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
-     * @param[in]  overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8, QASYMM8_SIGNED or QSYMM16.
+     *                             If both @p input1, @p input2 and @p output are of datatype S32, scale cannot be 1/255
+     * @param[in]  overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if any of the inputs is of quantized datatype
      * @param[in]  rounding_policy Rounding policy.
      */
     void configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
@@ -83,27 +83,27 @@ public:
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
-     *   - (U8,U8)                         -> U8
-     *   - (U8,U8)                         -> S16
+     *   - (U8,U8)                         -> U8, S16
      *   - (U8,S16)                        -> S16
      *   - (S16,U8)                        -> S16
      *   - (S16,S16)                       -> S16
+     *   - (S32,S32)                       -> S32
      *   - (F16,F16)                       -> F16
      *   - (F32,F32)                       -> F32
      *   - (QASYMM8,QASYMM8)               -> QASYMM8
      *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16)               -> QSYMM16
-     *   - (QSYMM16,QSYMM16)               -> S32
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16, S32
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in] input1          First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in] input2          Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in] output          Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
+     * @param[in] input1          First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
+     * @param[in] input2          Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
+     * @param[in] output          Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
      * @param[in] scale           Scale to apply after multiplication.
      *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
-     * @param[in] overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8, QASYMM8_SIGNED or QSYMM16.
+     *                            If both @p input1, @p input2 and @p output are of datatype S32, scale cannot be 1/255
+     * @param[in] overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if any of the inputs is of quantized datatype
      * @param[in] rounding_policy Rounding policy.
      *
      * @return a status

@@ -43,6 +43,8 @@ struct is_floating_point
 
 namespace
 {
+constexpr float scale1_constant = 1.f;
+
 /** Compute the result of `src1 * src2 * scale`. The result type always matches the type of @p src2.
  *
  * @param[in] src1            An input value. Data types supported: U8/S16/F16/F32.
@@ -86,6 +88,90 @@ T3 mul(const T1 src1, const T2 src2, float scale, ConvertPolicy convert_policy, 
         const auto result = static_cast<T3>((convert_policy == ConvertPolicy::SATURATE) ? saturate_cast<T3>(rounded_val) : rounded_val);
 
         return result;
+    }
+}
+
+template <>
+int32_t mul(const int32_t src1, const int32_t src2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
+{
+    const int64_t intermediate_val = static_cast<int64_t>(src1) * static_cast<int64_t>(src2);
+
+    if(std::abs(scale - scale1_constant) < 0.00001f)
+    {
+        // Use bit-accurate integer arithmetic for scale == 1
+        // Apply conversion
+        if(convert_policy == ConvertPolicy::SATURATE)
+        {
+            return saturate_cast<int32_t>(intermediate_val);
+        }
+        else
+        {
+            // Correct wrapping behaviour for int32_t
+            const auto i32_hi              = static_cast<int64_t>(std::numeric_limits<int32_t>::max());
+            const auto i32_lo              = static_cast<int64_t>(std::numeric_limits<int32_t>::lowest());
+            const auto i32_wi              = static_cast<int64_t>(1) << 32;
+            int64_t    wrapped_rounded_val = intermediate_val - i32_wi * static_cast<int64_t>(support::cpp11::trunc(static_cast<double>(intermediate_val) / i32_wi));
+            if(wrapped_rounded_val <= i32_hi)
+            {
+                return static_cast<int32_t>(wrapped_rounded_val);
+            }
+            else
+            {
+                // Values beyond i32_hi wrap around to negatives
+                return static_cast<int32_t>((wrapped_rounded_val - i32_hi) + i32_lo - 1);
+            }
+        }
+    }
+    else
+    {
+        // Use double arithmetic for scale != 1; may not be bit-accurate
+        // Apply scaling
+        // scale == 1 / 2^scale_exponent
+        int scale_exponent = 0;
+        std::frexp(scale, &scale_exponent);
+        // Store the positive exponent. We know that we compute 1/2^n
+        // Additionally we need to subtract 1 to compensate that frexp used a mantissa of 0.5
+        scale_exponent         = std::abs(scale_exponent - 1);
+        const double scale_inv = static_cast<int64_t>(1) << scale_exponent;
+        const double val       = intermediate_val / scale_inv;
+        // Apply rounding
+        double rounded_val = 0;
+        switch(rounding_policy)
+        {
+            case(RoundingPolicy::TO_ZERO):
+                rounded_val = support::cpp11::trunc(val);
+                break;
+            case(RoundingPolicy::TO_NEAREST_UP):
+                rounded_val = round_half_up(val);
+                break;
+            case(RoundingPolicy::TO_NEAREST_EVEN):
+                rounded_val = round_half_even(val);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Unsupported rounding policy");
+        }
+        // Apply conversion
+        if(convert_policy == ConvertPolicy::SATURATE)
+        {
+            return saturate_cast<int32_t>(rounded_val);
+        }
+        else
+        {
+            // Correct wrapping behaviour for int32_t
+            const auto i32_hi              = static_cast<double>(std::numeric_limits<int32_t>::max());
+            const auto i32_lo              = static_cast<double>(std::numeric_limits<int32_t>::lowest());
+            const auto i32_wi              = static_cast<double>(static_cast<int64_t>(1) << 32);
+            double     wrapped_rounded_val = rounded_val - i32_wi * std::floor(rounded_val / i32_wi);
+            if(wrapped_rounded_val <= i32_hi)
+            {
+                return static_cast<int32_t>(wrapped_rounded_val);
+            }
+            else
+            {
+                // Values beyond i32_hi wrap around to negatives
+                return static_cast<int32_t>((wrapped_rounded_val - i32_hi) + i32_lo - 1);
+            }
+        }
     }
 }
 
@@ -264,6 +350,7 @@ SimpleTensor<int16_t> pixel_wise_multiplication(const SimpleTensor<int16_t> &src
 // clang-format off
 template SimpleTensor<int16_t> pixel_wise_multiplication(const SimpleTensor<uint8_t> &src1, const SimpleTensor<int16_t> &src2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy, DataType dt_out, const QuantizationInfo &qout);
 template SimpleTensor<int32_t> pixel_wise_multiplication(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy, DataType dt_out, const QuantizationInfo &qout);
+template SimpleTensor<int32_t> pixel_wise_multiplication(const SimpleTensor<int32_t> &src1, const SimpleTensor<int32_t> &src2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy, DataType dt_out, const QuantizationInfo &qout);
 template SimpleTensor<float> pixel_wise_multiplication(const SimpleTensor<float> &src1, const SimpleTensor<float> &src2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy, DataType dt_out, const QuantizationInfo &qout);
 template SimpleTensor<half_float::half> pixel_wise_multiplication(const SimpleTensor<half_float::half> &src1, const SimpleTensor<half_float::half> &src2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy, DataType dt_out, const QuantizationInfo &qout);
 // clang-format on
