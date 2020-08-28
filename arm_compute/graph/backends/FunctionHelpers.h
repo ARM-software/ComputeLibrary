@@ -614,6 +614,45 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
     return RETURN_UNIQUE_PTR(func);
 }
 
+/** Create a backend depth to space layer function
+ *
+ * @tparam DepthToSpaceLayerNode Function Backend depth to space function
+ * @tparam TargetInfo            Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend depth to space layer function
+ */
+template <typename DepthToSpaceLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_depth_to_space_layer(DepthToSpaceLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<DepthToSpaceLayerFunction>();
+    func->configure(input, output, node.block_shape());
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Block Size: " << node.block_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
 /** Create a backend dequantize layer function
  *
  * @tparam DequantizationLayer Function Backend dequantize function

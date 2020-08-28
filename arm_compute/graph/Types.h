@@ -147,6 +147,7 @@ enum class NodeType
     ConcatenateLayer,
     ConvolutionLayer,
     DeconvolutionLayer,
+    DepthToSpaceLayer,
     DepthwiseConvolutionLayer,
     DequantizationLayer,
     DetectionOutputLayer,

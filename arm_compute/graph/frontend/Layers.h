@@ -489,6 +489,31 @@ private:
     const QuantizationInfo _weights_quant_info;
     const QuantizationInfo _out_quant_info;
 };
+
+/** DepthToSpace Layer */
+class DepthToSpaceLayer final : public ILayer
+{
+public:
+    /** Construct an DepthToSpace layer.
+     *
+     * @param[in] block_shape Block size to rearranged
+     */
+    DepthToSpaceLayer(int32_t block_shape)
+        : _block_shape(block_shape)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_depth_to_space_node(s.graph(), common_params, input, _block_shape);
+    }
+
+private:
+    int32_t _block_shape;
+};
+
 /** Dequantization Layer */
 class DequantizationLayer final : public ILayer
 {

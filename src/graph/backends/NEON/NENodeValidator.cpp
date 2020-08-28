@@ -72,6 +72,8 @@ Status NENodeValidator::validate(INode *node)
                    NEDirectConvolutionLayer,
                    NEGEMMConvolutionLayer,
                    NEWinogradConvolutionLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
+        case NodeType::DepthToSpaceLayer:
+            return detail::validate_depth_to_space_layer<NEDepthToSpaceLayer>(*polymorphic_downcast<DepthToSpaceLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DequantizationLayer:

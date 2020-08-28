@@ -137,6 +137,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_channel_shuffle_layer<NEChannelShuffleLayer, NETargetInfo>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:
             return detail::create_convolution_layer<NEConvolutionLayerFunctions, NETargetInfo>(*polymorphic_downcast<ConvolutionLayerNode *>(node), ctx);
+        case NodeType::DepthToSpaceLayer:
+            return detail::create_depth_to_space_layer<NEDepthToSpaceLayer, NETargetInfo>(*polymorphic_downcast<DepthToSpaceLayerNode *>(node));
         case NodeType::DeconvolutionLayer:
             return detail::create_deconvolution_layer<NEDeconvolutionLayer, NETargetInfo>(*polymorphic_downcast<DeconvolutionLayerNode *>(node), ctx);
         case NodeType::ConcatenateLayer:

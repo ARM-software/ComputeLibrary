@@ -173,6 +173,16 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_concatenate_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, const descriptors::ConcatLayerDescriptor &concat_descriptor);
+    /** Adds an depth to space layer node to the graph
+     *
+     * @param[in] g           Graph to add the node to
+     * @param[in] params      Common node parameters
+     * @param[in] input       Input to the depth to space layer node as a NodeID-Index pair
+     * @param[in] block_shape Block shape to reshape tensor with
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_depth_to_space_node(Graph &g, NodeParams params, NodeIdxPair input, int32_t block_shape);
     /** Adds a depth-wise convolution layer node to the graph
      *
      * @param[in] g                     Graph to add the node to

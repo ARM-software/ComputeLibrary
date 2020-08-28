@@ -250,6 +250,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_deconvolution_layer<CLDeconvolutionLayer, CLTargetInfo>(*polymorphic_downcast<DeconvolutionLayerNode *>(node), ctx);
         case NodeType::ConcatenateLayer:
             return detail::create_concatenate_layer<CLConcatenateLayer, CLTargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
+        case NodeType::DepthToSpaceLayer:
+            return detail::create_depth_to_space_layer<CLDepthToSpaceLayer, CLTargetInfo>(*polymorphic_downcast<DepthToSpaceLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::create_depthwise_convolution_layer<CLDepthwiseConvolutionLayer, CLTargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DequantizationLayer:

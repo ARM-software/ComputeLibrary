@@ -376,6 +376,12 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
 
     return conv_nid;
 }
+
+NodeID GraphBuilder::add_depth_to_space_node(Graph &g, NodeParams params, NodeIdxPair input, int32_t block_shape)
+{
+    return create_simple_single_input_output_node<DepthToSpaceLayerNode>(g, params, input, block_shape);
+}
+
 NodeID GraphBuilder::add_dequantization_node(Graph &g, NodeParams params, NodeIdxPair input)
 {
     return create_simple_single_input_output_node<DequantizationLayerNode>(g, params, input);

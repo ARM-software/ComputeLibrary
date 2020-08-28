@@ -38,6 +38,7 @@ class ConcatenateLayerNode;
 class ConstNode;
 class ConvolutionLayerNode;
 class DeconvolutionLayerNode;
+class DepthToSpaceLayerNode;
 class DepthwiseConvolutionLayerNode;
 class DequantizationLayerNode;
 class DetectionOutputLayerNode;
