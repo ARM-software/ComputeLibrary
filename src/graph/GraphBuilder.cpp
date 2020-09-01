@@ -552,6 +552,11 @@ NodeID GraphBuilder::add_generate_proposals_node(Graph &g, NodeParams params, No
     return nid;
 }
 
+NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
+{
+    return create_simple_single_input_output_node<L2NormalizeLayerNode>(g, params, input, axis, epsilon);
+}
+
 NodeID GraphBuilder::add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info)
 {
     return create_simple_single_input_output_node<NormalizationLayerNode>(g, params, input, norm_info);

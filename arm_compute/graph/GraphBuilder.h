@@ -336,6 +336,17 @@ public:
      */
     static NodeID add_generate_proposals_node(Graph &g, NodeParams params, NodeIdxPair scores, NodeIdxPair deltas,
                                               NodeIdxPair anchors, GenerateProposalsInfo info);
+    /** Adds a L2 Normalize layer node to the graph
+     *
+     * @param[in] g       Graph to add the node to
+     * @param[in] params  Common node parameters
+     * @param[in] input   Input to the normalization layer node as a NodeID-Index pair
+     * @param[in] axis    Axis to perform normalization on
+     * @param[in] epsilon Lower bound value for the normalization
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon);
     /** Adds a normalization layer node to the graph
      *
      * @param[in] g         Graph to add the node to

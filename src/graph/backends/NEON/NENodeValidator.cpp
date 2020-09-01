@@ -86,6 +86,8 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_detection_post_process_layer<NEDetectionPostProcessLayer>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::GenerateProposalsLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : GenerateProposalsLayer");
+        case NodeType::L2NormalizeLayer:
+            return detail::validate_l2_normalize_layer<NEL2NormalizeLayer>(*polymorphic_downcast<L2NormalizeLayerNode *>(node));
         case NodeType::NormalizePlanarYUVLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : NormalizePlanarYUVLayer");
         case NodeType::PadLayer:

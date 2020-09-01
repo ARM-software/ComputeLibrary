@@ -86,6 +86,8 @@ Status CLNodeValidator::validate(INode *node)
             return detail::validate_detection_post_process_layer<CPPDetectionPostProcessLayer>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::GenerateProposalsLayer:
             return detail::validate_generate_proposals_layer<CLGenerateProposalsLayer>(*polymorphic_downcast<GenerateProposalsLayerNode *>(node));
+        case NodeType::L2NormalizeLayer:
+            return detail::validate_l2_normalize_layer<CLL2NormalizeLayer>(*polymorphic_downcast<L2NormalizeLayerNode *>(node));
         case NodeType::NormalizePlanarYUVLayer:
             return detail::validate_normalize_planar_yuv_layer<CLNormalizePlanarYUVLayer>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
         case NodeType::PadLayer:

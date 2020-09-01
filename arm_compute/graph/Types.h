@@ -159,6 +159,7 @@ enum class NodeType
     FusedConvolutionBatchNormalizationLayer,
     FusedDepthwiseConvolutionBatchNormalizationLayer,
     GenerateProposalsLayer,
+    L2NormalizeLayer,
     NormalizationLayer,
     NormalizePlanarYUVLayer,
     PadLayer,

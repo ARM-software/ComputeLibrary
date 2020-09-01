@@ -52,6 +52,7 @@ class FusedConvolutionBatchNormalizationNode;
 class FusedDepthwiseConvolutionBatchNormalizationNode;
 class GenerateProposalsLayerNode;
 class InputNode;
+class L2NormalizeLayerNode;
 class NormalizationLayerNode;
 class NormalizePlanarYUVLayerNode;
 class OutputNode;

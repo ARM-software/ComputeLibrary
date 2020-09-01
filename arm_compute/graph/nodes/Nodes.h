@@ -46,6 +46,7 @@
 #include "arm_compute/graph/nodes/FusedDepthwiseConvolutionBatchNormalizationNode.h"
 #include "arm_compute/graph/nodes/GenerateProposalsLayerNode.h"
 #include "arm_compute/graph/nodes/InputNode.h"
+#include "arm_compute/graph/nodes/L2NormalizeLayerNode.h"
 #include "arm_compute/graph/nodes/NormalizationLayerNode.h"
 #include "arm_compute/graph/nodes/NormalizePlanarYUVLayerNode.h"
 #include "arm_compute/graph/nodes/OutputNode.h"

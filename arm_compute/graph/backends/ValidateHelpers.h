@@ -343,6 +343,31 @@ Status validate_generate_proposals_layer(GenerateProposalsLayerNode &node)
     return GenerateProposalsLayer::validate(scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
 }
 
+/** Validates a L2Normalization layer node
+ *
+ * @tparam L2Normalization layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename L2NormalizeLayer>
+Status validate_l2_normalize_layer(L2NormalizeLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating L2NormalizeLayerNode node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input   = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output  = get_backing_tensor_info(node.output(0));
+    int                       axis    = node.axis();
+    float                     epsilon = node.epsilon();
+
+    // Validate function
+    return L2NormalizeLayer::validate(input, output, axis, epsilon);
+}
+
 /** Validates a NormalizePlanarYUV layer node
  *
  * @tparam NormalizePlanarYUVLayer layer type

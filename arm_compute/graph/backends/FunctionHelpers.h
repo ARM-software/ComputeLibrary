@@ -1089,6 +1089,50 @@ std::unique_ptr<IFunction> create_generate_proposals_layer(GenerateProposalsLaye
     return RETURN_UNIQUE_PTR(func);
 }
 
+/** Create a backend l2 normalization layer function
+ *
+ * @tparam NormalizationLayerFunction Backend normalization function
+ * @tparam TargetInfo                 Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
+ *
+ * @return Backend normalization layer function
+ */
+template <typename L2NormalizeLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_l2_normalize_layer(L2NormalizeLayerNode &node, GraphContext &ctx)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
+    int                              axis    = node.axis();
+    float                            epsilon = node.epsilon();
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
+    auto func = support::cpp14::make_unique<L2NormalizeLayerFunction>(mm);
+    func->configure(input, output, axis, epsilon);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Axis: " << axis
+                               << " Epsilon: " << epsilon
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
 /** Create a backend normalization layer function
  *
  * @tparam NormalizationLayerFunction Backend normalization function

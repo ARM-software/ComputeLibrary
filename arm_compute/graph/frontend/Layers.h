@@ -838,6 +838,32 @@ private:
     GenerateProposalsInfo _info;
 };
 
+/** L2 Normalize Layer */
+class L2NormalizeLayer final : public ILayer
+{
+public:
+    /** Construct a L2 Normalize layer.
+     *
+     * @param[in] axis    Axis to perform normalization on
+     * @param[in] epsilon Lower bound value for the normalization
+     */
+    L2NormalizeLayer(int axis, float epsilon)
+        : _axis(axis), _epsilon(epsilon)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_l2_normalize_node(s.graph(), common_params, input, _axis, _epsilon);
+    }
+
+private:
+    int   _axis;
+    float _epsilon;
+};
+
 /** Normalization Layer */
 class NormalizationLayer final : public ILayer
 {
