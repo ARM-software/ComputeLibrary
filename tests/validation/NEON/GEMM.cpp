@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,6 +67,30 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 const auto data_interleave = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12);
 const auto data_transpose  = framework::dataset::make("M", 8, 14) * framework::dataset::make("N", 7, 14);
 
+/** Zero padding test */
+bool validate_zero_padding(unsigned int m_value, unsigned int k_value)
+{
+    const unsigned int M = m_value;
+    const unsigned int K = k_value;
+
+    const TensorShape lhs_shape(K, M);
+    const TensorShape lhs_shape_reshaped(K * 4, std::ceil(M / 4.0f));
+
+    // Create tensors
+    Tensor lhs = create_tensor<Tensor>(lhs_shape, DataType::U32);
+    Tensor dst = create_tensor<Tensor>(lhs_shape_reshaped, DataType::U32);
+
+    ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Validate zero-padding
+    NEGEMMInterleave4x4Kernel lhs_reshape;
+
+    lhs_reshape.configure(&lhs, &dst);
+
+    return lhs.info()->padding().empty();
+}
+
 } // namespace
 
 TEST_SUITE(NEON)
@@ -88,14 +112,41 @@ TEST_SUITE_END() // TRANSPOSE_1XW
 TEST_SUITE(INTERLEAVE_4X4)
 using NEGEMMInterleave4x4 = NESynthetizeFunctionWithZeroConstantBorder<NEGEMMInterleave4x4Kernel, 4>;
 
-TEST_SUITE(FP32)
-using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, float>;
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::F32))
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
+                   framework::dataset::make("M", { 1, 23, 63, 101 }),
+                   framework::dataset::make("K", { 1, 47, 29, 27 })),
+               m_value, k_value)
+{
+    bool status = validate_zero_padding(m_value, k_value);
+    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
+
+TEST_SUITE(U32)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, uint32_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END() // FP32
+TEST_SUITE_END() // U32
+
+TEST_SUITE(U16)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, uint16_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::U16))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // U16
+
+TEST_SUITE(U8)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, uint8_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::QASYMM8))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // U8
 
 TEST_SUITE_END() // INTERLEAVE_4X4
 
