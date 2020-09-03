@@ -243,6 +243,8 @@ v20.11 Public major release
    - @ref NEArithmeticSubtractionKernel
    - @ref NEPixelWiseMultiplication
    - @ref NEPixelWiseMultiplicationKernel
+   - @ref NEElementwiseDivision
+   - @ref NEDivisionOperationKernel
  - Interface change
    - Properly support softmax axis to have the same meaning as other major frameworks. That is, axis now defines the dimension
      on which Softmax/Logsoftmax is performed. E.g. for input of shape 4x5x6 and axis=1, softmax will be applied to 4x6=24 vectors of size 5.

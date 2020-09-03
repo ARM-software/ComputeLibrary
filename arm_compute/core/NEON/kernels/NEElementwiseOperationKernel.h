@@ -97,7 +97,7 @@ public:
     /** Default constructor */
     NEArithmeticOperationKernel() = default;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
+    /** Configure kernel
      *
      * @param[in]  op     Arithmetic operation to be executed.
      * @param[in]  input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
@@ -128,17 +128,17 @@ public:
     /** Default constructor */
     NEDivisionOperationKernel() = default;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
+    /** Configure kernel
      *
-     * @param[in]  input1 First tensor input info. Data types supported: F16/F32.
+     * @param[in]  input1 First tensor input info. Data types supported: S32/F16/F32.
      * @param[in]  input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[out] output Output tensor info. Data types supported: Same as @p input1.
      */
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDivisionOperationKernel
      *
-     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
+     * @param[in] input1 First tensor input info. Data types supported: S32/F16/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      *
@@ -157,7 +157,7 @@ public:
     /** Default constructor */
     NEPowerOperationKernel() = default;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
+    /** Configure kernel
      *
      * @param[in]  input1 First tensor input info. Data types supported: F16/F32.
      * @param[in]  input2 Second tensor input info. Data types supported: Same as @p input1.
@@ -165,7 +165,7 @@ public:
      */
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref NEPowerOperationKernel
      *
      * @param[in] input1 First tensor input info. Data types supported: F16/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
@@ -186,7 +186,7 @@ public:
     /** Default constructor */
     NEComparisonOperationKernel() = default;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
+    /** Configure kernel
      *
      * @param[in]  op     Comparison operation to be executed.
      * @param[in]  input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.

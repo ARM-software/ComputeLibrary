@@ -142,6 +142,14 @@ inline ScalarType elementwise_arithm_op_scalar(const ScalarType &a, const Scalar
         case ArithmeticOperation::DIV:
         {
             res = a / b;
+            if(std::is_integral<ScalarType>::value)
+            {
+                res = (b == 0) ? 0 : res;
+                if(static_cast<int32_t>(a) % static_cast<int32_t>(b) != 0 && ((a < 0) != (b < 0)))
+                {
+                    --res;
+                }
+            }
             break;
         }
         case ArithmeticOperation::POWER:
@@ -205,6 +213,12 @@ inline typename VectorType::type elementwise_arithm_op(const typename VectorType
     }
 
     return res;
+}
+
+template <>
+inline int32x4_t elementwise_arithm_op<ArithmeticOperation::DIV, typename wrapper::traits::neon_vector<int32_t, 4>>(const int32x4_t &a, const int32x4_t &b)
+{
+    return vcvtq_s32_f32(vfloorq_f32(wrapper::vdiv(vcvtq_f32_s32(a), vcvtq_f32_s32(b))));
 }
 
 template <>
@@ -1259,7 +1273,7 @@ void NEDivisionOperationKernel::configure(const ITensorInfo *input1, const ITens
 
 Status NEDivisionOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::S32, DataType::F16, DataType::F32);
     return NEArithmeticOperationKernel::validate_arguments(input1, input2, output);
 }
 

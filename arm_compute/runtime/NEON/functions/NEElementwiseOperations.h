@@ -456,22 +456,22 @@ public:
 
 /** Basic function to run @ref NEArithmeticOperationKernel for division
  *
- * @note The tensor data type for the inputs must be F16/F32.
- * @note The function performs a squared different operation between two tensors (i.e., out[i] = in1[i] / in2[i])
+ * @note The tensor data type for the inputs must be S32/F16/F32.
+ * @note The function performs a division operation between two tensors (i.e., out[i] = in1[i] / in2[i])
  */
 class NEElementwiseDivision : public INEOperator
 {
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input info. Data types supported: F16/F32.
+     * @param[in, out] input1 First tensor input info. Data types supported: S32/F16/F32.
      * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
      */
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for division
      *
-     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
+     * @param[in] input1 First tensor input info. Data types supported: S32/F16/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      *

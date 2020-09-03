@@ -44,6 +44,9 @@ namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
 /** Input data sets **/
+const auto ElementwiseDivisionS32Dataset = combine(combine(framework::dataset::make("DataType", DataType::S32),
+                                                           framework::dataset::make("DataType", DataType::S32)),
+                                                   framework::dataset::make("DataType", DataType::S32));
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 RelativeTolerance<half> tolerance_fp16(static_cast<half>(0.01f));
 const auto              ElementwiseDivisionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
@@ -134,6 +137,16 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseDivisionBroadcastFixture<
 }
 TEST_SUITE_END() // F32
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Integer)
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseDivisionFixture<int32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseDivisionS32Dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // S32
+TEST_SUITE_END() // Integer
 
 TEST_SUITE_END() // ElementwiseDivision
 TEST_SUITE_END() // NEON
