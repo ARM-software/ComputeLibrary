@@ -127,10 +127,13 @@ Status CLLocallyConnectedLayer::validate(const ITensorInfo *input, const ITensor
     return Status{};
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info);
 }
+#pragma GCC diagnostic pop
 
 void CLLocallyConnectedLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                         const PadStrideInfo &conv_info)

@@ -72,6 +72,7 @@ public:
      *                       Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.11)
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
     /** Set the input and output tensors.
      *
@@ -85,6 +86,7 @@ public:
      *                             Data types supported: Same as @p input.
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.11)
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLocallyConnectedLayer
      *

@@ -248,6 +248,12 @@ v20.11 Public major release
       - @ref CLSoftmaxLayer
       - @ref CLLogSoftmaxLayer
       - @ref GCSoftmaxLayer
+ - Deprecated OpenCL kernels / functions:
+     - CLLocallyConnectedLayer
+     - CLLocallyConnectedMatrixMultiplyKernel
+ - Deprecated NEON kernels / functions:
+     - NELocallyConnectedLayer
+     - NELocallyConnectedMatrixMultiplyKernel
 
 v20.08 Public major release
  - Various bug fixes.
