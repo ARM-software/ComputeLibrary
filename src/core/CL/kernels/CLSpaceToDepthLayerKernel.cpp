@@ -75,7 +75,7 @@ void CLSpaceToDepthLayerKernel::configure(const CLCompileContext &compile_contex
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    TensorShape output_shape = compute_depth_to_space_shape(input->info(), block_shape);
+    TensorShape output_shape = compute_space_to_depth_shape(input->info(), block_shape);
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), block_shape));

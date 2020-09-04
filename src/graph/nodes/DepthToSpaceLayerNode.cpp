@@ -53,7 +53,7 @@ TensorDescriptor DepthToSpaceLayerNode::compute_output_descriptor(const TensorDe
 
     // Set descriptor shape
     TensorDescriptor output_descriptor = input_descriptor;
-    output_descriptor.shape            = compute_depth_to_space_output_shape(input_shape, data_layout, block_shape);
+    output_descriptor.shape            = misc::shape_calculator::compute_depth_to_space_shape(input_shape, data_layout, block_shape);
 
     return output_descriptor;
 }

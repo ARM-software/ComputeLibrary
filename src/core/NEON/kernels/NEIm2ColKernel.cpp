@@ -161,7 +161,7 @@ inline void linearize_volume_nchw(const uint8_t *const in_ptr,
             if((y < 0 || y >= input_h) && has_pads)
             {
                 // All the values will be the offset (will be zeros when not quantized)
-                memset(out_ptr, pad_value, kernel_width * sizeof(T));
+                memset(static_cast<void *>(out_ptr), pad_value, kernel_width * sizeof(T));
                 out_ptr += kernel_width;
             }
             else
@@ -224,7 +224,7 @@ inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
         {
             if(y < 0 || y >= input_h)
             {
-                memset(out_ptr, pad_value, pad_quant * element_size);
+                memset(static_cast<void *>(out_ptr), pad_value, pad_quant * element_size);
                 out_ptr += pad_quant;
             }
             else if(dilation_x > 1 || start_x < 0 || end_x >= input_w || input_stride_y != input_c * element_size)
@@ -233,7 +233,7 @@ inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
                 {
                     if(x < 0 || x >= input_w)
                     {
-                        memset(out_ptr, pad_value, input_c * element_size);
+                        memset(static_cast<void *>(out_ptr), pad_value, input_c * element_size);
                         out_ptr += input_c;
                     }
                     else
