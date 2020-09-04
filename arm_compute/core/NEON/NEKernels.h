@@ -54,7 +54,6 @@
 #include "arm_compute/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthConvertLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDequantizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDerivativeKernel.h"

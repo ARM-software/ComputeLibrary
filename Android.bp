@@ -261,7 +261,6 @@ cc_library_static {
         "src/core/NEON/kernels/NEDepthConcatenateLayerKernel.cpp",
         "src/core/NEON/kernels/NEDepthConvertLayerKernel.cpp",
         "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.cpp",
-        "src/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.cpp",
         "src/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.cpp",
         "src/core/NEON/kernels/NEDequantizationLayerKernel.cpp",
         "src/core/NEON/kernels/NEDerivativeKernel.cpp",
