@@ -246,7 +246,7 @@ ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const Tens
     }
 
     // Setup output valid region
-    ValidRegion valid_region{ Coordinates(), dst_shape, src_info.tensor_shape().num_dimensions() };
+    ValidRegion valid_region{ Coordinates(), dst_shape, dst_shape.num_dimensions() };
 
     valid_region.anchor.set(idx_width, std::max(0, valid_start_out_x));
     valid_region.anchor.set(idx_height, std::max(0, valid_start_out_y));
