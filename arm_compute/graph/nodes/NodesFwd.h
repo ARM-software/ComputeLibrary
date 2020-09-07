@@ -63,6 +63,7 @@ class PReluLayerNode;
 class PrintLayerNode;
 class PriorBoxLayerNode;
 class QuantizationLayerNode;
+class ReductionLayerNode;
 class ReorgLayerNode;
 class ReshapeLayerNode;
 class ResizeLayerNode;

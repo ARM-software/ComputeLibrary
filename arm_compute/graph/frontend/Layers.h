@@ -1133,6 +1133,34 @@ private:
     QuantizationInfo _out_quant_info;
 };
 
+/** Reduction Layer */
+class ReductionLayer final : public ILayer
+{
+public:
+    /** Construct a reduction layer.
+     *
+     * @param[in] op        Reduction operation
+     * @param[in] axis      Reduction axis
+     * @param[in] keep_dims (Optional) Whether to keep the reduced dimension after the operation. Defaults to true.
+     */
+    ReductionLayer(ReductionOperation op, unsigned int axis, bool keep_dims)
+        : _op(op), _axis(axis), _keep_dims(keep_dims)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_reduction_operation_node(s.graph(), common_params, input, _op, _axis, _keep_dims);
+    }
+
+private:
+    ReductionOperation _op;
+    unsigned int       _axis;
+    bool               _keep_dims;
+};
+
 /** Reorg Layer */
 class ReorgLayer final : public ILayer
 {

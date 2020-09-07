@@ -447,6 +447,18 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_quantization_node(Graph &g, NodeParams params, NodeIdxPair input, const QuantizationInfo &out_quant_info);
+    /** Adds a reduction sum layer node to the graph
+     *
+     * @param[in] g         Graph to add the node to
+     * @param[in] params    Common node parameters
+     * @param[in] input     Input to the reorg layer node as a NodeID-Index pair
+     * @param[in] op        Reduction operation
+     * @param[in] axis      Reduction axis
+     * @param[in] keep_dims (Optional) Whether to keep the reduced dimension after the operation. Defaults to true.
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_reduction_operation_node(Graph &g, NodeParams params, NodeIdxPair input, ReductionOperation op, int axis, bool keep_dims = true);
     /** Adds a reorg layer node to the graph
      *
      * @param[in] g      Graph to add the node to

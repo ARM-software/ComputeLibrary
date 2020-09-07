@@ -169,6 +169,7 @@ enum class NodeType
     PrintLayer,
     PriorBoxLayer,
     QuantizationLayer,
+    ReductionOperationLayer,
     ReorgLayer,
     ReshapeLayer,
     ResizeLayer,

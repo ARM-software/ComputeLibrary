@@ -151,6 +151,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::QuantizationLayer:
             os << "QuantizationLayer";
             break;
+        case NodeType::ReductionOperationLayer:
+            os << "ReductionOperationLayer";
+            break;
         case NodeType::ReorgLayer:
             os << "ReorgLayer";
             break;

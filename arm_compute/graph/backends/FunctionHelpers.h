@@ -1478,6 +1478,50 @@ std::unique_ptr<IFunction> create_quantization_layer(QuantizationLayerNode &node
     return RETURN_UNIQUE_PTR(func);
 }
 
+/** Create a backend reduction operation layer function
+ *
+ * @tparam ReductionOperationFunction Backend reduction operation function
+ * @tparam TargetInfo                 Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
+ *
+ * @return Backend reduction sum layer function
+ */
+template <typename ReductionOperationFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_reduction_operation_layer(ReductionLayerNode &node, GraphContext &ctx)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input     = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output    = get_backing_tensor<TargetInfo>(node.output(0));
+    ReductionOperation               op        = node.op();
+    int                              axis      = node.axis();
+    bool                             keep_dims = node.keep_dims();
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<ReductionOperationFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    func->configure(input, output, axis, op, keep_dims);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Operation: " << op
+                               << " Axis: " << axis
+                               << " Keep dimensions:" << keep_dims
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
 /** Create a backend reorg layer function
  *
  * @tparam ReorgLayerFunction Backend reorg function

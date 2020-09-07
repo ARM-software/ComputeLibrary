@@ -296,6 +296,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_priorbox_layer<CLPriorBoxLayer, CLTargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:
             return detail::create_quantization_layer<CLQuantizationLayer, CLTargetInfo>(*polymorphic_downcast<QuantizationLayerNode *>(node));
+        case NodeType::ReductionOperationLayer:
+            return detail::create_reduction_operation_layer<CLReductionOperation, CLTargetInfo>(*polymorphic_downcast<ReductionLayerNode *>(node), ctx);
         case NodeType::ReorgLayer:
             return detail::create_reorg_layer<CLReorgLayer, CLTargetInfo>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:
