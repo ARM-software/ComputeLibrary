@@ -137,6 +137,7 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
                     v_shf1l = vld1q_s32(perch_shiftl_ptr + 4);
                     v_shf2l = vld1q_s32(perch_shiftl_ptr + 8);
                     v_shf3l = vld1q_s32(perch_shiftl_ptr + 12);
+                    perch_shiftl_ptr += 16;
                 }
             } else {
                 v_mul0=v_mul1=v_mul2=v_mul3=v_mul;

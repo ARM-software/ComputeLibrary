@@ -252,7 +252,7 @@ std::tuple<bool, const int32_t *, const int32_t *, const int32_t *> Fallback<Typ
     {
         left_shifts.push_back(std::max(-s, int32_t(0)));
         right_shifts.push_back(std::min(-s, int32_t(0)));
-        if(s > 0 && !need_left)
+        if(s < 0 && !need_left)
         {
             need_left = true;
         }
