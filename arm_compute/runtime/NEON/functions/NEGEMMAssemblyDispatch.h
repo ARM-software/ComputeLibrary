@@ -61,7 +61,7 @@ private:
     MemoryGroup                _memory_group;    /**< Function memory group */
     IWeightsManager           *_weights_manager; /**< Pointer to the weights manager */
 public:
-    /** If supported create an ACL function else fallback to the arm_gemm function.
+    /** If supported create a Compute Library function else fallback to the arm_gemm function.
      *
      * @param[in]  a         Input tensor (Matrix A)
      * @param[in]  b         Input tensor (Matrix B)

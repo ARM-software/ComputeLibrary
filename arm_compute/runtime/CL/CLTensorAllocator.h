@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -108,7 +108,7 @@ public:
     void free() override;
     /** Import an existing memory as a tensor's backing memory
      *
-     * @warning memory should have been created under the same context that ACL uses.
+     * @warning memory should have been created under the same context that Compute Library uses.
      * @warning memory is expected to be aligned with the device requirements.
      * @warning tensor shouldn't be memory managed.
      * @warning ownership of memory is not transferred.

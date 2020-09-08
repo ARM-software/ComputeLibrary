@@ -1670,7 +1670,7 @@ CLTuner looks for the optimal LWS for each unique OpenCL kernel configuration. S
 
 @subsubsection S3_7_1_cl_tuner_how_to How to use it
 
-All the graph examples in the ACL's folder "examples" and the arm_compute_benchmark accept an argument to enable the OpenCL tuner and an argument to export/import the LWS values to/from a file
+All the graph examples in the Compute Library's folder "examples" and the arm_compute_benchmark accept an argument to enable the OpenCL tuner and an argument to export/import the LWS values to/from a file
 
     #Enable CL tuner
     ./graph_mobilenet --enable-tuner –-target=CL

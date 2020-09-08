@@ -34,7 +34,7 @@ what kernel and subsequently what configurations for that kernels are the most p
 ### Step1: Prepare the shape and configs files
 1. We first need to identify the shapes that we are interested in and store them in a csv file, say *gemm_shapes.csv*.
 2. Then we need to specify a set of good GEMMConfig candidates for each kernel in 3 separate csv files (this requires
-    some prior heuristics, but can be provided by the ACL developers upon requests, based on your target device).
+    some prior heuristics, but can be provided by the Compute Library developers upon requests, based on your target device).
 
    Say we have *gemm_configs_native.csv", "gemm_configs_reshaped.csv" and "gemm_configs_reshaped_only_rhs.csv".
 
@@ -42,9 +42,9 @@ what kernel and subsequently what configurations for that kernels are the most p
 
 ### Step2: Push relevant files to the target device
 All the files that need to be present on the target device are:
-* benchmark script: \<ACL\>/examples/gemm_tuner/benchmark_gemm_examples.sh
+* benchmark script: \<ComputeLibrary\>/examples/gemm_tuner/benchmark_gemm_examples.sh
 * shapes and configs csv files: gemm_shapes.csv, gemm_configs_native.csv, gemm_configs_reshaped_only_rhs.csv, gemm_configs_reshaped.csv
-* Example benchmark binaries: \<ACL\>/build/tests/gemm_tuner/benchmark_cl_gemm*
+* Example benchmark binaries: \<ComputeLibrary\>/build/tests/gemm_tuner/benchmark_cl_gemm*
 
 ### Step3: Collect benchmark data
 With these files on device, we can collect benchmark data using the script. Assume all the example binaries are pushed
@@ -64,7 +64,7 @@ but you may need to change the output folder for each repeat
 1. After benchmarking, we pull the benchmark data, the *results* folder, from the target device to our host machine
 2. We use the GemmTuner.py script to give us the heuristics
    ```
-   python3 <ACL>/examples/gemm_tuner/GemmTuner.py -b ./results -o heuristics
+   python3 <ComputeLibrary>/examples/gemm_tuner/GemmTuner.py -b ./results -o heuristics
    ```
    When it's finished, there should be 4 json files in the *heuristics* folder
 
@@ -76,12 +76,12 @@ passing a lower value to *-t \<tolerance\>* to the GemmTuner.py script.
 * A target device to be tuned, plus the following on the device:
     * Android or Linux OS
     * Bash shell
-    * Built ACL with benchmark examples binaries
+    * Built Compute Library with benchmark examples binaries
     * benchmark_gemm_examples.sh script
     * gemm shape file
 
        A csv file containing the **GEMMParam search list**. This is the list of GEMMParams/gemm shapes that we're
-       interested in (For more details see Approach section). The default list is prepared by ACL developers in advance
+       interested in (For more details see Approach section). The default list is prepared by Compute Library developers in advance
        and can be provided on request.
 
        The format is described as:
@@ -105,7 +105,7 @@ passing a lower value to *-t \<tolerance\>* to the GemmTuner.py script.
     * gemm config file  
       A csv file containing the **GEMMConfig search list**. This is the list of candidate GEMMConfigs among which we
       search for the optimal one. **Note that we have a different list for each strategy.**
-      The default lists are prepared by ACL developers in advance and can be provided on request.
+      The default lists are prepared by Compute Library developers in advance and can be provided on request.
 
       The format of the file for each strategy is the same:  
 
