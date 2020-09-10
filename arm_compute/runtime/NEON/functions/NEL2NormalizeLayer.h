@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ public:
      * @param[in]      axis    Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in]      epsilon (Optional) Lower bound value for the normalization.
      */
-    void configure(ITensor *input, ITensor *output, int axis, float epsilon = 1e-12f);
+    void configure(ITensor *input, ITensor *output, int axis, float epsilon = 1e-6f);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEL2NormalizeLayer.
      *
@@ -66,7 +66,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int axis, float epsilon = 1e-12f);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int axis, float epsilon = 1e-6f);
 
     // Inherited methods overridden:
     void run() override;
