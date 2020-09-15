@@ -217,6 +217,29 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+TEST_CASE(NoPaddingAdded, framework::DatasetMode::PRECOMMIT)
+{
+    Tensor input1 = create_tensor<Tensor>(TensorShape(21U, 13U), DataType::S32);
+    Tensor input2 = create_tensor<Tensor>(TensorShape(21U, 1U), DataType::S32);
+    Tensor output = create_tensor<Tensor>(TensorShape(21U, 13U), DataType::QASYMM8);
+
+    GEMMLowpOutputStageInfo output_stage = GEMMLowpOutputStageInfo();
+    output_stage.type        = GEMMLowpOutputStageType::QUANTIZE_DOWN;
+    output_stage.gemmlowp_min_bound        = 0;
+    output_stage.gemmlowp_max_bound        = 205;
+    output_stage.output_data_type = DataType::QASYMM8;
+
+
+    NEGEMMLowpOutputStage f;
+    f.configure(&input1, &input2, &output, output_stage);
+
+    // Validate padding is zero
+    validate(input1.info()->padding(), PaddingSize());
+    validate(input2.info()->padding(), PaddingSize());
+    validate(output.info()->padding(), PaddingSize());
+}
+
+
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ScaleFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_cases))
 {
     // Validate output
