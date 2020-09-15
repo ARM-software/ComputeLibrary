@@ -44,12 +44,12 @@ class TensorShape;
  * @param[in] ctx             cl::Context object
  * @param[in] buffer          cl::Buffer object from which the OpenCL image2d object is created
  * @param[in] shape2d         2D tensor shape
- * @param[in] data_type       cl_channel_type to use. Only supported CL_FLOAT
+ * @param[in] data_type       DataType to use. Only supported: F32,F16
  * @param[in] image_row_pitch Image row pitch (a.k.a. stride Y) to be used in the image2d object
  *
  * @return cl::Image2D object
  */
-cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, cl_channel_type data_type, size_t image_row_pitch);
+cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch);
 
 } // arm_compute
 

@@ -139,13 +139,13 @@ const auto a_values_nightly = framework::dataset::make("alpha", {1.0f} );
 const auto beta_values_nightly = framework::dataset::make("beta", {1.0f} );
 
 /** M0 values to test - Nightly */
-const auto m0_values_nightly = framework::dataset::make("M0", { 2, 3, 4, 8 });
+const auto m0_values_nightly = framework::dataset::make("M0", { 8 });
 
 /** N0 values to test - Nightly */
-const auto n0_values_nightly = framework::dataset::make("N0", { 2, 3, 4, 8 });
+const auto n0_values_nightly = framework::dataset::make("N0", { 8 });
 
 /** K0 values to test - Nightly */
-const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8 });
+const auto k0_values_nightly = framework::dataset::make("K0", { 4 });
 
 /** N0 values to test with export to OpenCL image object - Nightly */
 const auto n0_export_to_cl_image_values_nightly = framework::dataset::make("N0", { 4, 8, 16 });
@@ -154,10 +154,10 @@ const auto n0_export_to_cl_image_values_nightly = framework::dataset::make("N0",
 const auto k0_export_to_cl_image_values_nightly = framework::dataset::make("K0", { 4, 8, 16 });
 
 /** V0 values to test - Nightly */
-const auto v0_values_nightly = framework::dataset::make("V0", 1, 4);
+const auto v0_values_nightly = framework::dataset::make("V0", 1, 3);
 
 /** H0 values to test - Nightly */
-const auto h0_values_nightly = framework::dataset::make("H0", 1, 4);
+const auto h0_values_nightly = framework::dataset::make("H0", 1, 3);
 
 /** Interleave values to test with LHS matrix */
 const auto i_values_lhs = framework::dataset::make("interleave_lhs", { true, false });
@@ -886,6 +886,269 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
 }
+
+TEST_SUITE(ExportToCLImage)
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
+               framework::dataset::make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
+                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
+                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
+                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // Incorrect k0
+                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // Incorrect n0
+
+                                                      }),
+               framework::dataset::make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(512U, 8U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(128U, 32U, 2U), 1, DataType::F16),
+
+                      })),
+               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(64U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(64U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(64U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(64U), 1, DataType::F16),
+
+                                                      })),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
+
+                           })),
+               framework::dataset::make("LHSMInfo",{
+                                                          GEMMLHSMatrixInfo(4, 4, 1, false, true),
+                                                          GEMMLHSMatrixInfo(4, 8, 1, false, true),
+                                                          GEMMLHSMatrixInfo(4, 4, 1, false, true),
+                                                          GEMMLHSMatrixInfo(4, 2, 1, false, false),
+                                                          GEMMLHSMatrixInfo(4, 4, 1, false, false),
+
+                                })),
+               framework::dataset::make("RHSMInfo",{
+                                                          GEMMRHSMatrixInfo(4, 4, 1, true, true, true),
+                                                          GEMMRHSMatrixInfo(4, 8, 1, true, true, true),
+                                                          GEMMRHSMatrixInfo(8, 4, 1, true, true, true),
+                                                          GEMMRHSMatrixInfo(4, 2, 1, true, false, true),
+                                                          GEMMRHSMatrixInfo(2, 4, 1, true, false, true),
+                           })),
+               framework::dataset::make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+                                                                    64 /**<N Number of RHS columns*/,
+                                                                    64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                             false /**< reinterpret the input as 3D */,
+                                                             true  /**< Flag used to broadcast the bias addition */,
+                                                             false /**< wider accumm */,
+                                                           ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                             1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                             1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                             GEMMLHSMatrixInfo(),
+                                                             GEMMRHSMatrixInfo(),
+                                                             0  /**< Offset to be added to each element of the matrix A */,
+                                                             0 /**< Offset to be added to each element of the matrix B */),
+                                                    GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+                                                                    64 /**<N Number of RHS columns*/,
+                                                                    64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                             false /**< reinterpret the input as 3D */,
+                                                             true  /**< Flag used to broadcast the bias addition */,
+                                                             false /**< wider accumm */,
+                                                           ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                             1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                             1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                             GEMMLHSMatrixInfo(),
+                                                             GEMMRHSMatrixInfo(),
+                                                             0  /**< Offset to be added to each element of the matrix A */,
+                                                             0 /**< Offset to be added to each element of the matrix B */),
+                                                    GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+                                                                    64 /**<N Number of RHS columns*/,
+                                                                    64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                             false /**< reinterpret the input as 3D */,
+                                                             true  /**< Flag used to broadcast the bias addition */,
+                                                             false /**< wider accumm */,
+                                                           ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                             1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                             1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                             GEMMLHSMatrixInfo(),
+                                                             GEMMRHSMatrixInfo(),
+                                                             0  /**< Offset to be added to each element of the matrix A */,
+                                                             0 /**< Offset to be added to each element of the matrix B */),
+
+                                                    GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+                                                                    64 /**<N Number of RHS columns*/,
+                                                                    64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                             false /**< reinterpret the input as 3D */,
+                                                             true  /**< Flag used to broadcast the bias addition */,
+                                                             false /**< wider accumm */,
+                                                           ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                             1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                             1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                             GEMMLHSMatrixInfo(),
+                                                             GEMMRHSMatrixInfo(),
+                                                             0  /**< Offset to be added to each element of the matrix A */,
+                                                             0 /**< Offset to be added to each element of the matrix B */),
+                                                    GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+                                                                    64 /**<N Number of RHS columns*/,
+                                                                    64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                             false /**< reinterpret the input as 3D */,
+                                                             true  /**< Flag used to broadcast the bias addition */,
+                                                             false /**< wider accumm */,
+                                                           ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                             1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                             1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                             GEMMLHSMatrixInfo(),
+                                                             GEMMRHSMatrixInfo(),
+                                                             0  /**< Offset to be added to each element of the matrix A */,
+                                                             0 /**< Offset to be added to each element of the matrix B */)
+                                                    })),
+               framework::dataset::make("Expected", { true,
+                                                      true,
+                                                      true,
+                                                      false,
+                                                      false})),
+                    input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
+{
+   ARM_COMPUTE_EXPECT(bool(CLGEMMMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
+                                                          &input1_info.clone()->set_is_resizable(true),
+                                                          &input2_info.clone()->set_is_resizable(true),
+                                                          &output_info.clone()->set_is_resizable(true),1.f,1.f,
+                                                          lhs_info,
+                                                          rhs_info,
+                                                          gemm_info)) == (expected && image2d_from_buffer_supported(CLKernelLibrary::get().get_device())), framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::ALL,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   v0_values_precommit),
+                                                                   h0_values_precommit),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values_precommit),
+                                                                   beta_values_precommit),
+                                                                   broadcast_bias_values),
+                                                                   lhs_transpose_values),
+                                                                   act_values))
+{
+    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
+    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_export_to_cl_image_values_nightly),
+                                                                   k0_export_to_cl_image_values_nightly),
+                                                                   v0_values_nightly),
+                                                                   h0_values_nightly),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values_nightly),
+                                                                   beta_values_nightly),
+                                                                   broadcast_bias_values),
+                                                                   lhs_transpose_values),
+                                                                   act_values))
+{
+    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
+    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::ALL,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   v0_values_precommit),
+                                                                   h0_values_precommit),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values_precommit),
+                                                                   beta_values_precommit),
+                                                                   lhs_transpose_values),
+                                                                   act_values))
+{
+    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
+    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_export_to_cl_image_values_nightly),
+                                                                   k0_export_to_cl_image_values_nightly),
+                                                                   v0_values_nightly),
+                                                                   h0_values_nightly),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values_nightly),
+                                                                   beta_values_nightly),
+                                                                   lhs_transpose_values),
+                                                                   act_values))
+{
+    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
+    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+TEST_SUITE_END() // ExportToCLImage
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(MixedPrecision)

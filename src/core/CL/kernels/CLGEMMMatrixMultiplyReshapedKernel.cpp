@@ -376,7 +376,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
         const TensorShape shape2d(_input1->info()->dimension(0) / 4, _input1->info()->dimension(1) * _input1->info()->dimension(2));
         const size_t      image_row_pitch = _input1->info()->strides_in_bytes()[1];
 
-        input1_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), _input1->cl_buffer(), shape2d, CL_FLOAT, image_row_pitch);
+        input1_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), _input1->cl_buffer(), shape2d, _input1->info()->data_type(), image_row_pitch);
     }
 
     do
