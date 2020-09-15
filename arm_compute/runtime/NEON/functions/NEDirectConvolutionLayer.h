@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,6 +106,7 @@ private:
     bool                                      _has_bias;
     bool                                      _is_activationlayer_enabled;
     unsigned int                              _dim_split;
+    bool                                      _is_padding_required;
 };
 }
 #endif /* ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H */

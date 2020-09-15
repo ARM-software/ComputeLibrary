@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,6 +86,14 @@ public:
     BorderSize border_size() const override;
 
 private:
+    /* Template function for optimized convolution NHWC */
+    template <typename T>
+    void convolve_nhwc_optimized(const Window &window);
+
+    /* Template function for convolution NHWC */
+    template <typename T>
+    void convolve_nhwc(const Window &window);
+
     const ITensor *_input;
     const ITensor *_weights;
     ITensor       *_output;
