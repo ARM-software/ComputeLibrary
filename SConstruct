@@ -42,7 +42,7 @@ vars.AddVariables(
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a",
                   allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64",
-                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "x86")),
+                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
@@ -64,6 +64,7 @@ vars.AddVariables(
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", False),
+    ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
     ("toolchain_prefix", "Override the toolchain prefix", ""),
     ("compiler_prefix", "Override the compiler prefix", ""),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
@@ -206,7 +207,9 @@ elif 'v8' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8-a'])
 
     if 'v8.6-a' in env['arch']:
-        env.Append(CPPDEFINES = ['MMLA_INT8', 'MMLA_FP32', 'V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
+        env.Append(CPPDEFINES = ['MMLA_INT8', 'V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
+        if "disable_mmla_fp" not in env['custom_options']:
+            env.Append(CPPDEFINES = ['MMLA_FP32'])
 
 elif 'x86' in env['arch']:
     if env['estate'] == '32':
