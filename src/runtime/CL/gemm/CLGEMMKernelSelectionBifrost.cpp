@@ -186,7 +186,7 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f32(unsigned int m, unsigned 
 
     if(!is_rhs_constant)
     {
-        return CLGEMMKernelType::NATIVE;
+        return CLGEMMKernelType::NATIVE_V1;
     }
 
     if(m == 1)
