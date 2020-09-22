@@ -178,6 +178,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
 
 void NEReductionOperation::run()
 {
+    MemoryGroupResourceScope scope_mg(_memory_group);
     if(_reduction_axis == 0)
     {
         NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
