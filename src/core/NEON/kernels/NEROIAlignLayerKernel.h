@@ -55,10 +55,10 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  rois      ROIs tensor, it is a 2D tensor of size [5, N] (where N is the number of ROIs) containing top left and bottom right corner
      *                       as coordinate of an image and batch_id of ROI [ batch_id, x1, y1, x2, y2 ].
-     *                       Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p input is QASYMM8, otherwise same as @p input
+     *                       Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p input is QASYMM8/QASYMM8_SIGNED, otherwise same as @p input
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
      *
@@ -70,8 +70,8 @@ public:
     void configure(const ITensor *input, const ITensor *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEROIAlignLayerKernel
      *
-     * @param[in] input     Source tensor info. Data types supported: QASYMM8/F16/F32.
-     * @param[in] rois      ROIs tensor info. Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p input is QASYMM8,
+     * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in] rois      ROIs tensor info. Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p input is QASYMM8/QASYMM8_SIGNED,
      *                      otherwise same as @p input
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
@@ -89,7 +89,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    template <DataLayout data_layout, typename input_data_type, typename roi_data_type = input_data_type>
+    template <typename input_data_type, typename roi_data_type = input_data_type>
     void internal_run(const Window &window, const ThreadInfo &info);
 
     const ITensor      *_input;

@@ -43,7 +43,7 @@ class NEROIAlignLayer : public INESimpleFunctionNoBorder
 public:
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  rois      ROIs tensor, it is a 2D tensor of size [5, N] (where N is the number of ROIs) containing top left and bottom right corner
      *                       as coordinate of an image and batch_id of ROI [ batch_id, x1, y1, x2, y2 ].
      *                       Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p input is QASYMM8, otherwise same as @p input
@@ -58,7 +58,7 @@ public:
     void configure(const ITensor *input, const ITensor *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEROIAlignLayerKernel
      *
-     * @param[in] input     Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] rois      ROIs tensor info. Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p input is QASYMM8,
      *                      otherwise same as @p input
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
