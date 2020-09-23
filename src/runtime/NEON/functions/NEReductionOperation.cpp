@@ -54,7 +54,7 @@ size_t reduction_window_split_dimension(unsigned int axis)
 } // namespace
 
 NEReductionOperation::NEReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _reduction_kernel(), _fill_border_kernel(), _reshape(), _output_internal(), _window_split(0), _reduction_axis(), _is_reshape_required(false)
+    : _memory_group(memory_manager), _reduction_kernel(), _reshape(), _output_internal(), _window_split(0), _reduction_axis(), _is_reshape_required(false)
 {
 }
 
@@ -128,47 +128,6 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     _window_split   = reduction_window_split_dimension(axis);
     _reduction_axis = axis;
 
-    if(axis == 0)
-    {
-        // Configure fill border kernel
-        const BorderSize fill_border_size = _reduction_kernel.border_size();
-        PixelValue       pixelValue;
-        switch(op)
-        {
-            case ReductionOperation::PROD:
-            {
-                pixelValue = PixelValue(1, input->info()->data_type(), input->info()->quantization_info());
-                break;
-            }
-            case ReductionOperation::MIN:
-            {
-                pixelValue = std::get<1>(get_min_max(input->info()->data_type()));
-                break;
-            }
-            case ReductionOperation::MAX:
-            {
-                pixelValue = std::get<0>(get_min_max(input->info()->data_type()));
-                break;
-            }
-            case ReductionOperation::ARG_IDX_MAX:
-            case ReductionOperation::ARG_IDX_MIN:
-            {
-                pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
-                break;
-            }
-            case ReductionOperation::MEAN_SUM:
-            case ReductionOperation::SUM_SQUARE:
-            case ReductionOperation::SUM:
-            {
-                pixelValue = PixelValue(static_cast<uint32_t>(0));
-                break;
-            }
-            default:
-                ARM_COMPUTE_ERROR("Reduction Operation unsupported");
-        }
-        _fill_border_kernel.configure(input, fill_border_size, (is_arg_min_max ? BorderMode::REPLICATE : BorderMode::CONSTANT), pixelValue);
-    }
-
     if(_is_reshape_required)
     {
         _reshape.configure(output_internal, output);
@@ -179,10 +138,6 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
 void NEReductionOperation::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
-    if(_reduction_axis == 0)
-    {
-        NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
-    }
     NEScheduler::get().schedule(&_reduction_kernel, _window_split);
     if(_is_reshape_required)
     {

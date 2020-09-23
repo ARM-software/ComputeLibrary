@@ -81,14 +81,12 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
     const ITensor     *_input;
     ITensor           *_output;
     unsigned int       _reduction_axis;
     ReductionOperation _op;
-    BorderSize         _border_size;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEREDUCTIONOPERATIONKERNEL_H */

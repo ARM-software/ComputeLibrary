@@ -45,17 +45,17 @@ namespace
 {
 // Helper function that calls vqmovun/vqmvn, vcombine and vstore, allows templating of RedOpYZW_quantized
 template <typename T>
-void combine_and_store(int16x8_t t1, int16x8_t t2, Iterator &output)
+void combine_and_store(int16x8_t t1, int16x8_t t2, Iterator &output, int offset = 0)
 {
     if(std::is_same<T, uint8_t>::value)
     {
         auto res = wrapper::vcombine(wrapper::vqmovun(t1), wrapper::vqmovun(t2));
-        wrapper::vstore(output.ptr(), res);
+        wrapper::vstore(output.ptr() + offset, res);
     }
     else
     {
         auto res = wrapper::vcombine(wrapper::vqmovn(t1), wrapper::vqmovn(t2));
-        wrapper::vstore(reinterpret_cast<int8_t *>(output.ptr()), res);
+        wrapper::vstore(reinterpret_cast<int8_t *>(output.ptr() + offset), res);
     }
 }
 
@@ -342,20 +342,9 @@ public:
     {
         // Set out window
         Window out_window(window);
-        out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
+        out_window.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-        // Get first input and output slices
-        Window in_slice  = window.first_slice_window_1D();
-        Window out_slice = out_window.first_slice_window_1D();
-
-        do
-        {
-            Iterator in(input, in_slice);
-            Iterator out(output, out_slice);
-
-            f(in, out, in_slice, out_slice, *input->info(), op);
-        }
-        while(window.slide_window_slice_1D(in_slice) && out_window.slide_window_slice_1D(out_slice));
+        f(window, out_window, input, output, op);
     }
     static void reduceY(const Window &window, const ITensor *input, ITensor *output, F f, const ReductionOperation op)
     {
@@ -366,18 +355,7 @@ public:
         in_window.set(Window::DimY, Window::Dimension(0, 1, 1));
         out_window.set(Window::DimY, Window::Dimension(0, output->info()->dimension(1), output->info()->dimension(1)));
 
-        // Get first input and output slices
-        Window in_slice  = in_window.first_slice_window_2D();
-        Window out_slice = out_window.first_slice_window_2D();
-
-        do
-        {
-            Iterator in(input, in_slice);
-            Iterator out(output, out_slice);
-
-            f(in, out, in_slice, out_slice, *input->info(), 1, op);
-        }
-        while(in_window.slide_window_slice_2D(in_slice) && out_window.slide_window_slice_2D(out_slice));
+        f(in_window, out_window, input, output, 1, op);
     }
     static void reduceZ(const Window &window, const ITensor *input, ITensor *output, F f, const ReductionOperation op)
     {
@@ -388,18 +366,7 @@ public:
         in_window.set(Window::DimZ, Window::Dimension(0, 1, 1));
         out_window.set(Window::DimZ, Window::Dimension(0, output->info()->dimension(2), output->info()->dimension(2)));
 
-        // Get first input and output slices
-        Window in_slice  = in_window.first_slice_window_3D();
-        Window out_slice = out_window.first_slice_window_3D();
-
-        do
-        {
-            Iterator in(input, in_slice);
-            Iterator out(output, out_slice);
-
-            f(in, out, in_slice, out_slice, *input->info(), 2, op);
-        }
-        while(in_window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_3D(out_slice));
+        f(in_window, out_window, input, output, 2, op);
     }
     static void reduceW(const Window &window, const ITensor *input, ITensor *output, F f, const ReductionOperation op)
     {
@@ -410,18 +377,7 @@ public:
         in_window.set(3, Window::Dimension(0, 1, 1));
         out_window.set(3, Window::Dimension(0, 1, 1));
 
-        // Get first input and output slices
-        Window in_slice  = in_window.first_slice_window_4D();
-        Window out_slice = out_window.first_slice_window_4D();
-
-        do
-        {
-            Iterator in(input, in_slice);
-            Iterator out(output, out_slice);
-
-            f(in, out, in_slice, out_slice, *input->info(), 3, op);
-        }
-        while(in_window.slide_window_slice_4D(in_slice) && out_window.slide_window_slice_4D(out_slice));
+        f(in_window, out_window, input, output, 3, op);
     }
 };
 
@@ -431,326 +387,21 @@ struct RedOpX
     /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
-    inline void operator()(Iterator &input, Iterator &output, Window &in_slice, Window &out_slice, const TensorInfo &in_info, const ReductionOperation op)
+    inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, const ReductionOperation op)
     {
-        ARM_COMPUTE_UNUSED(out_slice);
-        auto init_res_value = static_cast<T>(0.f);
-        switch(op)
+        const TensorInfo in_info = *(in->info());
+
+        Iterator   input(in, in_window);
+        Iterator   output(out, out_window);
+        const int  window_step_x  = 16 / sizeof(T);
+        const auto window_start_x = static_cast<int>(in_window.x().start());
+        const auto window_end_x   = static_cast<int>(in_window.x().end());
+
+        execute_window_loop(in_window, [&](const Coordinates &)
         {
-            case ReductionOperation::ARG_IDX_MAX:
-            case ReductionOperation::ARG_IDX_MIN:
-            case ReductionOperation::MIN:
-            case ReductionOperation::MAX:
-            {
-                init_res_value = *reinterpret_cast<T *>(input.ptr());
-                break;
-            }
-            case ReductionOperation::PROD:
-            {
-                init_res_value = static_cast<T>(1.f);
-                break;
-            }
-            default:
-                break;
-        }
-        auto         vec_res_value = wrapper::vdup_n(init_res_value, ExactTagType{});
-        uint32x4x4_t vec_res_idx{ { 0 } };
+            const auto input_ptr = reinterpret_cast<const T *>(input.ptr());
 
-        execute_window_loop(in_slice, [&](const Coordinates & id)
-        {
-            const auto in_ptr       = reinterpret_cast<const T *>(input.ptr());
-            const auto vec_elements = wrapper::vloadq(in_ptr);
-
-            switch(op)
-            {
-                case ReductionOperation::SUM_SQUARE:
-                    vec_res_value = wrapper::vadd(wrapper::vmul(vec_elements, vec_elements), vec_res_value);
-                    break;
-                case ReductionOperation::MEAN_SUM:
-                case ReductionOperation::SUM:
-                    vec_res_value = wrapper::vadd(vec_elements, vec_res_value);
-                    break;
-                case ReductionOperation::PROD:
-                    vec_res_value = wrapper::vmul(vec_elements, vec_res_value);
-                    break;
-                case ReductionOperation::ARG_IDX_MIN:
-                {
-                    auto temp_vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
-                    vec_res_idx             = calculate_index<decltype(vec_res_value)>(id.x(), temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
-                    vec_res_value           = temp_vec_res_value;
-                    break;
-                }
-                case ReductionOperation::ARG_IDX_MAX:
-                {
-                    auto temp_vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
-                    vec_res_idx             = calculate_index<decltype(vec_res_value)>(id.x(), temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
-                    vec_res_value           = temp_vec_res_value;
-                    break;
-                }
-                case ReductionOperation::MIN:
-                {
-                    vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
-                    break;
-                }
-                case ReductionOperation::MAX:
-                {
-                    vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
-                    break;
-                }
-                default:
-                    ARM_COMPUTE_ERROR("Not supported");
-            }
-        },
-        input);
-
-        switch(op)
-        {
-            case ReductionOperation::SUM:
-            case ReductionOperation::SUM_SQUARE:
-            case ReductionOperation::MEAN_SUM:
-            {
-                auto carry_res = wrapper::vpadd(wrapper::vgethigh(vec_res_value), wrapper::vgetlow(vec_res_value));
-                for(int i = 0; i < S / 4; ++i)
-                {
-                    carry_res = wrapper::vpadd(carry_res, carry_res);
-                }
-                auto res = wrapper::vgetlane(carry_res, 0);
-
-                if(op == ReductionOperation::MEAN_SUM)
-                {
-                    res /= in_info.dimension(0);
-                }
-
-                *(reinterpret_cast<T *>(output.ptr())) = res;
-                break;
-            }
-            case ReductionOperation::PROD:
-            {
-                auto carry_res = wrapper::vmul(wrapper::vgethigh(vec_res_value), wrapper::vgetlow(vec_res_value));
-                T    res       = 1;
-                for(int i = 0; i < S / 2; ++i)
-                {
-                    res *= wrapper::vgetlane(carry_res, i);
-                }
-                *(reinterpret_cast<T *>(output.ptr())) = res;
-                break;
-            }
-            case ReductionOperation::ARG_IDX_MIN:
-            case ReductionOperation::ARG_IDX_MAX:
-            {
-                auto res                                      = calculate_vector_index<decltype(vec_res_value)>(vec_res_idx, vec_res_value, op);
-                *(reinterpret_cast<uint32_t *>(output.ptr())) = res;
-                break;
-            }
-            case ReductionOperation::MIN:
-            {
-                *(reinterpret_cast<T *>(output.ptr())) = wrapper::vgetlane(calculate_min(vec_res_value), 0);
-                break;
-            }
-            case ReductionOperation::MAX:
-            {
-                *(reinterpret_cast<T *>(output.ptr())) = wrapper::vgetlane(calculate_max(vec_res_value), 0);
-                break;
-            }
-            default:
-                ARM_COMPUTE_ERROR("Not supported");
-        }
-    }
-};
-
-template <typename T>
-struct RedOpX_quantized
-{
-    inline void operator()(Iterator &input, Iterator &output, Window &in_slice, Window &out_slice, const TensorInfo &in_info, const ReductionOperation op)
-    {
-        ARM_COMPUTE_UNUSED(out_slice);
-
-        using PromotedType = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
-
-        const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
-
-        auto vec_res_value1 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
-        auto vec_res_value2 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
-        auto vec_res_value3 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
-        auto vec_res_value4 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
-
-        auto vec_res_value1_f = vdupq_n_f32(static_cast<float>(1.f));
-        auto vec_res_value2_f = vdupq_n_f32(static_cast<float>(1.f));
-        auto vec_res_value3_f = vdupq_n_f32(static_cast<float>(1.f));
-        auto vec_res_value4_f = vdupq_n_f32(static_cast<float>(1.f));
-
-        typename wrapper::traits::neon_vector<T, 16>::type vec_res_value = { 0 };
-
-        if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN || op == ReductionOperation::MAX)
-        {
-            vec_res_value = wrapper::vdup_n(*reinterpret_cast<T *>(input.ptr()), wrapper::traits::vector_128_tag{});
-        }
-
-        uint32x4x4_t vec_res_idx{ { 0 } };
-        execute_window_loop(in_slice, [&](const Coordinates & id)
-        {
-            const auto vec_elements = wrapper::vloadq(reinterpret_cast<T *>(input.ptr()));
-            switch(op)
-            {
-                case ReductionOperation::SUM:
-                case ReductionOperation::MEAN_SUM:
-                {
-                    const auto temp16x8t_1 = wrapper::vmovl(wrapper::vgetlow(vec_elements));
-                    const auto temp16x8t_2 = wrapper::vmovl(wrapper::vgethigh(vec_elements));
-
-                    const auto temp32x4t_1 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_1));
-                    const auto temp32x4t_2 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_1));
-                    const auto temp32x4t_3 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_2));
-                    const auto temp32x4t_4 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_2));
-
-                    vec_res_value1 = wrapper::vadd(temp32x4t_1, vec_res_value1);
-                    vec_res_value2 = wrapper::vadd(temp32x4t_2, vec_res_value2);
-                    vec_res_value3 = wrapper::vadd(temp32x4t_3, vec_res_value3);
-                    vec_res_value4 = wrapper::vadd(temp32x4t_4, vec_res_value4);
-                    break;
-                }
-                case ReductionOperation::PROD:
-                {
-                    const auto offset32x4f_4 = vdupq_n_f32(iq_info.offset);
-                    const auto scale32x4f_4  = vdupq_n_f32(iq_info.scale);
-
-                    const auto temp16x8t_1 = wrapper::vmovl(wrapper::vgetlow(vec_elements));
-                    const auto temp16x8t_2 = wrapper::vmovl(wrapper::vgethigh(vec_elements));
-
-                    const auto temp32x4t_1 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_1));
-                    const auto temp32x4t_2 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_1));
-                    const auto temp32x4t_3 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_2));
-                    const auto temp32x4t_4 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_2));
-
-                    auto temp32x4f_1 = wrapper::vcvt<float>(temp32x4t_1);
-                    auto temp32x4f_2 = wrapper::vcvt<float>(temp32x4t_2);
-                    auto temp32x4f_3 = wrapper::vcvt<float>(temp32x4t_3);
-                    auto temp32x4f_4 = wrapper::vcvt<float>(temp32x4t_4);
-
-                    //de-quantize vec_elements
-                    temp32x4f_1 = vmulq_f32(vsubq_f32(temp32x4f_1, offset32x4f_4), scale32x4f_4);
-                    temp32x4f_2 = vmulq_f32(vsubq_f32(temp32x4f_2, offset32x4f_4), scale32x4f_4);
-                    temp32x4f_3 = vmulq_f32(vsubq_f32(temp32x4f_3, offset32x4f_4), scale32x4f_4);
-                    temp32x4f_4 = vmulq_f32(vsubq_f32(temp32x4f_4, offset32x4f_4), scale32x4f_4);
-
-                    vec_res_value1_f = vmulq_f32(temp32x4f_1, vec_res_value1_f);
-                    vec_res_value2_f = vmulq_f32(temp32x4f_2, vec_res_value2_f);
-                    vec_res_value3_f = vmulq_f32(temp32x4f_3, vec_res_value3_f);
-                    vec_res_value4_f = vmulq_f32(temp32x4f_4, vec_res_value4_f);
-                    break;
-                }
-                case ReductionOperation::ARG_IDX_MIN:
-                {
-                    auto temp_vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
-                    vec_res_idx             = calculate_index_quantized(id.x(), temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
-                    vec_res_value           = temp_vec_res_value;
-                    break;
-                }
-                case ReductionOperation::ARG_IDX_MAX:
-                {
-                    auto temp_vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
-                    vec_res_idx             = calculate_index_quantized(id.x(), temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
-                    vec_res_value           = temp_vec_res_value;
-                    break;
-                }
-                case ReductionOperation::MIN:
-                {
-                    vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
-                    break;
-                }
-                case ReductionOperation::MAX:
-                {
-                    vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
-                    break;
-                }
-                default:
-                    ARM_COMPUTE_ERROR("Not supported");
-            }
-        },
-        input);
-
-        switch(op)
-        {
-            case ReductionOperation::ARG_IDX_MIN:
-            case ReductionOperation::ARG_IDX_MAX:
-            {
-                auto res                                          = calculate_vector_index_quantized(vec_res_idx, vec_res_value, op);
-                *(reinterpret_cast<PromotedType *>(output.ptr())) = res;
-                break;
-            }
-            case ReductionOperation::MIN:
-            {
-                *(output.ptr()) = static_cast<T>(wrapper::vgetlane(calculate_min(vec_res_value), 0));
-                break;
-            }
-            case ReductionOperation::MAX:
-            {
-                *(output.ptr()) = static_cast<T>(wrapper::vgetlane(calculate_max(vec_res_value), 0));
-                break;
-            }
-            case ReductionOperation::PROD:
-            {
-                auto carry_res = wrapper::vmul(vec_res_value1_f, vec_res_value2_f);
-                carry_res      = wrapper::vmul(carry_res, vec_res_value3_f);
-                carry_res      = wrapper::vmul(carry_res, vec_res_value4_f);
-
-                float res = wrapper::vgetlane(carry_res, 0);
-                res *= wrapper::vgetlane(carry_res, 1);
-                res *= wrapper::vgetlane(carry_res, 2);
-                res *= wrapper::vgetlane(carry_res, 3);
-
-                //re-quantize result
-                if(std::is_same<T, uint8_t>::value)
-                {
-                    res = quantize_qasymm8(res, iq_info);
-                }
-                else
-                {
-                    res = quantize_qasymm8_signed(res, iq_info);
-                }
-
-                *reinterpret_cast<T *>(output.ptr()) = static_cast<T>(res);
-                break;
-            }
-            default:
-            {
-                auto carry_res = wrapper::vadd(vec_res_value1, vec_res_value2);
-                carry_res      = wrapper::vadd(carry_res, vec_res_value3);
-                carry_res      = wrapper::vadd(carry_res, vec_res_value4);
-
-                auto carry_paddition = wrapper::vpadd(wrapper::vgethigh(carry_res), wrapper::vgetlow(carry_res));
-                carry_paddition      = wrapper::vpadd(carry_paddition, carry_paddition);
-                auto res             = static_cast<int32_t>(wrapper::vgetlane(carry_paddition, 0));
-
-                if(op == ReductionOperation::MEAN_SUM)
-                {
-                    res /= static_cast<int32_t>(in_info.dimension(0));
-                }
-                else
-                {
-                    // Subtract accumulated offsets
-                    res -= (in_info.dimension(0) - 1) * iq_info.offset;
-                }
-                *reinterpret_cast<T *>(output.ptr()) = utils::cast::saturate_cast<T>(res);
-            }
-        }
-    }
-};
-
-template <typename T, int S>
-struct RedOpYZW
-{
-    /** NEON vector tag type. */
-    using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
-    using neon_vector  = typename wrapper::traits::neon_vector<T, S>::type;
-
-    inline void operator()(Iterator &input, Iterator &output, Window &in_slice, Window &out_slice, const TensorInfo &in_info, int axis, const ReductionOperation op)
-    {
-        ARM_COMPUTE_UNUSED(out_slice);
-
-        execute_window_loop(in_slice, [&](const Coordinates &)
-        {
-            neon_vector vec_res_value = { 0 };
+            auto init_res_value = static_cast<T>(0.f);
             switch(op)
             {
                 case ReductionOperation::ARG_IDX_MAX:
@@ -758,34 +409,33 @@ struct RedOpYZW
                 case ReductionOperation::MIN:
                 case ReductionOperation::MAX:
                 {
-                    vec_res_value = wrapper::vloadq(reinterpret_cast<T *>(input.ptr()));
+                    init_res_value = static_cast<T>(*input_ptr);
                     break;
                 }
                 case ReductionOperation::PROD:
                 {
-                    vec_res_value = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
+                    init_res_value = static_cast<T>(1.f);
                     break;
                 }
                 default:
-                {
-                    vec_res_value = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
                     break;
-                }
             }
+            auto         vec_res_value = wrapper::vdup_n(init_res_value, ExactTagType{});
             uint32x4x4_t vec_res_idx{ { 0 } };
 
-            for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                const T   *in_ptr       = reinterpret_cast<T *>(input.ptr() + in_info.strides_in_bytes()[axis] * dim);
-                const auto vec_elements = wrapper::vloadq(in_ptr);
+                const auto vec_elements = wrapper::vloadq(input_ptr + x);
                 switch(op)
                 {
-                    case ReductionOperation::SUM:
-                    case ReductionOperation::MEAN_SUM:
-                        vec_res_value = wrapper::vadd(vec_elements, vec_res_value);
-                        break;
                     case ReductionOperation::SUM_SQUARE:
                         vec_res_value = wrapper::vadd(wrapper::vmul(vec_elements, vec_elements), vec_res_value);
+                        break;
+                    case ReductionOperation::MEAN_SUM:
+                    case ReductionOperation::SUM:
+                        vec_res_value = wrapper::vadd(vec_elements, vec_res_value);
                         break;
                     case ReductionOperation::PROD:
                         vec_res_value = wrapper::vmul(vec_elements, vec_res_value);
@@ -793,14 +443,14 @@ struct RedOpYZW
                     case ReductionOperation::ARG_IDX_MIN:
                     {
                         auto temp_vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
-                        vec_res_idx             = calculate_index(dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                        vec_res_idx             = calculate_index<decltype(vec_res_value)>(x, temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
                         vec_res_value           = temp_vec_res_value;
                         break;
                     }
                     case ReductionOperation::ARG_IDX_MAX:
                     {
                         auto temp_vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
-                        vec_res_idx             = calculate_index(dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                        vec_res_idx             = calculate_index<decltype(vec_res_value)>(x, temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
                         vec_res_value           = temp_vec_res_value;
                         break;
                     }
@@ -819,118 +469,171 @@ struct RedOpYZW
                 }
             }
 
-            if(op == ReductionOperation::MEAN_SUM)
+            switch(op)
             {
-                auto vec_width_inv = wrapper::vinv(wrapper::vdup_n(static_cast<T>(in_info.dimension(axis)), ExactTagType{}));
-                vec_res_value      = wrapper::vmul(vec_res_value, vec_width_inv);
-            }
-
-            if(op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX)
-            {
-                wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()), vec_res_idx.val[0]);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                if(std::is_same<T, float16_t>::value)
+                case ReductionOperation::SUM:
+                case ReductionOperation::MEAN_SUM:
+                case ReductionOperation::SUM_SQUARE:
                 {
-                    wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 4, vec_res_idx.val[1]);
+                    auto carry_res = wrapper::vpadd(wrapper::vgethigh(vec_res_value), wrapper::vgetlow(vec_res_value));
+                    for(int i = 0; i < S / 4; ++i)
+                    {
+                        carry_res = wrapper::vpadd(carry_res, carry_res);
+                    }
+                    auto res = wrapper::vgetlane(carry_res, 0);
+
+                    if(op == ReductionOperation::SUM_SQUARE)
+                    {
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            res += (*(input_ptr + x)) * (*(input_ptr + x));
+                        }
+                    }
+                    else
+                    {
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            res += *(input_ptr + x);
+                        }
+                    }
+
+                    if(op == ReductionOperation::MEAN_SUM)
+                    {
+                        res /= in_info.dimension(0);
+                    }
+
+                    *(reinterpret_cast<T *>(output.ptr())) = res;
+                    break;
                 }
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-            }
-            else
-            {
-                wrapper::vstore(reinterpret_cast<T *>(output.ptr()), vec_res_value);
-            }
-        },
-        input, output);
-    }
-};
-
-template <typename T, int S, int axis, ReductionOperation op>
-struct RedOpYZW_complex
-{
-    /** NEON vector tag type. */
-    using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
-    using neon_vector  = typename wrapper::traits::neon_vector<T, S>::type;
-
-    inline void operator()(Iterator &input, Iterator &output, Window &in_slice, Window &out_slice, const TensorInfo &in_info, int, const ReductionOperation)
-    {
-        ARM_COMPUTE_UNUSED(out_slice);
-        ARM_COMPUTE_ERROR_ON(axis != 2);
-
-        const size_t stride_z = in_info.strides_in_bytes()[axis];
-
-        execute_window_loop(in_slice, [&](const Coordinates &)
-        {
-            neon_vector vec_res_value_0 = { 0 };
-            neon_vector vec_res_value_1 = { 0 };
-
-            vec_res_value_0 = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
-            vec_res_value_1 = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
-
-            for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
-            {
-                T *in_ptr_0;
-                T *in_ptr_1;
-                switch(axis)
+                case ReductionOperation::PROD:
                 {
-                    case 2:
-                        in_ptr_0 = reinterpret_cast<T *>(input.ptr() + stride_z * dim);
-                        in_ptr_1 = reinterpret_cast<T *>(input.ptr() + 16 + stride_z * dim);
-                        break;
-                    default:
-                        ARM_COMPUTE_ERROR("Not supported");
-                }
-                const auto vec_elements_0 = wrapper::vloadq(in_ptr_0);
-                const auto vec_elements_1 = wrapper::vloadq(in_ptr_1);
+                    auto carry_res = wrapper::vmul(wrapper::vgethigh(vec_res_value), wrapper::vgetlow(vec_res_value));
+                    T    res       = 1;
+                    for(int i = 0; i < S / 2; ++i)
+                    {
+                        res *= wrapper::vgetlane(carry_res, i);
+                    }
 
-                switch(op)
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        res *= *(input_ptr + x);
+                    }
+
+                    *(reinterpret_cast<T *>(output.ptr())) = res;
+                    break;
+                }
+                case ReductionOperation::ARG_IDX_MIN:
                 {
-                    case ReductionOperation::SUM:
-                        vec_res_value_0 = wrapper::vadd(vec_elements_0, vec_res_value_0);
-                        vec_res_value_1 = wrapper::vadd(vec_elements_1, vec_res_value_1);
-                        break;
-                    default:
-                        ARM_COMPUTE_ERROR("Not supported");
+                    auto idx = calculate_vector_index<decltype(vec_res_value)>(vec_res_idx, vec_res_value, op);
+                    auto res = static_cast<T>(wrapper::vgetlane(calculate_min(vec_res_value), 0));
+
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        if(*(input_ptr + x) < res)
+                        {
+                            idx = x;
+                            res = *(input_ptr + x);
+                        }
+                    }
+                    *(reinterpret_cast<uint32_t *>(output.ptr())) = idx;
+                    break;
                 }
+                case ReductionOperation::ARG_IDX_MAX:
+                {
+                    auto idx = calculate_vector_index<decltype(vec_res_value)>(vec_res_idx, vec_res_value, op);
+                    auto res = static_cast<T>(wrapper::vgetlane(calculate_max(vec_res_value), 0));
+
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        if(*(input_ptr + x) > res)
+                        {
+                            idx = x;
+                            res = *(input_ptr + x);
+                        }
+                    }
+                    *(reinterpret_cast<uint32_t *>(output.ptr())) = idx;
+                    break;
+                }
+                case ReductionOperation::MIN:
+                {
+                    auto res = static_cast<T>(wrapper::vgetlane(calculate_min(vec_res_value), 0));
+
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        res = *(input_ptr + x) < res ? *(input_ptr + x) : res;
+                    }
+                    *(reinterpret_cast<T *>(output.ptr())) = res;
+                    break;
+                }
+                case ReductionOperation::MAX:
+                {
+                    auto res = static_cast<T>(wrapper::vgetlane(calculate_max(vec_res_value), 0));
+
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        res = *(input_ptr + x) > res ? *(input_ptr + x) : res;
+                    }
+                    *(reinterpret_cast<T *>(output.ptr())) = res;
+                    break;
+                }
+                default:
+                    ARM_COMPUTE_ERROR("Not supported");
             }
-
-            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), vec_res_value_0);
-            wrapper::vstore(reinterpret_cast<T *>(output.ptr() + 16), vec_res_value_1);
-
         },
         input, output);
     }
 };
 
 template <typename T>
-struct RedOpYZW_quantized
+struct RedOpX_quantized
 {
-    inline void operator()(Iterator &input, Iterator &output, Window &in_slice, Window &out_slice, const TensorInfo &in_info, int axis, const ReductionOperation op)
+    inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, const ReductionOperation op)
     {
-        ARM_COMPUTE_UNUSED(out_slice);
-
         using PromotedType = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
 
+        const TensorInfo              in_info = *(in->info());
         const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
 
-        execute_window_loop(in_slice, [&](const Coordinates &)
+        Iterator   input(in, in_window);
+        Iterator   output(out, out_window);
+        const int  window_step_x  = 16 / sizeof(T);
+        const auto window_start_x = static_cast<int>(in_window.x().start());
+        const auto window_end_x   = static_cast<int>(in_window.x().end());
+
+        execute_window_loop(in_window, [&](const Coordinates &)
         {
-            uint32x4x4_t vec_res_idx{ { 0 } };
-            auto         vec_res_value1 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
-            auto         vec_res_value2 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
-            auto         vec_res_value3 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
-            auto         vec_res_value4 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+            const auto input_ptr = reinterpret_cast<T *>(input.ptr());
 
-            auto vec_res_value1_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
-            auto vec_res_value2_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
-            auto vec_res_value3_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
-            auto vec_res_value4_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+            auto vec_res_value1 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
+            auto vec_res_value2 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
+            auto vec_res_value3 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
+            auto vec_res_value4 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
 
-            auto vec_res_value = wrapper::vloadq(reinterpret_cast<T *>(input.ptr()));
+            auto vec_res_value1_f = vdupq_n_f32(static_cast<float>(1.f));
+            auto vec_res_value2_f = vdupq_n_f32(static_cast<float>(1.f));
+            auto vec_res_value3_f = vdupq_n_f32(static_cast<float>(1.f));
+            auto vec_res_value4_f = vdupq_n_f32(static_cast<float>(1.f));
 
-            for(unsigned int index_dim = 0; index_dim < in_info.dimension(axis); ++index_dim)
+            typename wrapper::traits::neon_vector<T, 16>::type vec_res_value = { 0 };
+
+            if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN || op == ReductionOperation::MAX)
             {
-                const T   *in_ptr       = reinterpret_cast<T *>(input.ptr()) + in_info.strides_in_bytes()[axis] * index_dim;
-                const auto vec_elements = wrapper::vloadq(in_ptr);
+                vec_res_value = wrapper::vdup_n(*input_ptr, wrapper::traits::vector_128_tag{});
+            }
+
+            uint32x4x4_t vec_res_idx{ { 0 } };
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const auto vec_elements = wrapper::vloadq(input_ptr + x);
                 switch(op)
                 {
                     case ReductionOperation::SUM:
@@ -952,8 +655,8 @@ struct RedOpYZW_quantized
                     }
                     case ReductionOperation::PROD:
                     {
-                        const auto offset32x4f_4 = wrapper::vdup_n(static_cast<float>(iq_info.offset), wrapper::traits::vector_128_tag{});
-                        const auto scale32x4f_4  = wrapper::vdup_n(iq_info.scale, wrapper::traits::vector_128_tag{});
+                        const auto offset32x4f_4 = vdupq_n_f32(iq_info.offset);
+                        const auto scale32x4f_4  = vdupq_n_f32(iq_info.scale);
 
                         const auto temp16x8t_1 = wrapper::vmovl(wrapper::vgetlow(vec_elements));
                         const auto temp16x8t_2 = wrapper::vmovl(wrapper::vgethigh(vec_elements));
@@ -969,28 +672,28 @@ struct RedOpYZW_quantized
                         auto temp32x4f_4 = wrapper::vcvt<float>(temp32x4t_4);
 
                         //de-quantize vec_elements
-                        temp32x4f_1 = wrapper::vmul(wrapper::vsub(temp32x4f_1, offset32x4f_4), scale32x4f_4);
-                        temp32x4f_2 = wrapper::vmul(wrapper::vsub(temp32x4f_2, offset32x4f_4), scale32x4f_4);
-                        temp32x4f_3 = wrapper::vmul(wrapper::vsub(temp32x4f_3, offset32x4f_4), scale32x4f_4);
-                        temp32x4f_4 = wrapper::vmul(wrapper::vsub(temp32x4f_4, offset32x4f_4), scale32x4f_4);
+                        temp32x4f_1 = vmulq_f32(vsubq_f32(temp32x4f_1, offset32x4f_4), scale32x4f_4);
+                        temp32x4f_2 = vmulq_f32(vsubq_f32(temp32x4f_2, offset32x4f_4), scale32x4f_4);
+                        temp32x4f_3 = vmulq_f32(vsubq_f32(temp32x4f_3, offset32x4f_4), scale32x4f_4);
+                        temp32x4f_4 = vmulq_f32(vsubq_f32(temp32x4f_4, offset32x4f_4), scale32x4f_4);
 
-                        vec_res_value1_f = wrapper::vmul(temp32x4f_1, vec_res_value1_f);
-                        vec_res_value2_f = wrapper::vmul(temp32x4f_2, vec_res_value2_f);
-                        vec_res_value3_f = wrapper::vmul(temp32x4f_3, vec_res_value3_f);
-                        vec_res_value4_f = wrapper::vmul(temp32x4f_4, vec_res_value4_f);
+                        vec_res_value1_f = vmulq_f32(temp32x4f_1, vec_res_value1_f);
+                        vec_res_value2_f = vmulq_f32(temp32x4f_2, vec_res_value2_f);
+                        vec_res_value3_f = vmulq_f32(temp32x4f_3, vec_res_value3_f);
+                        vec_res_value4_f = vmulq_f32(temp32x4f_4, vec_res_value4_f);
                         break;
                     }
                     case ReductionOperation::ARG_IDX_MIN:
                     {
                         auto temp_vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
-                        vec_res_idx             = calculate_index_quantized(index_dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                        vec_res_idx             = calculate_index_quantized<decltype(vec_res_value)>(x, temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
                         vec_res_value           = temp_vec_res_value;
                         break;
                     }
                     case ReductionOperation::ARG_IDX_MAX:
                     {
                         auto temp_vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
-                        vec_res_idx             = calculate_index_quantized(index_dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                        vec_res_idx             = calculate_index_quantized<decltype(vec_res_value)>(x, temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
                         vec_res_value           = temp_vec_res_value;
                         break;
                     }
@@ -1009,79 +712,787 @@ struct RedOpYZW_quantized
                 }
             }
 
-            if(op == ReductionOperation::MEAN_SUM)
+            switch(op)
             {
-                const auto vec_width_inv = wrapper::vinv(wrapper::vdup_n(static_cast<float>(in_info.dimension(axis)), wrapper::traits::vector_128_tag{}));
-                vec_res_value1_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value1), vec_width_inv);
-                vec_res_value2_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value2), vec_width_inv);
-                vec_res_value3_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value3), vec_width_inv);
-                vec_res_value4_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value4), vec_width_inv);
-
-                vec_res_value1 = wrapper::vcvt<T>(vec_res_value1_f);
-                vec_res_value2 = wrapper::vcvt<T>(vec_res_value2_f);
-                vec_res_value3 = wrapper::vcvt<T>(vec_res_value3_f);
-                vec_res_value4 = wrapper::vcvt<T>(vec_res_value4_f);
-            }
-            else if(op == ReductionOperation::PROD)
-            {
-                const auto offset32x4f_4 = wrapper::vdup_n(static_cast<float>(iq_info.offset), wrapper::traits::vector_128_tag{});
-                const auto iscale32x4f_4 = vinvq_f32(vdupq_n_f32(iq_info.scale));
-
-                //re-quantize
-                vec_res_value1_f = wrapper::vadd(wrapper::vmul(vec_res_value1_f, iscale32x4f_4), offset32x4f_4);
-                vec_res_value2_f = wrapper::vadd(wrapper::vmul(vec_res_value2_f, iscale32x4f_4), offset32x4f_4);
-                vec_res_value3_f = wrapper::vadd(wrapper::vmul(vec_res_value3_f, iscale32x4f_4), offset32x4f_4);
-                vec_res_value4_f = wrapper::vadd(wrapper::vmul(vec_res_value4_f, iscale32x4f_4), offset32x4f_4);
-
-                vec_res_value1 = wrapper::vcvt<T>(vec_res_value1_f);
-                vec_res_value2 = wrapper::vcvt<T>(vec_res_value2_f);
-                vec_res_value3 = wrapper::vcvt<T>(vec_res_value3_f);
-                vec_res_value4 = wrapper::vcvt<T>(vec_res_value4_f);
-            }
-
-            if(op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX)
-            {
-                wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()), vec_res_idx.val[0]);
-                wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 4, vec_res_idx.val[1]);
-                wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 8, vec_res_idx.val[2]);
-                wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 12, vec_res_idx.val[3]);
-            }
-            else if(op == ReductionOperation::MIN || op == ReductionOperation::MAX)
-            {
-                wrapper::vstore(reinterpret_cast<T *>(output.ptr()), vec_res_value);
-            }
-            else
-            {
-                if(op == ReductionOperation::SUM)
+                case ReductionOperation::ARG_IDX_MIN:
                 {
-                    // Subtract offsets
-                    auto offsets = vdupq_n_s32((in_info.dimension(axis) - 1) * iq_info.offset);
+                    auto idx = calculate_vector_index_quantized<decltype(vec_res_value)>(vec_res_idx, vec_res_value, op);
+                    auto res = static_cast<T>(wrapper::vgetlane(calculate_min(vec_res_value), 0));
 
-                    auto vec_res_s_value1 = wrapper::vreinterpret(vec_res_value1);
-                    auto vec_res_s_value2 = wrapper::vreinterpret(vec_res_value2);
-                    auto vec_res_s_value3 = wrapper::vreinterpret(vec_res_value3);
-                    auto vec_res_s_value4 = wrapper::vreinterpret(vec_res_value4);
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        if(*(input_ptr + x) < res)
+                        {
+                            idx = x;
+                            res = *(input_ptr + x);
+                        }
+                    }
+                    *(reinterpret_cast<uint32_t *>(output.ptr())) = idx;
+                    break;
+                }
+                case ReductionOperation::ARG_IDX_MAX:
+                {
+                    auto idx = calculate_vector_index_quantized<decltype(vec_res_value)>(vec_res_idx, vec_res_value, op);
+                    auto res = static_cast<T>(wrapper::vgetlane(calculate_max(vec_res_value), 0));
 
-                    vec_res_s_value1 = wrapper::vsub(vec_res_s_value1, offsets);
-                    vec_res_s_value2 = wrapper::vsub(vec_res_s_value2, offsets);
-                    vec_res_s_value3 = wrapper::vsub(vec_res_s_value3, offsets);
-                    vec_res_s_value4 = wrapper::vsub(vec_res_s_value4, offsets);
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        if(*(input_ptr + x) > res)
+                        {
+                            idx = x;
+                            res = *(input_ptr + x);
+                        }
+                    }
+                    *(reinterpret_cast<uint32_t *>(output.ptr())) = idx;
+                    break;
+                }
+                case ReductionOperation::MIN:
+                {
+                    auto res = static_cast<T>(wrapper::vgetlane(calculate_min(vec_res_value), 0));
 
-                    const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_s_value1), wrapper::vqmovn(vec_res_s_value2));
-                    const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_s_value3), wrapper::vqmovn(vec_res_s_value4));
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        res = *(input_ptr + x) < res ? *(input_ptr + x) : res;
+                    }
+                    *(reinterpret_cast<T *>(output.ptr())) = res;
+                    break;
+                }
+                case ReductionOperation::MAX:
+                {
+                    auto res = static_cast<T>(wrapper::vgetlane(calculate_max(vec_res_value), 0));
 
-                    combine_and_store<T>(temp16x8t_1, temp16x8t_2, output);
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        res = *(input_ptr + x) > res ? *(input_ptr + x) : res;
+                    }
+                    *(reinterpret_cast<T *>(output.ptr())) = res;
+                    break;
+                }
+                case ReductionOperation::PROD:
+                {
+                    auto carry_res = wrapper::vmul(vec_res_value1_f, vec_res_value2_f);
+                    carry_res      = wrapper::vmul(carry_res, vec_res_value3_f);
+                    carry_res      = wrapper::vmul(carry_res, vec_res_value4_f);
+
+                    float res = wrapper::vgetlane(carry_res, 0);
+                    res *= wrapper::vgetlane(carry_res, 1);
+                    res *= wrapper::vgetlane(carry_res, 2);
+                    res *= wrapper::vgetlane(carry_res, 3);
+
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        //de-quantize input
+                        if(std::is_same<T, uint8_t>::value)
+                        {
+                            res *= dequantize_qasymm8(*(input_ptr + x), iq_info);
+                        }
+                        else
+                        {
+                            res *= dequantize_qasymm8_signed(*(input_ptr + x), iq_info);
+                        }
+                    }
+
+                    //re-quantize result
+                    if(std::is_same<T, uint8_t>::value)
+                    {
+                        res = quantize_qasymm8(res, iq_info);
+                    }
+                    else
+                    {
+                        res = quantize_qasymm8_signed(res, iq_info);
+                    }
+
+                    *reinterpret_cast<T *>(output.ptr()) = static_cast<T>(res);
+                    break;
+                }
+                case ReductionOperation::SUM:
+                case ReductionOperation::MEAN_SUM:
+                {
+                    auto carry_res = wrapper::vadd(vec_res_value1, vec_res_value2);
+                    carry_res      = wrapper::vadd(carry_res, vec_res_value3);
+                    carry_res      = wrapper::vadd(carry_res, vec_res_value4);
+
+                    auto carry_paddition = wrapper::vpadd(wrapper::vgethigh(carry_res), wrapper::vgetlow(carry_res));
+                    carry_paddition      = wrapper::vpadd(carry_paddition, carry_paddition);
+                    auto res             = static_cast<int32_t>(wrapper::vgetlane(carry_paddition, 0));
+
+                    // Compute left-over elements
+                    for(; x < window_end_x; ++x)
+                    {
+                        res += *(input_ptr + x);
+                    }
+
+                    if(op == ReductionOperation::MEAN_SUM)
+                    {
+                        res /= static_cast<int32_t>(in_info.dimension(0));
+                    }
+                    else
+                    {
+                        // Subtract accumulated offsets
+                        res -= (in_info.dimension(0) - 1) * iq_info.offset;
+                    }
+                    *reinterpret_cast<T *>(output.ptr()) = utils::cast::saturate_cast<T>(res);
+                    break;
+                }
+                default:
+                    ARM_COMPUTE_ERROR("Not supported");
+            }
+        },
+        input, output);
+    }
+};
+
+template <typename T, int S>
+struct RedOpYZW
+{
+    /** NEON vector tag type. */
+    using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
+    using neon_vector  = typename wrapper::traits::neon_vector<T, S>::type;
+
+    inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, int axis, const ReductionOperation op)
+    {
+        const TensorInfo in_info = *(in->info());
+
+        Iterator   input(in, in_window);
+        Iterator   output(out, out_window);
+        const int  window_step_x  = 16 / sizeof(T);
+        const auto window_start_x = static_cast<int>(in_window.x().start());
+        const auto window_end_x   = static_cast<int>(in_window.x().end());
+
+        execute_window_loop(in_window, [&](const Coordinates &)
+        {
+            const auto input_ptr = reinterpret_cast<T *>(input.ptr());
+
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                neon_vector vec_res_value = { 0 };
+                switch(op)
+                {
+                    case ReductionOperation::ARG_IDX_MAX:
+                    case ReductionOperation::ARG_IDX_MIN:
+                    case ReductionOperation::MIN:
+                    case ReductionOperation::MAX:
+                    {
+                        vec_res_value = wrapper::vloadq(input_ptr + x);
+                        break;
+                    }
+                    case ReductionOperation::PROD:
+                    {
+                        vec_res_value = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
+                        break;
+                    }
+                    default:
+                    {
+                        vec_res_value = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
+                        break;
+                    }
+                }
+                uint32x4x4_t vec_res_idx{ { 0 } };
+
+                for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
+                {
+                    const T   *in_ptr       = reinterpret_cast<T *>(input.ptr() + x * sizeof(T) + in_info.strides_in_bytes()[axis] * dim);
+                    const auto vec_elements = wrapper::vloadq(in_ptr);
+                    switch(op)
+                    {
+                        case ReductionOperation::SUM:
+                        case ReductionOperation::MEAN_SUM:
+                            vec_res_value = wrapper::vadd(vec_elements, vec_res_value);
+                            break;
+                        case ReductionOperation::SUM_SQUARE:
+                            vec_res_value = wrapper::vadd(wrapper::vmul(vec_elements, vec_elements), vec_res_value);
+                            break;
+                        case ReductionOperation::PROD:
+                            vec_res_value = wrapper::vmul(vec_elements, vec_res_value);
+                            break;
+                        case ReductionOperation::ARG_IDX_MIN:
+                        {
+                            auto temp_vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
+                            vec_res_idx             = calculate_index(dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                            vec_res_value           = temp_vec_res_value;
+                            break;
+                        }
+                        case ReductionOperation::ARG_IDX_MAX:
+                        {
+                            auto temp_vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
+                            vec_res_idx             = calculate_index(dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                            vec_res_value           = temp_vec_res_value;
+                            break;
+                        }
+                        case ReductionOperation::MIN:
+                        {
+                            vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
+                            break;
+                        }
+                        case ReductionOperation::MAX:
+                        {
+                            vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
+                            break;
+                        }
+                        default:
+                            ARM_COMPUTE_ERROR("Not supported");
+                    }
+                }
+
+                if(op == ReductionOperation::MEAN_SUM)
+                {
+                    auto vec_width_inv = wrapper::vinv(wrapper::vdup_n(static_cast<T>(in_info.dimension(axis)), ExactTagType{}));
+                    vec_res_value      = wrapper::vmul(vec_res_value, vec_width_inv);
+                }
+
+                if(op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX)
+                {
+                    wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + x, vec_res_idx.val[0]);
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                    if(std::is_same<T, float16_t>::value)
+                    {
+                        wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + x + 4, vec_res_idx.val[1]);
+                    }
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 }
                 else
                 {
-                    const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_value1), wrapper::vqmovn(vec_res_value2));
-                    const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_value3), wrapper::vqmovn(vec_res_value4));
-                    auto       res         = wrapper::vcombine(wrapper::vqmovn(temp16x8t_1), wrapper::vqmovn(temp16x8t_2));
-
-                    wrapper::vstore(reinterpret_cast<T *>(output.ptr()), res);
+                    wrapper::vstore(reinterpret_cast<T *>(output.ptr() + x * sizeof(T)), vec_res_value);
                 }
             }
 
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                auto res_value = 0.f;
+                switch(op)
+                {
+                    case ReductionOperation::ARG_IDX_MAX:
+                    case ReductionOperation::ARG_IDX_MIN:
+                    case ReductionOperation::MIN:
+                    case ReductionOperation::MAX:
+                    {
+                        res_value = *(input_ptr + x);
+                        break;
+                    }
+                    case ReductionOperation::PROD:
+                    {
+                        res_value = static_cast<T>(1.f);
+                        break;
+                    }
+                    default:
+                    {
+                        res_value = static_cast<T>(0.f);
+                        break;
+                    }
+                }
+
+                uint32_t res_idx = 0;
+                for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
+                {
+                    const T *in_ptr = reinterpret_cast<T *>(input.ptr() + x * sizeof(T) + in_info.strides_in_bytes()[axis] * dim);
+
+                    switch(op)
+                    {
+                        case ReductionOperation::SUM:
+                        case ReductionOperation::MEAN_SUM:
+                            res_value += *in_ptr;
+                            break;
+                        case ReductionOperation::SUM_SQUARE:
+                            res_value += *in_ptr * *in_ptr;
+                            break;
+                        case ReductionOperation::PROD:
+                            res_value *= *in_ptr;
+                            break;
+                        case ReductionOperation::ARG_IDX_MIN:
+                        {
+                            if(*in_ptr < res_value)
+                            {
+                                res_value = *in_ptr;
+                                res_idx   = dim;
+                            }
+                            break;
+                        }
+                        case ReductionOperation::ARG_IDX_MAX:
+                        {
+                            if(*in_ptr > res_value)
+                            {
+                                res_value = *in_ptr;
+                                res_idx   = dim;
+                            }
+                            break;
+                        }
+                        case ReductionOperation::MIN:
+                        {
+                            res_value = *in_ptr < res_value ? *in_ptr : res_value;
+                            break;
+                        }
+                        case ReductionOperation::MAX:
+                        {
+                            res_value = *in_ptr > res_value ? *in_ptr : res_value;
+                            break;
+                        }
+                        default:
+                            ARM_COMPUTE_ERROR("Not supported");
+                    }
+                }
+
+                if(op == ReductionOperation::MEAN_SUM)
+                {
+                    res_value /= in_info.dimension(axis);
+                }
+
+                if(op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX)
+                {
+                    *(reinterpret_cast<uint32_t *>(output.ptr()) + x) = res_idx;
+                }
+                else
+                {
+                    *(reinterpret_cast<T *>(output.ptr() + x * sizeof(T))) = res_value;
+                }
+            }
+        },
+        input, output);
+    }
+};
+
+template <typename T, int S, int axis, ReductionOperation op>
+struct RedOpYZW_complex
+{
+    /** NEON vector tag type. */
+    using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
+    using neon_vector  = typename wrapper::traits::neon_vector<T, S>::type;
+
+    inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, int, const ReductionOperation)
+    {
+        ARM_COMPUTE_ERROR_ON(axis != 2);
+
+        const TensorInfo in_info = *(in->info());
+
+        Iterator   input(in, in_window);
+        Iterator   output(out, out_window);
+        const int  window_step_x  = 16 / sizeof(T);
+        const auto window_start_x = static_cast<int>(in_window.x().start());
+        const auto window_end_x   = static_cast<int>(in_window.x().end());
+
+        const size_t stride_z = in_info.strides_in_bytes()[axis];
+
+        execute_window_loop(in_window, [&](const Coordinates &)
+        {
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                neon_vector vec_res_value_0 = { 0 };
+                neon_vector vec_res_value_1 = { 0 };
+
+                vec_res_value_0 = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
+                vec_res_value_1 = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
+
+                T *out_ptr = reinterpret_cast<T *>(output.ptr() + 2 * x * sizeof(T));
+                for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
+                {
+                    T *in_ptr_0;
+                    T *in_ptr_1;
+                    switch(axis)
+                    {
+                        case 2:
+                            in_ptr_0 = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + stride_z * dim);
+                            in_ptr_1 = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + 16 + stride_z * dim);
+                            break;
+                        default:
+                            ARM_COMPUTE_ERROR("Not supported");
+                    }
+                    const auto vec_elements_0 = wrapper::vloadq(in_ptr_0);
+                    const auto vec_elements_1 = wrapper::vloadq(in_ptr_1);
+
+                    switch(op)
+                    {
+                        case ReductionOperation::SUM:
+                            vec_res_value_0 = wrapper::vadd(vec_elements_0, vec_res_value_0);
+                            vec_res_value_1 = wrapper::vadd(vec_elements_1, vec_res_value_1);
+                            break;
+                        default:
+                            ARM_COMPUTE_ERROR("Not supported");
+                    }
+                }
+
+                wrapper::vstore(out_ptr, vec_res_value_0);
+                wrapper::vstore(out_ptr + 4, vec_res_value_1);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                auto res_value_0 = 0.f;
+                auto res_value_1 = 0.f;
+
+                T *out_ptr = reinterpret_cast<T *>(output.ptr() + 2 * x * sizeof(T));
+                for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
+                {
+                    T *in_ptr;
+                    switch(axis)
+                    {
+                        case 2:
+                            in_ptr = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + stride_z * dim);
+                            break;
+                        default:
+                            ARM_COMPUTE_ERROR("Not supported");
+                    }
+                    switch(op)
+                    {
+                        case ReductionOperation::SUM:
+                            res_value_0 += *in_ptr;
+                            res_value_1 += *(in_ptr + 1);
+                            break;
+                        default:
+                            ARM_COMPUTE_ERROR("Not supported");
+                    }
+                }
+                *out_ptr       = res_value_0;
+                *(out_ptr + 1) = res_value_1;
+            }
+        },
+        input, output);
+    }
+};
+
+template <typename T>
+struct RedOpYZW_quantized
+{
+    inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, int axis, const ReductionOperation op)
+    {
+        const TensorInfo in_info = *(in->info());
+
+        Iterator   input(in, in_window);
+        Iterator   output(out, out_window);
+        const int  window_step_x  = 16 / sizeof(T);
+        const auto window_start_x = static_cast<int>(in_window.x().start());
+        const auto window_end_x   = static_cast<int>(in_window.x().end());
+
+        using PromotedType = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
+
+        const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
+
+        execute_window_loop(in_window, [&](const Coordinates &)
+        {
+            const auto input_ptr = reinterpret_cast<T *>(input.ptr());
+
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                uint32x4x4_t vec_res_idx{ { 0 } };
+                auto         vec_res_value1 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+                auto         vec_res_value2 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+                auto         vec_res_value3 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+                auto         vec_res_value4 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+
+                auto vec_res_value1_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+                auto vec_res_value2_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+                auto vec_res_value3_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+                auto vec_res_value4_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+
+                auto vec_res_value = wrapper::vloadq(input_ptr + x);
+
+                for(unsigned int index_dim = 0; index_dim < in_info.dimension(axis); ++index_dim)
+                {
+                    const T   *in_ptr       = input_ptr + x + in_info.strides_in_bytes()[axis] * index_dim;
+                    const auto vec_elements = wrapper::vloadq(in_ptr);
+                    switch(op)
+                    {
+                        case ReductionOperation::SUM:
+                        case ReductionOperation::MEAN_SUM:
+                        {
+                            const auto temp16x8t_1 = wrapper::vmovl(wrapper::vgetlow(vec_elements));
+                            const auto temp16x8t_2 = wrapper::vmovl(wrapper::vgethigh(vec_elements));
+
+                            const auto temp32x4t_1 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_1));
+                            const auto temp32x4t_2 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_1));
+                            const auto temp32x4t_3 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_2));
+                            const auto temp32x4t_4 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_2));
+
+                            vec_res_value1 = wrapper::vadd(temp32x4t_1, vec_res_value1);
+                            vec_res_value2 = wrapper::vadd(temp32x4t_2, vec_res_value2);
+                            vec_res_value3 = wrapper::vadd(temp32x4t_3, vec_res_value3);
+                            vec_res_value4 = wrapper::vadd(temp32x4t_4, vec_res_value4);
+                            break;
+                        }
+                        case ReductionOperation::PROD:
+                        {
+                            const auto offset32x4f_4 = wrapper::vdup_n(static_cast<float>(iq_info.offset), wrapper::traits::vector_128_tag{});
+                            const auto scale32x4f_4  = wrapper::vdup_n(iq_info.scale, wrapper::traits::vector_128_tag{});
+
+                            const auto temp16x8t_1 = wrapper::vmovl(wrapper::vgetlow(vec_elements));
+                            const auto temp16x8t_2 = wrapper::vmovl(wrapper::vgethigh(vec_elements));
+
+                            const auto temp32x4t_1 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_1));
+                            const auto temp32x4t_2 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_1));
+                            const auto temp32x4t_3 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_2));
+                            const auto temp32x4t_4 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_2));
+
+                            auto temp32x4f_1 = wrapper::vcvt<float>(temp32x4t_1);
+                            auto temp32x4f_2 = wrapper::vcvt<float>(temp32x4t_2);
+                            auto temp32x4f_3 = wrapper::vcvt<float>(temp32x4t_3);
+                            auto temp32x4f_4 = wrapper::vcvt<float>(temp32x4t_4);
+
+                            //de-quantize vec_elements
+                            temp32x4f_1 = wrapper::vmul(wrapper::vsub(temp32x4f_1, offset32x4f_4), scale32x4f_4);
+                            temp32x4f_2 = wrapper::vmul(wrapper::vsub(temp32x4f_2, offset32x4f_4), scale32x4f_4);
+                            temp32x4f_3 = wrapper::vmul(wrapper::vsub(temp32x4f_3, offset32x4f_4), scale32x4f_4);
+                            temp32x4f_4 = wrapper::vmul(wrapper::vsub(temp32x4f_4, offset32x4f_4), scale32x4f_4);
+
+                            vec_res_value1_f = wrapper::vmul(temp32x4f_1, vec_res_value1_f);
+                            vec_res_value2_f = wrapper::vmul(temp32x4f_2, vec_res_value2_f);
+                            vec_res_value3_f = wrapper::vmul(temp32x4f_3, vec_res_value3_f);
+                            vec_res_value4_f = wrapper::vmul(temp32x4f_4, vec_res_value4_f);
+                            break;
+                        }
+                        case ReductionOperation::ARG_IDX_MIN:
+                        {
+                            auto temp_vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
+                            vec_res_idx             = calculate_index_quantized(index_dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                            vec_res_value           = temp_vec_res_value;
+                            break;
+                        }
+                        case ReductionOperation::ARG_IDX_MAX:
+                        {
+                            auto temp_vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
+                            vec_res_idx             = calculate_index_quantized(index_dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                            vec_res_value           = temp_vec_res_value;
+                            break;
+                        }
+                        case ReductionOperation::MIN:
+                        {
+                            vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
+                            break;
+                        }
+                        case ReductionOperation::MAX:
+                        {
+                            vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
+                            break;
+                        }
+                        default:
+                            ARM_COMPUTE_ERROR("Not supported");
+                    }
+                }
+
+                switch(op)
+                {
+                    case ReductionOperation::ARG_IDX_MIN:
+                    case ReductionOperation::ARG_IDX_MAX:
+                    {
+                        wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr() + 4 * x), vec_res_idx.val[0]);
+                        wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr() + 4 * x) + 4, vec_res_idx.val[1]);
+                        wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr() + 4 * x) + 8, vec_res_idx.val[2]);
+                        wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr() + 4 * x) + 12, vec_res_idx.val[3]);
+                        break;
+                    }
+                    case ReductionOperation::MIN:
+                    case ReductionOperation::MAX:
+                    {
+                        wrapper::vstore(reinterpret_cast<T *>(output.ptr() + x), vec_res_value);
+                        break;
+                    }
+                    case ReductionOperation::SUM:
+                    {
+                        // Subtract offsets
+                        auto offsets = vdupq_n_s32((in_info.dimension(axis) - 1) * iq_info.offset);
+
+                        auto vec_res_s_value1 = wrapper::vreinterpret(vec_res_value1);
+                        auto vec_res_s_value2 = wrapper::vreinterpret(vec_res_value2);
+                        auto vec_res_s_value3 = wrapper::vreinterpret(vec_res_value3);
+                        auto vec_res_s_value4 = wrapper::vreinterpret(vec_res_value4);
+
+                        vec_res_s_value1 = wrapper::vsub(vec_res_s_value1, offsets);
+                        vec_res_s_value2 = wrapper::vsub(vec_res_s_value2, offsets);
+                        vec_res_s_value3 = wrapper::vsub(vec_res_s_value3, offsets);
+                        vec_res_s_value4 = wrapper::vsub(vec_res_s_value4, offsets);
+
+                        const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_s_value1), wrapper::vqmovn(vec_res_s_value2));
+                        const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_s_value3), wrapper::vqmovn(vec_res_s_value4));
+
+                        combine_and_store<T>(temp16x8t_1, temp16x8t_2, output, x);
+                        break;
+                    }
+                    case ReductionOperation::MEAN_SUM:
+                    {
+                        const auto vec_width_inv = wrapper::vinv(wrapper::vdup_n(static_cast<float>(in_info.dimension(axis)), wrapper::traits::vector_128_tag{}));
+                        vec_res_value1_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value1), vec_width_inv);
+                        vec_res_value2_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value2), vec_width_inv);
+                        vec_res_value3_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value3), vec_width_inv);
+                        vec_res_value4_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value4), vec_width_inv);
+
+                        vec_res_value1 = wrapper::vcvt<T>(vec_res_value1_f);
+                        vec_res_value2 = wrapper::vcvt<T>(vec_res_value2_f);
+                        vec_res_value3 = wrapper::vcvt<T>(vec_res_value3_f);
+                        vec_res_value4 = wrapper::vcvt<T>(vec_res_value4_f);
+
+                        const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_value1), wrapper::vqmovn(vec_res_value2));
+                        const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_value3), wrapper::vqmovn(vec_res_value4));
+                        auto       res         = wrapper::vcombine(wrapper::vqmovn(temp16x8t_1), wrapper::vqmovn(temp16x8t_2));
+
+                        wrapper::vstore(reinterpret_cast<T *>(output.ptr() + x), res);
+                        break;
+                    }
+                    case ReductionOperation::PROD:
+                    {
+                        const auto offset32x4f_4 = wrapper::vdup_n(static_cast<float>(iq_info.offset), wrapper::traits::vector_128_tag{});
+                        const auto iscale32x4f_4 = vinvq_f32(vdupq_n_f32(iq_info.scale));
+
+                        //re-quantize
+                        vec_res_value1_f = wrapper::vadd(wrapper::vmul(vec_res_value1_f, iscale32x4f_4), offset32x4f_4);
+                        vec_res_value2_f = wrapper::vadd(wrapper::vmul(vec_res_value2_f, iscale32x4f_4), offset32x4f_4);
+                        vec_res_value3_f = wrapper::vadd(wrapper::vmul(vec_res_value3_f, iscale32x4f_4), offset32x4f_4);
+                        vec_res_value4_f = wrapper::vadd(wrapper::vmul(vec_res_value4_f, iscale32x4f_4), offset32x4f_4);
+
+                        vec_res_value1 = wrapper::vcvt<T>(vec_res_value1_f);
+                        vec_res_value2 = wrapper::vcvt<T>(vec_res_value2_f);
+                        vec_res_value3 = wrapper::vcvt<T>(vec_res_value3_f);
+                        vec_res_value4 = wrapper::vcvt<T>(vec_res_value4_f);
+
+                        const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_value1), wrapper::vqmovn(vec_res_value2));
+                        const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_value3), wrapper::vqmovn(vec_res_value4));
+                        auto       res         = wrapper::vcombine(wrapper::vqmovn(temp16x8t_1), wrapper::vqmovn(temp16x8t_2));
+
+                        wrapper::vstore(reinterpret_cast<T *>(output.ptr() + x), res);
+                        break;
+                    }
+                    default:
+                        ARM_COMPUTE_ERROR("Not supported");
+                }
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                auto res_value = 0;
+                switch(op)
+                {
+                    case ReductionOperation::ARG_IDX_MAX:
+                    case ReductionOperation::ARG_IDX_MIN:
+                    case ReductionOperation::MIN:
+                    case ReductionOperation::MAX:
+                    {
+                        res_value = *(input_ptr + x);
+                        break;
+                    }
+                    case ReductionOperation::PROD:
+                    {
+                        res_value = static_cast<T>(1.0f);
+                        break;
+                    }
+                    default:
+                    {
+                        res_value = static_cast<T>(0.0f);
+                        break;
+                    }
+                }
+                uint32_t res_idx = 0;
+
+                for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
+                {
+                    const T *in_ptr = reinterpret_cast<T *>(input.ptr() + x + in_info.strides_in_bytes()[axis] * dim);
+                    switch(op)
+                    {
+                        case ReductionOperation::SUM:
+                        case ReductionOperation::MEAN_SUM:
+                        {
+                            res_value += *in_ptr;
+                            break;
+                        }
+                        case ReductionOperation::SUM_SQUARE:
+                        {
+                            res_value += *in_ptr * *in_ptr;
+                            break;
+                        }
+                        case ReductionOperation::PROD:
+                        {
+                            //de-quantize input
+                            if(std::is_same<T, uint8_t>::value)
+                            {
+                                res_value *= dequantize_qasymm8(*input_ptr, iq_info);
+                            }
+                            else
+                            {
+                                res_value *= dequantize_qasymm8_signed(*input_ptr, iq_info);
+                            }
+                            break;
+                        }
+                        case ReductionOperation::ARG_IDX_MIN:
+                        {
+                            if(*in_ptr < res_value)
+                            {
+                                res_value = *in_ptr;
+                                res_idx   = dim;
+                            }
+                            break;
+                        }
+                        case ReductionOperation::ARG_IDX_MAX:
+                        {
+                            if(*in_ptr > res_value)
+                            {
+                                res_value = *in_ptr;
+                                res_idx   = dim;
+                            }
+                            break;
+                        }
+                        case ReductionOperation::MIN:
+                        {
+                            res_value = *in_ptr < res_value ? *in_ptr : res_value;
+                            break;
+                        }
+                        case ReductionOperation::MAX:
+                        {
+                            res_value = *in_ptr > res_value ? *in_ptr : res_value;
+                            break;
+                        }
+                        default:
+                            ARM_COMPUTE_ERROR("Not supported");
+                    }
+                }
+
+                switch(op)
+                {
+                    case ReductionOperation::MEAN_SUM:
+                    {
+                        res_value /= in_info.dimension(axis);
+                        *reinterpret_cast<T *>(output.ptr() + x) = utils::cast::saturate_cast<T>(res_value);
+                        break;
+                    }
+                    case ReductionOperation::SUM:
+                    {
+                        // Subtract accumulated offsets
+                        res_value -= (in_info.dimension(axis) - 1) * iq_info.offset;
+                        *reinterpret_cast<T *>(output.ptr() + x) = utils::cast::saturate_cast<T>(res_value);
+                        break;
+                    }
+                    case ReductionOperation::PROD:
+                    {
+                        //re-quantize result
+                        if(std::is_same<T, uint8_t>::value)
+                        {
+                            res_value = quantize_qasymm8(res_value, iq_info);
+                        }
+                        else
+                        {
+                            res_value = quantize_qasymm8_signed(res_value, iq_info);
+                        }
+                        break;
+                        *(reinterpret_cast<T *>(output.ptr() + x)) = res_value;
+                    }
+                    case ReductionOperation::ARG_IDX_MIN:
+                    case ReductionOperation::ARG_IDX_MAX:
+                    {
+                        *(reinterpret_cast<uint32_t *>(output.ptr() + x * 4)) = res_idx;
+                        break;
+                    }
+                    default:
+                        *(reinterpret_cast<T *>(output.ptr() + x)) = res_value;
+                }
+            }
         },
         input, output);
     }
@@ -1235,41 +1646,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 
     return Status{};
 }
-
-std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int axis, ReductionOperation op)
-{
-    // Calculate output shape and set if empty
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis);
-
-    // Output auto initialization if not yet initialized
-    const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
-    DataType   output_data_type = is_arg_min_max ? DataType::S32 : input->data_type();
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
-
-    unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->data_type());
-
-    // Configure kernel window
-    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-
-    return std::make_tuple(err, win);
-}
 } // namespace
 
 NEReductionOperationKernel::NEReductionOperationKernel()
-    : _input(nullptr), _output(nullptr), _reduction_axis(0), _op(ReductionOperation::SUM_SQUARE), _border_size()
+    : _input(nullptr), _output(nullptr), _reduction_axis(0), _op(ReductionOperation::SUM_SQUARE)
 {
-}
-
-BorderSize NEReductionOperationKernel::border_size() const
-{
-    return _border_size;
 }
 
 void NEReductionOperationKernel::configure(const ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op)
@@ -1278,26 +1659,30 @@ void NEReductionOperationKernel::configure(const ITensor *input, ITensor *output
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis, op));
 
-    unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->info()->data_type());
-
     _input          = input;
     _output         = output;
-    _border_size    = (axis == 0) ? BorderSize(0, num_elems_processed_per_iteration - (input->info()->dimension(0) % num_elems_processed_per_iteration), 0, 0) : BorderSize();
     _op             = op;
     _reduction_axis = axis;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(_input->info(), _output->info(), axis, op);
+    Coordinates coord;
+    coord.set_num_dimensions(input->info()->num_dimensions());
+    input->info()->set_valid_region(ValidRegion(coord, input->info()->tensor_shape()));
+    Window win = calculate_max_window(*input->info(), Steps(input->info()->dimension(0)));
+    INEKernel::configure(win);
 
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-
-    INEKernel::configure(std::get<1>(win_config));
+    // Calculate output shape and set if empty
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis);
+    // Output auto initialization if not yet initialized
+    const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
+    DataType   output_data_type = is_arg_min_max ? DataType::S32 : input->info()->data_type();
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
+    output->info()->set_valid_region(ValidRegion(coord, output_shape));
 }
 
 Status NEReductionOperationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis, op));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), axis, op)));
 
     return Status{};
 }

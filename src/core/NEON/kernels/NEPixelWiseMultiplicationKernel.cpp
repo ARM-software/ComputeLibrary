@@ -1018,33 +1018,115 @@ void mul_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const
     }
 }
 
-void c_mul_F32_F32_F32_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr)
+void c_mul_F32_F32_F32_n(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    const auto input1 = static_cast<const float *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const float *__restrict>(input2_ptr);
-    const auto output = static_cast<float *__restrict>(output_ptr);
+    // Create input windows
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
 
-    const float32x4_t a = wrapper::vloadq(input1);
-    float32x4_t       b = wrapper::vloadq(input2);
+    // Clear X Dimension on execution window as we handle manually
+    Window win = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    using ExactTagType = typename wrapper::traits::neon_vector<float, 2>::tag_type;
+    constexpr int window_step_x         = 8 / sizeof(float);
+    const auto    window_start_x        = static_cast<int>(window.x().start());
+    const auto    window_end_x          = static_cast<int>(window.x().end());
+    const bool    is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
 
-    const float32x4_t mask  = { -1.0f, 1.0f, -1.0f, 1.0f };
-    const float32x2_t tmp00 = wrapper::vdup_n(wrapper::vgetlane(a, 0), ExactTagType{});
-    const float32x2_t tmp01 = wrapper::vdup_n(wrapper::vgetlane(a, 1), ExactTagType{});
-    const float32x2_t tmp10 = wrapper::vdup_n(wrapper::vgetlane(a, 2), ExactTagType{});
-    const float32x2_t tmp11 = wrapper::vdup_n(wrapper::vgetlane(a, 3), ExactTagType{});
+    if(is_broadcast_across_x)
+    {
+        const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
+        Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
+        Window         non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
+        const ITensor *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
+        const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
 
-    const float32x4_t tmp0 = wrapper::vcombine(tmp00, tmp10);
-    const float32x4_t tmp1 = wrapper::vcombine(tmp01, tmp11);
+        // Clear X Dimension on execution window as we handle manually
+        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    float32x4_t res = wrapper::vmul(tmp0, b);
+        Iterator broadcast_input(broadcast_tensor, broadcast_win);
+        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
+        Iterator output(out, win);
 
-    b = wrapper::vrev64(b);
-    b = wrapper::vmul(b, mask);
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto non_broadcast_input_ptr = reinterpret_cast<const float *>(non_broadcast_input.ptr());
+            const auto output_ptr              = reinterpret_cast<float *>(output.ptr());
 
-    res = wrapper::vmla(res, tmp1, b);
-    wrapper::vstore(output, res);
+            const float broadcast_value = *reinterpret_cast<const float *>(broadcast_input.ptr());
+
+            int x = window_start_x;
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                const auto broadcast_value0 = *(non_broadcast_input_ptr + 2 * x);
+                const auto broadcast_value1 = *(non_broadcast_input_ptr + 2 * x + 1);
+                auto       res1             = broadcast_value * (broadcast_value0 - broadcast_value1);
+                auto       res2             = broadcast_value * (broadcast_value1 + broadcast_value0);
+                *(output_ptr + 2 * x)       = res1;
+                *(output_ptr + 2 * x + 1)   = res2;
+            }
+        },
+        broadcast_input, non_broadcast_input, output);
+    }
+    else
+    {
+        // Clear X Dimension on execution window as we handle manually
+        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input1(in1, input1_win);
+        Iterator input2(in2, input2_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto input1_ptr = reinterpret_cast<const float *>(input1.ptr());
+            const auto input2_ptr = reinterpret_cast<const float *>(input2.ptr());
+            const auto output_ptr = reinterpret_cast<float *>(output.ptr());
+
+            using ExactTagType = typename wrapper::traits::neon_vector<float, 2>::tag_type;
+
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const float32x4_t a = wrapper::vloadq(input1_ptr + 2 * x);
+                float32x4_t       b = wrapper::vloadq(input2_ptr + 2 * x);
+
+                const float32x4_t mask  = { -1.0f, 1.0f, -1.0f, 1.0f };
+                const float32x2_t tmp00 = wrapper::vdup_n(wrapper::vgetlane(a, 0), ExactTagType{});
+                const float32x2_t tmp01 = wrapper::vdup_n(wrapper::vgetlane(a, 1), ExactTagType{});
+                const float32x2_t tmp10 = wrapper::vdup_n(wrapper::vgetlane(a, 2), ExactTagType{});
+                const float32x2_t tmp11 = wrapper::vdup_n(wrapper::vgetlane(a, 3), ExactTagType{});
+
+                const float32x4_t tmp0 = wrapper::vcombine(tmp00, tmp10);
+                const float32x4_t tmp1 = wrapper::vcombine(tmp01, tmp11);
+
+                float32x4_t res = wrapper::vmul(tmp0, b);
+
+                b = wrapper::vrev64(b);
+                b = wrapper::vmul(b, mask);
+
+                res = wrapper::vmla(res, tmp1, b);
+                wrapper::vstore(output_ptr + 2 * x, res);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                const auto a0             = *(input1_ptr + 2 * x);
+                const auto a1             = *(input1_ptr + 2 * x + 1);
+                const auto b0             = *(input2_ptr + 2 * x);
+                const auto b1             = *(input2_ptr + 2 * x + 1);
+                auto       res1           = a0 * b0 - a1 * b1;
+                auto       res2           = a0 * b1 + a1 * b0;
+                *(output_ptr + 2 * x)     = res1;
+                *(output_ptr + 2 * x + 1) = res2;
+            }
+        },
+        input1, input2, output);
+    }
 }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -1507,8 +1589,6 @@ void NEPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window 
 }
 namespace
 {
-constexpr unsigned int num_elems_processed_per_iteration_complex = 2;
-
 Status validate_arguments_complex(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 2, DataType::F32);
@@ -1527,9 +1607,13 @@ Status validate_arguments_complex(const ITensorInfo *input1, const ITensorInfo *
 
     return Status{};
 }
+} // namespace
 
-std::pair<Status, Window> validate_and_configure_window_complex(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
+void NEComplexPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1, input2, output));
+
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
     const TensorShape &out_shape    = broadcast_pair.first;
     const ValidRegion &valid_region = broadcast_pair.second;
@@ -1538,43 +1622,19 @@ std::pair<Status, Window> validate_and_configure_window_complex(ITensorInfo *inp
     const TensorInfo out_info(out_shape, input1->num_channels(), input1->data_type());
     auto_init_if_empty(*output, out_info);
 
-    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration_complex));
-    Window win_input1 = win.broadcast_if_dimension_le_one(*input1);
-    Window win_input2 = win.broadcast_if_dimension_le_one(*input2);
-
-    AccessWindowHorizontal input1_access(input1, 0, num_elems_processed_per_iteration_complex);
-    AccessWindowHorizontal input2_access(input2, 0, num_elems_processed_per_iteration_complex);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_complex);
-
-    bool window_changed = update_window_and_padding(win_input1, input1_access)
-                          || update_window_and_padding(win_input2, input2_access)
-                          || update_window_and_padding(win, output_access);
-
-    output_access.set_valid_region(win, valid_region);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-} // namespace
-
-void NEComplexPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1, input2, output));
-
     // Configure kernel window
-    auto win_config = validate_and_configure_window_complex(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    Coordinates coord;
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(valid_region);
+    Window win = calculate_max_window(valid_region, Steps());
 
-    // Create kernel
-    INEKernel::configure(win_config.second);
+    INEKernel::configure(win);
 }
 
 Status NEComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_complex(input1, input2, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_complex(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
     return Status{};
 }
@@ -1589,14 +1649,6 @@ void NEComplexPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const 
     auto input2 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto output = tensors.get_tensor(TensorType::ACL_DST);
 
-    Iterator input1_it(input1, window.broadcast_if_dimension_le_one(input1->info()->tensor_shape()));
-    Iterator input2_it(input2, window.broadcast_if_dimension_le_one(input2->info()->tensor_shape()));
-    Iterator output_it(output, window);
-
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        c_mul_F32_F32_F32_n(input1_it.ptr(), input2_it.ptr(), output_it.ptr());
-    },
-    input1_it, input2_it, output_it);
+    c_mul_F32_F32_F32_n(input1, input2, output, window);
 }
 } // namespace arm_compute
