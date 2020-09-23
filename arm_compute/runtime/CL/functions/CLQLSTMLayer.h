@@ -113,7 +113,7 @@ public:
                    const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                    const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                    const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                   ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                   ICLTensor *cell_state_in, ICLTensor *output_state_in,
                    ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
                    const LSTMParams<ICLTensor> &lstm_params);
 
@@ -163,7 +163,7 @@ public:
                    const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                    const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                    const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                   ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                   ICLTensor *cell_state_in, ICLTensor *output_state_in,
                    ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
                    const LSTMParams<ICLTensor> &lstm_params);
 

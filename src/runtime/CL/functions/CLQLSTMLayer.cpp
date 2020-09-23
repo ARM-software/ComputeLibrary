@@ -113,7 +113,7 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
                              const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                              const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                              const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                             ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                             ICLTensor *cell_state_in, ICLTensor *output_state_in,
                              ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
                              const LSTMParams<ICLTensor> &lstm_params)
 {
@@ -126,7 +126,7 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
                              const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                              const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                              const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                             ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                             ICLTensor *cell_state_in, ICLTensor *output_state_in,
                              ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
                              const LSTMParams<ICLTensor> &lstm_params)
 {
@@ -504,9 +504,9 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
         if(_projection_tensor_copy_required)
         {
             _hidden_gate.allocator()->allocate();
-            _projection_accumulate_res.allocator()->init(*output_state_out->info());
+            _projection_accumulate_res.allocator()->init(*output_state_in->info());
             _projection_accumulate_res.info()->set_tensor_shape(_projection_outstage_res.info()->tensor_shape());
-            _projection_output_to_accumulate_copy.configure(*output_state_out, _projection_accumulate_res);
+            _projection_output_to_accumulate_copy.configure(*output_state_in, _projection_accumulate_res);
             accumulate_destination = &_projection_accumulate_res;
         }
 
@@ -863,7 +863,7 @@ Status CLQLSTMLayer::validate(const ITensorInfo *input,
 
         if(projection_tensor_copy_required)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLQLSTMLayer::TensorCopyKernel::validate(*output_state_out, projection_outstage_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLQLSTMLayer::TensorCopyKernel::validate(*output_state_in, projection_outstage_info));
         }
 
         ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(output_state_out, output_state_out, output_state_out, ConvertPolicy::SATURATE));

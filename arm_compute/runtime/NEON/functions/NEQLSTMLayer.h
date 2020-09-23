@@ -115,7 +115,7 @@ public:
                    const ITensor *input_to_forget_weights, const ITensor *input_to_cell_weights, const ITensor *input_to_output_weights,
                    const ITensor *recurrent_to_forget_weights, const ITensor *recurrent_to_cell_weights, const ITensor *recurrent_to_output_weights,
                    const ITensor *forget_gate_bias, const ITensor *cell_bias, const ITensor *output_gate_bias,
-                   const ITensor *cell_state_in, const ITensor *output_state_in,
+                   const ITensor *cell_state_in, ITensor *output_state_in,
                    ITensor *cell_state_out, ITensor *output_state_out, ITensor *output,
                    const LSTMParams<ITensor> &lstm_params);
 
