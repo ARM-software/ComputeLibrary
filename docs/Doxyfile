@@ -291,7 +291,7 @@ OPTIMIZE_OUTPUT_VHDL   = NO
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
 
-EXTENSION_MAPPING      = cl=C
+EXTENSION_MAPPING      = cl=C bp=C dir=C
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -776,11 +776,14 @@ INPUT                  = ./docs/00_introduction.dox \
                          ./docs/05_contribution_guidelines.dox \
                          ./docs/06_functions_list.dox \
                          ./docs/07_errata.dox \
+                         ./docs/ComputeLibrary.dir \
                          ./arm_compute/ \
                          ./src/ \
                          ./examples/ \
                          ./tests/ \
                          ./utils/ \
+                         ./Android.bp \
+                         ./scripts \
                          ./support/
 
 # This tag can be used to specify the character encoding of the source files
@@ -843,6 +846,8 @@ FILE_PATTERNS          = *.c \
                          *.qsf \
                          *.as \
                          *.js \
+                         *.bp \
+                         *.dir \
                          *.cl
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should

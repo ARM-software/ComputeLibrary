@@ -1,0 +1,364 @@
+//
+// Copyright © 2020 Arm Ltd. All rights reserved.
+// SPDX-License-Identifier: MIT
+//
+
+/** @file Android.bp
+ *  @brief Generation script for building AndroidNN driver.
+ */
+
+/** @dir arm_compute
+ *  @brief All the arm_compute headers.
+ */
+
+/** @dir arm_compute/core
+ *  @brief Core module: common basic types and kernels.
+ */
+
+/** @dir arm_compute/core/CL
+ *  @brief OpenCL backend core: kernels and utilities.
+ */
+
+/** @file arm_compute/core/CL/CLKernelLibrary.h
+ *  @brief Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
+ */
+
+/** @file arm_compute/core/CL/CLKernels.h
+ *  @brief Includes all the OpenCL kernels at once
+ */
+
+/** @file arm_compute/core/CL/OpenCL.h
+ *  @brief Wrapper to configure the Khronos OpenCL C++ header
+ */
+
+/** @dir arm_compute/core/CL/gemm
+ *  @brief Folder containing all the configuration files for GEMM
+ */
+
+/** @dir arm_compute/core/CL/kernels
+ * @brief Folder containing all the OpenCL kernels
+ */
+
+/** @dir arm_compute/core/CPP
+ *  @brief CPP backend core: kernels and utilities.
+ */
+
+/** @file arm_compute/core/CPP/CPPKernels.h
+ *  @brief Includes all the CPP kernels at once
+ */
+
+/** @dir arm_compute/core/CPP/kernels
+ *  @brief Folder containing all the CPP kernels
+ */
+
+/** @dir arm_compute/core/experimental
+ *  @brief All experimental interfaces
+ */
+
+/** @dir arm_compute/core/GLES_COMPUTE
+ *  @brief OpenGLES backend core: kernels and utilities.
+ */
+
+/** @file arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h
+ *  @brief Manages all the GLES kernels compilation and caching, provides accessors for the GLES Context.
+ */
+
+/** @file arm_compute/core/GLES_COMPUTE/GCKernels.h
+ *  @brief Includes all the GLES kernels at once
+ */
+
+/** @file arm_compute/core/GLES_COMPUTE/OpenGLES.h
+ *  @brief Wrapper to configure the Khronos EGL and OpenGL ES C header
+ */
+
+/** @dir arm_compute/core/GLES_COMPUTE/kernels
+ *  @brief Folder containing all the GLES kernels
+ */
+
+/** @dir arm_compute/core/NEON
+ *  @brief NEON backend core: kernels and utilities.
+ */
+
+/** @file arm_compute/core/NEON/NEKernels.h
+ *  @brief Includes all the NEON kernels at once
+ */
+
+/** @dir arm_compute/core/NEON/kernels
+ *  @brief Folder containing all the NEON kernels
+ */
+
+/** @dir arm_compute/core/NEON/kernels/detail
+ *  @brief Common code for several intrinsics implementations.
+ */
+
+/** @dir arm_compute/core/NEON/wrapper
+ *  @brief NEON wrapper used to simplify code
+ */
+
+/** @file arm_compute/core/NEON/wrapper/traits.h
+ *  @brief Traits defined on NEON vectors
+ */
+
+/** @file arm_compute/core/NEON/wrapper/wrapper.h
+ *  @brief Includes all wrapper headers at once
+ */
+
+/** @dir arm_compute/core/NEON/wrapper/intrinsics
+ *  @brief NEON intrinsics wrappers
+ */
+
+/** @dir arm_compute/core/NEON/wrapper/scalar
+ *  @brief Scalar operations
+ */
+
+/** @dir arm_compute/core/utils
+ *  @brief Common core utilities.
+ */
+
+/** @dir arm_compute/graph
+ *  @brief Graph API.
+ */
+
+/** @dir arm_compute/graph/algorithms
+ *  @brief Generic algorithms used by the graph backend (e.g Order of traversal)
+ */
+
+/** @dir arm_compute/graph/backends
+ *  @brief The backend specific code
+ */
+
+/** @dir arm_compute/graph/backends/CL
+ *  @brief OpenCL specific operations
+ */
+
+/** @dir arm_compute/graph/backends/GLES
+ *  @brief OpenGLES specific operations
+ */
+
+/** @dir arm_compute/graph/backends/NEON
+ *  @brief NEON specific operations
+ */
+
+/** @dir arm_compute/graph/detail
+ *  @brief Collection of internal utilities.
+ */
+
+/** @dir arm_compute/graph/frontend
+ *  @brief Code related to the stream frontend interface.
+ */
+
+/** @dir arm_compute/graph/mutators
+ *  @brief Used to modify / optimise the Graph intermediate representation(Operator fusion, in place operations, etc.)
+ */
+
+/** @dir arm_compute/graph/nodes
+ *  @brief The various nodes supported by the graph API.
+ */
+
+/** @dir arm_compute/graph/printers
+ *  @brief Debug printers.
+ */
+
+/** @file arm_compute/graph.h
+ *  @brief Includes all the Graph headers at once.
+ */
+
+/** @dir arm_compute/runtime
+ *  @brief Runtime interface: memory, scheduler, functions.
+ */
+
+/** @dir arm_compute/runtime/CL
+ *  @brief OpenCL backend runtime interface.
+ */
+
+/** @file arm_compute/runtime/CL/CLFunctions.h
+ *  @brief Includes all the OpenCL functions at once
+ */
+
+/** @file arm_compute/runtime/CL/CLScheduler.h
+ *  @brief Interface to enqueue OpenCL kernels and get/set the OpenCL CommandQueue and ICLTuner.
+ */
+
+/** @file arm_compute/runtime/CL/ICLTuner.h
+ *  @brief Interface used to tune the local work-group size of OpenCL kernels.
+ */
+
+/** @dir arm_compute/runtime/CL/functions
+ *  @brief Folder containing all the OpenCL functions.
+ */
+
+/** @dir arm_compute/runtime/CL/tuners
+ *  @brief Local workgroup size tuners for specific architectures / GPUs.
+ */
+
+/** @dir arm_compute/runtime/CPP
+ *  @brief CPP backend runtime interface.
+ */
+
+/** @file arm_compute/runtime/CPP/CPPScheduler.h
+ *  @brief Basic pool of threads to execute CPP/NEON code on several cores in parallel.
+ */
+
+/** @dir arm_compute/runtime/CPP/functions
+ *  @brief Folder containing all the CPP functions.
+ */
+
+/** @dir arm_compute/runtime/experimental
+ *  @brief Experimental runtime interface.
+ */
+
+/** @dir arm_compute/runtime/GLES_COMPUTE
+ *  @brief OpenGLES backend runtime interface.
+ */
+
+/** @file arm_compute/runtime/GLES_COMPUTE/GCFunctions.h
+ *  @brief Includes all the OpenGLES functions at once
+ */
+
+/** @file arm_compute/runtime/GLES_COMPUTE/GCScheduler.h
+ *  @brief Interface to enqueue GLES kernels and get/set the GLES CommandQueue.
+ */
+
+/** @dir arm_compute/runtime/GLES_COMPUTE/functions
+ *  @brief Folder containing all the GLES functions.
+ */
+
+/** @dir arm_compute/runtime/NEON
+ *  @brief NEON backend runtime interface.
+ */
+
+/** @file arm_compute/runtime/NEON/NEFunctions.h
+ *  @brief Includes all the NEON functions at once.
+ */
+
+/** @dir arm_compute/runtime/NEON/functions
+ *  @brief Folder containing all the NEON functions.
+ */
+
+/** @dir arm_compute/runtime/OMP
+ *  @brief OpenMP backend runtime interface.
+ */
+
+/** @file arm_compute/runtime/OMP/OMPScheduler.h
+ *  @brief OpenMP scheduler (Alternative to the CPPScheduler).
+ */
+
+/** @dir arm_compute/runtime/common
+ *  @brief Common utility code used by all backends.
+ */
+
+/** @dir docs
+ *  @brief Doxyfile and Doxygen sources used to generate this documentation.
+ */
+
+/** @dir ./examples
+ *  @brief Set of examples using the Compute Library
+ *
+ *  @details Examples have the following structure:
+ *
+ *  -# cl_*.cpp --> OpenCL examples
+ *  -# gc_*.cpp --> GLES compute shaders examples
+ *  -# graph_*.cpp --> Graph examples
+ *  -# neoncl_*.cpp --> NEON / OpenCL interoperability examples
+ *  -# neon_*.cpp --> NEON examples
+ */
+
+/** @dir examples/gemm_tuner
+ *  @brief OpenCL GEMM tuner utility.
+ */
+
+/** @dir scripts
+ *  @brief Utility scripts.
+ */
+
+/** @file scripts/caffe_data_extractor.py
+ *  @brief Basic script to export weights from Caffe to npy files.
+ */
+
+/** @file scripts/tensorflow_data_extractor.py
+ *  @brief Basic script to export weights from TensorFlow to npy files.
+ */
+
+/** @dir src
+ *  @brief Source code implementing all the arm_compute headers.
+ */
+
+/** @dir src/core/CL/cl_kernels
+ *  @brief All the OpenCL kernels
+ */
+
+/** @dir support
+ *  @brief Various headers to work around toolchains / platform issues.
+ */
+
+/** @dir tests
+ *  @brief All test related files shared between validation and benchmark.
+ */
+
+/** @dir tests/CL
+ *  @brief OpenCL accessors.
+ */
+
+/** @dir tests/GLES_COMPUTE
+ *  @brief GLES accessors.
+ */
+
+/** @dir tests/NEON
+ *  @brief NEON accessors.
+ */
+
+/** @dir tests/benchmark
+ *  @brief Sources for benchmarking.
+ */
+
+/** @dir tests/benchmark/CL
+ *  @brief OpenCL benchmarking tests.
+ */
+
+/** @dir tests/benchmark/GLES_COMPUTE
+ *  @brief GLES benchmarking tests.
+ */
+
+/** @dir tests/benchmark/NEON
+ *  @brief NEON benchmarking tests.
+ */
+
+/** @dir tests/benchmark_examples
+ *  @brief Sources needed to wrap examples to run through our benchmarking framework.
+ */
+
+/** @dir tests/framework
+ *  @brief Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
+ */
+
+/** @dir tests/instruments
+ *  @brief User defined instruments that can be registered to the framework.
+ */
+
+/** @dir tests/validate_examples
+ *  @brief Sources needed to wrap examples to run through our validation framework.
+ */
+
+/** @dir tests/validation
+ *  @brief Source for validation.
+ */
+
+/** @dir tests/validation/CL
+ *  @brief OpenCL validation tests.
+ */
+
+/** @dir tests/validation/CPP
+ *  @brief C++ validation tests.
+ */
+
+/** @dir tests/validation/GLES_COMPUTE
+ *  @brief GLES validation tests.
+ */
+
+/** @dir tests/validation/NEON
+ *  @brief NEON validation tests.
+ */
+
+/** @dir tests/validation/reference
+ *  @brief Reference implementation used to validate the results of the various backends.
+ */
