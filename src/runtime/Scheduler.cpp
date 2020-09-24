@@ -67,7 +67,7 @@ std::map<Scheduler::Type, std::unique_ptr<IScheduler>> init()
 }
 } // namespace
 
-std::map<Scheduler::Type, std::unique_ptr<IScheduler>> Scheduler::_schedulers = init();
+std::map<Scheduler::Type, std::unique_ptr<IScheduler>> Scheduler::_schedulers{};
 
 void Scheduler::set(Type t)
 {
@@ -107,6 +107,11 @@ IScheduler &Scheduler::get()
     }
     else
     {
+        if(_schedulers.empty())
+        {
+            _schedulers = init();
+        }
+
         auto it = _schedulers.find(_scheduler_type);
         if(it != _schedulers.end())
         {
