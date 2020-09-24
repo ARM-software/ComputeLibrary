@@ -251,8 +251,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
 
     if(m == 1)
     {
-        const unsigned int h0 = std::max(n / 2, 1U);
-        return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, h0, false, true, false, true);
+        return configure_lhs_rhs_info(m,n,1,2,16,1,32,false,true,false,true,false);
     }
     else
     {
