@@ -773,75 +773,151 @@ template <bool is_sat>
 void mul_S32_S32_S32(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int n)
 {
     // Create input windows
-    Window win        = window;
     Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
     Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
 
     // Clear X Dimension on execution window as we handle manually
+    Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input1(in1, input1_win);
-    Iterator input2(in2, input2_win);
-    Iterator output(out, win);
+    const int  window_step_x         = 8;
+    const auto window_start_x        = static_cast<int>(window.x().start());
+    const auto window_end_x          = static_cast<int>(window.x().end());
+    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
 
-    const int  window_step_x  = 8;
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-
-    execute_window_loop(win, [&](const Coordinates &)
+    if(is_broadcast_across_x)
     {
-        const auto input1_ptr = reinterpret_cast<const int32_t *>(input1.ptr());
-        const auto input2_ptr = reinterpret_cast<const int32_t *>(input2.ptr());
-        const auto output_ptr = reinterpret_cast<int32_t *>(output.ptr());
+        const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
+        Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
+        Window         non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
+        const ITensor *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
+        const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
 
-        // Compute window_step_x elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        // Clear X Dimension on execution window as we handle manually
+        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator broadcast_input(broadcast_tensor, broadcast_win);
+        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
         {
-            const int32x4x2_t ta1 =
-            {
-                {
-                    vld1q_s32(input1_ptr + x),
-                    vld1q_s32(input1_ptr + x + 4),
-                }
-            };
-            const int32x4x2_t ta2 =
-            {
-                {
-                    vld1q_s32(input2_ptr + x),
-                    vld1q_s32(input2_ptr + x + 4),
-                }
-            };
-            const int32x4x2_t result = mul_S32_S32_S32_n_k<is_sat>(ta1, ta2, n);
+            const auto non_broadcast_input_ptr = reinterpret_cast<const int32_t *>(non_broadcast_input.ptr());
+            const auto output_ptr              = reinterpret_cast<int32_t *>(output.ptr());
 
-            vst1q_s32(output_ptr + x, result.val[0]);
-            vst1q_s32(output_ptr + x + 4, result.val[1]);
-        }
+            const int32_t broadcast_value     = *reinterpret_cast<const int32_t *>(broadcast_input.ptr());
+            const auto    broadcast_value_vec = vdupq_n_s32(broadcast_value);
 
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const int32x4x2_t broadcast_v =
+                {
+                    {
+                        broadcast_value_vec,
+                        broadcast_value_vec,
+                    }
+                };
+                const int32x4x2_t non_broadcast_v =
+                {
+                    {
+                        vld1q_s32(non_broadcast_input_ptr + x),
+                        vld1q_s32(non_broadcast_input_ptr + x + 4),
+                    }
+                };
+                const int32x4x2_t result = mul_S32_S32_S32_n_k<is_sat>(broadcast_v, non_broadcast_v, n);
+
+                vst1q_s32(output_ptr + x, result.val[0]);
+                vst1q_s32(output_ptr + x + 4, result.val[1]);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                int64_t tmp = static_cast<int64_t>(broadcast_value) * static_cast<int64_t>(*(non_broadcast_input_ptr + x));
+
+                if(tmp >= 0)
+                {
+                    tmp >>= n;
+                }
+                else
+                {
+                    uint64_t mask = (1u << n) - 1;
+                    tmp           = (tmp + static_cast<int64_t>(mask)) >> n;
+                }
+                if(is_sat)
+                {
+                    tmp = utility::clamp<int64_t, int32_t>(tmp);
+                }
+                *(output_ptr + x) = static_cast<int32_t>(tmp);
+            }
+        },
+        broadcast_input, non_broadcast_input, output);
+    }
+    else
+    {
+        // Clear X Dimension on execution window as we handle manually
+        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input1(in1, input1_win);
+        Iterator input2(in2, input2_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
         {
-            int64_t tmp = static_cast<int64_t>(*(input1_ptr + x)) * static_cast<int64_t>(*(input2_ptr + x));
+            const auto input1_ptr = reinterpret_cast<const int32_t *>(input1.ptr());
+            const auto input2_ptr = reinterpret_cast<const int32_t *>(input2.ptr());
+            const auto output_ptr = reinterpret_cast<int32_t *>(output.ptr());
 
-            if(tmp >= 0)
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                tmp >>= n;
+                const int32x4x2_t ta1 =
+                {
+                    {
+                        vld1q_s32(input1_ptr + x),
+                        vld1q_s32(input1_ptr + x + 4),
+                    }
+                };
+                const int32x4x2_t ta2 =
+                {
+                    {
+                        vld1q_s32(input2_ptr + x),
+                        vld1q_s32(input2_ptr + x + 4),
+                    }
+                };
+                const int32x4x2_t result = mul_S32_S32_S32_n_k<is_sat>(ta1, ta2, n);
+
+                vst1q_s32(output_ptr + x, result.val[0]);
+                vst1q_s32(output_ptr + x + 4, result.val[1]);
             }
-            else
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
             {
-                uint64_t mask = (1u << n) - 1;
-                tmp           = (tmp + static_cast<int64_t>(mask)) >> n;
+                int64_t tmp = static_cast<int64_t>(*(input1_ptr + x)) * static_cast<int64_t>(*(input2_ptr + x));
+
+                if(tmp >= 0)
+                {
+                    tmp >>= n;
+                }
+                else
+                {
+                    uint64_t mask = (1u << n) - 1;
+                    tmp           = (tmp + static_cast<int64_t>(mask)) >> n;
+                }
+                if(is_sat)
+                {
+                    tmp = utility::clamp<int64_t, int32_t>(tmp);
+                }
+                *(output_ptr + x) = static_cast<int32_t>(tmp);
             }
-            if(is_sat)
-            {
-                tmp = (tmp > INT_MAX) ? INT_MAX : ((tmp < INT_MIN) ? INT_MIN : tmp);
-            }
-            *(output_ptr + x) = static_cast<int32_t>(tmp);
-        }
-    },
-    input1, input2, output);
+        },
+        input1, input2, output);
+    }
 }
 
 void mul_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale)

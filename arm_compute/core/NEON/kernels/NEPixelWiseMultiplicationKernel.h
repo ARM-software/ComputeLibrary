@@ -55,16 +55,17 @@ public:
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
-     *   - (U8,U8)                         -> U8, S16
-     *   - (U8,S16)                        -> S16
-     *   - (S16,U8)                        -> S16
-     *   - (S16,S16)                       -> S16
-     *   - (S32,S32)                       -> S32
-     *   - (F16,F16)                       -> F16
-     *   - (F32,F32)                       -> F32
-     *   - (QASYMM8,QASYMM8)               -> QASYMM8
-     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16)               -> QSYMM16, S32
+     *                                                       Support: Broadcast? Scale=1/255?
+     *   - (U8,U8)                         -> U8, S16                 N          Y
+     *   - (U8,S16)                        -> S16                     N          Y
+     *   - (S16,U8)                        -> S16                     N          Y
+     *   - (S16,S16)                       -> S16                     N          Y
+     *   - (S32,S32)                       -> S32                     Y          N
+     *   - (F16,F16)                       -> F16                     N          Y
+     *   - (F32,F32)                       -> F32                     Y          Y
+     *   - (QASYMM8,QASYMM8)               -> QASYMM8                 Y          Y
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED          Y          Y
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16, S32            N          Y
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
@@ -82,17 +83,17 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEPixelWiseMultiplicationKernel
      *
      * Valid configurations (Input1,Input2) -> Output :
-     *
-     *   - (U8,U8)                         -> U8, S16
-     *   - (U8,S16)                        -> S16
-     *   - (S16,U8)                        -> S16
-     *   - (S16,S16)                       -> S16
-     *   - (S32,S32)                       -> S32
-     *   - (F16,F16)                       -> F16
-     *   - (F32,F32)                       -> F32
-     *   - (QASYMM8,QASYMM8)               -> QASYMM8
-     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16)               -> QSYMM16, S32
+     *                                                       Support: Broadcast? Scale=1/255?
+     *   - (U8,U8)                         -> U8, S16                 N          Y
+     *   - (U8,S16)                        -> S16                     N          Y
+     *   - (S16,U8)                        -> S16                     N          Y
+     *   - (S16,S16)                       -> S16                     N          Y
+     *   - (S32,S32)                       -> S32                     Y          N
+     *   - (F16,F16)                       -> F16                     N          Y
+     *   - (F32,F32)                       -> F32                     Y          Y
+     *   - (QASYMM8,QASYMM8)               -> QASYMM8                 Y          Y
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED          Y          Y
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16, S32            N          Y
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
