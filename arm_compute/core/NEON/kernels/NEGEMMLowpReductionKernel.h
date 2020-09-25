@@ -63,7 +63,6 @@ protected:
     const ITensor *_input;
     ITensor       *_output;
     int32_t        _k;
-    bool           _is_reshaped;
     int32_t        _scalar;
     bool           _mul_by_scalar;
 };
