@@ -87,7 +87,7 @@ public:
 
 private:
     using OutputStageKernel = void(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
-                                   int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift);
+                                   int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift, bool has_bias);
 
 private:
     OutputStageKernel *_func;
