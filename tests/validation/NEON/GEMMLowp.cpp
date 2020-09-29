@@ -79,6 +79,31 @@ TEST_SUITE(GEMMLowp)
 TEST_SUITE(MatrixMultiplyCore)
 using NEGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
 
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
+               shape_a, shape_b, shape_c, a_offset, b_offset)
+{
+    // Create tensors
+    Tensor a = create_tensor<Tensor>(shape_a, DataType::QASYMM8);
+    Tensor b = create_tensor<Tensor>(shape_b, DataType::QASYMM8);
+    Tensor c = create_tensor<Tensor>(shape_c, DataType::S32);
+
+    a.info()->set_quantization_info(QuantizationInfo(1.0f / 255, a_offset));
+    b.info()->set_quantization_info(QuantizationInfo(1.0f / 255, b_offset));
+
+    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NEGEMMLowpMatrixMultiplyCore gemmlowp_mm;
+    gemmlowp_mm.configure(&a, &b, nullptr, &c);
+
+    // Validate padding is zero
+    validate(a.info()->padding(), PaddingSize());
+    validate(b.info()->padding(), PaddingSize());
+    validate(c.info()->padding(), PaddingSize());
+}
+
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
@@ -100,7 +125,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(8U, 11U), 1, DataType::S32),
                                             TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),
                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, true })),
+    framework::dataset::make("Expected", { true, false, false, false, true })),
     a_info, b_info, output_info, expected)
 {
     // Lock tensors
