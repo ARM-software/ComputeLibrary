@@ -210,8 +210,8 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
 }
 
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::NEDepthwiseConvolutionLayerGeneric()
-    : _depthwise_conv_kernel(), _fill_border(), _permute_input(), _permute_weights(), _permute_output(), _activationlayer_function(), _permuted_input(), _permuted_weights(), _permuted_output(),
-      _is_prepared(false), _is_nchw(false), _is_activationlayer_enabled(false), _original_weights(nullptr)
+    : _depthwise_conv_kernel(), _permute_input(), _permute_weights(), _permute_output(), _activationlayer_function(), _permuted_input(), _permuted_weights(), _permuted_output(), _is_prepared(false),
+      _is_nchw(false), _is_activationlayer_enabled(false), _original_weights(nullptr)
 {
 }
 
@@ -244,7 +244,6 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::configure(
     _original_weights = weights_to_use;
 
     _depthwise_conv_kernel.configure(input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier, dilation);
-    _fill_border.configure(input_to_use, _depthwise_conv_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint64_t>(0), input->info()->data_type(), input->info()->quantization_info()));
 
     if(_is_nchw)
     {
@@ -310,7 +309,6 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::run()
         _permute_input.run();
     }
 
-    NEScheduler::get().schedule(&_fill_border, Window::DimX);
     NEScheduler::get().schedule(&_depthwise_conv_kernel, Window::DimY);
 
     if(_is_nchw)

@@ -249,7 +249,6 @@ private:
 
     private:
         NEDepthwiseConvolutionLayerNativeKernel _depthwise_conv_kernel;
-        NEFillBorderKernel                      _fill_border;
         NEPermute                               _permute_input;
         NEPermute                               _permute_weights;
         NEPermute                               _permute_output;

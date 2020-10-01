@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_NEDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/utils/misc/Requires.h"
+#include "arm_compute/core/utils/misc/Traits.h"
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #include <arm_neon.h>
@@ -92,18 +92,18 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
-    template < typename T, typename TW, int S, typename std::enable_if < std::is_same<T, float>::value
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                                         || std::is_same<T, float16_t>::value
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                                         ,
-                                                                         int >::type = 0 >
+    template <typename T>
+    using FloatEnalber = typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, int>::type;
+
+    template <typename T, typename TW, FloatEnalber<T> = 0>
     void run_depthwise(const Window &window, bool has_biases);
 
-    template < typename T, typename TW, int S, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
+    template <typename T>
+    using Quantized8bitEnalber = typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int >::type;
+
+    template <typename T, typename TW, Quantized8bitEnalber<T> = 0>
     void run_depthwise(const Window &window, bool has_biases);
 
     /** Common signature for all the specialised depthwise convolution native functions
@@ -113,7 +113,6 @@ private:
     using DepthwiseFunctionPtr = void (NEDepthwiseConvolutionLayerNativeKernel::*)(const Window &window, bool has_biases);
 
     DepthwiseFunctionPtr _func;
-    BorderSize           _border_size;
     const ITensor       *_input;
     const ITensor       *_weights;
     const ITensor       *_biases;

@@ -102,6 +102,37 @@ const auto data_layout_values = framework::dataset::make("data_layout", { DataLa
 
 TEST_SUITE(NEON)
 TEST_SUITE(DepthwiseConvolutionLayerNative)
+
+TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL)
+{
+    // this test case will ensure that the kernel is not adding implicit padding
+    constexpr uint32_t vector_size = 8; // Asummed vector size of the current native kernel
+    constexpr auto     depth = vector_size * 2 + 1; // mis-aligned depth to force padding if exists.
+    constexpr auto     data_layout = DataLayout::NHWC;
+    constexpr auto     data_type = DataType::F32;
+
+    const auto input_size  = Size2D{ 100, 100 }; // random plane size of the input
+    const auto kernel_size = Size2D{ 4, 4 }; // random plane size of the kernel
+    const auto pad_stride_info = PadStrideInfo(3, 3); // random convolution information to
+
+    TensorShape src_shape{ depth, input_size.x(), input_size.y() };
+    TensorShape weights_shape{ depth, kernel_size.x(), kernel_size.y() };
+    TensorShape bias_shape{ depth };
+
+    auto src     = create_tensor<Tensor>(src_shape, data_type, 1, QuantizationInfo(), data_layout);
+    auto weights = create_tensor<Tensor>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
+    auto biases  = create_tensor<Tensor>(bias_shape, data_type, 1, QuantizationInfo(), data_layout);
+    auto dst     = create_tensor<Tensor>(TensorShape(), data_type, 1, QuantizationInfo(), data_layout);
+
+    NEDepthwiseConvolutionLayerNativeKernel dwc;
+    dwc.configure(&src, &weights, &biases, &dst, pad_stride_info);
+
+    ARM_COMPUTE_EXPECT(src.info()->padding().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->padding().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(biases.info()->padding().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->padding().empty(), framework::LogLevel::ERRORS);
+}
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
