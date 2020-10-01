@@ -43,7 +43,6 @@ namespace validation
 {
 namespace
 {
-constexpr unsigned int num_elems_processed_per_iteration = 16;
 /** Input data sets **/
 const auto ArithmeticSubtractionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)),
                                                     framework::dataset::make("DataType",
