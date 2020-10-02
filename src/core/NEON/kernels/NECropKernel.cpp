@@ -29,11 +29,11 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
 
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/helpers/bit_ops.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {

@@ -28,13 +28,13 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/NEFixedPoint.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 #include <cstddef>

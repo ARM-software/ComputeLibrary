@@ -26,9 +26,9 @@
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
-#include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/NEFixedPoint.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 #include <map>

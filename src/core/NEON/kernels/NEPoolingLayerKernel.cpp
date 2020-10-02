@@ -28,17 +28,17 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
-#include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/NEFixedPoint.h"
+#include "src/core/NEON/NEMath.h"
 #include "support/ToolchainSupport.h"
 
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 #include <algorithm>
 #include <arm_neon.h>
 #include <cmath>
@@ -2415,7 +2415,8 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
 
                 // Store result
                 wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + x_off, (input_qinfo != output_qinfo) ? vrequantize_pooling<q8x8_t, q8x16_t>(wrapper::vgetlow(vres), wrapper::vgethigh(vres),
-                                requant_qinfo) : vres);
+                                requant_qinfo) :
+                                vres);
             }
         }
 

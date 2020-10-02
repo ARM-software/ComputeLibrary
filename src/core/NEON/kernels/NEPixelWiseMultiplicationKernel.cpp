@@ -24,10 +24,10 @@
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 
 #include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NESymm.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/NESymm.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 

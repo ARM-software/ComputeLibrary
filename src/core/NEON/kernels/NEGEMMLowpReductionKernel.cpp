@@ -26,8 +26,8 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {

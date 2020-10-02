@@ -28,10 +28,10 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 #include "utils/TypePrinter.h"
 
 #include <arm_neon.h>
@@ -229,7 +229,7 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
 
 Status NESelectKernel::validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(c, x, y); 
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(c, x, y);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(x);
     ARM_COMPUTE_RETURN_ERROR_ON(x->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(x, y);

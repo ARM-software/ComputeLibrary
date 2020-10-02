@@ -26,10 +26,10 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Rounding.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include "src/core/utils/ScaleUtils.h"
 

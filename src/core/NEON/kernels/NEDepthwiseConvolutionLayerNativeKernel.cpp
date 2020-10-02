@@ -25,11 +25,11 @@
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/NEON/wrapper/traits.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "src/core/NEON/kernels/convolution/depthwise/impl_qa8_qa8.hpp"
+#include "src/core/NEON/wrapper/traits.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute

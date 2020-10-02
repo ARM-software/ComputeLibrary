@@ -29,8 +29,8 @@
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/NEON/NEMath.h"
 
 #include <arm_neon.h>
 

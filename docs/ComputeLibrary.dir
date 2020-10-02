@@ -87,30 +87,6 @@
  *  @brief Folder containing all the NEON kernels
  */
 
-/** @dir arm_compute/core/NEON/kernels/detail
- *  @brief Common code for several intrinsics implementations.
- */
-
-/** @dir arm_compute/core/NEON/wrapper
- *  @brief NEON wrapper used to simplify code
- */
-
-/** @file arm_compute/core/NEON/wrapper/traits.h
- *  @brief Traits defined on NEON vectors
- */
-
-/** @file arm_compute/core/NEON/wrapper/wrapper.h
- *  @brief Includes all wrapper headers at once
- */
-
-/** @dir arm_compute/core/NEON/wrapper/intrinsics
- *  @brief NEON intrinsics wrappers
- */
-
-/** @dir arm_compute/core/NEON/wrapper/scalar
- *  @brief Scalar operations
- */
-
 /** @dir arm_compute/core/utils
  *  @brief Common core utilities.
  */
@@ -281,6 +257,30 @@
 
 /** @dir src
  *  @brief Source code implementing all the arm_compute headers.
+ */
+
+/** @dir src/core/NEON/kernels/detail
+ *  @brief Common code for several intrinsics implementations.
+ */
+
+/** @dir src/core/NEON/wrapper
+ *  @brief NEON wrapper used to simplify code
+ */
+
+/** @file src/core/NEON/wrapper/traits.h
+ *  @brief Traits defined on NEON vectors
+ */
+
+/** @file src/core/NEON/wrapper/wrapper.h
+ *  @brief Includes all wrapper headers at once
+ */
+
+/** @dir src/core/NEON/wrapper/intrinsics
+ *  @brief NEON intrinsics wrappers
+ */
+
+/** @dir src/core/NEON/wrapper/scalar
+ *  @brief Scalar operations
  */
 
 /** @dir src/core/CL/cl_kernels

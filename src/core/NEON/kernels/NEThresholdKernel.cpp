@@ -28,7 +28,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {

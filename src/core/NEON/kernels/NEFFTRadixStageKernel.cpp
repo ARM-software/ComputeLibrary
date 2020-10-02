@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,8 @@
 #include <complex>
 #include <map>
 
-#include "arm_compute/core/NEON/wrapper/traits.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
+#include "src/core/NEON/wrapper/traits.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {
