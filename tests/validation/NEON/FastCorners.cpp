@@ -44,8 +44,6 @@ namespace validation
 {
 namespace
 {
-/* Radius of the Bresenham circle around the candidate point */
-const unsigned int bresenham_radius = 3;
 /* Tolerance used to compare corner strengths */
 const AbsoluteTolerance<float> tolerance(0.5f);
 } // namespace

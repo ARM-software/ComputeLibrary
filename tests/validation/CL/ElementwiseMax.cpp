@@ -46,7 +46,6 @@ namespace
 RelativeTolerance<float> tolerance_fp32(0.000001f);
 RelativeTolerance<float> tolerance_fp16(0.001f);
 
-constexpr unsigned int num_elems_processed_per_iteration = 16;
 /** Input data sets **/
 const auto ElementwiseMaxU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
                                              DataType::U8));
