@@ -179,6 +179,7 @@ public:
     {
         // Batch size 1
         TensorShape{ 11U, 11U },
+                     TensorShape{ 16U, 16U },
                      TensorShape{ 27U, 13U, 7U },
                      TensorShape{ 31U, 27U, 17U, 2U },
                      // Batch size 4

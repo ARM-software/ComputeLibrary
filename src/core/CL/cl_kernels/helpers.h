@@ -24,6 +24,8 @@
 #ifndef ARM_COMPUTE_HELPER_H
 #define ARM_COMPUTE_HELPER_H
 
+#include "load_store_utility.h"
+
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
@@ -273,21 +275,30 @@
 #define VSTORE_PARTIAL_STR(size, store_size) vstore_partial_##size##_##store_size
 #define VSTORE_PARTIAL(size, store_size) VSTORE_PARTIAL_STR(size, store_size)
 
+#define NO_STORE(data, offs, ptr) \
+    {                             \
+    }
+
 // Size == 1 (scalar)
+#define vstore_partial_1_0 NO_STORE
 #define vstore_partial_1_1 vstore1
 // Size == 2
+#define vstore_partial_2_0 NO_STORE
 #define vstore_partial_2_1 vstore_partial_1
 #define vstore_partial_2_2 vstore_partial_2
 // Size == 3
+#define vstore_partial_3_0 NO_STORE
 #define vstore_partial_3_1 vstore_partial_1
 #define vstore_partial_3_2 vstore_partial_2
 #define vstore_partial_3_3 vstore_partial_3
 // Size == 4
+#define vstore_partial_4_0 NO_STORE
 #define vstore_partial_4_1 vstore_partial_1
 #define vstore_partial_4_2 vstore_partial_2
 #define vstore_partial_4_3 vstore_partial_3
 #define vstore_partial_4_4 vstore_partial_4
 // Size == 8
+#define vstore_partial_8_0 NO_STORE
 #define vstore_partial_8_1 vstore_partial_1
 #define vstore_partial_8_2 vstore_partial_2
 #define vstore_partial_8_3 vstore_partial_3
@@ -297,6 +308,7 @@
 #define vstore_partial_8_7 vstore_partial_7
 #define vstore_partial_8_8 vstore_partial_8
 // Size == 16
+#define vstore_partial_16_0 NO_STORE
 #define vstore_partial_16_1 vstore_partial_1
 #define vstore_partial_16_2 vstore_partial_2
 #define vstore_partial_16_3 vstore_partial_3
@@ -376,15 +388,15 @@
 
 #define vstore_partial_13(DATA, OFFSET, PTR)       \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vstore_partial_5(DATA.s89abc, OFFSET, PTR + 8);
+    vstore_partial_5(DATA.s89abcdef, OFFSET, PTR + 8);
 
 #define vstore_partial_14(DATA, OFFSET, PTR)       \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vstore_partial_6(DATA.s89abcd, OFFSET, PTR + 8);
+    vstore_partial_6(DATA.s89abcdef, OFFSET, PTR + 8);
 
 #define vstore_partial_15(DATA, OFFSET, PTR)       \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vstore_partial_7(DATA.s89abcde, OFFSET, PTR + 8);
+    vstore_partial_7(DATA.s89abcdef, OFFSET, PTR + 8);
 
 #define vstore_partial_16(DATA, OFFSET, PTR) \
     vstore16(DATA, OFFSET, PTR);

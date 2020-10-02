@@ -80,37 +80,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    if(output != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-        // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output, *input);
-    }
-
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-
-    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    bool   window_changed = false;
-
-    if(output != nullptr)
-    {
-        AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = update_window_and_padding(win, input_access, output_access);
-        output_access.set_valid_region(win, input->valid_region());
-    }
-    else
-    {
-        window_changed = update_window_and_padding(win,
-                                                   AccessWindowHorizontal(input, 0, num_elems_processed_per_iteration));
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 CLActivationLayerKernel::CLActivationLayerKernel()
@@ -132,10 +101,11 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, (output != nullptr) ? output : nullptr, act_info));
 
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-    const DataType     dt                                = input->data_type();
-    float              a_const                           = act_info.a();
-    float              b_const                           = act_info.b();
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->element_size(), input->dimension(0));
+
+    const DataType dt      = input->data_type();
+    float          a_const = act_info.a();
+    float          b_const = act_info.b();
 
     const ActivationLayerInfo::ActivationFunction f_act        = act_info.activation();
     const bool                                    is_quantized = is_data_type_quantized(dt);
@@ -146,9 +116,10 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     CLBuildOptions build_opts;
     build_opts.add_option_if(perform_activation_in_float, "-DFLOAT_DOMAIN");
     build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
-    build_opts.add_option(("-DACT=" + lower_string(string_from_activation_func(f_act))));
-    build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
-    build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
+    build_opts.add_option("-DACT=" + lower_string(string_from_activation_func(f_act)));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->dimension(0) % num_elems_processed_per_iteration));
 
     std::string kernel_name = std::string("activation_layer");
 
@@ -226,9 +197,8 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input, (_run_in_place) ? nullptr : output);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    ICLKernel::configure_internal(win);
 
     // Set config_id for enabling LWS tuning
     _config_id = "activation_layer_";
@@ -241,10 +211,7 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
 
 Status CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    const bool run_in_place = (output == nullptr) || (output == input);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (run_in_place) ? nullptr : output->clone().get()).first);
-
     return Status{};
 }
 

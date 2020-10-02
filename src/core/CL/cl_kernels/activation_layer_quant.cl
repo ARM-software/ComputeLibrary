@@ -66,34 +66,35 @@ __kernel void activation_layer_quant_f32(
 #endif /* not IN_PLACE */
 )
 {
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE * sizeof(DATA_TYPE) - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE * sizeof(DATA_TYPE)), 0);
+
     // Get pixels pointer
-    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
+    __global uchar *input_addr = input_ptr + input_offset_first_element_in_bytes + x_offs + get_global_id(1) * input_stride_y + get_global_id(2) * input_stride_z;
 #ifdef IN_PLACE
-    Tensor3D output = input;
+    __global uchar *output_addr = input_addr;
 #else  /* IN_PLACE */
-    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x_offs + get_global_id(1) * output_stride_y + get_global_id(2) * output_stride_z;
 #endif /* IN_PLACE */
 
     // Load data
-    TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
+    TYPE data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr);
 
-    VEC_FLOAT data_flt = CONVERT(data, VEC_FLOAT);
+    VEC_FLOAT data_flt = CONVERT(data0, VEC_FLOAT);
 #if defined(O1_VAL)
     data_flt = round(data_flt - (float)O1_VAL) * ((float)S1_VAL);
 #else  // defined(O1_VAL)
-    data_flt        = round(data_flt) * ((float)S1_VAL);
+    data_flt                    = round(data_flt) * ((float)S1_VAL);
 #endif // defined(O1_VAL)
     data_flt = ACTIVATION(ACT, float, data_flt, A_VAL, B_VAL);
 
 #if defined(O2_VAL)
-    data = CONVERT_SAT(round(data_flt / ((float)S2_VAL)) + (float)O2_VAL, TYPE);
+    data0 = CONVERT_SAT(round(data_flt / ((float)S2_VAL)) + (float)O2_VAL, TYPE);
 #else  // defined(O2_VAL)
-    data            = CONVERT_SAT(round(data_flt / ((float)S2_VAL)), TYPE);
+    data0                       = CONVERT_SAT(round(data_flt / ((float)S2_VAL)), TYPE);
 #endif // defined(O2_VAL)
 
     // Store result
-    VSTORE(VEC_SIZE)
-    (data, 0, (__global DATA_TYPE *)output.ptr);
+    STORE_VECTOR_SELECT(data, DATA_TYPE, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 
 #else // defined(FLOAT_DOMAIN)
@@ -137,22 +138,23 @@ __kernel void activation_layer_quant(
 #endif /* not IN_PLACE */
 )
 {
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE * sizeof(DATA_TYPE) - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE * sizeof(DATA_TYPE)), 0);
+
     // Get pixels pointer
-    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x_offs + get_global_id(1) * input_stride_y + get_global_id(2) * input_stride_z;
 #ifdef IN_PLACE
-    Tensor3D output = input;
+    __global uchar *output_addr = input_addr;
 #else  /* IN_PLACE */
-    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x_offs + get_global_id(1) * output_stride_y + get_global_id(2) * output_stride_z;
 #endif /* IN_PLACE */
 
     // Load data
-    TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
+    TYPE data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr);
 
-    data = PERFORM_ACTIVATION_QUANT(ACT, data);
+    data0 = PERFORM_ACTIVATION_QUANT(ACT, data0);
 
     // Store result
-    VSTORE(VEC_SIZE)
-    (data, 0, (__global DATA_TYPE *)output.ptr);
+    STORE_VECTOR_SELECT(data, DATA_TYPE, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(ACT)
 #endif // defined(FLOAT_DOMAIN)

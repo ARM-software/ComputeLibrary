@@ -1322,6 +1322,30 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
     }
 }
 
+/** Returns the adjusted vector size in case it is less than the input's first dimension, getting rounded down to its closest valid vector size
+ *
+ * @param[in] vec_size vector size to be adjusted
+ * @param[in] dim0     size of the first dimension
+ *
+ * @return the number of element processed along the X axis per thread
+ */
+inline unsigned int adjust_vec_size(unsigned int vec_size, size_t dim0)
+{
+    ARM_COMPUTE_ERROR_ON(vec_size > 16);
+
+    if(dim0 == 3)
+    {
+        return dim0;
+    }
+
+    while(vec_size > dim0)
+    {
+        vec_size >>= 1;
+    }
+
+    return vec_size;
+}
+
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 /** Print consecutive elements to an output stream.
  *
