@@ -245,6 +245,11 @@ if env['neon']:
         if "sve" in env['arch']:
              core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/sve_*/*.cpp')
 
+    if any(i in env['data_type_support'] for i in ['all', 'fp16']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/fp16_*.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'fp32']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/fp32_*.cpp')
+
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/assembly/*.cpp')
