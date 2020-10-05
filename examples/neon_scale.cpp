@@ -60,7 +60,13 @@ public:
         dst.allocator()->init(dst_tensor_info);
 
         // Configure Scale function object:
-        scale.configure(&src, &dst, ScaleKernelInfo{ InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED });
+        scale.configure(&src, &dst, ScaleKernelInfo{
+                    InterpolationPolicy::NEAREST_NEIGHBOR,
+                    BorderMode::UNDEFINED,
+                    PixelValue(),
+                    SamplingPolicy::CENTER,
+                    false
+        });
 
         // Allocate all the images
         src.allocator()->allocate();
