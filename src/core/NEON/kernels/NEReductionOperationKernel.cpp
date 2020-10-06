@@ -1368,7 +1368,7 @@ struct RedOpYZW_quantized
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                auto res_value = 0;
+                float res_value = 0.f;
                 switch(op)
                 {
                     case ReductionOperation::ARG_IDX_MAX:
@@ -1413,11 +1413,11 @@ struct RedOpYZW_quantized
                             //de-quantize input
                             if(std::is_same<T, uint8_t>::value)
                             {
-                                res_value *= dequantize_qasymm8(*input_ptr, iq_info);
+                                res_value *= dequantize_qasymm8(*in_ptr, iq_info);
                             }
                             else
                             {
-                                res_value *= dequantize_qasymm8_signed(*input_ptr, iq_info);
+                                res_value *= dequantize_qasymm8_signed(*in_ptr, iq_info);
                             }
                             break;
                         }
@@ -1458,8 +1458,9 @@ struct RedOpYZW_quantized
                 {
                     case ReductionOperation::MEAN_SUM:
                     {
-                        res_value /= in_info.dimension(axis);
-                        *reinterpret_cast<T *>(output.ptr() + x) = utils::cast::saturate_cast<T>(res_value);
+                        int32_t res = static_cast<int32_t>(res_value);
+                        res /= in_info.dimension(axis);
+                        *reinterpret_cast<T *>(output.ptr() + x) = utils::cast::saturate_cast<T>(res);
                         break;
                     }
                     case ReductionOperation::SUM:
@@ -1472,16 +1473,17 @@ struct RedOpYZW_quantized
                     case ReductionOperation::PROD:
                     {
                         //re-quantize result
+                        T res = 0;
                         if(std::is_same<T, uint8_t>::value)
                         {
-                            res_value = quantize_qasymm8(res_value, iq_info);
+                            res = quantize_qasymm8(res_value, iq_info);
                         }
                         else
                         {
-                            res_value = quantize_qasymm8_signed(res_value, iq_info);
+                            res = quantize_qasymm8_signed(res_value, iq_info);
                         }
+                        *(reinterpret_cast<T *>(output.ptr() + x)) = res;
                         break;
-                        *(reinterpret_cast<T *>(output.ptr() + x)) = res_value;
                     }
                     case ReductionOperation::ARG_IDX_MIN:
                     case ReductionOperation::ARG_IDX_MAX:
