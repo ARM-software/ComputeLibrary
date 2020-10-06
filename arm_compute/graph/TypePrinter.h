@@ -124,6 +124,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::L2NormalizeLayer:
             os << "L2NormalizeLayer";
+            break;
         case NodeType::NormalizationLayer:
             os << "NormalizationLayer";
             break;
