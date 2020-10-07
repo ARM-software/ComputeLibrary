@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_CLELEMENTWISEOPERATIONS_H
 #define ARM_COMPUTE_CLELEMENTWISEOPERATIONS_H
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -99,9 +98,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 
 /** Basic function to run @ref CLSaturatedArithmeticOperationKernel for subtraction
@@ -169,9 +165,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 
 /** Basic function to run @ref CLSaturatedArithmeticOperationKernel for division
@@ -208,9 +201,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 
 /** Basic function to run @ref CLArithmeticOperationKernel for max
@@ -247,9 +237,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 
 /** Basic function to run @ref CLArithmeticOperationKernel for min
@@ -286,9 +273,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 
 /** Basic function to run @ref CLArithmeticOperationKernel for squared difference
@@ -325,9 +309,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 
 /** Basic function to run @ref CLArithmeticOperationKernel for power
@@ -364,9 +345,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 } // namespace experimental
 

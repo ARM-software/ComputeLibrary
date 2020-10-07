@@ -55,7 +55,6 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
-    BorderSize border_size() const override;
 
 protected:
     /** The name of the operation */

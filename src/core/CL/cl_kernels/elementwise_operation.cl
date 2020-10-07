@@ -43,7 +43,7 @@
 #define OP_FUN_NAME_STR(op) elementwise_operation_##op
 #define OP_FUN_NAME(op) OP_FUN_NAME_STR(op)
 
-#if defined(OP) && defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE)
+#if defined(OP) && defined(VEC_SIZE_IN1) && defined(VEC_SIZE_IN2) && defined(VEC_SIZE_OUT) && defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_OUT)
 
 #if defined(ACTIVATION_TYPE)
 #include "activation_float_helpers.h"
@@ -51,11 +51,12 @@
 
 /** This function executes an element-wise operation among two tensors.
  *
- * @attention The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN1, -DDATA_TYPE_IN2 and -DDATA_TYPE_OUT:
+ * @note Vector sizes of inputs and output have to be passed at compile time using -DVEC_SIZE_IN1, -DVEC_SIZE_IN2, -DVEC_SIZE_OUT.
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_OUT=3. It is defined as the remainder between the input's first dimension and VEC_SIZE_OUT
+ * @note The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN1, -DDATA_TYPE_IN2 and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN1=uchar -DDATA_TYPE_IN2=uchar -DDATA_TYPE_OUT=short
- * @attention To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
- * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
- * @attention The element-wise operation to be executed has to be passed at compile time using -DOP (e.g., -DOP=ADD)
+ * @note To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
+ * @note The element-wise operation to be executed has to be passed at compile time using -DOP (e.g., -DOP=ADD)
  *
  * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: U8/S16/F16/F32
  * @param[in]  in1_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -87,24 +88,36 @@ __kernel void OP_FUN_NAME(OP)(
     TENSOR3D_DECLARATION(in2),
     TENSOR3D_DECLARATION(out))
 {
+#if VEC_SIZE_IN1 == 1
+    uint in1_x_offs = 0;
+#else  // VEC_SIZE_IN1 == 1
+    uint in1_x_offs = max((int)(get_global_id(0) * VEC_SIZE_IN1 - (VEC_SIZE_IN1 - VEC_SIZE_LEFTOVER) % VEC_SIZE_IN1), 0);
+#endif // VEC_SIZE_IN1 == 1
+#if VEC_SIZE_IN2 == 1
+    uint in2_x_offs = 0;
+#else  // VEC_SIZE_IN2 == 1
+    uint in2_x_offs = max((int)(get_global_id(0) * VEC_SIZE_IN2 - (VEC_SIZE_IN2 - VEC_SIZE_LEFTOVER) % VEC_SIZE_IN2), 0);
+#endif // VEC_SIZE_IN2 == 1
+    uint out_x_offs = max((int)(get_global_id(0) * VEC_SIZE_OUT - (VEC_SIZE_OUT - VEC_SIZE_LEFTOVER) % VEC_SIZE_OUT), 0);
+
     // Get pixels pointer
-    Tensor3D in1 = CONVERT_TO_TENSOR3D_STRUCT(in1);
-    Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + in1_x_offs * sizeof(DATA_TYPE_IN1) + get_global_id(1) * in1_step_y + get_global_id(2) * in1_step_z;
+    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + in2_x_offs * sizeof(DATA_TYPE_IN2) + get_global_id(1) * in2_step_y + get_global_id(2) * in2_step_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + out_x_offs * sizeof(DATA_TYPE_OUT) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
     // Load values
-    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
-    in_a = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN1 *)in1.ptr), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
-    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
-    in_b = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)
+    in_a = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN1, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_IN1 *)in1_addr)), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT));
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)
+    in_b = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN2, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE_IN2 *)in2_addr)), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT));
 
     // Calculate and store result
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)
+    res0 = OP(in_a, in_b);
 #if defined(ACTIVATION_TYPE)
-    VSTORE(VEC_SIZE)
-    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, VEC_SIZE, CONVERT(OP(in_a, in_b), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), A_VAL, B_VAL), 0, (__global DATA_TYPE_OUT *)out.ptr);
-#else  // defined(ACTIVATION_TYPE)
-    VSTORE(VEC_SIZE)
-    (OP(in_a, in_b), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    res0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, VEC_SIZE_OUT, res0, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
+
+    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE_OUT, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE) */
+#endif /* defined(OP) && defined(VEC_SIZE_IN1) && defined(VEC_SIZE_IN2) && defined(VEC_SIZE_OUT) && defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_OUT) */

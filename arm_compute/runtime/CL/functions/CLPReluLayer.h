@@ -65,9 +65,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 } // namespace experimental
 
