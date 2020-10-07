@@ -33,6 +33,7 @@
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note Activation function should be given as a preprocessor argument using -DACT=name. e.g. -DACT=TANH
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively.
  *

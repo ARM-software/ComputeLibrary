@@ -38,24 +38,6 @@ namespace arm_compute
 {
 namespace
 {
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int depth_offset, ITensorInfo *output)
-{
-    ARM_COMPUTE_UNUSED(depth_offset);
-
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-
-    // The window needs to be based on input as we copy all the depths of input
-    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-    win.set(Window::DimZ, Window::Dimension(0, input->tensor_shape().z(), 1));
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 Status validate_arguments(const ITensorInfo *input, unsigned int depth_offset, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
@@ -84,12 +66,13 @@ void CLDepthConcatenateLayerKernel::configure(const CLCompileContext &compile_co
 
     _depth_offset = depth_offset;
 
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->element_size(), input->dimension(0));
 
     // Add build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->dimension(0) % num_elems_processed_per_iteration));
     if(is_data_type_quantized_asymmetric(input->data_type()) && input->quantization_info() != output->quantization_info())
     {
         const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
@@ -105,10 +88,9 @@ void CLDepthConcatenateLayerKernel::configure(const CLCompileContext &compile_co
     _kernel = create_kernel(compile_context, "concatenate", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input, depth_offset, output);
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-
-    ICLKernel::configure_internal(std::get<1>(win_config));
+    auto win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    win.set(Window::DimZ, Window::Dimension(0, input->tensor_shape().z(), 1));
+    ICLKernel::configure_internal(win);
 
     // Set output valid region
     output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
@@ -119,7 +101,6 @@ Status CLDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *i
                                                const arm_compute::ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, depth_offset, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), depth_offset, output->clone().get()).first);
     return Status{};
 }
 

@@ -383,10 +383,13 @@ __kernel void concatenate_height(
 
 #endif /* defined(HEIGHT_OFFSET) && defined(DEPTH) */
 
+#if defined(VEC_SIZE_LEFTOVER)
+
 /** This kernel concatenates the input tensor into the output tensor along the third dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
  * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -411,17 +414,19 @@ __kernel void concatenate(
     TENSOR3D_DECLARATION(dst),
     int offset)
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE * sizeof(DATA_TYPE) - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE * sizeof(DATA_TYPE)), 0);
+
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offs + get_global_id(1) * src_stride_y + get_global_id(2) * src_stride_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offs + get_global_id(1) * dst_stride_y + get_global_id(2) * dst_stride_z;
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
+    source_values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
-    source_values = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+    source_values0 = requantize(source_values0, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
-    VSTORE(VEC_SIZE)
-    (source_values, 0, (__global DATA_TYPE *)(dst.ptr + offset));
+    STORE_VECTOR_SELECT(source_values, DATA_TYPE, dst_addr + offset, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
+#endif /* defined(VEC_SIZE_LEFTOVER) */
 #endif /* defined(DATA_TYPE) && defined(VEC_SIZE) */

@@ -121,6 +121,7 @@ public:
                      TensorShape{ 2U, 5U, 4U },
 
                      TensorShape{ 7U, 7U, 5U },
+                     TensorShape{ 16U, 16U, 5U },
                      TensorShape{ 27U, 13U, 37U },
     })
     {
