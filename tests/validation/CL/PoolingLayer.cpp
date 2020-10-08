@@ -85,6 +85,39 @@ const auto                           pool_data_layout_dataset = framework::datas
 
 const auto pool_fp_mixed_precision_dataset = framework::dataset::make("FpMixedPrecision", { true, false });
 
+/** Zero padding test */
+bool validate_zero_padding(unsigned int width, DataType data_type)
+{
+    const PoolingLayerInfo pool_info(PoolingType::MAX, Size2D(2U, 2U), DataLayout::NHWC);
+
+    TensorShape shape(width, 23, 11, 1);
+
+    // Create tensors
+    CLTensor src = create_tensor<CLTensor>(shape, data_type);
+    CLTensor idx;
+    CLTensor dst;
+
+    src.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
+    dst.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
+
+    CLPoolingLayer pool;
+
+    if(is_data_type_quantized(data_type))
+    {
+        pool.configure(&src, &dst, pool_info, nullptr);
+
+        // Padding can be added along rhs and bias's X dimension
+        return src.info()->padding().empty() && dst.info()->padding().empty();
+    }
+    else
+    {
+        pool.configure(&src, &dst, pool_info, &idx);
+
+        // Padding can be added along rhs and bias's X dimension
+        return src.info()->padding().empty() && dst.info()->padding().empty() && idx.info()->padding().empty();
+    }
+}
+
 } // namespace
 
 TEST_SUITE(CL)
@@ -94,17 +127,15 @@ TEST_SUITE(PoolingLayer)
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data type
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Window shrink
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8), // Invalid parameters
                                                        TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32),     // Non-rectangular Global Pooling
                                                        TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),     // Invalid output Global Pooling
-                                                       TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::QASYMM8), // Invalid exclude_padding = false with quantized type, no actual padding and NHWC
+                                                       TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8),
@@ -114,7 +145,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32),
                                                      })),
                framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
-                                                       PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
                                                        PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 2, 0)),
                                                        PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 2)),
                                                        PoolingLayerInfo(PoolingType::L2, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
@@ -123,11 +153,32 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NHWC, PadStrideInfo(), false),
                                                        PoolingLayerInfo(PoolingType::AVG, DataLayout::NCHW),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, false, false, true, false, false, true })),
+               framework::dataset::make("Expected", { false, false, false, false, true, false, true, true })),
                input_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info)) == expected, framework::LogLevel::ERRORS);
 }
+
+/** Validate zero padding tests
+ *
+ * A series of validation tests to check that no padding is added as part of configuration for 4 different scenarios.
+ *
+ * Checks performed in order:
+ *     - First dimension multiple of 16
+ *     - First dimension non-multiple of 16
+ *     - First dimension less than 16 (vec_size for qasymm8) but multiple
+ *     - First dimension less than 16 (vec_size for qasymm8) non-multiple
+ *     - Tensor with only one element
+ */
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
+framework::dataset::make("Width",    { 32U, 37U, 12U, 13U, 1U }),
+framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 })),
+width, data_type)
+{
+    bool status = validate_zero_padding(width, data_type);
+    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
+
 // clang-format on
 // *INDENT-ON*
 

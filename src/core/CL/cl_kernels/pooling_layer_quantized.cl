@@ -47,8 +47,6 @@
 
 #define DIV_OP(x, y) (x * (1.f / y))
 
-#define DIV_OP_NHWC(x, y) (convert_float8(x) * (float8)(1.f / y))
-
 #if defined(POOL_L2)
 #error "L2 pooling is not supported"
 #endif /* defined(POOL_L2) */
@@ -155,34 +153,22 @@ __kernel void pooling_layer_MxN_quantized_nchw(
     *(__global DATA_TYPE *)output.ptr = result_q8;
 }
 
-int calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int upper_bound_w, int upper_bound_h,
-                             const int pad_x, const int pad_y, const int stride_x, const int stride_y)
-{
-    int start_x = get_global_id(1) * stride_x - pad_x;
-#if defined(DST_DEPTH)
-    int start_y = (get_global_id(2) % DST_DEPTH) * stride_y - pad_y;
-#else  /* defined(DST_DEPTH) */
-    int       start_y    = get_global_id(2) * stride_y - pad_y;
-#endif /* defined(DST_DEPTH) */
-
-    const int end_x = min(start_x + pool_size_x, upper_bound_w);
-    const int end_y = min(start_y + pool_size_y, upper_bound_h);
-
-    start_x = max(0, start_x);
-    start_y = max(0, start_y);
-
-    return ((end_y - start_y) * (end_x - start_x));
-}
-
-/** Performs a pooling function of pool size equal to N (NHWC)
+#if defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_CHANNELS) && defined(DST_HEIGHT) && defined(DST_BATCH_SIZE) && defined(ACC_DATA_TYPE)
+/** Performs pooling layer of size equal to MxN. This OpenCL kernel can perform the following pooling types:
+ * -# max, -DPOOL_MAX must be passed at compile time
+ * -# average, -DPOOL_AVG must be passed at compile time. If padding has to be expluded, -DEXCLUDE_PADDING should be passed at compile time
  *
- * @note Pool sizes must be passed using -DPOOL_SIZE_X and -DPOOL_SIZE_Y e.g. -DPOOL_SIZE_X=13;
- * @note Tensors width and height must be passed at compile time using -DMAX_WIDTH and -DMAX_HEIGHT
- * @note Strides must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
- * @note Pad values must be passed at compile time using -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
- * @note In case of average pooling the following information must be passed at compile time:
- *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
+ * @note Datatype must be passed at compile type using -DDATA_TYPE e.g. -DDATA_TYPE=uchar. Supported data types are QASYMM8/QASYMM8_SIGNED
+ * @note Accumulation data type must be passed at compile time using -DACC_DATA_TYPE e.g. -DACC_DATA_TYPE=int
+ * @note Pool size must be passed at compile time using -DPOOL_SIZE_X and -DPOOL_SIZE_Y. e.g. -DPOOL_SIZE_X=4, -DPOOL_SIZE_Y=4
+ * @note Input tensor width and height must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT
+ * @note Output tensor height, channels and batch size must be passed at compile time using -DDST_HEIGHT, -DDST_CHANNELS and -DDST_BATCH_SIZE
+ * @note Pool strides must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
+ * @note Pool pads must be passed at compile time using -DPAD_X and -DPAD_Y
+ * @note Vector size must be passed at compile time using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size must be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note The initial value for the pooling operation must be passed at compile time using -DINITIAL_VALUE e.g. -DINITIAL_VALUE=0
+ * @note If the output has be requantized, -DOFFSET_IN1, -DOFFSET_OUT, -DSCALE_IN1 and -DSCALE_OUT muste be passed at compile time
  *
  * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -209,57 +195,75 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     TENSOR4D_DECLARATION(input),
     TENSOR4D_DECLARATION(output))
 {
-    // Get pixels pointer
-#if defined(DST_DEPTH)
-    Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT(input, DST_DEPTH);
-    Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT(output, DST_DEPTH);
-#else  /* defined(DST_DEPTH) */
-    Tensor3D  input      = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D  output     = CONVERT_TO_TENSOR3D_STRUCT(output);
-#endif /* defined(DST_DEPTH) */
+    // Note: If C is not multiple of VEC_SIZE, we shift back of VEC_SIZE_LEFTOVER elements to compute the leftover elements for get_global_id(0) == 0
+    // Note: If C is less than VEC_SIZE, VEC_SIZE should be SHRINKED to the closest smaller VEC_SIZE. This operation is performed on the host side
+    int offset_c = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0) * sizeof(DATA_TYPE);
+    int idx_out_w = get_global_id(1);
+#if DST_BATCH_SIZE != 1
+    // If batch size != 1, the batch size dimension is collapsed over the height dimension
+    int idx_out_h = get_global_id(2) % DST_HEIGHT;
+    int idx_out_n = get_global_id(2) / DST_HEIGHT;
+#else //DST_BATCH_SIZE != 1
+    int idx_out_h = get_global_id(2);
+    int idx_out_n = 0;
+#endif // DST_BATCH_SIZE != 1
 
-    int8 vdata = INITIAL_VALUE;
+    int idx_in_w  = idx_out_w * STRIDE_X - PAD_X;
+    int idx_in_h  = idx_out_h * STRIDE_Y - PAD_Y;
 
-    const int idx_width = get_global_id(1) * STRIDE_X;
-#if defined(DST_DEPTH)
-    const int idx_height = (get_global_id(2) % DST_DEPTH) * STRIDE_Y;
-#else  /* defined(DST_DEPTH) */
-    const int idx_height = get_global_id(2) * STRIDE_Y;
-#endif /* defined(DST_DEPTH) */
+    __global unsigned char *in_base_ptr = input_ptr + input_offset_first_element_in_bytes +
+                                                      offset_c +
+                                                      idx_out_n * input_stride_w;
 
-    for(int y = 0; y < POOL_SIZE_Y; ++y)
+    __global unsigned char *out_base_ptr = output_ptr + output_offset_first_element_in_bytes +
+                                                        offset_c +
+                                                        idx_out_w * output_stride_y +
+                                                        idx_out_h * output_stride_z +
+                                                        idx_out_n * output_stride_w;
+
+    int pool_x_s = max((int)0, -idx_in_w);
+    int pool_x_e = min((int)POOL_SIZE_X, (int)SRC_WIDTH - idx_in_w);
+    int pool_y_s = max((int)0, -idx_in_h);
+    int pool_y_e = min((int)POOL_SIZE_Y, (int)SRC_HEIGHT - idx_in_h);
+
+#if defined(POOL_AVG) && defined(EXCLUDE_PADDING)
+    int filter_size = 0;
+#elif defined(POOL_AVG) && !defined(EXCLUDE_PADDING) // defined(POOL_AVG) && defined(EXCLUDE_PADDING)
+    int filter_size = POOL_SIZE_X * POOL_SIZE_Y;
+#endif // defined(POOL_AVG) && !defined(EXCLUDE_PADDING)
+
+    VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
+    res0 = INITIAL_VALUE;
+
+    for(int y = pool_y_s; y < pool_y_e; ++y)
     {
-        int y1 = select(y, PAD_Y - idx_height, y + idx_height - PAD_Y < 0 || y + idx_height - PAD_Y >= MAX_HEIGHT);
-        for(int x = 0; x < POOL_SIZE_X; ++x)
+        for(int x = pool_x_s; x < pool_x_e; ++x)
         {
-            int x1 = select(x, PAD_X - idx_width - 1, x + idx_width - PAD_X < 0 || x + idx_width - PAD_X >= MAX_WIDTH);
-            x1     = select(x1, PAD_X - idx_width - 1, y != y1);
+            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) data;
+            VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE) data0;
 
-#if defined(DST_DEPTH)
-            VEC_TYPE(8)
-            data = vload8(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y, 0));
-#else  /* defined(DST_DEPTH) */
-            VEC_TYPE(8)
-            data = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y));
-#endif /* defined(DST_DEPTH) */
+            data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z));
+            data0 = CONVERT(data, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 
-            int8 data0 = convert_int8(data);
-            vdata      = POOL_OP(vdata, data0);
+            res0 = POOL_OP(res0, data0);
+
+#if defined(POOL_AVG) && defined(EXCLUDE_PADDING)
+            filter_size++;
+#endif // defined(POOL_AVG) && defined(EXCLUDE_PADDING)
         }
     }
 
 #if defined(POOL_AVG)
-    // Divide by pool region in case of average pooling
-    vdata = convert_int8(round(DIV_OP_NHWC(vdata, calculate_avg_scale_nhwc(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y))));
-#endif /* defined(POOL_AVG) */
+    res0 = (res0 + (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))(filter_size >> 1)) / filter_size;
+#endif // defined(POOL_AVG)
 
-    VEC_TYPE(8)
-    out_q8 = CONVERT(vdata, VEC_TYPE(8));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) out_q0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
-    REQUANTIZE(8, out_q8, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT, out_q8);
+    REQUANTIZE(VEC_SIZE, out_q0, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT, out_q0);
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
     // Store result
-    vstore8(out_q8, 0, (__global DATA_TYPE *)output.ptr);
+    STORE_VECTOR_SELECT(out_q, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, ((VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0));
 }
-#endif /* defined(DATA_TYPE) && defined(INITIAL_VALUE) */
+#endif // defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_CHANNELS) && defined(DST_HEIGHT) && defined(DST_BATCH_SIZE) && defined(SELECT_DATA_TYPE) && defined(ACC_DATA_TYPE)
+#endif // defined(DATA_TYPE) && defined(INITIAL_VALUE)
