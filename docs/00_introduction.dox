@@ -104,6 +104,25 @@ v20.11 Public major release
       - @ref CLSoftmaxLayer
       - @ref CLLogSoftmaxLayer
       - @ref GCSoftmaxLayer
+ - Removed padding from:
+   - @ref NEComplexPixelWiseMultiplicationKernel
+   - @ref NENonMaximaSuppression3x3Kernel
+   - @ref NERemapKernel
+   - @ref NEGEMMInterleave4x4Kernel
+   - @ref NEDirectConvolutionLayerKernel
+   - @ref NEScaleKernel
+   - @ref NELocallyConnectedMatrixMultiplyKernel
+   - @ref NEGEMMLowpOffsetContributionKernel
+   - @ref NEGEMMTranspose1xWKernel
+   - @ref NEPoolingLayerKernel
+   - @ref NEConvolutionKernel
+   - @ref NEDepthwiseConvolutionLayerNativeKernel
+   - @ref NEGEMMLowpMatrixMultiplyKernel
+   - @ref NEGEMMMatrixMultiplyKernel
+   - @ref NEDirectConvolutionLayerOutputStageKernel
+   - @ref NEReductionOperationKernel
+   - @ref NEGEMMLowpMatrixAReductionKernel
+   - @ref NEGEMMLowpMatrixBReductionKernel
  - Deprecated OpenCL kernels / functions:
      - CLLocallyConnectedLayer
      - CLLocallyConnectedMatrixMultiplyKernel
@@ -158,7 +177,7 @@ v20.08 Public major release
    - @ref NEDepthConvertLayerKernel
    - @ref NERangeKernel
    - @ref NEPriorBoxLayer
- - Removedd OpenCL kernels / functions:
+ - Removed OpenCL kernels / functions:
    - CLGEMMLowpQuantizeDownInt32ToUint8Scale
    - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
  - Removed NEON kernels / functions:
