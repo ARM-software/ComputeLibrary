@@ -59,7 +59,18 @@ Moreover, Compute Library supports the following data layouts (fast changing dim
 - NCHW: Legacy layout where width is in the fastest changing dimension
 where N = batches, C = channels, H = height, W = width
 
-@section S4_1_3 Thread-safety
+@section S4_1_3 Fast-math support
+
+Compute Library supports different types of convolution methods, fast-math flag is only used for the Winograd algorithm.
+When the fast-math flag is enabled, both NEON and CL convolution layers will try to dispatch the fastest implementation available, which may introduce a drop in accuracy as well. The different scenarios involving the fast-math flag are presented below:
+- For FP32:
+    - no-fast-math: Only supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7
+    - fast-math: Supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7,5x5,7x7
+- For fp16:
+    - no-fast-math: No Winograd support
+    - fast-math: Supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7,5x5,7x7
+
+@section S4_1_4 Thread-safety
 
 Although the library supports multi-threading during workload dispatch, thus parallelizing the execution of the workload at multiple threads, the current runtime module implementation is not thread-safe in the sense of executing different functions from separate threads.
 This lies to the fact that the provided scheduling mechanism wasn't designed with thread-safety in mind.
