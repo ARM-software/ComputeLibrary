@@ -129,7 +129,7 @@ __kernel void batchnormalization_layer_nchw(TENSOR3D_DECLARATION(input),
     res = MUL_OP(gamma_vec, x_bar);
 #else  /* USE_DEFAULT_GAMMA */
     // gamma is equal to 1, no need to perform multiplications
-    res          = x_bar;
+    res                         = x_bar;
 #endif /* USE_DEFAULT_GAMMA */
 
 #ifndef USE_DEFAULT_BETA
@@ -198,19 +198,21 @@ __kernel void batchnormalization_layer_nhwc(TENSOR3D_DECLARATION(input),
 #endif /* USE_DEFAULT_GAMMA */
                                             float epsilon)
 {
-    Tensor3D in = CONVERT_TO_TENSOR3D_STRUCT(input);
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE * sizeof(DATA_TYPE) - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE * sizeof(DATA_TYPE)), 0);
+
+    __global uchar *input_addr = input_ptr + input_offset_first_element_in_bytes + x_offs + get_global_id(1) * input_stride_y + get_global_id(2) * input_stride_z;
 #ifdef IN_PLACE
-    Tensor3D out = in;
+    __global uchar *output_addr = input_ptr;
 #else  /* IN_PLACE */
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x_offs + get_global_id(1) * output_stride_y + get_global_id(2) * output_stride_z;
 #endif /* IN_PLACE */
-    Vector mean = CONVERT_TO_VECTOR_STRUCT(mean);
-    Vector var  = CONVERT_TO_VECTOR_STRUCT(var);
+    __global uchar *mean_addr = mean_ptr + mean_offset_first_element_in_bytes + x_offs;
+    __global uchar *var_addr  = var_ptr + var_offset_first_element_in_bytes + x_offs;
 #ifndef USE_DEFAULT_BETA
-    Vector beta = CONVERT_TO_VECTOR_STRUCT(beta);
+    __global uchar *beta_addr = beta_ptr + beta_offset_first_element_in_bytes + x_offs;
 #endif /* USE_DEFAULT_BETA */
 #ifndef USE_DEFAULT_GAMMA
-    Vector gamma = CONVERT_TO_VECTOR_STRUCT(gamma);
+    __global uchar *gamma_addr = gamma_ptr + gamma_offset_first_element_in_bytes + x_offs;
 #endif /* USE_DEFAULT_GAMMA */
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
@@ -222,40 +224,37 @@ __kernel void batchnormalization_layer_nhwc(TENSOR3D_DECLARATION(input),
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     x_bar = 0;
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    res = 0;
+    res0 = 0;
 
-    const int current_slice = get_global_id(0);
-
-    data        = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in.ptr);
-    denominator = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(var.ptr + current_slice * VEC_SIZE * var.stride_x));
+    data        = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr);
+    denominator = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)var_addr);
     denominator = INVSQRT_OP(ADD_OP(denominator, ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(epsilon))));
 
     // Calculate x bar and store results
-    numerator = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(mean.ptr + current_slice * VEC_SIZE * mean.stride_x));
+    numerator = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)mean_addr);
     numerator = SUB_OP(data, numerator);
     x_bar     = MUL_OP(numerator, denominator);
 
 #ifndef USE_DEFAULT_GAMMA
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    gamma_vec = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(gamma.ptr + current_slice * VEC_SIZE * gamma.stride_x));
+    gamma_vec = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)gamma_addr);
 
-    res = MUL_OP(gamma_vec, x_bar);
+    res0 = MUL_OP(gamma_vec, x_bar);
 #else  /* USE_DEFAULT_GAMMA */
     // gamma is equal to 1, no need to perform multiplications
-    res = x_bar;
+    res0 = x_bar;
 #endif /* USE_DEFAULT_GAMMA */
 
 #ifndef USE_DEFAULT_BETA
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    beta_vec = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(beta.ptr + current_slice * VEC_SIZE * beta.stride_x));
+    beta_vec = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)beta_addr);
     // beta is not zero, hence we need to perform the addition
-    res = ADD_OP(res, beta_vec);
+    res0 = ADD_OP(res0, beta_vec);
 #endif /* USE_DEFAULT_BETA */
 
-    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, res, A_VAL, B_VAL);
+    res0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, res0, A_VAL, B_VAL);
 
-    VSTORE(VEC_SIZE)
-    (res, 0, (__global DATA_TYPE *)out.ptr);
+    STORE_VECTOR_SELECT(res, DATA_TYPE, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif /* defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE)*/
 

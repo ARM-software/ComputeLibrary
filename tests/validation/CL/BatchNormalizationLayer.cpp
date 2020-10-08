@@ -62,6 +62,29 @@ const auto common_fusion_dataset = combine(combine(combine(framework::dataset::m
                                                            framework::dataset::make("UseBeta", { false, true })),
                                                    framework::dataset::make("UseGamma", { false, true })),
                                            framework::dataset::make("Epsilon", { 0.001f }));
+
+bool validate_zero_padding(TensorShape shape0, const TensorShape shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
+{
+    if(data_layout == DataLayout::NHWC)
+    {
+        permute(shape0, PermutationVector(2U, 0U, 1U));
+    }
+
+    // Create tensors
+    CLTensor src   = create_tensor<CLTensor>(shape0, dt, 1, QuantizationInfo(), data_layout);
+    CLTensor dst   = create_tensor<CLTensor>(shape0, dt, 1, QuantizationInfo(), data_layout);
+    CLTensor mean  = create_tensor<CLTensor>(shape1, dt, 1);
+    CLTensor var   = create_tensor<CLTensor>(shape1, dt, 1);
+    CLTensor beta  = create_tensor<CLTensor>(shape1, dt, 1);
+    CLTensor gamma = create_tensor<CLTensor>(shape1, dt, 1);
+
+    // Create and configure function
+    CLBatchNormalizationLayer norm;
+    norm.configure(&src, &dst, &mean, &var, &beta, &gamma, epsilon, act_info);
+
+    return src.info()->padding().empty() && dst.info()->padding().empty() && mean.info()->padding().empty() && var.info()->padding().empty() && beta.info()->padding().empty()
+           && gamma.info()->padding().empty();
+}
 } // namespace
 
 TEST_SUITE(CL)
@@ -117,6 +140,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
+                                                                                         act_infos),
+                                                                                 framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
+                                                                         framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+               shape0, shape1, episilon, act_infos, data_type, data_layout)
+{
+    bool status = validate_zero_padding(shape0, shape1, episilon, act_infos, data_type, data_layout);
+    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)

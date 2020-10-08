@@ -80,16 +80,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output,
-                                                        ITensorInfo *mean, ITensorInfo *var, ITensorInfo *beta, ITensorInfo *gamma)
+std::pair<Status, Window> validate_and_configure_window_nchw(ITensorInfo *input, ITensorInfo *output)
 {
-    if(output != nullptr)
-    {
-        // Output tensor auto initialization if not yet initialized
-        auto_init_if_empty(*output, *input->clone());
-    }
-
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->element_size(), input->dimension(0));
 
     // Configure kernel window
     Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
@@ -105,25 +98,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     else
     {
         window_changed = update_window_and_padding(win, input_access);
-    }
-
-    // Mean, var, gamma and beta get parallelized for the NHWC case as they follow the channel dimension, which is along the first axis
-    if(input->data_layout() == DataLayout::NHWC)
-    {
-        AccessWindowHorizontal mean_access(mean, 0, num_elems_processed_per_iteration);
-        AccessWindowHorizontal var_access(var, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, mean_access, var_access);
-
-        if(beta != nullptr)
-        {
-            AccessWindowHorizontal beta_access(beta, 0, num_elems_processed_per_iteration);
-            window_changed = window_changed || update_window_and_padding(win, beta_access);
-        }
-        if(gamma != nullptr)
-        {
-            AccessWindowHorizontal gamma_access(gamma, 0, num_elems_processed_per_iteration);
-            window_changed = window_changed || update_window_and_padding(win, gamma_access);
-        }
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -162,12 +136,13 @@ void CLBatchNormalizationLayerKernel::configure(const CLCompileContext &compile_
                                                   mean->info(), var->info(), (beta != nullptr) ? beta->info() : nullptr,
                                                   (gamma != nullptr) ? gamma->info() : nullptr, epsilon, act_info));
 
-    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
+    unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->info()->element_size(), input->info()->dimension(0));
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
     build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
@@ -191,13 +166,24 @@ void CLBatchNormalizationLayerKernel::configure(const CLCompileContext &compile_
     }
     _kernel.setArg<cl_float>(idx++, _epsilon);
 
+    if(output != nullptr)
+    {
+        // Output tensor auto initialization if not yet initialized
+        auto_init_if_empty(*output->info(), *input->info()->clone());
+    }
+
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (_run_in_place) ? nullptr : output->info(),
-                                                    mean->info(), var->info(),
-                                                    (beta != nullptr) ? beta->info() : nullptr,
-                                                    (gamma != nullptr) ? gamma->info() : nullptr);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    if(input->info()->data_layout() == DataLayout::NHWC)
+    {
+        Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+        ICLKernel::configure_internal(win);
+    }
+    else
+    {
+        auto win_config = validate_and_configure_window_nchw(input->info(), (_run_in_place) ? nullptr : output->info());
+        ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+        ICLKernel::configure_internal(win_config.second);
+    }
 
     _config_id = "batch_normalization_layer_";
     _config_id += string_from_data_type(input->info()->data_type());
@@ -218,11 +204,12 @@ Status CLBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const
 {
     const bool run_in_place = (output == nullptr) || (output == input);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mean, var, beta, gamma, epsilon, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (run_in_place) ? nullptr : output->clone().get(),
-                                                              mean->clone().get(), var->clone().get(),
-                                                              (beta != nullptr) ? beta->clone().get() : nullptr,
-                                                              (gamma != nullptr) ? gamma->clone().get() : nullptr)
-                                .first);
+
+    if(input->data_layout() != DataLayout::NHWC)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_nchw(input->clone().get(), (run_in_place) ? nullptr : output->clone().get())
+                                    .first);
+    }
 
     return Status{};
 }
