@@ -87,6 +87,20 @@ bool validate_zero_padding(unsigned int dim0_value, unsigned int dim1_value)
     return in.info()->padding().empty();
 }
 
+/* Zero padding test for GEMM kernels */
+bool validate_gemm_zero_padding(const TensorShape shape0, const TensorShape shape1)
+{
+    // Create tensors
+    Tensor in0 = create_tensor<Tensor>(shape0, DataType::F32);
+    Tensor in1 = create_tensor<Tensor>(shape1, DataType::F32);
+    Tensor dst;
+
+    // Validate zero-padding
+    NEGEMMMatrixMultiplyKernel gemm;
+    gemm.configure(&in0, &in1, &dst, 1.0, false);
+
+    return in0.info()->padding().empty() && in1.info()->padding().empty() && dst.info()->padding().empty();
+}
 } // namespace
 
 TEST_SUITE(NEON)
@@ -182,6 +196,26 @@ template <typename T>
 using NEGEMMFixtureDisabledC = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true>;
 
 TEST_SUITE(Float)
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(framework::dataset::make("In0", { TensorShape(21U, 13U),
+                                                                                                       TensorShape(31U, 1U),
+                                                                                                       TensorShape(31U, 1U),
+                                                                                                       TensorShape(8U, 2U),
+                                                                                                       TensorShape(38U, 12U),
+                                                                                                       TensorShape(32U, 1U)
+                                                                                                     }),
+                                                                     framework::dataset::make("In1", { TensorShape(33U, 21U),
+                                                                                                       TensorShape(23U, 31U),
+                                                                                                       TensorShape(23U, 31U),
+                                                                                                       TensorShape(16U, 8U),
+                                                                                                       TensorShape(21U, 38U),
+                                                                                                       TensorShape(17U, 32U)
+                                                                                                     })),
+               shape0, shape1)
+{
+    bool status = validate_gemm_zero_padding(shape0, shape1);
+    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
