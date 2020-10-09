@@ -110,7 +110,7 @@ output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window, ITe
     execute_window_loop(win, [&](const Coordinates & id)
     {
         int x = window_start_x;
-        for(; x < (window_end_x - window_step_x); x += window_step_x)
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
             // Get bias and pointer to input
             const auto in_ptr = reinterpret_cast<const T *>(in.ptr()) + x;
@@ -175,7 +175,7 @@ output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window, ITe
     execute_window_loop(win, [&](const Coordinates &)
     {
         int x = window_start_x;
-        for(; x < (window_end_x - window_step_x); x += window_step_x)
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
             // Get bias and pointer to input
             const auto in_ptr = reinterpret_cast<const T *>(in.ptr());
@@ -238,7 +238,7 @@ void output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window
     {
 
         int x = window_start_x;
-        for(; x < (window_end_x - window_step_x); x += window_step_x)
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
             // Get bias and pointer to input
             const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
@@ -323,7 +323,7 @@ void output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window
     execute_window_loop(win, [&](const Coordinates &)
     {
         int x = window_start_x;
-        for(; x < (window_end_x - window_step_x); x += window_step_x)
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
             // Get bias and pointer to input
             const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;

@@ -139,7 +139,7 @@ void run_offset_contribution(const Window &window,
             const int32x4_t b_offset_term_s32_vec = vdupq_n_s32(b_offset_term_s32);
 
             int x = window_start_x;
-            for(; x < (window_end_x - window_step_x); x += window_step_x)
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 // Compute the leftover term due to a_offset.
                 int32x4x4_t a_offset_term_s32 =
@@ -237,7 +237,7 @@ void run_offset_contribution(const Window &window,
             const int32x4_t b_offset_term_s32_vec = vdupq_n_s32(b_offset_term_s32);
 
             int x = window_start_x;
-            for(; x < (window_end_x - window_step_x); x += window_step_x)
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 int32x4x4_t in_s32 =
                 {
@@ -291,7 +291,7 @@ void run_offset_contribution(const Window &window,
             auto      mm_result_ptr      = reinterpret_cast<int32_t *>(mm_result_it.ptr());
 
             int x = window_start_x;
-            for(; x < (window_end_x - window_step_x); x += window_step_x)
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 // Compute the leftover term due to a_offset.
                 int32x4x4_t a_offset_term_s32 =

@@ -1316,7 +1316,7 @@ void NEPoolingLayerKernel::pooling2_f16_nhwc_maxpool_indices(const Window &windo
                                  (_input->info()->strides_in_bytes().z());
 
         int x_off = window_start_x;
-        for(; x_off < (window_end_x - window_step_x); x_off += window_step_x)
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
         {
             const auto  in_x0_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x0_offset) + x_off;
             const auto  in_x1_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x1_offset) + x_off;
@@ -1432,7 +1432,7 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
         const int pool_end_x   = std::min(pool_size_x, window_input.y().end() + pool_limit_x);
 
         int x_off = window_start_x;
-        for(; x_off < (window_end_x - window_step_x); x_off += window_step_x)
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
         {
             if(pooling_type != PoolingType::MAX)
             {
@@ -1943,7 +1943,7 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
             const int pool_end_x   = std::min(pool_size_x, window_input.y().end() + pool_limit_x);
 
             int x_off = window_start_x;
-            for(; x_off < (window_end_x - window_step_x); x_off += window_step_x)
+            for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
             {
                 if(pooling_type != PoolingType::MAX)
                 {
@@ -2113,7 +2113,7 @@ void NEPoolingLayerKernel::pooling2_f32_nhwc_maxpool_indices(const Window &windo
                                  (_input->info()->strides_in_bytes().z());
 
         int x_off = window_start_x;
-        for(; x_off < (window_end_x - window_step_x); x_off += window_step_x)
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
         {
             const auto in_x0_ptr = reinterpret_cast<const float *>(input.ptr() + in_x0_offset);
             const auto in_x1_ptr = reinterpret_cast<const float *>(input.ptr() + in_x1_offset);
@@ -2337,7 +2337,7 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
         const int pool_end_x   = std::min(pool_size_x, window_input.y().end() + pool_limit_x);
 
         int x_off = window_start_x;
-        for(; x_off < (window_end_x - window_step_x); x_off += window_step_x)
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
         {
             if(pooling_type != PoolingType::MAX)
             {
