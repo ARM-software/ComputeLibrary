@@ -1459,7 +1459,7 @@ struct RedOpYZW_quantized
                     case ReductionOperation::MEAN_SUM:
                     {
                         int32_t res = static_cast<int32_t>(res_value);
-                        res /= in_info.dimension(axis);
+                        res /= static_cast<int32_t>(in_info.dimension(axis));
                         *reinterpret_cast<T *>(output.ptr() + x) = utils::cast::saturate_cast<T>(res);
                         break;
                     }
