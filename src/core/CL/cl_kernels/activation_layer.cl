@@ -76,7 +76,7 @@ __kernel void activation_layer(
     TYPE data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr);
 
     // Perform activation
-    data0 = ACTIVATION(ACT, DATA_TYPE, data0, A_VAL, B_VAL);
+    data0 = ACTIVATION(ACT, DATA_TYPE, VEC_SIZE, data0, A_VAL, B_VAL);
 
     // Store result
     STORE_VECTOR_SELECT(data, DATA_TYPE, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)

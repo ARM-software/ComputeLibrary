@@ -86,7 +86,7 @@ __kernel void activation_layer_quant_f32(
 #else  // defined(O1_VAL)
     data_flt                    = round(data_flt) * ((float)S1_VAL);
 #endif // defined(O1_VAL)
-    data_flt = ACTIVATION(ACT, float, data_flt, A_VAL, B_VAL);
+    data_flt = ACTIVATION(ACT, float, VEC_SIZE, data_flt, A_VAL, B_VAL);
 
 #if defined(O2_VAL)
     data0 = CONVERT_SAT(round(data_flt / ((float)S2_VAL)) + (float)O2_VAL, TYPE);

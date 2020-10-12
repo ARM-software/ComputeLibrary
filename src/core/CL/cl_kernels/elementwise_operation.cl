@@ -101,7 +101,7 @@ __kernel void OP_FUN_NAME(OP)(
     // Calculate and store result
 #if defined(ACTIVATION_TYPE)
     VSTORE(VEC_SIZE)
-    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, CONVERT(OP(in_a, in_b), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), A_VAL, B_VAL), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, VEC_SIZE, CONVERT(OP(in_a, in_b), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), A_VAL, B_VAL), 0, (__global DATA_TYPE_OUT *)out.ptr);
 #else  // defined(ACTIVATION_TYPE)
     VSTORE(VEC_SIZE)
     (OP(in_a, in_b), 0, (__global DATA_TYPE_OUT *)out.ptr);

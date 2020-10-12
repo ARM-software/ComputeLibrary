@@ -135,7 +135,6 @@ void CLPadLayerKernel::configure(const CLCompileContext &compile_context, const 
 
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
-    build_opts.add_option("-DSELECT_DT=" + get_cl_select_type_from_data_type(data_type));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size));
     build_opts.add_option("-DPAD_X_BEFORE=" + support::cpp11::to_string(pad_x_before));
     build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input_width));

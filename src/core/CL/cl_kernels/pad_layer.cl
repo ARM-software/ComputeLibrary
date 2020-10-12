@@ -23,11 +23,11 @@
  */
 #include "helpers.h"
 
-#if defined(DATA_TYPE) && defined(SELECT_DT) && defined(VEC_SIZE) && defined(PAD_X_BEFORE) && defined(SRC_WIDTH)
+#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(PAD_X_BEFORE) && defined(SRC_WIDTH)
 
 #define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
-#define VEC_SELECT VEC_DATA_TYPE(SELECT_DT, VEC_SIZE)
+#define VEC_SELECT SELECT_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define OFFSETS VEC_OFFS(VEC_SELECT, VEC_SIZE)
 
 #if defined(CONST_VAL)
@@ -38,7 +38,6 @@
  * @note Constant value used to fill the pads must be passed using the -DCONST_VAL compile flag, e.g. -DCONST_VAL=1.27
  * @note Pad to add to the left must be passed using the -DPAD_X_BEFORE compile flag, e.g. -DPAD_X_BEFORE=5
  * @note Input tensor's width must be passed using the -DSRC_WIDTH compile flag, e.g. -DSRC_WIDTH=224
- * @note Data type to use for the select instruction must be passed using the -DSELECT_DT compile flag, e.g. -DSELECT_DT=float
  * @note In case pad left is more than the vector size, the number of threads to skip along the X axis must be passed using the
  *       -DNUM_THREADS_TO_SKIP_X compile flag, e.g. -DNUM_THREADS_TO_SKIP_X=1. This is defined as (PAD_X_BEFORE / VEC_SIZE)
  * @note If pad also needs to be added to the top of the tensor, the following compile flags must be passed at compile time:
@@ -149,7 +148,6 @@ __kernel void pad_layer_constant(TENSOR3D_DECLARATION(src),
  * @note Constant value must be passed using the -DCONST_VAL compile flag, e.g. -DCONST_VAL=1.27
  * @note Pad to add to the left must be passed using the -DPAD_X_BEFORE compile flag, e.g. -DPAD_X_BEFORE=5
  * @note Input tensor's width must be passed using the -DSRC_WIDTH compile flag, e.g. -DSRC_WIDTH=224
- * @note Data type to use for the select instruction must be passed using the -DSELECT_DT compile flag, e.g. -DSELECT_DT=float
  * @note Number of values to the left when operating across left padding must be passed using the -DPAD_X_BEFORE_REMAINDER compile flag, e.g. -DPAD_X_BEFORE_REMAINDER=5
  * @note Number of values to the left when operating across right padding must be passed using the -DPAD_X_AFTER_REMAINDER compile flag, e.g. -DPAD_X_AFTER_REMAINDER=6
  * @note To rearrange the vectors properly, (PAD_X_BEFORE_REMAINDER + 1) must be passed when mode is REFLECT using the -DPAD_X_BEFORE_REMAINDER_REFL compile flag, e.g. -DPAD_X_BEFORE_REMAINDER=6
@@ -250,4 +248,4 @@ __kernel void pad_layer_symmetric_reflect(TENSOR3D_DECLARATION(src),
 #endif // SRC_WIDTH == 1
 }
 #endif // defined(PAD_X_BEFORE_REMAINDER) && defined(PAD_X_AFTER_REMAINDER) && defined(PAD_X_BEFORE_REMAINDER_REFL) && defined(PAD_X_AFTER_REMAINDER_REFL) && defined(AFTER_PAD_FACT_X)
-#endif // defined(DATA_TYPE) && defined(SELECT_DT) && defined(VEC_SIZE) && defined(PAD_X_BEFORE) && defined(SRC_WIDTH)
+#endif // defined(DATA_TYPE) && defined(VEC_SIZE) && defined(PAD_X_BEFORE) && defined(SRC_WIDTH)

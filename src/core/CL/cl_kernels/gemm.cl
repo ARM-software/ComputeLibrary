@@ -1275,7 +1275,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     const bool cond_y = y == 0;
@@ -1621,7 +1621,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     const bool cond_y = y == 0;
@@ -2017,7 +2017,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     const bool cond_y = y == 0;
@@ -2326,7 +2326,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     const bool cond_y = y == 0;
@@ -2763,9 +2763,9 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 
 #if defined(ACTIVATION_TYPE)
 #if defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, VEC_SIZE, c, A_VAL, B_VAL);
 #else  // defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
@@ -3033,9 +3033,9 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 
 #if defined(ACTIVATION_TYPE)
 #if defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, VEC_SIZE, c, A_VAL, B_VAL);
 #else  // defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
@@ -3527,9 +3527,9 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 
 #if defined(ACTIVATION_TYPE)
 #if defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, VEC_SIZE, c, A_VAL, B_VAL);
 #else  // defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
@@ -3894,9 +3894,9 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 
 #if defined(ACTIVATION_TYPE)
 #if defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, VEC_SIZE, c, A_VAL, B_VAL);
 #else  // defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
@@ -4280,7 +4280,7 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     const bool cond_y = y == 0;
@@ -4505,7 +4505,7 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, float, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, float, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x4 block
@@ -4833,7 +4833,7 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, float, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, float, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x4 block
@@ -5057,7 +5057,7 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, half, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, half, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x8 block
@@ -5287,7 +5287,7 @@ __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
     half8 c_h3 = convert_half8(c3);
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, half, c_h, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, half, VEC_SIZE, c_h, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x8 block
@@ -5587,7 +5587,7 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, half, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(4, ACTIVATION_TYPE, half, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x8 block
@@ -5911,7 +5911,7 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, DATA_TYPE, acc, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
@@ -6355,7 +6355,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, float, acc, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, float, VEC_SIZE, acc, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store the output block
@@ -6765,7 +6765,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, float, acc, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, float, VEC_SIZE, acc, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store the output block
@@ -7144,7 +7144,7 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, half, acc_h, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, half, VEC_SIZE, acc_h, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store the output block
@@ -7490,7 +7490,7 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, half, acc, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(NUM_ELEMS_PROCESSED_PER_THREAD_Y, ACTIVATION_TYPE, half, VEC_SIZE, acc, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store the output block

@@ -370,7 +370,7 @@ __kernel void depthwise_convolution_3x3(
     pixels += (float2)bias;
 #endif //defined(HAS_BIAS)
 
-    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels, A_VAL, B_VAL), 0, (__global float *)dst.ptr);
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels, A_VAL, B_VAL), 0, (__global float *)dst.ptr);
 }
 #endif //defined(CONV_STRIDE_X)
 
@@ -568,10 +568,10 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
     pixels3 += (float2)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels0, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
-    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels1, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
-    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels2, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 2 * dst_stride_y));
-    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels3, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 3 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels0, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels1, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels2, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 2 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels3, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 3 * dst_stride_y));
 }
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the depthwise convolution 3x3 when both
@@ -678,8 +678,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     pixels1 += (float2)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels0, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
-    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels1, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels0, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels1, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
 }
 
 #endif // defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F32)
@@ -1085,7 +1085,7 @@ __kernel void depthwise_convolution_3x3_f16(
     pixels += (half4)(*((__global half *)(biases.ptr + channel * biases_stride_x)));
 #endif //defined(HAS_BIAS)
 
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels, A_VAL, B_VAL), 0, (__global half *)dst.ptr);
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels, A_VAL, B_VAL), 0, (__global half *)dst.ptr);
 }
 #endif // defined(DEPTH_MULTIPLIER)
 #endif // defined(CONV_STRIDE_X)
@@ -1207,10 +1207,10 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
     pixels3 += (half4)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels0, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels1, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels2, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 2 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels3, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 3 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels0, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels1, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels2, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 2 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels3, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 3 * dst_stride_y));
 }
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes 16bit floating point the depthwise convolution 3x3
@@ -1319,8 +1319,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     pixels1 += (half4)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels0, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels1, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels0, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, pixels1, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
 }
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F16)
 
@@ -1452,7 +1452,7 @@ __kernel void dwc_MxN_native_fp_nhwc(
         res += VLOAD(N0)(0, (__global DATA_TYPE *)(b_addr));
 #endif // defined(HAS_BIAS)
 
-        res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, res, A_VAL, B_VAL);
+        res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, res, A_VAL, B_VAL);
 
         VSTORE(N0)
         (res, 0, (__global DATA_TYPE *)(d_addr));
@@ -1624,7 +1624,7 @@ __kernel void depthwise_convolution_3x3_nhwc(
 #endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
-    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr));
+    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr));
 }
 #endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
@@ -1828,18 +1828,18 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
 #endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
-    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc0, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
+    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc0, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
     VSTORE(VEC_SIZE)
-    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc1, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
+    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc1, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
 
 #if((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     if((z * NUM_PLANES_PROCESSED + 1) < DST_DIM_2)
 #endif // ((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     {
         VSTORE(VEC_SIZE)
-        (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc2, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z));
+        (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc2, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z));
         VSTORE(VEC_SIZE)
-        (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc3, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z));
+        (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc3, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z));
     }
 }
 

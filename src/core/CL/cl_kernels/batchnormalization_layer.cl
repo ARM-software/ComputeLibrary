@@ -139,7 +139,7 @@ __kernel void batchnormalization_layer_nchw(TENSOR3D_DECLARATION(input),
     res = ADD_OP(res, beta_vec);
 #endif /* USE_DEFAULT_BETA */
 
-    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, res, A_VAL, B_VAL);
+    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, res, A_VAL, B_VAL);
 
     VSTORE(VEC_SIZE)
     (res, 0, (__global DATA_TYPE *)out.ptr);
@@ -252,7 +252,7 @@ __kernel void batchnormalization_layer_nhwc(TENSOR3D_DECLARATION(input),
     res = ADD_OP(res, beta_vec);
 #endif /* USE_DEFAULT_BETA */
 
-    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, res, A_VAL, B_VAL);
+    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, res, A_VAL, B_VAL);
 
     VSTORE(VEC_SIZE)
     (res, 0, (__global DATA_TYPE *)out.ptr);

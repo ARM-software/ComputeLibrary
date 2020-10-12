@@ -457,6 +457,20 @@
 #define CONVERT_SAT_ROUND_STR(x, type, round) (convert_##type##_sat_##round((x)))
 #define CONVERT_SAT_ROUND(x, type, round) CONVERT_SAT_ROUND_STR(x, type, round)
 
+#define select_dt_uchar(size) uchar##size
+#define select_dt_char(size) char##size
+#define select_dt_ushort(size) ushort##size
+#define select_dt_short(size) short##size
+#define select_dt_half(size) short##size
+#define select_dt_uint(size) uint##size
+#define select_dt_int(size) int##size
+#define select_dt_float(size) int##size
+#define select_dt_ulong(size) ulong##size
+#define select_dt_long(size) long##size
+
+#define SELECT_DATA_TYPE_STR(type, size) select_dt_##type(size)
+#define SELECT_DATA_TYPE(type, size) SELECT_DATA_TYPE_STR(type, size)
+
 #define VECTOR_DECLARATION(name)     \
     __global uchar *name##_ptr,      \
     uint        name##_stride_x, \

@@ -97,7 +97,7 @@ __kernel void pixelwise_mul_float(
 #endif /* DATA_TYPE_FLOAT */
 
 #if defined(ACTIVATION_TYPE)
-    vstore16(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, res, A_VAL, B_VAL), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    vstore16(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, VEC_SIZE, res, A_VAL, B_VAL), 0, (__global DATA_TYPE_OUT *)out.ptr);
 #else  // defined(ACTIVATION_TYPE)
     // Store result
     vstore16(res, 0, (__global DATA_TYPE_OUT *)out.ptr);
@@ -150,7 +150,7 @@ __kernel void pixelwise_mul_complex(
     float2 res = { vin1.x *vin2.x - vin1.y * vin2.y, vin1.x *vin2.y + vin2.x * vin1.y };
 
 #if defined(ACTIVATION_TYPE)
-    vstore2(ACTIVATION(ACTIVATION_TYPE, float, res, A_VAL, B_VAL), 0, (__global float *)out.ptr);
+    vstore2(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, res, A_VAL, B_VAL), 0, (__global float *)out.ptr);
 #else  // defined(ACTIVATION_TYPE)
     // Store result
     vstore2(res, 0, (__global float *)out.ptr);
