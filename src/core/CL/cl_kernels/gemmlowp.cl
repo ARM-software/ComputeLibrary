@@ -992,10 +992,11 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
 #endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
-    uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
+    uint lhs_offset = lhs_offset_first_element_in_bytes + COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * (uint)lhs_stride_y;
 
     // Compute RHS matrix address
-    uint rhs_offset = rhs_offset_first_element_in_bytes + x * N0;
+    uint rhs_offset = rhs_offset_first_element_in_bytes + x * N0 * sizeof(DATA_TYPE);
+
 
 #if defined(MATRIX_B_DEPTH)
     // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
@@ -1074,7 +1075,8 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
         rhs_offset += rhs_stride_y;
     }
 
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(int) + (y * (uint)M0 * dst_stride_y);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(int)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * dst_stride_y);
+
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
 
@@ -1092,9 +1094,12 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
     dst_addr += z * dst_stride_z;
 
 #endif // defined(REINTERPRET_OUTPUT_AS_3D)
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
 
-    // Convert and store output block
-    CONVERT_STORE_BLOCK(M0, N0, int, c, dst_addr, dst_stride_y, zout);
+
+   // Store output block
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 }
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(K)
 
