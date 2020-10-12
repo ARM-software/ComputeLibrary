@@ -305,7 +305,7 @@ v20.02 Public major release
      - @ref NESplit
  - New OpenCL kernels / functions:
      - @ref CLFill
-     - @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
+     - CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
  - New NEON kernels / functions:
      - @ref NEFill
      - @ref NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
@@ -439,7 +439,7 @@ v19.08 Public major release
     - @ref CLBatchConcatenateLayerKernel
     - @ref CLDepthToSpaceLayerKernel / @ref CLDepthToSpaceLayer
     - @ref CLGEMMLowpMatrixMultiplyNativeKernel
-    - @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+    - CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
     - @ref CLGEMMMatrixMultiplyNativeKernel
     - @ref CLMeanStdDevNormalizationKernel / @ref CLMeanStdDevNormalizationLayer
     - @ref CLSpaceToDepthLayerKernel / @ref CLSpaceToDepthLayer
@@ -873,7 +873,7 @@ v17.12 Public major release
 
  - New OpenCL kernels / functions
     - @ref CLGEMMLowpOffsetContributionKernel / @ref CLGEMMLowpMatrixAReductionKernel / @ref CLGEMMLowpMatrixBReductionKernel / @ref CLGEMMLowpMatrixMultiplyCore
-    - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+    - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
 
  - New graph nodes for NEON and OpenCL
     - graph::BranchLayer

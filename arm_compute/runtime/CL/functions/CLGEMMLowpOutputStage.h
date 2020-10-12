@@ -61,7 +61,7 @@ class ITensor;
  *
  *  This function calls the following OpenCL kernels:
  *
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
+ * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
  *
  * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
  *       after the result is shifted right by result_shift
@@ -139,7 +139,7 @@ public:
  *
  *  This function calls the following OpenCL kernels:
  *
- * -# @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel
+ * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
  *
  * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
  *       after the result is shifted right by result_shift
@@ -217,7 +217,7 @@ public:
  *
  *  This function calls the following NEON kernels:
  *
- * -# @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+ * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
  *
  * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
  *       after the result is shifted right by result_shift
@@ -274,9 +274,7 @@ public:
  *
  * -# @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
  * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
- * -# @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel
- * -# @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+ * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
 */
 class CLGEMMLowpOutputStage : public ICLSimpleFunction
 {
@@ -300,7 +298,7 @@ public:
      * @param[in]  info            GEMMLowp output stage metadata.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
      *
      * @param[in] input  Input tensor. It is the output of @ref CLGEMMLowpMatrixMultiplyCore function. Data type supported: S32
      * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.

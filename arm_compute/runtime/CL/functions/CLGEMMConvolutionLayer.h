@@ -158,8 +158,8 @@ private:
  *
  * -# @ref CLIm2ColKernel
  * -# @ref CLGEMM (if the data type is FP32 or FP16)
- * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
+ * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
+ * -# @ref CLGEMMLowpOutputStage with QUANTIZE_DOWN_FIXEDPOINT type of quantization (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref CLCol2ImKernel (if NCHW data layout)
  */
 class CLGEMMConvolutionLayer : public IFunction

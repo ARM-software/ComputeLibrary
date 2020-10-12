@@ -1986,6 +1986,7 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
  * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                              Pointer to the source tensor. Supported data type: S32
  * @param[in]  src_stride_x                         Stride of the source tensor in X dimension (in bytes)
@@ -2015,7 +2016,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
                                                              TENSOR3D_DECLARATION(dst))
 {
     // Compute source and destination addresses
-    int x = get_global_id(0) * 4;
+    int x = max((int)(get_global_id(0) * 4 - (4 - VEC_SIZE_LEFTOVER) % 4), 0);
     int y = get_global_id(1);
     int z = get_global_id(2);
 
@@ -2044,17 +2045,17 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
     input_values += (int4)RESULT_OFFSET_AFTER_SHIFT;
 
     VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
-    res = CONVERT_SAT(input_values, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
+    res0 = CONVERT_SAT(input_values, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
 
 #if defined(MIN_BOUND)
-    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
+    res0 = max(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
+    res0 = min(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
+    STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, 4, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(RESULT_OFFSET_AFTER_SHIFT) && defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 
@@ -2077,6 +2078,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
  * @note In case the addition of int32 biases is required, -DADD_BIAS should be passed at compile time
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                              Pointer to the source tensor. Supported data type: S32
  * @param[in]  src_stride_x                         Stride of the source tensor in X dimension (in bytes)
@@ -2106,13 +2108,13 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
                                                                      TENSOR3D_DECLARATION(dst))
 {
     // Compute source and destination addresses
-    int x = get_global_id(0) * 4;
+    int x = max((int)(get_global_id(0) * 4 - (4 - VEC_SIZE_LEFTOVER) % 4), 0);
     int y = get_global_id(1);
     int z = get_global_id(2);
 
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(int) + y * src_stride_y + z * src_stride_z;
 
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * 2 + y * dst_stride_y + z * dst_stride_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(short) + y * dst_stride_y + z * dst_stride_z;
 
     int4 input_values = vload4(0, (__global int *)src_addr);
 
@@ -2131,17 +2133,17 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
     input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
 #endif // RESULT_SHIFT < 0
 
-    short4 res = convert_short4_sat(input_values);
+    short4 res0 = convert_short4_sat(input_values);
 
 #if defined(MIN_BOUND)
-    res = max(res, (short4)MIN_BOUND);
+    res0 = max(res0, (short4)MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (short4)MAX_BOUND);
+    res0 = min(res0, (short4)MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, (__global short *)dst_addr);
+    STORE_VECTOR_SELECT(res, short, dst_addr, 4, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 
