@@ -212,7 +212,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
 template <typename T>
 void NEScaleKernel::scale_nearest_nchw(const Window &window)
 {
-    const size_t in_dim_x = _input->info()->dimension(0);
+    const size_t in_stride_x = _input->info()->dimension(0) + _input->info()->padding().left + _input->info()->padding().right;
 
     // Compute the ratio between source height and destination height
     const auto hr = scale_utils::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
@@ -240,7 +240,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
     {
         const auto    offsets_ptr         = reinterpret_cast<const int32_t *>(offsets.ptr());
         const auto    in_yi               = static_cast<int32_t>(_align_corners ? utils::rounding::round_half_away_from_zero((id.y() + _sampling_offset) * hr) : std::floor((id.y() + _sampling_offset) * hr));
-        const int32_t offset_row          = in_yi * in_dim_x;
+        const int32_t offset_row          = in_yi * in_stride_x;
         *reinterpret_cast<T *>(out.ptr()) = *(reinterpret_cast<const T *>(in.ptr()) + offsets_ptr[0] + offset_row);
     },
     in, offsets, out);
@@ -272,8 +272,9 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
     Iterator dx(_dx, win_off);
     Iterator dy(_dy, win_off);
 
-    const int32_t in_dim_w = _input->info()->dimension(0);
-    const int32_t in_dim_h = _input->info()->dimension(1);
+    const int32_t in_dim_w    = _input->info()->dimension(0);
+    const int32_t in_dim_h    = _input->info()->dimension(1);
+    const int32_t in_stride_w = in_dim_w + _input->info()->padding().left + _input->info()->padding().right;
 
     if(_border_mode == BorderMode::CONSTANT)
     {
@@ -291,15 +292,15 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
             const auto    dy_val        = *(reinterpret_cast<const float *>(dy.ptr()));
             const auto    pixel_row_ptr = reinterpret_cast<const T *>(in.ptr());
 
-            const auto a00 = (0 <= index_w && index_w < in_dim_w && 0 <= index_h && index_h < in_dim_h) ? (*(pixel_row_ptr + index_w + index_h * in_dim_w)) : const_border_value;
-            const auto a01 = (-1 <= index_w && index_w < in_dim_w - 1 && 0 <= index_h && index_h < in_dim_h) ? (*(pixel_row_ptr + index_w + 1 + index_h * in_dim_w)) : const_border_value;
+            const auto a00 = (0 <= index_w && index_w < in_dim_w && 0 <= index_h && index_h < in_dim_h) ? (*(pixel_row_ptr + index_w + index_h * in_stride_w)) : const_border_value;
+            const auto a01 = (-1 <= index_w && index_w < in_dim_w - 1 && 0 <= index_h && index_h < in_dim_h) ? (*(pixel_row_ptr + index_w + 1 + index_h * in_stride_w)) : const_border_value;
             const auto a10 = (0 <= index_w && index_w < in_dim_w && -1 <= index_h
                               && index_h < in_dim_h - 1) ?
-                             (*(pixel_row_ptr + index_w + index_h * in_dim_w + in_dim_w)) :
+                             (*(pixel_row_ptr + index_w + index_h * in_stride_w + in_stride_w)) :
                              const_border_value;
             const auto a11 = (-1 <= index_w && index_w < in_dim_w - 1 && -1 <= index_h
                               && index_h < in_dim_h - 1) ?
-                             (*(pixel_row_ptr + index_w + 1 + index_h * in_dim_w + in_dim_w)) :
+                             (*(pixel_row_ptr + index_w + 1 + index_h * in_stride_w + in_stride_w)) :
                              const_border_value;
 
             *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(compute_bilinear(a00, a01, a10, a11, dx_val, dy_val));
@@ -321,10 +322,10 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
             auto clamped_y  = utility::clamp<int>(index_h, 0, in_dim_h - 1);
             auto clamped_y1 = utility::clamp<int>(index_h + 1, 0, in_dim_h - 1);
 
-            const auto a00 = *(pixel_row_ptr + clamped_x + clamped_y * in_dim_w);
-            const auto a01 = *(pixel_row_ptr + clamped_x1 + clamped_y * in_dim_w);
-            const auto a10 = *(pixel_row_ptr + clamped_x + clamped_y1 * in_dim_w);
-            const auto a11 = *(pixel_row_ptr + clamped_x1 + clamped_y1 * in_dim_w);
+            const auto a00 = *(pixel_row_ptr + clamped_x + clamped_y * in_stride_w);
+            const auto a01 = *(pixel_row_ptr + clamped_x1 + clamped_y * in_stride_w);
+            const auto a10 = *(pixel_row_ptr + clamped_x + clamped_y1 * in_stride_w);
+            const auto a11 = *(pixel_row_ptr + clamped_x1 + clamped_y1 * in_stride_w);
 
             *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(compute_bilinear(a00, a01, a10, a11, dx_val, dy_val));
         },
@@ -390,10 +391,10 @@ void NEScaleKernel::scale_area_nchw_u8(const Window &window)
 template <typename T>
 void NEScaleKernel::scale_nearest_nhwc(const Window &window)
 {
-    const size_t in_dim_w  = _input->info()->dimension(1);
-    const size_t in_dim_h  = _input->info()->dimension(2);
-    const size_t in_dim_c  = _input->info()->dimension(0);
-    const size_t in_dim_wc = in_dim_w * in_dim_c;
+    const size_t in_stride_c  = _input->info()->dimension(0) + _input->info()->padding().left + _input->info()->padding().right;
+    const size_t in_stride_w  = _input->info()->dimension(1) + _input->info()->padding().top + _input->info()->padding().bottom;
+    const size_t in_stride_wc = in_stride_w * in_stride_c;
+    const size_t in_dim_h     = _input->info()->dimension(2);
 
     // Compute the ratio between source height and destination height
     const auto hr             = scale_utils::calculate_resize_ratio(in_dim_h, _output->info()->dimension(2), _align_corners);
@@ -403,32 +404,30 @@ void NEScaleKernel::scale_nearest_nhwc(const Window &window)
 
     Window win(window);
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    // Don't increment in X and Y direction for the input tensor
-    // A pointer to the start of this plane is needed as base for the precomputed offsets
-    Window win_in(window);
-    win_in.set(Window::DimX, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    Iterator in(_input, win_in);
     Iterator out(_output, win);
+
+    const uint8_t     *in_ptr_start        = _input->buffer() + _input->info()->offset_first_element_in_bytes();
+    const unsigned int in_stride_bytes_hwc = _input->info()->strides_in_bytes()[3];
 
     execute_window_loop(win, [&](const Coordinates & id)
     {
-        const int32_t offset     = *reinterpret_cast<const int32_t *>(_offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_dim_c;
+        const int32_t offset     = *reinterpret_cast<const int32_t *>(_offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
         const auto    in_hi      = static_cast<int>(_align_corners ? utils::rounding::round_half_away_from_zero((id.z() + _sampling_offset) * hr) : std::floor((id.z() + _sampling_offset) * hr));
-        const int     offset_row = in_hi * in_dim_wc;
+        const int     offset_row = in_hi * in_stride_wc;
         int32_t       x          = window_start_x;
+        const T      *in_ptr     = reinterpret_cast<const T *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
+
         for(; x <= window_end_x - window_step_x; x += window_step_x)
         {
             wrapper::vstore(reinterpret_cast<T *>(out.ptr()) + x,
-                            wrapper::vloadq(reinterpret_cast<const T *>(in.ptr()) + offset + offset_row + x));
+                            wrapper::vloadq(in_ptr + offset + offset_row + x));
         }
         for(; x < window_end_x; ++x)
         {
-            *(reinterpret_cast<T *>(out.ptr()) + x) = *(reinterpret_cast<const T *>(in.ptr()) + offset + offset_row + x);
+            *(reinterpret_cast<T *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
         }
     },
-    in, out);
+    out);
 }
 
 template <typename T>
@@ -438,10 +437,10 @@ void NEScaleKernel::scale_bilinear_nhwc(const Window &window)
     const auto hr = scale_utils::calculate_resize_ratio(_input->info()->dimension(2), _output->info()->dimension(2), _align_corners);
 
     Iterator  out(_output, window);
-    const int in_dim_c = _input->info()->dimension(0);
-    const int in_dim_w = _input->info()->dimension(1);
-    const int in_dim_h = _input->info()->dimension(2);
-    const int input_wc = in_dim_c * in_dim_w;
+    const int in_stride_c  = _input->info()->dimension(0) + _input->info()->padding().left + _input->info()->padding().right;
+    const int in_dim_w     = _input->info()->dimension(1);
+    const int in_dim_h     = _input->info()->dimension(2);
+    const int in_stride_wc = in_stride_c * (in_dim_w + _input->info()->padding().top + _input->info()->padding().bottom);
 
     // Don't increment in Y and Z direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
@@ -464,12 +463,12 @@ void NEScaleKernel::scale_bilinear_nhwc(const Window &window)
             const auto    dx_val = *reinterpret_cast<const float *>(_dx->ptr_to_element(Coordinates(id.y(), id.z())));
             const auto    dy_val = *reinterpret_cast<const float *>(_dy->ptr_to_element(Coordinates(id.y(), id.z())));
             const int32_t in_hi  = std::floor((id.z() + _sampling_offset) * hr - _sampling_offset);
-            const T      *in_ptr = reinterpret_cast<const T *>(in.ptr()) + offset * in_dim_c + in_hi * input_wc;
+            const T      *in_ptr = reinterpret_cast<const T *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
 
             const auto a00 = (0 <= offset && offset < in_dim_w && 0 <= in_hi && in_hi < in_dim_h) ? *in_ptr : const_border_value;
-            const auto a01 = (-1 <= offset && offset < in_dim_w - 1 && 0 <= in_hi && in_hi < in_dim_h) ? *(in_ptr + in_dim_c) : const_border_value;
-            const auto a10 = (0 <= offset && offset < in_dim_w && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + input_wc) : const_border_value;
-            const auto a11 = (-1 <= offset && offset < in_dim_w - 1 && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_dim_c + input_wc) : const_border_value;
+            const auto a01 = (-1 <= offset && offset < in_dim_w - 1 && 0 <= in_hi && in_hi < in_dim_h) ? *(in_ptr + in_stride_c) : const_border_value;
+            const auto a10 = (0 <= offset && offset < in_dim_w && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_wc) : const_border_value;
+            const auto a11 = (-1 <= offset && offset < in_dim_w - 1 && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_c + in_stride_wc) : const_border_value;
 
             *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(compute_bilinear(a00, a01, a10, a11, dx_val, dy_val));
         },
@@ -489,10 +488,10 @@ void NEScaleKernel::scale_bilinear_nhwc(const Window &window)
             auto clamped_h  = utility::clamp<int>(in_hi, 0, in_dim_h - 1);
             auto clamped_h1 = utility::clamp<int>(in_hi + 1, 0, in_dim_h - 1);
 
-            const auto a00 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_dim_c + clamped_h * input_wc);
-            const auto a01 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_dim_c + clamped_h * input_wc);
-            const auto a10 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_dim_c + clamped_h1 * input_wc);
-            const auto a11 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_dim_c + clamped_h1 * input_wc);
+            const auto a00 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_stride_c + clamped_h * in_stride_wc);
+            const auto a01 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h * in_stride_wc);
+            const auto a10 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_stride_c + clamped_h1 * in_stride_wc);
+            const auto a11 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h1 * in_stride_wc);
 
             *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(compute_bilinear(a00, a01, a10, a11, dx_val, dy_val));
         },
