@@ -66,6 +66,7 @@
 #include "src/core/NEON/wrapper/intrinsics/round.h"
 #include "src/core/NEON/wrapper/intrinsics/setlane.h"
 #include "src/core/NEON/wrapper/intrinsics/sin.h"
+#include "src/core/NEON/wrapper/intrinsics/sqrt.h"
 #include "src/core/NEON/wrapper/intrinsics/store.h"
 #include "src/core/NEON/wrapper/intrinsics/sub.h"
 #include "src/core/NEON/wrapper/intrinsics/tanh.h"

@@ -108,6 +108,23 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input
 
     return std::make_pair(Status{}, win);
 }
+
+#ifndef __aarch64__
+inline float32x4_t mask_float_vector(const float32x4_t &in, const uint32x4_t &mask)
+{
+    auto int_in = vreinterpretq_u32_f32(in);
+    return vreinterpretq_f32_u32(wrapper::vand(int_in, mask));
+}
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+inline float16x8_t mask_float_vector(const float16x8_t &in, const uint16x8_t &mask)
+{
+    auto int_in = vreinterpretq_u16_f16(in);
+    return vreinterpretq_f16_u16(wrapper::vand(int_in, mask));
+}
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* __arch64__ */
+
 } // namespace
 
 NEActivationLayerKernel::NEActivationLayerKernel()
@@ -252,12 +269,12 @@ NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Wind
     Iterator input(src, win_collapsed);
     Iterator output(dst, win_collapsed);
 
-    // A small delta added to the input to prevent NAN values caused by zeros in inputs to SQRT
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    const auto delta = wrapper::vdup_n(static_cast<T>(1e-7), ExactTagType {});
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    const auto delta = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType {});
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+    // In case of non-aarch64, a small delta value is added to the input
+    // to prevent NAN values caused by zeros in inputs to SQRT.
+    // In case of aarh64, we call vsqrt directly, so we don't use delta.
+#ifndef __aarch64__
+    const auto delta = wrapper::vdup_n(static_cast<T>((src->info()->data_type() == DataType::F32 ? 1e-24 : 1e-7)), ExactTagType {});
+#endif /* __aarch64 */
     const auto const_1     = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType {});
     const auto const_0     = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
     const auto const_6     = wrapper::vdup_n(static_cast<T>(6.f), ExactTagType{});
@@ -310,7 +327,15 @@ NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Wind
                     tmp = wrapper::vbsl(wrapper::vcge(vin, const_0), vin, wrapper::vmul(va, wrapper::vsub(wrapper::vexpq(vin), const_1)));
                     break;
                 case ActivationFunction::SQRT:
-                    tmp = wrapper::vinv(wrapper::vinvsqrt(wrapper::vadd(vin, delta)));
+#ifdef __aarch64__
+                    tmp = wrapper::vsqrt(vin);
+#else  /* aarch64 */
+                    {
+                        const auto bitmask = wrapper::vceq(vin, wrapper::vdup_n(T(0), ExactTagType{}));
+                        tmp                 = wrapper::vinv(wrapper::vinvsqrt(wrapper::vadd(vin, mask_float_vector(delta, bitmask))));
+                        tmp                 = mask_float_vector(tmp, wrapper::vnot(bitmask));
+                    }
+#endif /* aarch64 */
                     break;
                 case ActivationFunction::SQUARE:
                     tmp = wrapper::vmul(vin, vin);
