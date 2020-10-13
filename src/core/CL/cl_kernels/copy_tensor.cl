@@ -77,8 +77,13 @@ __kernel void copy_pad_tensor(
 }
 #endif // Compile time constants
 
-#if defined(DATA_TYPE)
+#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 /** Performs a copy of input tensor to the output tensor.
+ *
+ * @note The following variables must be passed at compile time:
+ * -# -DDATA_TYPE        : Input and output datatypes.
+ * -# -DVEC_SIZE         : The number of elements processed in X dimension
+ * -# -DVEC_SIZE_LEFTOVER: Leftover size in the X dimension; x_dimension % VEC_SIZE
  *
  * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  in_stride_x                       Stride of the source tensor in X dimension (in bytes)
@@ -104,25 +109,18 @@ __kernel void copy_tensor(
     Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(in);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
-#if defined(VEC_SIZE)
-
-#if defined(LAST_ACCESSED_X)
-    // Check if access on width gets out of bounds
-    // If it does then shift access vector to access elements within bounds
-    const int shift = max((int)(get_global_id(0) * VEC_SIZE) - (int)LAST_ACCESSED_X, 0);
+    // Boundary-aware access:
+    // If the there's left-over in width (VEC_SIZE_LEFTOVER > 0):
+    // Shift all accesses other than the first to avoid accessing out of bounds
+    const int shift = max((int)(get_global_id(0) * VEC_SIZE) - (int)VEC_SIZE_LEFTOVER, 0) % VEC_SIZE;
     in.ptr -= shift * in.stride_x;
     out.ptr -= shift * out.stride_x;
-#endif // defined(LAST_ACCESSED_X)
 
     // Load data
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in.ptr);
+    data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in.ptr);
 
-    // Store result
-    VSTORE(VEC_SIZE)
-    (data, 0, (__global DATA_TYPE *)out.ptr);
-#else  // defined(VEC_SIZE)
-    *((__global DATA_TYPE *)(out.ptr)) = *((__global DATA_TYPE *)(in.ptr));
-#endif // defined(VEC_SIZE)
+    // Boundary-aware store
+    STORE_VECTOR_SELECT(data, DATA_TYPE, (__global DATA_TYPE *)out.ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
-#endif // defined(DATA_TYPE)
+#endif // defined(DATA_TYPE) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)

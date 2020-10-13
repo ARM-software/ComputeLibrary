@@ -28,6 +28,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -63,32 +64,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, Window *output_window)
+std::pair<Status, Window> configure_window(ITensorInfo *input, ITensorInfo *output)
 {
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, *input);
 
     // Configure window
-    const unsigned int vec_size_x = 16 / input->element_size();
+    const unsigned int vec_size_x = adjust_vec_size(16 / input->element_size(), input->dimension(0));
 
-    if(output_window == nullptr)
-    {
-        // Create and update the window (if needed)
-        Window win = calculate_max_window(*input, Steps(vec_size_x));
-
-        AccessWindowHorizontal input_access(input, 0, vec_size_x);
-        AccessWindowHorizontal output_access(output, 0, vec_size_x);
-
-        bool window_changed = update_window_and_padding(win, input_access, output_access);
-
-        Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-        return std::make_pair(err, win);
-    }
-    else
-    {
-        Window win = calculate_max_window(*input);
-        return std::make_pair(Status{}, win);
-    }
+    const Window win = calculate_max_window(*input, Steps(vec_size_x));
+    return std::make_pair(Status{}, win);
 }
 
 std::pair<Status, Window> validate_and_configure_window_with_padding(ITensorInfo *input, ITensorInfo *output, const PaddingList &padding)
@@ -165,6 +150,8 @@ void CLCopyKernel::configure(const CLCompileContext &compile_context, const ICLT
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), padding, output_window));
 
+    auto padding_info = get_padding_info({ input, output });
+
     _input  = input;
     _output = output;
 
@@ -179,29 +166,32 @@ void CLCopyKernel::configure(const CLCompileContext &compile_context, const ICLT
     if(padding.empty())
     {
         // Configure window
-        win_config = validate_and_configure_window(input->info(), output->info(), output_window);
+        win_config = configure_window(input->info(), output->info());
 
         if(output_window != nullptr)
         {
-            _has_output_window        = true;
-            _output_window            = Window(*output_window);
-            const int  width_x        = output_window->num_iterations(0);
-            const bool multi_access_x = width_x >= static_cast<int32_t>(vec_size_x);
-            const bool remainder_x    = width_x % vec_size_x > 0;
+            _has_output_window             = true;
+            _output_window                 = Window(*output_window);
+            const int  width_x             = output_window->num_iterations(0);
+            const int  vec_size_x_leftover = width_x % vec_size_x;
+            const bool multi_access_x      = width_x >= static_cast<int32_t>(vec_size_x);
 
             if(multi_access_x)
             {
                 _output_window.set(Window::DimX, Window::Dimension(output_window->x().start(), ceil_to_multiple(output_window->x().end(), vec_size_x), vec_size_x));
-                win_config.second.set(Window::DimX, Window::Dimension(win_config.second.x().start(), ceil_to_multiple(win_config.second.x().end(), vec_size_x), vec_size_x));
             }
 
-            build_opts.add_option_if(multi_access_x, "-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
-            build_opts.add_option_if(multi_access_x && remainder_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(width_x - vec_size_x, 0)));
+            build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_x_leftover));
         }
         else
         {
-            build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
+            const int width_x             = input->info()->tensor_shape().x();
+            const int vec_size_x_leftover = width_x % vec_size_x;
+
+            build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_x_leftover));
         }
+
+        build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
 
         // Build kernel
         _kernel = create_kernel(compile_context, "copy_tensor", build_opts.options());
@@ -231,17 +221,15 @@ void CLCopyKernel::configure(const CLCompileContext &compile_context, const ICLT
     // Validate and set the window
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLCopyKernel::validate(const arm_compute::ITensorInfo *input, const arm_compute::ITensorInfo *output, const PaddingList &padding, Window *output_window)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, padding, output_window));
 
-    if(padding.empty())
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), output_window).first);
-    }
-    else
+    if(!padding.empty())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_with_padding(input->clone().get(), output->clone().get(), padding).first);
     }
