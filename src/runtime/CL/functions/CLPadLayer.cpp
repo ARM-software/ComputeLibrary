@@ -67,9 +67,7 @@ Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
     }
     else
     {
-        Window copy_window = Window();
-        copy_window.use_tensor_dimensions(output->tensor_shape());
-        ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(input, output, PaddingList(), &copy_window));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(input, output));
     }
     return Status{};
 }

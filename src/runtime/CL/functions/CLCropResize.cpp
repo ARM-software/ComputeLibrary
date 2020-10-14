@@ -146,7 +146,7 @@ void CLCropResize::configure(const CLCompileContext &compile_context, const ICLT
         win.set(3, Window::Dimension(num_box, num_box + 1, 1));
 
         auto copy_kernel = support::cpp14::make_unique<CLCopyKernel>();
-        copy_kernel->configure(compile_context, _scaled_results[num_box].get(), _output, PaddingList(), &win);
+        copy_kernel->configure(compile_context, _scaled_results[num_box].get(), _output, &win);
         _copy.emplace_back(std::move(copy_kernel));
 
         _crop_results[num_box]->allocator()->allocate();

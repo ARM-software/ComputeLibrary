@@ -108,7 +108,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "convolution_separable1x9_static", "convolution9x9.cl" },
     { "convolution_separable9x1_static", "convolution9x9.cl" },
     { "copy_tensor", "copy_tensor.cl" },
-    { "copy_pad_tensor", "copy_tensor.cl" },
     { "copy_plane", "channel_extract.cl" },
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },

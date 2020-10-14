@@ -49,29 +49,26 @@ public:
      *
      * @param[in]  input         Source tensor. Data types supported: All.
      * @param[out] output        Destination tensor. Data types supported: same as @p input.
-     * @param[in]  padding       (Optional) Padding to be applied to the input tensor
      * @param[in]  output_window (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
+    void configure(const ICLTensor *input, ICLTensor *output, Window *output_window = nullptr);
     /** Initialize the kernel's input, output.
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Source tensor. Data types supported: All.
      * @param[out] output          Destination tensor. Data types supported: same as @p input.
-     * @param[in]  padding         (Optional) Padding to be applied to the input tensor
      * @param[in]  output_window   (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Window *output_window = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCopyKernel
      *
      * @param[in] input         Source tensor info. Data types supported: All.
      * @param[in] output        Destination tensor info. Data types supported: same as @p input.
-     * @param[in] padding       (Optional) Padding to be applied to the input tensor
      * @param[in] output_window (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, Window *output_window = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
