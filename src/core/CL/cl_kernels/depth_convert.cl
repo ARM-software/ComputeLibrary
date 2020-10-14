@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,7 @@
  * @note The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN=uchar -DDATA_TYPE_OUT=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8/S8/QSYMM8_PER_CHANNEL/U16/S16/U32/S32/F16/F32
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -67,24 +68,27 @@ __kernel void convert_depth_down(
     TENSOR3D_DECLARATION(out),
     const int shift)
 {
-    // Get pixels pointer
-    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(in);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+    int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+
+    __global uchar *in_addr  = in_ptr + in_offset_first_element_in_bytes + sizeof(DATA_TYPE_IN) * x_offs + get_global_id(1) * in_stride_y + get_global_id(2) * in_stride_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + sizeof(DATA_TYPE_OUT) * x_offs + get_global_id(1) * out_stride_y + get_global_id(2) * out_stride_z;
 
     // Load data
     VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)
-    in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in.ptr);
+    in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in_addr);
 
 #if defined(IS_DATA_TYPE_QUANTIZED)
     in_data ^= (VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE))0x80;
 #endif // defined(IS_DATA_TYPE_QUANTIZED)
 
 #if defined(IS_DATA_TYPE_FLOAT)
-    VSTORE(VEC_SIZE)
-    (CONVERT_DOWN(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
+    res0 = CONVERT_DOWN(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
+    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #else  /* defined(IS_DATA_TYPE_FLOAT) */
-    VSTORE(VEC_SIZE)
-    (CONVERT_DOWN(in_data >> shift, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
+    res0 = CONVERT_DOWN(in_data >> shift, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
+    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif /* defined(IS_DATA_TYPE_FLOAT) */
 }
 
@@ -93,6 +97,7 @@ __kernel void convert_depth_down(
  * @note The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN=uchar -DDATA_TYPE_OUT=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8/S8/U16/S16/U32/S32/F16/F32
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -117,19 +122,22 @@ __kernel void convert_depth_up(
     TENSOR3D_DECLARATION(out),
     const int shift)
 {
-    // Get pixels pointer
-    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(in);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+    int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+
+    __global uchar *in_addr  = in_ptr + in_offset_first_element_in_bytes + sizeof(DATA_TYPE_IN) * x_offs + get_global_id(1) * in_stride_y + get_global_id(2) * in_stride_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + sizeof(DATA_TYPE_OUT) * x_offs + get_global_id(1) * out_stride_y + get_global_id(2) * out_stride_z;
 
     // Load data
     VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)
-    in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in.ptr);
+    in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in_addr);
 
 #if defined(IS_DATA_TYPE_FLOAT)
-    VSTORE(VEC_SIZE)
-    (CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
+    res0 = CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
+    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #else  /* defined(IS_DATA_TYPE_FLOAT) */
-    VSTORE(VEC_SIZE)
-    (CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)) << shift, 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
+    res0 = CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)) << shift;
+    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif /* defined(IS_DATA_TYPE_FLOAT) */
 }

@@ -32,6 +32,7 @@
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 #include <cstddef>
@@ -81,21 +82,27 @@ void CLDepthConvertLayerKernel::configure(const CLCompileContext &compile_contex
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
+    _input  = input;
+    _output = output;
+
     // Auto initialize output shape if not initialized (We can only auto-configure the shape, datatype must be given)
     set_shape_if_empty(*output->info(), input->info()->tensor_shape());
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy, shift));
+
+    auto padding_info = get_padding_info({ input, output });
 
     // Get data sizes
     const size_t input_size  = data_size_from_type(input->info()->data_type());
     const size_t output_size = data_size_from_type(output->info()->data_type());
 
     // Get number of elements to process per iterations
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->info()->element_size(), input->info()->dimension(0));
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
     // Conversions from float always SATURATE as out-of-bounds conversion from float->integer is implementation defined
@@ -111,13 +118,24 @@ void CLDepthConvertLayerKernel::configure(const CLCompileContext &compile_contex
     unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
     _kernel.setArg(idx++, shift);
 
+    // Since we have a leftover vector size calculated using the input tensor shape, it is required to
+    // have the input region equal to the tensor shape
+    ValidRegion input_valid_region = input->info()->valid_region();
+    input->info()->set_valid_region(ValidRegion(Coordinates(0, 0), input->info()->tensor_shape()));
+
     // Configure kernel
-    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    ICLKernel::configure_internal(win);
 
     // Collapse window
     const Window &full_window      = window();
     Window        collapsed_window = full_window.collapse_if_possible(full_window, Window::DimZ);
     ICLKernel::configure_internal(collapsed_window);
+
+    // Restore the valid region
+    input->info()->set_valid_region(input_valid_region);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
