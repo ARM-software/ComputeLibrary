@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
@@ -65,38 +64,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output, DataType output_data_type)
-{
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_data_type(output_data_type));
-
-    constexpr unsigned int num_elems_processed_per_iteration = 4;
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_data_type(DataType::QASYMM8));
-
-    // Configure kernel window
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win,
-                                                    input_access);
-
-    AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
-    window_changed = window_changed || update_window_and_padding(win, output_result_access);
-    output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-
-    if(bias != nullptr)
-    {
-        AccessWindowStatic bias_access(bias, 0, 0, ceil_to_multiple(bias->dimension(0), num_elems_processed_per_iteration), bias->tensor_shape()[1]);
-        window_changed = window_changed || update_window_and_padding(win, bias_access);
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 class Coordinates;
@@ -127,15 +94,22 @@ void CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::configure(const CLCompileCon
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), info));
 
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(info->output_data_type));
+
     _input  = input;
     _bias   = bias;
     _output = output;
+
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(4, input->info()->dimension(0));
 
     auto min = info->gemmlowp_min_bound;
     auto max = info->gemmlowp_max_bound;
 
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DREAL_MULTIPLIER=" + float_to_string_with_full_precision(info->gemmlowp_real_multiplier));
     build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(info->gemmlowp_offset));
     build_opts.add_option("-DOUTPUT_DATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
@@ -147,9 +121,8 @@ void CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::configure(const CLCompileCon
     _kernel = create_kernel(compile_context, "gemmlowp_output_stage_quantize_down_float", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), info->output_data_type);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    ICLKernel::configure_internal(win);
 }
 
 void CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::run(const Window &window, cl::CommandQueue &queue)

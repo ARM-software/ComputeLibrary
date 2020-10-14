@@ -42,7 +42,7 @@ class ICLTensor;
  *  -# Clamp the value between the specified min and max bounds
  *  -# Clamp the resulting int32 values:
  *  -#  -to the [0..255] range and cast to QASYMM8.
- *  -#  -to the [-128..127] range and cast to QASYMM8/SIGNED.
+ *  -#  -to the [-128..127] range and cast to QASYMM8_SIGNED.
  *
  */
 class CLGEMMLowpQuantizeDownInt32ScaleKernel : public ICLKernel
@@ -93,10 +93,9 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    const ICLTensor               *_input;
-    const ICLTensor               *_bias;
-    ICLTensor                     *_output;
-    const GEMMLowpOutputStageInfo *_output_stage;
+    const ICLTensor *_input;
+    const ICLTensor *_bias;
+    ICLTensor       *_output;
 };
 } // namespace arm_compute
 

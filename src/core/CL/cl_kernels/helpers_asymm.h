@@ -123,8 +123,8 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
         VEC_DATA_TYPE(int, size)                                                                                                        \
         mask = (one << exponent) - one;                                                                                                 \
         VEC_DATA_TYPE(int, size)                                                                                                        \
-        threshold = (mask >> 1) + select(zero, one, x < 0);                                                                             \
-        return (x >> exponent) + select(zero, one, (x & mask) > threshold);                                                             \
+        threshold = (mask >> 1) + select(zero, one, (SELECT_DATA_TYPE(int, size))(x < 0));                                              \
+        return (x >> exponent) + select(zero, one, (SELECT_DATA_TYPE(int, size))((x & mask) > threshold));                              \
     }
 
 /** Product of two numbers, interpreting them as fixed-point values in the interval [-1, 1),
@@ -153,12 +153,12 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
         VEC_DATA_TYPE(long, size)                                                                            \
         is_positive_or_zero = ab_64 >= 0;                                                                    \
         VEC_DATA_TYPE(long, size)                                                                            \
-        nudge = select(mask2, mask1, is_positive_or_zero);                                                   \
+        nudge = select(mask2, mask1, (SELECT_DATA_TYPE(long, size))(is_positive_or_zero));                   \
         VEC_DATA_TYPE(long, size)                                                                            \
         mask = 1ll << 31;                                                                                    \
         VEC_DATA_TYPE(int, size)                                                                             \
         ab_x2_high32 = convert_int##size((ab_64 + nudge) / mask);                                            \
-        return select(ab_x2_high32, INT_MAX, overflow);                                                      \
+        return select(ab_x2_high32, INT_MAX, (SELECT_DATA_TYPE(int, size))(overflow));                       \
     }
 
 /** Calculates \f$ exp(x) \f$ for x in [-1/4, 0).
@@ -216,7 +216,7 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
     {                                                                                    \
         const VEC_DATA_TYPE(int, size) all_zeros = 0;                                    \
         const VEC_DATA_TYPE(int, size) all_ones  = ~0;                                   \
-        return select(all_zeros, all_ones, a == 0);                                      \
+        return select(all_zeros, all_ones, (SELECT_DATA_TYPE(int, size))(a == 0));       \
     }
 
 /** For each element of input vector, the corresponding bits of the result item are set
@@ -231,7 +231,7 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
     {                                                                                        \
         const VEC_DATA_TYPE(int, size) all_zeros = 0;                                        \
         const VEC_DATA_TYPE(int, size) all_ones  = ~0;                                       \
-        return select(all_zeros, all_ones, a != 0);                                          \
+        return select(all_zeros, all_ones, (SELECT_DATA_TYPE(int, size))(a != 0));           \
     }
 
 #define EXP_BARREL_SHIFTER_IMPL(size)                                                                                                                                                                         \
@@ -338,7 +338,7 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
         const VEC_DATA_TYPE(long, size) one       = 1;                                                                    \
         const VEC_DATA_TYPE(long, size) minus_one = -1;                                                                   \
         VEC_DATA_TYPE(long, size)                                                                                         \
-        sign = select(minus_one, one, sum >= 0);                                                                          \
+        sign = select(minus_one, one, (SELECT_DATA_TYPE(long, size))(sum >= 0));                                          \
         return convert_int##size((sum + sign) / 2);                                                                       \
     }
 
@@ -446,73 +446,91 @@ DEQUANTIZE_IMPL(int, 16)
 
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(1)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(2)
+ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(3)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(4)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(8)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(16)
 
 ASYMM_MULT_IMPL(1)
 ASYMM_MULT_IMPL(2)
+ASYMM_MULT_IMPL(3)
 ASYMM_MULT_IMPL(4)
 ASYMM_MULT_IMPL(8)
 ASYMM_MULT_IMPL(16)
 
+ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(1)
 ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(2)
+ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(3)
 ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(4)
 ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(8)
 ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(16)
 
 ASYMM_SELECT_USING_MASK_IMPL(1)
 ASYMM_SELECT_USING_MASK_IMPL(2)
+ASYMM_SELECT_USING_MASK_IMPL(3)
 ASYMM_SELECT_USING_MASK_IMPL(4)
 ASYMM_SELECT_USING_MASK_IMPL(8)
 ASYMM_SELECT_USING_MASK_IMPL(16)
 
 ASYMM_MASK_IF_ZERO_IMPL(1)
 ASYMM_MASK_IF_ZERO_IMPL(2)
+ASYMM_MASK_IF_ZERO_IMPL(3)
 ASYMM_MASK_IF_ZERO_IMPL(4)
 ASYMM_MASK_IF_ZERO_IMPL(8)
 ASYMM_MASK_IF_ZERO_IMPL(16)
 
 ASYMM_MASK_IF_NON_ZERO_IMPL(1)
 ASYMM_MASK_IF_NON_ZERO_IMPL(2)
+ASYMM_MASK_IF_NON_ZERO_IMPL(3)
 ASYMM_MASK_IF_NON_ZERO_IMPL(4)
 ASYMM_MASK_IF_NON_ZERO_IMPL(8)
 ASYMM_MASK_IF_NON_ZERO_IMPL(16)
 
+EXP_BARREL_SHIFTER_IMPL(1)
 EXP_BARREL_SHIFTER_IMPL(2)
+EXP_BARREL_SHIFTER_IMPL(3)
 EXP_BARREL_SHIFTER_IMPL(4)
 EXP_BARREL_SHIFTER_IMPL(8)
 EXP_BARREL_SHIFTER_IMPL(16)
 
+ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(1)
 ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(2)
+ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(3)
 ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(4)
 ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(8)
 ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(16)
 
 ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(1)
 ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(2)
+ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(3)
 ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(4)
 ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(8)
 ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(16)
 
+ASYMM_ROUNDING_HALF_SUM_IMPL(1)
 ASYMM_ROUNDING_HALF_SUM_IMPL(2)
+ASYMM_ROUNDING_HALF_SUM_IMPL(3)
 ASYMM_ROUNDING_HALF_SUM_IMPL(4)
 ASYMM_ROUNDING_HALF_SUM_IMPL(8)
 ASYMM_ROUNDING_HALF_SUM_IMPL(16)
 
+ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(1)
 ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(2)
+ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(3)
 ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(4)
 ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(8)
 ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(16)
 
 ASYMM_RESCALE_IMPL(1)
 ASYMM_RESCALE_IMPL(2)
+ASYMM_RESCALE_IMPL(3)
 ASYMM_RESCALE_IMPL(4)
 ASYMM_RESCALE_IMPL(8)
 ASYMM_RESCALE_IMPL(16)
 
 MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(1)
 MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(2)
+MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(3)
 MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(4)
 MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(8)
 MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(16)

@@ -97,6 +97,7 @@ void CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::configure(const CLCompi
     auto           min = info->gemmlowp_min_bound;
     auto           max = info->gemmlowp_max_bound;
     CLBuildOptions build_opts;
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DRESULT_OFFSET_AFTER_SHIFT=" + support::cpp11::to_string(info->gemmlowp_offset));
     build_opts.add_option("-DRESULT_FIXEDPOINT_MULTIPLIER=" + support::cpp11::to_string(info->gemmlowp_multiplier));
