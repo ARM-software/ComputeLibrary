@@ -25,12 +25,14 @@ import os
 import subprocess
 
 def version_at_least(version, required):
-    end = min(len(version), len(required))
 
-    for i in range(0, end, 2):
-        if int(version[i]) < int(required[i]):
+    version_list = version.split('.')
+    required_list = required.split('.')
+    end = min(len(version_list), len(required_list))
+    for i in range(0, end):
+        if int(version_list[i]) < int(required_list[i]):
             return False
-        elif int(version[i]) > int(required[i]):
+        elif int(version_list[i]) > int(required_list[i]):
             return True
 
     return True
@@ -282,6 +284,9 @@ if not GetOption("help"):
 
         if compiler_ver == '4.8.3':
             env.Append(CXXFLAGS = ['-Wno-array-bounds'])
+
+        if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
+            env.Append(LINKFLAGS = ['-fstack-protector-strong'])
 
 if env['data_type_support']:
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):
