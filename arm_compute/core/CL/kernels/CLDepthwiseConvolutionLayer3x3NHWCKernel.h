@@ -107,7 +107,6 @@ public:
     BorderSize border_size() const override;
 
 private:
-    unsigned int _num_rows_processed_per_iteration;
     unsigned int _num_planes_processed_per_iteration;
 };
 } // namespace arm_compute

@@ -38,11 +38,14 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 namespace arm_compute
 {
+class ITensor;
+
 /** Calculate the rounded up quotient of val / m.
  *
  * @param[in] val Value to divide and round up.
@@ -1091,6 +1094,21 @@ std::string string_from_pixel_value(const PixelValue &value, const DataType data
  * @return DataType
  */
 DataType data_type_from_name(const std::string &name);
+/** Stores padding information before configuring a kernel
+ *
+ * @param[in] tensors list of tensors to store the padding info for
+ *
+ * @return An unordered map where each tensor pointer is paired with its original padding info
+ */
+std::unordered_map<const ITensor *, PaddingSize> get_padding_info(std::initializer_list<const ITensor *> tensors);
+/** Check if the previously stored padding info has changed after configuring a kernel
+ *
+ * @param[in] padding_map an unordered map where each tensor pointer is paired with its original padding info
+ *
+ * @return true if any of the tensors has changed its paddings
+ */
+bool has_padding_changed(const std::unordered_map<const ITensor *, PaddingSize> &padding_map);
+
 /** Input Stream operator for @ref DataType
  *
  * @param[in]  stream    Stream to parse

@@ -495,6 +495,30 @@ std::pair<int32_t, int32_t> get_quantized_activation_min_max(ActivationLayerInfo
     return std::make_pair(min_activation, max_activation);
 }
 
+std::unordered_map<const ITensor *, PaddingSize> get_padding_info(std::initializer_list<const ITensor *> tensors)
+{
+    std::unordered_map<const ITensor *, PaddingSize> res;
+
+    for(const ITensor *tensor : tensors)
+    {
+        if(tensor)
+        {
+            res.insert({ tensor, tensor->info()->padding() });
+        }
+    }
+
+    return res;
+}
+
+bool has_padding_changed(const std::unordered_map<const ITensor *, PaddingSize> &padding_map)
+{
+    return std::find_if(padding_map.begin(), padding_map.end(), [](const std::pair<const ITensor *, PaddingSize> &padding_info)
+    {
+        return (padding_info.first->info()->padding() != padding_info.second);
+    })
+    != padding_map.end();
+}
+
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
 {

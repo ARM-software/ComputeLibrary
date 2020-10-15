@@ -337,6 +337,28 @@ struct BorderSize
         return size;
     }
 
+    /** Check equality with another BorderSize struct
+     *
+     * @param[in] rhs other struct to check against
+     *
+     * @return true if they are equal
+     */
+    bool operator==(const BorderSize &rhs)
+    {
+        return (top == rhs.top) && (right == rhs.right) && (bottom == rhs.bottom) && (left == rhs.left);
+    }
+
+    /** Check non-equality with another BorderSize struct
+     *
+     * @param[in] rhs other struct to check against
+     *
+     * @return true if they are different
+     */
+    bool operator!=(const BorderSize &rhs)
+    {
+        return !(*this == rhs);
+    }
+
     /** Limit this border size.
      *
      * @param[in] limit Border size to limit this border size to.

@@ -1474,6 +1474,19 @@ __kernel void dwc_MxN_native_fp_nhwc(
 
 #define VEC_FLOAT VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
+#define FILL_ZERO_OUT_OF_BOUND_3(data_type, vec_size, basename, cond)                                                                 \
+    ({                                                                                                                                \
+        basename##0 = select(basename##0, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_DATA_TYPE(data_type, vec_size))((cond).s0)); \
+        basename##1 = select(basename##1, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_DATA_TYPE(data_type, vec_size))((cond).s1)); \
+        basename##2 = select(basename##2, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_DATA_TYPE(data_type, vec_size))((cond).s2)); \
+    })
+
+#define FILL_ZERO_OUT_OF_BOUND_4(data_type, vec_size, basename, cond)                                                                 \
+    ({                                                                                                                                \
+        FILL_ZERO_OUT_OF_BOUND_3(data_type, vec_size, basename, cond);                                                                \
+        basename##3 = select(basename##3, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_DATA_TYPE(data_type, vec_size))((cond).s3)); \
+    })
+
 #if defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
 /** This function computes the depthwise convolution for NHWC data layout when the stride along the width or height is not 1.
@@ -1485,9 +1498,13 @@ __kernel void dwc_MxN_native_fp_nhwc(
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
  * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
  * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
+ * @note The dilation_x and dilation_y must be passed at compile time using -DDILATION_X and -DDILATION_Y: e.g. -DDILATION_X=1, -DDILATION_Y=1
  * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
+ * @note In case of biases, -DHAS_BIAS must to be passed at compile
+ * @note If the output tensor has more than three dimensions, its third dimension must be passed at compile time using -DDST_DEPTH (e.g. -DDST_DEPTH=32)
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1526,14 +1543,15 @@ __kernel void dwc_MxN_native_fp_nhwc(
 __kernel void depthwise_convolution_3x3_nhwc(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst),
-    TENSOR3D_DECLARATION(weights),
+    TENSOR3D_DECLARATION(weights)
 #if defined(HAS_BIAS)
-    VECTOR_DECLARATION(biases),
+    ,
+    VECTOR_DECLARATION(biases)
 #endif /* defined(HAS_BIAS) */
-    int max_offset)
+)
 {
-    int x = get_global_id(0); // channels
-    int y = get_global_id(1); // spatial coordinate x
+    int x_offset = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - PARTIAL_STORE_N0) % VEC_SIZE), 0) * sizeof(DATA_TYPE);
+    int y        = get_global_id(1); // spatial coordinate x
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
@@ -1541,90 +1559,89 @@ __kernel void depthwise_convolution_3x3_nhwc(
     int      z               = get_global_id(2); // spatial coordinate y
 #endif                                         // defined(DST_DEPTH)
 
-    Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
+    __global uchar *weights_addr = weights_ptr + weights_offset_first_element_in_bytes + x_offset;
 
 #if defined(DST_DEPTH)
-    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * VEC_SIZE + b * src_stride_w;
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offset + b * src_stride_w;
 #else  /* defined(DST_DEPTH) */
-    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * VEC_SIZE;
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offset;
 #endif /* defined(DST_DEPTH) */
 
-    int  z_coord  = 0;
-    int4 offset   = 0;
-    int4 y_offset = ((int4)(y * CONV_STRIDE_X) + (int4)(0, DILATION_X * 1, DILATION_X * 2, DILATION_X * 3) - CONV_PAD_LEFT) * (int4)src_stride_y;
+    int3 src_coord_y = (int3)(y * CONV_STRIDE_X - CONV_PAD_LEFT) + (int3)(0, DILATION_X, 2 * DILATION_X);
+    int3 src_coord_z = (int3)(z * CONV_STRIDE_Y - CONV_PAD_TOP) + (int3)(0, DILATION_Y, 2 * DILATION_Y);
 
-    // We compute 2x1x1 [C,W,H] elements
-    VEC_FLOAT acc = 0;
+    int3 src_offset_y = clamp(src_coord_y, (int3)0, (int3)(SRC_DIM_1 - 1));
+    int3 src_offset_z = clamp(src_coord_z, (int3)0, (int3)(SRC_DIM_2 - 1));
+
+    // Use these vectors to check whether the unclamped load would have been out of bounds
+    src_coord_y = (src_offset_y != src_coord_y);
+    src_coord_z = (src_offset_z != src_coord_z);
+
+    src_offset_y *= (int3)src_stride_y;
+    src_offset_z *= (int3)src_stride_z;
+
+    // We compute VEC_SIZEx1x1 [C,W,H] elements
+    VEC_FLOAT acc0 = 0;
 
     // Load weights
-    VEC_FLOAT w0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 0 * weights_stride_y + 0 * weights_stride_z));
-    VEC_FLOAT w1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 1 * weights_stride_y + 0 * weights_stride_z));
-    VEC_FLOAT w2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 2 * weights_stride_y + 0 * weights_stride_z));
-    VEC_FLOAT w3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 0 * weights_stride_y + 1 * weights_stride_z));
-    VEC_FLOAT w4 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 1 * weights_stride_y + 1 * weights_stride_z));
-    VEC_FLOAT w5 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 2 * weights_stride_y + 1 * weights_stride_z));
-    VEC_FLOAT w6 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 0 * weights_stride_y + 2 * weights_stride_z));
-    VEC_FLOAT w7 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 1 * weights_stride_y + 2 * weights_stride_z));
-    VEC_FLOAT w8 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 2 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w4 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w5 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w6 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w7 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w8 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y + 2 * weights_stride_z));
 
     // Load input values
     // z == 0
-    // Clamp z_coord as for z = 0, it can be negative
-    // z_coord is casted to unsigned int in order to use just a min() operation
-    // A "-1" 32 bit signed variable converted to unsigned gives 4294967295
-    z_coord = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP;
-    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
+    VEC_FLOAT values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s0 + src_offset_y.s0));
+    VEC_FLOAT values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s0 + src_offset_y.s1));
+    VEC_FLOAT values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s0 + src_offset_y.s2));
 
-    VEC_FLOAT values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
-    VEC_FLOAT values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s1));
-    VEC_FLOAT values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s2));
+    FILL_ZERO_OUT_OF_BOUND_3(DATA_TYPE, VEC_SIZE, values, src_coord_y | (int3)src_coord_z.s0);
+
+    acc0 = fma(values0, w0, acc0);
+    acc0 = fma(values1, w1, acc0);
+    acc0 = fma(values2, w2, acc0);
 
     // z == 1
-    // z_coord can be only negative for z = 0 so we do not need to clamp it
-    // Moreover z_coord cannot be out-of-bound for z = 1 so we do not need to clamp the offset
-    z_coord           = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP + DILATION_Y;
-    offset            = y_offset + (int4)(z_coord * src_stride_z);
-    VEC_FLOAT values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
-    VEC_FLOAT values4 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s1));
-    VEC_FLOAT values5 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s2));
+    values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s1 + src_offset_y.s0));
+    values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s1 + src_offset_y.s1));
+    values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s1 + src_offset_y.s2));
+
+    FILL_ZERO_OUT_OF_BOUND_3(DATA_TYPE, VEC_SIZE, values, src_coord_y | (int3)src_coord_z.s1);
+
+    acc0 = fma(values0, w3, acc0);
+    acc0 = fma(values1, w4, acc0);
+    acc0 = fma(values2, w5, acc0);
 
     // z == 2
-    // Offset can be out-of-bound so we need to check if it is greater than max_offset
-    z_coord           = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP + DILATION_Y * 2;
-    offset            = y_offset + (int4)(z_coord * src_stride_z);
-    offset            = min(offset, (int4)max_offset);
-    VEC_FLOAT values6 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
-    VEC_FLOAT values7 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s1));
-    VEC_FLOAT values8 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s2));
+    values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s2 + src_offset_y.s0));
+    values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s2 + src_offset_y.s1));
+    values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s2 + src_offset_y.s2));
 
-    acc = fma(values0, w0, acc);
-    acc = fma(values1, w1, acc);
-    acc = fma(values2, w2, acc);
+    FILL_ZERO_OUT_OF_BOUND_3(DATA_TYPE, VEC_SIZE, values, src_coord_y | (int3)src_coord_z.s2);
 
-    acc = fma(values3, w3, acc);
-    acc = fma(values4, w4, acc);
-    acc = fma(values5, w5, acc);
-
-    acc = fma(values6, w6, acc);
-    acc = fma(values7, w7, acc);
-    acc = fma(values8, w8, acc);
+    acc0 = fma(values0, w6, acc0);
+    acc0 = fma(values1, w7, acc0);
+    acc0 = fma(values2, w8, acc0);
 
 #if defined(HAS_BIAS)
-    Vector    biases      = CONVERT_TO_VECTOR_STRUCT(biases);
-    VEC_FLOAT bias_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)biases.ptr);
-    acc += bias_values;
+    __global uchar *biases_addr = biases_ptr + biases_offset_first_element_in_bytes + x_offset;
+    VEC_FLOAT bias_values       = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)biases_addr);
+    acc0 += bias_values;
 #endif // defined(HAS_BIAS)
 
 #if defined(DST_DEPTH)
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + z * dst_step_z + b * dst_stride_w;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offset + y * dst_step_y + z * dst_step_z + b * dst_stride_w;
 #else  /* defined(DST_DEPTH) */
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + z * dst_step_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offset + y * dst_step_y + z * dst_step_z;
 #endif /* defined(DST_DEPTH) */
 
-    VSTORE(VEC_SIZE)
-    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr));
+    acc0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc0, A_VAL, B_VAL);
+    STORE_VECTOR_SELECT(acc, DATA_TYPE, dst_addr, VEC_SIZE, PARTIAL_STORE_N0, PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0)
 }
 #endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
@@ -1641,6 +1658,12 @@ __kernel void depthwise_convolution_3x3_nhwc(
  * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
+ * @note The size of the output's second dimension must be passed at compile time using -DDST_DIM_1 (e.g. -DDST_DIM_1=64)
+ * @note The size of the output's third dimension must be passed at compile time using -DDST_DIM_2 (e.g. -DDST_DIM_2=32)
+ * @note In case of biases, -DHAS_BIAS must to be passed at compile
+ * @note If the output tensor has more than three dimensions, its third dimension must be passed at compile time using -DDST_DEPTH (e.g. -DDST_DEPTH=32)
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1679,14 +1702,15 @@ __kernel void depthwise_convolution_3x3_nhwc(
 __kernel void depthwise_convolution_3x3_nhwc_stride1(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst),
-    TENSOR3D_DECLARATION(weights),
+    TENSOR3D_DECLARATION(weights)
 #if defined(HAS_BIAS)
-    VECTOR_DECLARATION(biases),
+    ,
+    VECTOR_DECLARATION(biases)
 #endif /* defined(HAS_BIAS) */
-    int max_offset)
+)
 {
-    int x = get_global_id(0); // channels
-    int y = get_global_id(1); // spatial coordinate x
+    int x_offset = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - PARTIAL_STORE_N0) % VEC_SIZE), 0) * sizeof(DATA_TYPE);
+    int y        = get_global_id(1); // spatial coordinate x
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
@@ -1694,79 +1718,52 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     int             z        = get_global_id(2); // spatial coordinate y
 #endif                                         // defined(DST_DEPTH)
 
-    Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
+    __global uchar *weights_addr = weights_ptr + weights_offset_first_element_in_bytes + x_offset;
 
 #if defined(DST_DEPTH)
-    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * VEC_SIZE + b * src_stride_w;
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offset + b * src_stride_w;
 #else  /* defined(DST_DEPTH) */
-    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * VEC_SIZE;
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offset;
 #endif /* defined(DST_DEPTH) */
 
-    int  z_coord  = 0;
-    int4 offset   = 0;
-    int4 y_offset = ((int4)(y * NUM_ROWS_PROCESSED) + (int4)(0, 1, 2, 3) - (int)CONV_PAD_LEFT) * (int4)src_stride_y;
+    int4 src_coord_y = (int4)(y * NUM_ROWS_PROCESSED - CONV_PAD_LEFT) + V_OFFS4(int4);
+    int4 src_coord_z = (int4)(z * NUM_PLANES_PROCESSED - CONV_PAD_TOP) + V_OFFS4(int4);
 
-    // We compute 2x2x2 [C,W,H] elements
+    int4 src_offset_y = clamp(src_coord_y, (int4)0, (int4)(SRC_DIM_1 - 1));
+    int4 src_offset_z = clamp(src_coord_z, (int4)0, (int4)(SRC_DIM_2 - 1));
+
+    // Use these vectors to check whether the unclamped load would have been out of bounds
+    src_coord_y = (src_offset_y != src_coord_y);
+    src_coord_z = (src_offset_z != src_coord_z);
+
+    src_offset_y *= (int4)src_stride_y;
+    src_offset_z *= (int4)src_stride_z;
+
+    // We compute VEC_SIZEx2x2 [C,W,H] elements
     VEC_FLOAT acc0 = 0;
     VEC_FLOAT acc1 = 0;
     VEC_FLOAT acc2 = 0;
     VEC_FLOAT acc3 = 0;
 
     // Load weights
-    VEC_FLOAT w0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 0 * weights_stride_y + 0 * weights_stride_z));
-    VEC_FLOAT w1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 1 * weights_stride_y + 0 * weights_stride_z));
-    VEC_FLOAT w2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 2 * weights_stride_y + 0 * weights_stride_z));
-    VEC_FLOAT w3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 0 * weights_stride_y + 1 * weights_stride_z));
-    VEC_FLOAT w4 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 1 * weights_stride_y + 1 * weights_stride_z));
-    VEC_FLOAT w5 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 2 * weights_stride_y + 1 * weights_stride_z));
-    VEC_FLOAT w6 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 0 * weights_stride_y + 2 * weights_stride_z));
-    VEC_FLOAT w7 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 1 * weights_stride_y + 2 * weights_stride_z));
-    VEC_FLOAT w8 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights.ptr + 2 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w4 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w5 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w6 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w7 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w8 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y + 2 * weights_stride_z));
 
     // Load input values
     // z == 0
-    // Clamp z_coord as for z = 0, it can be negative
-    // z_coord is casted to unsigned int in order to use just a min() operation
-    // A "-1" 32 bit signed variable converted to unsigned gives 4294967295
-    z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP;
-    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
+    VEC_FLOAT values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s0 + src_offset_y.s0));
+    VEC_FLOAT values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s0 + src_offset_y.s1));
+    VEC_FLOAT values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s0 + src_offset_y.s2));
+    VEC_FLOAT values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s0 + src_offset_y.s3));
 
-    VEC_FLOAT values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
-    VEC_FLOAT values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s1));
-    VEC_FLOAT values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s2));
-    VEC_FLOAT values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s3));
-
-    // z == 1
-    // z_coord can be only negative for z = 0 so we do not need to clamp it
-    // Moreover z_coord cannot be out-of-bound for z = 1 so we do not need to clamp the offset
-    z_coord           = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 1;
-    offset            = y_offset + (int4)(z_coord * src_stride_z);
-    VEC_FLOAT values4 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
-    VEC_FLOAT values5 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s1));
-    VEC_FLOAT values6 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s2));
-    VEC_FLOAT values7 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s3));
-
-    // z == 2
-    // After z = 1 we can simply add src_stride_z to offset without updating z_coord
-    // However offset can be out-of-bound so we need to check if it is greater than max_offset
-    offset += (int4)src_stride_z;
-    offset             = min(offset, (int4)max_offset);
-    VEC_FLOAT values8  = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
-    VEC_FLOAT values9  = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s1));
-    VEC_FLOAT values10 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s2));
-    VEC_FLOAT values11 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s3));
-
-    // z == 3
-    // After z = 1 we can simply add src_stride_z to offset without updating z_coord
-    // However offset can be out-of-bound so we need to check if it is greater than max_offset
-    offset += (int4)src_stride_z;
-    offset             = min(offset, (int4)max_offset);
-    VEC_FLOAT values12 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
-    VEC_FLOAT values13 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s1));
-    VEC_FLOAT values14 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s2));
-    VEC_FLOAT values15 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s3));
+    FILL_ZERO_OUT_OF_BOUND_4(DATA_TYPE, VEC_SIZE, values, src_coord_y | (int4)src_coord_z.s0);
 
     acc0 = fma(values0, w0, acc0);
     acc0 = fma(values1, w1, acc0);
@@ -1775,45 +1772,69 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     acc1 = fma(values2, w1, acc1);
     acc1 = fma(values3, w2, acc1);
 
-    acc0 = fma(values4, w3, acc0);
-    acc0 = fma(values5, w4, acc0);
-    acc0 = fma(values6, w5, acc0);
-    acc1 = fma(values5, w3, acc1);
-    acc1 = fma(values6, w4, acc1);
-    acc1 = fma(values7, w5, acc1);
+    // z == 1
+    values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s1 + src_offset_y.s0));
+    values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s1 + src_offset_y.s1));
+    values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s1 + src_offset_y.s2));
+    values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s1 + src_offset_y.s3));
 
-    acc0 = fma(values8, w6, acc0);
-    acc0 = fma(values9, w7, acc0);
-    acc0 = fma(values10, w8, acc0);
-    acc1 = fma(values9, w6, acc1);
-    acc1 = fma(values10, w7, acc1);
-    acc1 = fma(values11, w8, acc1);
+    FILL_ZERO_OUT_OF_BOUND_4(DATA_TYPE, VEC_SIZE, values, src_coord_y | (int4)src_coord_z.s1);
 
-    acc2 = fma(values4, w0, acc2);
-    acc2 = fma(values5, w1, acc2);
-    acc2 = fma(values6, w2, acc2);
-    acc3 = fma(values5, w0, acc3);
-    acc3 = fma(values6, w1, acc3);
-    acc3 = fma(values7, w2, acc3);
+    acc0 = fma(values0, w3, acc0);
+    acc0 = fma(values1, w4, acc0);
+    acc0 = fma(values2, w5, acc0);
+    acc1 = fma(values1, w3, acc1);
+    acc1 = fma(values2, w4, acc1);
+    acc1 = fma(values3, w5, acc1);
 
-    acc2 = fma(values8, w3, acc2);
-    acc2 = fma(values9, w4, acc2);
-    acc2 = fma(values10, w5, acc2);
-    acc3 = fma(values9, w3, acc3);
-    acc3 = fma(values10, w4, acc3);
-    acc3 = fma(values11, w5, acc3);
+    acc2 = fma(values0, w0, acc2);
+    acc2 = fma(values1, w1, acc2);
+    acc2 = fma(values2, w2, acc2);
+    acc3 = fma(values1, w0, acc3);
+    acc3 = fma(values2, w1, acc3);
+    acc3 = fma(values3, w2, acc3);
 
-    acc2 = fma(values12, w6, acc2);
-    acc2 = fma(values13, w7, acc2);
-    acc2 = fma(values14, w8, acc2);
-    acc3 = fma(values13, w6, acc3);
-    acc3 = fma(values14, w7, acc3);
-    acc3 = fma(values15, w8, acc3);
+    // z == 2
+    values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s2 + src_offset_y.s0));
+    values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s2 + src_offset_y.s1));
+    values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s2 + src_offset_y.s2));
+    values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s2 + src_offset_y.s3));
+
+    FILL_ZERO_OUT_OF_BOUND_4(DATA_TYPE, VEC_SIZE, values, src_coord_y | (int4)src_coord_z.s2);
+
+    acc0 = fma(values0, w6, acc0);
+    acc0 = fma(values1, w7, acc0);
+    acc0 = fma(values2, w8, acc0);
+    acc1 = fma(values1, w6, acc1);
+    acc1 = fma(values2, w7, acc1);
+    acc1 = fma(values3, w8, acc1);
+
+    acc2 = fma(values0, w3, acc2);
+    acc2 = fma(values1, w4, acc2);
+    acc2 = fma(values2, w5, acc2);
+    acc3 = fma(values1, w3, acc3);
+    acc3 = fma(values2, w4, acc3);
+    acc3 = fma(values3, w5, acc3);
+
+    // z == 3
+    values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s3 + src_offset_y.s0));
+    values1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s3 + src_offset_y.s1));
+    values2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s3 + src_offset_y.s2));
+    values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + src_offset_z.s3 + src_offset_y.s3));
+
+    FILL_ZERO_OUT_OF_BOUND_4(DATA_TYPE, VEC_SIZE, values, src_coord_y | (int4)src_coord_z.s3);
+
+    acc2 = fma(values0, w6, acc2);
+    acc2 = fma(values1, w7, acc2);
+    acc2 = fma(values2, w8, acc2);
+    acc3 = fma(values1, w6, acc3);
+    acc3 = fma(values2, w7, acc3);
+    acc3 = fma(values3, w8, acc3);
 
 #if defined(HAS_BIAS)
-    Vector biases = CONVERT_TO_VECTOR_STRUCT(biases);
+    __global uchar *biases_addr = biases_ptr + biases_offset_first_element_in_bytes + x_offset;
 
-    VEC_FLOAT bias_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)biases.ptr);
+    VEC_FLOAT bias_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)biases_addr);
 
     acc0 += bias_values;
     acc1 += bias_values;
@@ -1821,25 +1842,34 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     acc3 += bias_values;
 #endif // defined(HAS_BIAS)
 
-#if defined(DST_DEPTH)
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z + b * dst_stride_w;
-#else  /* defined(DST_DEPTH) */
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z;
-#endif /* defined(DST_DEPTH) */
+    int2 dst_offset_y = min((int2)(y * NUM_ROWS_PROCESSED) + V_OFFS2(int2), (int2)(DST_DIM_1 - 1)) * (int2)dst_stride_y;
+    int  dst_coord_z  = z * NUM_PLANES_PROCESSED;
 
-    VSTORE(VEC_SIZE)
-    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc0, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
-    VSTORE(VEC_SIZE)
-    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc1, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
+#if defined(DST_DEPTH)
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offset + dst_coord_z * dst_stride_z + b * dst_stride_w;
+#else  // defined(DST_DEPTH)
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offset + dst_coord_z * dst_stride_z;
+#endif //  defined(DST_DEPTH)
+
+    /* Store vectors in reverse order along the Y. The Y offsets are calculated so that they are forced to be in bound.
+     * If only the first address is in bound, the Y offset of the second address will be brought back and there will be 2 writes in the same location for the same thread.
+     * Since the last vector to be written is always the valid one for that location, it overwrites the wrong values.
+     */
+    values0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc1, A_VAL, B_VAL);
+    STORE_VECTOR_SELECT(values, DATA_TYPE, dst_addr + dst_offset_y.s1, VEC_SIZE, PARTIAL_STORE_N0, PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0)
+
+    values0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc0, A_VAL, B_VAL);
+    STORE_VECTOR_SELECT(values, DATA_TYPE, dst_addr + dst_offset_y.s0, VEC_SIZE, PARTIAL_STORE_N0, PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0)
 
 #if((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
-    if((z * NUM_PLANES_PROCESSED + 1) < DST_DIM_2)
+    if((dst_coord_z + 1) < DST_DIM_2)
 #endif // ((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     {
-        VSTORE(VEC_SIZE)
-        (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc2, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z));
-        VSTORE(VEC_SIZE)
-        (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc3, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z));
+        values0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc3, A_VAL, B_VAL);
+        STORE_VECTOR_SELECT(values, DATA_TYPE, dst_addr + dst_stride_z + dst_offset_y.s1, VEC_SIZE, PARTIAL_STORE_N0, PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0)
+
+        values0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, acc2, A_VAL, B_VAL);
+        STORE_VECTOR_SELECT(values, DATA_TYPE, dst_addr + dst_stride_z + dst_offset_y.s0, VEC_SIZE, PARTIAL_STORE_N0, PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0)
     }
 }
 
