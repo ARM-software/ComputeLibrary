@@ -1238,7 +1238,7 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 #endif // defined(COLS_A)
 
-#if defined(COLS_B) && defined(ROWS_B)
+#if defined(COLS_B) && defined(ROWS_B) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each column of Matrix B.
  * It is also possible to multiply each reduced column by a scalar value, if SCALAR is passed at compile time.
  *
@@ -1249,6 +1249,8 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
  * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
  * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note In case of scaling the scalar value must be passed at compile time using -DSCALAR (i.e. -DSCALAR=3)
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -1269,29 +1271,30 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
                                           IMAGE_DECLARATION(dst))
 {
     // Compute source and destination addresses
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Image    dst = CONVERT_TO_IMAGE_STRUCT(dst);
+    const uint x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    const uint y      = get_global_id(1);
 
-    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
-    sum_col_32 = (VEC_DATA_TYPE(ACC_DATA_TYPE, 16))0;
+    __global const DATA_TYPE *matrix_b = (__global const DATA_TYPE *)(src_ptr + src_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) + y * src_step_y + y * src_stride_z);
+    __global uchar *dst_addr           = dst_ptr + dst_offset_first_element_in_bytes + x_offs * sizeof(int) + y * dst_stride_y;
 
-    __global const DATA_TYPE *matrix_b = (__global const DATA_TYPE *)(src.ptr + get_global_id(1) * src_stride_z);
+    VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
+    sum_col_32_0 = (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))0;
 
     int i = 0;
     // This for loop performs 4 accumulations
     for(; i <= ((int)ROWS_B - 4); i += 4)
     {
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b0 = vload16(0, matrix_b + 0 * src_stride_y);
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b1 = vload16(0, matrix_b + 1 * src_stride_y);
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b2 = vload16(0, matrix_b + 2 * src_stride_y);
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b3 = vload16(0, matrix_b + 3 * src_stride_y);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b0 = VLOAD(VEC_SIZE)(0, matrix_b + 0 * src_stride_y);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b1 = VLOAD(VEC_SIZE)(0, matrix_b + 1 * src_stride_y);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b2 = VLOAD(VEC_SIZE)(0, matrix_b + 2 * src_stride_y);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b3 = VLOAD(VEC_SIZE)(0, matrix_b + 3 * src_stride_y);
 
-        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b1, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b2, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b3, VEC_DATA_TYPE(ACC_DATA_TYPE,
-                      16));
+        sum_col_32_0 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b1, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b2, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b3,
+                        VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 
         matrix_b += 4 * src_stride_y;
     }
@@ -1299,21 +1302,20 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
     // This for loop perfoms the leftover accumulations
     for(; i < (int)ROWS_B; ++i)
     {
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b0 = vload16(0, matrix_b);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b0 = VLOAD(VEC_SIZE)(0, matrix_b);
 
-        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
+        sum_col_32_0 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 
         matrix_b += src_stride_y;
     }
 
 #if defined(SCALAR)
-    sum_col_32 *= (VEC_DATA_TYPE(ACC_DATA_TYPE, 16))SCALAR;
+    sum_col_32_0 *= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))SCALAR;
 #endif // defined(SCALAR)
-    VSTORE(16)
-    (convert_int16(sum_col_32), 0, (__global int *)dst.ptr);
+    STORE_VECTOR_SELECT(sum_col_32_, int, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif // defined(COLS_B) && defined(ROWS_B)
+#endif // defined(COLS_B) && defined(ROWS_B) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 
 #endif // defined(DATA_TYPE) && defined(ACC_DATA_TYPE)
 
