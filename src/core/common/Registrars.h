@@ -36,4 +36,22 @@
 #define REGISTER_FP32_NEON(func_name) nullptr
 #endif /* defined(ENABLE_FP32_KERNELS) */
 
+#if defined(ENABLE_QASYMM8_SIGNED_KERNELS)
+#define REGISTER_QASYMM8_SIGNED_NEON(func_name) &(func_name)
+#else /* defined(ENABLE_QASYMM8_SIGNED_KERNELS) */
+#define REGISTER_QASYMM8_SIGNED_NEON(func_name) nullptr
+#endif /* defined(ENABLE_QASYMM8_SIGNED_KERNELS) */
+
+#if defined(ENABLE_QASYMM8_KERNELS)
+#define REGISTER_QASYMM8_NEON(func_name) &(func_name)
+#else /* defined(ENABLE_QASYMM8_KERNELS) */
+#define REGISTER_QASYMM8_NEON(func_name) nullptr
+#endif /* defined(ENABLE_QASYMM8_KERNELS) */
+
+#if defined(ENABLE_QSYMM16_KERNELS)
+#define REGISTER_QSYMM16_NEON(func_name) &(func_name)
+#else /* defined(ENABLE_QSYMM16_KERNELS) */
+#define REGISTER_QSYMM16_NEON(func_name) nullptr
+#endif /* defined(ENABLE_QSYMM16_KERNELS) */
+
 #endif /* SRC_CORE_COMMON_REGISTRARS_H */

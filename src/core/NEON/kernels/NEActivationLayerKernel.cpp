@@ -23,29 +23,85 @@
  */
 #include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Window.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/NEAsymm.h"
-#include "src/core/NEON/NESymm.h"
-#include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
-#include <arm_neon.h>
+#include "src/core/NEON/kernels/activation/impl/list.h"
+#include "src/core/common/Registrars.h"
+
 #include <set>
 
 namespace arm_compute
 {
 namespace
 {
+struct ActivationSelectorData
+{
+    DataType dt;
+};
+
+using ActivationSelectorPtr = std::add_pointer<bool(const ActivationSelectorData &data)>::type;
+using ActivationKernelPtr   = std::add_pointer<void(const ITensor *, ITensor *, const ActivationLayerInfo &, const Window &)>::type;
+
+struct ActivationKernel
+{
+    const char                 *name;
+    const ActivationSelectorPtr is_selected;
+    ActivationKernelPtr         ukernel;
+};
+
+static const ActivationKernel available_kernels[] =
+{
+    {
+        "fp16_neon_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_activation)
+    },
+    {
+        "fp32_neon_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_activation)
+    },
+    {
+        "qasymm8_neon_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::qasymm8_neon_activation)
+    },
+    {
+        "qasymm8_signed_neon_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::qasymm8_signed_neon_activation)
+    },
+    {
+        "qsymm16_neon_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
+        REGISTER_QSYMM16_NEON(arm_compute::cpu::qsymm16_neon_activation)
+    },
+};
+
+const ActivationKernel *get_implementation(const ActivationSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
+        {
+            return &uk;
+        }
+    }
+    return nullptr;
+}
+
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
+
+    const auto *uk = get_implementation(ActivationSelectorData{ input->data_type() });
+    ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     const static std::set<ActivationLayerInfo::ActivationFunction> qasymm8_supported_activations =
     {
@@ -110,27 +166,10 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input
 
     return std::make_pair(Status{}, win);
 }
-
-#ifndef __aarch64__
-inline float32x4_t mask_float_vector(const float32x4_t &in, const uint32x4_t &mask)
-{
-    auto int_in = vreinterpretq_u32_f32(in);
-    return vreinterpretq_f32_u32(wrapper::vand(int_in, mask));
-}
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-inline float16x8_t mask_float_vector(const float16x8_t &in, const uint16x8_t &mask)
-{
-    auto int_in = vreinterpretq_u16_f16(in);
-    return vreinterpretq_f16_u16(wrapper::vand(int_in, mask));
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-#endif /* __arch64__ */
-
 } // namespace
 
 NEActivationLayerKernel::NEActivationLayerKernel()
-    : _func(nullptr), _act_info()
+    : _act_info()
 {
 }
 
@@ -140,732 +179,12 @@ void NEActivationLayerKernel::configure(const ITensorInfo *input, ITensorInfo *o
 
     _act_info = activation_info;
 
-    // Disabled activation, thus no operation needed
-    if(!activation_info.enabled())
-    {
-        _func = nullptr;
-    }
-
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output, activation_info));
-
-    // Activation functions : FP32
-    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f32 =
-    {
-        { ActivationFunction::ABS, &NEActivationLayerKernel::activation<ActivationFunction::ABS, float> },
-        { ActivationFunction::LINEAR, &NEActivationLayerKernel::activation<ActivationFunction::LINEAR, float> },
-        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, float> },
-        { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, float> },
-        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, float> },
-        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float> },
-        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float> },
-        { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float> },
-        { ActivationFunction::ELU, &NEActivationLayerKernel::activation<ActivationFunction::ELU, float> },
-        { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float> },
-        { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float> },
-        { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float> },
-        { ActivationFunction::IDENTITY, &NEActivationLayerKernel::activation<ActivationFunction::IDENTITY, float> },
-        { ActivationFunction::HARD_SWISH, &NEActivationLayerKernel::activation<ActivationFunction::HARD_SWISH, float> },
-
-    };
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    // Activation functions : FP16
-    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f16 =
-    {
-        { ActivationFunction::ABS, &NEActivationLayerKernel::activation<ActivationFunction::ABS, float16_t> },
-        { ActivationFunction::LINEAR, &NEActivationLayerKernel::activation<ActivationFunction::LINEAR, float16_t> },
-        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, float16_t> },
-        { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, float16_t> },
-        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, float16_t> },
-        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float16_t> },
-        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float16_t> },
-        { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float16_t> },
-        { ActivationFunction::ELU, &NEActivationLayerKernel::activation<ActivationFunction::ELU, float16_t> },
-        { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float16_t> },
-        { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
-        { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float16_t> },
-        { ActivationFunction::IDENTITY, &NEActivationLayerKernel::activation<ActivationFunction::IDENTITY, float16_t> },
-        { ActivationFunction::HARD_SWISH, &NEActivationLayerKernel::activation<ActivationFunction::HARD_SWISH, float16_t> },
-
-    };
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
-
-    // Activation functions : QASYMM8_SIGNED
-    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qasymm8_signed =
-    {
-        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qasymm8_signed_t> },
-        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qasymm8_signed_t> },
-        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qasymm8_signed_t> },
-        { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qasymm8_signed_t> },
-        { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qasymm8_signed_t> },
-        { ActivationFunction::IDENTITY, &NEActivationLayerKernel::activation<ActivationFunction::IDENTITY, qasymm8_signed_t> },
-        { ActivationFunction::HARD_SWISH, &NEActivationLayerKernel::activation<ActivationFunction::HARD_SWISH, qasymm8_signed_t> },
-
-    };
-
-    // Activation functions : QASYMM8
-    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qasymm8 =
-    {
-        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qasymm8_t> },
-        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qasymm8_t> },
-        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qasymm8_t> },
-        { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qasymm8_t> },
-        { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qasymm8_t> },
-        { ActivationFunction::IDENTITY, &NEActivationLayerKernel::activation<ActivationFunction::IDENTITY, qasymm8_t> },
-        { ActivationFunction::HARD_SWISH, &NEActivationLayerKernel::activation<ActivationFunction::HARD_SWISH, qasymm8_t> },
-
-    };
-
-    // Activation functions : QSYMM16
-    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qsymm16 =
-    {
-        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qsymm16_t> },
-        { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qsymm16_t> },
-
-    };
-
-    switch(input->data_type())
-    {
-        case DataType::QASYMM8_SIGNED:
-            _func = act_map_qasymm8_signed[activation_info.activation()];
-            break;
-        case DataType::QASYMM8:
-            _func = act_map_qasymm8[activation_info.activation()];
-            break;
-        case DataType::QSYMM16:
-            _func = act_map_qsymm16[activation_info.activation()];
-            break;
-        case DataType::F32:
-            _func = act_map_f32[activation_info.activation()];
-            break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            _func = act_map_f16[activation_info.activation()];
-            break;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        default:
-            ARM_COMPUTE_ERROR("Unsupported data type.");
-    }
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICPPKernel::configure(win_config.second);
-}
-
-template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Window &window)
-{
-    /** NEON vector tag type. */
-    using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
-
-    const int                window_step_x  = 16 / sizeof(T);
-    const auto               window_start_x = static_cast<int>(window.x().start());
-    const auto               window_end_x   = static_cast<int>(window.x().end());
-    const ActivationFunction act            = F;
-
-    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
-    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator input(src, win_collapsed);
-    Iterator output(dst, win_collapsed);
-
-    // In case of non-aarch64, a small delta value is added to the input
-    // to prevent NAN values caused by zeros in inputs to SQRT.
-    // In case of aarh64, we call vsqrt directly, so we don't use delta.
-#ifndef __aarch64__
-    const auto delta = wrapper::vdup_n(static_cast<T>((src->info()->data_type() == DataType::F32 ? 1e-24 : 1e-7)), ExactTagType {});
-#endif /* __aarch64 */
-    const auto const_1     = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType {});
-    const auto const_0     = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
-    const auto const_6     = wrapper::vdup_n(static_cast<T>(6.f), ExactTagType{});
-    const auto const_3     = wrapper::vdup_n(static_cast<T>(3.f), ExactTagType{});
-    const auto const_inv_6 = wrapper::vdup_n(static_cast<T>(0.166666667f), ExactTagType{});
-
-    const auto va = wrapper::vdup_n(static_cast<T>(_act_info.a()), ExactTagType{});
-    const auto vb = wrapper::vdup_n(static_cast<T>(_act_info.b()), ExactTagType{});
-    const auto a  = static_cast<T>(_act_info.a());
-    const auto b  = static_cast<T>(_act_info.b());
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
-
-        wrapper::traits::neon_bitvector_t<T, wrapper::traits::BitWidth::W128> tmp;
-
-        // Compute S elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            const auto vin = wrapper::vloadq(input_ptr + x);
-            switch(act)
-            {
-                case ActivationFunction::ABS:
-                    tmp = wrapper::vabs(vin);
-                    break;
-                case ActivationFunction::LINEAR:
-                    tmp = wrapper::vmla(vb, va, vin);
-                    break;
-                case ActivationFunction::LOGISTIC:
-                    tmp = wrapper::vinv(wrapper::vadd(const_1, wrapper::vexpq(wrapper::vneg(vin))));
-                    break;
-                case ActivationFunction::RELU:
-                    tmp = wrapper::vmax(const_0, vin);
-                    break;
-                case ActivationFunction::BOUNDED_RELU:
-                    tmp = wrapper::vmin(va, wrapper::vmax(const_0, vin));
-                    break;
-                case ActivationFunction::LU_BOUNDED_RELU:
-                    tmp = wrapper::vmin(va, wrapper::vmax(vb, vin));
-                    break;
-                case ActivationFunction::LEAKY_RELU:
-                    tmp = wrapper::vbsl(wrapper::vcgt(vin, const_0), vin, wrapper::vmul(va, vin));
-                    break;
-                case ActivationFunction::SOFT_RELU:
-                    tmp = wrapper::vlog(wrapper::vadd(const_1, wrapper::vexpq(vin)));
-                    break;
-                case ActivationFunction::ELU:
-                    tmp = wrapper::vbsl(wrapper::vcge(vin, const_0), vin, wrapper::vmul(va, wrapper::vsub(wrapper::vexpq(vin), const_1)));
-                    break;
-                case ActivationFunction::SQRT:
-#ifdef __aarch64__
-                    tmp = wrapper::vsqrt(vin);
-#else  /* aarch64 */
-                    {
-                        const auto bitmask = wrapper::vceq(vin, wrapper::vdup_n(T(0), ExactTagType{}));
-                        tmp                 = wrapper::vinv(wrapper::vinvsqrt(wrapper::vadd(vin, mask_float_vector(delta, bitmask))));
-                        tmp                 = mask_float_vector(tmp, wrapper::vnot(bitmask));
-                    }
-#endif /* aarch64 */
-                    break;
-                case ActivationFunction::SQUARE:
-                    tmp = wrapper::vmul(vin, vin);
-                    break;
-                case ActivationFunction::TANH:
-                    tmp = wrapper::vmul(va, wrapper::vtanh(wrapper::vmul(vb, vin)));
-                    break;
-                case ActivationFunction::IDENTITY:
-                    tmp = vin;
-                    break;
-                case ActivationFunction::HARD_SWISH:
-                    tmp = wrapper::vmul(vin, wrapper::vmul(const_inv_6, wrapper::vmin(const_6, wrapper::vmax(const_0, wrapper::vadd(vin, const_3)))));
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Unsupported activation function");
-            }
-            wrapper::vstore(output_ptr + x, tmp);
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            const T in = *(reinterpret_cast<const T *>(input_ptr + x));
-            T       tmp;
-            switch(act)
-            {
-                case ActivationFunction::ABS:
-                    tmp = std::abs(in);
-                    break;
-                case ActivationFunction::LINEAR:
-                    tmp = a * in + b;
-                    break;
-                case ActivationFunction::LOGISTIC:
-                    tmp = static_cast<T>(1) / (static_cast<T>(1) + std::exp(-in));
-                    break;
-                case ActivationFunction::RELU:
-                    tmp = std::max<T>(static_cast<T>(0), in);
-                    break;
-                case ActivationFunction::BOUNDED_RELU:
-                    tmp = std::min<T>(a, std::max(static_cast<T>(0), in));
-                    break;
-                case ActivationFunction::LU_BOUNDED_RELU:
-                    tmp = std::min<T>(a, std::max<T>(b, in));
-                    break;
-                case ActivationFunction::LEAKY_RELU:
-                    tmp = (in > 0) ? in : a * in;
-                    break;
-                case ActivationFunction::SOFT_RELU:
-                    tmp = std::log(static_cast<T>(1) + std::exp(in));
-                    break;
-                case ActivationFunction::ELU:
-                    tmp = (in >= 0) ? in : a * (std::exp(in) - 1);
-                    break;
-                case ActivationFunction::SQRT:
-                    tmp = std::sqrt(in);
-                    break;
-                case ActivationFunction::SQUARE:
-                    tmp = in * in;
-                    break;
-                case ActivationFunction::TANH:
-                    tmp = a * std::tanh(b * in);
-                    break;
-                case ActivationFunction::IDENTITY:
-                    tmp = in;
-                    break;
-                case ActivationFunction::HARD_SWISH:
-                    tmp = in * ((std::min(std::max((in + 3), 0.0f), 6.0f)) * 0.166666667f);
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Unsupported activation function");
-            }
-            *(output_ptr + x) = tmp;
-        }
-    },
-    input, output);
-}
-
-template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Window &window)
-{
-    const int                window_step_x  = 16 / sizeof(T);
-    const auto               window_start_x = static_cast<int>(window.x().start());
-    const auto               window_end_x   = static_cast<int>(window.x().end());
-    const ActivationFunction act            = F;
-
-    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
-    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator input(src, win_collapsed);
-    Iterator output(dst, win_collapsed);
-
-    const UniformQuantizationInfo qi_in           = src->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out          = dst->info()->quantization_info().uniform();
-    const qasymm8x16_t            va              = vdupq_n_u8(quantize_qasymm8(_act_info.a(), qi_in));
-    const qasymm8x16_t            vb              = vdupq_n_u8(quantize_qasymm8(_act_info.b(), qi_in));
-    const qasymm8_t               a               = quantize_qasymm8(_act_info.a(), qi_in);
-    const qasymm8_t               b               = quantize_qasymm8(_act_info.b(), qi_in);
-    const qasymm8_t               const_0         = quantize_qasymm8(0.f, qi_in);
-    const qasymm8x16_t            vconst_0        = vdupq_n_u8(const_0);
-    const auto                    vconst_1        = vdupq_n_f32(1.f);
-    const float32x4_t             va_f32          = vdupq_n_f32(_act_info.a());
-    const float32x4_t             vb_f32          = vdupq_n_f32(_act_info.b());
-    const float                   a_f32           = _act_info.a();
-    const float                   b_f32           = _act_info.b();
-    const auto                    const_6_f32     = vdupq_n_f32(6.f);
-    const auto                    const_0_f32     = vdupq_n_f32(0.f);
-    const auto                    const_3_f32     = vdupq_n_f32(3.f);
-    const auto                    const_inv_6_f32 = vdupq_n_f32(0.166666667f);
-
-    // Initialise scale/offset for re-quantization
-    float       s  = qi_in.scale / qi_out.scale;
-    float       o  = -qi_in.offset * s + qi_out.offset;
-    float32x4_t vs = vdupq_n_f32(s);
-    float32x4_t vo = vdupq_n_f32(o);
-
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
-
-        wrapper::traits::neon_bitvector_t<T, wrapper::traits::BitWidth::W128> tmp;
-
-        // Compute S elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            const auto vin = wrapper::vloadq(input_ptr + x);
-            if(act == ActivationFunction::RELU)
-            {
-                // Perform activation
-                tmp = vmaxq_u8(vconst_0, vin);
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8(tmp, vs, vo);
-            }
-            else if(act == ActivationFunction::BOUNDED_RELU)
-            {
-                // Perform activation
-                tmp = vminq_u8(va, vmaxq_u8(vconst_0, vin));
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8(tmp, vs, vo);
-            }
-            else if(act == ActivationFunction::LU_BOUNDED_RELU)
-            {
-                // Perform activation
-                tmp = vminq_u8(va, vmaxq_u8(vb, vin));
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8(tmp, vs, vo);
-            }
-            else if(act == ActivationFunction::LOGISTIC)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
-                {
-                    {
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[0])))),
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[1])))),
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[2])))),
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[3])))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize(tmp_dep, qi_out);
-            }
-            else if(act == ActivationFunction::TANH)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
-                {
-                    {
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[0], vb_f32))),
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[1], vb_f32))),
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[2], vb_f32))),
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[3], vb_f32))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize(tmp_dep, qi_out);
-            }
-            else if(act == ActivationFunction::HARD_SWISH)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
-                {
-                    {
-                        wrapper::vmul(vin_deq.val[0], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[0], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[1], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[1], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[2], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[2], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[3], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[3], const_3_f32))))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize(tmp_dep, qi_out);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Unsupported activation function");
-            }
-            wrapper::vstore(output_ptr + x, tmp);
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            T in = *(reinterpret_cast<const T *>(input_ptr + x));
-            T tmp;
-            if(act == ActivationFunction::RELU)
-            {
-                tmp = std::max(const_0, in);
-                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
-            }
-            else if(act == ActivationFunction::BOUNDED_RELU)
-            {
-                tmp = std::min(a, std::max(const_0, in));
-                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
-            }
-            else if(act == ActivationFunction::LU_BOUNDED_RELU)
-            {
-                tmp = std::min(a, std::max(b, in));
-                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
-            }
-            else if(act == ActivationFunction::LOGISTIC)
-            {
-                float tmp_f = dequantize_qasymm8(in, qi_in);
-                tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
-                tmp         = quantize_qasymm8(tmp_f, qi_out);
-            }
-            else if(act == ActivationFunction::TANH)
-            {
-                float tmp_f = dequantize_qasymm8(in, qi_in);
-                tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
-                tmp         = quantize_qasymm8(tmp_f, qi_out);
-            }
-            else if(act == ActivationFunction::HARD_SWISH)
-            {
-                float tmp_f = dequantize_qasymm8(in, qi_in);
-                tmp_f       = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
-                tmp         = quantize_qasymm8(tmp_f, qi_out);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Unsupported activation function");
-            }
-            *(output_ptr + x) = tmp;
-        }
-    },
-    input, output);
-}
-
-template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Window &window)
-{
-    const int                window_step_x  = 16 / sizeof(T);
-    const auto               window_start_x = static_cast<int>(window.x().start());
-    const auto               window_end_x   = static_cast<int>(window.x().end());
-    const ActivationFunction act            = F;
-
-    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
-    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator input(src, win_collapsed);
-    Iterator output(dst, win_collapsed);
-
-    const UniformQuantizationInfo qi_in           = src->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out          = dst->info()->quantization_info().uniform();
-    const qasymm8x16_signed_t     va              = vdupq_n_s8(quantize_qasymm8_signed(_act_info.a(), qi_in));
-    const qasymm8x16_signed_t     vb              = vdupq_n_s8(quantize_qasymm8_signed(_act_info.b(), qi_in));
-    const qasymm8_signed_t        a               = quantize_qasymm8_signed(_act_info.a(), qi_in);
-    const qasymm8_signed_t        b               = quantize_qasymm8_signed(_act_info.b(), qi_in);
-    const qasymm8_signed_t        const_0         = quantize_qasymm8_signed(0.f, qi_in);
-    const qasymm8x16_signed_t     vconst_0        = vdupq_n_s8(const_0);
-    const auto                    vconst_1        = vdupq_n_f32(1.f);
-    const float32x4_t             va_f32          = vdupq_n_f32(_act_info.a());
-    const float32x4_t             vb_f32          = vdupq_n_f32(_act_info.b());
-    const float                   a_f32           = _act_info.a();
-    const float                   b_f32           = _act_info.b();
-    const auto                    const_6_f32     = vdupq_n_f32(6.f);
-    const auto                    const_0_f32     = vdupq_n_f32(0.f);
-    const auto                    const_3_f32     = vdupq_n_f32(3.f);
-    const auto                    const_inv_6_f32 = vdupq_n_f32(0.166666667f);
-
-    // Initialise scale/offset for re-quantization
-    float       s  = qi_in.scale / qi_out.scale;
-    float       o  = -qi_in.offset * s + qi_out.offset;
-    float32x4_t vs = vdupq_n_f32(s);
-    float32x4_t vo = vdupq_n_f32(o);
-
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
-
-        wrapper::traits::neon_bitvector_t<T, wrapper::traits::BitWidth::W128> tmp;
-
-        // Compute S elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            const auto vin = wrapper::vloadq(input_ptr + x);
-            if(act == ActivationFunction::RELU)
-            {
-                // Perform activation
-                tmp = vmaxq_s8(vconst_0, vin);
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8_signed(tmp, vs, vo);
-            }
-            else if(act == ActivationFunction::BOUNDED_RELU)
-            {
-                // Perform activation
-                tmp = vminq_s8(va, vmaxq_s8(vconst_0, vin));
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8_signed(tmp, vs, vo);
-            }
-            else if(act == ActivationFunction::LU_BOUNDED_RELU)
-            {
-                // Perform activation
-                tmp = vminq_s8(va, vmaxq_s8(vb, vin));
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8_signed(tmp, vs, vo);
-            }
-            else if(act == ActivationFunction::LOGISTIC)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
-                {
-                    {
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[0])))),
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[1])))),
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[2])))),
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[3])))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize_signed(tmp_dep, qi_out);
-            }
-            else if(act == ActivationFunction::TANH)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
-                {
-                    {
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[0], vb_f32))),
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[1], vb_f32))),
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[2], vb_f32))),
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[3], vb_f32))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize_signed(tmp_dep, qi_out);
-            }
-            else if(act == ActivationFunction::HARD_SWISH)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
-                {
-                    {
-                        wrapper::vmul(vin_deq.val[0], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[0], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[1], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[1], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[2], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[2], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[3], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[3], const_3_f32))))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize_signed(tmp_dep, qi_out);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Unsupported activation function");
-            }
-            wrapper::vstore(output_ptr + x, tmp);
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            T in = *(reinterpret_cast<const T *>(input_ptr + x));
-            T tmp;
-            if(act == ActivationFunction::RELU)
-            {
-                tmp = std::max(const_0, in);
-                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
-            }
-            else if(act == ActivationFunction::BOUNDED_RELU)
-            {
-                tmp = std::min(a, std::max(const_0, in));
-                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
-            }
-            else if(act == ActivationFunction::LU_BOUNDED_RELU)
-            {
-                tmp = std::min(a, std::max(b, in));
-                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
-            }
-            else if(act == ActivationFunction::LOGISTIC)
-            {
-                float tmp_f = dequantize_qasymm8_signed(in, qi_in);
-                tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
-                tmp         = quantize_qasymm8_signed(tmp_f, qi_out);
-            }
-            else if(act == ActivationFunction::TANH)
-            {
-                float tmp_f = dequantize_qasymm8_signed(in, qi_in);
-                tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
-                tmp         = quantize_qasymm8_signed(tmp_f, qi_out);
-            }
-            else if(act == ActivationFunction::HARD_SWISH)
-            {
-                float tmp_f = dequantize_qasymm8_signed(in, qi_in);
-                tmp_f       = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
-                tmp         = quantize_qasymm8_signed(tmp_f, qi_out);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Unsupported activation function");
-            }
-            *(output_ptr + x) = tmp;
-        }
-    },
-    input, output);
-}
-
-template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, qsymm16_t>::value, void>::type NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Window &window)
-{
-    const int                window_step_x  = 16 / sizeof(T);
-    const auto               window_start_x = static_cast<int>(window.x().start());
-    const auto               window_end_x   = static_cast<int>(window.x().end());
-    const ActivationFunction act            = F;
-
-    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
-    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator input(src, win_collapsed);
-    Iterator output(dst, win_collapsed);
-
-    const UniformQuantizationInfo qi_in    = src->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out   = dst->info()->quantization_info().uniform();
-    const auto                    vconst_1 = vdupq_n_f32(1.f);
-    const float32x4_t             va_f32   = vdupq_n_f32(_act_info.a());
-    const float32x4_t             vb_f32   = vdupq_n_f32(_act_info.b());
-    const float                   a_f32    = _act_info.a();
-    const float                   b_f32    = _act_info.b();
-
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
-
-        wrapper::traits::neon_bitvector_t<T, wrapper::traits::BitWidth::W128> tmp;
-        ARM_COMPUTE_UNUSED(tmp);
-
-        // Compute S elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            const auto vin = wrapper::vloadq(input_ptr + x);
-            if(act == ActivationFunction::LOGISTIC)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize_int16(vin, qi_in.scale);
-                // Perform activation
-                const float32x4x2_t tmp_dep =
-                {
-                    {
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[0])))),
-                        wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[1])))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize_int16(tmp_dep, qi_out.scale);
-            }
-            else if(act == ActivationFunction::TANH)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize_int16(vin, qi_in.scale);
-                // Perform activation
-                const float32x4x2_t tmp_dep =
-                {
-                    {
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[0], vb_f32))),
-                        wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[1], vb_f32))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize_int16(tmp_dep, qi_out.scale);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Unsupported activation function");
-            }
-            wrapper::vstore(output_ptr + x, tmp);
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            T in = *(reinterpret_cast<const T *>(input_ptr + x));
-            T tmp;
-            if(act == ActivationFunction::LOGISTIC)
-            {
-                float tmp_f = dequantize_qsymm16(in, qi_in.scale);
-                tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
-                tmp         = quantize_qsymm16(tmp_f, qi_out);
-            }
-            else if(act == ActivationFunction::TANH)
-            {
-                float tmp_f = dequantize_qsymm16(in, qi_in.scale);
-                tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
-                tmp         = quantize_qsymm16(tmp_f, qi_out);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Unsupported activation function");
-            }
-            *(output_ptr + x) = tmp;
-        }
-    },
-    input, output);
 }
 
 Status NEActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -888,12 +207,14 @@ void NEActivationLayerKernel::run_op(ITensorPack &tensors, const Window &window,
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
     ARM_COMPUTE_ERROR_ON(tensors.empty());
 
-    (this->*_func)(tensors.get_const_tensor(TensorType::ACL_SRC),
-                   tensors.get_tensor(TensorType::ACL_DST),
-                   window);
+    const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    const auto *uk = get_implementation(ActivationSelectorData{ src->info()->data_type() });
+
+    uk->ukernel(src, dst, _act_info, window);
 }
 } // namespace arm_compute

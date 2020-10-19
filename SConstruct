@@ -67,7 +67,7 @@ vars.AddVariables(
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
-    ListVariable("data_type_support", "Enable a list of data types to support", "all", ["fp16", "fp32"]),
+    ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32"]),
     ("toolchain_prefix", "Override the toolchain prefix", ""),
     ("compiler_prefix", "Override the compiler prefix", ""),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
@@ -293,6 +293,12 @@ if env['data_type_support']:
         env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS'])
     if any(i in env['data_type_support'] for i in ['all', 'fp32']):
         env.Append(CXXFLAGS = ['-DENABLE_FP32_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
+        env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
+        env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_SIGNED_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
+        env.Append(CXXFLAGS = ['-DENABLE_QSYMM16_KERNELS'])
 
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])

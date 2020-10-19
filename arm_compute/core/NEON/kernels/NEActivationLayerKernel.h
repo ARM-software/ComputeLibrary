@@ -79,41 +79,7 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
-    using ActivationFunction = ActivationLayerInfo::ActivationFunction;
-    /** Common signature for all the specialised @ref NEActivationLayerKernel functions
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    using ActivationFunctionExecutorPtr = void (NEActivationLayerKernel::*)(const ITensor *src, ITensor *dst, const Window &window);
-    /** Function to apply an activation function on a tensor.
-     *
-     * @param[in] window Region on which to execute the kernel
-     */
-    template <ActivationLayerInfo::ActivationFunction F, typename T>
-    typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-    activation(const ITensor *src, ITensor *dst, const Window &window);
-    /** Function to apply an activation function on a tensor.
-     *
-     * @param[in] window Region on which to execute the kernel
-     */
-    template <ActivationLayerInfo::ActivationFunction F, typename T>
-    typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type activation(const ITensor *src, ITensor *dst, const Window &window);
-    /** Function to apply an activation function on a tensor.
-     *
-     * @param[in] window Region on which to execute the kernel
-     */
-    template <ActivationLayerInfo::ActivationFunction F, typename T>
-    typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type activation(const ITensor *src, ITensor *dst, const Window &window);
-    /** Function to apply an activation function on a tensor.
-     *
-     * @param[in] window Region on which to execute the kernel
-     */
-    template <ActivationLayerInfo::ActivationFunction F, typename T>
-    typename std::enable_if<std::is_same<T, qsymm16_t>::value, void>::type activation(const ITensor *src, ITensor *dst, const Window &window);
-
-private:
-    ActivationFunctionExecutorPtr _func;
-    ActivationLayerInfo           _act_info;
+    ActivationLayerInfo _act_info;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEACTIVATIONLAYERKERNEL_H */

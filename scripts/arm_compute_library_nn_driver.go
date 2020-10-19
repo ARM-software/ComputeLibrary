@@ -25,6 +25,15 @@ func globalFlags(ctx android.BaseContext) []string {
     data_types := strings.Split(ctx.AConfig().GetenvWithDefault("COMPUTE_LIB_DATA_TYPE", "ALL"), ",")
 
     for _, x := range data_types {
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QASYMM8" {
+            cppflags = append(cppflags, "-DENABLE_QASYMM8_KERNELS")
+        }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QASYMM8_SIGNED" {
+            cppflags = append(cppflags, "-DENABLE_QASYMM8_SIGNED_KERNELS")
+        }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QASYMM16" {
+            cppflags = append(cppflags, "-DENABLE_QASYMM16_KERNELS")
+        }
         if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "FP16" {
             cppflags = append(cppflags, "-DENABLE_FP16_KERNELS")
         }
