@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/gemm/CLGEMMKernelSelectionMidgard.h"
+#include "src/runtime/CL/gemm/CLGEMMKernelSelectionMidgard.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/GPUTarget.h"
+#include "src/core/CL/gemm/CLGEMMHelpers.h"
 
 #include <map>
 #include <utility>

@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute
 {

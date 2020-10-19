@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #include "arm_compute/graph/Graph.h"
 
-#include "arm_compute/core/utils/misc/Iterable.h"
+#include "support/Iterable.h"
 
 #include <list>
 #include <stack>

@@ -26,7 +26,7 @@
 
 #include "arm_compute/graph/Types.h"
 
-#include "arm_compute/core/utils/misc/ICloneable.h"
+#include "support/ICloneable.h"
 #include "support/MemorySupport.h"
 
 #include <memory>

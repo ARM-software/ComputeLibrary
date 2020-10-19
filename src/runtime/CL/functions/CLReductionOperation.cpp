@@ -30,7 +30,9 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/Utils.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/runtime/Utils.h"
+
 #include "support/MemorySupport.h"
 
 namespace arm_compute
@@ -47,7 +49,7 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
 
-    const unsigned int num_of_stages       = calculate_number_of_stages_only_x_axis(input->dimension(0), axis);
+    const unsigned int num_of_stages       = utils::calculate_number_of_stages_only_x_axis(input->dimension(0), axis);
     const bool         is_serial           = needs_serialized_reduction(op, input->data_type(), axis);
     const bool         is_reshape_required = !keep_dims;
 
@@ -194,7 +196,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
 void CLReductionOperation::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    _num_of_stages       = calculate_number_of_stages_only_x_axis(input->info()->dimension(0), axis);
+    _num_of_stages       = utils::calculate_number_of_stages_only_x_axis(input->info()->dimension(0), axis);
     _reduction_axis      = axis;
     _is_serial           = needs_serialized_reduction(op, input->info()->data_type(), axis);
     _is_reshape_required = !keep_dims;

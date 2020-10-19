@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,12 +23,12 @@
  */
 #include "arm_compute/runtime/DeviceProperties.h"
 
-#include "arm_compute/runtime/CPUUtils.h"
+#include "src/runtime/CPUUtils.h"
 
 namespace arm_compute
 {
 DeviceProperties::DeviceProperties()
 {
-    get_cpu_configuration(cpu_info);
+    utils::cpu::get_cpu_configuration(cpu_info);
 }
 } // namespace arm_compute

@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Requires.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/RuntimeContext.h"
@@ -37,6 +36,8 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ActivationLayerFixture.h"
+
+#include "support/Requires.h"
 
 namespace arm_compute
 {

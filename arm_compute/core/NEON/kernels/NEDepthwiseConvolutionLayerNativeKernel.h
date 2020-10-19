@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+#include "support/Requires.h"
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #include <arm_neon.h>

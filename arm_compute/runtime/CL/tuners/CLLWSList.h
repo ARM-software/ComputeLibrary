@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "support/ToolchainSupport.h"
-#include <memory>
+
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {

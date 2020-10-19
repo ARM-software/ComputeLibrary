@@ -29,7 +29,7 @@
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "support/Cast.h"
 
 #include <set>
 

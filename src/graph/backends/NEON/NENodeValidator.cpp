@@ -26,9 +26,9 @@
 #include "arm_compute/graph/backends/ValidateHelpers.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
+#include "support/Cast.h"
 
 using namespace arm_compute::utils::cast;
 

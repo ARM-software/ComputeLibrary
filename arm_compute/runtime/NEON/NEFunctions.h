@@ -136,7 +136,6 @@
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 #include "arm_compute/runtime/NEON/functions/NEScharr3x3.h"
 #include "arm_compute/runtime/NEON/functions/NESelect.h"
-#include "arm_compute/runtime/NEON/functions/NESimpleAssemblyFunction.h"
 #include "arm_compute/runtime/NEON/functions/NESlice.h"
 #include "arm_compute/runtime/NEON/functions/NESobel3x3.h"
 #include "arm_compute/runtime/NEON/functions/NESobel5x5.h"

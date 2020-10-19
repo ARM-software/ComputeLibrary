@@ -36,6 +36,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/helpers/AutoConfiguration.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -30,6 +30,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <set>
 #include <string>

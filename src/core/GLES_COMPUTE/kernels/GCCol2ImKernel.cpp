@@ -24,7 +24,6 @@
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCCol2ImKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
 #include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
@@ -33,6 +32,9 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 using namespace arm_compute;
@@ -42,7 +44,7 @@ GCCol2ImKernel::GCCol2ImKernel()
 {
 }
 
-void GCCol2ImKernel::configure(const IGCTensor *input, IGCTensor *output,
+void GCCol2ImKernel::configure(const IGCTensor *input, IGCTensor    *output,
                                std::pair<unsigned int, unsigned int> convolved_dims)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);

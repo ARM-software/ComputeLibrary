@@ -27,6 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 #include <memory>
 

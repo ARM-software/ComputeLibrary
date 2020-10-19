@@ -23,16 +23,18 @@
  */
 #include "arm_compute/core/NEON/kernels/NEYOLOLayerKernel.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/NEMath.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include "src/core/NEON/kernels/detail/NEActivationFunctionDetail.h"
 

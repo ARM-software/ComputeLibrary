@@ -26,6 +26,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute
 {

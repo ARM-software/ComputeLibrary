@@ -23,12 +23,12 @@
  */
 #include "arm_compute/graph/backends/CL/CLFunctionFactory.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/backends/FunctionHelpers.h"
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
+#include "support/Cast.h"
 
 using namespace arm_compute::utils::cast;
 

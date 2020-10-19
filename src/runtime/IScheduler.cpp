@@ -26,17 +26,17 @@
 #include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/runtime/CPUUtils.h"
-#include "arm_compute/runtime/SchedulerUtils.h"
+#include "src/runtime/CPUUtils.h"
+#include "src/runtime/SchedulerUtils.h"
 
 namespace arm_compute
 {
 IScheduler::IScheduler()
     : _cpu_info()
 {
-    get_cpu_configuration(_cpu_info);
+    utils::cpu::get_cpu_configuration(_cpu_info);
     // Work out the best possible number of execution threads
-    _num_threads_hint = get_threads_hint();
+    _num_threads_hint = utils::cpu::get_threads_hint();
 }
 
 CPUInfo &IScheduler::cpu_info()
@@ -74,7 +74,7 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, ITensor
 
         //in c++17 this can be swapped for   auto [ m_threads, n_threads ] = split_2d(...
         unsigned m_threads, n_threads;
-        std::tie(m_threads, n_threads) = split_2d(this->num_threads(), m, n);
+        std::tie(m_threads, n_threads) = scheduler_utils::split_2d(this->num_threads(), m, n);
 
         std::vector<IScheduler::Workload> workloads;
         for(unsigned int ni = 0; ni != n_threads; ++ni)

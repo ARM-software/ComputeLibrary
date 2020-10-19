@@ -25,6 +25,10 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+
+#include "support/MemorySupport.h"
 
 #include <cstddef>
 

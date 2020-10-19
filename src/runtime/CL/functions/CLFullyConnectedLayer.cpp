@@ -25,10 +25,10 @@
 
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "support/Cast.h"
 #include "support/MemorySupport.h"
 
 #include <algorithm>

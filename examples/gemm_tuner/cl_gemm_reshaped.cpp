@@ -25,8 +25,6 @@
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
 
-#include "CommonGemmExampleOptions.h"
-#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "arm_compute/core/Helpers.h"
@@ -36,6 +34,8 @@
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+#include "examples/gemm_tuner/CommonGemmExampleOptions.h"
+#include "examples/gemm_tuner/GemmTunerHelpers.h"
 #include "tests/CL/Helper.h"
 #include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"
@@ -254,14 +254,14 @@ public:
         kernel_info.activation_info         = act_info;
 
         // Initialise lhs_reshaped tensor info
-        auto_init_if_empty(*lhs_reshaped.info(), lhs.info()->clone()->set_tensor_shape(compute_lhs_reshaped_shape(*lhs.info(), lhs_info)));
+        lhs_reshaped.allocator()->init(TensorInfo(compute_lhs_reshaped_shape(*lhs.info(), lhs_info), 1, params.data_type));
 
         // Initialise rhs_reshaped tensor info
-        auto_init_if_empty(*rhs_reshaped.info(), rhs.info()->clone()->set_tensor_shape(compute_rhs_reshaped_shape(*rhs.info(), rhs_info)));
+        rhs_reshaped.allocator()->init(TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));
 
         if(rhs_info.export_to_cl_image)
         {
-            arm_compute::cl_gemm::update_padding_for_cl_image(rhs_reshaped.info());
+            examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info());
         }
 
         // Validate argments

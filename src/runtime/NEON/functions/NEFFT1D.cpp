@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,8 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/utils/helpers/fft.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/utils/helpers/fft.h"
 
 namespace arm_compute
 {

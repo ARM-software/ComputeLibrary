@@ -27,6 +27,8 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
+#include "support/MemorySupport.h"
+
 using namespace arm_compute;
 
 namespace arm_compute

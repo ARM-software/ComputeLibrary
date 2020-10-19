@@ -23,7 +23,6 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -34,6 +33,8 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 #include <cmath>
 

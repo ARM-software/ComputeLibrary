@@ -25,6 +25,8 @@
 
 #include "arm_compute/runtime/NEON/functions/NECropResize.h"
 
+#include "support/MemorySupport.h"
+
 #include <cstddef>
 
 namespace arm_compute

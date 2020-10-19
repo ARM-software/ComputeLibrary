@@ -28,14 +28,15 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/NEON/wrapper/traits.h"
+#include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 #include <cmath>
 #include <complex>
 #include <map>
-
-#include "src/core/NEON/wrapper/traits.h"
-#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {

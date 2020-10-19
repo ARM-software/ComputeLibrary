@@ -43,7 +43,7 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
 }
 
 void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
-                                         const PadStrideInfo &conv_info,
+                                         const PadStrideInfo       &conv_info,
                                          const ActivationLayerInfo &act_info)
 {
     // Set GPU target

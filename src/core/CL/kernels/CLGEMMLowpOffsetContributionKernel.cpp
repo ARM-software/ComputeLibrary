@@ -23,15 +23,13 @@
  */
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 #include <cstddef>
@@ -148,7 +146,8 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
     configure(CLKernelLibrary::get().get_compile_context(), mm_result, vector_sum_col, vector_sum_row, bias, k, a_offset, b_offset);
 }
 
-void CLGEMMLowpOffsetContributionKernel::configure(const CLCompileContext &compile_context, ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias,
+void CLGEMMLowpOffsetContributionKernel::configure(const CLCompileContext &compile_context, ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row,
+                                                   const ICLTensor *bias,
                                                    int32_t k, int32_t a_offset,
                                                    int32_t b_offset)
 {

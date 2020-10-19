@@ -23,15 +23,17 @@
  */
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/Rounding.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/ScaleHelpers.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
+#include "support/Rounding.h"
 
 #include <arm_neon.h>
 #include <map>
@@ -336,6 +338,8 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
 
 void NEScaleKernel::scale_area_nchw_u8(const Window &window)
 {
+    using namespace scale_helpers;
+
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8);
 
     // Don't increment in width/height/channels for the input tensor

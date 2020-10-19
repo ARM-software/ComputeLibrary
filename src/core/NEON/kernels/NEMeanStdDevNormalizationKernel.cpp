@@ -23,14 +23,16 @@
  */
 #include "arm_compute/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,8 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/utils/misc/ICloneable.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+#include "support/ICloneable.h"
 
 #include <cstddef>
 

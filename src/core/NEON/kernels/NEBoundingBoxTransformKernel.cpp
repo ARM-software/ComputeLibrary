@@ -23,12 +23,14 @@
  */
 #include "arm_compute/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 

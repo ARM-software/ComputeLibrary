@@ -28,6 +28,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 using namespace arm_compute;
 

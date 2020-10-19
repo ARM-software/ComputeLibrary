@@ -30,11 +30,13 @@
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/Rounding.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 
 #include "src/core/utils/ScaleUtils.h"
+
+#include "support/MemorySupport.h"
+#include "support/Rounding.h"
 
 #include <cmath>
 #include <cstddef>

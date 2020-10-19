@@ -21,12 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/runtime/SchedulerUtils.h"
 
 #include "arm_compute/core/Error.h"
 
 #include <cmath>
 
 namespace arm_compute
+{
+namespace scheduler_utils
 {
 #ifndef BARE_METAL
 std::pair<unsigned, unsigned> split_2d(unsigned max_threads, std::size_t m, std::size_t n)
@@ -76,4 +79,5 @@ std::pair<unsigned, unsigned> split_2d(unsigned max_threads, std::size_t m, std:
     }
 }
 #endif /* #ifndef BARE_METAL */
+} // namespace scheduler_utils
 } // namespace arm_compute

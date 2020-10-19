@@ -21,15 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfigurationBifrost.h"
+#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfigurationBifrost.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/CL/gemm/CLGEMMHelpers.h"
 
 #include <map>
 #include <utility>
@@ -122,13 +122,13 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
 
     if(m == 1)
     {
-        if ( n <= 2548 )
+        if(n <= 2548)
         {
-            return configure_lhs_rhs_info(m,n,1,2,16,1,4,false,true,false,true,false);
+            return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 4, false, true, false, true, false);
         }
         else
         {
-            return configure_lhs_rhs_info(m,n,1,4,16,1,8,false,true,false,true,false);
+            return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, 8, false, true, false, true, false);
         }
     }
     else
@@ -251,7 +251,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
 
     if(m == 1)
     {
-        return configure_lhs_rhs_info(m,n,1,2,16,1,32,false,true,false,true,false);
+        return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 32, false, true, false, true, false);
     }
     else
     {

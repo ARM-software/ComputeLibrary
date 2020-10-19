@@ -25,7 +25,7 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernels.h"
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "support/Cast.h"
 
 namespace arm_compute
 {

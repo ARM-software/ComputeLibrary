@@ -31,7 +31,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/Random.h"
+#include "support/Random.h"
 #include "tests/RawTensor.h"
 #include "tests/TensorCache.h"
 #include "tests/Utils.h"

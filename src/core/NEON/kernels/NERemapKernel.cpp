@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,13 +23,16 @@
  */
 #include "arm_compute/core/NEON/kernels/NERemapKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/ScaleHelpers.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 #include <cstddef>
@@ -175,6 +178,8 @@ void NERemapKernel::remap_nearest(const Window &window)
 
 void NERemapKernel::remap_bilinear(const Window &window)
 {
+    using namespace scale_helpers;
+
     // Don't increment in X and Y direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
     Window win_in(window);

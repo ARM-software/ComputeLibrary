@@ -21,15 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
+#include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/CL/gemm/CLGEMMHelpers.h"
 
 #include <map>
 #include <utility>
@@ -216,17 +216,17 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
         {
             if(workload <= 790.39f)
             {
-                return configure_lhs_rhs_info(m,n,2,4,4,2,2,false,false,true,false,false);
+                return configure_lhs_rhs_info(m, n, 2, 4, 4, 2, 2, false, false, true, false, false);
             }
             else
             {
                 if(workload <= 982.39f)
                 {
-                    return configure_lhs_rhs_info(m,n,4,2,4,4,4,false,false,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 4, 2, 4, 4, 4, false, false, true, false, false);
                 }
                 else
                 {
-                    return configure_lhs_rhs_info(m,n,2,4,4,2,1,false,true,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 2, 4, 4, 2, 1, false, true, true, false, false);
                 }
             }
         }
@@ -236,16 +236,16 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
             {
                 if(r_mn <= 0.11f)
                 {
-                    return configure_lhs_rhs_info(m,n,2,4,4,2,2,false,false,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 2, 4, 4, 2, 2, false, false, true, false, false);
                 }
                 else
                 {
-                    return configure_lhs_rhs_info(m,n,4,4,4,4,4,false,true,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, false, true, true, false, false);
                 }
             }
             else
             {
-                return configure_lhs_rhs_info(m,n,2,4,4,2,2,false,false,true,false,false);
+                return configure_lhs_rhs_info(m, n, 2, 4, 4, 2, 2, false, false, true, false, false);
             }
         }
     }
@@ -257,22 +257,22 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
             {
                 if(m <= 64.5)
                 {
-                    return configure_lhs_rhs_info(m,n,4,4,4,2,4,true,false,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 4, true, false, true, false, false);
                 }
                 else
                 {
-                    return configure_lhs_rhs_info(m,n,4,4,4,2,2,false,true,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 2, false, true, true, false, false);
                 }
             }
             else
             {
                 if(r_mn <= 1.09f)
                 {
-                    return configure_lhs_rhs_info(m,n,4,4,4,4,4,false,true,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, false, true, true, false, false);
                 }
                 else
                 {
-                    return configure_lhs_rhs_info(m,n,4,4,4,2,2,true,true,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 2, true, true, true, false, false);
                 }
             }
         }
@@ -280,17 +280,17 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
         {
             if(m <= 43)
             {
-                return configure_lhs_rhs_info(m,n,4,4,4,2,4,true,false,true,false,false);
+                return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 4, true, false, true, false, false);
             }
             else
             {
                 if(workload <= 26364.79f)
                 {
-                    return configure_lhs_rhs_info(m,n,4,4,4,2,2,false,true,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 2, false, true, true, false, false);
                 }
                 else
                 {
-                    return configure_lhs_rhs_info(m,n,4,4,4,4,4,false,true,true,false,false);
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, false, true, true, false, false);
                 }
             }
         }

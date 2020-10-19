@@ -23,12 +23,14 @@
  */
 #include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/NESymm.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {

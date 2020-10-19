@@ -23,11 +23,13 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "src/core/AccessWindowStatic.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {

@@ -25,8 +25,8 @@
 
 #include "tests/validation/Helpers.h"
 
-#include "arm_compute/core/utils/misc/Rounding.h"
-#include "arm_compute/core/utils/misc/SaturateCast.h"
+#include "support/Rounding.h"
+#include "support/SaturateCast.h"
 
 #include "tests/Types.h"
 

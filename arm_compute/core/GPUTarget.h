@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_GPUTARGET_H
 #define ARM_COMPUTE_GPUTARGET_H
 
-#include "arm_compute/core/Helpers.h"
+#include "support/Traits.h"
 
 #include <string>
 

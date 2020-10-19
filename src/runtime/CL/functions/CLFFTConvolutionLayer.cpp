@@ -26,10 +26,13 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/utils/helpers/fft.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/utils/helpers/fft.h"
+
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {

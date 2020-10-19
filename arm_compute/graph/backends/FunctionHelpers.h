@@ -37,7 +37,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "support/Cast.h"
 
 namespace arm_compute
 {

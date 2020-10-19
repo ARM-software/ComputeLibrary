@@ -23,16 +23,17 @@
  */
 #include "arm_compute/core/NEON/kernels/NEStridedSliceKernel.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Window.h"
-
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/helpers/bit_ops.h"
+#include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/core/utils/helpers/bit_ops.h"
 
 namespace arm_compute
 {

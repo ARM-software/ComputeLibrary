@@ -26,6 +26,8 @@
 #include "arm_compute/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
 #include "arm_compute/core/Types.h"
 
+#include "support/MemorySupport.h"
+
 namespace arm_compute
 {
 CLInstanceNormalizationLayer::CLInstanceNormalizationLayer()

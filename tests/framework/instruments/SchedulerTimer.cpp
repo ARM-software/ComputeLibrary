@@ -26,8 +26,8 @@
 #include "Instruments.h"
 #include "WallClockTimer.h"
 #include "arm_compute/core/CPP/ICPPKernel.h"
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/graph/INode.h"
+#include "support/Cast.h"
 
 namespace arm_compute
 {

@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/CL/kernels/CLWarpPerspectiveKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -32,6 +31,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <cstddef>
 #include <set>

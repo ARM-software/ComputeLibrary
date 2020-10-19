@@ -27,7 +27,8 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/runtime/CPUUtils.h"
+#include "src/runtime/CPUUtils.h"
+#include "support/MemorySupport.h"
 #include "support/Mutex.h"
 
 #include <atomic>

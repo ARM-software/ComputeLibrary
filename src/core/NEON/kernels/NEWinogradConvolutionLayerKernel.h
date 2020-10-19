@@ -25,8 +25,8 @@
 #define ARM_COMPUTE_NEGEMMWINOGRADCONVOLUTIONLAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/NEON/kernels/convolution/common/convolution.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/common/tensor.hpp"
+#include "src/core/NEON/kernels/convolution/common/convolution.hpp"
+#include "src/core/NEON/kernels/convolution/common/tensor.hpp"
 
 #include "src/core/NEON/kernels/convolution/winograd/winograd_layer.hpp"
 

@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 #include <memory>
 #include <tuple>

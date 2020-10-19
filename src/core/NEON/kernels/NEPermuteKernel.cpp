@@ -30,10 +30,12 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace
 {
-#include "arm_compute/core/NEON/kernels/convolution/common/shims.hpp"
+#include "src/core/NEON/kernels/convolution/common/shims.hpp"
 } // namespace
 
 namespace arm_compute

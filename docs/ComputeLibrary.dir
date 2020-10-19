@@ -31,10 +31,6 @@
  *  @brief Wrapper to configure the Khronos OpenCL C++ header
  */
 
-/** @dir arm_compute/core/CL/gemm
- *  @brief Folder containing all the configuration files for GEMM
- */
-
 /** @dir arm_compute/core/CL/kernels
  * @brief Folder containing all the OpenCL kernels
  */
@@ -281,6 +277,10 @@
 
 /** @dir src/core/NEON/wrapper/scalar
  *  @brief Scalar operations
+ */
+
+/** @dir src/core/CL/gemm
+ *  @brief Folder containing all the configuration files for GEMM
  */
 
 /** @dir src/core/CL/cl_kernels

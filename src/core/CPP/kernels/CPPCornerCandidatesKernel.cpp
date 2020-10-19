@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,17 +23,9 @@
  */
 #include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
 
-#include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
-
-#include "support/Mutex.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 using namespace arm_compute;
 

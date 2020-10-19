@@ -102,7 +102,7 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
 }
 
 void CLWinogradConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
-                                           const PadStrideInfo &conv_info,
+                                           const PadStrideInfo       &conv_info,
                                            const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
     // Get indices for the width and height

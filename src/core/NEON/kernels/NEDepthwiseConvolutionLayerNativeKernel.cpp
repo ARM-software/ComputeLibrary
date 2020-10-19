@@ -23,13 +23,15 @@
  */
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/convolution/depthwise/impl_qa8_qa8.hpp"
 #include "src/core/NEON/wrapper/traits.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
@@ -48,7 +50,6 @@ constexpr size_t vector_size          = 8;
 
 struct DepthwiseConvolutionRunInfo
 {
-public:
     const size_t   num_read_elements_per_iteration;
     const uint32_t x_start;
     const uint32_t x_end;

@@ -24,17 +24,20 @@
 
 #include "arm_compute/runtime/NEON/functions/assembly/NEDepthwiseConvolutionAssemblyDispatch.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/assembly/NEDepthwiseConvolutionAssemblyKernelWrapper.h"
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/depthwise_dilated.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/depthwise_quantized_dilated.hpp"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/NEON/kernels/assembly/NEDepthwiseConvolutionAssemblyKernelWrapper.h"
+#include "src/core/NEON/kernels/convolution/depthwise/depthwise_dilated.hpp"
+#include "src/core/NEON/kernels/convolution/depthwise/depthwise_quantized_dilated.hpp"
+#include "src/core/helpers/AutoConfiguration.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
+#include "support/MemorySupport.h"
 
 #include <set>
 

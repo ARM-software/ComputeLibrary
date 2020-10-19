@@ -42,7 +42,7 @@ void CLRemap::configure(ICLTensor *input, const ICLTensor *map_x, const ICLTenso
 
 void CLRemap::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy,
                         BorderMode border_mode,
-                        uint8_t constant_border_value)
+                        uint8_t    constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);

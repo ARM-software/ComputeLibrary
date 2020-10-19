@@ -23,8 +23,9 @@
  */
 #include "arm_compute/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute

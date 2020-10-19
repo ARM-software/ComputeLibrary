@@ -23,12 +23,14 @@
  */
 #include "arm_compute/core/NEON/kernels/NEElementwiseOperationKernel.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 #include <map>

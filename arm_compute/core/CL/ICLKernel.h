@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/IKernel.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/experimental/Types.h"
 
 #include <string>

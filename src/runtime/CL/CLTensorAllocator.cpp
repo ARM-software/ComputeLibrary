@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {

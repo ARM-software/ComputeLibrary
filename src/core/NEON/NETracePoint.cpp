@@ -24,8 +24,8 @@
 #include "arm_compute/core/TracePoint.h"
 
 #include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"
-#include "arm_compute/core/NEON/kernels/assembly/INEGEMMWrapperKernel.h"
-#include "arm_compute/core/NEON/kernels/convolution/common/convolution.hpp"
+#include "src/core/NEON/kernels/assembly/INEGEMMWrapperKernel.h"
+#include "src/core/NEON/kernels/convolution/common/convolution.hpp"
 #include "utils/TypePrinter.h"
 
 #include <memory>

@@ -28,8 +28,8 @@
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Requires.h"
 #include "arm_compute/runtime/NEON/INEOperator.h"
+#include "support/Requires.h"
 
 #include <memory>
 #include <vector>

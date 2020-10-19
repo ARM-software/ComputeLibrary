@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 
-#include "arm_compute/core/utils/helpers/bit_ops.h"
+#include "bit_ops.h"
 
 namespace arm_compute
 {

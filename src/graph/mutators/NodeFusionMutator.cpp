@@ -30,7 +30,7 @@
 #include "arm_compute/graph/nodes/FusedConvolutionBatchNormalizationNode.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "support/Cast.h"
 
 #include <set>
 
@@ -300,11 +300,12 @@ IGraphMutator::MutationType NodeFusionMutator::type() const
 void NodeFusionMutator::mutate(Graph &g)
 {
     // Supported activations when fusing
-    const std::set<Activation> supported_fused_activations    = { Activation::ABS, Activation::BOUNDED_RELU, Activation::ELU,
-                                                                  Activation::HARD_SWISH, Activation::IDENTITY, Activation::LEAKY_RELU,
-                                                                  Activation::LINEAR, Activation::LOGISTIC, Activation::LU_BOUNDED_RELU,
-                                                                  Activation::RELU, Activation::SOFT_RELU, Activation::SQRT,
-                                                                  Activation::SQUARE, Activation::TANH  };
+    const std::set<Activation> supported_fused_activations = { Activation::ABS, Activation::BOUNDED_RELU, Activation::ELU,
+                                                               Activation::HARD_SWISH, Activation::IDENTITY, Activation::LEAKY_RELU,
+                                                               Activation::LINEAR, Activation::LOGISTIC, Activation::LU_BOUNDED_RELU,
+                                                               Activation::RELU, Activation::SOFT_RELU, Activation::SQRT,
+                                                               Activation::SQUARE, Activation::TANH
+                                                             };
 
     // Preconditions
     auto empty_prec = [](INode &)

@@ -23,13 +23,13 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/NEON/kernels/assembly/INEGEMMWrapperKernel.h"
+#include "src/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
 #include "src/core/NEON/kernels/assembly/arm_gemm.hpp"
 
-#include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "arm_compute/runtime/NEON/functions/NESimpleAssemblyFunction.h"
-
-#include "src/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
+#include "support/MemorySupport.h"
 
 #include <arm_neon.h>
 

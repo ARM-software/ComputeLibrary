@@ -23,12 +23,14 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 

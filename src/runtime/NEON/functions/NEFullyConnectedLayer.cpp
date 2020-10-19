@@ -30,6 +30,8 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include "support/MemorySupport.h"
+
 #include <algorithm>
 #include <cmath>
 

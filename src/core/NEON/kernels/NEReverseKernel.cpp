@@ -27,6 +27,8 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {

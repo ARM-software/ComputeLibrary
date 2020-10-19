@@ -23,6 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
 
+#include "support/MemorySupport.h"
+
 namespace arm_compute
 {
 void CLConvertFullyConnectedWeights::configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,

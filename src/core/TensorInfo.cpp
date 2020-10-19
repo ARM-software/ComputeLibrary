@@ -28,6 +28,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/helpers/Utils.h"
 #include "support/MemorySupport.h"
 
 using namespace arm_compute;

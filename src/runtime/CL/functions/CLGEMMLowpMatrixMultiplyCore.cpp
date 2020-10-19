@@ -24,8 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/gemm/native/CLGEMMNativeKernelConfiguration.h"
-#include "arm_compute/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
@@ -35,7 +33,10 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/gemm/CLGEMMKernelSelection.h"
+#include "src/core/CL/gemm/native/CLGEMMNativeKernelConfiguration.h"
+#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/runtime/CL/gemm/CLGEMMKernelSelection.h"
 
 namespace arm_compute
 {

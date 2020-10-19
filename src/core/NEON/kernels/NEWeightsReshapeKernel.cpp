@@ -25,6 +25,8 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {

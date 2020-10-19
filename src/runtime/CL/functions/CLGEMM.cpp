@@ -23,10 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 
-#include "arm_compute/core/CL/ICLGEMMKernelConfiguration.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfiguration.h"
-#include "arm_compute/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/Helpers.h"
@@ -35,12 +32,18 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/utils/helpers/float_ops.h"
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/gemm/CLGEMMKernelSelection.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "src/core/CL/ICLGEMMKernelConfiguration.h"
+#include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfiguration.h"
+#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/utils/helpers/float_ops.h"
+#include "src/runtime/CL/gemm/CLGEMMKernelSelection.h"
+#include "support/Cast.h"
+
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {

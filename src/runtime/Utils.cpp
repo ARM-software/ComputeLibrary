@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Utils.h"
+#include "src/runtime/Utils.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
@@ -30,6 +30,8 @@
 #include <string>
 
 namespace arm_compute
+{
+namespace utils
 {
 #ifndef DOXYGEN_SKIP_THIS
 static const std::string information =
@@ -78,4 +80,5 @@ unsigned int calculate_number_of_stages_only_x_axis(size_t input_x_dimension, un
     const unsigned int num_of_stages = num_of_wg / 128 + 2;
     return num_of_stages;
 }
+} // namespace utils
 } // namespace arm_compute

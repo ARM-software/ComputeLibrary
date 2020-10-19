@@ -30,6 +30,7 @@
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {
