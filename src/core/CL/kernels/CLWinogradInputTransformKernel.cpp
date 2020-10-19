@@ -87,11 +87,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         AccessWindowRectangle input_access(input, -conv_info.pad_left(), -conv_info.pad_top(), num_elems_read_per_iteration_x, num_elems_read_per_iteration_y);
         window_changed = update_window_and_padding(win, input_access);
     }
-    else
-    {
-        AccessWindowStatic input_access(input, 0, -1, input->dimension(0), input->dimension(1) + 1);
-        window_changed = update_window_and_padding(win, input_access);
-    }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
@@ -141,7 +136,7 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     }
     else
     {
-        _border_size = BorderSize(1U, 0U, 1U, 0);
+        _border_size = BorderSize();
     }
 
     // Compute the number of output tiles along the x and y direction of size "output_tile_size"
