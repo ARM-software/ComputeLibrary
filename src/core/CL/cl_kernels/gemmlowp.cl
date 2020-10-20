@@ -916,7 +916,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
 #endif // defined(RESULT_OFFSET) && defined(RESULT_SHIFT) && defined(RESULT_MULTIPLIER)
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(K)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(K)
+#if defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix is NOT reshaped
@@ -997,7 +997,6 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
     // Compute RHS matrix address
     uint rhs_offset = rhs_offset_first_element_in_bytes + x * N0 * sizeof(DATA_TYPE);
 
-
 #if defined(MATRIX_B_DEPTH)
     // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
     rhs_offset += (z % MATRIX_B_DEPTH) * rhs_stride_z;
@@ -1077,7 +1076,6 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
 
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(int)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * dst_stride_y);
 
-
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
@@ -1097,11 +1095,10 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
     const bool cond_y = y == 0;
     const bool cond_x = ((x + 1) * N0 >= N);
 
-
-   // Store output block
+    // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, N, cond_y, cond_x);
 }
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(K)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
 #if defined(COLS_A)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
