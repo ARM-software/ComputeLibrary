@@ -23,11 +23,15 @@
  */
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
+#include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/INEKernel.h"
 #include "src/runtime/Utils.h"
 
 namespace arm_compute
 {
+INESimpleFunctionNoBorder::~INESimpleFunctionNoBorder() = default;
+
 INESimpleFunctionNoBorder::INESimpleFunctionNoBorder(IRuntimeContext *ctx)
     : _kernel(),
       _ctx(ctx)

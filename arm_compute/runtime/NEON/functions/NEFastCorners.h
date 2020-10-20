@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,6 @@
 #ifndef ARM_COMPUTE_NEFASTCORNERS_H
 #define ARM_COMPUTE_NEFASTCORNERS_H
 
-#include "arm_compute/core/NEON/kernels/NEFastCornersKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillArrayKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -41,6 +37,10 @@
 namespace arm_compute
 {
 class ITensor;
+class NENonMaximaSuppression3x3Kernel;
+class NEFastCornersKernel;
+class NEFillBorderKernel;
+class NEFillArrayKernel;
 using IImage = ITensor;
 
 /** Basic function to execute fast corners. This function call the following NEON kernels:
@@ -55,6 +55,16 @@ class NEFastCorners : public IFunction
 public:
     /** Constructor */
     NEFastCorners(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFastCorners(const NEFastCorners &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFastCorners &operator=(const NEFastCorners &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEFastCorners(NEFastCorners &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEFastCorners &operator=(NEFastCorners &&) = delete;
+    /** Default destructor */
+    ~NEFastCorners();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in, out] input                 Source image. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -71,14 +81,14 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                     _memory_group;
-    NEFastCornersKernel             _fast_corners_kernel;
-    NEFillBorderKernel              _border_handler;
-    NENonMaximaSuppression3x3Kernel _nonmax_kernel;
-    NEFillArrayKernel               _fill_kernel;
-    Image                           _output;
-    Image                           _suppressed;
-    bool                            _non_max;
+    MemoryGroup                                      _memory_group;
+    std::unique_ptr<NEFastCornersKernel>             _fast_corners_kernel;
+    std::unique_ptr<NEFillBorderKernel>              _border_handler;
+    std::unique_ptr<NENonMaximaSuppression3x3Kernel> _nonmax_kernel;
+    std::unique_ptr<NEFillArrayKernel>               _fill_kernel;
+    Image                                            _output;
+    Image                                            _suppressed;
+    bool                                             _non_max;
 };
 }
 #endif /*ARM_COMPUTE_NEFASTCORNERS_H */

@@ -45,6 +45,16 @@ class NEUnstack : public IFunction
 public:
     /** Default constructor */
     NEUnstack();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEUnstack(const NEUnstack &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEUnstack &operator=(const NEUnstack &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEUnstack(NEUnstack &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEUnstack &operator=(NEUnstack &&) = delete;
+    /** Default destructor */
+    ~NEUnstack() = default;
     /** Set the input, output and unstacking axis.
      *
      * @param[in]     input         A tensor to be unstacked. Data type supported: All.

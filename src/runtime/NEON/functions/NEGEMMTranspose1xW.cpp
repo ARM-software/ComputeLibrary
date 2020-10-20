@@ -25,9 +25,9 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

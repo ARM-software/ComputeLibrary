@@ -32,6 +32,7 @@
 #include "arm_compute/graph/nodes/Nodes.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
+#include "src/core/NEON/NEKernels.h"
 #include "support/Cast.h"
 #include "support/ToolchainSupport.h"
 

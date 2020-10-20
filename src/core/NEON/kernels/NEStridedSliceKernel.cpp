@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEStridedSliceKernel.h"
+#include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"

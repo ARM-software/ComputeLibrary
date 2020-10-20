@@ -32,6 +32,7 @@
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /**Basic function to run @ref NEDepthConvertLayerKernel */
 class NEDepthConvertLayer : public INESimpleFunctionNoBorder
@@ -43,6 +44,8 @@ public:
     NEDepthConvertLayer(const NEDepthConvertLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers)*/
     const NEDepthConvertLayer &operator=(const NEDepthConvertLayer &) = delete;
+    /** Default destructor */
+    ~NEDepthConvertLayer() = default;
     /** Initialize the function's source, destination
      *
      * Valid conversions Input -> Output :

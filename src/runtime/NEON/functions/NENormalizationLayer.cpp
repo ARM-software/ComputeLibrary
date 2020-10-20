@@ -29,9 +29,13 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+NENormalizationLayer::~NENormalizationLayer() = default;
+
 NENormalizationLayer::NENormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _norm_kernel(), _multiply_f(), _input_squared()
 {
@@ -48,7 +52,8 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, cons
     _memory_group.manage(&_input_squared);
 
     // Configure kernels
-    _norm_kernel.configure(input, &_input_squared, output, norm_info);
+    _norm_kernel = arm_compute::support::cpp14::make_unique<NENormalizationLayerKernel>();
+    _norm_kernel->configure(input, &_input_squared, output, norm_info);
     _multiply_f.configure(input, input, &_input_squared, 1.0f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
 
     // Allocate the tensor once the configure methods have been called
@@ -70,6 +75,6 @@ void NENormalizationLayer::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
     _multiply_f.run();
-    NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
+    NEScheduler::get().schedule(_norm_kernel.get(), Window::DimY);
 }
 }

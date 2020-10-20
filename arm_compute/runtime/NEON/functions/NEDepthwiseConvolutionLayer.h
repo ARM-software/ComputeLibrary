@@ -24,17 +24,16 @@
 #ifndef ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H
 #define ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H
 
-#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/NEON/functions/assembly/NEDepthwiseConvolutionAssemblyDispatch.h"
+#include <memory>
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class NEDepthwiseConvolutionLayerNativeKernel;
 
 /** Function to execute a depthwise convolution.
  */
@@ -51,6 +50,8 @@ public:
     NEDepthwiseConvolutionLayer &operator=(const NEDepthwiseConvolutionLayer &) = delete;
     /** Default move assignment operator */
     NEDepthwiseConvolutionLayer &operator=(NEDepthwiseConvolutionLayer &&) = default;
+    /** Default destructor */
+    ~NEDepthwiseConvolutionLayer();
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
@@ -133,6 +134,8 @@ private:
         NEDepthwiseConvolutionLayerOptimizedInternal &operator=(const NEDepthwiseConvolutionLayerOptimizedInternal &) = delete;
         /** Default move assignment operator */
         NEDepthwiseConvolutionLayerOptimizedInternal &operator=(NEDepthwiseConvolutionLayerOptimizedInternal &&) = default;
+        /** Default destructor */
+        ~NEDepthwiseConvolutionLayerOptimizedInternal() = default;
         /** Initialize the function's source, destination, kernels and border_size.
          *
          * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
@@ -170,25 +173,23 @@ private:
         void prepare() override;
 
     private:
-        MemoryGroup                               _memory_group;
-        NEDepthwiseConvolutionAssemblyDispatch    _dwc_optimized_func;
-        NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
-        NEFillBorderKernel                        _border_handler;
-        NEPermute                                 _permute_input;
-        NEPermute                                 _permute_weights;
-        NEPermute                                 _permute_output;
-        NEActivationLayer                         _activationlayer_function;
-        Tensor                                    _accumulator;
-        Tensor                                    _permuted_input;
-        Tensor                                    _permuted_weights;
-        Tensor                                    _permuted_output;
-        const ITensor                            *_original_weights;
-        bool                                      _has_bias;
-        bool                                      _is_quantized;
-        bool                                      _is_nchw;
-        bool                                      _permute;
-        bool                                      _is_activationlayer_enabled;
-        bool                                      _is_prepared;
+        MemoryGroup                            _memory_group;
+        NEDepthwiseConvolutionAssemblyDispatch _dwc_optimized_func;
+        NEPermute                              _permute_input;
+        NEPermute                              _permute_weights;
+        NEPermute                              _permute_output;
+        NEActivationLayer                      _activationlayer_function;
+        Tensor                                 _accumulator;
+        Tensor                                 _permuted_input;
+        Tensor                                 _permuted_weights;
+        Tensor                                 _permuted_output;
+        const ITensor                         *_original_weights;
+        bool                                   _has_bias;
+        bool                                   _is_quantized;
+        bool                                   _is_nchw;
+        bool                                   _permute;
+        bool                                   _is_activationlayer_enabled;
+        bool                                   _is_prepared;
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernel:
@@ -209,6 +210,8 @@ private:
         NEDepthwiseConvolutionLayerGeneric &operator=(const NEDepthwiseConvolutionLayerGeneric &) = delete;
         /** Default move assignment operator */
         NEDepthwiseConvolutionLayerGeneric &operator=(NEDepthwiseConvolutionLayerGeneric &&) = default;
+        /** Default destructor */
+        ~NEDepthwiseConvolutionLayerGeneric() = default;
         /** Initialize the function's source, destination, weights and convolution information.
          *
          * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
@@ -248,18 +251,18 @@ private:
         void prepare() override;
 
     private:
-        NEDepthwiseConvolutionLayerNativeKernel _depthwise_conv_kernel;
-        NEPermute                               _permute_input;
-        NEPermute                               _permute_weights;
-        NEPermute                               _permute_output;
-        NEActivationLayer                       _activationlayer_function;
-        Tensor                                  _permuted_input;
-        Tensor                                  _permuted_weights;
-        Tensor                                  _permuted_output;
-        bool                                    _is_prepared;
-        bool                                    _is_nchw;
-        bool                                    _is_activationlayer_enabled;
-        const ITensor                          *_original_weights;
+        std::unique_ptr<NEDepthwiseConvolutionLayerNativeKernel> _depthwise_conv_kernel;
+        NEPermute                                                _permute_input;
+        NEPermute                                                _permute_weights;
+        NEPermute                                                _permute_output;
+        NEActivationLayer                                        _activationlayer_function;
+        Tensor                                                   _permuted_input;
+        Tensor                                                   _permuted_weights;
+        Tensor                                                   _permuted_output;
+        bool                                                     _is_prepared;
+        bool                                                     _is_nchw;
+        bool                                                     _is_activationlayer_enabled;
+        const ITensor                                           *_original_weights;
     };
 
     DepthwiseConvolutionFunction                 _depth_conv_func;

@@ -26,14 +26,16 @@
 
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
-#include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Types.h"
+#include <memory>
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class ITensorInfo;
+class NEIm2ColKernel;
 
 /** Basic function to run @ref NEIm2ColKernel */
 class NEIm2Col : public IFunction
@@ -41,6 +43,16 @@ class NEIm2Col : public IFunction
 public:
     /** Default constructor */
     NEIm2Col();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEIm2Col(const NEIm2Col &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEIm2Col &operator=(const NEIm2Col &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEIm2Col(NEIm2Col &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEIm2Col &operator=(NEIm2Col &&) = delete;
+    /** Default destructor */
+    ~NEIm2Col();
     /** Configure the im2col NEON kernel
      *
      * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
@@ -78,8 +90,8 @@ public:
     void run() override;
 
 private:
-    NEIm2ColKernel _kernel;
-    unsigned int   _y_dim;
+    std::unique_ptr<NEIm2ColKernel> _kernel;
+    unsigned int                    _y_dim;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEIM2COL_H */

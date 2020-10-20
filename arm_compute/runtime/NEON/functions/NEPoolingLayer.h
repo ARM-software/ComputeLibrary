@@ -26,13 +26,15 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
 #include "arm_compute/core/Types.h"
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
+class NEPoolingLayerKernel;
+class NEFillBorderKernel;
 
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following NEON kernels:
  *
@@ -44,6 +46,16 @@ class NEPoolingLayer : public IFunction
 public:
     /** Constructor */
     NEPoolingLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEPoolingLayer(const NEPoolingLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEPoolingLayer &operator=(const NEPoolingLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEPoolingLayer(NEPoolingLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEPoolingLayer &operator=(NEPoolingLayer &&) = delete;
+    /** Default destructor */
+    ~NEPoolingLayer();
     /** Set the input and output tensors.
      *
      * @note F16 is supported for pool sizes 2 and 3 only
@@ -71,10 +83,10 @@ public:
     void run() override;
 
 private:
-    NEPoolingLayerKernel _pooling_layer_kernel;
-    NEFillBorderKernel   _border_handler;
-    bool                 _is_global_pooling_layer;
-    DataLayout           _data_layout;
+    std::unique_ptr<NEPoolingLayerKernel> _pooling_layer_kernel;
+    std::unique_ptr<NEFillBorderKernel>   _border_handler;
+    bool                                  _is_global_pooling_layer;
+    DataLayout                            _data_layout;
 };
 }
 #endif /* ARM_COMPUTE_NEPOOLINGLAYER_H */

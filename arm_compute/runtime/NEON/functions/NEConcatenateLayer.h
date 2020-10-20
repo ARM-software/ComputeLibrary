@@ -26,7 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INEOperator.h"
 #include "support/Requires.h"
@@ -106,8 +105,18 @@ namespace experimental
 class NEConcatenation : public INEOperator
 {
 public:
-    /** Default constructor */
+    /** Constructor */
     NEConcatenation();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConcatenation(const NEConcatenation &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConcatenation &operator=(const NEConcatenation &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConcatenation(NEConcatenation &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConcatenation &operator=(NEConcatenation &&) = delete;
+    /** Default destructor */
+    ~NEConcatenation() = default;
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
@@ -135,9 +144,9 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::vector<std::unique_ptr<INEKernel>> _concat_kernels;
-    unsigned int                            _num_inputs;
-    unsigned int                            _axis;
+    std::vector<std::unique_ptr<ICPPKernel>> _concat_kernels;
+    unsigned int                             _num_inputs;
+    unsigned int                             _axis;
 };
 } // namespace experimental
 } // namespace arm_compute

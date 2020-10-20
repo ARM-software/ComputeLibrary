@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEChannelExtractKernel.h"
+#include "src/core/NEON/kernels/NEChannelExtractKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -29,11 +29,11 @@
 #include "arm_compute/core/IMultiImage.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/MultiImageInfo.h"
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/NEON/INEKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 

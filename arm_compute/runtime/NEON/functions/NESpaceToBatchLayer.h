@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,13 +26,15 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEMemsetKernel.h"
-#include "arm_compute/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
 #include "arm_compute/core/Types.h"
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
+class NESpaceToBatchLayerKernel;
+class NEMemsetKernel;
 
 /** Basic function to spatial divide a tensor. This function calls the following NEON kernels/functions:
  *
@@ -53,7 +55,7 @@ public:
     /** Allow instances of this class to be moved */
     NESpaceToBatchLayer &operator=(NESpaceToBatchLayer &&) = default;
     /** Default destructor */
-    virtual ~NESpaceToBatchLayer() = default;
+    ~NESpaceToBatchLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -99,9 +101,9 @@ public:
     void run() override;
 
 private:
-    NESpaceToBatchLayerKernel _space_to_batch_kernel; /**< SpaceToBatch kernel to run */
-    NEMemsetKernel            _memset_kernel;         /**< Memset kernel to run */
-    bool                      _has_padding;           /**< Flag to check if the output has padding */
+    std::unique_ptr<NESpaceToBatchLayerKernel> _space_to_batch_kernel; /**< SpaceToBatch kernel to run */
+    std::unique_ptr<NEMemsetKernel>            _memset_kernel;         /**< Memset kernel to run */
+    bool                                       _has_padding;           /**< Flag to check if the output has padding */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NESPACETOBATCHLAYER_H */

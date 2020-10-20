@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,16 @@ class NELaplacianPyramid : public IFunction
 public:
     /** Constructor */
     NELaplacianPyramid();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELaplacianPyramid(const NELaplacianPyramid &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELaplacianPyramid &operator=(const NELaplacianPyramid &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELaplacianPyramid(NELaplacianPyramid &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELaplacianPyramid &operator=(NELaplacianPyramid &&) = delete;
+    /** Default destructor */
+    ~NELaplacianPyramid();
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in]  input                 Source tensor. Data type supported: U8.

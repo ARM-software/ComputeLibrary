@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_NERNNLAYER_H
 #define ARM_COMPUTE_NERNNLAYER_H
 
-#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
@@ -36,6 +34,7 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class NECopyKernel;
 
 /** Basic function to run @ref NERNNLayer */
 class NERNNLayer : public IFunction
@@ -51,6 +50,8 @@ public:
     NERNNLayer &operator=(const NERNNLayer &) = delete;
     /** Default move assignment operator */
     NERNNLayer &operator=(NERNNLayer &&) = default;
+    /** Default destructor */
+    ~NERNNLayer();
     /** Initialize the function
      *
      * @param[in]     input             Input is a 2-D tensor of shape [input_size, batch_size]. Data types supported: F16/F32
@@ -82,16 +83,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup           _memory_group;
-    NEGEMM                _gemm_state_f;
-    NEArithmeticAddition  _add_f;
-    NEActivationLayer     _activation;
-    NEFullyConnectedLayer _fully_connected;
-    NECopyKernel          _copy_kernel;
-    Tensor                _fully_connected_out;
-    Tensor                _gemm_output;
-    Tensor                _add_output;
-    bool                  _is_prepared;
+    MemoryGroup                   _memory_group;
+    NEGEMM                        _gemm_state_f;
+    NEArithmeticAddition          _add_f;
+    NEActivationLayer             _activation;
+    NEFullyConnectedLayer         _fully_connected;
+    std::unique_ptr<NECopyKernel> _copy_kernel;
+    Tensor                        _fully_connected_out;
+    Tensor                        _gemm_output;
+    Tensor                        _add_output;
+    bool                          _is_prepared;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NERNNLAYER_H */

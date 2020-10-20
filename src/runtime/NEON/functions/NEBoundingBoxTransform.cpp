@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
+#include "src/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 
 #include "support/MemorySupport.h"
 

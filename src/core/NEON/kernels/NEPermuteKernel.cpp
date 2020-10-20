@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
+#include "src/core/NEON/kernels/NEPermuteKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -123,7 +123,7 @@ void NEPermuteKernel::run_permute(const Window &window)
     // Input window
     Window window_in = window;
 
-    // we only support these two configs in arm_compute/core/NEON/kernels/convolution/common/shims.hpp, for all others
+    // we only support these two configs in src/core/NEON/kernels/convolution/common/shims.hpp, for all others
     // we have to fall back to C++
     if((input_layout == DataLayout::NCHW && _perm == PermutationVector{ 2U, 0U, 1U }) || (input_layout == DataLayout::NHWC && _perm == PermutationVector{ 1U, 2U, 0U }))
     {

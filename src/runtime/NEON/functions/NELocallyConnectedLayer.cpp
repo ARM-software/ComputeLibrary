@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,12 +27,16 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEIm2ColKernel.h"
+#include "src/core/NEON/kernels/NELocallyConnectedMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
+#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <tuple>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 void calculate_shapes(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
@@ -70,9 +74,10 @@ void calculate_shapes(const ITensorInfo *input, const ITensorInfo *weights, cons
     shape_gemm.set(1, mat_input_rows);
 }
 } // namespace
+NELocallyConnectedLayer::~NELocallyConnectedLayer() = default;
 
 NELocallyConnectedLayer::NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(),
+    : _memory_group(std::move(memory_manager)), _input_im2col(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(),
       _is_prepared(false), _original_weights(nullptr)
 {
 }
@@ -113,10 +118,10 @@ Status NELocallyConnectedLayer::validate(const ITensorInfo *input, const ITensor
     TensorInfo input_im2col_reshaped_info(shape_im2col, 1, input->data_type());
     TensorInfo gemm_output_info(shape_gemm, 1, input->data_type());
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &input_im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, has_bias));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEIm2Col::validate(input, &input_im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, has_bias));
     ARM_COMPUTE_RETURN_ON_ERROR(NEWeightsReshapeKernel::validate(weights, biases, &weights_reshaped_info));
     ARM_COMPUTE_RETURN_ON_ERROR(NELocallyConnectedMatrixMultiplyKernel::validate(&input_im2col_reshaped_info, &weights_reshaped_info, &gemm_output_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(NECol2ImKernel::validate(&gemm_output_info, output, Size2D(conv_w, conv_h)));
+    ARM_COMPUTE_RETURN_ON_ERROR(NECol2Im::validate(&gemm_output_info, output, Size2D(conv_w, conv_h)));
 
     return Status{};
 }
@@ -154,10 +159,12 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     _memory_group.manage(&_gemm_output);
 
     // Configure kernels
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
-    _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
-    _mm_kernel.configure(&_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
-    _output_col2im_kernel.configure(&_gemm_output, output, Size2D(conv_w, conv_h));
+    _input_im2col.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
+    _weights_reshape_kernel = arm_compute::support::cpp14::make_unique<NEWeightsReshapeKernel>();
+    _weights_reshape_kernel->configure(weights, biases, &_weights_reshaped);
+    _mm_kernel = arm_compute::support::cpp14::make_unique<NELocallyConnectedMatrixMultiplyKernel>();
+    _mm_kernel->configure(&_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
+    _output_col2im.configure(&_gemm_output, output, Size2D(conv_w, conv_h));
 
     // Allocate intermediate tensors
     _input_im2col_reshaped.allocator()->allocate();
@@ -171,13 +178,13 @@ void NELocallyConnectedLayer::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run input reshaping
-    NEScheduler::get().schedule(&_input_im2col_kernel, Window::DimY);
+    _input_im2col.run();
 
     // Runs GEMM on reshaped matrices
-    NEScheduler::get().schedule(&_mm_kernel, Window::DimX);
+    NEScheduler::get().schedule(_mm_kernel.get(), Window::DimX);
 
     // Reshape output matrix
-    NEScheduler::get().schedule(&_output_col2im_kernel, Window::DimY);
+    _output_col2im.run();
 }
 
 void NELocallyConnectedLayer::prepare()
@@ -188,9 +195,10 @@ void NELocallyConnectedLayer::prepare()
 
         // Run weights reshaping and mark original weights tensor as unused
         _weights_reshaped.allocator()->allocate();
-        NEScheduler::get().schedule(&_weights_reshape_kernel, 3);
+        NEScheduler::get().schedule(_weights_reshape_kernel.get(), 3);
         _original_weights->mark_as_unused();
 
         _is_prepared = true;
     }
 }
+} // namespace arm_compute

@@ -23,12 +23,16 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEHOGGradient.h"
 
-#include "arm_compute/core/NEON/kernels/NEMagnitudePhaseKernel.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEDerivativeKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEMagnitudePhaseKernel.h"
 #include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEHOGGradient::~NEHOGGradient() = default;
 
 NEHOGGradient::NEHOGGradient(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
@@ -88,3 +92,4 @@ void NEHOGGradient::run()
     // Run magnitude/phase kernel
     NEScheduler::get().schedule(_mag_phase.get(), Window::DimY);
 }
+} // namespace arm_compute

@@ -26,9 +26,13 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+NEInstanceNormalizationLayer::~NEInstanceNormalizationLayer() = default;
+
 NEInstanceNormalizationLayer::NEInstanceNormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _normalization_kernel(), _is_nchw(false), _permute_input(), _permute_output(), _permuted_input(), _permuted_output()
 {
@@ -42,6 +46,8 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
     // Configure Kernels
     _is_nchw = data_layout == DataLayout::NCHW;
 
+    _normalization_kernel = arm_compute::support::cpp14::make_unique<NEInstanceNormalizationLayerKernel>();
+
     if(!_is_nchw)
     {
         _memory_group.manage(&_permuted_input);
@@ -51,7 +57,7 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
         _permute_input.configure(input, &_permuted_input, PermutationVector(1U, 2U, 0U));
         _permuted_input.info()->set_data_layout(DataLayout::NCHW);
 
-        _normalization_kernel.configure(&_permuted_input, &_permuted_output, kernel_descriptor);
+        _normalization_kernel->configure(&_permuted_input, &_permuted_output, kernel_descriptor);
         _permuted_output.info()->set_data_layout(DataLayout::NCHW);
 
         _permute_output.configure(&_permuted_output, output != nullptr ? output : input, PermutationVector(2U, 0U, 1U));
@@ -60,7 +66,7 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
     }
     else
     {
-        _normalization_kernel.configure(input, output, kernel_descriptor);
+        _normalization_kernel->configure(input, output, kernel_descriptor);
     }
 }
 
@@ -81,7 +87,7 @@ void NEInstanceNormalizationLayer::run()
         _permute_input.run();
     }
 
-    NEScheduler::get().schedule(&_normalization_kernel, Window::DimZ);
+    NEScheduler::get().schedule(_normalization_kernel.get(), Window::DimZ);
 
     // Permute output
     if(!_is_nchw)

@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEChannelShuffleLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEChannelShuffleLayerKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/NEON/kernels/NEChannelShuffleLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

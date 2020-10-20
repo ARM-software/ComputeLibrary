@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEBitwiseOr.h"
 
-#include "arm_compute/core/NEON/kernels/NEBitwiseOrKernel.h"
+#include "src/core/NEON/kernels/NEBitwiseOrKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

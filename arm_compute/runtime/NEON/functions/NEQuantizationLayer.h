@@ -26,7 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/Types.h"
@@ -34,6 +33,7 @@
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to simulate a quantization layer. This function calls the following NEON kernels:
  *
@@ -44,8 +44,6 @@ class ITensor;
 class NEQuantizationLayer : public INESimpleFunctionNoBorder
 {
 public:
-    /** Default constructor */
-    NEQuantizationLayer() = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.

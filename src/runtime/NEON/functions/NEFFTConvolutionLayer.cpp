@@ -27,6 +27,12 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/NEON/kernels/NECopyKernel.h"
+#include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
+#include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
+#include "src/core/NEON/kernels/NEFFTScaleKernel.h"
+#include "src/core/NEON/kernels/NEPadLayerKernel.h"
+#include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/helpers/fft.h"
 
@@ -96,6 +102,7 @@ NEFFTConvolutionLayer::NEFFTConvolutionLayer(std::shared_ptr<IMemoryManager> mem
       _is_prepared(false)
 {
 }
+NEFFTConvolutionLayer::~NEFFTConvolutionLayer() = default;
 
 void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
                                       const ActivationLayerInfo &act_info)

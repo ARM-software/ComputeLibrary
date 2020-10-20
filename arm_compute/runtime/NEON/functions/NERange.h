@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,13 +24,15 @@
 #ifndef ARM_COMPUTE_NERANGE_H
 #define ARM_COMPUTE_NERANGE_H
 
-#include "arm_compute/core/NEON/kernels/NERangeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
+class NERangeKernel;
 
 /** Basic function to run @ref NERangeKernel
  *
@@ -42,6 +44,16 @@ class NERange : public IFunction
 public:
     /** Default constructor */
     NERange();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NERange(const NERange &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NERange &operator=(const NERange &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NERange(NERange &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NERange &operator=(NERange &&) = delete;
+    /** Default destructor */
+    ~NERange();
     /** Initialize the kernel's start, end, step and output tensor.
      *
      * @param[out] output Output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
@@ -65,7 +77,7 @@ public:
     void run() override;
 
 private:
-    NERangeKernel _kernel;
+    std::unique_ptr<NERangeKernel> _kernel;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NERANGE_H */

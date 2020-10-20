@@ -29,10 +29,13 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"
 
 #include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEBatchNormalizationLayer::~NEBatchNormalizationLayer() = default;
 
 NEBatchNormalizationLayer::NEBatchNormalizationLayer()
     : _norm_kernel()
@@ -43,7 +46,8 @@ void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const
                                           ActivationLayerInfo act_info)
 {
     // Configure kernel
-    _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon, act_info);
+    _norm_kernel = arm_compute::support::cpp14::make_unique<NEBatchNormalizationLayerKernel>();
+    _norm_kernel->configure(input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
 Status NEBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta, const ITensorInfo *gamma,
@@ -55,5 +59,6 @@ Status NEBatchNormalizationLayer::validate(const ITensorInfo *input, const ITens
 
 void NEBatchNormalizationLayer::run()
 {
-    NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
+    NEScheduler::get().schedule(_norm_kernel.get(), Window::DimY);
 }
+} // namespace arm_compute

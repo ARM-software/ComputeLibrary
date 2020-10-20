@@ -24,19 +24,20 @@
 #ifndef ARM_COMPUTE_NEBOUNDINGBOXTRANSOFORM_H
 #define ARM_COMPUTE_NEBOUNDINGBOXTRANSOFORM_H
 
-#include "arm_compute/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEBoundingBoxTransformKernel.
  *
  * This function calls the following Neon kernels:
  * -# @ref NEBoundingBoxTransformKernel
  */
-class NEBoundingBoxTransform : public INESimpleFunction
+class NEBoundingBoxTransform : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and output tensors.

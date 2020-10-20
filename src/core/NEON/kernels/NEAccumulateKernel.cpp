@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEAccumulateKernel.h"
+#include "src/core/NEON/kernels/NEAccumulateKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -33,13 +33,8 @@
 
 #include <arm_neon.h>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 /* Max S16 value used for saturation purposes. */
 const static uint16x8_t max_int_u16 = vdupq_n_u16(static_cast<uint16_t>(INT16_MAX));
 
@@ -361,3 +356,4 @@ void NEAccumulateSquaredKernel::run(const Window &window, const ThreadInfo &info
     },
     input, accum);
 }
+} // namespace arm_compute

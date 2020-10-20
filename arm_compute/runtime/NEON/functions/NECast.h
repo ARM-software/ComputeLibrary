@@ -25,16 +25,17 @@
 #define ARM_COMPUTE_NECAST_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEDepthConvertLayerKernel.
  * This function ignores the scale and zeroPoint of quanized tensors,so QASYMM8 input is treated as uint8 values.
  */
-class NECast : public INESimpleFunction
+class NECast : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function's source, destination

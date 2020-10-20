@@ -24,9 +24,9 @@
 #ifndef SRC_ASSEMBLY_DEPTHWISE_CONVOLUTION_ASSEMBLY_WRAPPER_KERNEL_H
 #define SRC_ASSEMBLY_DEPTHWISE_CONVOLUTION_ASSEMBLY_WRAPPER_KERNEL_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/NEON/INEKernel.h"
 
 #include "src/core/NEON/kernels/convolution/depthwise/depthwise.hpp"
 

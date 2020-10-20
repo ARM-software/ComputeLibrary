@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEMinMaxLayerKernel.h"
+#include "src/core/NEON/kernels/NEMinMaxLayerKernel.h"
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"

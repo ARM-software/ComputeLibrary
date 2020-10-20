@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,19 +24,21 @@
 #ifndef ARM_COMPUTE_NEFFT1D_H
 #define ARM_COMPUTE_NEFFT1D_H
 
-#include "arm_compute/core/NEON/kernels/NEFFTDigitReverseKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFFTRadixStageKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFFTScaleKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include <memory>
+
 namespace arm_compute
 {
 // Forward declaration
 class ITensor;
+class NEFFTDigitReverseKernel;
+class NEFFTRadixStageKernel;
+class NEFFTScaleKernel;
 
 /** Basic function to execute one dimensional FFT. This function calls the following NEON kernels:
  *
@@ -49,6 +51,16 @@ class NEFFT1D : public IFunction
 public:
     /** Default Constructor */
     NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFFT1D(const NEFFT1D &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFFT1D &operator=(const NEFFT1D &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEFFT1D(NEFFT1D &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEFFT1D &operator=(NEFFT1D &&) = delete;
+    /** Default destructor */
+    ~NEFFT1D();
     /** Initialise the function's source and destinations.
      *
      * @param[in]  input  Source tensor. Data types supported: F32. Number of channels supported: 1 (real tensor) or 2 (complex tensor).
@@ -71,15 +83,15 @@ public:
     void run() override;
 
 protected:
-    MemoryGroup                        _memory_group;
-    NEFFTDigitReverseKernel            _digit_reverse_kernel;
-    std::vector<NEFFTRadixStageKernel> _fft_kernels;
-    NEFFTScaleKernel                   _scale_kernel;
-    Tensor                             _digit_reversed_input;
-    Tensor                             _digit_reverse_indices;
-    unsigned int                       _num_ffts;
-    unsigned int                       _axis;
-    bool                               _run_scale;
+    MemoryGroup                                         _memory_group;
+    std::unique_ptr<NEFFTDigitReverseKernel>            _digit_reverse_kernel;
+    std::vector<std::unique_ptr<NEFFTRadixStageKernel>> _fft_kernels;
+    std::unique_ptr<NEFFTScaleKernel>                   _scale_kernel;
+    Tensor                                              _digit_reversed_input;
+    Tensor                                              _digit_reverse_indices;
+    unsigned int                                        _num_ffts;
+    unsigned int                                        _axis;
+    bool                                                _run_scale;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEFFT1D_H */

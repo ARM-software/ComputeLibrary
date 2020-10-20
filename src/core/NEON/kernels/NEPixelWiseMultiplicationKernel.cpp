@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
+#include "src/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 
 #include "arm_compute/core/TensorInfo.h"
 #include "src/core/CPP/Validate.h"

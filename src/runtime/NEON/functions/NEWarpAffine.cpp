@@ -24,8 +24,9 @@
 #include "arm_compute/runtime/NEON/functions/NEWarpAffine.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEWarpKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
@@ -58,5 +59,7 @@ void NEWarpAffine::configure(ITensor *input, ITensor *output, const std::array<f
             ARM_COMPUTE_ERROR("Interpolation type not supported");
     }
 
-    _border_handler.configure(input, _kernel->border_size(), border_mode, constant_border_value);
+    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    b->configure(input, _kernel->border_size(), border_mode, constant_border_value);
+    _border_handler = std::move(b);
 }

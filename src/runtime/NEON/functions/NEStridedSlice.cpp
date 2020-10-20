@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/NEON/functions/NEStridedSlice.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEStridedSliceKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

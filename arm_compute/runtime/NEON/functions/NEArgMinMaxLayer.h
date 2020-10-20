@@ -52,6 +52,16 @@ class NEArgMinMaxLayer : public IFunction
 public:
     /** Constructor */
     NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEArgMinMaxLayer(const NEArgMinMaxLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEArgMinMaxLayer &operator=(const NEArgMinMaxLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEArgMinMaxLayer(NEArgMinMaxLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEArgMinMaxLayer &operator=(NEArgMinMaxLayer &&) = delete;
+    /** Default destructor */
+    ~NEArgMinMaxLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input  Input source tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/S32/F16/F32.

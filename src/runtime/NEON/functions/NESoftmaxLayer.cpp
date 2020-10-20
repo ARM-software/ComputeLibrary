@@ -24,13 +24,19 @@
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
 
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NESoftmaxLayerKernel.h"
+#include "src/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+template <bool IS_LOG>
+NESoftmaxLayerGeneric<IS_LOG>::~NESoftmaxLayerGeneric() = default;
+
 template <bool IS_LOG>
 NESoftmaxLayerGeneric<IS_LOG>::NESoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _permute_input(), _permute_output(), _max_kernel(), _softmax_kernel(), _fill_border_kernel(), _max(), _tmp(), _input_permuted(), _output_permuted(),
@@ -76,15 +82,17 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
     _memory_group.manage(&_max);
     _memory_group.manage(&_tmp);
 
-    // Configure Kernels
-    _max_kernel.configure(tmp_input, &_max);
+    // Configure kernels
+    _max_kernel     = arm_compute::support::cpp14::make_unique<NELogits1DMaxKernel>();
+    _softmax_kernel = arm_compute::support::cpp14::make_unique<NELogits1DSoftmaxKernel<IS_LOG>>();
+    _max_kernel->configure(tmp_input, &_max);
     if(_needs_permute)
     {
         // Add to the memory manager _output_permuted
         _memory_group.manage(&_output_permuted);
 
         // The normalization kernel stores the result in a permuted output tensor
-        _softmax_kernel.configure(tmp_input, &_max, &_output_permuted, beta, &_tmp);
+        _softmax_kernel->configure(tmp_input, &_max, &_output_permuted, beta, &_tmp);
         _input_permuted.allocator()->allocate();
 
         // Re-permute the permuted output into the requested (4D) output
@@ -96,8 +104,9 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
     else
     {
         // Softmax 2D case
-        _fill_border_kernel.configure(tmp_input, _max_kernel.border_size(), BorderMode::REPLICATE);
-        _softmax_kernel.configure(tmp_input, &_max, output, beta, &_tmp);
+        _fill_border_kernel = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+        _fill_border_kernel->configure(tmp_input, _max_kernel->border_size(), BorderMode::REPLICATE);
+        _softmax_kernel->configure(tmp_input, &_max, output, beta, &_tmp);
     }
 
     // Allocate intermediate buffers
@@ -152,10 +161,13 @@ void           NESoftmaxLayerGeneric<IS_LOG>::run()
     {
         _permute_input.run();
     }
+    else
+    {
+        NEScheduler::get().schedule(_fill_border_kernel.get(), Window::DimY);
+    }
 
-    NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
-    NEScheduler::get().schedule(&_max_kernel, Window::DimY);
-    NEScheduler::get().schedule(&_softmax_kernel, Window::DimY);
+    NEScheduler::get().schedule(_max_kernel.get(), Window::DimY);
+    NEScheduler::get().schedule(_softmax_kernel.get(), Window::DimY);
 
     if(_needs_permute)
     {

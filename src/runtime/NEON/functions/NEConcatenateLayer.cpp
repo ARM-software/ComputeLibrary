@@ -23,10 +23,10 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEBatchConcatenateLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
+#include "src/core/NEON/kernels/NEBatchConcatenateLayerKernel.h"
+#include "src/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
+#include "src/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
+#include "src/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"

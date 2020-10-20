@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,12 +26,12 @@
 
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
-#include "arm_compute/core/NEON/kernels/NEYOLOLayerKernel.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEYOLOLayerKernel */
 class NEYOLOLayer : public INESimpleFunctionNoBorder

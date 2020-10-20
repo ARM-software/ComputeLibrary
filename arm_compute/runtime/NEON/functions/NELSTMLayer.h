@@ -24,18 +24,17 @@
 #ifndef ARM_COMPUTE_NELSTMLAYER_H
 #define ARM_COMPUTE_NELSTMLAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
+#include "arm_compute/runtime/NEON/functions/NECopy.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
+#include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 
 namespace arm_compute
@@ -49,6 +48,16 @@ class NELSTMLayer : public IFunction
 public:
     /** Default constructor */
     NELSTMLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELSTMLayer(const NELSTMLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELSTMLayer &operator=(const NELSTMLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELSTMLayer(NELSTMLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELSTMLayer &operator=(NELSTMLayer &&) = delete;
+    /** Default destructor */
+    ~NELSTMLayer();
     /** Initialize function's tensors.
      *
      * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: F16/F32.
@@ -158,7 +167,7 @@ private:
     NEActivationLayer              _activation_forget_gate;
     NEFullyConnectedLayer          _fully_connected_cell_state;
     NEGEMM                         _gemm_cell_state1;
-    NETransposeKernel              _transpose_cell_state;
+    NETranspose                    _transpose_cell_state;
     NEArithmeticAddition           _accum_cell_state1;
     NEArithmeticAddition           _accum_cell_state2;
     NEPixelWiseMultiplication      _pixelwise_mul_cell_state1;
@@ -173,8 +182,8 @@ private:
     NEPixelWiseMultiplication      _pixelwise_mul_output_state2;
     NEFullyConnectedLayer          _fully_connected_output_state;
     NEActivationLayer              _projection_clip;
-    NECopyKernel                   _copy_cell_state;
-    NECopyKernel                   _copy_output;
+    NECopy                         _copy_cell_state;
+    NECopy                         _copy_output;
     NEConcatenateLayer             _concat_scratch_buffer;
     NEConcatenateLayer             _concat_inputs_forget_gate;
     NEConcatenateLayer             _concat_weights_forget_gate;

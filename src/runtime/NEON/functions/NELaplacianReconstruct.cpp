@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NELaplacianReconstruct.h"
 
+#include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/ITensor.h"
@@ -31,7 +32,9 @@
 
 #include <cstddef>
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NELaplacianReconstruct::~NELaplacianReconstruct() = default;
 
 NELaplacianReconstruct::NELaplacianReconstruct() // NOLINT
     : _tmp_pyr(),
@@ -100,3 +103,4 @@ void NELaplacianReconstruct::run()
 
     _depthf.run();
 }
+} // namespace arm_compute

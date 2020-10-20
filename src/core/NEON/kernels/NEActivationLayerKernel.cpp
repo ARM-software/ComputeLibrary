@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
+#include "src/core/NEON/kernels/NEActivationLayerKernel.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,14 @@
 #ifndef ARM_COMPUTE_NEHOGDETECTOR_H
 #define ARM_COMPUTE_NEHOGDETECTOR_H
 
+#include "arm_compute/core/IArray.h"
 #include "arm_compute/core/IHOG.h"
-#include "arm_compute/core/NEON/kernels/NEHOGDetectorKernel.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
+class ITensor;
+class ITensorInfo;
 /** Basic function to execute HOG detector based on linear SVM. This function calls the following NEON kernel:
  *
  * -# @ref NEHOGDetectorKernel
@@ -38,6 +40,18 @@ namespace arm_compute
 class NEHOGDetector : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NEHOGDetector() = default;
+    /** Prevent instances of this class from being copied */
+    NEHOGDetector(const NEHOGDetector &) = delete;
+    /** Default move constructor */
+    NEHOGDetector(NEHOGDetector &&) = default;
+    /** Prevent instances of this class from being copied */
+    NEHOGDetector &operator=(const NEHOGDetector &) = delete;
+    /** Default move assignment operator */
+    NEHOGDetector &operator=(NEHOGDetector &&) = default;
+    /** Destructor */
+    ~NEHOGDetector();
     /** Initialise the kernel's input, output, HOG data object, detection window stride, threshold and index class
      *
      * @attention The function does not reset the number of values in @ref IDetectionWindowArray so it is caller's responsibility to clear it.

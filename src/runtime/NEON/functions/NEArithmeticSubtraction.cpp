@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
+#include "src/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

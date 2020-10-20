@@ -23,18 +23,25 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEIntegralImage.h"
 
-#include "arm_compute/core/NEON/kernels/NEIntegralImageKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEIntegralImageKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEIntegralImage::~NEIntegralImage() = default;
 
 void NEIntegralImage::configure(const ITensor *input, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEIntegralImageKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
-    _border_handler.configure(output, _kernel->border_size(), BorderMode::CONSTANT, PixelValue());
+
+    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    b->configure(output, _kernel->border_size(), BorderMode::CONSTANT, PixelValue());
+    _border_handler = std::move(b);
 }
+} // namespace arm_compute

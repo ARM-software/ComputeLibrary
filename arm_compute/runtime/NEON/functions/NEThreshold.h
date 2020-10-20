@@ -34,6 +34,7 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEThresholdKernel */
 class NEThreshold : public INESimpleFunctionNoBorder

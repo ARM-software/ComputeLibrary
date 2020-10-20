@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEGEMMLOWPASSEMBLYMATRIXMULTIPLYCORE_H
 #define ARM_COMPUTE_NEGEMMLOWPASSEMBLYMATRIXMULTIPLYCORE_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -37,6 +36,9 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class NEGEMMInterleave4x4Kernel;
+class NEGEMMTranspose1xWKernel;
+class NEGEMMLowpMatrixMultiplyKernel;
 
 /** Basic function to execute matrix multiply assembly kernels. */
 class NEGEMMLowpAssemblyMatrixMultiplyCore : public IFunction
@@ -44,6 +46,9 @@ class NEGEMMLowpAssemblyMatrixMultiplyCore : public IFunction
 public:
     /** Constructor */
     NEGEMMLowpAssemblyMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Destructor */
+    ~NEGEMMLowpAssemblyMatrixMultiplyCore();
+
     /** Initialise the kernel's inputs, output
      *
      * @param[in]  a      First input tensor  (Matrix A). Data type supported: U8, S8.
@@ -57,13 +62,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                _memory_group;
-    NEGEMMAssemblyDispatch     _asm_glue;
-    std::unique_ptr<INEKernel> _mm_kernel;
-    std::unique_ptr<INEKernel> _mtx_a_reshape_kernel;
-    std::unique_ptr<INEKernel> _mtx_b_reshape_kernel;
-    Tensor                     _tmp_a;
-    Tensor                     _tmp_b;
+    MemoryGroup                                     _memory_group;
+    NEGEMMAssemblyDispatch                          _asm_glue;
+    std::unique_ptr<NEGEMMLowpMatrixMultiplyKernel> _mm_kernel;
+    std::unique_ptr<NEGEMMInterleave4x4Kernel>      _mtx_a_reshape_kernel;
+    std::unique_ptr<NEGEMMTranspose1xWKernel>       _mtx_b_reshape_kernel;
+    Tensor                                          _tmp_a;
+    Tensor                                          _tmp_b;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMMLOWPASSEMBLYMATRIXMULTIPLYCORE_H */

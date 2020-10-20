@@ -27,7 +27,10 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/NEON/kernels/NECopyKernel.h"
+#include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -47,6 +50,8 @@ uint32_t last_padding_dimension(const PaddingList &padding)
 }
 } // namespace
 
+NEPadLayer::~NEPadLayer() = default;
+
 NEPadLayer::NEPadLayer()
     : _copy_kernel(), _pad_kernel(), _mode(), _padding(), _num_dimensions(0), _slice_functions(), _concat_functions(), _slice_results(), _concat_results()
 {
@@ -54,7 +59,8 @@ NEPadLayer::NEPadLayer()
 
 void NEPadLayer::configure_constant_mode(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value)
 {
-    _pad_kernel.configure(input, output, padding, constant_value, PaddingMode::CONSTANT);
+    _pad_kernel = arm_compute::support::cpp14::make_unique<NEPadLayerKernel>();
+    _pad_kernel->configure(input, output, padding, constant_value, PaddingMode::CONSTANT);
 }
 
 void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *output)
@@ -195,7 +201,8 @@ void NEPadLayer::configure(ITensor *input, ITensor *output, const PaddingList &p
     else
     {
         // Copy the input to the whole output if no padding is applied
-        _copy_kernel.configure(input, output);
+        _copy_kernel = arm_compute::support::cpp14::make_unique<NECopyKernel>();
+        _copy_kernel->configure(input, output);
     }
 }
 
@@ -251,7 +258,7 @@ void NEPadLayer::run()
         {
             case PaddingMode::CONSTANT:
             {
-                NEScheduler::get().schedule(&_pad_kernel, Window::DimZ);
+                NEScheduler::get().schedule(_pad_kernel.get(), Window::DimZ);
                 break;
             }
             case PaddingMode::REFLECT:
@@ -280,7 +287,7 @@ void NEPadLayer::run()
     }
     else
     {
-        NEScheduler::get().schedule(&_copy_kernel, Window::DimY);
+        NEScheduler::get().schedule(_copy_kernel.get(), Window::DimY);
     }
 }
 } // namespace arm_compute

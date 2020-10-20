@@ -23,10 +23,10 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Types.h"
+#include "src/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
@@ -35,6 +35,8 @@ namespace arm_compute
 {
 namespace experimental
 {
+NEReshape::~NEReshape() = default;
+
 void NEReshape::configure(const ITensorInfo *input, ITensorInfo *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();

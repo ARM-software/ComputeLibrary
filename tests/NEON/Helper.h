@@ -26,6 +26,8 @@
 
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "support/MemorySupport.h"
 #include "tests/Globals.h"
 
@@ -52,7 +54,7 @@ void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&.
 
 /** This template synthetizes an INESimpleFunction which runs the given kernel K */
 template <typename K>
-class NESynthetizeFunction : public INESimpleFunction
+class NESynthetizeFunction : public INESimpleFunctionNoBorder
 {
 public:
     /** Configure the kernel.
@@ -93,7 +95,10 @@ public:
         auto k = arm_compute::support::cpp14::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
-        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
+
+        auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+        b->configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
+        _border_handler = std::move(b);
     }
 };
 
@@ -113,7 +118,10 @@ public:
         auto k = arm_compute::support::cpp14::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
-        _border_handler.configure(first, BorderSize(_kernel->border_size()), BorderMode::CONSTANT, PixelValue());
+
+        auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+        b->configure(first, BorderSize(_kernel->border_size()), BorderMode::CONSTANT, PixelValue());
+        _border_handler = std::move(b);
     }
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,13 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NESobel7x7Kernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NESobel7x7::~NESobel7x7() = default;
 
 NESobel7x7::NESobel7x7(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _sobel_hor(), _sobel_vert(), _tmp_x(), _tmp_y(), _border_handler()
@@ -45,6 +50,9 @@ void NESobel7x7::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
     const bool run_sobel_y = output_y != nullptr;
 
     TensorInfo tensor_info(input->info()->tensor_shape(), Format::S32);
+    _sobel_hor      = arm_compute::support::cpp14::make_unique<NESobel7x7HorKernel>();
+    _sobel_vert     = arm_compute::support::cpp14::make_unique<NESobel7x7VertKernel>();
+    _border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
 
     if(run_sobel_x && run_sobel_y)
     {
@@ -52,8 +60,8 @@ void NESobel7x7::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
         _tmp_y.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_x);
         _memory_group.manage(&_tmp_y);
-        _sobel_hor.configure(input, &_tmp_x, &_tmp_y, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(&_tmp_x, &_tmp_y, output_x, output_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor->configure(input, &_tmp_x, &_tmp_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert->configure(&_tmp_x, &_tmp_y, output_x, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
         _tmp_y.allocator()->allocate();
     }
@@ -61,28 +69,29 @@ void NESobel7x7::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
     {
         _tmp_x.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_x);
-        _sobel_hor.configure(input, &_tmp_x, nullptr, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(&_tmp_x, nullptr, output_x, nullptr, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor->configure(input, &_tmp_x, nullptr, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert->configure(&_tmp_x, nullptr, output_x, nullptr, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
     }
     else if(run_sobel_y)
     {
         _tmp_y.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_y);
-        _sobel_hor.configure(input, nullptr, &_tmp_y, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(nullptr, &_tmp_y, nullptr, output_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor->configure(input, nullptr, &_tmp_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert->configure(nullptr, &_tmp_y, nullptr, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_y.allocator()->allocate();
     }
 
-    _border_handler.configure(input, _sobel_hor.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler->configure(input, _sobel_hor->border_size(), border_mode, PixelValue(constant_border_value));
 }
 
 void NESobel7x7::run()
 {
-    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+    NEScheduler::get().schedule(_border_handler.get(), Window::DimZ);
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    NEScheduler::get().schedule(&_sobel_hor, Window::DimY);
-    NEScheduler::get().schedule(&_sobel_vert, Window::DimY);
+    NEScheduler::get().schedule(_sobel_hor.get(), Window::DimY);
+    NEScheduler::get().schedule(_sobel_vert.get(), Window::DimY);
 }
+} // namespace arm_compute

@@ -26,10 +26,16 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
+#include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
+#include "src/core/NEON/kernels/NEFFTScaleKernel.h"
 #include "src/core/utils/helpers/fft.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+NEFFT1D::~NEFFT1D() = default;
+
 NEFFT1D::NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _digit_reverse_kernel(), _fft_kernels(), _scale_kernel(), _digit_reversed_input(), _digit_reverse_indices(), _num_ffts(0), _axis(0), _run_scale(false)
 {
@@ -58,7 +64,8 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
     TensorInfo digit_reverse_indices_info(TensorShape(input->info()->tensor_shape()[config.axis]), 1, DataType::U32);
     _digit_reverse_indices.allocator()->init(digit_reverse_indices_info);
     _memory_group.manage(&_digit_reversed_input);
-    _digit_reverse_kernel.configure(input, &_digit_reversed_input, &_digit_reverse_indices, digit_reverse_config);
+    _digit_reverse_kernel = arm_compute::support::cpp14::make_unique<NEFFTDigitReverseKernel>();
+    _digit_reverse_kernel->configure(input, &_digit_reversed_input, &_digit_reverse_indices, digit_reverse_config);
 
     // Create and configure FFT kernels
     unsigned int Nx = 1;
@@ -75,7 +82,8 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
         fft_kernel_info.radix          = radix_for_stage;
         fft_kernel_info.Nx             = Nx;
         fft_kernel_info.is_first_stage = (i == 0);
-        _fft_kernels[i].configure(&_digit_reversed_input, ((i == (_num_ffts - 1)) && !is_c2r) ? output : nullptr, fft_kernel_info);
+        _fft_kernels[i]                = arm_compute::support::cpp14::make_unique<NEFFTRadixStageKernel>();
+        _fft_kernels[i]->configure(&_digit_reversed_input, ((i == (_num_ffts - 1)) && !is_c2r) ? output : nullptr, fft_kernel_info);
 
         Nx *= radix_for_stage;
     }
@@ -86,7 +94,8 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
         FFTScaleKernelInfo scale_config;
         scale_config.scale     = static_cast<float>(N);
         scale_config.conjugate = config.direction == FFTDirection::Inverse;
-        is_c2r ? _scale_kernel.configure(&_digit_reversed_input, output, scale_config) : _scale_kernel.configure(output, nullptr, scale_config);
+        _scale_kernel          = arm_compute::support::cpp14::make_unique<NEFFTScaleKernel>();
+        is_c2r ? _scale_kernel->configure(&_digit_reversed_input, output, scale_config) : _scale_kernel->configure(output, nullptr, scale_config);
     }
 
     // Allocate tensors
@@ -128,17 +137,17 @@ void NEFFT1D::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    NEScheduler::get().schedule(&_digit_reverse_kernel, (_axis == 0 ? Window::DimY : Window::DimZ));
+    NEScheduler::get().schedule(_digit_reverse_kernel.get(), (_axis == 0 ? Window::DimY : Window::DimZ));
 
     for(unsigned int i = 0; i < _num_ffts; ++i)
     {
-        NEScheduler::get().schedule(&_fft_kernels[i], (_axis == 0 ? Window::DimY : Window::DimX));
+        NEScheduler::get().schedule(_fft_kernels[i].get(), (_axis == 0 ? Window::DimY : Window::DimX));
     }
 
     // Run output scaling
     if(_run_scale)
     {
-        NEScheduler::get().schedule(&_scale_kernel, Window::DimY);
+        NEScheduler::get().schedule(_scale_kernel.get(), Window::DimY);
     }
 }
 } // namespace arm_compute

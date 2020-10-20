@@ -32,6 +32,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NEScaleKernel.h"
 
 #include "src/core/utils/ScaleUtils.h"
 

@@ -24,11 +24,13 @@
 #ifndef ARM_COMPUTE_NEROIALIGNLAYER_H
 #define ARM_COMPUTE_NEROIALIGNLAYER_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEROIAlignLayerKernel.
  *
@@ -36,7 +38,7 @@ class ITensor;
  * -# @ref NEROIAlignLayerKernel
  *
  */
-class NEROIAlignLayer : public INESimpleFunction
+class NEROIAlignLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and output tensors.

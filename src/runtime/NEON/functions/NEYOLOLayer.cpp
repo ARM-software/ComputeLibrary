@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEYOLOLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEYOLOLayerKernel.h"
+#include "src/core/NEON/kernels/NEYOLOLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,13 +24,13 @@
 #ifndef ARM_COMPUTE_NEPRIORBOXLAYER_H
 #define ARM_COMPUTE_NEPRIORBOXLAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEPriorBoxLayerKernel. */
 class NEPriorBoxLayer : public INESimpleFunctionNoBorder

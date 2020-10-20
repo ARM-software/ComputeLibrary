@@ -24,14 +24,16 @@
 #ifndef ARM_COMPUTE_NEMAXUNPOOLINGLAYER_H
 #define ARM_COMPUTE_NEMAXUNPOOLINGLAYER_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEMemsetKernel.h"
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
+class NEMemsetKernel;
+class NEMaxUnpoolingLayerKernel;
 
 /** Function to perform MaxUnpooling. This function calls the following NEON kernels:
  *
@@ -43,6 +45,16 @@ class NEMaxUnpoolingLayer : public IFunction
 public:
     /** Constructor */
     NEMaxUnpoolingLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEMaxUnpoolingLayer(const NEMaxUnpoolingLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEMaxUnpoolingLayer &operator=(const NEMaxUnpoolingLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMaxUnpoolingLayer(NEMaxUnpoolingLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMaxUnpoolingLayer &operator=(NEMaxUnpoolingLayer &&) = delete;
+    /** Default destructor */
+    ~NEMaxUnpoolingLayer();
     /** Set the input and output tensors.
      *
      * @note Only supported pool size 2
@@ -70,8 +82,8 @@ public:
     void run() override;
 
 private:
-    NEMemsetKernel            _memset_kernel;
-    NEMaxUnpoolingLayerKernel _unpooling_layer_kernel;
+    std::unique_ptr<NEMemsetKernel>            _memset_kernel;
+    std::unique_ptr<NEMaxUnpoolingLayerKernel> _unpooling_layer_kernel;
 };
 }
 #endif /* ARM_COMPUTE_NEMAXUNPOOLINGLAYER_H */

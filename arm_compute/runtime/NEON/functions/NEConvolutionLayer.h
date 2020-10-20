@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,7 +75,16 @@ class NEConvolutionLayer : public IFunction
 public:
     /** Constructor */
     NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionLayer(const NEConvolutionLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionLayer &operator=(const NEConvolutionLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionLayer(NEConvolutionLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionLayer &operator=(NEConvolutionLayer &&) = delete;
+    /** Default destructor */
+    ~NEConvolutionLayer() = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],

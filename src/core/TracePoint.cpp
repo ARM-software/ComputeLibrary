@@ -33,12 +33,12 @@
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "src/core/NEON/kernels/assembly/arm_gemm.hpp"
 #include "utils/TypePrinter.h"
 
 #include <array>

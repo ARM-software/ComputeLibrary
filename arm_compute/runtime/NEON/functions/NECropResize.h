@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEON_CROP_RESIZE_H
 #define ARM_COMPUTE_NEON_CROP_RESIZE_H
 
-#include "arm_compute/core/NEON/kernels/NECropKernel.h"
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 
 #include <memory>
@@ -33,6 +32,7 @@ namespace arm_compute
 {
 // Forward Declarations
 class ITensor;
+class NECropKernel;
 
 /** Function to perform cropping and resizing */
 class NECropResize : public IFunction
@@ -49,7 +49,7 @@ public:
     /** Allow instances of this class to be moved */
     NECropResize &operator=(NECropResize &&) = default;
     /** Default destructor */
-    virtual ~NECropResize() = default;
+    ~NECropResize();
 
     /** Configure kernel
      *

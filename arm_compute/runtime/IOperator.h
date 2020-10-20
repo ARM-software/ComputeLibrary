@@ -24,6 +24,8 @@
 #ifndef ARM_COMPUTE_IOPERATOR_H
 #define ARM_COMPUTE_IOPERATOR_H
 
+#include "arm_compute/core/ITensorPack.h"
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/IOperator.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Types.h"

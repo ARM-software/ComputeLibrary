@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_NESCALEIMAGE_H
 #define ARM_COMPUTE_NESCALEIMAGE_H
 
-#include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 #include "arm_compute/runtime/Tensor.h"

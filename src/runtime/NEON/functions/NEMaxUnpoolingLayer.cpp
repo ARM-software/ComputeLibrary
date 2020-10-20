@@ -25,9 +25,14 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
+#include "src/core/NEON/kernels/NEMemsetKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+NEMaxUnpoolingLayer::~NEMaxUnpoolingLayer() = default;
+
 NEMaxUnpoolingLayer::NEMaxUnpoolingLayer()
 
     : _memset_kernel(), _unpooling_layer_kernel()
@@ -37,8 +42,10 @@ NEMaxUnpoolingLayer::NEMaxUnpoolingLayer()
 void NEMaxUnpoolingLayer::configure(ITensor *input, ITensor *indices, ITensor *output, const PoolingLayerInfo &pool_info)
 {
     const PixelValue zero_value(0.f);
-    _memset_kernel.configure(output, zero_value);
-    _unpooling_layer_kernel.configure(input, indices, output, pool_info);
+    _memset_kernel          = arm_compute::support::cpp14::make_unique<NEMemsetKernel>();
+    _unpooling_layer_kernel = arm_compute::support::cpp14::make_unique<NEMaxUnpoolingLayerKernel>();
+    _memset_kernel->configure(output, zero_value);
+    _unpooling_layer_kernel->configure(input, indices, output, pool_info);
 }
 
 Status NEMaxUnpoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
@@ -48,7 +55,7 @@ Status NEMaxUnpoolingLayer::validate(const ITensorInfo *input, const ITensorInfo
 
 void NEMaxUnpoolingLayer::run()
 {
-    NEScheduler::get().schedule(&_memset_kernel, Window::DimY);
-    NEScheduler::get().schedule(&_unpooling_layer_kernel, Window::DimY);
+    NEScheduler::get().schedule(_memset_kernel.get(), Window::DimY);
+    NEScheduler::get().schedule(_unpooling_layer_kernel.get(), Window::DimY);
 }
 } /* namespace arm_compute */

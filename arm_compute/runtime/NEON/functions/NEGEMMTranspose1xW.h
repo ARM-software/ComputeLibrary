@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,14 @@
 #ifndef ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H
 #define ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to execute NEGEMMTranspose1xWKernel. This function calls the following NEON kernels:
  *
@@ -39,6 +41,18 @@ class ITensor;
 class NEGEMMTranspose1xW : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NEGEMMTranspose1xW() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMTranspose1xW(const NEGEMMTranspose1xW &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMTranspose1xW &operator=(const NEGEMMTranspose1xW &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMTranspose1xW(NEGEMMTranspose1xW &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMTranspose1xW &operator=(NEGEMMTranspose1xW &&) = delete;
+    /** Default destructor */
+    ~NEGEMMTranspose1xW() = default;
     /** Initialise the kernel's inputs, output
      *
      * @param[in]  input  First input tensor. Data type supported: All

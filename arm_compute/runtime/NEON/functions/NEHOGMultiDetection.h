@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,6 @@
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/IMultiHOG.h"
-#include "arm_compute/core/NEON/kernels/NEHOGDescriptorKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -39,6 +38,9 @@
 
 namespace arm_compute
 {
+class NEHOGOrientationBinningKernel;
+class NEHOGBlockNormalizationKernel;
+
 /** Basic function to detect multiple objects (or the same object at different scales) on the same input image using HOG. This function calls the following NEON kernels:
  *
  * -# @ref NEHOGGradient
@@ -60,8 +62,14 @@ public:
     NEHOGMultiDetection(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEHOGMultiDetection(const NEHOGMultiDetection &) = delete;
+    /** Default move constructor */
+    NEHOGMultiDetection(NEHOGMultiDetection &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEHOGMultiDetection &operator=(const NEHOGMultiDetection &) = delete;
+    /** Default move assignment operator */
+    NEHOGMultiDetection &operator=(NEHOGMultiDetection &&) = default;
+    /** Default destructor */
+    ~NEHOGMultiDetection();
     /** Initialise the function's source, destination, detection window strides, border mode, threshold and non-maxima suppression
      *
      * @param[in, out] input                    Input tensor. Data type supported: U8

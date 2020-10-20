@@ -29,6 +29,19 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
+#include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "src/core/NEON/kernels/NEFlattenLayerKernel.h"
+#include "src/core/NEON/kernels/NEFlattenLayerKernel.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/NEON/kernels/NETransposeKernel.h"
 
 #include "support/MemorySupport.h"
 
@@ -145,6 +158,8 @@ Status NEFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, c
     return NETransposeKernel::validate(input, output);
 }
 
+NEFullyConnectedLayer::~NEFullyConnectedLayer() = default;
+
 NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _memory_group(std::move(memory_manager)), _weights_manager(weights_manager), _flatten_kernel(), _convert_weights(), _convert_weights_managed(), _reshape_weights_function(),
       _reshape_weights_managed_function(), _mm_gemm(nullptr, weights_manager), _mm_gemmlowp(nullptr, weights_manager), _flatten_output(), _converted_weights_output(), _reshape_weights_output(),
@@ -199,7 +214,9 @@ void NEFullyConnectedLayer::configure_conv_fc(const ITensor *input, const ITenso
 
     // Configure flatten kernel
     _memory_group.manage(&_flatten_output);
-    _flatten_kernel.configure(input, &_flatten_output);
+
+    _flatten_kernel = arm_compute::support::cpp14::make_unique<NEFlattenLayerKernel>();
+    _flatten_kernel->configure(input, &_flatten_output);
 
     // Configure matrix multiply kernel
     configure_mm(&_flatten_output, weights, biases, output, act);
@@ -398,7 +415,7 @@ void NEFullyConnectedLayer::run()
     // Linearize input if it comes from a convolutional layer
     if(_is_fc_after_conv)
     {
-        NEScheduler::get().schedule(&_flatten_kernel, Window::DimY);
+        NEScheduler::get().schedule(_flatten_kernel.get(), Window::DimY);
     }
 
     // Run matrix multiply

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_NEOPTICALFLOW_H
 
 #include "arm_compute/core/IArray.h"
-#include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -41,6 +41,7 @@
 namespace arm_compute
 {
 class Pyramid;
+class NELKTrackerKernel;
 
 /** Array of LK Internel Keypoints */
 using LKInternalKeypointArray = Array<NELKInternalKeypoint>;
@@ -62,6 +63,8 @@ public:
     NEOpticalFlow(const NEOpticalFlow &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEOpticalFlow &operator=(const NEOpticalFlow &) = delete;
+    /** Default destructor */
+    ~NEOpticalFlow();
     /**  Initialise the function input and output
      *
      * @param[in]  old_pyramid           Pointer to the pyramid for the old tensor. Data type supported U8
@@ -86,17 +89,17 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                    _memory_group;
-    std::vector<NEScharr3x3>       _func_scharr;
-    std::vector<NELKTrackerKernel> _kernel_tracker;
-    std::vector<Tensor>            _scharr_gx;
-    std::vector<Tensor>            _scharr_gy;
-    IKeyPointArray                *_new_points;
-    const IKeyPointArray          *_new_points_estimates;
-    const IKeyPointArray          *_old_points;
-    LKInternalKeypointArray        _new_points_internal;
-    LKInternalKeypointArray        _old_points_internal;
-    unsigned int                   _num_levels;
+    MemoryGroup                                     _memory_group;
+    std::vector<NEScharr3x3>                        _func_scharr;
+    std::vector<std::unique_ptr<NELKTrackerKernel>> _kernel_tracker;
+    std::vector<Tensor>                             _scharr_gx;
+    std::vector<Tensor>                             _scharr_gy;
+    IKeyPointArray                                 *_new_points;
+    const IKeyPointArray                           *_new_points_estimates;
+    const IKeyPointArray                           *_old_points;
+    LKInternalKeypointArray                         _new_points_internal;
+    LKInternalKeypointArray                         _old_points_internal;
+    unsigned int                                    _num_levels;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEOPTICALFLOW_H */

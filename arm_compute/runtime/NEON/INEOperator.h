@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_INEOPERATOR_H
 
 #include "../../core/ITensor.h"
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/runtime/IOperator.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Types.h"
@@ -34,6 +33,8 @@
 
 namespace arm_compute
 {
+class ICPPKernel;
+using INEKernel = ICPPKernel;
 namespace experimental
 {
 /** Basic interface for functions which have a single async NEON kernel */
@@ -53,6 +54,8 @@ public:
     INEOperator &operator=(const INEOperator &) = delete;
     /** Default move assignment operator */
     INEOperator &operator=(INEOperator &&) = default;
+    /** Default destructor */
+    ~INEOperator();
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;

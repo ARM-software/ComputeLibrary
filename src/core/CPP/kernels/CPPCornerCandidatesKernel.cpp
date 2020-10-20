@@ -84,14 +84,14 @@ void CPPCornerCandidatesKernel::configure(const IImage *input, InternalKeypoint 
 
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
 
-    INEKernel::configure(win);
+    ICPPKernel::configure(win);
 }
 
 void CPPCornerCandidatesKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
     Iterator input(_input, window);
 
     execute_window_loop(window, [&](const Coordinates & id)

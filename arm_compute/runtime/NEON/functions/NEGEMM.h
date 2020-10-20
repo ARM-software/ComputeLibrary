@@ -24,11 +24,6 @@
 #ifndef ARM_COMPUTE_NEGEMM_H
 #define ARM_COMPUTE_NEGEMM_H
 
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
@@ -38,8 +33,14 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include <memory>
+
 namespace arm_compute
 {
+class NEGEMMInterleave4x4Kernel;
+class NEGEMMMatrixAdditionKernel;
+class NEGEMMMatrixMultiplyKernel;
+class NEGEMMTranspose1xWKernel;
 /** Basic function to execute GEMM on NEON. This function calls the following NEON kernels:
  *
  * If optimized assembly is available:
@@ -69,6 +70,8 @@ public:
     NEGEMM &operator=(const NEGEMM &) = delete;
     /** Default move assignment operator */
     NEGEMM &operator=(NEGEMM &&) = default;
+    /** Default destructor */
+    ~NEGEMM();
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
@@ -104,16 +107,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                _memory_group;
-    IWeightsManager           *_weights_manager;
-    NEGEMMInterleave4x4Kernel  _interleave_kernel;
-    NEGEMMTranspose1xWKernel   _transpose_kernel;
-    NEGEMMMatrixMultiplyKernel _mm_kernel;
-    NEGEMMAssemblyDispatch     _asm_glue;
-    NEGEMMMatrixAdditionKernel _ma_kernel;
-    NEActivationLayer          _alpha_scale_func;
-    NEArithmeticAddition       _add_bias;
-    NEActivationLayer          _activation_func;
+    MemoryGroup                                 _memory_group;
+    IWeightsManager                            *_weights_manager;
+    std::unique_ptr<NEGEMMInterleave4x4Kernel>  _interleave_kernel;
+    std::unique_ptr<NEGEMMTranspose1xWKernel>   _transpose_kernel;
+    std::unique_ptr<NEGEMMMatrixMultiplyKernel> _mm_kernel;
+    NEGEMMAssemblyDispatch                      _asm_glue;
+    std::unique_ptr<NEGEMMMatrixAdditionKernel> _ma_kernel;
+    NEActivationLayer                           _alpha_scale_func;
+    NEArithmeticAddition                        _add_bias;
+    NEActivationLayer                           _activation_func;
 
     Tensor         _tmp_a;
     Tensor         _tmp_b;

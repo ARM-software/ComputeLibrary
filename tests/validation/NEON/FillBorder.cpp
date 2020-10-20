@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/datasets/BorderModeDataset.h"

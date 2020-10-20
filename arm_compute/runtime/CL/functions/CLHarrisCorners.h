@@ -29,13 +29,13 @@
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
-#include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"
+#include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
+#include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-
 #include <cstdint>
 #include <memory>
 

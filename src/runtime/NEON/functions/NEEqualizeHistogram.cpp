@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,15 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NECumulativeDistributionKernel.h"
+#include "src/core/NEON/kernels/NEHistogramKernel.h"
+#include "src/core/NEON/kernels/NEHistogramKernel.h"
+#include "src/core/NEON/kernels/NETableLookupKernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEEqualizeHistogram::~NEEqualizeHistogram() = default;
 
 NEEqualizeHistogram::NEEqualizeHistogram()
     : _histogram_kernel(), _cd_histogram_kernel(), _map_histogram_kernel(), _hist(nr_bins, 0, max_range), _cum_dist(nr_bins, 0, max_range), _cd_lut(nr_bins, DataType::U8)
@@ -43,20 +50,25 @@ void NEEqualizeHistogram::configure(const IImage *input, IImage *output)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
+    _histogram_kernel     = arm_compute::support::cpp14::make_unique<NEHistogramKernel>();
+    _cd_histogram_kernel  = arm_compute::support::cpp14::make_unique<NECumulativeDistributionKernel>();
+    _map_histogram_kernel = arm_compute::support::cpp14::make_unique<NETableLookupKernel>();
+
     // Configure kernels
-    _histogram_kernel.configure(input, &_hist);
-    _cd_histogram_kernel.configure(input, &_hist, &_cum_dist, &_cd_lut);
-    _map_histogram_kernel.configure(input, &_cd_lut, output);
+    _histogram_kernel->configure(input, &_hist);
+    _cd_histogram_kernel->configure(input, &_hist, &_cum_dist, &_cd_lut);
+    _map_histogram_kernel->configure(input, &_cd_lut, output);
 }
 
 void NEEqualizeHistogram::run()
 {
     // Calculate histogram of input.
-    NEScheduler::get().schedule(&_histogram_kernel, Window::DimY);
+    NEScheduler::get().schedule(_histogram_kernel.get(), Window::DimY);
 
     // Calculate cumulative distribution of histogram and create LUT.
-    NEScheduler::get().schedule(&_cd_histogram_kernel, Window::DimY);
+    NEScheduler::get().schedule(_cd_histogram_kernel.get(), Window::DimY);
 
     // Map input to output using created LUT.
-    NEScheduler::get().schedule(&_map_histogram_kernel, Window::DimY);
+    NEScheduler::get().schedule(_map_histogram_kernel.get(), Window::DimY);
 }
+} // namespace arm_compute

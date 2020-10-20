@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
+#include "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"

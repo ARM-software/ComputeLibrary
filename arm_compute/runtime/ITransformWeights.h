@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_ITRANSFORMWEIGHTS_H
 
 #include <atomic>
+#include <utility>
 
 namespace arm_compute
 {

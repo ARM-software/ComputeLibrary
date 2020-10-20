@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_NEGEMMWINOGRADCONVOLUTIONLAYERKERNEL_H
 #define ARM_COMPUTE_NEGEMMWINOGRADCONVOLUTIONLAYERKERNEL_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
+#include "src/core/NEON/INEKernel.h"
 #include "src/core/NEON/kernels/convolution/common/convolution.hpp"
 #include "src/core/NEON/kernels/convolution/common/tensor.hpp"
 

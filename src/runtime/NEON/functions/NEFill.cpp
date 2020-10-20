@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEMemsetKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

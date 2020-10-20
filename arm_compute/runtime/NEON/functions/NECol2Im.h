@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,12 +26,13 @@
 
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Size2D.h"
-#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NECol2Im */
 class NECol2Im : public INESimpleFunctionNoBorder

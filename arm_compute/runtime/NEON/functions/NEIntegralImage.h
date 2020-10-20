@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,18 @@ class ITensor;
 class NEIntegralImage : public INESimpleFunction
 {
 public:
+    /** Constructor */
+    NEIntegralImage() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEIntegralImage(const NEIntegralImage &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEIntegralImage &operator=(const NEIntegralImage &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEIntegralImage(NEIntegralImage &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEIntegralImage &operator=(NEIntegralImage &&) = delete;
+    /** Default destructor */
+    ~NEIntegralImage();
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in]  input  Source tensor. Data type supported: U8.

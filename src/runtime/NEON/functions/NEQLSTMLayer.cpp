@@ -30,7 +30,16 @@
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -46,6 +55,31 @@ Status validate_mm(GEMMLowpOutputStageInfo &gemmlowp_info, const ITensorInfo *mm
     return Status{};
 }
 } // namespace
+
+Status NEQLSTMLayer::validate_layer_norm(const ITensorInfo &in, const ITensorInfo &weight, const ITensorInfo &bias)
+{
+    // Output quantization scale will be different, but ignored here
+    // since it will be configured at configure() stage.
+    const TensorInfo out
+    {
+        in
+    };
+    return NEQLSTMLayerNormalizationKernel::validate(&in, &out, &weight, &bias);
+}
+
+void NEQLSTMLayer::configure_layer_norm(NEQLSTMLayer::LayerNormGate g, const ITensor *in)
+{
+    ARM_COMPUTE_ERROR_ON(!_has_layer_norm);
+
+    Tensor &out = get_layer_norm_output(g);
+    _memory_group.manage(&out);
+    out.allocator()->init(*(in->info()));
+
+    get_layer_norm(g) = arm_compute::support::cpp14::make_unique<NEQLSTMLayerNormalizationKernel>();
+    get_layer_norm(g)->configure(in, &out, get_layer_norm_weight(g), get_layer_norm_bias(g));
+}
+
+NEQLSTMLayer::TensorCopyKernel::~TensorCopyKernel() = default;
 
 Status NEQLSTMLayer::TensorCopyKernel::validate(const ITensorInfo &src, const ITensorInfo &dst)
 {
@@ -77,7 +111,21 @@ void NEQLSTMLayer::TensorCopyKernel::run()
     input_iter, output_iter);
 }
 
+NEQLSTMLayer::~NEQLSTMLayer() = default;
+
 NEQLSTMLayer::NEQLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(), _transpose_input_to_forget_weights(), _transpose_input_to_cell_weights(), _transpose_input_to_output_weights(), _transpose_input_to_input_weights(),
+      _transpose_recurrent_to_forget_weights(), _transpose_recurrent_to_cell_weights(), _transpose_recurrent_to_output_weights(), _transpose_recurrent_to_input_weights(), _transpose_projection_weights(),
+      _input_to_input_reduction(), _recurrent_to_input_reduction(), _input_to_forget_reduction(), _recurrent_to_forget_reduction(), _input_to_cell_reduction(), _recurrent_to_cell_reduction(),
+      _input_to_output_reduction(), _recurrent_to_output_reduction(), _projection_reduction(), _projection_bias_add(), _mm_input_to_forget(), _mm_recurrent_to_forget(), _pixelwise_mul_cell_to_forget(),
+      _input_to_forget_outstage(), _recurrent_to_forget_outstage(), _cell_to_forget_outstage(), _accumulate_input_recurrent_forget(), _accumulate_cell_forget(), _forget_gate_sigmoid(), _mm_input_to_cell(),
+      _input_to_cell_outstage(), _mm_recurrent_to_cell(), _recurrent_to_cell_outstage(), _accumulate_input_recurrent_modulation(), _cell_gate_tanh(), _input_gate_sub(), _mm_input_to_input(),
+      _input_to_input_outstage(), _mm_recurrent_to_input(), _recurrent_to_input_outstage(), _accumulate_input_recurrent_input(), _pixelwise_mul_cell_to_input(), _cell_to_input_outstage(),
+      _accumulate_cell_input(), _input_gate_sigmoid(), _pixelwise_mul_forget_cell(), _pixelwise_mul_input_cell(), _add_forget_cell(), _cell_clip(), _mm_input_to_output(), _input_to_output_outstage(),
+      _mm_recurrent_to_output(), _recurrent_to_output_outstage(), _accumulate_input_recurrent_output(), _pixelwise_mul_cell_to_output(), _cell_to_output_outstage(), _accumulate_cell_to_output(),
+      _output_gate_sigmoid(), _hidden_tanh(), _pixelwise_mul_hidden(), _hidden_outstage(), _mm_projection(), _projection_outstage(), _accumulate_projection(), _projection_clip(), _projection_bias_copy(),
+      _projection_output_to_accumulate_copy(), _projection_accumulate_to_output_copy(), _hidden_to_output_copy(), _layer_norms(), _copy_output(), _layer_norm_weights(), _layer_norm_bias(),
+      _layer_norm_output()
 {
     _memory_group = MemoryGroup(std::move(memory_manager));
 }
@@ -178,18 +226,29 @@ void NEQLSTMLayer::configure(const ITensor *input,
         _input_to_input_weights     = lstm_params.input_to_input_weights();
         _recurrent_to_input_weights = lstm_params.recurrent_to_input_weights();
 
-        _input_to_input_reduction.configure(_input_to_input_weights, &_input_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-        _recurrent_to_input_reduction.configure(_recurrent_to_input_weights, &_recurrent_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+        _input_to_input_reduction     = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+        _recurrent_to_input_reduction = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+        _input_to_input_reduction->configure(_input_to_input_weights, &_input_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+        _recurrent_to_input_reduction->configure(_recurrent_to_input_weights, &_recurrent_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     }
-    _input_to_forget_reduction.configure(input_to_forget_weights, &_input_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_forget_reduction.configure(recurrent_to_forget_weights, &_recurrent_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
-    _input_to_cell_reduction.configure(input_to_cell_weights, &_input_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_cell_reduction.configure(recurrent_to_cell_weights, &_recurrent_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
-    _input_to_output_reduction.configure(input_to_output_weights, &_input_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_output_reduction.configure(recurrent_to_output_weights, &_recurrent_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+
+    _input_to_forget_reduction     = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _recurrent_to_forget_reduction = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _input_to_cell_reduction       = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _recurrent_to_cell_reduction   = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _input_to_output_reduction     = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _recurrent_to_output_reduction = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+
+    _recurrent_to_cell_reduction->configure(input_to_forget_weights, &_input_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_forget_reduction->configure(recurrent_to_forget_weights, &_recurrent_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_cell_reduction->configure(input_to_cell_weights, &_input_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_cell_reduction->configure(recurrent_to_cell_weights, &_recurrent_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_output_reduction->configure(input_to_output_weights, &_input_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_output_reduction->configure(recurrent_to_output_weights, &_recurrent_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     if(_has_projection)
     {
-        _projection_reduction.configure(_projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
+        _projection_reduction = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+        _projection_reduction->configure(_projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
         if(_projection_bias != nullptr)
         {
             _projection_bias_add.configure(_projection_bias, &_projection_eff_bias, &_projection_eff_bias, ConvertPolicy::SATURATE);
@@ -878,7 +937,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output_state_in, output_state_out);
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NECopyKernel::validate(output_state_out, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(NECopy::validate(output_state_out, output));
     return Status{};
 }
 
@@ -906,7 +965,7 @@ void NEQLSTMLayer::run()
 
     if(_has_layer_norm)
     {
-        NEScheduler::get().schedule(&get_layer_norm(LayerNormGate::Forget), Window::DimY);
+        NEScheduler::get().schedule(get_layer_norm(LayerNormGate::Forget).get(), Window::DimY);
     }
 
     _forget_gate_sigmoid.run();
@@ -921,7 +980,7 @@ void NEQLSTMLayer::run()
 
     if(_has_layer_norm)
     {
-        NEScheduler::get().schedule(&get_layer_norm(LayerNormGate::Cell), Window::DimY);
+        NEScheduler::get().schedule(get_layer_norm(LayerNormGate::Cell).get(), Window::DimY);
     }
 
     _cell_gate_tanh.run();
@@ -948,7 +1007,7 @@ void NEQLSTMLayer::run()
 
         if(_has_layer_norm)
         {
-            NEScheduler::get().schedule(&get_layer_norm(LayerNormGate::Input), Window::DimY);
+            NEScheduler::get().schedule(get_layer_norm(LayerNormGate::Input).get(), Window::DimY);
         }
 
         _input_gate_sigmoid.run();
@@ -979,7 +1038,7 @@ void NEQLSTMLayer::run()
 
     if(_has_layer_norm)
     {
-        NEScheduler::get().schedule(&get_layer_norm(LayerNormGate::Output), Window::DimY);
+        NEScheduler::get().schedule(get_layer_norm(LayerNormGate::Output).get(), Window::DimY);
     }
 
     _output_gate_sigmoid.run();
@@ -1021,7 +1080,7 @@ void NEQLSTMLayer::run()
     }
 
     // Copy output_state_out to output
-    NEScheduler::get().schedule(&_copy_output, Window::DimY);
+    _copy_output.run();
 }
 
 void NEQLSTMLayer::prepare()
@@ -1051,8 +1110,8 @@ void NEQLSTMLayer::prepare()
         {
             _input_to_input_eff_bias.allocator()->allocate();
             _recurrent_to_input_eff_bias.allocator()->allocate();
-            NEScheduler::get().schedule(&_input_to_input_reduction, Window::DimY);
-            NEScheduler::get().schedule(&_recurrent_to_input_reduction, Window::DimY);
+            NEScheduler::get().schedule(_input_to_input_reduction.get(), Window::DimY);
+            NEScheduler::get().schedule(_recurrent_to_input_reduction.get(), Window::DimY);
 
             _input_to_input_weights_transposed.allocator()->allocate();
             _recurrent_to_input_weights_transposed.allocator()->allocate();
@@ -1067,17 +1126,17 @@ void NEQLSTMLayer::prepare()
         _recurrent_to_cell_eff_bias.allocator()->allocate();
         _input_to_output_eff_bias.allocator()->allocate();
         _recurrent_to_output_eff_bias.allocator()->allocate();
-        NEScheduler::get().schedule(&_input_to_forget_reduction, Window::DimY);
-        NEScheduler::get().schedule(&_recurrent_to_forget_reduction, Window::DimY);
-        NEScheduler::get().schedule(&_input_to_cell_reduction, Window::DimY);
-        NEScheduler::get().schedule(&_recurrent_to_cell_reduction, Window::DimY);
-        NEScheduler::get().schedule(&_input_to_output_reduction, Window::DimY);
-        NEScheduler::get().schedule(&_recurrent_to_output_reduction, Window::DimY);
+        NEScheduler::get().schedule(_input_to_forget_reduction.get(), Window::DimY);
+        NEScheduler::get().schedule(_recurrent_to_forget_reduction.get(), Window::DimY);
+        NEScheduler::get().schedule(_input_to_cell_reduction.get(), Window::DimY);
+        NEScheduler::get().schedule(_recurrent_to_cell_reduction.get(), Window::DimY);
+        NEScheduler::get().schedule(_input_to_output_reduction.get(), Window::DimY);
+        NEScheduler::get().schedule(_recurrent_to_output_reduction.get(), Window::DimY);
 
         if(_has_projection)
         {
             _projection_eff_bias.allocator()->allocate();
-            NEScheduler::get().schedule(&_projection_reduction, Window::DimY);
+            NEScheduler::get().schedule(_projection_reduction.get(), Window::DimY);
             if(_projection_bias != nullptr)
             {
                 _projection_bias_add.run();
@@ -1106,5 +1165,4 @@ void NEQLSTMLayer::prepare()
         _is_prepared = true;
     }
 }
-
 } // namespace arm_compute

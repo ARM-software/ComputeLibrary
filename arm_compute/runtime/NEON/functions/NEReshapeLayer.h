@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NERESHAPELAYER_H
 #define ARM_COMPUTE_NERESHAPELAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/INEOperator.h"
@@ -81,6 +80,18 @@ namespace experimental
 class NEReshape : public INEOperator
 {
 public:
+    /** Default Constructor */
+    NEReshape() = default;
+    /** Default Destructor */
+    ~NEReshape();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEReshape(const NEReshape &) = delete;
+    /** Default move constructor */
+    NEReshape(NEReshapeLayer &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEReshape &operator=(const NEReshape &) = delete;
+    /** Default move assignment operator */
+    NEReshape &operator=(NEReshape &&);
     /** Initialise the kernel's inputs and outputs
      *
      * @param[in]  input  Input tensor info. Data type supported: All

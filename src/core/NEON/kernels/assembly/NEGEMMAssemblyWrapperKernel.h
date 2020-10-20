@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H
 #define ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_gemm_compute_iface.hpp"
+#include "src/core/NEON/INEKernel.h"
 
 #include "gemm_common.hpp"
 

@@ -26,8 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NENormalizationLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -39,6 +37,7 @@
 namespace arm_compute
 {
 class ITensor;
+class NENormalizationLayerKernel;
 
 /** Basic function to compute a normalization layer. This function calls the following NEON kernels:
  *
@@ -52,6 +51,16 @@ class NENormalizationLayer : public IFunction
 public:
     /** Default constructor */
     NENormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NENormalizationLayer(const NENormalizationLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NENormalizationLayer &operator=(const NENormalizationLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NENormalizationLayer(NENormalizationLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NENormalizationLayer &operator=(NENormalizationLayer &&) = delete;
+    /** Default destructor */
+    ~NENormalizationLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
@@ -75,10 +84,10 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                _memory_group;  /**< Function memory group */
-    NENormalizationLayerKernel _norm_kernel;   /**< Normalization layer kernel */
-    NEPixelWiseMultiplication  _multiply_f;    /**< Pixel multiplication function */
-    Tensor                     _input_squared; /**< The intermediate buffer which stores results of squaring input */
+    MemoryGroup                                 _memory_group;  /**< Function memory group */
+    std::unique_ptr<NENormalizationLayerKernel> _norm_kernel;   /**< Normalization layer kernel */
+    NEPixelWiseMultiplication                   _multiply_f;    /**< Pixel multiplication function */
+    Tensor                                      _input_squared; /**< The intermediate buffer which stores results of squaring input */
 };
 }
 #endif /* ARM_COMPUTE_NENORMALIZATIONLAYER_H */

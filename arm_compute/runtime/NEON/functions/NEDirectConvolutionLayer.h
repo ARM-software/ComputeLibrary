@@ -24,9 +24,6 @@
 #ifndef ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -38,6 +35,10 @@
 
 namespace arm_compute
 {
+class NEDirectConvolutionLayerOutputStageKernel;
+class NEDirectConvolutionLayerKernel;
+class NEFillBorderKernel;
+
 /** Function to run the direct convolution.
  *
  *  This function calls the following NEON kernels:
@@ -51,6 +52,16 @@ class NEDirectConvolutionLayer : public IFunction
 public:
     /** Constructor */
     NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEDirectConvolutionLayer(const NEDirectConvolutionLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEDirectConvolutionLayer &operator=(const NEDirectConvolutionLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEDirectConvolutionLayer(NEDirectConvolutionLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEDirectConvolutionLayer &operator=(NEDirectConvolutionLayer &&) = delete;
+    /** Default destructor */
+    ~NEDirectConvolutionLayer();
     /** Set the input, weights, biases and output tensors.
      *
      * @note: DirectConvolution only works in the following configurations:
@@ -97,16 +108,16 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                               _memory_group;
-    NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
-    NEDirectConvolutionLayerKernel            _conv_kernel;
-    NEFillBorderKernel                        _input_border_handler;
-    NEActivationLayer                         _activationlayer_function;
-    Tensor                                    _accumulator;
-    bool                                      _has_bias;
-    bool                                      _is_activationlayer_enabled;
-    unsigned int                              _dim_split;
-    bool                                      _is_padding_required;
+    MemoryGroup                                                _memory_group;
+    std::unique_ptr<NEDirectConvolutionLayerOutputStageKernel> _output_stage_kernel;
+    std::unique_ptr<NEDirectConvolutionLayerKernel>            _conv_kernel;
+    std::unique_ptr<NEFillBorderKernel>                        _input_border_handler;
+    NEActivationLayer                                          _activationlayer_function;
+    Tensor                                                     _accumulator;
+    bool                                                       _has_bias;
+    bool                                                       _is_activationlayer_enabled;
+    unsigned int                                               _dim_split;
+    bool                                                       _is_padding_required;
 };
 }
 #endif /* ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H */

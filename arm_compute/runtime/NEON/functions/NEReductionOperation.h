@@ -26,13 +26,14 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
+class NEReductionOperationKernel;
 
 /** Basic function to simulate a reduction operation. This function calls the following NEON kernels:
  *
@@ -45,6 +46,16 @@ class NEReductionOperation : public IFunction
 public:
     /** Default constructor */
     NEReductionOperation(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEReductionOperation(const NEReductionOperation &) = delete;
+    /** Default move constructor */
+    NEReductionOperation(NEReductionOperation &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEReductionOperation &operator=(const NEReductionOperation &) = delete;
+    /** Default move assignment operator */
+    NEReductionOperation &operator=(NEReductionOperation &&) = default;
+    /** Default destructor */
+    ~NEReductionOperation();
     /** Set the input and output tensors.
      *
      * @param[in, out] input     Source tensor. Data type supported: QASYMM8_SIGNED/QASYMM8/F16/F32/S32. Data layouts supported: NCHW. (Written to only for border_size != 0)
@@ -71,13 +82,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                _memory_group;
-    NEReductionOperationKernel _reduction_kernel;
-    NEReshapeLayer             _reshape;
-    Tensor                     _output_internal;
-    size_t                     _window_split;
-    int                        _reduction_axis;
-    bool                       _is_reshape_required;
+    MemoryGroup                                 _memory_group;
+    std::unique_ptr<NEReductionOperationKernel> _reduction_kernel;
+    NEReshapeLayer                              _reshape;
+    Tensor                                      _output_internal;
+    size_t                                      _window_split;
+    int                                         _reduction_axis;
+    bool                                        _is_reshape_required;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEREDUCTIONOPERATION_H */

@@ -71,15 +71,15 @@
  *  @brief Folder containing all the GLES kernels
  */
 
-/** @dir arm_compute/core/NEON
+/** @dir src/core/NEON
  *  @brief NEON backend core: kernels and utilities.
  */
 
-/** @file arm_compute/core/NEON/NEKernels.h
+/** @file src/core/NEON/NEKernels.h
  *  @brief Includes all the NEON kernels at once
  */
 
-/** @dir arm_compute/core/NEON/kernels
+/** @dir src/core/NEON/kernels
  *  @brief Folder containing all the NEON kernels
  */
 

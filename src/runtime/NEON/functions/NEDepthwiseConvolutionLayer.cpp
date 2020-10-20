@@ -27,6 +27,8 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;
@@ -69,10 +71,11 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
 }
 } // namespace
 
+NEDepthwiseConvolutionLayer::~NEDepthwiseConvolutionLayer() = default;
+
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::NEDepthwiseConvolutionLayerOptimizedInternal(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _dwc_optimized_func(memory_manager), _output_stage_kernel(), _border_handler(), _permute_input(), _permute_weights(), _permute_output(), _activationlayer_function(),
-      _accumulator(), _permuted_input(), _permuted_weights(), _permuted_output(), _original_weights(nullptr), _has_bias(false), _is_quantized(false), _is_nchw(true), _permute(false),
-      _is_activationlayer_enabled(false), _is_prepared(false)
+    : _memory_group(memory_manager), _dwc_optimized_func(memory_manager), _permute_input(), _permute_weights(), _permute_output(), _activationlayer_function(), _accumulator(), _permuted_input(),
+      _permuted_weights(), _permuted_output(), _original_weights(nullptr), _has_bias(false), _is_quantized(false), _is_nchw(true), _permute(false), _is_activationlayer_enabled(false), _is_prepared(false)
 {
 }
 
@@ -243,7 +246,8 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::configure(
     }
     _original_weights = weights_to_use;
 
-    _depthwise_conv_kernel.configure(input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier, dilation);
+    _depthwise_conv_kernel = arm_compute::support::cpp14::make_unique<NEDepthwiseConvolutionLayerNativeKernel>();
+    _depthwise_conv_kernel->configure(input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier, dilation);
 
     if(_is_nchw)
     {
@@ -309,7 +313,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::run()
         _permute_input.run();
     }
 
-    NEScheduler::get().schedule(&_depthwise_conv_kernel, Window::DimY);
+    NEScheduler::get().schedule(_depthwise_conv_kernel.get(), Window::DimY);
 
     if(_is_nchw)
     {

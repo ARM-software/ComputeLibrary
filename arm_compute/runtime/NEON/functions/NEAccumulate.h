@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,18 @@ class ITensor;
 class NEAccumulate : public INESimpleFunctionNoBorder
 {
 public:
+    /** Default constructor */
+    NEAccumulate() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEAccumulate(const NEAccumulate &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEAccumulate &operator=(const NEAccumulate &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEAccumulate(NEAccumulate &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEAccumulate &operator=(NEAccumulate &&) = delete;
+    /** Default destructor */
+    ~NEAccumulate();
     /** Set the input and accumulation tensors
      *
      * @param[in]  input  Source tensor. Data type supported: U8.
@@ -48,6 +60,18 @@ public:
 class NEAccumulateWeighted : public INESimpleFunctionNoBorder
 {
 public:
+    /** Default constructor */
+    NEAccumulateWeighted() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEAccumulateWeighted(const NEAccumulateWeighted &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEAccumulateWeighted &operator=(const NEAccumulateWeighted &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEAccumulateWeighted(NEAccumulateWeighted &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEAccumulateWeighted &operator=(NEAccumulateWeighted &&) = delete;
+    /** Default destructor */
+    ~NEAccumulateWeighted();
     /** Set the input and accumulation tensors, and the scale value
      *
      * @param[in]     input    Source tensor. Data type supported: U8.
@@ -62,6 +86,18 @@ public:
 class NEAccumulateSquared : public INESimpleFunctionNoBorder
 {
 public:
+    /** Default constructor */
+    NEAccumulateSquared() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEAccumulateSquared(const NEAccumulateSquared &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEAccumulateSquared &operator=(const NEAccumulateSquared &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEAccumulateSquared(NEAccumulateSquared &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEAccumulateSquared &operator=(NEAccumulateSquared &&) = delete;
+    /** Default destructor */
+    ~NEAccumulateSquared();
     /** Set the input and accumulation tensors and the shift value.
      *
      * @param[in]     input  Source tensor. Data type supported: U8.

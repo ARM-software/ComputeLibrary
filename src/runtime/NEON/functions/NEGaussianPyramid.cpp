@@ -25,16 +25,18 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEGaussianPyramidKernel.h"
-#include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
 #include "arm_compute/runtime/Pyramid.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEGaussian5x5Kernel.h"
+#include "src/core/NEON/kernels/NEGaussianPyramidKernel.h"
+#include "src/core/NEON/kernels/NEScaleKernel.h"
+#include "support/MemorySupport.h"
 
 #include <cstddef>
 
@@ -44,6 +46,8 @@ NEGaussianPyramid::NEGaussianPyramid()
     : _input(nullptr), _pyramid(nullptr), _tmp()
 {
 }
+
+NEGaussianPyramidHalf::~NEGaussianPyramidHalf() = default;
 
 NEGaussianPyramidHalf::NEGaussianPyramidHalf() // NOLINT
     : _horizontal_border_handler(),
@@ -94,16 +98,20 @@ void NEGaussianPyramidHalf::configure(const ITensor *input, IPyramid *pyramid, B
         for(size_t i = 0; i < num_stages; ++i)
         {
             /* Configure horizontal kernel */
-            _horizontal_reduction[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
+            _horizontal_reduction[i] = arm_compute::support::cpp14::make_unique<NEGaussianPyramidHorKernel>();
+            _horizontal_reduction[i]->configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
 
             /* Configure vertical kernel */
-            _vertical_reduction[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
+            _vertical_reduction[i] = arm_compute::support::cpp14::make_unique<NEGaussianPyramidVertKernel>();
+            _vertical_reduction[i]->configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
 
             /* Configure border */
-            _horizontal_border_handler[i].configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
+            _horizontal_border_handler[i] = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+            _horizontal_border_handler[i]->configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i]->border_size(), border_mode, PixelValue(constant_border_value));
 
             /* Configure border */
-            _vertical_border_handler[i].configure(_tmp.get_pyramid_level(i), _vertical_reduction[i].border_size(), border_mode, PixelValue(pixel_value_u16));
+            _vertical_border_handler[i] = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+            _vertical_border_handler[i]->configure(_tmp.get_pyramid_level(i), _vertical_reduction[i]->border_size(), border_mode, PixelValue(pixel_value_u16));
         }
 
         _tmp.allocate();
@@ -122,12 +130,14 @@ void NEGaussianPyramidHalf::run()
 
     for(unsigned int i = 0; i < num_levels - 1; ++i)
     {
-        NEScheduler::get().schedule(&_horizontal_border_handler[i], Window::DimZ);
-        NEScheduler::get().schedule(&_horizontal_reduction[i], Window::DimY);
-        NEScheduler::get().schedule(&_vertical_border_handler[i], Window::DimZ);
-        NEScheduler::get().schedule(&_vertical_reduction[i], Window::DimY);
+        NEScheduler::get().schedule(_horizontal_border_handler[i].get(), Window::DimZ);
+        NEScheduler::get().schedule(_horizontal_reduction[i].get(), Window::DimY);
+        NEScheduler::get().schedule(_vertical_border_handler[i].get(), Window::DimZ);
+        NEScheduler::get().schedule(_vertical_reduction[i].get(), Window::DimY);
     }
 }
+
+NEGaussianPyramidOrb::~NEGaussianPyramidOrb() = default;
 
 NEGaussianPyramidOrb::NEGaussianPyramidOrb() // NOLINT
     : _gaus5x5(),

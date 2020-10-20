@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEChannelCombine.h"
 
-#include "arm_compute/core/NEON/kernels/NEChannelCombineKernel.h"
+#include "src/core/NEON/kernels/NEChannelCombineKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

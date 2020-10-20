@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,27 +24,38 @@
 #ifndef ARM_COMPUTE_INESIMPLEFUNCTION_H
 #define ARM_COMPUTE_INESIMPLEFUNCTION_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
 namespace arm_compute
 {
+class ICPPKernel;
+class NEFillBorderKernel;
+using INEKernel = ICPPKernel;
 /** Basic interface for functions which have a single NEON kernel */
 class INESimpleFunction : public IFunction
 {
 public:
     /** Constructor */
     INESimpleFunction();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INESimpleFunction(const INESimpleFunction &) = delete;
+    /** Default move constructor */
+    INESimpleFunction(INESimpleFunction &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INESimpleFunction &operator=(const INESimpleFunction &) = delete;
+    /** Default move assignment operator */
+    INESimpleFunction &operator=(INESimpleFunction &&) = default;
+    /** Default destructor */
+    ~INESimpleFunction();
 
     // Inherited methods overridden:
     void run() override final;
 
 protected:
-    std::unique_ptr<INEKernel> _kernel;         /**< Kernel to run */
-    NEFillBorderKernel         _border_handler; /**< Kernel to handle image borders */
+    std::unique_ptr<INEKernel>          _kernel;         /**< Kernel to run */
+    std::unique_ptr<NEFillBorderKernel> _border_handler; /**< Kernel to handle image borders */
 };
 }
 #endif /*ARM_COMPUTE_INESIMPLEFUNCTION_H */

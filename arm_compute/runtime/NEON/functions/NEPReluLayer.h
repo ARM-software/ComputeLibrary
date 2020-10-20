@@ -31,6 +31,7 @@
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 namespace experimental
 {

@@ -2246,5 +2246,14 @@ struct IOFormatInfo
     /** Align columns */
     bool align_columns;
 };
+
+/** Internal keypoint class for Lucas-Kanade Optical Flow */
+struct NELKInternalKeypoint
+{
+    float x{ 0.f };                 /**< x coordinate of the keypoint */
+    float y{ 0.f };                 /**< y coordinate of the keypoint */
+    bool  tracking_status{ false }; /**< the tracking status of the keypoint */
+};
+
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TYPES_H */

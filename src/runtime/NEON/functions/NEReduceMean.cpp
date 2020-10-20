@@ -28,6 +28,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute
@@ -95,6 +96,8 @@ Status validate_config(const ITensorInfo *input, const Coordinates &reduction_ax
     return Status{};
 }
 } // namespace
+
+NEReduceMean::~NEReduceMean() = default;
 
 NEReduceMean::NEReduceMean(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _reduction_kernels(), _reduced_outs(), _reshape(), _dequant(), _requant(), _reduction_ops(), _keep_dims(), _do_requant(), _input_no_quant(),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,12 @@
 #include "arm_compute/runtime/NEON/functions/NEMinMaxLocation.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEMinMaxLocationKernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEMinMaxLocation::~NEMinMaxLocation() = default;
 
 NEMinMaxLocation::NEMinMaxLocation()
     : _min_max(), _min_max_loc()
@@ -34,17 +38,21 @@ NEMinMaxLocation::NEMinMaxLocation()
 
 void NEMinMaxLocation::configure(const IImage *input, void *min, void *max, ICoordinates2DArray *min_loc, ICoordinates2DArray *max_loc, uint32_t *min_count, uint32_t *max_count)
 {
-    _min_max.configure(input, min, max);
-    _min_max_loc.configure(input, min, max, min_loc, max_loc, min_count, max_count);
+    _min_max = arm_compute::support::cpp14::make_unique<NEMinMaxKernel>();
+    _min_max->configure(input, min, max);
+
+    _min_max_loc = arm_compute::support::cpp14::make_unique<NEMinMaxLocationKernel>();
+    _min_max_loc->configure(input, min, max, min_loc, max_loc, min_count, max_count);
 }
 
 void NEMinMaxLocation::run()
 {
-    _min_max.reset();
+    _min_max->reset();
 
     /* Run min max kernel */
-    NEScheduler::get().schedule(&_min_max, Window::DimY);
+    NEScheduler::get().schedule(_min_max.get(), Window::DimY);
 
     /* Run min max location */
-    NEScheduler::get().schedule(&_min_max_loc, Window::DimY);
+    NEScheduler::get().schedule(_min_max_loc.get(), Window::DimY);
 }
+} // namespace arm_compute

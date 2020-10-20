@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
+#include "src/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
@@ -33,6 +33,8 @@ namespace arm_compute
 {
 namespace experimental
 {
+NEArithmeticAddition::~NEArithmeticAddition() = default;
+
 void NEArithmeticAddition::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);

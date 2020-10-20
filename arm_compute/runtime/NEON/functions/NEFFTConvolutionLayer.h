@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,8 @@ public:
     NEFFTConvolutionLayer &operator=(const NEFFTConvolutionLayer &) = delete;
     /** Default move assignment operator */
     NEFFTConvolutionLayer &operator=(NEFFTConvolutionLayer &&) = default;
+    /** Default destructor */
+    ~NEFFTConvolutionLayer();
     /** Set the input and output tensors.
      *
      * @note: This function only works with any square kernel size and unit strides for both NCHW and NHWC data layout

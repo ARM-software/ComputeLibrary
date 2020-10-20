@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEHOGDESCRIPTOR_H
 #define ARM_COMPUTE_NEHOGDESCRIPTOR_H
 
-#include "arm_compute/core/NEON/kernels/NEHOGDescriptorKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -36,6 +35,9 @@
 namespace arm_compute
 {
 class IHOG;
+class NEHOGOrientationBinningKernel;
+class NEHOGBlockNormalizationKernel;
+
 /** Basic function to calculate HOG descriptor. This function calls the following NEON kernels:
  *
  * -# @ref NEHOGGradient
@@ -48,6 +50,16 @@ class NEHOGDescriptor : public IFunction
 public:
     /** Default constructor */
     NEHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEHOGDescriptor(const NEHOGDescriptor &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEHOGDescriptor &operator=(const NEHOGDescriptor &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHOGDescriptor(NEHOGDescriptor &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHOGDescriptor &operator=(NEHOGDescriptor &&) = delete;
+    /** Default destructor */
+    ~NEHOGDescriptor();
     /** Initialise the function's source, destination, HOG data-object and border mode
      *
      * @param[in, out] input                 Input tensor. Data type supported: U8
@@ -63,13 +75,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                   _memory_group;
-    NEHOGGradient                 _gradient;
-    NEHOGOrientationBinningKernel _orient_bin;
-    NEHOGBlockNormalizationKernel _block_norm;
-    Tensor                        _mag;
-    Tensor                        _phase;
-    Tensor                        _hog_space;
+    MemoryGroup                                    _memory_group;
+    NEHOGGradient                                  _gradient;
+    std::unique_ptr<NEHOGOrientationBinningKernel> _orient_bin;
+    std::unique_ptr<NEHOGBlockNormalizationKernel> _block_norm;
+    Tensor                                         _mag;
+    Tensor                                         _phase;
+    Tensor                                         _hog_space;
 };
 }
 

@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NETableLookup.h"
 
-#include "arm_compute/core/NEON/kernels/NETableLookupKernel.h"
+#include "src/core/NEON/kernels/NETableLookupKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

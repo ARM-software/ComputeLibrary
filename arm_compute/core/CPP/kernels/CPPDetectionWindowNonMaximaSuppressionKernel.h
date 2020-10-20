@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_CPPDETECTIONWINDOWNONMAXIMASUPPRESSIONKERNEL_H
 #define ARM_COMPUTE_CPPDETECTIONWINDOWNONMAXIMASUPPRESSIONKERNEL_H
 
+#include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/IHOG.h"
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -53,6 +53,8 @@ public:
     CPPDetectionWindowNonMaximaSuppressionKernel(CPPDetectionWindowNonMaximaSuppressionKernel &&) = default;
     /** Allow instances of this class to be moved */
     CPPDetectionWindowNonMaximaSuppressionKernel &operator=(CPPDetectionWindowNonMaximaSuppressionKernel &&) = default;
+    /** Default destructor */
+    ~CPPDetectionWindowNonMaximaSuppressionKernel() = default;
     /** Initialise the kernel's input, output and the euclidean minimum distance
      *
      * @attention: If @ref IDetectionWindowArray is passed to the kernel, the map() and unmap() methods @ref IDetectionWindowArray must be called respectively before and after

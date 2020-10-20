@@ -26,9 +26,14 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
+#include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
+#include "src/core/NEON/kernels/NEFFTScaleKernel.h"
 
 namespace arm_compute
 {
+NEFFT2D::~NEFFT2D() = default;
+
 NEFFT2D::NEFFT2D(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _first_pass_func(memory_manager), _second_pass_func(memory_manager), _first_pass_tensor()
 {

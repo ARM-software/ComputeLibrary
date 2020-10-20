@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CPPBOXWITHNONMAXIMASUPPRESSIONLIMITKERNEL_H
 #define ARM_COMPUTE_CPPBOXWITHNONMAXIMASUPPRESSIONLIMITKERNEL_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute

@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_NEGEMMLOWPOUTPUTSTAGE_H
 #define ARM_COMPUTE_NEGEMMLOWPOUTPUTSTAGE_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 /** This file contains all available output stages for GEMMLowp on NEON.
@@ -37,6 +38,7 @@
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to execute NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint on NEON.
  *
@@ -69,6 +71,18 @@ class ITensor;
 class NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint(const NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint &operator=(const NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint(NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint &operator=(NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint &&) = delete;
+    /** Default destructor */
+    ~NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint();
     /** Initialise the kernel's inputs, output
      *
      * @param[in]  input                        Input tensor. Data type supported: S32
@@ -129,6 +143,18 @@ public:
 class NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint(const NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint &operator=(const NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint(NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint &operator=(NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint &&) = delete;
+    /** Default destructor */
+    ~NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint();
     /** Initialise the kernel's inputs, output
      *
      * @param[in]  input                        Input tensor. Data type supported: S32
@@ -189,6 +215,18 @@ public:
 class NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint(const NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint &operator=(const NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint(NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint &operator=(NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint &&) = delete;
+    /** Default destructor */
+    ~NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint();
     /** Initialise the kernel's inputs, output
      *
      * @param[in]  input                        Input tensor. Data type supported: S32
@@ -230,6 +268,18 @@ public:
 class NEGEMMLowpOutputStage : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NEGEMMLowpOutputStage() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpOutputStage(const NEGEMMLowpOutputStage &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpOutputStage &operator=(const NEGEMMLowpOutputStage &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMLowpOutputStage(NEGEMMLowpOutputStage &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMLowpOutputStage &operator=(NEGEMMLowpOutputStage &&) = delete;
+    /** Default destructor */
+    ~NEGEMMLowpOutputStage();
     /** Initialise the kernel's inputs, output
      *
      * @param[in]  input  Input tensor. Data type supported: S32

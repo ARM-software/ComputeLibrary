@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,14 +27,14 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEStackLayerKernel.h"
-
 #include <memory>
 #include <vector>
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
+class NEStackLayerKernel;
 
 /** Basic function to stack tensors along an axis. This function calls the following kernel:
  *
@@ -46,6 +46,16 @@ class NEStackLayer : public IFunction
 public:
     /** Default constructor */
     NEStackLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEStackLayer(const NEStackLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEStackLayer &operator=(const NEStackLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEStackLayer(NEStackLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEStackLayer &operator=(NEStackLayer &&) = delete;
+    /** Default destructor */
+    ~NEStackLayer();
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Supported input tensor rank: up to 4
@@ -73,9 +83,9 @@ public:
     void run() override;
 
 private:
-    std::vector<ITensor *>          _input;
-    std::vector<NEStackLayerKernel> _stack_kernels;
-    unsigned int                    _num_inputs;
+    std::vector<ITensor *>                           _input;
+    std::vector<std::unique_ptr<NEStackLayerKernel>> _stack_kernels;
+    unsigned int                                     _num_inputs;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NESTACKLAYER_H */

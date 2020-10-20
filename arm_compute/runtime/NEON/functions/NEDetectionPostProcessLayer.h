@@ -53,6 +53,8 @@ public:
     NEDetectionPostProcessLayer(const NEDetectionPostProcessLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDetectionPostProcessLayer &operator=(const NEDetectionPostProcessLayer &) = delete;
+    /** Default destructor */
+    ~NEDetectionPostProcessLayer() = default;
     /** Configure the detection output layer NE function
      *
      * @param[in]  input_box_encoding The bounding box input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F32.

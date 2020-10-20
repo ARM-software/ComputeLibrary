@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_NEGAUSSIAN5x5_H
 #define ARM_COMPUTE_NEGAUSSIAN5x5_H
 
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGaussian5x5Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -38,6 +36,9 @@
 namespace arm_compute
 {
 class ITensor;
+class NEGaussian5x5HorKernel;
+class NEGaussian5x5VertKernel;
+class NEFillBorderKernel;
 
 /** Basic function to execute gaussian filter 5x5. This function calls the following NEON kernels:
  *
@@ -52,6 +53,16 @@ public:
     /** Default constructor
      */
     NEGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGaussian5x5(const NEGaussian5x5 &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGaussian5x5 &operator=(const NEGaussian5x5 &) = delete;
+    /** Allow instances of this class to be moved */
+    NEGaussian5x5(NEGaussian5x5 &&) = default;
+    /** Allow instances of this class to be moved */
+    NEGaussian5x5 &operator=(NEGaussian5x5 &&) = default;
+    /** Default destructor */
+    ~NEGaussian5x5();
     /** Initialise the function's input, output and border mode.
      *
      * @param[in, out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -65,11 +76,11 @@ public:
     void run() override;
 
 protected:
-    MemoryGroup             _memory_group;   /**< Function memory group */
-    NEGaussian5x5HorKernel  _kernel_hor;     /**< kernel for horizontal pass */
-    NEGaussian5x5VertKernel _kernel_vert;    /**< kernel for vertical pass */
-    Tensor                  _tmp;            /**< temporary buffer for output of horizontal pass */
-    NEFillBorderKernel      _border_handler; /**< kernel to handle tensor borders */
+    MemoryGroup                              _memory_group;   /**< Function memory group */
+    std::unique_ptr<NEGaussian5x5HorKernel>  _kernel_hor;     /**< kernel for horizontal pass */
+    std::unique_ptr<NEGaussian5x5VertKernel> _kernel_vert;    /**< kernel for vertical pass */
+    Tensor                                   _tmp;            /**< temporary buffer for output of horizontal pass */
+    std::unique_ptr<NEFillBorderKernel>      _border_handler; /**< kernel to handle tensor borders */
 };
 }
 #endif /*ARM_COMPUTE_NEGAUSSIAN5x5_H */

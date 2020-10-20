@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEFILL_H
 #define ARM_COMPUTE_NEFILL_H
 
-#include "arm_compute/core/NEON/kernels/NEMemsetKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"

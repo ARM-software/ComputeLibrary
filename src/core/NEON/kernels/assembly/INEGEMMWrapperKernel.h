@@ -24,7 +24,7 @@
 #ifndef SRC_INEGEMMWRAPPERKERNEL_H
 #define SRC_INEGEMMWRAPPERKERNEL_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
+#include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {

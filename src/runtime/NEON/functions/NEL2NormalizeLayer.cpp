@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,9 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
+#include "src/core/NEON/kernels/NEReductionOperationKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -32,6 +35,7 @@ namespace
 {
 constexpr int max_input_tensor_dim = 3;
 } // namespace
+NEL2NormalizeLayer::~NEL2NormalizeLayer() = default;
 
 NEL2NormalizeLayer::NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _reduce_func(), _normalize_kernel(), _sumsq()
@@ -46,7 +50,8 @@ void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, int axis, fl
     // Configure Kernels
     const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
     _reduce_func.configure(input, &_sumsq, actual_axis, ReductionOperation::SUM_SQUARE);
-    _normalize_kernel.configure(input, &_sumsq, output, axis, epsilon);
+    _normalize_kernel = arm_compute::support::cpp14::make_unique<NEL2NormalizeLayerKernel>();
+    _normalize_kernel->configure(input, &_sumsq, output, axis, epsilon);
 
     // Allocate intermediate tensors
     _sumsq.allocator()->allocate();
@@ -78,6 +83,6 @@ void NEL2NormalizeLayer::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     _reduce_func.run();
-    NEScheduler::get().schedule(&_normalize_kernel, Window::DimY);
+    NEScheduler::get().schedule(_normalize_kernel.get(), Window::DimY);
 }
 } // namespace arm_compute

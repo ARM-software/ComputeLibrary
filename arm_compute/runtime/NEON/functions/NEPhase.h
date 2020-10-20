@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,11 +24,13 @@
 #ifndef ARM_COMPUTE_NEPHASE_H
 #define ARM_COMPUTE_NEPHASE_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEMagnitudePhaseKernel */
 class NEPhase : public INESimpleFunctionNoBorder

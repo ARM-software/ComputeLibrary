@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,13 +24,17 @@
 #include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEGaussian5x5Kernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEGaussian5x5Kernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEGaussian5x5::~NEGaussian5x5() = default;
 
 NEGaussian5x5::NEGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _kernel_hor(), _kernel_vert(), _tmp(), _border_handler()
@@ -46,21 +50,26 @@ void NEGaussian5x5::configure(ITensor *input, ITensor *output, BorderMode border
     // Manage intermediate buffers
     _memory_group.manage(&_tmp);
 
+    _kernel_hor     = arm_compute::support::cpp14::make_unique<NEGaussian5x5HorKernel>();
+    _kernel_vert    = arm_compute::support::cpp14::make_unique<NEGaussian5x5VertKernel>();
+    _border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+
     // Create and configure kernels for the two passes
-    _kernel_hor.configure(input, &_tmp, border_mode == BorderMode::UNDEFINED);
-    _kernel_vert.configure(&_tmp, output, border_mode == BorderMode::UNDEFINED);
+    _kernel_hor->configure(input, &_tmp, border_mode == BorderMode::UNDEFINED);
+    _kernel_vert->configure(&_tmp, output, border_mode == BorderMode::UNDEFINED);
 
     _tmp.allocator()->allocate();
 
-    _border_handler.configure(input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler->configure(input, _kernel_hor->border_size(), border_mode, PixelValue(constant_border_value));
 }
 
 void NEGaussian5x5::run()
 {
-    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+    NEScheduler::get().schedule(_border_handler.get(), Window::DimZ);
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    NEScheduler::get().schedule(&_kernel_hor, Window::DimY);
-    NEScheduler::get().schedule(&_kernel_vert, Window::DimY);
+    NEScheduler::get().schedule(_kernel_hor.get(), Window::DimY);
+    NEScheduler::get().schedule(_kernel_vert.get(), Window::DimY);
 }
+} // namespace arm_compute

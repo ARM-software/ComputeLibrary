@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,9 +29,14 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEMemsetKernel.h"
+#include "src/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+NESpaceToBatchLayer::~NESpaceToBatchLayer() = default;
+
 NESpaceToBatchLayer::NESpaceToBatchLayer()
     : _space_to_batch_kernel(), _memset_kernel(), _has_padding(false)
 {
@@ -43,10 +48,12 @@ void NESpaceToBatchLayer::configure(const ITensor *input, const ITensor *block_s
 
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
-        _has_padding = true;
-        _memset_kernel.configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
+        _has_padding   = true;
+        _memset_kernel = arm_compute::support::cpp14::make_unique<NEMemsetKernel>();
+        _memset_kernel->configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
-    _space_to_batch_kernel.configure(input, block_shape, paddings, output);
+    _space_to_batch_kernel = arm_compute::support::cpp14::make_unique<NESpaceToBatchLayerKernel>();
+    _space_to_batch_kernel->configure(input, block_shape, paddings, output);
 }
 
 void NESpaceToBatchLayer::configure(const ITensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ITensor *output)
@@ -55,10 +62,12 @@ void NESpaceToBatchLayer::configure(const ITensor *input, const int block_shape_
 
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
-        _has_padding = true;
-        _memset_kernel.configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
+        _has_padding   = true;
+        _memset_kernel = arm_compute::support::cpp14::make_unique<NEMemsetKernel>();
+        _memset_kernel->configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
-    _space_to_batch_kernel.configure(input, block_shape_x, block_shape_y, padding_left, padding_right, output);
+    _space_to_batch_kernel = arm_compute::support::cpp14::make_unique<NESpaceToBatchLayerKernel>();
+    _space_to_batch_kernel->configure(input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 }
 
 Status NESpaceToBatchLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output)
@@ -81,8 +90,8 @@ void NESpaceToBatchLayer::run()
     // Zero out output only if we have paddings
     if(_has_padding)
     {
-        NEScheduler::get().schedule(&_memset_kernel, Window::DimY);
+        NEScheduler::get().schedule(_memset_kernel.get(), Window::DimY);
     }
-    NEScheduler::get().schedule(&_space_to_batch_kernel, Window::DimY);
+    NEScheduler::get().schedule(_space_to_batch_kernel.get(), Window::DimY);
 }
 } // namespace arm_compute

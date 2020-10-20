@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "arm_compute/core/Size2D.h"
+#include "src/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -26,13 +26,11 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
-#include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
-#include "arm_compute/core/NEON/kernels/NELocallyConnectedMatrixMultiplyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NECol2Im.h"
+#include "arm_compute/runtime/NEON/functions/NEIm2Col.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -40,6 +38,8 @@
 namespace arm_compute
 {
 class INETensor;
+class NEWeightsReshapeKernel;
+class NELocallyConnectedMatrixMultiplyKernel;
 
 /** Basic function to compute the locally connected layer. This function calls the following NEON kernels:
  *
@@ -61,6 +61,8 @@ public:
     NELocallyConnectedLayer &operator=(const NELocallyConnectedLayer &) = delete;
     /** Default move assignment operator */
     NELocallyConnectedLayer &operator=(NELocallyConnectedLayer &&) = default;
+    /** Default destructor */
+    ~NELocallyConnectedLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -94,16 +96,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                            _memory_group;
-    NEIm2ColKernel                         _input_im2col_kernel;
-    NEWeightsReshapeKernel                 _weights_reshape_kernel;
-    NELocallyConnectedMatrixMultiplyKernel _mm_kernel;
-    NECol2ImKernel                         _output_col2im_kernel;
-    Tensor                                 _input_im2col_reshaped;
-    Tensor                                 _weights_reshaped;
-    Tensor                                 _gemm_output;
-    bool                                   _is_prepared;
-    const ITensor                         *_original_weights;
+    MemoryGroup                                             _memory_group;
+    NEIm2Col                                                _input_im2col;
+    std::unique_ptr<NEWeightsReshapeKernel>                 _weights_reshape_kernel;
+    std::unique_ptr<NELocallyConnectedMatrixMultiplyKernel> _mm_kernel;
+    NECol2Im                                                _output_col2im;
+    Tensor                                                  _input_im2col_reshaped;
+    Tensor                                                  _weights_reshaped;
+    Tensor                                                  _gemm_output;
+    bool                                                    _is_prepared;
+    const ITensor                                          *_original_weights;
 };
 }
 #endif /* ARM_COMPUTE_NELOCALLYCONNECTEDLAYER_H */

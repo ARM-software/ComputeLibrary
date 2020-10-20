@@ -21,14 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEFloorKernel.h"
+#include "src/core/NEON/kernels/NEFloorKernel.h"
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/NEON/INEKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 

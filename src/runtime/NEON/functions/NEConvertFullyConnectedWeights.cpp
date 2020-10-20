@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,9 +22,13 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
+#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+NEConvertFullyConnectedWeights::~NEConvertFullyConnectedWeights() = default;
+
 NEConvertFullyConnectedWeights::NEConvertFullyConnectedWeights()
     : _kernel()
 {
@@ -33,7 +37,8 @@ NEConvertFullyConnectedWeights::NEConvertFullyConnectedWeights()
 void NEConvertFullyConnectedWeights::configure(const ITensor *input, ITensor *output, const TensorShape &original_input_shape,
                                                DataLayout data_layout)
 {
-    _kernel.configure(input, output, original_input_shape, data_layout);
+    _kernel = arm_compute::support::cpp14::make_unique<NEConvertFullyConnectedWeightsKernel>();
+    _kernel->configure(input, output, original_input_shape, data_layout);
 }
 
 Status NEConvertFullyConnectedWeights::validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape,
@@ -44,6 +49,6 @@ Status NEConvertFullyConnectedWeights::validate(const ITensorInfo *input, const 
 
 void NEConvertFullyConnectedWeights::run()
 {
-    NEScheduler::get().schedule(&_kernel, Window::DimZ);
+    NEScheduler::get().schedule(_kernel.get(), Window::DimZ);
 }
 } // namespace arm_compute

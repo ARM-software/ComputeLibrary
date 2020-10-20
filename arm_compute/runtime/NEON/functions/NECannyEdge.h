@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_NECANNYEDGE_H
 #define ARM_COMPUTE_NECANNYEDGE_H
 
-#include "arm_compute/core/NEON/kernels/NECannyEdgeKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -38,6 +36,10 @@
 namespace arm_compute
 {
 class ITensor;
+class NEGradientKernel;
+class NEFillBorderKernel;
+class NEEdgeNonMaxSuppressionKernel;
+class NEEdgeTraceKernel;
 
 /** Basic function to execute canny edge on NEON. This function calls the following NEON kernels and functions:
  *
@@ -64,6 +66,8 @@ public:
     NECannyEdge(const NECannyEdge &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NECannyEdge &operator=(const NECannyEdge &) = delete;
+    /** Default destructor */
+    ~NECannyEdge();
     /** Initialise the function's source, destination, thresholds, gradient size, normalization type and border mode.
      *
      * @param[in, out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -81,19 +85,19 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                   _memory_group;        /**< Function's memory group */
-    std::unique_ptr<IFunction>    _sobel;               /**< Pointer to Sobel kernel */
-    std::unique_ptr<INEKernel>    _gradient;            /**< Gradient kernel */
-    NEEdgeNonMaxSuppressionKernel _non_max_suppr;       /**< Non-Maxima suppression kernel */
-    NEEdgeTraceKernel             _edge_trace;          /**< Edge tracing kernel */
-    NEFillBorderKernel            _border_mag_gradient; /**< Fill border on magnitude tensor kernel */
-    NEFillBorderKernel            _border_edge_trace;   /**< Fill border before edge trace */
-    Tensor                        _gx;                  /**< Source tensor - Gx component */
-    Tensor                        _gy;                  /**< Source tensor - Gy component */
-    Tensor                        _magnitude;           /**< Source tensor - Magnitude */
-    Tensor                        _phase;               /**< Source tensor - Phase */
-    Tensor                        _nonmax;              /**< Source tensor - Non-Maxima suppressed */
-    ITensor                      *_output;              /**< Output tensor provided by the user. */
+    MemoryGroup                                    _memory_group;        /**< Function's memory group */
+    std::unique_ptr<IFunction>                     _sobel;               /**< Pointer to Sobel kernel */
+    std::unique_ptr<NEGradientKernel>              _gradient;            /**< Gradient kernel */
+    std::unique_ptr<NEEdgeNonMaxSuppressionKernel> _non_max_suppr;       /**< Non-Maxima suppression kernel */
+    std::unique_ptr<NEEdgeTraceKernel>             _edge_trace;          /**< Edge tracing kernel */
+    std::unique_ptr<NEFillBorderKernel>            _border_mag_gradient; /**< Fill border on magnitude tensor kernel */
+    std::unique_ptr<NEFillBorderKernel>            _border_edge_trace;   /**< Fill border before edge trace */
+    Tensor                                         _gx;                  /**< Source tensor - Gx component */
+    Tensor                                         _gy;                  /**< Source tensor - Gy component */
+    Tensor                                         _magnitude;           /**< Source tensor - Magnitude */
+    Tensor                                         _phase;               /**< Source tensor - Phase */
+    Tensor                                         _nonmax;              /**< Source tensor - Non-Maxima suppressed */
+    ITensor                                       *_output;              /**< Output tensor provided by the user. */
 };
 }
 #endif /* ARM_COMPUTE_NECANNYEDGE_H */
