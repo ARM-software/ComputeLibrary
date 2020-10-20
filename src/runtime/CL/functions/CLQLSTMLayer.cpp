@@ -834,7 +834,8 @@ Status CLQLSTMLayer::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplication::validate(&output_gate_info, &input_gate_info, &hidden_mul_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     const float hidden_state_scale = std::pow(2, -15) / lstm_params.hidden_state_scale() * std::pow(2, -15);
     ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(hidden_state_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift, /* ignore_epsilon */ true));
-    gemmlowp_info.gemmlowp_offset = lstm_params.hidden_state_zero();
+    gemmlowp_info.gemmlowp_offset  = lstm_params.hidden_state_zero();
+    gemmlowp_info.output_data_type = hidden_out_info.data_type();
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOutputStage::validate(&hidden_mul_res, nullptr, &hidden_out_info, gemmlowp_info));
 
     const bool projection_tensor_copy_required = num_units != output_size;
