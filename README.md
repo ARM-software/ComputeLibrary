@@ -44,6 +44,3 @@ To indicate that you agree to the the terms of the DCO, you "sign off" your cont
 ```Signed-off-by: John Doe <john.doe@example.org>```
 
 You must use your real name, no pseudonyms or anonymous contributions are accepted.
-
-### Security Issues
-If you believe you have discovered a security issue please contact MLG-Security@arm.com
