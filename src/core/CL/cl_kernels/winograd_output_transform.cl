@@ -188,6 +188,8 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=2
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=2
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note If this kernel is used to perform Winograd output transform 7x1, -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd output transform 1x7, -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -238,12 +240,11 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     int batch = get_global_id(2) / SRC_DEPTH;
 #endif /* defined(SRC_DEPTH) */
 
-#if defined(SRC_DEPTH)
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w;
-#else  /* defined(SRC_DEPTH) */
+    __global unsigned char *dst_base_ptr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE);
 
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
-#endif /* defined(SRC_DEPTH) */
+#if defined(SRC_DEPTH)
+    dst_base_ptr += batch * dst_stride_w;
+#endif // defined(SRC_DEPTH)
 
     // Load the values across the channels to compose the input tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -272,26 +273,32 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    // Get output address
-#if defined(SRC_DEPTH)
-    int2 offset = (int2)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
-#else                                                                         /* defined(SRC_DEPTH) */
-    int2 offset = (int2)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
-#endif                                                                        /* defined(SRC_DEPTH) */
-    offset = min(offset + (int2)(0, 1) * (int2)dst_stride_z, (int2)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
+
+    dst_base_ptr += y_out * dst_stride_y;
+
+    int2 offset_z = min((int2)z_out + (int2)(0, 1), (int2)((int)DST_HEIGHT - 1)) * (int2)dst_stride_z;
 
     VEC_DATA_TYPE(DATA_TYPE, 2)
     out0_dt                                      = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 2))(out00, out01), VEC_DATA_TYPE(DATA_TYPE, 2)), A_VAL, B_VAL);
-    *(__global DATA_TYPE *)(dst_ptr + offset.s0) = out0_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + offset.s1) = out0_dt.s1;
+
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_z.s1) = out0_dt.s1;
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_z.s0) = out0_dt.s0;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    // Get output address
-    int offset = dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
+
+    dst_base_ptr += z_out * dst_stride_z;
+
+    int2 offset_y = min((int2)y_out + (int2)(0, 1), (int2)((int)DST_WIDTH - 1)) * (int2)dst_stride_y;
+
     VEC_DATA_TYPE(DATA_TYPE, 2)
     out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 2))(out00, out01), VEC_DATA_TYPE(DATA_TYPE, 2)), A_VAL,
                          B_VAL);
-    *(__global DATA_TYPE *)(dst_ptr + 0 * dst_stride_y + offset) = out0_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + 1 * dst_stride_y + offset) = out0_dt.s1;
+
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s1) = out0_dt.s1;
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s0) = out0_dt.s0;
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -388,14 +395,9 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     out_col1 += (VEC_DATA_TYPE(float, 2))b;
 
 #endif // defined(HAS_BIAS)
-    // Get output address
-#if defined(SRC_DEPTH)
-    int2 offset = (int2)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
-#else  /* defined(SRC_DEPTH) */
-    int2 offset = (int2)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
-#endif /* defined(SRC_DEPTH) */
-    offset      = min(offset + (int2)(0, 1) * (int2)dst_stride_z, (int2)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
-    int2 mult_y = min((int2)dst_size - offset, (int2)1);                           // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
+
+    int2 offset_y = min((int2)y_out + (int2)(0, 1), (int2)((int)DST_WIDTH - 1)) * (int2)dst_stride_y;
+    int2 offset_z = min((int2)z_out + (int2)(0, 1), (int2)((int)DST_HEIGHT - 1)) * (int2)dst_stride_z;
 
     // Store the output tile
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
@@ -403,11 +405,12 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     out_col1_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT(out_col1, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)), A_VAL, B_VAL);
 
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 0 * (int)dst_stride_y + offset.s0) = out_col0_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 1 * (int)dst_stride_y + offset.s0) = out_col1_dt.s0;
-
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 0 * (int)dst_stride_y + offset.s1)     = out_col0_dt.s1;
-    *(__global     DATA_TYPE *)(dst_ptr + mult_y.s1 * 1 * (int)dst_stride_y + offset.s1) = out_col1_dt.s1;
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s1) = out_col1_dt.s1;
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s0) = out_col1_dt.s0;
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s1) = out_col0_dt.s1;
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s0) = out_col0_dt.s0;
 
 #endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
@@ -643,6 +646,8 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note If this kernel is used to perform Winograd output transform 3x1, -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd output transform 1x3, -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -831,43 +836,51 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 
 #endif // defined(HAS_BIAS)
 
-#if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
+    __global unsigned char *dst_base_ptr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE);
+
 #if defined(SRC_DEPTH)
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
-#else                                                                               /* defined(SRC_DEPTH) */
-    int4       offset                                            = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
-#endif                                                                              /* defined(SRC_DEPTH) */
-    offset = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
+    dst_base_ptr += batch * dst_stride_w;
+#endif // defined(SRC_DEPTH)
+
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
+
+    dst_base_ptr += y_out * dst_stride_y;
+
+    int4 offset_z = min((int4)z_out + (int4)(0, 1, 2, 3), (int4)((int)DST_HEIGHT - 1)) * (int4)dst_stride_z;
 
     // Store the 1x4 output tile
     VEC_DATA_TYPE(DATA_TYPE, 4)
     out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL,
                          B_VAL);
-    *((__global DATA_TYPE *)(dst_ptr + offset.s0)) = out0_dt.s0;
-    *((__global DATA_TYPE *)(dst_ptr + offset.s1)) = out0_dt.s1;
-    *((__global DATA_TYPE *)(dst_ptr + offset.s2)) = out0_dt.s2;
-    *((__global DATA_TYPE *)(dst_ptr + offset.s3)) = out0_dt.s3;
+
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s3)) = out0_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s2)) = out0_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s1)) = out0_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s0)) = out0_dt.s0;
+
 #elif defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
-    // Store the 4x1 output tile
-    int offset = dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
-    int mult_y = min(dst_size - offset, 1);
+
+    dst_base_ptr += z_out * dst_stride_z;
+
+    int4 offset_y = min((int4)y_out + (int4)(0, 1, 2, 3), (int4)((int)DST_WIDTH - 1)) * (int4)dst_stride_y;
 
     VEC_DATA_TYPE(DATA_TYPE, 4)
     out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)),
                          A_VAL, B_VAL);
-    *((__global DATA_TYPE *)(dst_ptr + mult_y * 0 * dst_stride_y + offset)) = out0_dt.s0;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y * 1 * dst_stride_y + offset)) = out0_dt.s1;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y * 2 * dst_stride_y + offset)) = out0_dt.s2;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y * 3 * dst_stride_y + offset)) = out0_dt.s3;
+
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3)) = out0_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2)) = out0_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1)) = out0_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0)) = out0_dt.s0;
+
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
-    // Get output address
-#if defined(SRC_DEPTH)
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
-#else  /* defined(SRC_DEPTH) */
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
-#endif /* defined(SRC_DEPTH) */
-    offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
-    int4 mult_y = min((int4)dst_size - offset, (int4)1);                                 // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
+
+    int4 offset_y = min((int4)y_out + (int4)(0, 1, 2, 3), (int4)((int)DST_WIDTH - 1)) * (int4)dst_stride_y;
+    int4 offset_z = min((int4)z_out + (int4)(0, 1, 2, 3), (int4)((int)DST_HEIGHT - 1)) * (int4)dst_stride_z;
 
     // Store the 4x4 output tile
     VEC_DATA_TYPE(DATA_TYPE, 4)
@@ -880,23 +893,25 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     out3_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out30, out31, out32, out33),
                                                                        VEC_DATA_TYPE(DATA_TYPE, 4)),
                          A_VAL, B_VAL);
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset.s0)) = out0_dt.s0;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s0)) = out0_dt.s1;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset.s0)) = out0_dt.s2;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset.s0)) = out0_dt.s3;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 0 * dst_stride_y + offset.s1)) = out1_dt.s0;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 1 * dst_stride_y + offset.s1)) = out1_dt.s1;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 2 * dst_stride_y + offset.s1)) = out1_dt.s2;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 3 * dst_stride_y + offset.s1)) = out1_dt.s3;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 0 * dst_stride_y + offset.s2)) = out2_dt.s0;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 1 * dst_stride_y + offset.s2)) = out2_dt.s1;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 2 * dst_stride_y + offset.s2)) = out2_dt.s2;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 3 * dst_stride_y + offset.s2)) = out2_dt.s3;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 0 * dst_stride_y + offset.s3)) = out3_dt.s0;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 1 * dst_stride_y + offset.s3)) = out3_dt.s1;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 2 * dst_stride_y + offset.s3)) = out3_dt.s2;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 3 * dst_stride_y + offset.s3)) = out3_dt.s3;
 
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s3)) = out3_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s3)) = out3_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s3)) = out3_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s3)) = out3_dt.s0;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s2)) = out2_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s2)) = out2_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s2)) = out2_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s2)) = out2_dt.s0;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s1)) = out1_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s1)) = out1_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s1)) = out1_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s1)) = out1_dt.s0;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s0)) = out0_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s0)) = out0_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s0)) = out0_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s0)) = out0_dt.s0;
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
 }
 
@@ -1153,6 +1168,8 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note If this kernel is used to perform Winograd output transform 5x1, -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd output transform 1x5, -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -1203,6 +1220,12 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     int batch = get_global_id(2) / SRC_DEPTH;
 #endif /* defined(SRC_DEPTH) */
 
+    __global unsigned char *dst_base_ptr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE);
+
+#if defined(SRC_DEPTH)
+    dst_base_ptr += batch * dst_stride_w;
+#endif // defined(SRC_DEPTH)
+
     // Load the values across the channels to compose the input tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
     DATA_TYPE d01 = *((__global DATA_TYPE *)(src_addr + 1 * src_stride_z));
@@ -1234,31 +1257,37 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    // Get output address
-#if defined(SRC_DEPTH)
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
-#else                                                                               /* defined(SRC_DEPTH) */
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
-#endif                                                                              /* defined(SRC_DEPTH) */
-    offset = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
+
+    dst_base_ptr += y_out * dst_stride_y;
+
+    int4 offset_z = min((int4)z_out + (int4)(0, 1, 2, 3), (int4)((int)DST_HEIGHT - 1)) * (int4)dst_stride_z;
 
     VEC_DATA_TYPE(DATA_TYPE, 4)
     out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL,
                          B_VAL);
-    *(__global DATA_TYPE *)(dst_ptr + offset.s0) = out0_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + offset.s1) = out0_dt.s1;
-    *(__global DATA_TYPE *)(dst_ptr + offset.s2) = out0_dt.s2;
-    *(__global DATA_TYPE *)(dst_ptr + offset.s3) = out0_dt.s3;
+
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s3)) = out0_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s2)) = out0_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s1)) = out0_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s0)) = out0_dt.s0;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    // Get output address
-    int offset = dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
+
+    dst_base_ptr += z_out * dst_stride_z;
+
+    int4 offset_y = min((int4)y_out + (int4)(0, 1, 2, 3), (int4)((int)DST_WIDTH - 1)) * (int4)dst_stride_y;
+
     VEC_DATA_TYPE(DATA_TYPE, 4)
     out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL,
                          B_VAL);
-    *(__global DATA_TYPE *)(dst_ptr + 0 * dst_stride_y + offset) = out0_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + 1 * dst_stride_y + offset) = out0_dt.s1;
-    *(__global DATA_TYPE *)(dst_ptr + 2 * dst_stride_y + offset) = out0_dt.s2;
-    *(__global DATA_TYPE *)(dst_ptr + 3 * dst_stride_y + offset) = out0_dt.s3;
+
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3)) = out0_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2)) = out0_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1)) = out0_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0)) = out0_dt.s0;
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -1371,14 +1400,9 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     out_col2 += (VEC_DATA_TYPE(float, 4))b;
     out_col3 += (VEC_DATA_TYPE(float, 4))b;
 #endif // defined(HAS_BIAS)
-    // Get output address
-#if defined(SRC_DEPTH)
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
-#else  /* defined(SRC_DEPTH) */
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
-#endif /* defined(SRC_DEPTH) */
-    offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
-    int4 mult_y = min((int4)dst_size - offset, (int4)1);                                 // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
+
+    int4 offset_y = min((int4)y_out + (int4)(0, 1, 2, 3), (int4)((int)DST_WIDTH - 1)) * (int4)dst_stride_y;
+    int4 offset_z = min((int4)z_out + (int4)(0, 1, 2, 3), (int4)((int)DST_HEIGHT - 1)) * (int4)dst_stride_z;
 
     // Store the output tile
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
@@ -1390,22 +1414,24 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     out_col3_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT(out_col3, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)), A_VAL, B_VAL);
 
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 0 * (int)dst_stride_y + offset.s0) = out_col0_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 1 * (int)dst_stride_y + offset.s0) = out_col1_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 2 * (int)dst_stride_y + offset.s0) = out_col2_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 3 * (int)dst_stride_y + offset.s0) = out_col3_dt.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 0 * (int)dst_stride_y + offset.s1) = out_col0_dt.s1;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 1 * (int)dst_stride_y + offset.s1) = out_col1_dt.s1;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 2 * (int)dst_stride_y + offset.s1) = out_col2_dt.s1;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 3 * (int)dst_stride_y + offset.s1) = out_col3_dt.s1;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 0 * (int)dst_stride_y + offset.s2) = out_col0_dt.s2;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 1 * (int)dst_stride_y + offset.s2) = out_col1_dt.s2;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 2 * (int)dst_stride_y + offset.s2) = out_col2_dt.s2;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 3 * (int)dst_stride_y + offset.s2) = out_col3_dt.s2;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 0 * (int)dst_stride_y + offset.s3) = out_col0_dt.s3;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 1 * (int)dst_stride_y + offset.s3) = out_col1_dt.s3;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 2 * (int)dst_stride_y + offset.s3) = out_col2_dt.s3;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 3 * (int)dst_stride_y + offset.s3) = out_col3_dt.s3;
+    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
+    // is overwritten with the valid one
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s3)) = out_col3_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s3)) = out_col2_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s3)) = out_col1_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s3)) = out_col0_dt.s3;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s2)) = out_col3_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s2)) = out_col2_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s2)) = out_col1_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s2)) = out_col0_dt.s2;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s1)) = out_col3_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s1)) = out_col2_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s1)) = out_col1_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s1)) = out_col0_dt.s1;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s0)) = out_col3_dt.s0;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s0)) = out_col2_dt.s0;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s0)) = out_col1_dt.s0;
+    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s0)) = out_col0_dt.s0;
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
 #endif // defined(VEC_SIZE) && VEC_SIZE == 4
@@ -1485,6 +1511,8 @@ __kernel void winograd_output_transform_2x1_3x1_nchw(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=2
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -1689,6 +1717,8 @@ __kernel void winograd_output_transform_4x1_5x1_nchw(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -1755,6 +1785,8 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -1893,6 +1925,8 @@ __kernel void winograd_output_transform_1x2_1x3_nchw(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=2
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -2097,6 +2131,8 @@ __kernel void winograd_output_transform_1x4_1x5_nchw(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -2163,6 +2199,8 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
+ * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
+ * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *

@@ -96,35 +96,22 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output, const Size2D &output_tile_size)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_UNUSED(bias);
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool   window_changed = false;
 
-    int output_static_window_end_x = 0;
-    int output_static_window_end_y = 0;
-
     if(output->data_layout() == DataLayout::NCHW)
     {
-        output_static_window_end_x = ceil_to_multiple(output->dimension(0), output_tile_size.width);
-        output_static_window_end_y = ceil_to_multiple(output->dimension(1), output_tile_size.height);
-    }
-    else
-    {
-        output_static_window_end_x = output->dimension(0);
-        output_static_window_end_y = std::max(ceil_to_multiple(output->dimension(1), output_tile_size.width), output->dimension(1) + 1 /* For out of bound reads towards the z axis */);
-    }
+        const int output_static_window_end_x = ceil_to_multiple(output->dimension(0), output_tile_size.width);
+        const int output_static_window_end_y = ceil_to_multiple(output->dimension(1), output_tile_size.height);
 
-    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-    AccessWindowStatic    output_access(output, 0, 0, output_static_window_end_x, output_static_window_end_y);
-    window_changed = update_window_and_padding(win, input_access, output_access);
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
-
-    if(bias != nullptr)
-    {
-        AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-        window_changed = window_changed || update_window_and_padding(win, bias_access);
+        AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+        AccessWindowStatic    output_access(output, 0, 0, output_static_window_end_x, output_static_window_end_y);
+        window_changed = update_window_and_padding(win, input_access, output_access);
+        output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -152,6 +139,8 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info, act_info));
 
+    auto padding_info = get_padding_info({ input, bias, output });
+
     _input   = input;
     _bias    = bias;
     _output  = output;
@@ -162,6 +151,8 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
     const Size2D        kernel_size      = winograd_info.kernel_size;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
+    const int           idx_width        = get_data_layout_dimension_index(winograd_info.output_data_layout, DataLayoutDimension::WIDTH);
+    const int           idx_height       = get_data_layout_dimension_index(winograd_info.output_data_layout, DataLayoutDimension::HEIGHT);
 
     // Compute the number of output tiles along the x and y direction of size "output_tile_size"
     const Size2D num_tiles = compute_winograd_convolution_tiles(input_dimensions,
@@ -190,6 +181,8 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
     build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
     build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(_output->info()->dimension(idx_width)));
+    build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(_output->info()->dimension(idx_height)));
     build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
     build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
     build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
@@ -217,6 +210,8 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
     _config_id += "_";
     _config_id += lower_string(string_from_data_layout(winograd_info.output_data_layout));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info) && _is_nhwc);
 }
 
 Status CLWinogradOutputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
