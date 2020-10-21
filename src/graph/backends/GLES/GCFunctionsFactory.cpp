@@ -120,7 +120,7 @@ std::unique_ptr<IFunction> create_convolution_layer<GCConvolutionLayerFunctions,
                                << " Output shape: " << output->info()->tensor_shape()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return func;
+    return std::move(func);
 }
 
 template <>
@@ -172,7 +172,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
                                << " Depth multiplier: " << depth_multiplier
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return func;
+    return std::move(func);
 }
 
 template <>
@@ -226,7 +226,7 @@ std::unique_ptr<IFunction> create_eltwise_layer<GCEltwiseFunctions, GCTargetInfo
                                << " Shape: " << input1->info()->tensor_shape()
                                << std::endl);
 
-    return func;
+    return std::move(func);
 }
 } //namespace detail
 

@@ -42,14 +42,14 @@ def build_bootcode_objs(sources):
     Default(obj)
     return obj
 
-def build_library(name, sources, static=False, libs=[]):
+def build_library(name, build_env, sources, static=False, libs=[]):
     if static:
-        obj = arm_compute_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+        obj = build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
     else:
         if env['set_soname']:
-            obj = arm_compute_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
+            obj = build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
         else:
-            obj = arm_compute_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+            obj = build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
     obj = install_lib(obj)
     Default(obj)
@@ -136,6 +136,9 @@ def create_version_file(target, source, env):
 arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
 arm_compute_env.AlwaysBuild(version_file)
+
+default_cpp_compiler = 'g++' if env['os'] != 'android' else 'clang++'
+cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 
 # Generate embed files
 generate_embed = [ version_file ]
@@ -282,26 +285,29 @@ if env['os'] == 'bare_metal':
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
-arm_compute_core_a = build_library('arm_compute_core-static', core_files, static=True)
+arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, core_files, static=True)
 Export('arm_compute_core_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_core_so = build_library('arm_compute_core', core_files, static=False)
+    arm_compute_core_so = build_library('arm_compute_core', arm_compute_env, core_files, static=False)
     Export('arm_compute_core_so')
 
-arm_compute_a = build_library('arm_compute-static', runtime_files, static=True, libs = [ arm_compute_core_a ])
+arm_compute_a = build_library('arm_compute-static', arm_compute_env, runtime_files, static=True, libs = [ arm_compute_core_a ])
 Export('arm_compute_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_so = build_library('arm_compute', runtime_files, static=False, libs = [ "arm_compute_core" ])
+    arm_compute_so = build_library('arm_compute', arm_compute_env, runtime_files, static=False, libs = [ "arm_compute_core" ])
     Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
 
-arm_compute_graph_a = build_library('arm_compute_graph-static', graph_files, static=True, libs = [ arm_compute_a])
+arm_compute_graph_env = arm_compute_env.Clone();
+if 'clang++' in cpp_compiler:
+    arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-pessimizing-move'])
+arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a])
 Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_graph_so = build_library('arm_compute_graph', graph_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
+    arm_compute_graph_so = build_library('arm_compute_graph', arm_compute_graph_env, graph_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
     Depends(arm_compute_graph_so, arm_compute_so)
     Export('arm_compute_graph_so')
 
