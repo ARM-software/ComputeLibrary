@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLTableLookup.h"
 
-#include "arm_compute/core/CL/kernels/CLTableLookupKernel.h"
+#include "src/core/CL/kernels/CLTableLookupKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

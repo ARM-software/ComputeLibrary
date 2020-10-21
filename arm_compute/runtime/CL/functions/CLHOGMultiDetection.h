@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/ICLMultiHOG.h"
-#include "arm_compute/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLHOGDetector.h"
@@ -39,6 +38,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLHOGOrientationBinningKernel;
+class CLHOGBlockNormalizationKernel;
 /** Basic function to detect multiple objects (or the same object at different scales) on the same input image using HOG. This function calls the following kernels:
  *
  * -# @ref CLHOGGradient
@@ -62,6 +64,8 @@ public:
     CLHOGMultiDetection(const CLHOGMultiDetection &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLHOGMultiDetection &operator=(const CLHOGMultiDetection &) = delete;
+    /** Default destructor */
+    ~CLHOGMultiDetection();
     /** Initialise the function's source, destination, detection window strides, border mode, threshold and non-maxima suppression
      *
      * @param[in, out] input                    Input tensor. Data type supported: U8
@@ -110,21 +114,21 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                  _memory_group;
-    CLHOGGradient                                _gradient_kernel;
-    std::vector<CLHOGOrientationBinningKernel>   _orient_bin_kernel;
-    std::vector<CLHOGBlockNormalizationKernel>   _block_norm_kernel;
-    std::vector<CLHOGDetector>                   _hog_detect_kernel;
-    CPPDetectionWindowNonMaximaSuppressionKernel _non_maxima_kernel;
-    std::vector<CLTensor>                        _hog_space;
-    std::vector<CLTensor>                        _hog_norm_space;
-    ICLDetectionWindowArray                     *_detection_windows;
-    CLTensor                                     _mag;
-    CLTensor                                     _phase;
-    bool                                         _non_maxima_suppression;
-    size_t                                       _num_orient_bin_kernel;
-    size_t                                       _num_block_norm_kernel;
-    size_t                                       _num_hog_detect_kernel;
+    MemoryGroup                                                 _memory_group;
+    CLHOGGradient                                               _gradient_kernel;
+    std::vector<std::unique_ptr<CLHOGOrientationBinningKernel>> _orient_bin_kernel;
+    std::vector<std::unique_ptr<CLHOGBlockNormalizationKernel>> _block_norm_kernel;
+    std::vector<CLHOGDetector>                                  _hog_detect_kernel;
+    CPPDetectionWindowNonMaximaSuppressionKernel                _non_maxima_kernel;
+    std::vector<CLTensor>                                       _hog_space;
+    std::vector<CLTensor>                                       _hog_norm_space;
+    ICLDetectionWindowArray                                    *_detection_windows;
+    CLTensor                                                    _mag;
+    CLTensor                                                    _phase;
+    bool                                                        _non_maxima_suppression;
+    size_t                                                      _num_orient_bin_kernel;
+    size_t                                                      _num_block_norm_kernel;
+    size_t                                                      _num_hog_detect_kernel;
 };
 }
 

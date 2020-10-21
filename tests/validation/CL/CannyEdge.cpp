@@ -48,8 +48,9 @@ namespace
 /* Allowed ratio of mismatches between target and reference (1.0 = 100%) */
 const float allowed_mismatch_ratio = 0.1f;
 
-const auto data = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }),
-                          combine(framework::dataset::make("Normalization", { MagnitudeType::L1NORM, MagnitudeType::L2NORM }), datasets::BorderModes()));
+const auto data = combine(framework::dataset::make("GradientSize",
+{ 3, 5, 7 }),
+combine(framework::dataset::make("Normalization", { MagnitudeType::L1NORM, MagnitudeType::L2NORM }), datasets::BorderModes()));
 } // namespace
 
 TEST_SUITE(CL)

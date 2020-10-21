@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
@@ -38,6 +39,11 @@
 #include "src/core/CL/ICLGEMMKernelConfiguration.h"
 #include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfiguration.h"
 #include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/helpers/float_ops.h"
 #include "src/runtime/CL/gemm/CLGEMMKernelSelection.h"
@@ -51,16 +57,58 @@ using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::cl_gemm;
 using namespace arm_compute::utils::cast;
 
+namespace weights_transformations
+{
+CLGEMMReshapeRHSMatrixKernelManaged::CLGEMMReshapeRHSMatrixKernelManaged()
+    : _kernel(support::cpp14::make_unique<CLGEMMReshapeRHSMatrixKernel>())
+{
+}
+
+CLGEMMReshapeRHSMatrixKernelManaged::~CLGEMMReshapeRHSMatrixKernelManaged() = default;
+
+void CLGEMMReshapeRHSMatrixKernelManaged::run()
+{
+    _output.allocator()->allocate();
+    CLScheduler::get().enqueue(*_kernel, false);
+    _reshape_run = true;
+}
+
+void CLGEMMReshapeRHSMatrixKernelManaged::release()
+{
+    _output.allocator()->free();
+}
+
+ICLTensor *CLGEMMReshapeRHSMatrixKernelManaged::get_weights()
+{
+    return &_output;
+}
+
+uint32_t CLGEMMReshapeRHSMatrixKernelManaged::uid()
+{
+    return _uid;
+}
+
+void CLGEMMReshapeRHSMatrixKernelManaged::configure(const ICLTensor *input, GEMMRHSMatrixInfo info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, info);
+}
+
+void CLGEMMReshapeRHSMatrixKernelManaged::configure(const CLCompileContext &compile_context, const ICLTensor *input, GEMMRHSMatrixInfo info)
+{
+    _kernel->configure(compile_context, input, &_output, info);
+}
+} // namespace weights_transformations
+
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _memory_group(std::move(memory_manager)),
       _weights_manager(weights_manager),
-      _mm_kernel(),
-      _reshape_lhs_kernel(),
-      _reshape_rhs_kernel(),
-      _reshape_rhs_kernel_managed(),
-      _mm_reshaped_kernel(),
-      _mm_reshaped_only_rhs_kernel(),
-      _mm_reshaped_only_rhs_fallback_kernel(),
+      _mm_kernel(support::cpp14::make_unique<CLGEMMMatrixMultiplyKernel>()),
+      _reshape_lhs_kernel(support::cpp14::make_unique<CLGEMMReshapeLHSMatrixKernel>()),
+      _reshape_rhs_kernel(support::cpp14::make_unique<CLGEMMReshapeRHSMatrixKernel>()),
+      _reshape_rhs_kernel_managed(support::cpp14::make_unique<weights_transformations::CLGEMMReshapeRHSMatrixKernelManaged>()),
+      _mm_reshaped_kernel(support::cpp14::make_unique<CLGEMMMatrixMultiplyReshapedKernel>()),
+      _mm_reshaped_only_rhs_kernel(support::cpp14::make_unique<CLGEMMMatrixMultiplyReshapedOnlyRHSKernel>()),
+      _mm_reshaped_only_rhs_fallback_kernel(support::cpp14::make_unique<CLGEMMMatrixMultiplyReshapedOnlyRHSKernel>()),
       _tmp_a(),
       _tmp_b(),
       _original_b(nullptr),
@@ -72,6 +120,8 @@ CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *
       _gemm_kernel_type(CLGEMMKernelType::NATIVE_V1)
 {
 }
+
+CLGEMM::~CLGEMM() = default;
 
 CLGEMMKernelType CLGEMM::select_gemm_kernel(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type, bool reshape_b_only_on_first_run)
 {
@@ -98,15 +148,15 @@ void CLGEMM::configure_native_v1(const CLCompileContext &compile_context, const 
     const GPUTarget    gpu_target = CLScheduler::get().target();
 
     // Set the target for the kernels
-    _mm_kernel.set_target(gpu_target);
+    _mm_kernel->set_target(gpu_target);
 
     GEMMReshapeInfo reshape_info(m, n, k, 1, 1, gemm_info.depth_output_gemm3d(), gemm_info.reinterpret_input_as_3d(), gemm_info.broadcast_bias());
 
     // Configure and tune matrix multiply kernel
-    _mm_kernel.configure(compile_context, a, b, c, output, alpha, beta, false, reshape_info, gemm_info.fp_mixed_precision(), gemm_info.activation_info());
+    _mm_kernel->configure(compile_context, a, b, c, output, alpha, beta, false, reshape_info, gemm_info.fp_mixed_precision(), gemm_info.activation_info());
 
     // Tune kernel statically
-    CLScheduler::get().tune_kernel_static(_mm_kernel);
+    CLScheduler::get().tune_kernel_static(*_mm_kernel);
 }
 
 void CLGEMM::configure_reshaped_v1(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta,
@@ -122,8 +172,8 @@ void CLGEMM::configure_reshaped_v1(const CLCompileContext &compile_context, cons
     int                mult_interleave4x4_height = 1;
 
     // Set the target for the kernels
-    _reshape_lhs_kernel.set_target(gpu_target);
-    _mm_kernel.set_target(gpu_target);
+    _reshape_lhs_kernel->set_target(gpu_target);
+    _mm_kernel->set_target(gpu_target);
 
     if(get_arch_from_target(gpu_target) == GPUTarget::BIFROST)
     {
@@ -158,24 +208,24 @@ void CLGEMM::configure_reshaped_v1(const CLCompileContext &compile_context, cons
     }
 
     // Configure interleave kernel
-    _reshape_lhs_kernel.configure(compile_context, a, &_tmp_a, lhs_info, reinterpret_input_as_3d);
+    _reshape_lhs_kernel->configure(compile_context, a, &_tmp_a, lhs_info, reinterpret_input_as_3d);
 
     // Configure transpose kernel
     ICLTensor *reshaped_rhs = &_tmp_b;
     if(_weights_manager && _weights_manager->are_weights_managed(b))
     {
-        _reshape_rhs_kernel_managed.configure(compile_context, b, rhs_info);
-        reshaped_rhs = utils::cast::polymorphic_downcast<ICLTensor *>(_weights_manager->acquire(b, &_reshape_rhs_kernel_managed));
+        _reshape_rhs_kernel_managed->configure(compile_context, b, rhs_info);
+        reshaped_rhs = utils::cast::polymorphic_downcast<ICLTensor *>(_weights_manager->acquire(b, _reshape_rhs_kernel_managed.get()));
     }
     else
     {
-        _reshape_rhs_kernel.configure(compile_context, b, &_tmp_b, rhs_info);
+        _reshape_rhs_kernel->configure(compile_context, b, &_tmp_b, rhs_info);
     }
 
     // Configure and tune matrix multiply kernel
-    _mm_kernel.configure(compile_context, &_tmp_a, reshaped_rhs, c, output, alpha, beta, true, reshape_info, gemm_info.fp_mixed_precision(), gemm_info.activation_info());
+    _mm_kernel->configure(compile_context, &_tmp_a, reshaped_rhs, c, output, alpha, beta, true, reshape_info, gemm_info.fp_mixed_precision(), gemm_info.activation_info());
 
-    CLScheduler::get().tune_kernel_static(_mm_kernel);
+    CLScheduler::get().tune_kernel_static(*_mm_kernel);
 
     // Allocate intermediate tensors
     _tmp_a.allocator()->allocate();
@@ -209,8 +259,8 @@ void CLGEMM::configure_reshaped_v2(const CLCompileContext &compile_context, cons
     kernel_info.activation_info         = gemm_info.activation_info();
 
     // Set the target for the kernels
-    _reshape_lhs_kernel.set_target(gpu_target);
-    _mm_kernel.set_target(gpu_target);
+    _reshape_lhs_kernel->set_target(gpu_target);
+    _mm_kernel->set_target(gpu_target);
 
     const bool use_mm_b = (!_weights_manager || !_weights_manager->are_weights_managed(b));
 
@@ -234,21 +284,21 @@ void CLGEMM::configure_reshaped_v2(const CLCompileContext &compile_context, cons
     // Configure lhs_info and rhs_info
     std::tie(lhs_info, rhs_info) = gemm_config->configure(m, n, k, batch_size, data_type);
 
-    _reshape_lhs_kernel.configure(compile_context, a, &_tmp_a, lhs_info, gemm_info.reinterpret_input_as_3d());
+    _reshape_lhs_kernel->configure(compile_context, a, &_tmp_a, lhs_info, gemm_info.reinterpret_input_as_3d());
 
     ICLTensor *reshaped_rhs = &_tmp_b;
     if(_weights_manager && _weights_manager->are_weights_managed(b))
     {
-        _reshape_rhs_kernel_managed.configure(compile_context, b, rhs_info);
-        reshaped_rhs = utils::cast::polymorphic_downcast<ICLTensor *>(_weights_manager->acquire(b, &_reshape_rhs_kernel_managed));
+        _reshape_rhs_kernel_managed->configure(compile_context, b, rhs_info);
+        reshaped_rhs = utils::cast::polymorphic_downcast<ICLTensor *>(_weights_manager->acquire(b, _reshape_rhs_kernel_managed.get()));
     }
     else
     {
-        _reshape_rhs_kernel.configure(compile_context, b, &_tmp_b, rhs_info);
+        _reshape_rhs_kernel->configure(compile_context, b, &_tmp_b, rhs_info);
     }
 
     // Configure and tune matrix multiply kernel
-    _mm_reshaped_kernel.configure(compile_context, &_tmp_a, reshaped_rhs, c, output, alpha, beta, lhs_info, rhs_info, kernel_info);
+    _mm_reshaped_kernel->configure(compile_context, &_tmp_a, reshaped_rhs, c, output, alpha, beta, lhs_info, rhs_info, kernel_info);
 
     // Allocate intermediate tensors
     _tmp_a.allocator()->allocate();
@@ -282,7 +332,7 @@ void CLGEMM::configure_reshaped_only_rhs(const CLCompileContext &compile_context
     kernel_info.activation_info         = gemm_info.activation_info();
 
     // Set the target for the kernels
-    _mm_kernel.set_target(gpu_target);
+    _mm_kernel->set_target(gpu_target);
 
     const bool use_mm_b = (!_weights_manager || !_weights_manager->are_weights_managed(b));
 
@@ -305,12 +355,12 @@ void CLGEMM::configure_reshaped_only_rhs(const CLCompileContext &compile_context
     ICLTensor *reshaped_rhs = &_tmp_b;
     if(_weights_manager && _weights_manager->are_weights_managed(b))
     {
-        _reshape_rhs_kernel_managed.configure(compile_context, b, rhs_info);
-        reshaped_rhs = utils::cast::polymorphic_downcast<ICLTensor *>(_weights_manager->acquire(b, &_reshape_rhs_kernel_managed));
+        _reshape_rhs_kernel_managed->configure(compile_context, b, rhs_info);
+        reshaped_rhs = utils::cast::polymorphic_downcast<ICLTensor *>(_weights_manager->acquire(b, _reshape_rhs_kernel_managed.get()));
     }
     else
     {
-        _reshape_rhs_kernel.configure(compile_context, b, &_tmp_b, rhs_info);
+        _reshape_rhs_kernel->configure(compile_context, b, &_tmp_b, rhs_info);
     }
 
     // Configure two variants of CLGEMMMatrixMultiplyReshapedOnlyRHSKernel (has_pad_y = false/true)
@@ -319,11 +369,11 @@ void CLGEMM::configure_reshaped_only_rhs(const CLCompileContext &compile_context
 
     // Configure matrix multiply kernel with no y padding support
     kernel_info.has_pad_y = false;
-    _mm_reshaped_only_rhs_kernel.configure(compile_context, a, reshaped_rhs, c, output, alpha, beta, lhs_info, rhs_info, kernel_info);
+    _mm_reshaped_only_rhs_kernel->configure(compile_context, a, reshaped_rhs, c, output, alpha, beta, lhs_info, rhs_info, kernel_info);
 
     // Configure matrix multiply kernel with y padding support
     kernel_info.has_pad_y = true;
-    _mm_reshaped_only_rhs_fallback_kernel.configure(compile_context, a, reshaped_rhs, c, output, alpha, beta, lhs_info, rhs_info, kernel_info);
+    _mm_reshaped_only_rhs_fallback_kernel->configure(compile_context, a, reshaped_rhs, c, output, alpha, beta, lhs_info, rhs_info, kernel_info);
 
     if(!_reshape_b_only_on_first_run && use_mm_b)
     {
@@ -626,49 +676,49 @@ void CLGEMM::run()
     {
         case CLGEMMKernelType::NATIVE_V1:
         {
-            CLScheduler::get().enqueue(_mm_kernel, true);
+            CLScheduler::get().enqueue(*_mm_kernel, true);
             break;
         }
         case CLGEMMKernelType::RESHAPED_V1:
         {
             // Run interleave kernel
-            CLScheduler::get().enqueue(_reshape_lhs_kernel, false);
+            CLScheduler::get().enqueue(*_reshape_lhs_kernel, false);
 
             if(!_reshape_b_only_on_first_run)
             {
                 // Run transpose kernel
                 if(_weights_manager && _weights_manager->are_weights_managed(_original_b))
                 {
-                    _weights_manager->run(_original_b, &_reshape_rhs_kernel_managed);
+                    _weights_manager->run(_original_b, _reshape_rhs_kernel_managed.get());
                 }
                 else
                 {
-                    CLScheduler::get().enqueue(_reshape_rhs_kernel, false);
+                    CLScheduler::get().enqueue(*_reshape_rhs_kernel, false);
                 }
             }
 
-            CLScheduler::get().enqueue(_mm_kernel, true);
+            CLScheduler::get().enqueue(*_mm_kernel, true);
             break;
         }
         case CLGEMMKernelType::RESHAPED:
         {
             // Run interleave kernel
-            CLScheduler::get().enqueue(_reshape_lhs_kernel, false);
+            CLScheduler::get().enqueue(*_reshape_lhs_kernel, false);
 
             if(!_reshape_b_only_on_first_run)
             {
                 // Run transpose kernel
                 if(_weights_manager && _weights_manager->are_weights_managed(_original_b))
                 {
-                    _weights_manager->run(_original_b, &_reshape_rhs_kernel_managed);
+                    _weights_manager->run(_original_b, _reshape_rhs_kernel_managed.get());
                 }
                 else
                 {
-                    CLScheduler::get().enqueue(_reshape_rhs_kernel, false);
+                    CLScheduler::get().enqueue(*_reshape_rhs_kernel, false);
                 }
             }
 
-            CLScheduler::get().enqueue(_mm_reshaped_kernel, true);
+            CLScheduler::get().enqueue(*_mm_reshaped_kernel, true);
             break;
         }
         case CLGEMMKernelType::RESHAPED_ONLY_RHS:
@@ -678,20 +728,20 @@ void CLGEMM::run()
                 // Run transpose kernel
                 if(_weights_manager && _weights_manager->are_weights_managed(_original_b))
                 {
-                    _weights_manager->run(_original_b, &_reshape_rhs_kernel_managed);
+                    _weights_manager->run(_original_b, _reshape_rhs_kernel_managed.get());
                 }
                 else
                 {
-                    CLScheduler::get().enqueue(_reshape_rhs_kernel, false);
+                    CLScheduler::get().enqueue(*_reshape_rhs_kernel, false);
                 }
             }
             if(_has_pad_y)
             {
-                CLScheduler::get().enqueue(_mm_reshaped_only_rhs_fallback_kernel, true);
+                CLScheduler::get().enqueue(*_mm_reshaped_only_rhs_fallback_kernel, true);
             }
             else
             {
-                CLScheduler::get().enqueue(_mm_reshaped_only_rhs_kernel, true);
+                CLScheduler::get().enqueue(*_mm_reshaped_only_rhs_kernel, true);
             }
             break;
         }
@@ -720,13 +770,13 @@ void CLGEMM::prepare()
         {
             if(_weights_manager && _weights_manager->are_weights_managed(_original_b))
             {
-                _weights_manager->run(_original_b, &_reshape_rhs_kernel_managed);
+                _weights_manager->run(_original_b, _reshape_rhs_kernel_managed.get());
             }
             else
             {
                 // Run transpose kernel and mark original weights tensor as unused
                 _tmp_b.allocator()->allocate();
-                CLScheduler::get().enqueue(_reshape_rhs_kernel, false);
+                CLScheduler::get().enqueue(*_reshape_rhs_kernel, false);
                 _original_b->mark_as_unused();
             }
         }

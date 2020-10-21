@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/benchmark/fixtures/ScaleFixture.h"
 #include "tests/datasets/BorderModeDataset.h"

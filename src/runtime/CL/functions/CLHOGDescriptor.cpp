@@ -28,13 +28,25 @@
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLHOGDescriptorKernel.h"
+#include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLHOGDescriptor::CLHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gradient(), _orient_bin(), _block_norm(), _mag(), _phase(), _hog_space()
+    : _memory_group(std::move(memory_manager)),
+      _gradient(),
+      _orient_bin(support::cpp14::make_unique<CLHOGOrientationBinningKernel>()),
+      _block_norm(support::cpp14::make_unique<CLHOGBlockNormalizationKernel>()),
+      _mag(),
+      _phase(),
+      _hog_space()
 {
 }
+
+CLHOGDescriptor::~CLHOGDescriptor() = default;
 
 void CLHOGDescriptor::configure(ICLTensor *input, ICLTensor *output, const IHOG *hog, BorderMode border_mode, uint8_t constant_border_value)
 {
@@ -87,10 +99,10 @@ void CLHOGDescriptor::configure(const CLCompileContext &compile_context, ICLTens
     _memory_group.manage(&_hog_space);
 
     // Initialise orientation binning kernel
-    _orient_bin.configure(compile_context, &_mag, &_phase, &_hog_space, hog->info());
+    _orient_bin->configure(compile_context, &_mag, &_phase, &_hog_space, hog->info());
 
     // Initialize HOG norm kernel
-    _block_norm.configure(compile_context, &_hog_space, output, hog->info());
+    _block_norm->configure(compile_context, &_hog_space, output, hog->info());
 
     // Allocate intermediate tensors
     _mag.allocator()->allocate();
@@ -106,8 +118,8 @@ void CLHOGDescriptor::run()
     _gradient.run();
 
     // Run orientation binning
-    CLScheduler::get().enqueue(_orient_bin, false);
+    CLScheduler::get().enqueue(*_orient_bin, false);
 
     // Run block normalization
-    CLScheduler::get().enqueue(_block_norm);
+    CLScheduler::get().enqueue(*_block_norm);
 }

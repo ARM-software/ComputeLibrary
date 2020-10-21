@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/Types.h"
-
+#include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"

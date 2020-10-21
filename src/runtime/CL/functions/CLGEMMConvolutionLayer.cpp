@@ -30,8 +30,23 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLCol2ImKernel.h"
+#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLIm2ColKernel.h"
+#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "support/Cast.h"
+#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <memory>
@@ -43,9 +58,11 @@ using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::utils::cast;
 
 CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights()
-    : _weights_reshape_kernel()
+    : _weights_reshape_kernel(support::cpp14::make_unique<CLWeightsReshapeKernel>())
 {
 }
+
+CLConvolutionLayerReshapeWeights::~CLConvolutionLayerReshapeWeights() = default;
 
 void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
 {
@@ -64,7 +81,7 @@ void CLConvolutionLayerReshapeWeights::configure(const CLCompileContext &compile
     const bool       append_biases = (biases != nullptr) && !is_data_type_quantized_asymmetric(weights->info()->data_type());
     const ICLTensor *biases_to_use = (append_biases) ? biases : nullptr;
 
-    _weights_reshape_kernel.configure(compile_context, weights, biases_to_use, output, num_groups);
+    _weights_reshape_kernel->configure(compile_context, weights, biases_to_use, output, num_groups);
 
     output->info()->set_quantization_info(weights->info()->quantization_info());
 }
@@ -96,15 +113,17 @@ Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
 
 void CLConvolutionLayerReshapeWeights::run()
 {
-    CLScheduler::get().enqueue(_weights_reshape_kernel);
+    CLScheduler::get().enqueue(*_weights_reshape_kernel);
 }
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(), _mm_gemm(memory_manager, weights_manager),
-      _mm_gemmlowp(memory_manager), _col2im_kernel(), _activationlayer_function(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _skip_im2col(false),
-      _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _is_prepared(false)
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(support::cpp14::make_unique<CLIm2ColKernel>()),
+      _mm_gemm(memory_manager, weights_manager), _mm_gemmlowp(memory_manager), _col2im_kernel(support::cpp14::make_unique<CLCol2ImKernel>()), _activationlayer_function(), _original_weights(nullptr),
+      _im2col_output(), _weights_reshaped(), _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _is_prepared(false)
 {
 }
+
+CLGEMMConvolutionLayer::~CLGEMMConvolutionLayer() = default;
 
 void CLGEMMConvolutionLayer::configure_mm(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                           const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
@@ -230,8 +249,8 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
     _fuse_activation = true;
 
     // Set the GPU target for im2col and col2im
-    _im2col_kernel.set_target(CLScheduler::get().target());
-    _col2im_kernel.set_target(CLScheduler::get().target());
+    _im2col_kernel->set_target(CLScheduler::get().target());
+    _col2im_kernel->set_target(CLScheduler::get().target());
 
     const ICLTensor *gemm_input_to_use  = input;
     ICLTensor       *gemm_output_to_use = output;
@@ -293,11 +312,11 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
         _memory_group.manage(&_im2col_output);
 
         // Configure and tune im2col. im2col output shape is auto-initialized
-        _im2col_kernel.configure(compile_context, input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation, num_groups);
+        _im2col_kernel->configure(compile_context, input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation, num_groups);
 
         // Set quantization info
         _im2col_output.info()->set_quantization_info(input->info()->quantization_info());
-        CLScheduler::get().tune_kernel_static(_im2col_kernel);
+        CLScheduler::get().tune_kernel_static(*_im2col_kernel);
 
         // Update GEMM input
         gemm_input_to_use = &_im2col_output;
@@ -390,8 +409,8 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
     if(!_skip_col2im)
     {
         // Configure and tune Col2Im
-        _col2im_kernel.configure(compile_context, gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups);
-        CLScheduler::get().tune_kernel_static(_col2im_kernel);
+        _col2im_kernel->configure(compile_context, gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups);
+        CLScheduler::get().tune_kernel_static(*_col2im_kernel.get());
     }
 
     if(!_skip_col2im)
@@ -611,7 +630,7 @@ void CLGEMMConvolutionLayer::run()
     // Run im2col
     if(!_skip_im2col)
     {
-        CLScheduler::get().enqueue(_im2col_kernel);
+        CLScheduler::get().enqueue(*_im2col_kernel);
     }
 
     // Runs CLGEMM or CLGEMMLowpMatrixMultiplyCore functions
@@ -629,7 +648,7 @@ void CLGEMMConvolutionLayer::run()
     // Reshape output matrix
     if(!_skip_col2im)
     {
-        CLScheduler::get().enqueue(_col2im_kernel, false);
+        CLScheduler::get().enqueue(*_col2im_kernel.get(), false);
     }
 
     //Run Activation Layer if we cannot fuse in GEMM

@@ -29,7 +29,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to perform inverse square root on an input tensor. */
 class CLRsqrtLayer : public IFunction

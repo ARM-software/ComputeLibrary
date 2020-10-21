@@ -24,14 +24,16 @@
 #ifndef ARM_COMPUTE_CLPIXELWISEMULTIPLICATION_H
 #define ARM_COMPUTE_CLPIXELWISEMULTIPLICATION_H
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
 // Forward declaration
+class CLCompileContext;
+class CLFillBorderKernel;
 class ICLTensor;
+class ITensorInfo;
 
 namespace experimental
 {
@@ -106,7 +108,7 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    CLFillBorderKernel _border_handler;
+    std::unique_ptr<CLFillBorderKernel> _border_handler;
 };
 
 /** Basic function to run @ref CLComplexPixelWiseMultiplicationKernel. */
@@ -139,7 +141,7 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    CLFillBorderKernel _border_handler;
+    std::unique_ptr<CLFillBorderKernel> _border_handler;
 };
 } // namespace experimental
 

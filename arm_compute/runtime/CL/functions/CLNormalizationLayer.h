@@ -24,18 +24,19 @@
 #ifndef ARM_COMPUTE_CLNORMALIZATIONLAYER_H
 #define ARM_COMPUTE_CLNORMALIZATIONLAYER_H
 
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLNormalizationLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-
-#include "arm_compute/core/Types.h"
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLFillBorderKernel;
+class CLNormalizationLayerKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to compute a normalization layer. This function calls the following CL kernels:
  *
@@ -48,6 +49,16 @@ class CLNormalizationLayer : public IFunction
 public:
     /** Default constructor */
     CLNormalizationLayer();
+    /** Prevent instances of this class from being copied */
+    CLNormalizationLayer(const CLNormalizationLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLNormalizationLayer &operator=(const CLNormalizationLayer &) = delete;
+    /** Prevent instances of this class to be moved */
+    CLNormalizationLayer(CLNormalizationLayer &&) = delete;
+    /** Prevent instances of this class to be moved */
+    CLNormalizationLayer &operator=(CLNormalizationLayer &&) = delete;
+    /** Default destructor */
+    ~CLNormalizationLayer();
     /** Set the input and output tensors.
      *
      * @param[in, out] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
@@ -85,8 +96,8 @@ public:
     void run() override;
 
 private:
-    CLNormalizationLayerKernel _norm_kernel;    /**< Normalization layer kernel to run */
-    CLFillBorderKernel         _border_handler; /**< Kernel to handle  borders */
+    std::unique_ptr<CLNormalizationLayerKernel> _norm_kernel;    /**< Normalization layer kernel to run */
+    std::unique_ptr<CLFillBorderKernel>         _border_handler; /**< Kernel to handle  borders */
 };
 }
 #endif /* ARM_COMPUTE_CLNORMALIZATIONLAYER_H */

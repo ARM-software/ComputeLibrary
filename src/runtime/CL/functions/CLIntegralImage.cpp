@@ -23,15 +23,19 @@
  */
 #include "arm_compute/runtime/CL/functions/CLIntegralImage.h"
 
-#include "arm_compute/core/CL/kernels/CLIntegralImageKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLIntegralImageKernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLIntegralImage::CLIntegralImage()
-    : _integral_hor(), _integral_vert()
+    : _integral_hor(support::cpp14::make_unique<CLIntegralImageHorKernel>()),
+      _integral_vert(support::cpp14::make_unique<CLIntegralImageVertKernel>())
 {
 }
+
+CLIntegralImage::~CLIntegralImage() = default;
 
 void CLIntegralImage::configure(const ICLTensor *input, ICLTensor *output)
 {
@@ -40,12 +44,12 @@ void CLIntegralImage::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLIntegralImage::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    _integral_hor.configure(compile_context, input, output);
-    _integral_vert.configure(compile_context, output);
+    _integral_hor->configure(compile_context, input, output);
+    _integral_vert->configure(compile_context, output);
 }
 
 void CLIntegralImage::run()
 {
-    CLScheduler::get().enqueue(_integral_hor, false);
-    CLScheduler::get().enqueue(_integral_vert);
+    CLScheduler::get().enqueue(*_integral_hor, false);
+    CLScheduler::get().enqueue(*_integral_vert);
 }

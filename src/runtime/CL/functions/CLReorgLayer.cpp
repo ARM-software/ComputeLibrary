@@ -24,10 +24,10 @@
 #include "arm_compute/runtime/CL/functions/CLReorgLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLReorgLayerKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/CL/kernels/CLReorgLayerKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

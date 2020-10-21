@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,9 +26,9 @@
 #endif /* ARM_COMPUTE_CL */
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+#include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "utils/Utils.h"
 
 #include <cstdlib>

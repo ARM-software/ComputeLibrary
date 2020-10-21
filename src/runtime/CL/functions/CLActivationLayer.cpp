@@ -24,9 +24,9 @@
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
+#include "src/core/CL/kernels/CLActivationLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -24,12 +24,16 @@
 #ifndef ARM_COMPUTE_CLBOUNDINGBOXTRANSOFORM_H
 #define ARM_COMPUTE_CLBOUNDINGBOXTRANSOFORM_H
 
-#include "arm_compute/core/CL/kernels/CLBoundingBoxTransformKernel.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLBoundingBoxTransformKernel;
+class BoundingBoxTransformInfo;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLBoundingBoxTransformKernel.
  *

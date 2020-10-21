@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLDequantizationLayerKernel.h"
+#include "src/core/CL/kernels/CLDequantizationLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

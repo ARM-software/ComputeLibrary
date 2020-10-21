@@ -24,15 +24,17 @@
 #ifndef ARM_COMPUTE_CLRNN_LAYER_H
 #define ARM_COMPUTE_CLRNN_LAYER_H
 
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 
+#include <memory>
+
 namespace arm_compute
 {
+class CLCopyKernel;
 class ICLTensor;
 
 /** Basic function to run @ref CLRNNLayer */
@@ -41,6 +43,12 @@ class CLRNNLayer : public IFunction
 public:
     /** Default constructor */
     CLRNNLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied */
+    CLRNNLayer(const CLRNNLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLRNNLayer &operator=(const CLRNNLayer &) = delete;
+    /** Default destructor */
+    ~CLRNNLayer();
     /** Initialize the function
      *
      * @param[in]     input             Input is a 2-D tensor of shape [input_size, batch_size]. Data types supported: F16/F32
@@ -85,16 +93,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup           _memory_group;
-    CLGEMM                _gemm_state_f;
-    CLArithmeticAddition  _add_kernel;
-    CLActivationLayer     _activation;
-    CLFullyConnectedLayer _fully_connected_kernel;
-    CLCopyKernel          _copy_kernel;
-    CLTensor              _fully_connected_out;
-    CLTensor              _gemm_output;
-    CLTensor              _add_output;
-    bool                  _is_prepared;
+    MemoryGroup                   _memory_group;
+    CLGEMM                        _gemm_state_f;
+    CLArithmeticAddition          _add_kernel;
+    CLActivationLayer             _activation;
+    CLFullyConnectedLayer         _fully_connected_kernel;
+    std::unique_ptr<CLCopyKernel> _copy_kernel;
+    CLTensor                      _fully_connected_out;
+    CLTensor                      _gemm_output;
+    CLTensor                      _add_output;
+    bool                          _is_prepared;
 };
 }
 #endif /* ARM_COMPUTE_CLRNN_LAYER_H */

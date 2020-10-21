@@ -23,19 +23,19 @@
  */
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
-#include "arm_compute/core/CL/kernels/CLWidthConcatenate4TensorsKernel.h"
-#include "arm_compute/core/CL/kernels/CLWidthConcatenateLayerKernel.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
+#include "src/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
+#include "src/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
+#include "src/core/CL/kernels/CLWidthConcatenate4TensorsKernel.h"
+#include "src/core/CL/kernels/CLWidthConcatenateLayerKernel.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "support/MemorySupport.h"
 

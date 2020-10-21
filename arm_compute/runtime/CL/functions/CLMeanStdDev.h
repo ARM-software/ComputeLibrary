@@ -25,15 +25,20 @@
 #define ARM_COMPUTE_CLMEANSTDDEV_H
 
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
+#include <memory>
+
 namespace arm_compute
 {
+class CLCompileContext;
+class ICLTensor;
+class ITensorInfo;
+class CLFillBorderKernel;
+class CLMeanStdDevKernel;
 /** Basic function to execute mean and standard deviation by calling @ref CLMeanStdDevKernel */
 class CLMeanStdDev : public IFunction
 {
@@ -49,7 +54,7 @@ public:
     /** Allow instances of this class to be moved */
     CLMeanStdDev &operator=(CLMeanStdDev &&) = default;
     /** Default destructor */
-    ~CLMeanStdDev() = default;
+    ~CLMeanStdDev();
     /** Initialise the kernel's inputs and outputs.
      *
      * @param[in, out] input  Input image. Data types supported: U8/F16/F32. (Written to only for border filling)
@@ -83,20 +88,20 @@ private:
     void run_float();
     void run_int();
 
-    MemoryGroup          _memory_group;               /**< Function's memory group */
-    DataType             _data_type;                  /**< Input data type. */
-    unsigned int         _num_pixels;                 /**< Number of image's pixels. */
-    bool                 _run_stddev;                 /**< Flag for knowing if we should run stddev reduction function. */
-    CLReductionOperation _reduction_operation_mean;   /**< Reduction operation function for computing mean value. */
-    CLReductionOperation _reduction_operation_stddev; /**< Reduction operation function for computing standard deviation. */
-    CLTensor             _reduction_output_mean;      /**< Reduction operation output tensor for mean value. */
-    CLTensor             _reduction_output_stddev;    /**< Reduction operation output tensor for standard deviation value. */
-    float               *_mean;                       /**< Pointer that holds the mean value. */
-    float               *_stddev;                     /**< Pointer that holds the standard deviation value. */
-    CLMeanStdDevKernel   _mean_stddev_kernel;         /**< Kernel that standard deviation calculation. */
-    CLFillBorderKernel   _fill_border_kernel;         /**< Kernel that fills the border with zeroes. */
-    cl::Buffer           _global_sum;                 /**< Variable that holds the global sum among calls in order to ease reduction */
-    cl::Buffer           _global_sum_squared;         /**< Variable that holds the global sum of squared values among calls in order to ease reduction */
+    MemoryGroup                         _memory_group;               /**< Function's memory group */
+    DataType                            _data_type;                  /**< Input data type. */
+    unsigned int                        _num_pixels;                 /**< Number of image's pixels. */
+    bool                                _run_stddev;                 /**< Flag for knowing if we should run stddev reduction function. */
+    CLReductionOperation                _reduction_operation_mean;   /**< Reduction operation function for computing mean value. */
+    CLReductionOperation                _reduction_operation_stddev; /**< Reduction operation function for computing standard deviation. */
+    CLTensor                            _reduction_output_mean;      /**< Reduction operation output tensor for mean value. */
+    CLTensor                            _reduction_output_stddev;    /**< Reduction operation output tensor for standard deviation value. */
+    float                              *_mean;                       /**< Pointer that holds the mean value. */
+    float                              *_stddev;                     /**< Pointer that holds the standard deviation value. */
+    std::unique_ptr<CLMeanStdDevKernel> _mean_stddev_kernel;         /**< Kernel that standard deviation calculation. */
+    std::unique_ptr<CLFillBorderKernel> _fill_border_kernel;         /**< Kernel that fills the border with zeroes. */
+    cl::Buffer                          _global_sum;                 /**< Variable that holds the global sum among calls in order to ease reduction */
+    cl::Buffer                          _global_sum_squared;         /**< Variable that holds the global sum of squared values among calls in order to ease reduction */
 };
 }
 #endif /*ARM_COMPUTE_CLMEANSTDDEV_H */

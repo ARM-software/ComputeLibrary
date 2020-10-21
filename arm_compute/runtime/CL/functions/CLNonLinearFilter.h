@@ -31,6 +31,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute non linear filter. This function calls the following OpenCL kernels:

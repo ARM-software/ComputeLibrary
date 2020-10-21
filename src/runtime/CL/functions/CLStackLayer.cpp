@@ -32,6 +32,8 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLStackLayerKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -42,6 +44,8 @@ CLStackLayer::CLStackLayer() // NOLINT
 {
 }
 
+CLStackLayer::~CLStackLayer() = default;
+
 void CLStackLayer::configure(const std::vector<ICLTensor *> &input, int axis, ICLTensor *output)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, axis, output);
@@ -50,14 +54,15 @@ void CLStackLayer::configure(const std::vector<ICLTensor *> &input, int axis, IC
 void CLStackLayer::configure(const CLCompileContext &compile_context, const std::vector<ICLTensor *> &input, int axis, ICLTensor *output)
 {
     _num_inputs = input.size();
-    _stack_kernels.resize(_num_inputs);
+    _stack_kernels.reserve(_num_inputs);
 
     // Wrap around negative values
     const unsigned int axis_u = wrap_around(axis, static_cast<int>(input[0]->info()->num_dimensions() + 1));
 
     for(unsigned int i = 0; i < _num_inputs; i++)
     {
-        _stack_kernels[i].configure(compile_context, input[i], axis_u, i, _num_inputs, output);
+        _stack_kernels.emplace_back(support::cpp14::make_unique<CLStackLayerKernel>());
+        _stack_kernels.back()->configure(compile_context, input[i], axis_u, i, _num_inputs, output);
     }
 }
 
@@ -87,7 +92,7 @@ void CLStackLayer::run()
 {
     for(unsigned i = 0; i < _num_inputs; i++)
     {
-        CLScheduler::get().enqueue(_stack_kernels[i], false);
+        CLScheduler::get().enqueue(*_stack_kernels[i], false);
     }
 }
 } // namespace arm_compute

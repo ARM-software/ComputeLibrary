@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLColorConvert.h"
 
-#include "arm_compute/core/CL/kernels/CLColorConvertKernel.h"
+#include "src/core/CL/kernels/CLColorConvertKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

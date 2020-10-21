@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
+#include "src/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"

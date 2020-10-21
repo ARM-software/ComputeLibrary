@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
+#include "src/core/CL/kernels/CLConvertFullyConnectedWeightsKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 
 #include "support/MemorySupport.h"
 

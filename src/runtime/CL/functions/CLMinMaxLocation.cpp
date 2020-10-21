@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLMinMaxLocation.h"
-
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "src/core/CL/kernels/CLMinMaxLocationKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLMinMaxLocation::CLMinMaxLocation()
-    : _min_max_kernel(),
-      _min_max_loc_kernel(),
+    : _min_max_kernel(support::cpp14::make_unique<CLMinMaxKernel>()),
+      _min_max_loc_kernel(support::cpp14::make_unique<CLMinMaxLocationKernel>()),
       _min_max_vals(),
       _min_max_count_vals(),
       _min(nullptr),
@@ -40,6 +41,8 @@ CLMinMaxLocation::CLMinMaxLocation()
       _max_loc(nullptr)
 {
 }
+
+CLMinMaxLocation::~CLMinMaxLocation() = default;
 
 void CLMinMaxLocation::configure(const ICLImage *input, void *min, void *max, CLCoordinates2DArray *min_loc, CLCoordinates2DArray *max_loc, uint32_t *min_count, uint32_t *max_count)
 {
@@ -62,16 +65,16 @@ void CLMinMaxLocation::configure(const CLCompileContext &compile_context, const 
     _min_loc            = min_loc;
     _max_loc            = max_loc;
 
-    _min_max_kernel.configure(compile_context, input, &_min_max_vals);
-    _min_max_loc_kernel.configure(compile_context, input, &_min_max_vals, &_min_max_count_vals, _min_loc, _max_loc);
+    _min_max_kernel->configure(compile_context, input, &_min_max_vals);
+    _min_max_loc_kernel->configure(compile_context, input, &_min_max_vals, &_min_max_count_vals, _min_loc, _max_loc);
 }
 
 void CLMinMaxLocation::run()
 {
     cl::CommandQueue q = CLScheduler::get().queue();
 
-    CLScheduler::get().enqueue(_min_max_kernel, false);
-    CLScheduler::get().enqueue(_min_max_loc_kernel, false);
+    CLScheduler::get().enqueue(*_min_max_kernel, false);
+    CLScheduler::get().enqueue(*_min_max_loc_kernel, false);
 
     // Update min and max
     q.enqueueReadBuffer(_min_max_vals, CL_FALSE, 0 * sizeof(int32_t), sizeof(int32_t), static_cast<int32_t *>(_min));

@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_CLGAUSSIAN5X5_H
 #define ARM_COMPUTE_CLGAUSSIAN5X5_H
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLGaussian5x5Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -37,6 +35,10 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLFillBorderKernel;
+class CLGaussian5x5HorKernel;
+class CLGaussian5x5VertKernel;
 class ICLTensor;
 
 /** Basic function to execute gaussian filter 5x5. This function calls the following OpenCL kernels:
@@ -54,6 +56,16 @@ public:
      * @param[in] memory_manager (Optional) Memory manager.
      */
     CLGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied */
+    CLGaussian5x5(const CLGaussian5x5 &) = delete;
+    /** Default move constructor */
+    CLGaussian5x5(CLGaussian5x5 &&) = default;
+    /** Prevent instances of this class from being copied */
+    CLGaussian5x5 &operator=(const CLGaussian5x5 &) = delete;
+    /** Default move assignment operator */
+    CLGaussian5x5 &operator=(CLGaussian5x5 &&) = default;
+    /** Default destructor */
+    ~CLGaussian5x5();
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -76,11 +88,11 @@ public:
     void run() override;
 
 protected:
-    MemoryGroup             _memory_group;   /**< Function's memory group */
-    CLGaussian5x5HorKernel  _kernel_hor;     /**< Horizontal pass kernel */
-    CLGaussian5x5VertKernel _kernel_vert;    /**< Vertical pass kernel */
-    CLFillBorderKernel      _border_handler; /**< Kernel to handle image borders */
-    CLImage                 _tmp;            /**< Temporary buffer */
+    MemoryGroup                              _memory_group;   /**< Function's memory group */
+    std::unique_ptr<CLGaussian5x5HorKernel>  _kernel_hor;     /**< Horizontal pass kernel */
+    std::unique_ptr<CLGaussian5x5VertKernel> _kernel_vert;    /**< Vertical pass kernel */
+    std::unique_ptr<CLFillBorderKernel>      _border_handler; /**< Kernel to handle image borders */
+    CLImage                                  _tmp;            /**< Temporary buffer */
 };
 }
 #endif /*ARM_COMPUTE_CLGAUSSIAN5X5_H */

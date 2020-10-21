@@ -24,12 +24,15 @@
 #ifndef ARM_COMPUTE_CLCOMPUTEALLANCHORS_H
 #define ARM_COMPUTE_CLCOMPUTEALLANCHORS_H
 
-#include "arm_compute/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
+class ComputeAnchorsInfo;
 
 /** Basic function to run @ref CLComputeAllAnchorsKernel.
  *

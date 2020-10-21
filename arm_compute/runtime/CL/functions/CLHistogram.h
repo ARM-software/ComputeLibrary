@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_CLHISTOGRAM_H
 #define ARM_COMPUTE_CLHISTOGRAM_H
 
-#include "arm_compute/core/CL/kernels/CLHistogramKernel.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "src/core/CL/kernels/CLHistogramKernel.h"
 
 namespace arm_compute
 {

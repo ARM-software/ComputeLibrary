@@ -24,11 +24,12 @@
 #include "arm_compute/runtime/CL/functions/CLReduceMean.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute

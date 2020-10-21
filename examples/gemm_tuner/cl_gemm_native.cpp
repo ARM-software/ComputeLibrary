@@ -26,14 +26,13 @@
 #endif /* ARM_COMPUTE_CL */
 
 #include "CommonGemmExampleOptions.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyNativeKernel.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyNativeKernel.h"
 #include "tests/CL/Helper.h"
 #include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"

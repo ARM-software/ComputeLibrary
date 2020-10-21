@@ -24,14 +24,17 @@
 #ifndef ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H
 #define ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H
 
-#include "arm_compute/core/CL/kernels/CLConvertFullyConnectedWeightsKernel.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/ITransformWeights.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLConvertFullyConnectedWeightsKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLConvertFullyConnectedWeightsKernel. */
 class CLConvertFullyConnectedWeights : public ICLSimpleFunction

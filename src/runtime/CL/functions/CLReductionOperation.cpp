@@ -30,9 +30,10 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/runtime/Utils.h"
-
 #include "support/MemorySupport.h"
 
 namespace arm_compute
@@ -42,6 +43,8 @@ CLReductionOperation::CLReductionOperation(std::shared_ptr<IMemoryManager> memor
       _is_reshape_required(false)
 {
 }
+
+CLReductionOperation::~CLReductionOperation() = default;
 
 Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
@@ -211,7 +214,7 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
     }
 
     // Configure reduction operation kernels
-    _reduction_kernels_vector.resize(_num_of_stages);
+    _reduction_kernels_vector.reserve(_num_of_stages);
 
     // Create temporary tensors
     if(_is_serial)
@@ -221,11 +224,12 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
             _memory_group.manage(&_results_vector.back());
         }
 
-        _reduction_kernels_vector[0].configure(compile_context, input, output_internal, axis, op, 0);
+        _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLReductionOperationKernel>());
+        _reduction_kernels_vector[0]->configure(compile_context, input, output_internal, axis, op, 0);
     }
     else
     {
-        _border_handlers_vector.resize(_num_of_stages);
+        _border_handlers_vector.reserve(_num_of_stages);
         _memory_group.manage(&_results_vector[0]);
 
         ReductionOperation first_kernel_op;
@@ -269,15 +273,23 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
                 ARM_COMPUTE_ERROR("Not supported");
         }
 
-        _reduction_kernels_vector[0].configure(compile_context, input, &_results_vector[0], axis, first_kernel_op);
-        _border_handlers_vector[0].configure(compile_context, input, _reduction_kernels_vector[0].border_size(), BorderMode::CONSTANT, pixelValue);
+        _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLReductionOperationKernel>());
+        _reduction_kernels_vector[0]->configure(compile_context, input, &_results_vector[0], axis, first_kernel_op);
+
+        _border_handlers_vector.emplace_back(support::cpp14::make_unique<CLFillBorderKernel>());
+        _border_handlers_vector[0]->configure(compile_context, input, _reduction_kernels_vector[0]->border_size(), BorderMode::CONSTANT, pixelValue);
 
         // Apply ReductionOperation on intermediate stages
         for(unsigned int i = 1; i < _num_of_stages - 1; ++i)
         {
             _memory_group.manage(&_results_vector[i]);
-            _reduction_kernels_vector[i].configure(compile_context, &_results_vector[i - 1], &_results_vector[i], axis, intermediate_kernel_op);
-            _border_handlers_vector[i].configure(compile_context, &_results_vector[i - 1], _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, pixelValue);
+
+            _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLReductionOperationKernel>());
+            _reduction_kernels_vector[i]->configure(compile_context, &_results_vector[i - 1], &_results_vector[i], axis, intermediate_kernel_op);
+
+            _border_handlers_vector.emplace_back(support::cpp14::make_unique<CLFillBorderKernel>());
+            _border_handlers_vector[i]->configure(compile_context, &_results_vector[i - 1], _reduction_kernels_vector[i]->border_size(), BorderMode::CONSTANT, pixelValue);
+
             _results_vector[i - 1].allocator()->allocate();
         }
 
@@ -290,8 +302,12 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
             _memory_group.manage(&_results_vector.back());
         }
 
-        _reduction_kernels_vector[last_stage].configure(compile_context, &_results_vector[last_stage - 1], output_internal, axis, last_kernel_op, input_width);
-        _border_handlers_vector[last_stage].configure(compile_context, &_results_vector[last_stage - 1], _reduction_kernels_vector[last_stage].border_size(), BorderMode::CONSTANT, pixelValue);
+        _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLReductionOperationKernel>());
+        _reduction_kernels_vector[last_stage]->configure(compile_context, &_results_vector[last_stage - 1], output_internal, axis, last_kernel_op, input_width);
+
+        _border_handlers_vector.emplace_back(support::cpp14::make_unique<CLFillBorderKernel>());
+        _border_handlers_vector[last_stage]->configure(compile_context, &_results_vector[last_stage - 1], _reduction_kernels_vector[last_stage]->border_size(), BorderMode::CONSTANT, pixelValue);
+
         _results_vector[last_stage - 1].allocator()->allocate();
     }
 
@@ -308,14 +324,14 @@ void CLReductionOperation::run()
 
     if(_is_serial)
     {
-        CLScheduler::get().enqueue(_reduction_kernels_vector[0], false);
+        CLScheduler::get().enqueue(*_reduction_kernels_vector[0], false);
     }
     else
     {
         for(unsigned int i = 0; i < _num_of_stages; ++i)
         {
-            CLScheduler::get().enqueue(_border_handlers_vector[i], false);
-            CLScheduler::get().enqueue(_reduction_kernels_vector[i], false);
+            CLScheduler::get().enqueue(*_border_handlers_vector[i], false);
+            CLScheduler::get().enqueue(*_reduction_kernels_vector[i], false);
         }
     }
 

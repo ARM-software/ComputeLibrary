@@ -29,13 +29,20 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLMemsetKernel.h"
+#include "src/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLSpaceToBatchLayer::CLSpaceToBatchLayer()
-    : _space_to_batch_kernel(), _memset_kernel(), _has_padding(false)
+    : _space_to_batch_kernel(support::cpp14::make_unique<CLSpaceToBatchLayerKernel>()),
+      _memset_kernel(support::cpp14::make_unique<CLMemsetKernel>()),
+      _has_padding(false)
 {
 }
+
+CLSpaceToBatchLayer::~CLSpaceToBatchLayer() = default;
 
 void CLSpaceToBatchLayer::configure(const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output)
 {
@@ -49,9 +56,9 @@ void CLSpaceToBatchLayer::configure(const CLCompileContext &compile_context, con
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
-        _memset_kernel.configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
+        _memset_kernel->configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
-    _space_to_batch_kernel.configure(compile_context, input, block_shape, paddings, output);
+    _space_to_batch_kernel->configure(compile_context, input, block_shape, paddings, output);
 }
 
 void CLSpaceToBatchLayer::configure(const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ICLTensor *output)
@@ -67,9 +74,9 @@ void CLSpaceToBatchLayer::configure(const CLCompileContext &compile_context, con
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
-        _memset_kernel.configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
+        _memset_kernel->configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
-    _space_to_batch_kernel.configure(compile_context, input, block_shape_x, block_shape_y, padding_left, padding_right, output);
+    _space_to_batch_kernel->configure(compile_context, input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 }
 
 Status CLSpaceToBatchLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output)
@@ -94,8 +101,8 @@ void CLSpaceToBatchLayer::run()
     // Zero out output only if we have paddings
     if(_has_padding)
     {
-        CLScheduler::get().enqueue(_memset_kernel, true);
+        CLScheduler::get().enqueue(*_memset_kernel, true);
     }
-    CLScheduler::get().enqueue(_space_to_batch_kernel, true);
+    CLScheduler::get().enqueue(*_space_to_batch_kernel, true);
 }
 } // namespace arm_compute

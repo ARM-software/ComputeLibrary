@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_CLL2NORMALIZELAYER_H
 #define ARM_COMPUTE_CLL2NORMALIZELAYER_H
 
-#include "arm_compute/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -37,7 +36,10 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLL2NormalizeLayerKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to perform a L2 normalization on a given axis.
  *
@@ -50,6 +52,16 @@ class CLL2NormalizeLayer : public IFunction
 public:
     /** Constructor */
     CLL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Default Destructor */
+    ~CLL2NormalizeLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLL2NormalizeLayer(const CLL2NormalizeLayer &) = delete;
+    /** Default move constructor */
+    CLL2NormalizeLayer(CLL2NormalizeLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLL2NormalizeLayer &operator=(const CLL2NormalizeLayer &) = delete;
+    /** Default move assignment operator */
+    CLL2NormalizeLayer &operator=(CLL2NormalizeLayer &&) = default;
 
     /** Set the input and output tensors.
      *
@@ -84,10 +96,10 @@ public:
     void run() override;
 
 private:
-    MemoryGroup              _memory_group;
-    CLReductionOperation     _reduce_func;
-    CLL2NormalizeLayerKernel _normalize_kernel;
-    CLTensor                 _sumsq;
+    MemoryGroup                               _memory_group;
+    CLReductionOperation                      _reduce_func;
+    std::unique_ptr<CLL2NormalizeLayerKernel> _normalize_kernel;
+    CLTensor                                  _sumsq;
 };
 }
 #endif /*ARM_COMPUTE_CLL2NORMALIZELAYER_H */

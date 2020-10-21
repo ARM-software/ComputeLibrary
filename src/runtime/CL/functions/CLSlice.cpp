@@ -24,9 +24,9 @@
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
+#include "src/core/CL/kernels/CLStridedSliceKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

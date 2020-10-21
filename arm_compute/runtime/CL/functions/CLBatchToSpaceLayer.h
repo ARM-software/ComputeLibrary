@@ -26,11 +26,15 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLBatchToSpaceLayerKernel.h"
 #include "arm_compute/core/Types.h"
+
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
+class ITensorInfo;
+class CLBatchToSpaceLayerKernel;
 class ICLTensor;
 
 /** Basic function to run @ref CLBatchToSpaceLayerKernel. */
@@ -39,6 +43,16 @@ class CLBatchToSpaceLayer : public IFunction
 public:
     /** Default constructor */
     CLBatchToSpaceLayer();
+    /** Prevent instances of this class from being copied */
+    CLBatchToSpaceLayer(const CLBatchToSpaceLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLBatchToSpaceLayer &operator=(const CLBatchToSpaceLayer &) = delete;
+    /** Prevent instances of this class to be moved */
+    CLBatchToSpaceLayer(CLBatchToSpaceLayer &&) = delete;
+    /** Prevent instances of this class to be moved */
+    CLBatchToSpaceLayer &operator=(CLBatchToSpaceLayer &&) = delete;
+    /** Default destructor */
+    ~CLBatchToSpaceLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -95,7 +109,7 @@ public:
     void run() override;
 
 private:
-    CLBatchToSpaceLayerKernel _batch_to_space_kernel; /**< CLBatchToSpaceLayerKernel to run */
+    std::unique_ptr<CLBatchToSpaceLayerKernel> _batch_to_space_kernel; /**< CLBatchToSpaceLayerKernel to run */
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLBATCHTOSPACELAYER_H */

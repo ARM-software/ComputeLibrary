@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H
 #define ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H
 
-#include "arm_compute/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
@@ -40,6 +39,7 @@
 
 namespace arm_compute
 {
+class CLDeconvolutionReshapeOutputKernel;
 class ICLTensor;
 /** Function to run the deconvolution layer through a call to GEMM.
  *
@@ -89,6 +89,8 @@ public:
     CLGEMMDeconvolutionLayer &operator=(const CLGEMMDeconvolutionLayer &) = delete;
     /** Default move assignment operator */
     CLGEMMDeconvolutionLayer &operator=(CLGEMMDeconvolutionLayer &&) = default;
+    /** Default desctructor */
+    ~CLGEMMDeconvolutionLayer();
     /** Set the input, weights, biases and output tensors.
      *
      * @param[in,out] input       Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
@@ -130,15 +132,15 @@ public:
 private:
     MemoryGroup _memory_group;
 
-    CLGEMM                             _mm_gemm;
-    CLGEMMLowpMatrixMultiplyCore       _mm_gemmlowp;
-    CLGEMMLowpOutputStage              _gemmlowp_output_stage;
-    CLPermute                          _permute_input_to_nhwc;
-    CLPermute                          _permute_weights_to_nhwc;
-    CLReshapeLayer                     _reshape_weights;
-    CLTranspose                        _transpose_weights;
-    CLDeconvolutionReshapeOutputKernel _deconv_reshape;
-    CLSlice                            _slice_gemm;
+    CLGEMM                                              _mm_gemm;
+    CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
+    CLGEMMLowpOutputStage                               _gemmlowp_output_stage;
+    CLPermute                                           _permute_input_to_nhwc;
+    CLPermute                                           _permute_weights_to_nhwc;
+    CLReshapeLayer                                      _reshape_weights;
+    CLTranspose                                         _transpose_weights;
+    std::unique_ptr<CLDeconvolutionReshapeOutputKernel> _deconv_reshape;
+    CLSlice                                             _slice_gemm;
 
     CLTensor _gemmlowp_final;
     CLTensor _reshaped_weights;

@@ -25,7 +25,6 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLGather.h"
-
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/GatherDataset.h"
 #include "tests/framework/Asserts.h"

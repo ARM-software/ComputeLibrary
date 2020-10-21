@@ -24,13 +24,15 @@
 #ifndef ARM_COMPUTE_TEST_CL_HELPER_H
 #define ARM_COMPUTE_TEST_CL_HELPER_H
 
-#include "arm_compute/core/CL/ICLKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLMemsetKernel.h"
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/IFunction.h"
+
+#include "src/core/CL/ICLKernel.h"
+
 #include "support/MemorySupport.h"
 
 namespace arm_compute
@@ -93,7 +95,7 @@ public:
         auto k = arm_compute::support::cpp14::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
-        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
+        _border_handler->configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
     }
 };
 

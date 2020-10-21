@@ -25,6 +25,10 @@
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLMeanStdDev.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLMeanStdDevKernel.h"
+#include "src/core/CL/kernels/CLReductionOperationKernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -39,12 +43,14 @@ CLMeanStdDev::CLMeanStdDev(std::shared_ptr<IMemoryManager> memory_manager) // NO
       _reduction_output_stddev(),
       _mean(nullptr),
       _stddev(nullptr),
-      _mean_stddev_kernel(),
-      _fill_border_kernel(),
+      _mean_stddev_kernel(support::cpp14::make_unique<CLMeanStdDevKernel>()),
+      _fill_border_kernel(support::cpp14::make_unique<CLFillBorderKernel>()),
       _global_sum(),
       _global_sum_squared()
 {
 }
+
+CLMeanStdDev::~CLMeanStdDev() = default;
 
 Status CLMeanStdDev::validate(ITensorInfo *input, float *mean, float *stddev)
 {
@@ -101,8 +107,8 @@ void CLMeanStdDev::configure(const CLCompileContext &compile_context, ICLImage *
             _global_sum_squared = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(cl_ulong));
         }
 
-        _mean_stddev_kernel.configure(compile_context, input, mean, &_global_sum, stddev, &_global_sum_squared);
-        _fill_border_kernel.configure(compile_context, input, _mean_stddev_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
+        _mean_stddev_kernel->configure(compile_context, input, mean, &_global_sum, stddev, &_global_sum_squared);
+        _fill_border_kernel->configure(compile_context, input, _mean_stddev_kernel->border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
     }
 }
 
@@ -149,8 +155,8 @@ void CLMeanStdDev::run_float()
 
 void CLMeanStdDev::run_int()
 {
-    CLScheduler::get().enqueue(_fill_border_kernel);
-    CLScheduler::get().enqueue(_mean_stddev_kernel);
+    CLScheduler::get().enqueue(*_fill_border_kernel);
+    CLScheduler::get().enqueue(*_mean_stddev_kernel);
 }
 
 void CLMeanStdDev::run()

@@ -31,6 +31,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute first order derivative operator. This function calls the following CL kernels:

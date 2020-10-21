@@ -24,14 +24,15 @@
 #ifndef ARM_COMPUTE_CLSELECT_H
 #define ARM_COMPUTE_CLSELECT_H
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
 // Forward declarations
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLSelect */
 class CLSelect : public ICLSimpleFunction

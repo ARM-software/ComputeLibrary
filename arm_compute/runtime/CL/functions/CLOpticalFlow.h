@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_CLOPTICALFLOW_H
 #define ARM_COMPUTE_CLOPTICALFLOW_H
 
-#include "arm_compute/core/CL/kernels/CLLKTrackerKernel.h"
-
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLArray.h"
@@ -41,7 +39,12 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class CLPyramid;
+class CLLKTrackerInitKernel;
+class CLLKTrackerStage0Kernel;
+class CLLKTrackerStage1Kernel;
+class CLLKTrackerFinalizeKernel;
 
 /** OpenCL Array of Internal Keypoints */
 using CLLKInternalKeypointArray = CLArray<CLLKInternalKeypoint>;
@@ -71,6 +74,8 @@ public:
     CLOpticalFlow(CLOpticalFlow &&) = default;
     /** Allow instances of this class to be moved */
     CLOpticalFlow &operator=(CLOpticalFlow &&) = default;
+    /** Default destructor */
+    ~CLOpticalFlow();
     /**  Initialise the function input and output
      *
      * @param[in]  old_pyramid           Pointer to the pyramid for the old tensor. Data types supported U8
@@ -117,22 +122,22 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                _memory_group;
-    std::vector<CLLKTrackerInitKernel>         _tracker_init_kernel;
-    std::vector<CLLKTrackerStage0Kernel>       _tracker_stage0_kernel;
-    std::vector<CLLKTrackerStage1Kernel>       _tracker_stage1_kernel;
-    CLLKTrackerFinalizeKernel                  _tracker_finalize_kernel;
-    std::vector<CLScharr3x3>                   _func_scharr;
-    std::vector<CLTensor>                      _scharr_gx;
-    std::vector<CLTensor>                      _scharr_gy;
-    const ICLKeyPointArray                    *_old_points;
-    const ICLKeyPointArray                    *_new_points_estimates;
-    ICLKeyPointArray                          *_new_points;
-    std::unique_ptr<CLLKInternalKeypointArray> _old_points_internal;
-    std::unique_ptr<CLLKInternalKeypointArray> _new_points_internal;
-    std::unique_ptr<CLCoefficientTableArray>   _coefficient_table;
-    std::unique_ptr<CLOldValueArray>           _old_values;
-    size_t                                     _num_levels;
+    MemoryGroup                                           _memory_group;
+    std::vector<std::unique_ptr<CLLKTrackerInitKernel>>   _tracker_init_kernel;
+    std::vector<std::unique_ptr<CLLKTrackerStage0Kernel>> _tracker_stage0_kernel;
+    std::vector<std::unique_ptr<CLLKTrackerStage1Kernel>> _tracker_stage1_kernel;
+    std::unique_ptr<CLLKTrackerFinalizeKernel>            _tracker_finalize_kernel;
+    std::vector<CLScharr3x3>                              _func_scharr;
+    std::vector<CLTensor>                                 _scharr_gx;
+    std::vector<CLTensor>                                 _scharr_gy;
+    const ICLKeyPointArray                               *_old_points;
+    const ICLKeyPointArray                               *_new_points_estimates;
+    ICLKeyPointArray                                     *_new_points;
+    std::unique_ptr<CLLKInternalKeypointArray>            _old_points_internal;
+    std::unique_ptr<CLLKInternalKeypointArray>            _new_points_internal;
+    std::unique_ptr<CLCoefficientTableArray>              _coefficient_table;
+    std::unique_ptr<CLOldValueArray>                      _old_values;
+    size_t                                                _num_levels;
 };
 }
 #endif /*ARM_COMPUTE_CLOPTICALFLOW_H */

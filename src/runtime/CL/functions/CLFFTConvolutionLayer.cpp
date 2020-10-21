@@ -29,6 +29,13 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "src/core/CL/kernels/CLCopyKernel.h"
+#include "src/core/CL/kernels/CLFFTDigitReverseKernel.h"
+#include "src/core/CL/kernels/CLFFTRadixStageKernel.h"
+#include "src/core/CL/kernels/CLFFTScaleKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLPadLayerKernel.h"
+#include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/helpers/fft.h"
 

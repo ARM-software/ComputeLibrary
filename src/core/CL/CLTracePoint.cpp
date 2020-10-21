@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/TracePoint.h"
 
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/ICLDistribution1D.h"
 #include "arm_compute/core/CL/ICLHOG.h"
@@ -30,7 +31,6 @@
 #include "arm_compute/core/CL/ICLMultiHOG.h"
 #include "arm_compute/core/CL/ICLMultiImage.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLLKTrackerKernel.h"
 #include "utils/TypePrinter.h"
 
 #include <vector>

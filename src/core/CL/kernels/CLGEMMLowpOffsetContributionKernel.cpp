@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"

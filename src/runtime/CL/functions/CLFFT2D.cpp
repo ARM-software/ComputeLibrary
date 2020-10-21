@@ -26,6 +26,9 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFFTDigitReverseKernel.h"
+#include "src/core/CL/kernels/CLFFTRadixStageKernel.h"
+#include "src/core/CL/kernels/CLFFTScaleKernel.h"
 
 namespace arm_compute
 {
@@ -33,6 +36,8 @@ CLFFT2D::CLFFT2D(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _first_pass_func(memory_manager), _second_pass_func(memory_manager), _first_pass_tensor()
 {
 }
+
+CLFFT2D::~CLFFT2D() = default;
 
 void CLFFT2D::configure(const ICLTensor *input, ICLTensor *output, const FFT2DInfo &config)
 {

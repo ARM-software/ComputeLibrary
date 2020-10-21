@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
@@ -356,10 +356,10 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::run(const Window &window, cl::Co
         ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != 0);
     }
 
-    const size_t lhs_idx_batch_size = _reinterpret_input_as_3d && !_has_pad_y? 3u : 2u;
+    const size_t lhs_idx_batch_size = _reinterpret_input_as_3d && !_has_pad_y ? 3u : 2u;
     const size_t rhs_idx_batch_size = 2u;
     const size_t bia_idx_batch_size = 2u;
-    const size_t out_idx_batch_size = _reinterpret_output_as_3d && !_has_pad_y? 3u : 2u;
+    const size_t out_idx_batch_size = _reinterpret_output_as_3d && !_has_pad_y ? 3u : 2u;
 
     Window slice          = window.first_slice_window_3D();
     Window slice_matrix_b = slice;

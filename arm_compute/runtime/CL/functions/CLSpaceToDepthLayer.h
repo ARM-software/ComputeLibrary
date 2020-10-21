@@ -24,14 +24,17 @@
 #ifndef ARM_COMPUTE_CLSPACETODEPTHLAYER_H
 #define ARM_COMPUTE_CLSPACETODEPTHLAYER_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLSpaceToDepthLayerKernel.h"
-#include "arm_compute/core/Types.h"
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLSpaceToDepthLayerKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLSpaceToDepthLayerKernel. */
 class CLSpaceToDepthLayer : public IFunction
@@ -39,6 +42,16 @@ class CLSpaceToDepthLayer : public IFunction
 public:
     /** Default constructor */
     CLSpaceToDepthLayer();
+    /** Prevent instances of this class from being copied */
+    CLSpaceToDepthLayer(const CLSpaceToDepthLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLSpaceToDepthLayer &operator=(const CLSpaceToDepthLayer &) = delete;
+    /** Prevent instances of this class to be moved */
+    CLSpaceToDepthLayer(CLSpaceToDepthLayer &&) = delete;
+    /** Prevent instances of this class to be moved */
+    CLSpaceToDepthLayer &operator=(CLSpaceToDepthLayer &&) = delete;
+    /** Default destructor */
+    ~CLSpaceToDepthLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -68,7 +81,7 @@ public:
     void run() override;
 
 private:
-    CLSpaceToDepthLayerKernel _space_to_depth_kernel; /**< CLSpaceToDepthLayerKernel to run */
+    std::unique_ptr<CLSpaceToDepthLayerKernel> _space_to_depth_kernel; /**< CLSpaceToDepthLayerKernel to run */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLSPACETODEPTHLAYER_H */

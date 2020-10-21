@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/ICLSimpleKernel.h"
-
+#include "src/core/CL/ICLSimpleKernel.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/Validate.h"

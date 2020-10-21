@@ -80,7 +80,7 @@ There are specific interfaces for OpenCL and Neon: @ref ICLKernel, INEKernel (us
 
 There are two others implementation of @ref IKernel called @ref ICLSimpleKernel and INESimpleKernel, they are the interface for simple kernels that have just one input tensor and one output tensor.
 Creating a new kernel implies adding new files:
-- arm_compute/core/CL/kernels/CLReshapeLayerKernel.h
+- src/core/CL/kernels/CLReshapeLayerKernel.h
 - src/core/CL/cl_kernels/reshape_layer.cl
 - src/core/CL/kernels/CLReshapeLayerKernel.cpp
 - src/core/CL/CLKernelLibrary.cpp
@@ -90,16 +90,16 @@ Neon kernel
 - src/core/NEON/kernels/NEReshapeLayerKernel.cpp
 
 We must register the new layer in the respective libraries:
-- arm_compute/core/CL/CLKernels.h
+- src/core/CL/CLKernels.h
 - arm_compute/core/NEON/NEKernels.h
 
 These files contain the list of all kernels available in the corresponding Compute Library's backend, for example CLKernels:
 @code{.cpp}
 ... 
-#include "arm_compute/core/CL/kernels/CLMinMaxLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLMinMaxLocationKernel.h"
+#include "src/core/CL/kernels/CLMinMaxLayerKernel.h"
+#include "src/core/CL/kernels/CLMinMaxLocationKernel.h"
 ... 
-#include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
+#include "src/core/CL/kernels/CLReshapeLayerKernel.h"
 ... 
 
 @endcode

@@ -58,10 +58,11 @@ const auto                         act_infos = framework::dataset::make("Activat
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
 });
 
-const auto common_fusion_dataset = combine(combine(combine(framework::dataset::make("UseBias", { false, true }),
-                                                           framework::dataset::make("UseBeta", { false, true })),
-                                                   framework::dataset::make("UseGamma", { false, true })),
-                                           framework::dataset::make("Epsilon", { 0.001f }));
+const auto common_fusion_dataset = combine(combine(combine(framework::dataset::make("UseBias",
+{ false, true }),
+framework::dataset::make("UseBeta", { false, true })),
+framework::dataset::make("UseGamma", { false, true })),
+framework::dataset::make("Epsilon", { 0.001f }));
 
 bool validate_zero_padding(TensorShape shape0, const TensorShape shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
 {
@@ -141,9 +142,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                         act_infos),
-                                                                                 framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(), act_infos), framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
                                                                          framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                shape0, shape1, episilon, act_infos, data_type, data_layout)
 {
@@ -154,8 +153,7 @@ DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, combine(combine
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                                                   combine(framework::dataset::make("UseBeta", { false, true }),
-                                                                                                                           framework::dataset::make("UseGamma", { false, true }))),
+                                                                                                                   combine(framework::dataset::make("UseBeta", { false, true }), framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                    act_infos),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -167,9 +165,9 @@ TEST_SUITE_END() //FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                                                  combine(framework::dataset::make("UseBeta", { false, true }),
-                                                                                                                          framework::dataset::make("UseGamma", { false, true }))),
-                                                                                                                  framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
+                                                                                                                  combine(framework::dataset::make("UseBeta", { false, true }), framework::dataset::make("UseGamma", { false, true }))),
+                                                                                                                  framework::dataset::make("ActivationInfo",
+                                                                                                                          ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {

@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CL_VALIDATE_H
 #define ARM_COMPUTE_CL_VALIDATE_H
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Validate.h"
 
 namespace arm_compute

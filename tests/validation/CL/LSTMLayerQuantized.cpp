@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
-
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/Utils.h"

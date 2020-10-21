@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLPoolingLayerKernel.h"
+#include "src/core/CL/kernels/CLPoolingLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
@@ -34,6 +33,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CL/ICLKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -176,7 +176,7 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
         case DataLayout::NHWC:
         {
             // Initialize border size
-            border_size = BorderSize();
+            border_size                       = BorderSize();
             num_elems_processed_per_iteration = adjust_vec_size(4, output->dimension(0));
             win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 

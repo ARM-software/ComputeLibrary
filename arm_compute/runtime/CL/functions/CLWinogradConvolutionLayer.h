@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_CLWINOGRADCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_CLWINOGRADCONVOLUTIONLAYER_H
 
-#include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
-#include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
@@ -33,7 +31,11 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLWinogradFilterTransformKernel;
+class CLWinogradOutputTransformKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to execute Winograd-based convolution on OpenCL. This function calls the following OpenCL functions/kernels:
  *
@@ -56,6 +58,8 @@ public:
     CLWinogradConvolutionLayer &operator=(const CLWinogradConvolutionLayer &) = delete;
     /** Default move assignment operator */
     CLWinogradConvolutionLayer &operator=(CLWinogradConvolutionLayer &&) = default;
+    /** Default destructor */
+    ~CLWinogradConvolutionLayer();
     /** Set the input and output tensors.
      *
      * @note: This function only works with 3x3,3x1,1x3,5x5,5x1,1x5,7x1 and 1x7 kernels along with unit strides for both NCHW and NHWC data layout
@@ -122,16 +126,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                     _memory_group;
-    CLGEMM                          _batched_mm;
-    CLWinogradInputTransform        _input_transform;
-    CLWinogradFilterTransformKernel _filter_transform;
-    CLWinogradOutputTransformKernel _output_transform;
-    CLTensor                        _input0;
-    CLTensor                        _input1;
-    CLTensor                        _batched_mm_output;
-    const ICLTensor                *_original_weights;
-    bool                            _is_prepared;
+    MemoryGroup                                      _memory_group;
+    CLGEMM                                           _batched_mm;
+    CLWinogradInputTransform                         _input_transform;
+    std::unique_ptr<CLWinogradFilterTransformKernel> _filter_transform;
+    std::unique_ptr<CLWinogradOutputTransformKernel> _output_transform;
+    CLTensor                                         _input0;
+    CLTensor                                         _input1;
+    CLTensor                                         _batched_mm_output;
+    const ICLTensor                                 *_original_weights;
+    bool                                             _is_prepared;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLWINOGRADCONVOLUTIONLAYER_H */

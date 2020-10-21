@@ -24,17 +24,20 @@
 #ifndef ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H
 #define ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H
 
-#include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 // Forward declarations
+class CLDeconvolutionLayerUpsampleKernel;
+class CLCompileContext;
+class CLMemsetKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to execute deconvolution upsample on OpenCL. This function calls the following OpenCL kernels and functions:
  *
@@ -55,7 +58,7 @@ public:
     /** Allow instances of this class to be moved */
     CLDeconvolutionLayerUpsample &operator=(CLDeconvolutionLayerUpsample &&) = default;
     /** Default destructor */
-    virtual ~CLDeconvolutionLayerUpsample() = default;
+    ~CLDeconvolutionLayerUpsample();
 
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
@@ -86,9 +89,9 @@ public:
     void run() override;
 
 private:
-    CLDeconvolutionLayerUpsampleKernel _upsample;
-    CLMemsetKernel                     _memset;
-    ICLTensor                         *_output;
+    std::unique_ptr<CLDeconvolutionLayerUpsampleKernel> _upsample;
+    std::unique_ptr<CLMemsetKernel>                     _memset;
+    ICLTensor                                          *_output;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H */

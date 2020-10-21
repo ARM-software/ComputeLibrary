@@ -24,12 +24,14 @@
 #include "arm_compute/runtime/CL/functions/CLFastCorners.h"
 
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/CL/kernels/CLFastCornersKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "src/core/CL/kernels/CLFastCornersKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "support/MemorySupport.h"
 
 #include <algorithm>
 #include <cstring>
@@ -38,9 +40,9 @@ using namespace arm_compute;
 
 CLFastCorners::CLFastCorners(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _fast_corners_kernel(),
+      _fast_corners_kernel(support::cpp14::make_unique<CLFastCornersKernel>()),
       _suppr_func(),
-      _copy_array_kernel(),
+      _copy_array_kernel(support::cpp14::make_unique<CLCopyToArrayKernel>()),
       _output(),
       _suppr(),
       _win(),
@@ -51,6 +53,8 @@ CLFastCorners::CLFastCorners(std::shared_ptr<IMemoryManager> memory_manager)
       _constant_border_value(0)
 {
 }
+
+CLFastCorners::~CLFastCorners() = default;
 
 void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonmax_suppression, ICLKeyPointArray *corners,
                               unsigned int *num_corners, BorderMode border_mode, uint8_t constant_border_value)
@@ -78,11 +82,11 @@ void CLFastCorners::configure(const CLCompileContext &compile_context, const ICL
     const bool update_number = (nullptr != _num_corners);
 
     _memory_group.manage(&_output);
-    _fast_corners_kernel.configure(compile_context, input, &_output, threshold, nonmax_suppression, border_mode);
+    _fast_corners_kernel->configure(compile_context, input, &_output, threshold, nonmax_suppression, border_mode);
 
     if(!_non_max)
     {
-        _copy_array_kernel.configure(compile_context, &_output, update_number, _corners, &_num_buffer);
+        _copy_array_kernel->configure(compile_context, &_output, update_number, _corners, &_num_buffer);
     }
     else
     {
@@ -90,7 +94,7 @@ void CLFastCorners::configure(const CLCompileContext &compile_context, const ICL
         _memory_group.manage(&_suppr);
 
         _suppr_func.configure(compile_context, &_output, &_suppr, border_mode);
-        _copy_array_kernel.configure(compile_context, &_suppr, update_number, _corners, &_num_buffer);
+        _copy_array_kernel->configure(compile_context, &_suppr, update_number, _corners, &_num_buffer);
 
         _suppr.allocator()->allocate();
     }
@@ -113,14 +117,14 @@ void CLFastCorners::run()
         q.enqueueUnmapMemObject(_output.cl_buffer(), out_buffer);
     }
 
-    CLScheduler::get().enqueue(_fast_corners_kernel, false);
+    CLScheduler::get().enqueue(*_fast_corners_kernel, false);
 
     if(_non_max)
     {
         _suppr_func.run();
     }
 
-    CLScheduler::get().enqueue(_copy_array_kernel, false);
+    CLScheduler::get().enqueue(*_copy_array_kernel, false);
 
     unsigned int get_num_corners = 0;
     q.enqueueReadBuffer(_num_buffer, CL_TRUE, 0, sizeof(unsigned int), &get_num_corners);

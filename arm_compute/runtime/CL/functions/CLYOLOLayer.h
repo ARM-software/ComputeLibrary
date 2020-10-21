@@ -24,13 +24,14 @@
 #ifndef ARM_COMPUTE_CLYOLOLAYER_H
 #define ARM_COMPUTE_CLYOLOLAYER_H
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLYOLOLayerKernel that performs a partial activation on the input
  *

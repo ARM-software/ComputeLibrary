@@ -28,6 +28,9 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLHistogramKernel.h"
+#include "src/core/CL/kernels/CLTableLookupKernel.h"
+#include "support/MemorySupport.h"
 
 #include <algorithm>
 #include <cmath>
@@ -83,9 +86,16 @@ void calculate_cum_dist_and_lut(CLDistribution1D &dist, CLDistribution1D &cum_di
 } // namespace
 
 CLEqualizeHistogram::CLEqualizeHistogram()
-    : _histogram_kernel(), _border_histogram_kernel(), _map_histogram_kernel(), _hist(nr_bins, 0, max_range), _cum_dist(nr_bins, 0, max_range), _cd_lut(nr_bins, DataType::U8)
+    : _histogram_kernel(support::cpp14::make_unique<CLHistogramKernel>()),
+      _border_histogram_kernel(support::cpp14::make_unique<CLHistogramBorderKernel>()),
+      _map_histogram_kernel(support::cpp14::make_unique<CLTableLookupKernel>()),
+      _hist(nr_bins, 0, max_range),
+      _cum_dist(nr_bins, 0, max_range),
+      _cd_lut(nr_bins, DataType::U8)
 {
 }
+
+CLEqualizeHistogram::~CLEqualizeHistogram() = default;
 
 void CLEqualizeHistogram::configure(const ICLImage *input, ICLImage *output)
 {
@@ -94,22 +104,22 @@ void CLEqualizeHistogram::configure(const ICLImage *input, ICLImage *output)
 
 void CLEqualizeHistogram::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLImage *output)
 {
-    _histogram_kernel.configure(compile_context, input, &_hist);
-    _border_histogram_kernel.configure(compile_context, input, &_hist);
-    _map_histogram_kernel.configure(compile_context, input, &_cd_lut, output);
+    _histogram_kernel->configure(compile_context, input, &_hist);
+    _border_histogram_kernel->configure(compile_context, input, &_hist);
+    _map_histogram_kernel->configure(compile_context, input, &_cd_lut, output);
 }
 
 void CLEqualizeHistogram::run()
 {
     // Calculate histogram of input.
-    CLScheduler::get().enqueue(_histogram_kernel, false);
+    CLScheduler::get().enqueue(*_histogram_kernel, false);
 
     // Calculate remaining pixels when image is not multiple of the elements of histogram kernel
-    CLScheduler::get().enqueue(_border_histogram_kernel, false);
+    CLScheduler::get().enqueue(*_border_histogram_kernel, false);
 
     // Calculate cumulative distribution of histogram and create LUT.
     calculate_cum_dist_and_lut(_hist, _cum_dist, _cd_lut);
 
     // Map input to output using created LUT.
-    CLScheduler::get().enqueue(_map_histogram_kernel);
+    CLScheduler::get().enqueue(*_map_histogram_kernel);
 }

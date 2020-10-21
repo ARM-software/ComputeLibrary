@@ -31,6 +31,8 @@ namespace arm_compute
 {
 // Forward Declarations
 class ICLTensor;
+class CLCompileContext;
+class ITensorInfo;
 
 namespace experimental
 {

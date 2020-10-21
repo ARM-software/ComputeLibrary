@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/CLFunctions.h"
-
+#include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/Utils.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute;

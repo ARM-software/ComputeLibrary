@@ -23,16 +23,8 @@
  *  @brief Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
  */
 
-/** @file arm_compute/core/CL/CLKernels.h
- *  @brief Includes all the OpenCL kernels at once
- */
-
 /** @file arm_compute/core/CL/OpenCL.h
  *  @brief Wrapper to configure the Khronos OpenCL C++ header
- */
-
-/** @dir arm_compute/core/CL/kernels
- * @brief Folder containing all the OpenCL kernels
  */
 
 /** @dir arm_compute/core/CPP
@@ -283,7 +275,7 @@
  *  @brief Folder containing all the configuration files for GEMM
  */
 
-/** @dir src/core/CL/cl_kernels
+/** @dir src/core/CL/kernels
  *  @brief All the OpenCL kernels
  */
 

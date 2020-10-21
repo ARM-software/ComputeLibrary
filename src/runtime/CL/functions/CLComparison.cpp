@@ -24,8 +24,9 @@
 #include "arm_compute/runtime/CL/functions/CLComparison.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLComparisonKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLComparisonKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute
@@ -47,7 +48,7 @@ void CLComparison::configure(const CLCompileContext &compile_context, ICLTensor 
 
         if(broadcasted_info->info()->dimension(0) == 1)
         {
-            _border_handler.configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+            _border_handler->configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
         }
     }
 }
@@ -76,7 +77,7 @@ void CLComparisonStatic<COP>::configure(const CLCompileContext &compile_context,
 
         if(broadcasted_info->info()->dimension(0) == 1)
         {
-            _border_handler.configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+            _border_handler->configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
         }
     }
 }

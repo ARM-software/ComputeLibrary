@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFlattenLayerKernel.h"
 #include "support/MemorySupport.h"
 
 using namespace arm_compute;

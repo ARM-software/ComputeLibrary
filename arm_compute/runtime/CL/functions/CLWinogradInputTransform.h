@@ -31,7 +31,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to execute a @ref CLWinogradInputTransformKernel. */
 class CLWinogradInputTransform : public ICLSimpleFunction

@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"

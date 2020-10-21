@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGaussian5x5Kernel.h"
+#include "src/core/CL/kernels/CLGaussian5x5Kernel.h"
 
 #include <cstdint>
 

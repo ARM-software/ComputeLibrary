@@ -31,6 +31,10 @@
 #include "arm_compute/runtime/CL/functions/CLSobel3x3.h"
 #include "arm_compute/runtime/CL/functions/CLSobel5x5.h"
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
+#include "src/core/CL/kernels/CLCannyEdgeKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLSobel5x5Kernel.h"
+#include "src/core/CL/kernels/CLSobel7x7Kernel.h"
 #include "support/MemorySupport.h"
 
 using namespace arm_compute;
@@ -38,10 +42,10 @@ using namespace arm_compute;
 CLCannyEdge::CLCannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
       _sobel(),
-      _gradient(),
-      _border_mag_gradient(),
-      _non_max_suppr(),
-      _edge_trace(),
+      _gradient(support::cpp14::make_unique<CLGradientKernel>()),
+      _border_mag_gradient(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _non_max_suppr(support::cpp14::make_unique<CLEdgeNonMaxSuppressionKernel>()),
+      _edge_trace(support::cpp14::make_unique<CLEdgeTraceKernel>()),
       _gx(),
       _gy(),
       _mag(),
@@ -54,6 +58,8 @@ CLCannyEdge::CLCannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLI
       _output(nullptr)
 {
 }
+
+CLCannyEdge::~CLCannyEdge() = default;
 
 void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode,
                             uint8_t constant_border_value)
@@ -143,7 +149,7 @@ void CLCannyEdge::configure(const CLCompileContext &compile_context, ICLTensor *
     _memory_group.manage(&_phase);
 
     // Configure gradient
-    _gradient.configure(compile_context, &_gx, &_gy, &_mag, &_phase, norm_type);
+    _gradient->configure(compile_context, &_gx, &_gy, &_mag, &_phase, norm_type);
 
     // Allocate intermediate buffers
     _gx.allocator()->allocate();
@@ -153,14 +159,14 @@ void CLCannyEdge::configure(const CLCompileContext &compile_context, ICLTensor *
     _memory_group.manage(&_nonmax);
 
     // Configure non-maxima suppression
-    _non_max_suppr.configure(compile_context, &_mag, &_phase, &_nonmax, lower_thr, border_mode == BorderMode::UNDEFINED);
+    _non_max_suppr->configure(compile_context, &_mag, &_phase, &_nonmax, lower_thr, border_mode == BorderMode::UNDEFINED);
 
     // Allocate intermediate buffers
     _phase.allocator()->allocate();
 
     // Fill border around magnitude image as non-maxima suppression will access
     // it. If border mode is undefined filling the border is a nop.
-    _border_mag_gradient.configure(compile_context, &_mag, _non_max_suppr.border_size(), border_mode, constant_border_value);
+    _border_mag_gradient->configure(compile_context, &_mag, _non_max_suppr->border_size(), border_mode, constant_border_value);
 
     // Allocate intermediate buffers
     _mag.allocator()->allocate();
@@ -172,7 +178,7 @@ void CLCannyEdge::configure(const CLCompileContext &compile_context, ICLTensor *
     _memory_group.manage(&_l1_list_counter);
 
     // Configure edge tracing
-    _edge_trace.configure(compile_context, &_nonmax, output, upper_thr, lower_thr, &_visited, &_recorded, &_l1_stack, &_l1_list_counter);
+    _edge_trace->configure(compile_context, &_nonmax, output, upper_thr, lower_thr, &_visited, &_recorded, &_l1_stack, &_l1_list_counter);
 
     // Allocate intermediate buffers
     _visited.allocator()->allocate();
@@ -190,14 +196,14 @@ void CLCannyEdge::run()
     _sobel->run();
 
     // Run phase and magnitude calculation
-    CLScheduler::get().enqueue(_gradient, false);
+    CLScheduler::get().enqueue(*_gradient, false);
 
     // Fill border before non-maxima suppression. Nop for border mode undefined.
-    CLScheduler::get().enqueue(_border_mag_gradient, false);
+    CLScheduler::get().enqueue(*_border_mag_gradient, false);
 
     // Run non max suppresion
     _nonmax.clear(CLScheduler::get().queue());
-    CLScheduler::get().enqueue(_non_max_suppr, false);
+    CLScheduler::get().enqueue(*_non_max_suppr, false);
 
     // Clear temporary structures and run edge trace
     _output->clear(CLScheduler::get().queue());
@@ -205,5 +211,5 @@ void CLCannyEdge::run()
     _recorded.clear(CLScheduler::get().queue());
     _l1_list_counter.clear(CLScheduler::get().queue());
     _l1_stack.clear(CLScheduler::get().queue());
-    CLScheduler::get().enqueue(_edge_trace, true);
+    CLScheduler::get().enqueue(*_edge_trace, true);
 }

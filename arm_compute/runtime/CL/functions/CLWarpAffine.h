@@ -31,6 +31,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to run @ref CLWarpAffineKernel for AFFINE transformation */

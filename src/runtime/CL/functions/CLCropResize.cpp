@@ -25,6 +25,10 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLCopyKernel.h"
+#include "src/core/CL/kernels/CLCropKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLMemsetKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -60,6 +64,8 @@ CLCropResize::CLCropResize()
     : _input(nullptr), _boxes(nullptr), _box_ind(nullptr), _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _scale(), _copy(), _crop_results(), _scaled_results(), _internal_kernels()
 {
 }
+
+CLCropResize::~CLCropResize() = default;
 
 Status CLCropResize::validate(const ITensorInfo *input, ITensorInfo *boxes, ITensorInfo *box_ind, const ITensorInfo *output,
                               Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value)

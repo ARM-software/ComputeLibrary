@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLChannelExtract.h"
 
-#include "arm_compute/core/CL/kernels/CLChannelExtractKernel.h"
+#include "src/core/CL/kernels/CLChannelExtractKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

@@ -29,7 +29,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 class CLReorgLayer : public ICLSimpleFunction
 {

@@ -28,6 +28,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLMultiImage;
 class ICLTensor;
 using ICLImage = ICLTensor;

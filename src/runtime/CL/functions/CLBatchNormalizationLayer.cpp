@@ -29,13 +29,18 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+#include "src/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 
+namespace arm_compute
+{
 CLBatchNormalizationLayer::CLBatchNormalizationLayer()
-    : _norm_kernel()
+    : _norm_kernel(support::cpp14::make_unique<CLBatchNormalizationLayerKernel>())
 {
 }
+
+CLBatchNormalizationLayer::~CLBatchNormalizationLayer() = default;
 
 void CLBatchNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon,
                                           ActivationLayerInfo act_info)
@@ -47,7 +52,7 @@ void CLBatchNormalizationLayer::configure(const CLCompileContext &compile_contex
                                           const ICLTensor *gamma, float epsilon,
                                           ActivationLayerInfo act_info)
 {
-    _norm_kernel.configure(compile_context, input, output, mean, var, beta, gamma, epsilon, act_info);
+    _norm_kernel->configure(compile_context, input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
 Status CLBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
@@ -60,5 +65,6 @@ Status CLBatchNormalizationLayer::validate(const ITensorInfo *input, const ITens
 
 void CLBatchNormalizationLayer::run()
 {
-    CLScheduler::get().enqueue(_norm_kernel, true);
+    CLScheduler::get().enqueue(*_norm_kernel, true);
 }
+} // namespace arm_compute

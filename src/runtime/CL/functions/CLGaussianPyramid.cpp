@@ -24,19 +24,21 @@
 #include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLGaussianPyramidKernel.h"
-#include "arm_compute/core/CL/kernels/CLScaleKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-
 #include "arm_compute/runtime/CL/CLPyramid.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLGaussian5x5Kernel.h"
+#include "src/core/CL/kernels/CLGaussianPyramidKernel.h"
+#include "src/core/CL/kernels/CLScaleKernel.h"
+#include "support/MemorySupport.h"
 
 #include <cstddef>
 
@@ -47,6 +49,8 @@ CLGaussianPyramid::CLGaussianPyramid()
 {
 }
 
+CLGaussianPyramid::~CLGaussianPyramid() = default;
+
 CLGaussianPyramidHalf::CLGaussianPyramidHalf() // NOLINT
     : _horizontal_border_handler(),
       _vertical_border_handler(),
@@ -54,6 +58,8 @@ CLGaussianPyramidHalf::CLGaussianPyramidHalf() // NOLINT
       _vertical_reduction()
 {
 }
+
+CLGaussianPyramidHalf::~CLGaussianPyramidHalf() = default;
 
 void CLGaussianPyramidHalf::configure(ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value)
 {
@@ -80,10 +86,10 @@ void CLGaussianPyramidHalf::configure(const CLCompileContext &compile_context, I
 
     if(num_levels > 1)
     {
-        _horizontal_border_handler.resize(num_levels - 1);
-        _vertical_border_handler.resize(num_levels - 1);
-        _horizontal_reduction.resize(num_levels - 1);
-        _vertical_reduction.resize(num_levels - 1);
+        _horizontal_border_handler.reserve(num_levels - 1);
+        _vertical_border_handler.reserve(num_levels - 1);
+        _horizontal_reduction.reserve(num_levels - 1);
+        _vertical_reduction.reserve(num_levels - 1);
 
         // Apply half scale to the X dimension of the tensor shape
         TensorShape tensor_shape = pyramid->info()->tensor_shape();
@@ -95,16 +101,20 @@ void CLGaussianPyramidHalf::configure(const CLCompileContext &compile_context, I
         for(size_t i = 0; i < num_levels - 1; ++i)
         {
             /* Configure horizontal kernel */
-            _horizontal_reduction[i].configure(compile_context, _pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
+            _horizontal_reduction.emplace_back(support::cpp14::make_unique<CLGaussianPyramidHorKernel>());
+            _horizontal_reduction.back()->configure(compile_context, _pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
 
             /* Configure vertical kernel */
-            _vertical_reduction[i].configure(compile_context, _tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
+            _vertical_reduction.emplace_back(support::cpp14::make_unique<CLGaussianPyramidVertKernel>());
+            _vertical_reduction.back()->configure(compile_context, _tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
 
             /* Configure border */
-            _horizontal_border_handler[i].configure(compile_context, _pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
+            _horizontal_border_handler.emplace_back(support::cpp14::make_unique<CLFillBorderKernel>());
+            _horizontal_border_handler.back()->configure(compile_context, _pyramid->get_pyramid_level(i), _horizontal_reduction.back()->border_size(), border_mode, PixelValue(constant_border_value));
 
             /* Configure border */
-            _vertical_border_handler[i].configure(compile_context, _tmp.get_pyramid_level(i), _vertical_reduction[i].border_size(), border_mode, PixelValue(pixel_value_u16));
+            _vertical_border_handler.emplace_back(support::cpp14::make_unique<CLFillBorderKernel>());
+            _vertical_border_handler.back()->configure(compile_context, _tmp.get_pyramid_level(i), _vertical_reduction.back()->border_size(), border_mode, PixelValue(pixel_value_u16));
         }
         _tmp.allocate();
     }
@@ -127,10 +137,10 @@ void CLGaussianPyramidHalf::run()
 
     for(unsigned int i = 0; i < num_levels - 1; ++i)
     {
-        CLScheduler::get().enqueue(_horizontal_border_handler[i], false);
-        CLScheduler::get().enqueue(_horizontal_reduction[i], false);
-        CLScheduler::get().enqueue(_vertical_border_handler[i], false);
-        CLScheduler::get().enqueue(_vertical_reduction[i], false);
+        CLScheduler::get().enqueue(*_horizontal_border_handler[i], false);
+        CLScheduler::get().enqueue(*_horizontal_reduction[i], false);
+        CLScheduler::get().enqueue(*_vertical_border_handler[i], false);
+        CLScheduler::get().enqueue(*_vertical_reduction[i], false);
     }
 }
 
@@ -163,7 +173,7 @@ void CLGaussianPyramidOrb::configure(const CLCompileContext &compile_context, IC
     if(num_levels > 1)
     {
         _gauss5x5.resize(num_levels - 1);
-        _scale_nearest.resize(num_levels - 1);
+        _scale_nearest.reserve(num_levels - 1);
 
         PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_ORB, pyramid->info()->tensor_shape(), Format::U8);
 
@@ -175,7 +185,8 @@ void CLGaussianPyramidOrb::configure(const CLCompileContext &compile_context, IC
             _gauss5x5[i].configure(compile_context, _pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode, constant_border_value);
 
             /* Configure scale image kernel */
-            _scale_nearest[i].configure(compile_context, _tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), ScaleKernelInfo{ InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, PixelValue(), SamplingPolicy::CENTER });
+            _scale_nearest.emplace_back(support::cpp14::make_unique<CLScaleKernel>());
+            _scale_nearest.back()->configure(compile_context, _tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), ScaleKernelInfo{ InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, PixelValue(), SamplingPolicy::CENTER });
         }
 
         _tmp.allocate();
@@ -199,6 +210,6 @@ void CLGaussianPyramidOrb::run()
     for(unsigned int i = 0; i < num_levels - 1; ++i)
     {
         _gauss5x5[i].run();
-        CLScheduler::get().enqueue(_scale_nearest[i]);
+        CLScheduler::get().enqueue(*_scale_nearest[i]);
     }
 }

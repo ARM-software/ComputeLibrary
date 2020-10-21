@@ -24,11 +24,12 @@
 #include "arm_compute/runtime/CL/functions/CLRemap.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLRemapKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLRemapKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
@@ -53,5 +54,5 @@ void CLRemap::configure(const CLCompileContext &compile_context, ICLTensor *inpu
     auto k = arm_compute::support::cpp14::make_unique<CLRemapKernel>();
     k->configure(compile_context, input, map_x, map_y, output, policy, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
 }

@@ -31,7 +31,9 @@
 namespace arm_compute
 {
 // Forward declarations
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLDequantizationLayerKernel that dequantizes an input tensor */
 class CLDequantizationLayer : public ICLSimpleFunction

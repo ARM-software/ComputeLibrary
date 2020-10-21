@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLChannelCombine.h"
 
-#include "arm_compute/core/CL/kernels/CLChannelCombineKernel.h"
+#include "src/core/CL/kernels/CLChannelCombineKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

@@ -26,8 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLCannyEdgeKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -36,6 +34,11 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLFillBorderKernel;
+class CLGradientKernel;
+class CLEdgeNonMaxSuppressionKernel;
+class CLEdgeTraceKernel;
 class ICLTensor;
 
 /** Basic function to execute canny edge on OpenCL. This function calls the following OpenCL kernels and functions:
@@ -56,6 +59,8 @@ public:
     CLCannyEdge(const CLCannyEdge &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLCannyEdge &operator=(const CLCannyEdge &) = delete;
+    /** Default destructor */
+    ~CLCannyEdge();
     /** Initialise the function's source, destination, thresholds, gradient size, normalization type and border mode.
      *
      * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for border_mode != UNDEFINED)
@@ -88,20 +93,20 @@ public:
     virtual void run() override;
 
 private:
-    MemoryGroup                   _memory_group;                                    /**< Function's memory group */
-    std::unique_ptr<IFunction>    _sobel;                                           /**< Pointer to Sobel kernel. */
-    CLGradientKernel              _gradient;                                        /**< Gradient kernel. */
-    CLFillBorderKernel            _border_mag_gradient;                             /**< Fill border on magnitude tensor kernel */
-    CLEdgeNonMaxSuppressionKernel _non_max_suppr;                                   /**< Non-Maxima suppression kernel. */
-    CLEdgeTraceKernel             _edge_trace;                                      /**< Edge tracing kernel. */
-    CLImage                       _gx;                                              /**< Source tensor - Gx component. */
-    CLImage                       _gy;                                              /**< Source tensor - Gy component. */
-    CLImage                       _mag;                                             /**< Source tensor - Magnitude. */
-    CLImage                       _phase;                                           /**< Source tensor - Phase. */
-    CLImage                       _nonmax;                                          /**< Source tensor - Non-Maxima suppressed. */
-    CLImage                       _visited, _recorded, _l1_list_counter, _l1_stack; /**< Temporary tensors */
-    ICLTensor                    *_output;                                          /**< Output tensor provided by the user. */
+    MemoryGroup                                    _memory_group;                                    /**< Function's memory group */
+    std::unique_ptr<IFunction>                     _sobel;                                           /**< Pointer to Sobel kernel. */
+    std::unique_ptr<CLGradientKernel>              _gradient;                                        /**< Gradient kernel. */
+    std::unique_ptr<CLFillBorderKernel>            _border_mag_gradient;                             /**< Fill border on magnitude tensor kernel */
+    std::unique_ptr<CLEdgeNonMaxSuppressionKernel> _non_max_suppr;                                   /**< Non-Maxima suppression kernel. */
+    std::unique_ptr<CLEdgeTraceKernel>             _edge_trace;                                      /**< Edge tracing kernel. */
+    CLImage                                        _gx;                                              /**< Source tensor - Gx component. */
+    CLImage                                        _gy;                                              /**< Source tensor - Gy component. */
+    CLImage                                        _mag;                                             /**< Source tensor - Magnitude. */
+    CLImage                                        _phase;                                           /**< Source tensor - Phase. */
+    CLImage                                        _nonmax;                                          /**< Source tensor - Non-Maxima suppressed. */
+    CLImage                                        _visited, _recorded, _l1_list_counter, _l1_stack; /**< Temporary tensors */
+    ICLTensor                                     *_output;                                          /**< Output tensor provided by the user. */
 };
-}
+} // namespace arm_compute
 
 #endif /* ARM_COMPUTE_CLCANNYEDGE_H */

@@ -26,7 +26,6 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLTableLookup.h"
-
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/CLLutAccessor.h"
 #include "tests/PaddingCalculator.h"
@@ -34,7 +33,6 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/TableLookupFixture.h"

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
+#include "src/core/CL/kernels/CLReshapeLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"

@@ -24,14 +24,18 @@
 #ifndef ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H
 #define ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H
 
-#include "arm_compute/core/CL/kernels/CLFuseBatchNormalizationKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 // Forward declarations
+class CLCompileContext;
+class CLFuseBatchNormalizationKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to fuse the batch normalization node to a preceding convolution node */
 class CLFuseBatchNormalization : public IFunction
@@ -48,7 +52,7 @@ public:
     /** Allow instances of this class to be moved */
     CLFuseBatchNormalization &operator=(CLFuseBatchNormalization &&) = default;
     /** Default destructor */
-    ~CLFuseBatchNormalization() = default;
+    ~CLFuseBatchNormalization();
     /** Set the input and output tensors.
      *
      * @param[in]  input_weights Input weights tensor for convolution or depthwise convolution layer. Data type supported: F16/F32. Data layout supported: NCHW, NHWC
@@ -112,7 +116,7 @@ public:
     void run() override;
 
 private:
-    CLFuseBatchNormalizationKernel _fuse_bn_kernel;
+    std::unique_ptr<CLFuseBatchNormalizationKernel> _fuse_bn_kernel;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H */

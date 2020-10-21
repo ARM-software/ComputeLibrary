@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,10 @@
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
 
+#include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/functions/CLConvolution.h"
 #include "utils/ImageLoader.h"
 #include "utils/Utils.h"
 

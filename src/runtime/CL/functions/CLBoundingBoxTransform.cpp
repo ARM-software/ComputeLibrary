@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLBoundingBoxTransform.h"
 
-#include "arm_compute/core/CL/kernels/CLBoundingBoxTransformKernel.h"
+#include "src/core/CL/kernels/CLBoundingBoxTransformKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

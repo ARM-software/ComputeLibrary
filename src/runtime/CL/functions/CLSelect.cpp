@@ -23,9 +23,9 @@
  */
 #include "arm_compute/runtime/CL/functions/CLSelect.h"
 
-#include "arm_compute/core/CL/kernels/CLSelectKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLSelectKernel.h"
 
 #include "support/MemorySupport.h"
 

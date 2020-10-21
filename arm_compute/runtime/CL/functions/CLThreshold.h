@@ -33,6 +33,7 @@
 namespace arm_compute
 {
 // Forward declarations
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to run @ref CLThresholdKernel */

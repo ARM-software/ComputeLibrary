@@ -30,6 +30,8 @@
 namespace arm_compute
 {
 class ICLTensor;
+class CLCompileContext;
+class ITensorInfo;
 
 namespace experimental
 {

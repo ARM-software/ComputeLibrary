@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to run @ref CLAccumulateKernel */

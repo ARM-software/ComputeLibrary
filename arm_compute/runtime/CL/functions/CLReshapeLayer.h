@@ -29,7 +29,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLReshapeLayerKernel */
 class CLReshapeLayer : public IFunction

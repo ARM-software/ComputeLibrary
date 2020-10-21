@@ -24,10 +24,13 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.h"
+#include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.h"
 #include "support/MemorySupport.h"
+
+#include <algorithm>
 
 namespace arm_compute
 {

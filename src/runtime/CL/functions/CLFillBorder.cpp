@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLFillBorder.h"
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

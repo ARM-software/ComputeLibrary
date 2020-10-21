@@ -24,16 +24,13 @@
 #ifndef ARM_COMPUTE_CLHARRISCORNERS_H
 #define ARM_COMPUTE_CLHARRISCORNERS_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/CL/ICLArray.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include <cstdint>
@@ -41,6 +38,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLHarrisScoreKernel;
+class CLFillBorderKernel;
 class ICLTensor;
 using ICLImage = ICLTensor;
 
@@ -66,6 +66,8 @@ public:
     CLHarrisCorners(const CLHarrisCorners &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     const CLHarrisCorners &operator=(const CLHarrisCorners &) = delete;
+    /** Default destructor */
+    ~CLHarrisCorners();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in,out] input                 Source image. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -104,21 +106,21 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                    _memory_group;          /**< Function's memory group */
-    std::unique_ptr<IFunction>     _sobel;                 /**< Sobel function */
-    CLHarrisScoreKernel            _harris_score;          /**< Harris score kernel */
-    CLNonMaximaSuppression3x3      _non_max_suppr;         /**< Non-maxima suppression function */
-    CPPCornerCandidatesKernel      _candidates;            /**< Sort kernel */
-    CPPSortEuclideanDistanceKernel _sort_euclidean;        /**< Euclidean distance kernel */
-    CLFillBorderKernel             _border_gx;             /**< Border handler before running harris score */
-    CLFillBorderKernel             _border_gy;             /**< Border handler before running harris score */
-    CLImage                        _gx;                    /**< Source image - Gx component */
-    CLImage                        _gy;                    /**< Source image - Gy component */
-    CLImage                        _score;                 /**< Source image - Harris score */
-    CLImage                        _nonmax;                /**< Source image - Non-Maxima suppressed image */
-    std::vector<InternalKeypoint>  _corners_list;          /**< Array of InternalKeypoint. It stores the potential corner candidates */
-    int32_t                        _num_corner_candidates; /**< Number of potential corner candidates */
-    ICLKeyPointArray              *_corners;               /**< Output corners array */
+    MemoryGroup                          _memory_group;          /**< Function's memory group */
+    std::unique_ptr<IFunction>           _sobel;                 /**< Sobel function */
+    std::unique_ptr<CLHarrisScoreKernel> _harris_score;          /**< Harris score kernel */
+    CLNonMaximaSuppression3x3            _non_max_suppr;         /**< Non-maxima suppression function */
+    CPPCornerCandidatesKernel            _candidates;            /**< Sort kernel */
+    CPPSortEuclideanDistanceKernel       _sort_euclidean;        /**< Euclidean distance kernel */
+    std::unique_ptr<CLFillBorderKernel>  _border_gx;             /**< Border handler before running harris score */
+    std::unique_ptr<CLFillBorderKernel>  _border_gy;             /**< Border handler before running harris score */
+    CLImage                              _gx;                    /**< Source image - Gx component */
+    CLImage                              _gy;                    /**< Source image - Gy component */
+    CLImage                              _score;                 /**< Source image - Harris score */
+    CLImage                              _nonmax;                /**< Source image - Non-Maxima suppressed image */
+    std::vector<InternalKeypoint>        _corners_list;          /**< Array of InternalKeypoint. It stores the potential corner candidates */
+    int32_t                              _num_corner_candidates; /**< Number of potential corner candidates */
+    ICLKeyPointArray                    *_corners;               /**< Output corners array */
 };
 }
 #endif /*ARM_COMPUTE_CLHARRISCORNERS_H */

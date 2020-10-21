@@ -24,7 +24,10 @@
 #ifndef ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H
 #define ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+
+#include <limits>
 
 /** This file contains all available output stages for GEMMLowp on OpenCL.
  *
@@ -36,7 +39,11 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ITensor;
+class ICLTensor;
+class ITensorInfo;
+struct GEMMLowpOutputStageInfo;
 
 /** Basic function to execute CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint on OpenCL.
  *

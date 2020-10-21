@@ -27,14 +27,15 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLStackLayerKernel.h"
-
 #include <memory>
 #include <vector>
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLStackLayerKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to stack tensors along an axis. This function calls the following kernel:
  *
@@ -46,6 +47,16 @@ class CLStackLayer : public IFunction
 public:
     /** Default constructor */
     CLStackLayer();
+    /** Prevent instances of this class from being copied */
+    CLStackLayer(const CLStackLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLStackLayer &operator=(const CLStackLayer &) = delete;
+    /** Prevent instances of this class to be moved */
+    CLStackLayer(CLStackLayer &&) = delete;
+    /** Prevent instances of this class to be moved */
+    CLStackLayer &operator=(CLStackLayer &&) = delete;
+    /** Default destructor */
+    ~CLStackLayer();
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Supported input tensor rank: up to 4
@@ -84,9 +95,9 @@ public:
     void run() override;
 
 private:
-    std::vector<ICLTensor *>        _input;
-    std::vector<CLStackLayerKernel> _stack_kernels;
-    unsigned int                    _num_inputs;
+    std::vector<ICLTensor *>                         _input;
+    std::vector<std::unique_ptr<CLStackLayerKernel>> _stack_kernels;
+    unsigned int                                     _num_inputs;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLSTACKLAYER_H */

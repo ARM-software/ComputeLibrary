@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
+#include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -83,7 +83,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const unsigned int num_elems_processed_per_iteration_y = input->dimension(1);
     const unsigned int num_elems_read_per_iteration_z      = input->data_layout() == DataLayout::NCHW ? 1 : input->dimension(2);
 
-    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y, num_elems_read_per_iteration_z));
+    Window win           = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y, num_elems_read_per_iteration_z));
     Window win_collapsed = win.collapse(win, Window::DimZ);
     return std::make_pair(Status{}, win_collapsed);
 }

@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLStridedSlice.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLStridedSliceKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -31,7 +31,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to execute an @ref CLPermuteKernel. */
 class CLPermute : public ICLSimpleFunction

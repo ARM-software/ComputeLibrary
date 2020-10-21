@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
 
 #include <memory>
@@ -36,7 +35,9 @@
 namespace arm_compute
 {
 // Forward declarations
+class CLCompileContext;
 class ICLTensor;
+class ICLKernel;
 class ITensorInfo;
 class Status;
 

@@ -24,9 +24,6 @@
 #ifndef ARM_COMPUTE_CLQLSTMLAYER_H
 #define ARM_COMPUTE_CLQLSTMLAYER_H
 
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "arm_compute/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
@@ -40,7 +37,12 @@
 namespace arm_compute
 {
 // Forward declarations
+class CLCompileContext;
+class CLCopyKernel;
 class ICLTensor;
+class CLGEMMLowpMatrixAReductionKernel;
+class CLQLSTMLayerNormalizationKernel;
+class ITensorInfo;
 
 /** Basic function to run @ref CLQLSTMLayer
  *
@@ -68,6 +70,8 @@ public:
     CLQLSTMLayer &operator=(const CLQLSTMLayer &) = delete;
     /** Default move assignment operator */
     CLQLSTMLayer &operator=(CLQLSTMLayer &&) = default;
+    /** Default destructor */
+    ~CLQLSTMLayer();
     /** Initialize function's tensors.
      *
      * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: QASYMM8_SIGNED.
@@ -285,72 +289,72 @@ private:
     };
 
     // Functions used
-    CLTranspose                      _transpose_input_to_forget_weights{};
-    CLTranspose                      _transpose_input_to_cell_weights{};
-    CLTranspose                      _transpose_input_to_output_weights{};
-    CLTranspose                      _transpose_input_to_input_weights{};
-    CLTranspose                      _transpose_recurrent_to_forget_weights{};
-    CLTranspose                      _transpose_recurrent_to_cell_weights{};
-    CLTranspose                      _transpose_recurrent_to_output_weights{};
-    CLTranspose                      _transpose_recurrent_to_input_weights{};
-    CLTranspose                      _transpose_projection_weights{};
-    CLGEMMLowpMatrixAReductionKernel _input_to_input_reduction{};
-    CLGEMMLowpMatrixAReductionKernel _recurrent_to_input_reduction{};
-    CLGEMMLowpMatrixAReductionKernel _input_to_forget_reduction{};
-    CLGEMMLowpMatrixAReductionKernel _recurrent_to_forget_reduction{};
-    CLGEMMLowpMatrixAReductionKernel _input_to_cell_reduction{};
-    CLGEMMLowpMatrixAReductionKernel _recurrent_to_cell_reduction{};
-    CLGEMMLowpMatrixAReductionKernel _input_to_output_reduction{};
-    CLGEMMLowpMatrixAReductionKernel _recurrent_to_output_reduction{};
-    CLGEMMLowpMatrixAReductionKernel _projection_reduction{};
-    CLArithmeticAddition             _projection_bias_add{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_input_to_forget{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_recurrent_to_forget{};
-    CLPixelWiseMultiplication        _pixelwise_mul_cell_to_forget{};
-    CLGEMMLowpOutputStage            _input_to_forget_outstage{};
-    CLGEMMLowpOutputStage            _recurrent_to_forget_outstage{};
-    CLGEMMLowpOutputStage            _cell_to_forget_outstage{};
-    CLArithmeticAddition             _accumulate_input_recurrent_forget{};
-    CLArithmeticAddition             _accumulate_cell_forget{};
-    CLActivationLayer                _forget_gate_sigmoid{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_input_to_cell{};
-    CLGEMMLowpOutputStage            _input_to_cell_outstage{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_recurrent_to_cell{};
-    CLGEMMLowpOutputStage            _recurrent_to_cell_outstage{};
-    CLArithmeticAddition             _accumulate_input_recurrent_modulation{};
-    CLActivationLayer                _cell_gate_tanh{};
-    CLArithmeticSubtraction          _input_gate_sub{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_input_to_input{};
-    CLGEMMLowpOutputStage            _input_to_input_outstage{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_recurrent_to_input{};
-    CLGEMMLowpOutputStage            _recurrent_to_input_outstage{};
-    CLArithmeticAddition             _accumulate_input_recurrent_input{};
-    CLPixelWiseMultiplication        _pixelwise_mul_cell_to_input{};
-    CLGEMMLowpOutputStage            _cell_to_input_outstage{};
-    CLArithmeticAddition             _accumulate_cell_input{};
-    CLActivationLayer                _input_gate_sigmoid{};
-    CLPixelWiseMultiplication        _pixelwise_mul_forget_cell{};
-    CLPixelWiseMultiplication        _pixelwise_mul_input_cell{};
-    CLArithmeticAddition             _add_forget_cell{};
-    CLActivationLayer                _cell_clip{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_input_to_output{};
-    CLGEMMLowpOutputStage            _input_to_output_outstage{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_recurrent_to_output{};
-    CLGEMMLowpOutputStage            _recurrent_to_output_outstage{};
-    CLArithmeticAddition             _accumulate_input_recurrent_output{};
-    CLPixelWiseMultiplication        _pixelwise_mul_cell_to_output{};
-    CLGEMMLowpOutputStage            _cell_to_output_outstage{};
-    CLArithmeticAddition             _accumulate_cell_to_output{};
-    CLActivationLayer                _output_gate_sigmoid{};
-    CLActivationLayer                _hidden_tanh{};
-    CLPixelWiseMultiplication        _pixelwise_mul_hidden{};
-    CLGEMMLowpOutputStage            _hidden_outstage{};
-    CLGEMMLowpMatrixMultiplyCore     _mm_projection{};
-    CLGEMMLowpOutputStage            _projection_outstage{};
-    CLArithmeticAddition             _accumulate_projection{};
-    CLActivationLayer                _projection_clip{};
-    std::array<CLQLSTMLayerNormalizationKernel, _layer_norm_count> _layer_norms{ {} };
-    CLCopyKernel _copy_output{};
+    CLTranspose                                       _transpose_input_to_forget_weights{};
+    CLTranspose                                       _transpose_input_to_cell_weights{};
+    CLTranspose                                       _transpose_input_to_output_weights{};
+    CLTranspose                                       _transpose_input_to_input_weights{};
+    CLTranspose                                       _transpose_recurrent_to_forget_weights{};
+    CLTranspose                                       _transpose_recurrent_to_cell_weights{};
+    CLTranspose                                       _transpose_recurrent_to_output_weights{};
+    CLTranspose                                       _transpose_recurrent_to_input_weights{};
+    CLTranspose                                       _transpose_projection_weights{};
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _input_to_input_reduction;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _recurrent_to_input_reduction;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _input_to_forget_reduction;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _recurrent_to_forget_reduction;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _input_to_cell_reduction;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _recurrent_to_cell_reduction;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _input_to_output_reduction;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _recurrent_to_output_reduction;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel> _projection_reduction;
+    CLArithmeticAddition                              _projection_bias_add{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_input_to_forget{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_recurrent_to_forget{};
+    CLPixelWiseMultiplication                         _pixelwise_mul_cell_to_forget{};
+    CLGEMMLowpOutputStage                             _input_to_forget_outstage{};
+    CLGEMMLowpOutputStage                             _recurrent_to_forget_outstage{};
+    CLGEMMLowpOutputStage                             _cell_to_forget_outstage{};
+    CLArithmeticAddition                              _accumulate_input_recurrent_forget{};
+    CLArithmeticAddition                              _accumulate_cell_forget{};
+    CLActivationLayer                                 _forget_gate_sigmoid{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_input_to_cell{};
+    CLGEMMLowpOutputStage                             _input_to_cell_outstage{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_recurrent_to_cell{};
+    CLGEMMLowpOutputStage                             _recurrent_to_cell_outstage{};
+    CLArithmeticAddition                              _accumulate_input_recurrent_modulation{};
+    CLActivationLayer                                 _cell_gate_tanh{};
+    CLArithmeticSubtraction                           _input_gate_sub{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_input_to_input{};
+    CLGEMMLowpOutputStage                             _input_to_input_outstage{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_recurrent_to_input{};
+    CLGEMMLowpOutputStage                             _recurrent_to_input_outstage{};
+    CLArithmeticAddition                              _accumulate_input_recurrent_input{};
+    CLPixelWiseMultiplication                         _pixelwise_mul_cell_to_input{};
+    CLGEMMLowpOutputStage                             _cell_to_input_outstage{};
+    CLArithmeticAddition                              _accumulate_cell_input{};
+    CLActivationLayer                                 _input_gate_sigmoid{};
+    CLPixelWiseMultiplication                         _pixelwise_mul_forget_cell{};
+    CLPixelWiseMultiplication                         _pixelwise_mul_input_cell{};
+    CLArithmeticAddition                              _add_forget_cell{};
+    CLActivationLayer                                 _cell_clip{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_input_to_output{};
+    CLGEMMLowpOutputStage                             _input_to_output_outstage{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_recurrent_to_output{};
+    CLGEMMLowpOutputStage                             _recurrent_to_output_outstage{};
+    CLArithmeticAddition                              _accumulate_input_recurrent_output{};
+    CLPixelWiseMultiplication                         _pixelwise_mul_cell_to_output{};
+    CLGEMMLowpOutputStage                             _cell_to_output_outstage{};
+    CLArithmeticAddition                              _accumulate_cell_to_output{};
+    CLActivationLayer                                 _output_gate_sigmoid{};
+    CLActivationLayer                                 _hidden_tanh{};
+    CLPixelWiseMultiplication                         _pixelwise_mul_hidden{};
+    CLGEMMLowpOutputStage                             _hidden_outstage{};
+    CLGEMMLowpMatrixMultiplyCore                      _mm_projection{};
+    CLGEMMLowpOutputStage                             _projection_outstage{};
+    CLArithmeticAddition                              _accumulate_projection{};
+    CLActivationLayer                                 _projection_clip{};
+    std::array<std::unique_ptr<CLQLSTMLayerNormalizationKernel>, _layer_norm_count> _layer_norms;
+    std::unique_ptr<CLCopyKernel> _copy_output;
 
     TensorCopyKernel _projection_bias_copy{};
     TensorCopyKernel _projection_output_to_accumulate_copy{};
@@ -402,30 +406,11 @@ private:
 
     inline CLQLSTMLayerNormalizationKernel &get_layer_norm(LayerNormGate g)
     {
-        return _layer_norms[getGateIndex(g)];
+        return *_layer_norms[getGateIndex(g)];
     }
 
-    inline void configure_layer_norm(LayerNormGate g, const ICLTensor *in)
-    {
-        ARM_COMPUTE_ERROR_ON(!_has_layer_norm);
-
-        CLTensor *out = &get_layer_norm_output(g);
-        _memory_group.manage(out);
-        out->allocator()->init(*(in->info()));
-
-        get_layer_norm(g).configure(in, out, get_layer_norm_weight(g), get_layer_norm_bias(g));
-    }
-
-    inline static Status validate_layer_norm(const ITensorInfo &in, const ITensorInfo &weight, const ITensorInfo &bias)
-    {
-        // Output quantization scale will be different, but ignored here
-        // since it will be configured at configure() stage.
-        const TensorInfo out
-        {
-            in
-        };
-        return CLQLSTMLayerNormalizationKernel::validate(&in, &out, &weight, &bias);
-    }
+    inline void configure_layer_norm(LayerNormGate g, const ICLTensor *in);
+    inline static Status validate_layer_norm(const ITensorInfo &in, const ITensorInfo &weight, const ITensorInfo &bias);
 
     // Temporary tensors
     CLTensor _input_to_forget_weights_transposed{ nullptr };

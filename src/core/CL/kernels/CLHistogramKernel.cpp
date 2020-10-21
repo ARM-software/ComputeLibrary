@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLHistogramKernel.h"
+#include "src/core/CL/kernels/CLHistogramKernel.h"
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLDistribution1D.h"

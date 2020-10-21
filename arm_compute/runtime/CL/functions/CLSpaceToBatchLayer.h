@@ -24,16 +24,19 @@
 #ifndef ARM_COMPUTE_CLSPACETOBATCHLAYER_H
 #define ARM_COMPUTE_CLSPACETOBATCHLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
-#include "arm_compute/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLMemsetKernel;
+class CLSpaceToBatchLayerKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to spatial divide a tensor. This function calls the following OpenCL kernels/functions:
  *
@@ -54,7 +57,7 @@ public:
     /** Allow instances of this class to be moved */
     CLSpaceToBatchLayer &operator=(CLSpaceToBatchLayer &&) = default;
     /** Default destructor */
-    virtual ~CLSpaceToBatchLayer() = default;
+    ~CLSpaceToBatchLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -121,9 +124,9 @@ public:
     void run() override;
 
 private:
-    CLSpaceToBatchLayerKernel _space_to_batch_kernel; /**< SpaceToBatch kernel to run */
-    CLMemsetKernel            _memset_kernel;         /**< Memset kernel to run */
-    bool                      _has_padding;           /**< Flag to check if the output has padding */
+    std::unique_ptr<CLSpaceToBatchLayerKernel> _space_to_batch_kernel; /**< SpaceToBatch kernel to run */
+    std::unique_ptr<CLMemsetKernel>            _memset_kernel;         /**< Memset kernel to run */
+    bool                                       _has_padding;           /**< Flag to check if the output has padding */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLSPACETOBATCHLAYER_H */

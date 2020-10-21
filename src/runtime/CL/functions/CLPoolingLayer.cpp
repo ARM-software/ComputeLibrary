@@ -24,8 +24,9 @@
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLPoolingLayerKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLPoolingLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute
@@ -79,7 +80,7 @@ void CLPoolingLayer::configure(const CLCompileContext &compile_context, ICLTenso
         default:
             ARM_COMPUTE_ERROR("Data layout not supported");
     }
-    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode, pixel_value);
+    _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, pixel_value);
 
     // Tune kernels
     CLScheduler::get().tune_kernel_static(*_kernel);

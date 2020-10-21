@@ -24,11 +24,15 @@
 #ifndef ARM_COMPUTE_CLINTEGRALIMAGE_H
 #define ARM_COMPUTE_CLINTEGRALIMAGE_H
 
-#include "arm_compute/core/CL/kernels/CLIntegralImageKernel.h"
 #include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLIntegralImageHorKernel;
+class CLIntegralImageVertKernel;
 class ICLTensor;
 
 /** Basic function to execute integral image. This function calls the following OpenCL kernels:
@@ -42,6 +46,12 @@ class CLIntegralImage : public IFunction
 public:
     /** Default Constructor. */
     CLIntegralImage();
+    /** Prevent instances of this class from being copied */
+    CLIntegralImage(const CLIntegralImage &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLIntegralImage &operator=(const CLIntegralImage &) = delete;
+    /** Default destructor */
+    ~CLIntegralImage();
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in]  input  Source tensor. Data types supported: U8.
@@ -60,8 +70,8 @@ public:
     void run() override;
 
 protected:
-    CLIntegralImageHorKernel  _integral_hor;  /**< Integral Image Horizontal kernel */
-    CLIntegralImageVertKernel _integral_vert; /**< Integral Image Vertical kernel */
+    std::unique_ptr<CLIntegralImageHorKernel>  _integral_hor;  /**< Integral Image Horizontal kernel */
+    std::unique_ptr<CLIntegralImageVertKernel> _integral_vert; /**< Integral Image Vertical kernel */
 };
 }
 #endif /*ARM_COMPUTE_CLINTEGRALIMAGE_H */

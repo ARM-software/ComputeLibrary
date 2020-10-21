@@ -30,8 +30,10 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CL/kernels/CLArgMinMaxLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/runtime/Utils.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -39,6 +41,8 @@ CLArgMinMaxLayer::CLArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manage
     : _memory_group(std::move(memory_manager)), _results_vector(), _not_reshaped_output(), _reduction_kernels_vector(), _reshape(), _num_of_stages(), _reduction_axis()
 {
 }
+
+CLArgMinMaxLayer::~CLArgMinMaxLayer() = default;
 
 Status CLArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
 {
@@ -124,13 +128,19 @@ void CLArgMinMaxLayer::configure(const CLCompileContext &compile_context, const 
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
 
     // Configure reduction operation kernels
-    _reduction_kernels_vector.resize(_num_of_stages);
+    _reduction_kernels_vector.reserve(_num_of_stages);
+
+    auto add_reduction_kernel = [this, &compile_context, axis, op](const ICLTensor * input, const ICLTensor * prev_output, ICLTensor * output)
+    {
+        _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLArgMinMaxLayerKernel>());
+        _reduction_kernels_vector.back()->configure(compile_context, input, prev_output, output, axis, op);
+    };
 
     _memory_group.manage(&_not_reshaped_output);
     // Create temporary tensors
     if(_num_of_stages == 1)
     {
-        _reduction_kernels_vector[0].configure(compile_context, input, nullptr, &_not_reshaped_output, axis, op);
+        add_reduction_kernel(input, nullptr, &_not_reshaped_output);
     }
     else
     {
@@ -144,19 +154,19 @@ void CLArgMinMaxLayer::configure(const CLCompileContext &compile_context, const 
 
         // Apply ReductionOperation only on first kernel
         _memory_group.manage(&_results_vector[0]);
-        _reduction_kernels_vector[0].configure(compile_context, input, nullptr, &_results_vector[0], axis, op);
+        add_reduction_kernel(input, nullptr, &_results_vector[0]);
 
         // Apply ReductionOperation on intermediate stages
         for(unsigned int i = 1; i < _num_of_stages - 1; ++i)
         {
             _memory_group.manage(&_results_vector[i]);
-            _reduction_kernels_vector[i].configure(compile_context, input, &_results_vector[i - 1], &_results_vector[i], axis, op);
+            add_reduction_kernel(input, &_results_vector[i - 1], &_results_vector[i]);
             _results_vector[i - 1].allocator()->allocate();
         }
 
         // Apply ReductionOperation on the last stage
         const unsigned int last_stage = _num_of_stages - 1;
-        _reduction_kernels_vector[last_stage].configure(compile_context, input, &_results_vector[last_stage - 1], &_not_reshaped_output, axis, op);
+        add_reduction_kernel(input, &_results_vector[last_stage - 1], &_not_reshaped_output);
         _results_vector[last_stage - 1].allocator()->allocate();
     }
     _reshape.configure(compile_context, &_not_reshaped_output, output);
@@ -169,7 +179,7 @@ void CLArgMinMaxLayer::run()
 
     for(unsigned int i = 0; i < _num_of_stages; ++i)
     {
-        CLScheduler::get().enqueue(_reduction_kernels_vector[i], false);
+        CLScheduler::get().enqueue(*_reduction_kernels_vector[i], false);
     }
     _reshape.run();
 }

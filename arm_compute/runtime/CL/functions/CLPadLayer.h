@@ -24,13 +24,15 @@
 #ifndef ARM_COMPUTE_CLPADLAYER_H
 #define ARM_COMPUTE_CLPADLAYER_H
 
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLPadLayerKernel;
+class CLCopyKernel;
 class ICLTensor;
 
 /** Basic function to pad a tensor. This function calls the following OpenCL functions/kernels:
@@ -51,6 +53,8 @@ public:
     CLPadLayer &operator=(const CLPadLayer &) = delete;
     /** Default move assignment operator */
     CLPadLayer &operator=(CLPadLayer &&) = default;
+    /** Default destructor */
+    ~CLPadLayer();
 
     /** Initialize the function
      *
@@ -95,9 +99,9 @@ public:
 private:
     void configure_reflect_mode(ICLTensor *input, ICLTensor *output);
 
-    CLPadLayerKernel _pad_kernel;
-    CLCopyKernel     _copy_kernel;
-    bool             _perform_pad;
+    std::unique_ptr<CLPadLayerKernel> _pad_kernel;
+    std::unique_ptr<CLCopyKernel>     _copy_kernel;
+    bool                              _perform_pad;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_PADLAYER_H */

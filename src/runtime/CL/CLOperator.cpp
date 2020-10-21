@@ -24,6 +24,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
 
+#include "src/core/CL/ICLKernel.h"
+
 namespace arm_compute
 {
 namespace experimental

@@ -29,6 +29,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute an @ref CLMagnitudePhaseKernel. */

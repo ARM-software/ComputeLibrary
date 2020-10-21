@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -195,11 +195,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 {
     ARM_COMPUTE_UNUSED(vector_sum_row, vector_sum_col, output_multipliers, bias, output_shifts);
 
-    const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
-    unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
-    unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
-    bool          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d;
-    bool          reinterpret_output_as_3d            = (gemm_info.depth_output_gemm3d != 0);
+    const GEMMLowpOutputStageInfo output_stage                        = gemm_info.output_stage;
+    unsigned int                 &num_elems_processed_per_iteration_x = num_elements_processed[0];
+    unsigned int                 &num_elems_processed_per_iteration_y = num_elements_processed[1];
+    bool                          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d;
+    bool                          reinterpret_output_as_3d            = (gemm_info.depth_output_gemm3d != 0);
 
     Window win{};
     Window win_out{};
@@ -297,7 +297,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
                                                   output_multipliers != nullptr ? output_multipliers->info() : nullptr,
                                                   output_shifts != nullptr ? output_shifts->info() : nullptr));
 
-    auto padding_info = get_padding_info({ input0, input1, output, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts });
+    auto                          padding_info = get_padding_info({ input0, input1, output, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts });
     const GEMMRHSMatrixInfo       rhs_info     = gemm_info.rhs_info;
     const GEMMLHSMatrixInfo       lhs_info     = gemm_info.lhs_info;
     const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
@@ -349,7 +349,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     // we will dispatch a batched-GEMM to reduce the complexity of the address calculation within the OpenCL kernel.
     // This means that the actual m used by the kernel is given by output->info()->dimension(1) and not by gemm_info.m
     const unsigned int internal_m = _reinterpret_output_as_3d ? gemm_info.m : output->info()->dimension(1);
-        // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
+    // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
     const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
     const unsigned int partial_store_n0 = gemm_info.n % rhs_info.n0;
 

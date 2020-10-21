@@ -22,10 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
-
 #include "arm_compute/core/CL/ICLArray.h"
-
-#include "arm_compute/core/CL/kernels/CLROIPoolingLayerKernel.h"
+#include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 #include "support/MemorySupport.h"
 
 using namespace arm_compute;

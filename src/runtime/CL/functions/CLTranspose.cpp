@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
 
-#include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
+#include "src/core/CL/kernels/CLTransposeKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

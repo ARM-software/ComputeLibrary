@@ -29,6 +29,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute non-maxima suppression over a 3x3 window. This function calls the following CL kernels:

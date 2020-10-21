@@ -24,14 +24,19 @@
 #ifndef ARM_COMPUTE_CLMAXUNPOOLINGLAYER_H
 #define ARM_COMPUTE_CLMAXUNPOOLINGLAYER_H
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
+#include <memory>
 
 namespace arm_compute
 {
-class ITensor;
+class CLCompileContext;
+class ICLTensor;
+class ITensorInfo;
+class CLMaxUnpoolingLayerKernel;
+class CLMemsetKernel;
+struct PoolingLayerInfo;
 
 /** Function to perform MaxUnpooling. This function calls the following OpenCL kernels:
  *
@@ -43,6 +48,12 @@ class CLMaxUnpoolingLayer : public IFunction
 public:
     /** Constructor */
     CLMaxUnpoolingLayer();
+    /** Prevent instances of this class from being copied */
+    CLMaxUnpoolingLayer(const CLMaxUnpoolingLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLMaxUnpoolingLayer &operator=(const CLMaxUnpoolingLayer &) = delete;
+    /** Default destructor */
+    ~CLMaxUnpoolingLayer();
     /** Set the input and output tensors.
      *
      * @note Output shape must be equal to the shape of the original input to pool.
@@ -88,8 +99,8 @@ public:
     void run() override;
 
 private:
-    CLMemsetKernel            _memset_kernel;
-    CLMaxUnpoolingLayerKernel _unpooling_layer_kernel;
+    std::unique_ptr<CLMemsetKernel>            _memset_kernel;
+    std::unique_ptr<CLMaxUnpoolingLayerKernel> _unpooling_layer_kernel;
 };
 }
 #endif /* ARM_COMPUTE_CLMAXUNPOOLINGLAYER_H */

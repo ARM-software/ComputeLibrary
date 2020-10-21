@@ -24,16 +24,19 @@
 #ifndef ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H
 #define ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H
 
-#include "arm_compute/core/CL/kernels/CLHistogramKernel.h"
-#include "arm_compute/core/CL/kernels/CLTableLookupKernel.h"
 #include "arm_compute/runtime/CL/CLDistribution1D.h"
 #include "arm_compute/runtime/CL/CLLut.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLHistogramKernel;
+class CLHistogramBorderKernel;
+class CLTableLookupKernel;
 class ICLTensor;
 using ICLImage = ICLTensor;
 
@@ -48,6 +51,12 @@ class CLEqualizeHistogram : public IFunction
 public:
     /** Default Constructor. */
     CLEqualizeHistogram();
+    /** Prevent instances of this class from being copied */
+    CLEqualizeHistogram(const CLEqualizeHistogram &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLEqualizeHistogram &operator=(const CLEqualizeHistogram &) = delete;
+    /** Default destructor */
+    ~CLEqualizeHistogram();
     /** Initialise the kernel's inputs.
      *
      * @param[in]  input  Input image. Data types supported: U8.
@@ -66,14 +75,14 @@ public:
     void run() override;
 
 private:
-    CLHistogramKernel       _histogram_kernel;        /**< Kernel that calculates the histogram of input. */
-    CLHistogramBorderKernel _border_histogram_kernel; /**< Kernel that calculates the histogram on the borders. */
-    CLTableLookupKernel     _map_histogram_kernel;    /**< Kernel that maps the input to output using the lut. */
-    CLDistribution1D        _hist;                    /**< Distribution that holds the histogram of the input image. */
-    CLDistribution1D        _cum_dist;                /**< Distribution that holds the cummulative distribution of the input histogram. */
-    CLLut                   _cd_lut;                  /**< Holds the equalization lookuptable. */
-    static const uint32_t   max_range = 256;          /**< Histogram range of the internal histograms. */
-    static const uint32_t   nr_bins   = 256;          /**< Histogram bins of the internal histograms. */
+    std::unique_ptr<CLHistogramKernel>       _histogram_kernel;        /**< Kernel that calculates the histogram of input. */
+    std::unique_ptr<CLHistogramBorderKernel> _border_histogram_kernel; /**< Kernel that calculates the histogram on the borders. */
+    std::unique_ptr<CLTableLookupKernel>     _map_histogram_kernel;    /**< Kernel that maps the input to output using the lut. */
+    CLDistribution1D                         _hist;                    /**< Distribution that holds the histogram of the input image. */
+    CLDistribution1D                         _cum_dist;                /**< Distribution that holds the cummulative distribution of the input histogram. */
+    CLLut                                    _cd_lut;                  /**< Holds the equalization lookuptable. */
+    static const uint32_t                    max_range = 256;          /**< Histogram range of the internal histograms. */
+    static const uint32_t                    nr_bins   = 256;          /**< Histogram bins of the internal histograms. */
 };
 }
 #endif /*ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H */

@@ -24,10 +24,10 @@
 #include "arm_compute/runtime/CL/functions/CLRange.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLRangeKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLRangeKernel.h"
 #include "support/MemorySupport.h"
 
 using namespace arm_compute;

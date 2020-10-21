@@ -30,7 +30,18 @@
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLCopyKernel.h"
+#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -86,8 +97,48 @@ void CLQLSTMLayer::TensorCopyKernel::run()
 }
 
 CLQLSTMLayer::CLQLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _input_to_input_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_input_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_forget_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_forget_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_cell_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_cell_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_output_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_output_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _projection_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _layer_norms(),
+      _copy_output(support::cpp14::make_unique<CLCopyKernel>())
 {
+    for(auto &norm : _layer_norms)
+    {
+        norm = support::cpp14::make_unique<CLQLSTMLayerNormalizationKernel>();
+    }
+
     _memory_group = MemoryGroup(std::move(memory_manager));
+}
+
+CLQLSTMLayer::~CLQLSTMLayer() = default;
+
+void CLQLSTMLayer::configure_layer_norm(LayerNormGate g, const ICLTensor *in)
+{
+    ARM_COMPUTE_ERROR_ON(!_has_layer_norm);
+
+    CLTensor *out = &get_layer_norm_output(g);
+    _memory_group.manage(out);
+    out->allocator()->init(*(in->info()));
+
+    get_layer_norm(g).configure(in, out, get_layer_norm_weight(g), get_layer_norm_bias(g));
+}
+
+Status CLQLSTMLayer::validate_layer_norm(const ITensorInfo &in, const ITensorInfo &weight, const ITensorInfo &bias)
+{
+    // Output quantization scale will be different, but ignored here
+    // since it will be configured at configure() stage.
+    const TensorInfo out
+    {
+        in
+    };
+    return CLQLSTMLayerNormalizationKernel::validate(&in, &out, &weight, &bias);
 }
 
 void CLQLSTMLayer::configure_mm(const CLCompileContext &compile_context, CLGEMMLowpMatrixMultiplyCore &mm, CLGEMMLowpOutputStage &outstage, GEMMLowpOutputStageInfo &gemmlowp_info,
@@ -200,18 +251,18 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
         _input_to_input_weights     = lstm_params.input_to_input_weights();
         _recurrent_to_input_weights = lstm_params.recurrent_to_input_weights();
 
-        _input_to_input_reduction.configure(compile_context, _input_to_input_weights, &_input_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-        _recurrent_to_input_reduction.configure(compile_context, _recurrent_to_input_weights, &_recurrent_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+        _input_to_input_reduction->configure(compile_context, _input_to_input_weights, &_input_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+        _recurrent_to_input_reduction->configure(compile_context, _recurrent_to_input_weights, &_recurrent_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     }
-    _input_to_forget_reduction.configure(compile_context, input_to_forget_weights, &_input_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_forget_reduction.configure(compile_context, recurrent_to_forget_weights, &_recurrent_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
-    _input_to_cell_reduction.configure(compile_context, input_to_cell_weights, &_input_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_cell_reduction.configure(compile_context, recurrent_to_cell_weights, &_recurrent_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
-    _input_to_output_reduction.configure(compile_context, input_to_output_weights, &_input_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_output_reduction.configure(compile_context, recurrent_to_output_weights, &_recurrent_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_forget_reduction->configure(compile_context, input_to_forget_weights, &_input_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_forget_reduction->configure(compile_context, recurrent_to_forget_weights, &_recurrent_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_cell_reduction->configure(compile_context, input_to_cell_weights, &_input_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_cell_reduction->configure(compile_context, recurrent_to_cell_weights, &_recurrent_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_output_reduction->configure(compile_context, input_to_output_weights, &_input_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_output_reduction->configure(compile_context, recurrent_to_output_weights, &_recurrent_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     if(_has_projection)
     {
-        _projection_reduction.configure(compile_context, _projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
+        _projection_reduction->configure(compile_context, _projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
         if(_projection_bias != nullptr)
         {
             _projection_bias_add.configure(compile_context, _projection_bias, &_projection_eff_bias, &_projection_eff_bias, ConvertPolicy::SATURATE);
@@ -543,7 +594,7 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
     }
 
     // Copy output_state_out to output
-    _copy_output.configure(compile_context, output_state_out, output);
+    _copy_output->configure(compile_context, output_state_out, output);
 }
 
 Status CLQLSTMLayer::validate(const ITensorInfo *input,
@@ -1049,7 +1100,7 @@ void CLQLSTMLayer::run()
     }
 
     // Copy output_state_out to output
-    CLScheduler::get().enqueue(_copy_output);
+    CLScheduler::get().enqueue(*_copy_output);
 }
 
 void CLQLSTMLayer::prepare()
@@ -1081,8 +1132,8 @@ void CLQLSTMLayer::prepare()
         {
             _input_to_input_eff_bias.allocator()->allocate();
             _recurrent_to_input_eff_bias.allocator()->allocate();
-            CLScheduler::get().enqueue(_input_to_input_reduction);
-            CLScheduler::get().enqueue(_recurrent_to_input_reduction);
+            CLScheduler::get().enqueue(*_input_to_input_reduction);
+            CLScheduler::get().enqueue(*_recurrent_to_input_reduction);
 
             _input_to_input_weights_transposed.allocator()->allocate();
             _recurrent_to_input_weights_transposed.allocator()->allocate();
@@ -1097,17 +1148,17 @@ void CLQLSTMLayer::prepare()
         _recurrent_to_cell_eff_bias.allocator()->allocate();
         _input_to_output_eff_bias.allocator()->allocate();
         _recurrent_to_output_eff_bias.allocator()->allocate();
-        CLScheduler::get().enqueue(_input_to_forget_reduction);
-        CLScheduler::get().enqueue(_recurrent_to_forget_reduction);
-        CLScheduler::get().enqueue(_input_to_cell_reduction);
-        CLScheduler::get().enqueue(_recurrent_to_cell_reduction);
-        CLScheduler::get().enqueue(_input_to_output_reduction);
-        CLScheduler::get().enqueue(_recurrent_to_output_reduction);
+        CLScheduler::get().enqueue(*_input_to_forget_reduction);
+        CLScheduler::get().enqueue(*_recurrent_to_forget_reduction);
+        CLScheduler::get().enqueue(*_input_to_cell_reduction);
+        CLScheduler::get().enqueue(*_recurrent_to_cell_reduction);
+        CLScheduler::get().enqueue(*_input_to_output_reduction);
+        CLScheduler::get().enqueue(*_recurrent_to_output_reduction);
 
         if(_has_projection)
         {
             _projection_eff_bias.allocator()->allocate();
-            CLScheduler::get().enqueue(_projection_reduction);
+            CLScheduler::get().enqueue(*_projection_reduction);
             if(_projection_bias != nullptr)
             {
                 _projection_bias_add.run();

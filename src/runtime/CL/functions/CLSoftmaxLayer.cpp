@@ -24,23 +24,37 @@
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/ICLKernel.h"
-#include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 template <bool IS_LOG>
 CLSoftmaxLayerGeneric<IS_LOG>::CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _permute_input(), _permute_output(), _max_shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp(), _input_permuted(), _output_permuted(),
+    : _memory_group(std::move(memory_manager)),
+      _permute_input(),
+      _permute_output(),
+      _max_shift_exp_sum_kernel(support::cpp14::make_unique<CLLogits1DMaxShiftExpSumKernel>()),
+      _norm_kernel(support::cpp14::make_unique<CLLogits1DNormKernel>()),
+      _max(),
+      _sum(),
+      _tmp(),
+      _input_permuted(),
+      _output_permuted(),
       _needs_permute()
 {
 }
+
+template <bool IS_LOG>
+CLSoftmaxLayerGeneric<IS_LOG>::~CLSoftmaxLayerGeneric() = default;
 
 template <bool IS_LOG>
 void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor *output, float beta, int32_t axis)
@@ -78,7 +92,7 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_co
     _sum.allocator()->init(tmp_input->info()->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type));
 
     // Set GPU target to kernels
-    _max_shift_exp_sum_kernel.set_target(CLScheduler::get().target());
+    _max_shift_exp_sum_kernel->set_target(CLScheduler::get().target());
 
     // Manage intermediate buffers
     _memory_group.manage(&_tmp);
@@ -91,8 +105,8 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_co
     softmax_info.input_data_type = tmp_input->info()->data_type();
 
     // Configure kernels
-    _max_shift_exp_sum_kernel.configure(compile_context, tmp_input, &_max, &_tmp, &_sum, softmax_info);
-    _norm_kernel.configure(compile_context, &_tmp, &_sum, tmp_output, softmax_info);
+    _max_shift_exp_sum_kernel->configure(compile_context, tmp_input, &_max, &_tmp, &_sum, softmax_info);
+    _norm_kernel->configure(compile_context, &_tmp, &_sum, tmp_output, softmax_info);
 
     // Allocate intermediate buffers
     _tmp.allocator()->allocate();
@@ -156,8 +170,8 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::run()
         _permute_input.run();
     }
 
-    CLScheduler::get().enqueue(_max_shift_exp_sum_kernel, false);
-    CLScheduler::get().enqueue(_norm_kernel, !_needs_permute);
+    CLScheduler::get().enqueue(*_max_shift_exp_sum_kernel, false);
+    CLScheduler::get().enqueue(*_norm_kernel, !_needs_permute);
 
     if(_needs_permute)
     {

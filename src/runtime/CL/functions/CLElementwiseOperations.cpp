@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

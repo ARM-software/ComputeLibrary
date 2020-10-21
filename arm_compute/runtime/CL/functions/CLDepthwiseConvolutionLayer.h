@@ -24,12 +24,6 @@
 #ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
 #define ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
 
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
@@ -38,6 +32,11 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLFillBorderKernel;
+class CLDepthwiseConvolutionLayerNativeKernel;
+class CLDepthwiseConvolutionLayerReshapeWeightsKernel;
+class ICLDepthwiseConvolutionLayer3x3Kernel;
 class ICLTensor;
 
 /** Function to execute a depthwise convolution
@@ -55,6 +54,8 @@ public:
     CLDepthwiseConvolutionLayer &operator=(const CLDepthwiseConvolutionLayer &) = delete;
     /** Default move assignment operator */
     CLDepthwiseConvolutionLayer &operator=(CLDepthwiseConvolutionLayer &&) = default;
+    /** Default destructor */
+    ~CLDepthwiseConvolutionLayer();
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/FP16/FP32. Data layout supported: NHWC, NCHW
@@ -211,25 +212,25 @@ private:
         };
 
     private:
-        MemoryGroup                                            _memory_group;
-        std::unique_ptr<ICLDepthwiseConvolutionLayer3x3Kernel> _kernel;
-        CLFillBorderKernel                                     _border_handler;
-        CLPermute                                              _permute_input_to_nchw;
-        CLPermute                                              _permute_weights_to_nchw;
-        CLPermute                                              _permute_output_to_nhwc;
-        CLDepthwiseConvolutionLayerReshapeWeightsKernel        _reshape_weights;
-        CLTensor                                               _permuted_input;
-        CLTensor                                               _permuted_weights;
-        CLTensor                                               _permuted_output;
-        CLTensor                                               _output_multipliers;
-        CLTensor                                               _output_shifts;
-        const ITensor                                         *_original_weights;
-        const ITensor                                         *_input;
-        const ITensor                                         *_output;
-        bool                                                   _needs_permute;
-        bool                                                   _needs_weights_reshape;
-        bool                                                   _is_prepared;
-        bool                                                   _is_quantized;
+        MemoryGroup                                                      _memory_group;
+        std::unique_ptr<ICLDepthwiseConvolutionLayer3x3Kernel>           _kernel;
+        std::unique_ptr<CLFillBorderKernel>                              _border_handler;
+        CLPermute                                                        _permute_input_to_nchw;
+        CLPermute                                                        _permute_weights_to_nchw;
+        CLPermute                                                        _permute_output_to_nhwc;
+        std::unique_ptr<CLDepthwiseConvolutionLayerReshapeWeightsKernel> _reshape_weights;
+        CLTensor                                                         _permuted_input;
+        CLTensor                                                         _permuted_weights;
+        CLTensor                                                         _permuted_output;
+        CLTensor                                                         _output_multipliers;
+        CLTensor                                                         _output_shifts;
+        const ITensor                                                   *_original_weights;
+        const ITensor                                                   *_input;
+        const ITensor                                                   *_output;
+        bool                                                             _needs_permute;
+        bool                                                             _needs_weights_reshape;
+        bool                                                             _is_prepared;
+        bool                                                             _is_quantized;
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
@@ -313,10 +314,10 @@ private:
     private:
         MemoryGroup _memory_group;
 
-        CLDepthwiseConvolutionLayerNativeKernel _dwc_native_kernel;
-        CLPermute                               _permute_input_to_nhwc;
-        CLPermute                               _permute_weights_to_nhwc;
-        CLPermute                               _permute_output_to_nchw;
+        std::unique_ptr<CLDepthwiseConvolutionLayerNativeKernel> _dwc_native_kernel;
+        CLPermute                                                _permute_input_to_nhwc;
+        CLPermute                                                _permute_weights_to_nhwc;
+        CLPermute                                                _permute_output_to_nchw;
 
         CLTensor       _permuted_input;
         CLTensor       _permuted_weights;

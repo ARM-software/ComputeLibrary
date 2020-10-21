@@ -23,9 +23,9 @@
  */
 #include "arm_compute/runtime/CL/functions/CLInstanceNormalizationLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
 #include "arm_compute/core/Types.h"
-
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

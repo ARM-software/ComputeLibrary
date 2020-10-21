@@ -29,7 +29,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-
 #include "support/MemorySupport.h"
 
 #include <cmath>
@@ -44,6 +43,8 @@ CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_ma
     : _memory_manager(std::move(memory_manager)), _function()
 {
 }
+
+CLConvolutionLayer::~CLConvolutionLayer() = default;
 
 void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
                                    const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)

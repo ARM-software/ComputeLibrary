@@ -32,6 +32,9 @@
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
 #include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLGaussian5x5Kernel.h"
+#include "src/core/CL/kernels/CLGaussianPyramidKernel.h"
 
 using namespace arm_compute;
 

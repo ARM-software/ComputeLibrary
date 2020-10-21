@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
+#include "src/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "support/MemorySupport.h"
 
 /** [CLReshapeLayer snippet] **/

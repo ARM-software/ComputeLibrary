@@ -21,8 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
-#include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -30,6 +28,8 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
+#include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
+#include "src/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
