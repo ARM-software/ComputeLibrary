@@ -43,9 +43,11 @@ cc_library_static {
     local_include_dirs: ["build/android-arm64v8a/src/core",
                          "build/android-arm64v8a/src/core/CL",
                          "arm_compute/core/NEON/kernels/assembly",
-                         "arm_compute/core/NEON/kernels/convolution/common",
-                         "arm_compute/core/NEON/kernels/convolution/depthwise",
+                         "src/core/common",
+                         "src/core/helpers",
                          "src/core/NEON/kernels/assembly",
+                         "src/core/NEON/kernels/convolution/common",
+                         "src/core/NEON/kernels/convolution/depthwise",
                          "src/core/NEON/kernels/convolution/winograd"],
     export_include_dirs: [".", "./include"],
     srcs: [
