@@ -32,16 +32,8 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
-#include <cstddef>
-#include <cstdint>
-
-using namespace arm_compute;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 namespace
 {
 Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
@@ -100,39 +92,6 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, ITensorInfo *bias,
-                                                        int32_t a_offset, int32_t b_offset)
-{
-    constexpr unsigned int num_elems_processed_per_iteration = 4;
-    bool                   window_changed                    = false;
-
-    // Configure kernel window
-    Window win = calculate_max_window(*mm_result, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal mm_result_access(mm_result, 0, num_elems_processed_per_iteration);
-    window_changed = window_changed || update_window_and_padding(win, mm_result_access);
-
-    if(a_offset != 0)
-    {
-        AccessWindowHorizontal vector_sum_col_access(vector_sum_col, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, vector_sum_col_access);
-    }
-    if(b_offset != 0)
-    {
-        AccessWindowStatic vector_sum_row_access(vector_sum_row, 0, 0, vector_sum_row->dimension(0), 0); // NOLINT
-        window_changed = window_changed || update_window_and_padding(win, vector_sum_row_access);
-    }
-
-    if(bias != nullptr)
-    {
-        AccessWindowStatic bias_access(bias, 0, 0, ceil_to_multiple(bias->dimension(0), num_elems_processed_per_iteration), bias->tensor_shape()[1]);
-        window_changed = window_changed || update_window_and_padding(win, bias_access);
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 CLGEMMLowpOffsetContributionKernel::CLGEMMLowpOffsetContributionKernel()
@@ -159,6 +118,8 @@ void CLGEMMLowpOffsetContributionKernel::configure(const CLCompileContext &compi
                                                   bias != nullptr ? bias->info() : nullptr,
                                                   a_offset, b_offset)); // NOLINT
 
+    auto padding_info = get_padding_info({ mm_result, vector_sum_col, vector_sum_row, bias });
+
     _vector_sum_col = vector_sum_col;
     _vector_sum_row = vector_sum_row;
     _mm_result      = mm_result;
@@ -169,8 +130,12 @@ void CLGEMMLowpOffsetContributionKernel::configure(const CLCompileContext &compi
                                    && mm_result->info()->num_dimensions() > 1
                                    && mm_result->info()->tensor_shape().y() != vector_sum_row->info()->tensor_shape().x();
 
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(4, mm_result->info()->dimension(0));
+
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(mm_result->info()->dimension(0) % num_elems_processed_per_iteration));
 
     // If a_offset == 0, vector_sum_col can be a nullptr
     if(a_offset != 0)
@@ -191,13 +156,8 @@ void CLGEMMLowpOffsetContributionKernel::configure(const CLCompileContext &compi
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(mm_result->info(),
-                                                    vector_sum_col != nullptr ? vector_sum_col->info() : nullptr,
-                                                    vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
-                                                    bias != nullptr ? bias->info() : nullptr,
-                                                    a_offset, b_offset); // NOLINT
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*mm_result->info(), Steps(num_elems_processed_per_iteration));
+    ICLKernel::configure_internal(win);
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name + "_";
@@ -206,19 +166,14 @@ void CLGEMMLowpOffsetContributionKernel::configure(const CLCompileContext &compi
     _config_id += support::cpp11::to_string(mm_result->info()->dimension(1));
     _config_id += "_";
     _config_id += support::cpp11::to_string(mm_result->info()->dimension(2));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
                                                     int32_t a_offset, int32_t b_offset)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, a_offset, b_offset));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(mm_result->clone().get(),
-                                                              vector_sum_col != nullptr ? vector_sum_col->clone().get() : nullptr,
-                                                              vector_sum_row != nullptr ? vector_sum_row->clone().get() : nullptr,
-                                                              bias != nullptr ? bias->clone().get() : nullptr,
-                                                              a_offset, b_offset)
-                                .first); // NOLINT
-
     return Status{};
 }
 
@@ -257,3 +212,4 @@ void CLGEMMLowpOffsetContributionKernel::run(const Window &window, cl::CommandQu
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute
