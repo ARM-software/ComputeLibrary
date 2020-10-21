@@ -290,7 +290,7 @@
         (VECTOR_ACC_TYPE, k0, a, b, c);                          \
     })
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N)
+#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices with QASYMM/QASYMM_SIGNED data type.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
@@ -447,7 +447,12 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(REINTERPRET_OUTPUT_AS_3D)
 
     // Convert and store output block
-    CONVERT_STORE_BLOCK(M0, N0, int, c, dst_addr, dst_stride_y, zout);
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
+    // Store output block
+    REPEAT_VAR_INIT_CONVERT_SAT(M0, VEC_DATA_TYPE(int, N0), c, c_lp);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #undef LHS_BLOCK_SIZE
 #undef LHS_OFFSET_X
@@ -456,7 +461,7 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
 }
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(K)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
 #if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(K)
 
