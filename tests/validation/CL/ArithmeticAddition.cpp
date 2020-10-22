@@ -184,6 +184,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<uint8_t>, 
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+template <typename T>
+using CLArithmeticAdditionBroadcastQuantizedFixture = ArithmeticAdditionValidationQuantizedBroadcastFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLArithmeticAdditionBroadcastQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapesBroadcast(),
+                       ArithmeticAdditionQASYMM8Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),

@@ -107,7 +107,7 @@ __kernel void OP_FUN_NAME(OP)(
     __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + out_x_offs * sizeof(DATA_TYPE_OUT) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
     VEC_INT in_a = CONVERT((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_OUT *)in1_addr)), VEC_INT);
-    VEC_INT in_b = CONVERT((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_OUT *)in2_addr)), VEC_INT);
+    VEC_INT in_b = CONVERT((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE_OUT *)in2_addr)), VEC_INT);
 
     in_a = SUB(in_a, (VEC_INT)((int)OFFSET_IN1));
     in_b = SUB(in_b, (VEC_INT)((int)OFFSET_IN2));
