@@ -162,6 +162,7 @@ private:
     bool             _add_bias;
     bool             _broadcast_bias;
     bool             _export_to_cl_image;
+    bool             _has_pad_y;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMMATRIXMULTIPLYRESHAPEDONLYRHSKERNEL_H*/

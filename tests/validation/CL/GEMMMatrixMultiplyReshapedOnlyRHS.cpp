@@ -92,13 +92,12 @@ const auto n_values = framework::dataset::make("N", 51);
 const auto k_values = framework::dataset::make("K", 23);
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", 1, 3);
+const auto b_values = framework::dataset::make("batch_size", 2);
 
 /** Activation values to test */
 const auto act_values = framework::dataset::make("Activation",
 {
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, -0.8f, 10.f),
 });
 
 /** M0 values to test - precommit */
@@ -211,70 +210,6 @@ bool validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
     CLGEMMMatrixMultiplyReshapedOnlyRHS gemm;
     return bool(gemm.validate(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info));
 }
-
-/** Zero padding test */
-bool validate_zero_padding(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value,
-                            unsigned int m0_value, unsigned int n0_value, unsigned int k0_value, unsigned int h0_value,
-                            bool i_value_rhs, bool t_value_rhs, bool export_to_cl_image, bool broadcast_bias, bool input_as_3d, unsigned int depth_output_gemm3d, const ActivationLayerInfo &act_info,
-                            DataType dt_input0, DataType dt_input1, DataType dt_input2, DataType dt_output, float alpha, float beta)
-{
-    const unsigned int M = m_value;
-    const unsigned int N = n_value;
-    const unsigned int K = k_value;
-
-    GEMMLHSMatrixInfo lhs_info;
-    lhs_info.m0         = m0_value;
-    lhs_info.k0         = k0_value;
-
-    GEMMRHSMatrixInfo rhs_info;
-    rhs_info.n0         = n0_value;
-    rhs_info.k0         = k0_value;
-    rhs_info.h0         = h0_value;
-    rhs_info.interleave = i_value_rhs;
-    rhs_info.transpose  = t_value_rhs;
-    rhs_info.export_to_cl_image = export_to_cl_image;
-
-    GEMMKernelInfo kernel_info;
-    kernel_info.m                       = M;
-    kernel_info.n                       = N;
-    kernel_info.k                       = K;
-    kernel_info.depth_output_gemm3d     = depth_output_gemm3d;
-    kernel_info.reinterpret_input_as_3d = input_as_3d;
-    kernel_info.broadcast_bias          = broadcast_bias;
-    kernel_info.activation_info         = act_info;
-
-    const TensorShape lhs_shape(K, M, b_value);
-    const TensorShape rhs_shape(N, K, b_value);
-    const TensorShape rhs_shape_reshaped = compute_rhs_reshaped_shape(TensorInfo(rhs_shape, 1, dt_input1),
-                                                                      rhs_info);
-
-    const TensorShape dst_shape = compute_mm_shape(TensorInfo(lhs_shape, 1, dt_input0),
-                                                   TensorInfo(rhs_shape_reshaped, 1, dt_input1),
-                                                   kernel_info);
-
-    const TensorShape bias_shape(N,
-                                 M, // Correct calculation should be: broadcast_bias? 1 : M, it's wrong here on purpose just for validation test
-                                 broadcast_bias? 1 : b_value);
-
-    // Create tensors
-    CLTensor lhs  = create_tensor<CLTensor>(lhs_shape, dt_input0);
-    CLTensor rhs_reshaped  = create_tensor<CLTensor>(rhs_shape_reshaped, dt_input1);
-    CLTensor bias = create_tensor<CLTensor>(bias_shape, dt_input2);
-    CLTensor dst  = create_tensor<CLTensor>(dst_shape, dt_output);
-
-    ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Validate zero-padding
-    CLGEMMMatrixMultiplyReshapedOnlyRHS gemm;
-
-    gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
-
-    // Padding can be added along rhs and bias's X dimension
-    return dst.info()->padding().empty() && lhs.info()->padding().empty() && bias.info()->padding().bottom == 0 && bias.info()->padding().top == 0;
-}
 } // namespace
 
 TEST_SUITE(CL)
@@ -324,33 +259,6 @@ b_value, m0_value, n0_value, k0_value, broadcast_bias, input_as_3d, depth_output
 
     bool status = validate_configuration(37, 51, 23, b_value, m0_value, n0_value, k0_value, 1, false, false, export_to_cl_image, broadcast_bias, input_as_3d, depth_output_gemm3d, ActivationLayerInfo(), dt_input0, dt_intpu1, dt_input2, dt_output, 1.0f, beta);
     ARM_COMPUTE_EXPECT(status == expected_value, framework::LogLevel::ERRORS);
-}
-
-/** Validate zero padding tests
- *
- * A series of validation tests to check that no padding is added as part of configuration for 4 different scenarios.
- *
- * Checks performed in order:
- *     - No partial blocks in both x and y dimensions
- *     - Partial blocks in x dimension
- *     - Partial blocks in y dimension
- *     - Partial blocks in both x and y dimensions
- *     - Special case: partial_n0 == 9 (vstore1 should be invoked instead of vstore_partial_1)
- */
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(zip(zip(zip(
-framework::dataset::make("M",                   { 24, 64, 101,   1, 100 }),
-framework::dataset::make("N",                   { 48, 29,  16, 122,  41 })),
-framework::dataset::make("M0",                  {  4,  8,   7,   2,   1 })),
-framework::dataset::make("N0",                  {  4,  4,  16,   3,  16 })),
-framework::dataset::make("export_to_cl_image",  { false, true, true, false, false })),
-m_value, n_value, m0_value, n0_value, export_to_cl_image)
-{
-    constexpr DataType dt = DataType::F32;
-    // Disable export_to_cl_image if the target platform does not support the OpenCL cl_khr_image2d_from_buffer extension
-    bool actual_export_to_cl_image = image2d_from_buffer_supported(CLKernelLibrary::get().get_device()) && export_to_cl_image;
-
-    bool status = validate_zero_padding(m_value, n_value, 23, 1, m0_value, n0_value, 4, 1, false, false, actual_export_to_cl_image, false, 0, 0, ActivationLayerInfo(), dt, dt, dt, dt, 1.0f, 1.0f);
-    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE(Float)
@@ -443,7 +351,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<fl
 }
 
 FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::PRECOMMIT,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -456,6 +364,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("has_pad_y", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
@@ -466,7 +375,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
 }
 
 FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -479,6 +388,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixtur
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("has_pad_y", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
@@ -552,7 +462,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<fl
 }
 
 FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::PRECOMMIT,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -565,6 +475,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("has_pad_y", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
@@ -575,7 +486,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
 }
 
 FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -588,6 +499,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixtur
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("has_pad_y", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
@@ -647,7 +559,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<ha
 }
 
 FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<half>, framework::DatasetMode::PRECOMMIT,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -660,6 +572,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("has_pad_y", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                    a_values),
                                                                    beta_values),
@@ -670,7 +583,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
 }
 
 FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -683,6 +596,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixtur
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("has_pad_y", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                    a_values),
                                                                    beta_values),
@@ -756,7 +670,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<ha
 }
 
 FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<half>, framework::DatasetMode::PRECOMMIT,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -769,6 +683,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("has_pad_y", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                    a_values),
                                                                    beta_values),
@@ -779,7 +694,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
 }
 
 FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -792,6 +707,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixtur
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("has_pad_y", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                    a_values),
                                                                    beta_values),

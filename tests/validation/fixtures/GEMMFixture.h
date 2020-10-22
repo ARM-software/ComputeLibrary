@@ -1125,7 +1125,7 @@ class GEMMMatrixMultiplyReshapedOnlyRHS3DValidationFixture : public framework::F
 public:
     template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
-               bool interleave_rhs, bool transpose_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, const ActivationLayerInfo &act_info)
+               bool interleave_rhs, bool transpose_rhs, bool export_to_cl_image, bool has_pad_y, DataType data_type, float alpha, float beta, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = m0;
@@ -1147,7 +1147,7 @@ public:
         const TensorShape rhs_shape(n, k, batch_size);
         const TensorShape bias_shape(n, 1, 1);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info, has_pad_y);
         _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
     }
 
@@ -1161,7 +1161,7 @@ protected:
 
     TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
                               DataType data_type, float alpha, float beta,
-                              unsigned int m_h, const ActivationLayerInfo &act_info)
+                              unsigned int m_h, const ActivationLayerInfo &act_info, bool has_pad_y)
     {
         // Create tensors
         TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
@@ -1181,14 +1181,21 @@ protected:
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = true;
         kernel_info.activation_info         = act_info;
+        kernel_info.has_pad_y               = has_pad_y;
 
         // The output tensor will be auto-initialized within the function
-
         // Create and configure function
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
+
+        if(has_pad_y)
+        {
+            // Add dummy padding into lhs to validate has_pad_y path
+            lhs.info()->extend_padding(PaddingSize(2, 0, 2, 0));
+            dst.info()->extend_padding(PaddingSize(2, 0, 1, 0));
+        }
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);

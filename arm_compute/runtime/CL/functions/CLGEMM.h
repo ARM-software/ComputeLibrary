@@ -206,11 +206,15 @@ private:
     weights_transformations::CLGEMMReshapeRHSMatrixKernelManaged _reshape_rhs_kernel_managed;
     CLGEMMMatrixMultiplyReshapedKernel                           _mm_reshaped_kernel;
     CLGEMMMatrixMultiplyReshapedOnlyRHSKernel                    _mm_reshaped_only_rhs_kernel;
+    CLGEMMMatrixMultiplyReshapedOnlyRHSKernel                    _mm_reshaped_only_rhs_fallback_kernel;
     CLTensor                                                     _tmp_a;
     CLTensor                                                     _tmp_b;
     const ICLTensor                                             *_original_b;
+    const ICLTensor                                             *_lhs;
+    ICLTensor                                                   *_dst;
     bool                                                         _reshape_b_only_on_first_run;
     bool                                                         _is_prepared;
+    bool                                                         _has_pad_y;
     CLGEMMKernelType                                             _gemm_kernel_type;
 };
 } // namespace arm_compute
