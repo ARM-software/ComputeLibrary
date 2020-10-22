@@ -1278,7 +1278,7 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
     __global uchar *dst_addr           = dst_ptr + dst_offset_first_element_in_bytes + x_offs * sizeof(int) + y * dst_stride_y;
 
     VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
-    sum_col_32_0 = (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))0;
+    sum_col_32 = (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))0;
 
     int i = 0;
     // This for loop performs 4 accumulations
@@ -1293,8 +1293,8 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
         const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
         b3 = VLOAD(VEC_SIZE)(0, matrix_b + 3 * src_stride_y);
 
-        sum_col_32_0 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b1, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b2, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b3,
-                        VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
+        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b1, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b2, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b3,
+                      VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 
         matrix_b += 4 * src_stride_y;
     }
@@ -1305,15 +1305,18 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
         const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
         b0 = VLOAD(VEC_SIZE)(0, matrix_b);
 
-        sum_col_32_0 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
+        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 
         matrix_b += src_stride_y;
     }
 
 #if defined(SCALAR)
-    sum_col_32_0 *= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))SCALAR;
+    sum_col_32 *= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))SCALAR;
 #endif // defined(SCALAR)
-    STORE_VECTOR_SELECT(sum_col_32_, int, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    res0 = CONVERT(sum_col_32, VEC_DATA_TYPE(int, VEC_SIZE));
+
+    STORE_VECTOR_SELECT(res, int, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(COLS_B) && defined(ROWS_B) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 
