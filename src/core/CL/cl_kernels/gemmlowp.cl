@@ -1486,44 +1486,44 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
     const int z = get_global_id(2);
 
     // Compute offset contribution
-    int4 offset_term_s32 = offset_contribution(
-                               x, y, z
+    VEC_INT offset_term_s32 = offset_contribution(
+                                  x, y, z
 #if defined(A_OFFSET)
-                               ,
-                               sum_col_ptr,
-                               sum_col_stride_x,
-                               sum_col_step_x,
-                               sum_col_stride_y,
-                               sum_col_step_y,
-                               sum_col_offset_first_element_in_bytes
+                                  ,
+                                  sum_col_ptr,
+                                  sum_col_stride_x,
+                                  sum_col_step_x,
+                                  sum_col_stride_y,
+                                  sum_col_step_y,
+                                  sum_col_offset_first_element_in_bytes
 #endif // defined(A_OFFSET)
 #if defined(B_OFFSET)
-                               ,
-                               sum_row_ptr,
-                               sum_row_stride_x,
-                               sum_row_step_x,
-                               sum_row_stride_y,
-                               sum_row_step_y,
-                               sum_row_offset_first_element_in_bytes
+                                  ,
+                                  sum_row_ptr,
+                                  sum_row_stride_x,
+                                  sum_row_step_x,
+                                  sum_row_stride_y,
+                                  sum_row_step_y,
+                                  sum_row_offset_first_element_in_bytes
 #endif // defined(B_OFFSET)
 #if defined(ADD_BIAS)
-                               ,
-                               biases_ptr,
-                               biases_stride_x,
-                               biases_step_x,
-                               biases_offset_first_element_in_bytes
+                                  ,
+                                  biases_ptr,
+                                  biases_stride_x,
+                                  biases_step_x,
+                                  biases_offset_first_element_in_bytes
 #endif // defined(ADD_BIAS)
-                           );
+                              );
 
     __global uchar *mm_result_addr = mm_result_ptr + mm_result_offset_first_element_in_bytes + x * sizeof(int) + y * mm_result_stride_y + z * mm_result_stride_z;
 
-    int4 in_s32 = vload4(0, (__global int *)mm_result_addr);
+    VEC_INT in_s32_0 = VLOAD(VEC_SIZE)(0, (__global int *)mm_result_addr);
 
     // Add the offset terms to GEMM's result
-    in_s32 += offset_term_s32;
+    in_s32_0 += offset_term_s32;
 
     // Store the result with the offset contribution
-    vstore4(in_s32, 0, (__global int *)mm_result_addr);
+    STORE_VECTOR_SELECT(in_s32_, int, mm_result_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 
 #if defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT) && defined(OUTPUT_DATA_TYPE)
