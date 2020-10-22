@@ -123,60 +123,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *output, const DWCWeightsKernelInfo &dwc_weights_info,
-                                                        const DWCKernelInfo &dwc_info, const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation,
-                                                        ITensorInfo *output_multipliers, ITensorInfo *output_shifts)
-{
-    ARM_COMPUTE_UNUSED(dwc_info);
-
-    // Get convolved dimensions
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
-
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
-
-    const unsigned int n0 = dwc_weights_info.n0;
-
-    // Configure kernel window
-    Window win = calculate_max_window(*output, Steps(n0));
-
-    // The following access windows are only valid in case of NHWC and because n0 must unit in case depth_multiplier > 1
-    AccessWindowHorizontal input_access(input, 0, n0);
-    AccessWindowHorizontal weights_access(weights, 0, n0);
-    AccessWindowHorizontal output_access(output, 0, n0);
-
-    bool window_changed = false;
-
-    if(bias != nullptr)
-    {
-        AccessWindowHorizontal bias_access(bias, 0, n0);
-        window_changed = update_window_and_padding(win, input_access, weights_access, bias_access, output_access);
-    }
-    else
-    {
-        window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
-    }
-
-    if(is_data_type_quantized(input->data_type()))
-    {
-        if((output_multipliers != nullptr) && (output_shifts != nullptr))
-        {
-            AccessWindowHorizontal output_multipliers_access(output_multipliers, 0, n0);
-            AccessWindowHorizontal output_shifts_access(output_shifts, 0, n0);
-            window_changed = window_changed || update_window_and_padding(win, output_multipliers_access, output_shifts_access);
-        }
-        else
-        {
-            Status err = ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "output_multipliers and output_shifts must be non-nullptr for quantized input");
-            return std::make_pair(err, win);
-        }
-    }
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 CLDepthwiseConvolutionLayerNativeKernel::CLDepthwiseConvolutionLayerNativeKernel()
@@ -208,10 +154,10 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
                                                   dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation,
                                                   (output_multipliers != nullptr) ? output_multipliers->info() : nullptr, (output_shifts != nullptr) ? output_shifts->info() : nullptr));
 
-    auto win_config = validate_and_configure_window(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(),
-                                                    dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation,
-                                                    (output_multipliers != nullptr) ? output_multipliers->info() : nullptr, (output_shifts != nullptr) ? output_shifts->info() : nullptr);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    auto padding_info = get_padding_info({ input, output });
+
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*(input->info()), *(weights->info()), conv_info, depth_multiplier, dilation);
+    auto_init_if_empty(*(output->info()), input->info()->clone()->set_tensor_shape(output_shape).set_quantization_info(output->info()->quantization_info()));
 
     _input              = input;
     _output             = output;
@@ -222,10 +168,7 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
     _output_shifts      = output_shifts;
     _is_quantized       = is_data_type_quantized(input->info()->data_type());
 
-    const size_t idx_w          = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h          = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
-    const size_t weights_width  = weights->info()->dimension(idx_w);
-    const size_t weights_height = weights->info()->dimension(idx_h);
+    const unsigned int n0 = adjust_vec_size(dwc_weights_info.n0, input->info()->dimension(0));
 
     CLBuildOptions build_opts;
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
@@ -233,17 +176,18 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(_input->info()->data_type()));
     build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(dwc_info.activation_info.activation())));
     build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(depth_multiplier));
-    build_opts.add_option("-DN0=" + support::cpp11::to_string(dwc_weights_info.n0));
+    build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
     build_opts.add_option("-DSRC_DIM1=" + support::cpp11::to_string(_input->info()->dimension(1)));
     build_opts.add_option("-DSRC_DIM2=" + support::cpp11::to_string(_input->info()->dimension(2)));
-    build_opts.add_option("-DKERNEL_WIDTH=" + support::cpp11::to_string(weights_width));
-    build_opts.add_option("-DKERNEL_HEIGHT=" + support::cpp11::to_string(weights_height));
+    build_opts.add_option("-DKERNEL_WIDTH=" + support::cpp11::to_string(weights->info()->dimension(1)));
+    build_opts.add_option("-DKERNEL_HEIGHT=" + support::cpp11::to_string(weights->info()->dimension(2)));
     build_opts.add_option("-DCONV_PAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
     build_opts.add_option("-DCONV_PAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
     build_opts.add_option("-DCONV_STRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
     build_opts.add_option("-DDILATION_X=" + support::cpp11::to_string(dilation.x()));
     build_opts.add_option("-DDILATION_Y=" + support::cpp11::to_string(dilation.y()));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(_input->info()->dimension(0) % n0));
 
     std::string kernel_name = (_is_quantized) ? "dwc_MxN_native_quantized8_nhwc" : "dwc_MxN_native_fp_nhwc";
 
@@ -290,8 +234,12 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
         build_opts.add_option_if(dwc_info.activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(dwc_info.activation_info.b()));
     }
 
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*(output->info()), Steps(n0));
+    ICLKernel::configure_internal(win);
+
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
@@ -316,13 +264,6 @@ Status CLDepthwiseConvolutionLayerNativeKernel::validate(const ITensorInfo *inpu
                                                          unsigned int depth_multiplier, const Size2D &dilation, const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation, output_multipliers, output_shifts));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(),
-                                                              biases != nullptr ? biases->clone().get() : nullptr,
-                                                              output->clone().get(), dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation,
-                                                              output_multipliers != nullptr ? output_multipliers->clone().get() : nullptr,
-                                                              output_shifts != nullptr ? output_shifts->clone().get() : nullptr)
-                                .first);
-
     return Status{};
 }
 

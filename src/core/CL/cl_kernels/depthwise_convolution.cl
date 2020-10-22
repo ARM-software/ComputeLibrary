@@ -1311,7 +1311,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     //3x3 Convolution of elements starting in 0th row
     pixels0 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src.stride_x, src.stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels1                 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src.stride_x, src.stride_y, 2, weights_addr, weights_stride_y);
+    pixels1                  = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src.stride_x, src.stride_y, 2, weights_addr, weights_stride_y);
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
 #ifdef HAS_BIAS
@@ -1324,7 +1324,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
 }
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F16)
 
-#if defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(N0) && defined(DATA_TYPE) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP)
+#if defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(N0) && defined(DATA_TYPE) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(VEC_SIZE_LEFTOVER)
 /** This function computes the depthwise convolution for NHWC data layout. This kernel assumes that the weights tensor is NOT reshaped
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
@@ -1338,6 +1338,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
  * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
  * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
@@ -1384,23 +1385,25 @@ __kernel void dwc_MxN_native_fp_nhwc(
 #endif // defined(HAS_BIAS)
 )
 {
+    int x_offs = max((int)(get_global_id(0) * N0 - (N0 - VEC_SIZE_LEFTOVER) % N0), 0) * sizeof(DATA_TYPE);
+
     int x = get_global_id(0); // channels
     int y = get_global_id(1); // spatial coordinate x
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
 #else                                          // defined(DST_DEPTH)
-    int z                   = get_global_id(2); // spatial coordinate y
+    int z                    = get_global_id(2); // spatial coordinate y
 #endif                                         // defined(DST_DEPTH)
 
-    __global uchar *s_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)N0;
+    __global uchar *s_addr = src_ptr + src_offset_first_element_in_bytes + x_offs;
 
-    __global uchar *d_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0 + y * dst_stride_y + z * dst_stride_z;
+    __global uchar *d_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offs * (int)DEPTH_MULTIPLIER + y * dst_stride_y + z * dst_stride_z;
 
-    __global uchar *w_addr = weights_ptr + weights_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0;
+    __global uchar *w_addr = weights_ptr + weights_offset_first_element_in_bytes + x_offs * (int)DEPTH_MULTIPLIER;
 
 #if defined(HAS_BIAS)
-    __global uchar *b_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0;
+    __global uchar *b_addr = biases_ptr + biases_offset_first_element_in_bytes + x_offs * (int)DEPTH_MULTIPLIER;
 #endif // defined(HAS_BIAS)
 
 #if defined(DST_DEPTH)
@@ -1412,7 +1415,7 @@ __kernel void dwc_MxN_native_fp_nhwc(
     {
         // Each work-item computes N0x1x1 elements
         VEC_DATA_TYPE(DATA_TYPE, N0)
-        res = 0;
+        res0 = 0;
 
         int x_coord = y * CONV_STRIDE_X - (int)CONV_PAD_LEFT;
         int y_coord = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP;
@@ -1437,9 +1440,9 @@ __kernel void dwc_MxN_native_fp_nhwc(
                         w = VLOAD(N0)(0, (__global DATA_TYPE *)(w_addr + w_offset));
 
 #if GPU_ARCH == GPU_ARCH_MIDGARD
-                        res += i * w;
+                        res0 += i * w;
 #else  // GPU_ARCH == GPU_ARCH_MIDGARD
-                        res = fma(i, w, res);
+                        res0 = fma(i, w, res0);
 #endif // GPU_ARCH == GPU_ARCH_MIDGARD
                     }
                     x_coord_tmp += DILATION_X;
@@ -1449,13 +1452,12 @@ __kernel void dwc_MxN_native_fp_nhwc(
         }
 
 #if defined(HAS_BIAS)
-        res += VLOAD(N0)(0, (__global DATA_TYPE *)(b_addr));
+        res0 += VLOAD(N0)(0, (__global DATA_TYPE *)(b_addr));
 #endif // defined(HAS_BIAS)
 
-        res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, res, A_VAL, B_VAL);
+        res0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, N0, res0, A_VAL, B_VAL);
 
-        VSTORE(N0)
-        (res, 0, (__global DATA_TYPE *)(d_addr));
+        STORE_VECTOR_SELECT(res, DATA_TYPE, d_addr, N0, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 
         w_addr += sizeof(DATA_TYPE);
         d_addr += sizeof(DATA_TYPE);
@@ -1464,7 +1466,7 @@ __kernel void dwc_MxN_native_fp_nhwc(
 #endif // defined(HAS_BIAS)
     }
 }
-#endif // defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defiend(N0) && defined(DATA_TYPE) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP)
+#endif // defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defiend(N0) && defined(DATA_TYPE) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(VEC_SIZE_LEFTOVER)
 
 #if defined(VEC_SIZE) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT) && defined(DATA_TYPE)
 
