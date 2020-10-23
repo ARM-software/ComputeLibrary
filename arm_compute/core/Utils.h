@@ -45,6 +45,7 @@
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Calculate the rounded up quotient of val / m.
  *
@@ -1096,18 +1097,25 @@ std::string string_from_pixel_value(const PixelValue &value, const DataType data
 DataType data_type_from_name(const std::string &name);
 /** Stores padding information before configuring a kernel
  *
+ * @param[in] infos list of tensor infos to store the padding info for
+ *
+ * @return An unordered map where each tensor info pointer is paired with its original padding info
+ */
+std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initializer_list<const ITensorInfo *> infos);
+/** Stores padding information before configuring a kernel
+ *
  * @param[in] tensors list of tensors to store the padding info for
  *
- * @return An unordered map where each tensor pointer is paired with its original padding info
+ * @return An unordered map where each tensor info pointer is paired with its original padding info
  */
-std::unordered_map<const ITensor *, PaddingSize> get_padding_info(std::initializer_list<const ITensor *> tensors);
+std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initializer_list<const ITensor *> tensors);
 /** Check if the previously stored padding info has changed after configuring a kernel
  *
- * @param[in] padding_map an unordered map where each tensor pointer is paired with its original padding info
+ * @param[in] padding_map an unordered map where each tensor info pointer is paired with its original padding info
  *
- * @return true if any of the tensors has changed its paddings
+ * @return true if any of the tensor infos has changed its paddings
  */
-bool has_padding_changed(const std::unordered_map<const ITensor *, PaddingSize> &padding_map);
+bool has_padding_changed(const std::unordered_map<const ITensorInfo *, PaddingSize> &padding_map);
 
 /** Input Stream operator for @ref DataType
  *

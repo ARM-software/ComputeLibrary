@@ -39,20 +39,6 @@ namespace arm_compute
 {
 namespace
 {
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int &num_elems_processed_per_iteration)
-{
-    num_elems_processed_per_iteration = 4;
-    // The window needs to be based on input as we copy all the heights of input
-    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-
-    Window win_collapsed = win.collapse(win, Window::DimZ);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win_collapsed);
-}
 Status validate_arguments(const ITensorInfo *input, unsigned int height_offset, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
@@ -72,15 +58,13 @@ Status validate_arguments(const ITensorInfo *input, unsigned int height_offset, 
 } // namespace
 
 CLHeightConcatenateLayerKernel::CLHeightConcatenateLayerKernel()
-    : _height_offset(0), _num_elems_processed_per_iteration()
+    : _height_offset(0)
 {
 }
 
 Status CLHeightConcatenateLayerKernel::validate(const ITensorInfo *input, unsigned int height_offset, const ITensorInfo *output)
 {
-    unsigned int num_elems_processed_per_iteration;
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, height_offset, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), num_elems_processed_per_iteration).first);
     return Status{};
 }
 
@@ -89,16 +73,19 @@ void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_c
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, height_offset, output));
 
+    auto padding_info = get_padding_info({ input, output });
+
     _height_offset = height_offset;
 
-    auto win_config = validate_and_configure_window(input, output, _num_elems_processed_per_iteration);
-
     // Add build options
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(4, input->dimension(0));
+
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->element_size()));
-    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(_num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DHEIGHT_OFFSET=" + support::cpp11::to_string(_height_offset));
     build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input->dimension(2)));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->dimension(0) % num_elems_processed_per_iteration));
 
     if(is_data_type_quantized_asymmetric(input->data_type()) && input->quantization_info() != output->quantization_info())
     {
@@ -115,12 +102,14 @@ void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_c
     _kernel = create_kernel(compile_context, "concatenate_height", build_opts.options());
     // Configure kernel window
 
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-
-    ICLKernel::configure_internal(std::get<1>(win_config));
+    // The window needs to be based on input as we copy all the heights of input
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    ICLKernel::configure_internal(win.collapse(win, Window::DimZ));
 
     // Set output valid region
     output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLHeightConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)

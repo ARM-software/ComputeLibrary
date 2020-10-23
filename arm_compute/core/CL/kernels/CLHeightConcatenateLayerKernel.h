@@ -72,7 +72,6 @@ public:
 
 private:
     unsigned int _height_offset;
-    unsigned int _num_elems_processed_per_iteration;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHEIGHTCONCATENATELAYERKERNEL_H */

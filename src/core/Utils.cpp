@@ -495,26 +495,41 @@ std::pair<int32_t, int32_t> get_quantized_activation_min_max(ActivationLayerInfo
     return std::make_pair(min_activation, max_activation);
 }
 
-std::unordered_map<const ITensor *, PaddingSize> get_padding_info(std::initializer_list<const ITensor *> tensors)
+std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initializer_list<const ITensor *> tensors)
 {
-    std::unordered_map<const ITensor *, PaddingSize> res;
+    std::unordered_map<const ITensorInfo *, PaddingSize> res;
 
     for(const ITensor *tensor : tensors)
     {
         if(tensor)
         {
-            res.insert({ tensor, tensor->info()->padding() });
+            res.insert({ tensor->info(), tensor->info()->padding() });
         }
     }
 
     return res;
 }
 
-bool has_padding_changed(const std::unordered_map<const ITensor *, PaddingSize> &padding_map)
+std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initializer_list<const ITensorInfo *> infos)
 {
-    return std::find_if(padding_map.begin(), padding_map.end(), [](const std::pair<const ITensor *, PaddingSize> &padding_info)
+    std::unordered_map<const ITensorInfo *, PaddingSize> res;
+
+    for(const ITensorInfo *info : infos)
     {
-        return (padding_info.first->info()->padding() != padding_info.second);
+        if(info)
+        {
+            res.insert({ info, info->padding() });
+        }
+    }
+
+    return res;
+}
+
+bool has_padding_changed(const std::unordered_map<const ITensorInfo *, PaddingSize> &padding_map)
+{
+    return std::find_if(padding_map.begin(), padding_map.end(), [](const std::pair<const ITensorInfo *, PaddingSize> &padding_info)
+    {
+        return (padding_info.first->padding() != padding_info.second);
     })
     != padding_map.end();
 }
