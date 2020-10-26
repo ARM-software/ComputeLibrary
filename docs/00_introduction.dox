@@ -104,7 +104,9 @@ v20.11 Public major release
       - @ref CLSoftmaxLayer
       - @ref CLLogSoftmaxLayer
       - @ref GCSoftmaxLayer
- - Removed padding from:
+ - New OpenCL kernels / functions:
+   - @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
+ - Removed padding from NEON kernels:
    - @ref NEComplexPixelWiseMultiplicationKernel
    - @ref NENonMaximaSuppression3x3Kernel
    - @ref NERemapKernel
@@ -123,6 +125,42 @@ v20.11 Public major release
    - @ref NEReductionOperationKernel
    - @ref NEGEMMLowpMatrixAReductionKernel
    - @ref NEGEMMLowpMatrixBReductionKernel
+ - Removed padding from OpenCL kernels:
+   - @ref CLBatchConcatenateLayerKernel
+   - @ref CLElementwiseOperationKernel
+   - @ref CLBatchNormalizationLayerKernel
+   - @ref CLPoolingLayerKernel
+   - @ref CLWinogradInputTransformKernel
+   - @ref CLGEMMLowpMatrixMultiplyNativeKernel
+   - @ref CLGEMMLowpMatrixAReductionKernel
+   - @ref CLGEMMLowpMatrixBReductionKernel
+   - @ref CLGEMMLowpOffsetContributionOutputStageKernel
+   - @ref CLGEMMLowpOffsetContributionKernel
+   - @ref CLWinogradOutputTransformKernel
+   - @ref CLGEMMLowpMatrixMultiplyReshapedKernel
+   - @ref CLFuseBatchNormalizationKernel
+   - @ref CLDepthwiseConvolutionLayerNativeKernel
+   - @ref CLDepthConvertLayerKernel
+   - @ref CLCopyKernel
+   - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
+   - @ref CLActivationLayerKernel
+   - @ref CLWinogradFilterTransformKernel
+   - @ref CLWidthConcatenateLayerKernel
+   - @ref CLWidthConcatenate4TensorsKernel
+   - @ref CLWidthConcatenate2TensorsKernel
+   - @ref CLLogits1DMaxShiftExpSumKernel
+   - @ref CLLogits1DNormKernel
+   - @ref CLHeightConcatenateLayerKernel
+   - @ref CLGEMMMatrixMultiplyKernel
+   - @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
+   - @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
+   - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
+   - @ref CLDepthConcatenateLayerKernel
+   - @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
+ - Removed OpenCL kernels / functions:
+   - CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+   - CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel
+   - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
  - Deprecated OpenCL kernels / functions (If a kernel is used only by the function that is being deprecated, the kernel is deprecated together):
      - CLLocallyConnectedLayer
      - CLLocallyConnectedMatrixMultiplyKernel
