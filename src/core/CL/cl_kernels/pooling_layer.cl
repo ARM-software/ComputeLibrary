@@ -786,7 +786,7 @@ __kernel void pooling_layer_MxN_nhwc(
 }
 #endif // defined(POOL_SIZE_X) && defined(POOL_SIZE_Y)
 
-#define SELECT_TYPE SELECT_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
+#define SELECT_TYPE SELECT_VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
 
 /** Performs pooling layer of size equal to 2. This OpenCL kernel can perform the following pooling types:
  * -# max, -DPOOL_MAX must be passed at compile time
@@ -957,7 +957,7 @@ __kernel void pooling_layer_2x2_nhwc(
     // note: Batch dimension does not contribute in the offset contribution
     VEC_DATA_TYPE(uint, VEC_SIZE) base_index = (uint)idx_out_c;
 
-    base_index += VEC_OFFS(VEC_DATA_TYPE(uint, VEC_SIZE), VEC_SIZE);
+    base_index += VEC_OFFS(uint, VEC_SIZE);
 
     VEC_DATA_TYPE(uint, VEC_SIZE) index0 = base_index + (uint)x0 * DST_CHANNELS + (uint)y0 * (DST_CHANNELS * SRC_WIDTH);
     VEC_DATA_TYPE(uint, VEC_SIZE) index1 = base_index + (uint)x1 * DST_CHANNELS + (uint)y0 * (DST_CHANNELS * SRC_WIDTH);
@@ -978,4 +978,4 @@ __kernel void pooling_layer_2x2_nhwc(
     STORE_VECTOR_SELECT(index, uint, idx_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, ((VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0));
 #endif // defined(EXTRACT_MAX_INDEX) && defined(POOL_MAX)
 }
-#endif // defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_CHANNELS) && defined(DST_HEIGHT) && defined(DST_BATCH_SIZE) && defined(SELECT_DATA_TYPE) && defined(ACC_DATA_TYPE)
+#endif // defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_CHANNELS) && defined(DST_HEIGHT) && defined(DST_BATCH_SIZE) && defined(ACC_DATA_TYPE)

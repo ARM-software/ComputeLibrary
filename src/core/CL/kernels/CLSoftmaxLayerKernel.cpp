@@ -23,26 +23,14 @@
  */
 #include "src/core/CL/kernels/CLSoftmaxLayerKernel.h"
 
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/KernelDescriptors.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
-#include <set>
-#include <string>
-
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 /** Calculates softmax parameters from the quantized input scale and scaling factor for the exponent and places them as build options.
@@ -153,59 +141,6 @@ Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *su
 
     return Status{};
 }
-
-// Window validation
-
-std::pair<Status, Window> validate_and_configure_window_1DMaxShiftExpSum(ITensorInfo *input, ITensorInfo *max, ITensorInfo *output, ITensorInfo *sum)
-{
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*sum, input->clone()->set_tensor_shape(max->tensor_shape()));
-    auto_init_if_empty(*output, *input->clone());
-
-    CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo parallel_reduction_info = CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(input->dimension(0));
-    unsigned int                                          vector_size             = std::get<1>(parallel_reduction_info);
-    const unsigned int                                    num_elems_x             = ceil_to_multiple(input->tensor_shape().x(), vector_size);
-    Window                                                win                     = calculate_max_window(*input, Steps(num_elems_x));
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_x);
-    AccessWindowHorizontal max_access(max, 0, 1);
-    AccessWindowHorizontal output_access(output, 0, num_elems_x);
-    AccessWindowHorizontal sum_access(sum, 0, 1);
-
-    bool window_changed = update_window_and_padding(win, input_access, max_access, output_access, sum_access);
-
-    output_access.set_valid_region(win, input->valid_region());
-    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-
-std::pair<Status, Window> validate_and_configure_window_1DNorm(ITensorInfo *input, ITensorInfo *output, ITensorInfo *sum, const SoftmaxKernelInfo &info)
-{
-    const DataType         output_data_type          = info.input_data_type;
-    const QuantizationInfo allowed_quantization_info = get_softmax_output_quantization_info(info.input_data_type, info.is_log);
-
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output,
-                       input->clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
-
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     sum_access(sum, 0, 0, 1, sum->dimension(1));
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win, input_access, sum_access, output_access);
-
-    output_access.set_valid_region(win, input->valid_region());
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-
 } // namespace
 
 /**< Grid size (obtained through auto-tuning) */
@@ -229,6 +164,8 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
 
+    auto padding_info = get_padding_info({ input, max, output, sum });
+
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*sum->info(), input->info()->clone()->set_tensor_shape(max->info()->tensor_shape()));
     auto_init_if_empty(*output->info(), *input->info()->clone());
@@ -248,30 +185,31 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
     const auto                    is_signed_qasymm8  = is_data_type_quantized_asymmetric_signed(info.input_data_type);
     const int                     min_value          = is_signed_qasymm8 ? CL_SCHAR_MIN : 0;
 
+    ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(reduction_dim_size);
+    const unsigned int    vector_size             = adjust_vec_size(std::get<1>(parallel_reduction_info), reduction_dim_size);
+
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
     build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(min_value));
-    build_opts.add_option_if(is_signed_qasymm8, "-DQASYMM8_SIGNED");
-    build_opts.add_option_if(dt == DataType::F16, "-DUSE_F16");
-    build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
-    build_opts.add_options_if(is_data_type_quantized_asymmetric(dt), prepare_quantized_softmax_build_options(qinfo.scale, beta).options());
-    build_opts.add_option_if(info.is_log, "-DLOG_SOFTMAX");
-
-    cl::NDRange lws_hint(cl::NullRange);
-    std::string kernel_name = is_data_type_quantized_asymmetric(dt) ? std::string("softmax_layer_max_shift_exp_sum_quantized_serial") :
-                              std::string("softmax_layer_max_shift_exp_sum_serial");
-    ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(reduction_dim_size);
-    unsigned int          vector_size             = std::get<1>(parallel_reduction_info);
-
     build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
+    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(reduction_dim_size));
+    build_opts.add_option("-DVECTOR_SIZE_LEFTOVER=" + support::cpp11::to_string(reduction_dim_size % vector_size));
     build_opts.add_option("-DLOG_VECTOR_SIZE=" + support::cpp11::to_string(lround(log2(vector_size))));
     build_opts.add_option_if((reduction_dim_size % vector_size) != 0, "-DNON_MULTIPLE_OF_VECTOR_SIZE");
+    build_opts.add_option_if(is_signed_qasymm8, "-DQASYMM8_SIGNED");
+    build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
+    build_opts.add_option_if(is_data_type_float(dt) && info.is_log, "-DLOG_SOFTMAX");
+    build_opts.add_option_if(is_data_type_float(dt), "-DMINVAL=" + ((dt == DataType::F16) ? std::string("-HALF_MAX") : std::string("-FLT_MAX")));
+    build_opts.add_options_if(is_data_type_quantized_asymmetric(dt), prepare_quantized_softmax_build_options(qinfo.scale, beta).options());
+
+    cl::NDRange lws_hint(cl::NullRange);
+    std::string kernel_name = std::string("softmax_layer_max_shift_exp_sum_") + (is_data_type_quantized_asymmetric(dt) ? "quantized_" : "");
 
     // Configure parallel kernel if needed
     if(std::get<0>(parallel_reduction_info))
     {
-        kernel_name            = is_data_type_quantized_asymmetric(dt) ? std::string("softmax_layer_max_shift_exp_sum_quantized_parallel") : std::string("softmax_layer_max_shift_exp_sum_parallel");
+        kernel_name += "parallel";
         bool is_grid_size_pow2 = (_grid_size != 0) && ((_grid_size & (_grid_size - 1)) == 0);
         build_opts.add_option_if(is_grid_size_pow2 && _grid_size <= 256, "-DGRID_SIZE=" + support::cpp11::to_string(_grid_size));
 
@@ -282,25 +220,24 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
         // A single workgroup performs reduction in dimension 0 in the parallel case, hence lws[0]==gws[0].
         lws_hint = cl::NDRange(_grid_size);
     }
+    else
+    {
+        kernel_name += "serial";
+    }
 
     // Create kernel.
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
-    // Set static arguments. Both the kernels use the same arguments
-    unsigned int idx = 4 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
-    _kernel.setArg<cl_uint>(idx++, reduction_dim_size);
-
     // Configure window
-    auto win_config = validate_and_configure_window_1DMaxShiftExpSum(input->info(), max->info(), output->info(), sum->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second, lws_hint);
+    Window win = calculate_max_window(*(input->info()), Steps(reduction_dim_size));
+    ICLKernel::configure_internal(win, lws_hint);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLLogits1DMaxShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DMaxShiftExpSum(input, max, output, sum));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DMaxShiftExpSum(input->clone().get(), max->clone().get(), output->clone().get(), sum->clone().get()).first);
-
     return Status{};
 }
 
@@ -323,9 +260,8 @@ void CLLogits1DMaxShiftExpSumKernel::run(const Window &window, cl::CommandQueue 
     ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(_input->info()->dimension(0));
     if(std::get<0>(parallel_reduction_info))
     {
-        // To launch grid_size parallel workitems, steps.x should be modified as follows.
-        const unsigned int step = std::get<1>(parallel_reduction_info);
-        window_collapsed.set(Window::DimX, Window::Dimension(0, _grid_size * step, step));
+        // Launch grid_size parallel work items
+        window_collapsed.set(Window::DimX, Window::Dimension(0, _grid_size, 1));
     }
 
     // Get slices
@@ -357,6 +293,8 @@ void CLLogits1DNormKernel::configure(const CLCompileContext &compile_context, co
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
 
+    auto padding_info = get_padding_info({ input, output, sum });
+
     // Note: output should always have a scale of 1/256 and offset 0
     const bool                    is_quantized_asymmetric   = is_data_type_quantized_asymmetric(info.input_data_type);
     const DataType                output_data_type          = info.input_data_type;
@@ -374,32 +312,35 @@ void CLLogits1DNormKernel::configure(const CLCompileContext &compile_context, co
     _sum    = sum;
     _output = output;
 
-    const auto is_signed_qasymm8 = is_data_type_quantized_asymmetric_signed(info.input_data_type);
-    const int  min_value         = is_signed_qasymm8 ? CL_SCHAR_MIN : 0;
+    const auto         is_signed_qasymm8 = is_data_type_quantized_asymmetric_signed(info.input_data_type);
+    const int          min_value         = is_signed_qasymm8 ? CL_SCHAR_MIN : 0;
+    const unsigned int vector_size       = adjust_vec_size(16, input->info()->dimension(0));
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(info.input_data_type));
     build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(min_value));
+    build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
+    build_opts.add_option("-DVECTOR_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % vector_size));
     build_opts.add_option_if(is_data_type_quantized_asymmetric_signed(info.input_data_type), "-DQASYMM8_SIGNED");
     build_opts.add_options_if(is_quantized_asymmetric,
                               prepare_quantized_softmax_build_options(qinfo.scale, info.beta).options());
     build_opts.add_option_if(info.is_log, "-DLOG_SOFTMAX");
 
     // Create kernel
-    std::string kernel_name = is_quantized_asymmetric ? "softmax_layer_norm_quantized" : "softmax_layer_norm";
+    std::string kernel_name = std::string("softmax_layer_norm") + (is_quantized_asymmetric ? "_quantized" : "");
     _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure window
-    auto win_config = validate_and_configure_window_1DNorm(input->info(), output->info(), sum->info(), info);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    auto win = calculate_max_window(*(input->info()), Steps(vector_size));
+    ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLLogits1DNormKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DNorm(input, sum, output, info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DNorm(input->clone().get(), output->clone().get(), sum->clone().get(), info).first);
 
     return Status{};
 }
@@ -426,3 +367,4 @@ void CLLogits1DNormKernel::run(const Window &window, cl::CommandQueue &queue)
     }
     while(window_collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

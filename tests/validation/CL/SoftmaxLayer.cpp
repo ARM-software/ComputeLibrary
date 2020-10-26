@@ -69,8 +69,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),    // Mismatching shapes
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::QASYMM8, // Invalid output quantization info
                                                                   QuantizationInfo(1.f/256, 12)),
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),    // Window shrink
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),// Invalid input dimensionality
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 12)),
@@ -85,8 +83,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 12)),
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 0)),
@@ -105,12 +101,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                   2.0,
                                                   1.0,
                                                   2.0,
-                                                  1.0,
-                                                  2.0,
                                                 })),
                framework::dataset::make("axis", {
-                                                  0,
-                                                  0,
                                                   0,
                                                   0,
                                                   0,
@@ -120,7 +112,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                   2,
                                                   -3,
                                                 })),
-               framework::dataset::make("Expected", { false, false, false, false, false, true, true, true, false, false })),
+               framework::dataset::make("Expected", { false, false, false, true, true, true, false, false })),
                input_info, output_info, beta, axis, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLSoftmaxLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), beta, axis)) == expected, framework::LogLevel::ERRORS);

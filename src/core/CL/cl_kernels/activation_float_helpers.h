@@ -55,7 +55,7 @@
 #define srelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (log((DATA_TYPE)1.0 + exp(x)))
 
 // ELU Activation
-#define elu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (select(((DATA_TYPE)A_VAL * (exp(x) - (DATA_TYPE)1.0)), x, (SELECT_DATA_TYPE(DATA_TYPE, VEC_SIZE))isgreaterequal(x, (DATA_TYPE)0.0)))
+#define elu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (select(((DATA_TYPE)A_VAL * (exp(x) - (DATA_TYPE)1.0)), x, (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))isgreaterequal(x, (DATA_TYPE)0.0)))
 
 // Absolute Activation
 #define abs_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (fabs(x))

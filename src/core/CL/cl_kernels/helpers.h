@@ -172,12 +172,12 @@
  * @return The vector filled with offset values
  * @{
  */
-#define V_OFFS1(dt) (dt)(0)
-#define V_OFFS2(dt) (dt)(0, 1)
-#define V_OFFS3(dt) (dt)(0, 1, 2)
-#define V_OFFS4(dt) (dt)(0, 1, 2, 3)
-#define V_OFFS8(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7)
-#define V_OFFS16(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+#define V_OFFS1(dt) (dt##1)(0)
+#define V_OFFS2(dt) (dt##2)(0, 1)
+#define V_OFFS3(dt) (dt##3)(0, 1, 2)
+#define V_OFFS4(dt) (dt##4)(0, 1, 2, 3)
+#define V_OFFS8(dt) (dt##8)(0, 1, 2, 3, 4, 5, 6, 7)
+#define V_OFFS16(dt) (dt##16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
 /** @} */ // end of group V_OFFSn
 
 /** Create a vector filled with offset values corresponding to the location of each element.
@@ -507,9 +507,6 @@
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
 
-#define CL_VEC_DATA_TYPE_STR(type, size) type##size
-#define CL_VEC_DATA_TYPE(type, size) CL_VEC_DATA_TYPE_STR(type, size)
-
 #define CONVERT_STR(x, type) (convert_##type((x)))
 #define CONVERT(x, type) CONVERT_STR(x, type)
 
@@ -519,19 +516,40 @@
 #define CONVERT_SAT_ROUND_STR(x, type, round) (convert_##type##_sat_##round((x)))
 #define CONVERT_SAT_ROUND(x, type, round) CONVERT_SAT_ROUND_STR(x, type, round)
 
-#define select_dt_uchar(size) uchar##size
-#define select_dt_char(size) char##size
-#define select_dt_ushort(size) ushort##size
-#define select_dt_short(size) short##size
-#define select_dt_half(size) short##size
-#define select_dt_uint(size) uint##size
-#define select_dt_int(size) int##size
-#define select_dt_float(size) int##size
-#define select_dt_ulong(size) ulong##size
-#define select_dt_long(size) long##size
+#define select_vec_dt_uchar(size) uchar##size
+#define select_vec_dt_char(size) char##size
+#define select_vec_dt_ushort(size) ushort##size
+#define select_vec_dt_short(size) short##size
+#define select_vec_dt_half(size) short##size
+#define select_vec_dt_uint(size) uint##size
+#define select_vec_dt_int(size) int##size
+#define select_vec_dt_float(size) int##size
+#define select_vec_dt_ulong(size) ulong##size
+#define select_vec_dt_long(size) long##size
 
-#define SELECT_DATA_TYPE_STR(type, size) select_dt_##type(size)
-#define SELECT_DATA_TYPE(type, size) SELECT_DATA_TYPE_STR(type, size)
+#define SELECT_VEC_DATA_TYPE_STR(type, size) select_vec_dt_##type(size)
+#define SELECT_VEC_DATA_TYPE(type, size) SELECT_VEC_DATA_TYPE_STR(type, size)
+#define SELECT_DATA_TYPE(type) SELECT_VEC_DATA_TYPE_STR(type, 1)
+
+#define sum_reduce_1(x) (x)
+#define sum_reduce_2(x) ((x).s0) + ((x).s1)
+#define sum_reduce_3(x) sum_reduce_2((x).s01) + ((x).s2)
+#define sum_reduce_4(x) sum_reduce_2((x).s01) + sum_reduce_2((x).s23)
+#define sum_reduce_8(x) sum_reduce_4((x).s0123) + sum_reduce_4((x).s4567)
+#define sum_reduce_16(x) sum_reduce_8((x).s01234567) + sum_reduce_8((x).s89ABCDEF)
+
+#define SUM_REDUCE_STR(x, size) sum_reduce_##size(x)
+#define SUM_REDUCE(x, size) SUM_REDUCE_STR(x, size)
+
+#define max_reduce_1(x) (x)
+#define max_reduce_2(x) max(((x).s0), ((x).s1))
+#define max_reduce_3(x) max(max_reduce_2((x).s01), ((x).s2))
+#define max_reduce_4(x) max(max_reduce_2((x).s01), max_reduce_2((x).s23))
+#define max_reduce_8(x) max(max_reduce_4((x).s0123), max_reduce_4((x).s4567))
+#define max_reduce_16(x) max(max_reduce_8((x).s01234567), max_reduce_8((x).s89ABCDEF))
+
+#define MAX_REDUCE_STR(x, size) max_reduce_##size(x)
+#define MAX_REDUCE(x, size) MAX_REDUCE_STR(x, size)
 
 #define VECTOR_DECLARATION(name)     \
     __global uchar *name##_ptr,      \

@@ -38,7 +38,7 @@
 #define SQUARED_DIFF(x, y) (x - y) * (x - y)
 #define DIV(x, y) (x / y)
 #define POWER(x, y) pow(x, y)
-#define PRELU(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE_OUT)0), SELECT_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))))
+#define PRELU(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE_OUT)0), SELECT_VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))))
 
 #define OP_FUN_NAME_STR(op) elementwise_operation_##op
 #define OP_FUN_NAME(op) OP_FUN_NAME_STR(op)

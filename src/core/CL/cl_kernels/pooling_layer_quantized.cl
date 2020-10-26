@@ -197,29 +197,23 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
 {
     // Note: If C is not multiple of VEC_SIZE, we shift back of VEC_SIZE_LEFTOVER elements to compute the leftover elements for get_global_id(0) == 0
     // Note: If C is less than VEC_SIZE, VEC_SIZE should be SHRINKED to the closest smaller VEC_SIZE. This operation is performed on the host side
-    int offset_c = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0) * sizeof(DATA_TYPE);
+    int offset_c  = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0) * sizeof(DATA_TYPE);
     int idx_out_w = get_global_id(1);
 #if DST_BATCH_SIZE != 1
     // If batch size != 1, the batch size dimension is collapsed over the height dimension
     int idx_out_h = get_global_id(2) % DST_HEIGHT;
     int idx_out_n = get_global_id(2) / DST_HEIGHT;
-#else //DST_BATCH_SIZE != 1
-    int idx_out_h = get_global_id(2);
-    int idx_out_n = 0;
+#else  //DST_BATCH_SIZE != 1
+    int idx_out_h   = get_global_id(2);
+    int idx_out_n   = 0;
 #endif // DST_BATCH_SIZE != 1
 
-    int idx_in_w  = idx_out_w * STRIDE_X - PAD_X;
-    int idx_in_h  = idx_out_h * STRIDE_Y - PAD_Y;
+    int idx_in_w = idx_out_w * STRIDE_X - PAD_X;
+    int idx_in_h = idx_out_h * STRIDE_Y - PAD_Y;
 
-    __global unsigned char *in_base_ptr = input_ptr + input_offset_first_element_in_bytes +
-                                                      offset_c +
-                                                      idx_out_n * input_stride_w;
+    __global unsigned char *in_base_ptr = input_ptr + input_offset_first_element_in_bytes + offset_c + idx_out_n * input_stride_w;
 
-    __global unsigned char *out_base_ptr = output_ptr + output_offset_first_element_in_bytes +
-                                                        offset_c +
-                                                        idx_out_w * output_stride_y +
-                                                        idx_out_h * output_stride_z +
-                                                        idx_out_n * output_stride_w;
+    __global unsigned char *out_base_ptr = output_ptr + output_offset_first_element_in_bytes + offset_c + idx_out_w * output_stride_y + idx_out_h * output_stride_z + idx_out_n * output_stride_w;
 
     int pool_x_s = max((int)0, -idx_in_w);
     int pool_x_e = min((int)POOL_SIZE_X, (int)SRC_WIDTH - idx_in_w);
@@ -230,7 +224,7 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     int filter_size = 0;
 #elif defined(POOL_AVG) && !defined(EXCLUDE_PADDING) // defined(POOL_AVG) && defined(EXCLUDE_PADDING)
     int filter_size = POOL_SIZE_X * POOL_SIZE_Y;
-#endif // defined(POOL_AVG) && !defined(EXCLUDE_PADDING)
+#endif                                               // defined(POOL_AVG) && !defined(EXCLUDE_PADDING)
 
     VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
     res0 = INITIAL_VALUE;
@@ -239,10 +233,12 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     {
         for(int x = pool_x_s; x < pool_x_e; ++x)
         {
-            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) data;
-            VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE) data0;
+            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+            data;
+            VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
+            data0;
 
-            data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z));
+            data  = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z));
             data0 = CONVERT(data, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 
             res0 = POOL_OP(res0, data0);
@@ -257,7 +253,8 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     res0 = (res0 + (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))(filter_size >> 1)) / filter_size;
 #endif // defined(POOL_AVG)
 
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) out_q0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    out_q0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
     REQUANTIZE(VEC_SIZE, out_q0, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT, out_q0);
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
@@ -265,5 +262,5 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     // Store result
     STORE_VECTOR_SELECT(out_q, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, ((VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0));
 }
-#endif // defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_CHANNELS) && defined(DST_HEIGHT) && defined(DST_BATCH_SIZE) && defined(SELECT_DATA_TYPE) && defined(ACC_DATA_TYPE)
+#endif // defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_CHANNELS) && defined(DST_HEIGHT) && defined(DST_BATCH_SIZE) && defined(ACC_DATA_TYPE)
 #endif // defined(DATA_TYPE) && defined(INITIAL_VALUE)

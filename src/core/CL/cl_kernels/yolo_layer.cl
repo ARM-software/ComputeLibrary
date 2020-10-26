@@ -25,7 +25,7 @@
 
 #include "activation_float_helpers.h"
 
-#define SELECT_TYPE SELECT_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#define SELECT_TYPE SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
 #if VEC_SIZE != 1
 #define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)

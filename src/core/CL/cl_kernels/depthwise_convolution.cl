@@ -1476,17 +1476,17 @@ __kernel void dwc_MxN_native_fp_nhwc(
 
 #define VEC_FLOAT VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
-#define FILL_ZERO_OUT_OF_BOUND_3(data_type, vec_size, basename, cond)                                                                 \
-    ({                                                                                                                                \
-        basename##0 = select(basename##0, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_DATA_TYPE(data_type, vec_size))((cond).s0)); \
-        basename##1 = select(basename##1, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_DATA_TYPE(data_type, vec_size))((cond).s1)); \
-        basename##2 = select(basename##2, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_DATA_TYPE(data_type, vec_size))((cond).s2)); \
+#define FILL_ZERO_OUT_OF_BOUND_3(data_type, vec_size, basename, cond)                                                                     \
+    ({                                                                                                                                    \
+        basename##0 = select(basename##0, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_VEC_DATA_TYPE(data_type, vec_size))((cond).s0)); \
+        basename##1 = select(basename##1, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_VEC_DATA_TYPE(data_type, vec_size))((cond).s1)); \
+        basename##2 = select(basename##2, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_VEC_DATA_TYPE(data_type, vec_size))((cond).s2)); \
     })
 
-#define FILL_ZERO_OUT_OF_BOUND_4(data_type, vec_size, basename, cond)                                                                 \
-    ({                                                                                                                                \
-        FILL_ZERO_OUT_OF_BOUND_3(data_type, vec_size, basename, cond);                                                                \
-        basename##3 = select(basename##3, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_DATA_TYPE(data_type, vec_size))((cond).s3)); \
+#define FILL_ZERO_OUT_OF_BOUND_4(data_type, vec_size, basename, cond)                                                                     \
+    ({                                                                                                                                    \
+        FILL_ZERO_OUT_OF_BOUND_3(data_type, vec_size, basename, cond);                                                                    \
+        basename##3 = select(basename##3, (VEC_DATA_TYPE(data_type, vec_size))0, (SELECT_VEC_DATA_TYPE(data_type, vec_size))((cond).s3)); \
     })
 
 #if defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
@@ -1728,8 +1728,8 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offset;
 #endif /* defined(DST_DEPTH) */
 
-    int4 src_coord_y = (int4)(y * NUM_ROWS_PROCESSED - CONV_PAD_LEFT) + V_OFFS4(int4);
-    int4 src_coord_z = (int4)(z * NUM_PLANES_PROCESSED - CONV_PAD_TOP) + V_OFFS4(int4);
+    int4 src_coord_y = (int4)(y * NUM_ROWS_PROCESSED - CONV_PAD_LEFT) + V_OFFS4(int);
+    int4 src_coord_z = (int4)(z * NUM_PLANES_PROCESSED - CONV_PAD_TOP) + V_OFFS4(int);
 
     int4 src_offset_y = clamp(src_coord_y, (int4)0, (int4)(SRC_DIM_1 - 1));
     int4 src_offset_z = clamp(src_coord_z, (int4)0, (int4)(SRC_DIM_2 - 1));
@@ -1844,7 +1844,7 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     acc3 += bias_values;
 #endif // defined(HAS_BIAS)
 
-    int2 dst_offset_y = min((int2)(y * NUM_ROWS_PROCESSED) + V_OFFS2(int2), (int2)(DST_DIM_1 - 1)) * (int2)dst_stride_y;
+    int2 dst_offset_y = min((int2)(y * NUM_ROWS_PROCESSED) + V_OFFS2(int), (int2)(DST_DIM_1 - 1)) * (int2)dst_stride_y;
     int  dst_coord_z  = z * NUM_PLANES_PROCESSED;
 
 #if defined(DST_DEPTH)
