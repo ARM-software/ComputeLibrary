@@ -173,7 +173,7 @@ class WinogradConvolutionLayer : public IWinogradConvolutionLayer
     /** Create a new Winograd convolution layer.
      */
     WinogradConvolutionLayer(
-      const arm_gemm::CPUInfo &cpuinfo,       /** Describes CPU properties. */
+      const CPUInfo &cpuinfo,       /** Describes CPU properties. */
       const int n_threads,          /** Maximum number of threads used to execute the convolution. */
       const int n_batches,          /** Number of batches in the input and output tensors. */
       const int n_input_channels,   /** Number of feature maps in a batch of the input tensor. */

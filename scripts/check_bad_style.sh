@@ -13,7 +13,7 @@ else
     FILES=$@
 fi
 
-grep -HrnP --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "/\*\*$" $FILES | tee bad_style.log
+grep -HrnP --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv "/\*\*$" $FILES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
 then
     echo ""
@@ -21,7 +21,7 @@ then
     exit -1
 fi
 
-grep -Hnr --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude=Doxyfile "@brief" $FILES | tee bad_style.log
+grep -Hnr --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv --exclude=Doxyfile "@brief" $FILES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
 then
     echo ""
@@ -29,7 +29,7 @@ then
     exit -1
 fi
 
-grep -HnRE --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $FILES | tee bad_style.log
+grep -HnRE --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -37,7 +37,7 @@ then
     exit -1
 fi
 
-grep -HnR --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "/^float32_t/" $FILES | tee bad_style.log
+grep -HnR --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv "/^float32_t/" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -45,7 +45,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "arm[_ ]\?cv" $FILES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv "arm[_ ]\?cv" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -53,7 +53,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "#.*if.*defined[^(]" $FILES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv "#.*if.*defined[^(]" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -61,7 +61,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "#else$\|#endif$" $FILES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv "#else$\|#endif$" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -69,7 +69,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "ARM_COMPUTE_AARCH64_V8_2" ./tests/validation/CL | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv "ARM_COMPUTE_AARCH64_V8_2" ./tests/validation/CL | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""

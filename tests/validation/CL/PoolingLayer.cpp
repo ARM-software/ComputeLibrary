@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -212,9 +212,12 @@ template <typename T>
 using CLPoolingLayerQuantizedFixture = PoolingLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8Small,
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8))),
-                                                                                                                     pool_data_layout_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     combine(PoolingLayerDatasetQASYMM8Small,
+                                                                                                                             framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                                     pool_data_layout_dataset),
+                                                                                                                     framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(1.f / 255.f, 10) })),
+                                                                                                                     framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 255.f, 5), QuantizationInfo(1.f / 255.f, 10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -222,9 +225,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framew
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8Small,
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
-                                                                                                                    pool_data_layout_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                    combine(PoolingLayerDatasetQASYMM8Small,
+                                                                                                                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                    pool_data_layout_dataset),
+                                                                                                                    framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10), QuantizationInfo(1.f / 127.f, -10) })),
+                                                                                                                    framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -5), QuantizationInfo(1.f / 127.f, -10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);

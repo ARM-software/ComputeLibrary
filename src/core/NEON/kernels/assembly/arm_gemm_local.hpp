@@ -27,8 +27,5 @@
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 
-namespace arm_gemm
-{
 using CPUModel = arm_compute::CPUModel;
 using CPUInfo  = arm_compute::CPUInfo;
-} // namespace arm_compute

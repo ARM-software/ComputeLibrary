@@ -231,6 +231,9 @@ if env['neon']:
     core_files += Glob('src/core/NEON/kernels/assembly/*.cpp')
 
     core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/arm_conv/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_*/*.cpp')
 
     # build winograd/depthwise sources for either v7a / v8a
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
@@ -248,8 +251,10 @@ if env['neon']:
 
     if env['estate'] == '64':
         core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/a64_*/*.cpp')
         if "sve" in env['arch']:
              core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/sve_*/*.cpp')
+             core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/sve_*/*.cpp')
 
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):
         core_files += Glob('src/core/NEON/kernels/*/impl/*/fp16.cpp')

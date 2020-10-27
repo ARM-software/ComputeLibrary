@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ void INEOperator::prepare(ITensorPack &constants)
 
 MemoryRequirements INEOperator::workspace() const
 {
-    return {};
+    return _workspace;
 }
 } // namespace experimental
 } // namespace arm_compute
