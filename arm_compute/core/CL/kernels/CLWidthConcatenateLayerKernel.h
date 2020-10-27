@@ -69,9 +69,6 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
-
-private:
-    unsigned int _width_offset;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLWIDTHCONCATENATELAYERKERNEL_H */

@@ -278,11 +278,12 @@ __kernel void concatenate_width_x4(
 #endif /* defined(INPUT1_WIDTH) */
 #endif /* defined(DEPTH) && defined(ELEMENT_SIZE) */
 
-#if defined(WIDTH_OFFSET) && defined(DEPTH)
+#if defined(WIDTH_OFFSET) && defined(DEPTH) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 /** This kernel concatenates the input tensor into the output tensor along the first dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
  * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note The offset for the first spatial dimension has to be passed at compile time using -DWIDTH_OFFSET. i.e. -DWIDTH_OFFSET=128
  * @note Tensor depth should be given as a preprocessor argument using -DDEPTH=size. e.g. -DDEPTH=16
  *
@@ -312,23 +313,27 @@ __kernel void concatenate_width(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst))
 {
-    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, DEPTH);
-    Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT(dst, DEPTH);
+    // Calculate input indices
+    const int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    const int y = get_global_id(1);
+    const int z = get_global_id(2) % (int)DEPTH;
+    const int w = get_global_id(2) / (int)DEPTH;
+
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * src_stride_y + z * src_stride_z + w * src_stride_w;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * dst_stride_y + z * dst_stride_z + w * dst_stride_w;
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
+    source_values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
-    const VEC_QUANT out = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
-    VSTORE(VEC_SIZE)
-    (out, 0, (__global DATA_TYPE *)(dst.ptr) + WIDTH_OFFSET);
+    const VEC_QUANT out0 = requantize(source_values0, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+    STORE_VECTOR_SELECT(out, DATA_TYPE, dst_addr + WIDTH_OFFSET * sizeof(DATA_TYPE), VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #else  /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
-    VSTORE(VEC_SIZE)
-    (source_values, 0, (__global DATA_TYPE *)(dst.ptr) + WIDTH_OFFSET);
+    STORE_VECTOR_SELECT(source_values, DATA_TYPE, dst_addr + WIDTH_OFFSET * sizeof(DATA_TYPE), VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 }
 
-#endif /* defined(WIDTH_OFFSET) && defined(DEPTH) */
+#endif /* defined(WIDTH_OFFSET) && defined(DEPTH) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)*/
 
 #if defined(VEC_SIZE_LEFTOVER)
 
