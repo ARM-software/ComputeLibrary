@@ -37,10 +37,6 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <tuple>
-
 namespace arm_compute
 {
 using namespace misc::shape_calculator;
@@ -110,6 +106,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     bool          reinterpret_output_as_3d            = (gemm_info.depth_output_gemm3d() != 0);
 
     Window win{};
+    bool   window_changed = false;
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_output_as_3d to be false.
@@ -137,7 +134,13 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     num_elems_processed_per_iteration_y = lhs_info.m0;
 
     win = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+
+    // RHS matrix still needs padding on the X
+    AccessWindowStatic input1_access(input1, 0, 0,
+                                     ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
+                                     input1->dimension(1));
+
+    window_changed = update_window_and_padding(win, input1_access); // window used by the execute_window_loop
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS
@@ -145,7 +148,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(output->num_dimensions()), 2u);
     collapsed                                = win.collapse(win, dimension_to_collapse);
 
-    return std::make_pair(Status(), collapsed);
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, collapsed);
 }
 } // namespace
 
@@ -175,6 +179,9 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     _reinterpret_output_as_3d = (gemm_info.depth_output_gemm3d() != 0);
     _use_dummy_work_items     = preferred_dummy_work_items_support(CLKernelLibrary::get().get_device());
 
+    // We still need padding on the X dimension for the RHS matrix
+    auto padding_info = get_padding_info({ input0, output });
+
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
     if(_reinterpret_input_as_3d == _reinterpret_output_as_3d)
@@ -197,10 +204,14 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     // If _reinterpret_input_as_3d = _reinterpret_output_as_3d = true,
     // we will dispatch a batched-GEMM to reduce the complexity of the address calculation within the OpenCL kernel.
     // This means that the actual m used by the kernel is given by output->info()->dimension(1) and not by gemm_info.m
-    const unsigned int internal_m = input0->info()->dimension(1);
+    const unsigned int internal_m = _reinterpret_output_as_3d ? gemm_info.m() : output->info()->dimension(1);
     // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
     const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
     const unsigned int partial_store_n0 = gemm_info.n() % rhs_info.n0;
+
+    // Shrink M0 to be always <= M (internal_m) to prevent out-of-bounds reads.
+    // NOTE: This might have implications on heuristics and performance
+    const unsigned int internal_m0 = std::min(internal_m, lhs_info.m0);
 
     // Create build options
     CLBuildOptions build_opts;
@@ -213,7 +224,7 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     build_opts.add_option("-DM=" + support::cpp11::to_string(input0->info()->dimension(1)));
     build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n()));
     build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k()));
-    build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
+    build_opts.add_option("-DM0=" + support::cpp11::to_string(internal_m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
@@ -245,6 +256,8 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     _config_id += support::cpp11::to_string(rhs_info.n0);
     _config_id += "_";
     _config_id += support::cpp11::to_string(lhs_info.k0);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMLowpMatrixMultiplyNativeKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, const GEMMLHSMatrixInfo &lhs_info,

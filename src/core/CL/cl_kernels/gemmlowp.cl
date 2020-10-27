@@ -1100,8 +1100,9 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
     const bool cond_y = y == 0;
     const bool cond_x = ((x + 1) * N0 >= N);
 
-    // Store output block
-    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
+    // Convert and store output block
+    REPEAT_VAR_INIT_CONVERT(M0, VEC_DATA_TYPE(int, N0), c, res); // resN = CONVERT(cN, VEC_DATA_TYPE(int, N0));
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, res, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
