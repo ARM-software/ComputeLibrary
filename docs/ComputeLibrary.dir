@@ -295,6 +295,10 @@
  *  @brief All test related files shared between validation and benchmark.
  */
 
+/** @file tests/main.cpp
+ *  @brief Main entry point for the tests. Currently shared between validation and benchmarking.
+ */
+
 /** @dir tests/CL
  *  @brief OpenCL accessors.
  */

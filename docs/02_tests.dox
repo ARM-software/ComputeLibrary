@@ -45,28 +45,6 @@ information is needed within the test (e.g. to validate the results).
 
 @note Tests are not included in the pre-built binary archive, you have to build them from sources.
 
-@subsection tests_overview_structure Directory structure
-
-    .
-    `-- tests <- Top level test directory. All files in here are shared among validation and benchmark.
-        |-- framework <- Underlying test framework.
-        |-- CL             \
-        |-- GLES_COMPUTE   \
-        |-- NEON -> Backend specific files with helper functions etc.
-        |-- benchmark <- Top level directory for the benchmarking files.
-        |   |-- fixtures <- Fixtures for benchmark tests.
-        |   |-- CL <- OpenCL backend test cases on a function level.
-        |   |-- GLES_COMPUTE <- Same of OpenGL ES
-        |   `-- NEON <- Same for NEON
-        |-- datasets <- Datasets for benchmark and validation tests.
-        |-- main.cpp <- Main entry point for the tests. Currently shared between validation and benchmarking.
-        `-- validation -> Top level directory for validation files.
-            |-- CPP -> C++ reference code
-            |-- CL             \
-            |-- GLES_COMPUTE   \
-            |-- NEON -> Backend specific test cases
-            `-- fixtures -> Fixtures shared among all backends. Used to setup target function and tensors.
-
 @subsection tests_overview_fixtures Fixtures
 
 Fixtures can be used to share common setup, teardown or even run tasks among
