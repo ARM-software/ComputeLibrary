@@ -93,6 +93,9 @@ void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const ICLTenso
 void CLBatchToSpaceLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    auto padding_info = get_padding_info({ input, block_shape, output });
+
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), block_shape->info(), output->info()));
 
     _input       = input;
@@ -111,6 +114,8 @@ void CLBatchToSpaceLayerKernel::configure(const CLCompileContext &compile_contex
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output)

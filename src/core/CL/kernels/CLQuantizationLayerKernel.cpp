@@ -52,26 +52,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    // Configure kernel window
-    Window win = calculate_max_window(*input, Steps());
-
-    const int  vec_size_x     = 16 / input->element_size();
-    const int  input_width_x  = input->tensor_shape().x();
-    const bool multi_access_x = (input_width_x / vec_size_x > 0);
-    if(multi_access_x)
-    {
-        win.set(Window::DimX, Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
-    }
-
-    Coordinates coord;
-    coord.set_num_dimensions(output->num_dimensions());
-    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
-
-    return std::make_pair(Status{}, win);
-}
 } // namespace
 
 CLQuantizationLayerKernel::CLQuantizationLayerKernel()
@@ -87,6 +67,9 @@ void CLQuantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *out
 void CLQuantizationLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    auto padding_info = get_padding_info({ input, output });
+
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
     _input  = input;
@@ -95,11 +78,6 @@ void CLQuantizationLayerKernel::configure(const CLCompileContext &compile_contex
     const int  vec_size_x     = 16 / input->info()->element_size();
     const int  input_width_x  = input->info()->tensor_shape().x();
     const bool multi_access_x = (input_width_x / vec_size_x > 0);
-
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
 
     const UniformQuantizationInfo qinfo            = output->info()->quantization_info().uniform();
     const DataType                output_data_type = output->info()->data_type();
@@ -160,13 +138,23 @@ void CLQuantizationLayerKernel::configure(const CLCompileContext &compile_contex
     build_opts.add_option("-DMAX_QUANT_VAL=" + support::cpp11::to_string(min_max_quant_values.second));
 
     _kernel = create_kernel(compile_context, "quantization_layer", build_opts.options());
+
+    // Configure kernel window
+    Window win = calculate_max_window(*input->info(), Steps());
+    if(multi_access_x)
+    {
+        win.set(Window::DimX, Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
+    }
+    ICLKernel::configure_internal(win);
+
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLQuantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
-
     return Status{};
 }
 

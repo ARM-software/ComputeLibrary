@@ -60,20 +60,15 @@ void CLElementWiseUnaryLayerKernel::configure(const ITensorInfo *input, ITensorI
 void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const ElementWiseUnary &op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    auto padding_info = get_padding_info({ input, output });
+
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input, *output));
 
     const std::string kernel_name    = "elementwise_unary";
     const int         vec_size_x     = 16 / output->element_size();
     const int         output_width_x = output->tensor_shape().x();
     const bool        multi_access_x = (output_width_x / vec_size_x > 0);
-
-    Window win = calculate_max_window(*output);
-    if(multi_access_x)
-    {
-        win.set(Window::DimX,
-                Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
-    }
-    ICLKernel::configure_internal(win);
 
     // Set kernel build options
     CLBuildOptions build_opts;
@@ -109,6 +104,17 @@ void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_co
 
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
+
+    // Configure kernel window
+    Window win = calculate_max_window(*output);
+    if(multi_access_x)
+    {
+        win.set(Window::DimX,
+                Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
+    }
+    ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLElementWiseUnaryLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ElementWiseUnary &op)

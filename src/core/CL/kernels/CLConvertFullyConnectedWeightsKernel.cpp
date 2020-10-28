@@ -53,6 +53,8 @@ void CLConvertFullyConnectedWeightsKernel::configure(const CLCompileContext &com
     // Output tensor auto initialisation if not yet initialized
     auto_init_if_empty(*output->info(), *input->info()->clone());
 
+    auto padding_info = get_padding_info({ input, output });
+
     ARM_COMPUTE_ERROR_THROW_ON(CLConvertFullyConnectedWeightsKernel::validate(input->info(), output->info(), original_input_shape, data_layout));
 
     _input  = input;
@@ -82,6 +84,8 @@ void CLConvertFullyConnectedWeightsKernel::configure(const CLCompileContext &com
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape,

@@ -52,18 +52,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_flatten_shape(input)));
-
-    Window win = calculate_max_window(*input, Steps()); // Flatten does not need paddings
-
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
-
-    return std::make_pair(Status{}, win);
-}
 } // namespace
 
 CLFlattenLayerKernel::CLFlattenLayerKernel()
@@ -79,15 +67,16 @@ void CLFlattenLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 void CLFlattenLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_flatten_shape(input->info())));
+
+    auto padding_info = get_padding_info({ input, output });
+
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
     _input  = input;
     _output = output;
-
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
 
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
@@ -98,6 +87,14 @@ void CLFlattenLayerKernel::configure(const CLCompileContext &compile_context, co
 
     // Create kernel
     _kernel = create_kernel(compile_context, "flatten", build_opts.options());
+
+    // Configure kernel window
+    Window win = calculate_max_window(*input->info(), Steps());
+    ICLKernel::configure_internal(win);
+
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 
     // Set config_id for enabling LWS tuning
     _config_id = "flatten";
@@ -118,7 +115,6 @@ void CLFlattenLayerKernel::configure(const CLCompileContext &compile_context, co
 Status CLFlattenLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
     return Status{};
 }
 

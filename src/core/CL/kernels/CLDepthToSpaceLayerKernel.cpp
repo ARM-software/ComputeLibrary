@@ -79,6 +79,8 @@ void CLDepthToSpaceLayerKernel::configure(const CLCompileContext &compile_contex
     TensorShape output_shape = compute_depth_to_space_shape(input->info()->tensor_shape(), input->info()->data_layout(), block_shape);
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
 
+    auto padding_info = get_padding_info({ input, output });
+
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), block_shape));
 
     _input       = input;
@@ -99,6 +101,8 @@ void CLDepthToSpaceLayerKernel::configure(const CLCompileContext &compile_contex
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLDepthToSpaceLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)

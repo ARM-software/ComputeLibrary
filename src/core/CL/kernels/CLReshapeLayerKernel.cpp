@@ -62,6 +62,8 @@ void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, co
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output));
 
+    auto padding_info = get_padding_info({ input, output });
+
     // Create kernel
     std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->element_size()) };
     _kernel                          = create_kernel(compile_context, "reshape_layer", build_opts);
@@ -91,6 +93,8 @@ void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, co
     // Set the output valid region
     output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLReshapeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
