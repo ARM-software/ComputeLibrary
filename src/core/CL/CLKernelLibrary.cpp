@@ -206,16 +206,16 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_ma_f32", "gemm.cl" },
     { "gemm_mv", "gemv.cl" },
     { "gemm_mv_quantized", "gemv.cl" },
-    { "gemm_mm_interleaved_transposed_f16", "gemm.cl" },
-    { "gemm_mm_interleaved_transposed_f16_acc32", "gemm.cl" },
-    { "gemm_mm_interleaved_transposed_f16_bifrost", "gemm.cl" },
-    { "gemm_mm_interleaved_transposed_f32", "gemm.cl" },
-    { "gemm_mm_interleaved_transposed_f32_bifrost", "gemm.cl" },
-    { "gemm_mm_floating_point", "gemm.cl" },
-    { "gemm_mm_floating_point_f16_bifrost", "gemm.cl" },
-    { "gemm_mm_floating_point_f16_bifrost_acc32", "gemm.cl" },
-    { "gemm_mm_floating_point_f32_bifrost", "gemm.cl" },
-    { "gemm_mm_floating_point_f32_bifrost_1000", "gemm.cl" },
+    { "gemm_mm_interleaved_transposed_f16", "gemm_v1.cl" },
+    { "gemm_mm_interleaved_transposed_f16_acc32", "gemm_v1.cl" },
+    { "gemm_mm_interleaved_transposed_f16_bifrost", "gemm_v1.cl" },
+    { "gemm_mm_interleaved_transposed_f32", "gemm_v1.cl" },
+    { "gemm_mm_interleaved_transposed_f32_bifrost", "gemm_v1.cl" },
+    { "gemm_mm_floating_point", "gemm_v1.cl" },
+    { "gemm_mm_floating_point_f16_bifrost", "gemm_v1.cl" },
+    { "gemm_mm_floating_point_f16_bifrost_acc32", "gemm_v1.cl" },
+    { "gemm_mm_floating_point_f32_bifrost", "gemm_v1.cl" },
+    { "gemm_mm_floating_point_f32_bifrost_1000", "gemm_v1.cl" },
     { "gemm_mm_native", "gemm.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t", "gemm.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t_texture", "gemm.cl" },
@@ -688,6 +688,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "gemm.cl",
 #include "./cl_kernels/gemm.clembed"
+    },
+    {
+        "gemm_v1.cl",
+#include "./cl_kernels/gemm_v1.clembed"
     },
     {
         "gemmlowp.cl",
