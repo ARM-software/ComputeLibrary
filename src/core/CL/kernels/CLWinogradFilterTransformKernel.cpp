@@ -41,9 +41,10 @@
 
 #include "support/StringSupport.h"
 
-using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
@@ -76,23 +77,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_UNUSED(output);
 
     const unsigned int num_elems_processed_per_iteration_x = input->data_layout() == DataLayout::NCHW ? input->dimension(0) : 1;
     const unsigned int num_elems_processed_per_iteration_y = input->dimension(1);
     const unsigned int num_elems_read_per_iteration_z      = input->data_layout() == DataLayout::NCHW ? 1 : input->dimension(2);
 
     Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y, num_elems_read_per_iteration_z));
-    bool   window_changed = false;
-
-    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-    AccessWindowStatic    output_access(output, 0, 0, output->dimension(0), output->dimension(1));
-    window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
-
     Window win_collapsed = win.collapse(win, Window::DimZ);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win_collapsed);
+    return std::make_pair(Status{}, win_collapsed);
 }
 } // namespace
 
@@ -114,6 +107,7 @@ void CLWinogradFilterTransformKernel::configure(const CLCompileContext &compile_
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_winograd_filter_transform_shape(*input->info(), winograd_info)));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), winograd_info));
+    auto padding_info = get_padding_info({ input, output });
 
     // Set build options
     CLBuildOptions build_opts;
@@ -135,6 +129,7 @@ void CLWinogradFilterTransformKernel::configure(const CLCompileContext &compile_
     auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLWinogradFilterTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
@@ -159,3 +154,4 @@ void CLWinogradFilterTransformKernel::run(const Window &window, cl::CommandQueue
     add_3D_tensor_argument(idx, _output, window_out);
     enqueue(queue, *this, window, lws_hint());
 }
+} // namespace arm_compute
