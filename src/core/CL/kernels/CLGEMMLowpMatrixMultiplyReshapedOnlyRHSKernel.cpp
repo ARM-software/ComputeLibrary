@@ -193,8 +193,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
                                                         ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, ITensorInfo *bias,
                                                         ITensorInfo *output_multipliers, ITensorInfo *output_shifts, ElementsProcessed &num_elements_processed)
 {
-    const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
+    ARM_COMPUTE_UNUSED(vector_sum_row, vector_sum_col, output_multipliers, bias, output_shifts);
 
+    const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
     unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
     unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
     bool          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d;
@@ -202,7 +203,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 
     Window win{};
     Window win_out{};
-    bool   window_changed = false;
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -237,50 +237,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     num_elems_processed_per_iteration_x = gemm_info.rhs_info.n0;
     num_elems_processed_per_iteration_y = gemm_info.lhs_info.m0;
 
-    // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
-    // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-    const int m          = reinterpret_output_as_3d ? gemm_info.m : input0->dimension(1);
-    const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
-
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-    AccessWindowStatic input0_access(input0, 0, 0,
-                                     ceil_to_multiple(input0->dimension(0), gemm_info.lhs_info.k0),
-                                     input0->dimension(1) + bottom_pad);
-    AccessWindowStatic input1_access(input1, 0, 0,
-                                     input1->dimension(0),
-                                     input1->dimension(1));
     AccessWindowStatic output_access(output, 0, 0,
-                                     ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
-                                     output->dimension(1) + bottom_pad);
-
-    window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
-                     update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
-
-    if(output_stage.type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
-    {
-        if(gemm_info.a_offset != 0)
-        {
-            AccessWindowHorizontal vector_sum_col_access(vector_sum_col, 0, num_elems_processed_per_iteration_x);
-            window_changed = window_changed || update_window_and_padding(win_out, vector_sum_col_access);
-        }
-        // No access window needed for vector_sum_row
-        ARM_COMPUTE_UNUSED(vector_sum_row);
-
-        if(bias != nullptr)
-        {
-            AccessWindowHorizontal bias_access(bias, 0, num_elems_processed_per_iteration_x);
-            window_changed = window_changed || update_window_and_padding(win_out, bias_access);
-        }
-
-        if(output_multipliers != nullptr && output_multipliers->dimension(0) > 1)
-        {
-            AccessWindowHorizontal output_multipliers_access(output_multipliers, 0, num_elems_processed_per_iteration_x);
-            AccessWindowHorizontal output_shifts_access(output_shifts, 0, num_elems_processed_per_iteration_x);
-            window_changed = window_changed || update_window_and_padding(win_out, output_multipliers_access, output_shifts_access);
-        }
-    }
+                                     output->dimension(0),
+                                     output->dimension(1));
 
     output_access.set_valid_region(win_out, ValidRegion(Coordinates(), output->tensor_shape()));
 
@@ -290,8 +252,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(output->num_dimensions()), 2u);
     collapsed                                = win.collapse(win, dimension_to_collapse);
 
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, collapsed);
+    return std::make_pair(Status{}, collapsed);
 }
 } // namespace
 
@@ -336,6 +297,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
                                                   output_multipliers != nullptr ? output_multipliers->info() : nullptr,
                                                   output_shifts != nullptr ? output_shifts->info() : nullptr));
 
+    auto padding_info = get_padding_info({ input0, input1, output, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts });
     const GEMMRHSMatrixInfo       rhs_info     = gemm_info.rhs_info;
     const GEMMLHSMatrixInfo       lhs_info     = gemm_info.lhs_info;
     const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
@@ -383,6 +345,14 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
+    // If _reinterpret_input_as_3d = _reinterpret_output_as_3d = true,
+    // we will dispatch a batched-GEMM to reduce the complexity of the address calculation within the OpenCL kernel.
+    // This means that the actual m used by the kernel is given by output->info()->dimension(1) and not by gemm_info.m
+    const unsigned int internal_m = _reinterpret_output_as_3d ? gemm_info.m : output->info()->dimension(1);
+        // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
+    const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
+    const unsigned int partial_store_n0 = gemm_info.n % rhs_info.n0;
+
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
@@ -399,6 +369,8 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
     build_opts.add_option("-DH0=" + support::cpp11::to_string(rhs_info.h0));
+    build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
+    build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
     build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(input0->info()->data_type()));
 
@@ -461,6 +433,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     _config_id += support::cpp11::to_string(rhs_info.h0);
     _config_id += "_";
     _config_id += support::cpp11::to_string(rhs_info.interleave);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, const GEMMKernelInfo &gemm_info,
