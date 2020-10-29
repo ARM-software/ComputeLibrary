@@ -51,7 +51,7 @@ void fp32_neon_floor(const void *src, void *dst, int len)
         pdst += step;
     }
 
-    for(; len >= 0; --len)
+    for(; len > 0; --len)
     {
         *pdst++ = std::floor(*psrc++);
     }
