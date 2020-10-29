@@ -54,6 +54,25 @@ namespace cl_gemm
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_lhs_rhs_info(unsigned int m, unsigned int n, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0,
                                                                        bool lhs_interleave, bool rhs_interleave, bool lhs_transpose, bool rhs_transpose, bool export_to_cl_image = false);
 
+/** Select @ref GEMMLHSMatrixInfo and @ref GEMMRHSMatrixInfo
+ *
+ * This function accepts two pairs of GEMMLHSMatrixInfo/GEMMRHSMatrixInfo where only the first is with cl_image2d support,
+ * and selects the valid one validating the GEMMRHSMatrixInfo. If the validation passes, the functions will return
+ * the first GEMMLHSMatrixInfo/GEMMRHSMatrixInfo pair with cl_image2d support.
+ *
+ * @param[in] info_img  GEMMLHSMatrixInfo/GEMMRHSMatrixInfo with cl_image2d support
+ * @param[in] info_buf  GEMMLHSMatrixInfo/GEMMRHSMatrixInfo to fall-back if cl_image2d cannot be used
+ * @param[in] n         Number of columns (N) in the RHS matrix not reshaped
+ * @param[in] k         Number of rows (K) in the RHS matrix not reshaped
+ * @param[in] b         Batch size
+ * @param[in] data_type Data type
+ *
+ * @return @ref GEMMLHSMatrixInfo and @ref GEMMRHSMatrixInfo
+ */
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> select_lhs_rhs_info(std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> info_img,
+                                                                    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> info_buf,
+                                                                    unsigned int n, unsigned int k, unsigned int b, DataType data_type);
+
 /** Update padding required to export the OpenCL buffer to OpenCL image2d
  *
  * @param[in,out] tensor ITensorInfo of the tensor required to be exported to OpenCL image2d

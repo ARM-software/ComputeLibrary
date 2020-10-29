@@ -72,7 +72,7 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::select_kernel(const CLGEMMKernelS
     static std::map<DataType, FunctionExecutorPtr> gemm_g76_configs =
     {
         { DataType::F32, &CLGEMMKernelSelectionBifrost::g76_f32 },
-        { DataType::F16, &CLGEMMKernelSelectionBifrost::default_f16 },
+        { DataType::F16, &CLGEMMKernelSelectionBifrost::g76_f16 },
         { DataType::QASYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
         { DataType::QASYMM8_SIGNED, &CLGEMMKernelSelectionBifrost::default_q8 },
         { DataType::QSYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
@@ -188,12 +188,10 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f32(unsigned int m, unsigned 
     {
         return CLGEMMKernelType::NATIVE_V1;
     }
-
     if(m == 1)
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
-
     if(k <= 496)
     {
         if(n <= 544)
@@ -235,6 +233,68 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f32(unsigned int m, unsigned 
         else
         {
             return CLGEMMKernelType::RESHAPED;
+        }
+    }
+}
+
+CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+{
+    ARM_COMPUTE_UNUSED(b);
+
+    if (!is_rhs_constant)
+    {
+        return CLGEMMKernelType::NATIVE_V1;
+    }
+
+    if (m == 1)
+    {
+        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+    }
+
+    const float r_mn = static_cast<float>(m) / static_cast<float>(n);
+    const float r_nk = static_cast<float>(n) / static_cast<float>(k);
+
+    if(k <= 212)
+    {
+        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+    }
+    else
+    {
+        if(r_nk <= 0.4990234375f)
+        {
+            if(k <= 1392)
+            {
+                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+            }
+            else
+            {
+                if(m <= 325)
+                {
+                    return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+                }
+                else
+                {
+                    return CLGEMMKernelType::RESHAPED;
+                }
+            }
+        }
+        else
+        {
+            if(k <= 471)
+            {
+                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+            }
+            else
+            {
+                if(r_mn <= 0.04475911520421505f)
+                {
+                    return CLGEMMKernelType::RESHAPED;
+                }
+                else
+                {
+                    return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+                }
+            }
         }
     }
 }

@@ -205,95 +205,38 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure_G76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
-    ARM_COMPUTE_UNUSED(k);
-
-    const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
     const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
+    const float r_mk = static_cast<float>(m) / static_cast<float>(k);
+    const float r_nk = static_cast<float>(n) / static_cast<float>(k);
 
-    if(workload <= 1049.59f)
+    if(workload <= 1422.40f)
     {
-        if(b <= 5)
+        if(r_mk <= 2.45f)
         {
-            if(workload <= 790.39f)
+            if(workload <= 801.60f)
             {
-                return configure_lhs_rhs_info(m, n, 2, 4, 4, 2, 2, false, false, true, false, false);
+                return configure_lhs_rhs_info(m, n, 2, 4, 4, 1, 2, true, false, true, false, false);
             }
             else
             {
-                if(workload <= 982.39f)
-                {
-                    return configure_lhs_rhs_info(m, n, 4, 2, 4, 4, 4, false, false, true, false, false);
-                }
-                else
-                {
-                    return configure_lhs_rhs_info(m, n, 2, 4, 4, 2, 1, false, true, true, false, false);
-                }
+                return configure_lhs_rhs_info(m, n, 4, 2, 4, 2, 2, false, false, true, false, false);
             }
         }
         else
         {
-            if(r_mn <= 0.21f)
+            if(r_nk <= 0.67f)
             {
-                if(r_mn <= 0.11f)
-                {
-                    return configure_lhs_rhs_info(m, n, 2, 4, 4, 2, 2, false, false, true, false, false);
-                }
-                else
-                {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, false, true, true, false, false);
-                }
+                return configure_lhs_rhs_info(m, n, 4, 2, 4, 2, 2, false, false, true, false, false);
             }
             else
             {
-                return configure_lhs_rhs_info(m, n, 2, 4, 4, 2, 2, false, false, true, false, false);
+                return configure_lhs_rhs_info(m, n, 2, 4, 4, 4, 1, false, true, false, true, false);
             }
         }
     }
     else
     {
-        if(n <= 200)
-        {
-            if(workload <= 29772.79f)
-            {
-                if(m <= 64.5)
-                {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 4, true, false, true, false, false);
-                }
-                else
-                {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 2, false, true, true, false, false);
-                }
-            }
-            else
-            {
-                if(r_mn <= 1.09f)
-                {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, false, true, true, false, false);
-                }
-                else
-                {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 2, true, true, true, false, false);
-                }
-            }
-        }
-        else
-        {
-            if(m <= 43)
-            {
-                return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 4, true, false, true, false, false);
-            }
-            else
-            {
-                if(workload <= 26364.79f)
-                {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 2, false, true, true, false, false);
-                }
-                else
-                {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, false, true, true, false, false);
-                }
-            }
-        }
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 4, true, true, true, false, false);
     }
 }
 
