@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMLowpAssemblyMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -53,28 +52,6 @@ const auto data_matrix_multiply = framework::dataset::make("M", 12, 20) * framew
 } // namespace
 
 TEST_SUITE(NEON)
-TEST_SUITE(ASSEMBLY_MATRIX_MULTIPLY)
-
-using NEGEMMAssemblyFixture_S8 = GEMMLowpAssemblyFixture<Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore, int8_t>;
-using NEGEMMAssemblyFixture_U8 = GEMMLowpAssemblyFixture<Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore, uint8_t>;
-
-TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAssemblyFixture_S8, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAssemblyFixture_U8, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
-
 TEST_SUITE(GEMMLowp)
 TEST_SUITE(MatrixMultiplyCore)
 using NEGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;

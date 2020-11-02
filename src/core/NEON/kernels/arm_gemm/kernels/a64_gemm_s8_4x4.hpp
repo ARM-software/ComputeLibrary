@@ -34,7 +34,7 @@ void a64_gemm_s8_4x4(const int8_t *, const int8_t *, int32_t *, int, int, int);
 
 #include "arm_gemm.hpp"
 
-class gemm_s8_4x4 {
+class cls_a64_gemm_s8_4x4 {
 public:
     typedef int8_t operand_type;
     typedef int32_t result_type;
@@ -56,10 +56,11 @@ public:
 
     // Use the standard fixed size transforms.
     StdTransformsFixed<operand_type, result_type, 4, 4, 16> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 4, 4, 16, true> transforms_quantized = {};
 
     kern_type kernel=a64_gemm_s8_4x4;
 
-    gemm_s8_4x4(const CPUInfo *) { }
+    cls_a64_gemm_s8_4x4(const CPUInfo *) { }
 };
 
 } // namespace arm_gemm

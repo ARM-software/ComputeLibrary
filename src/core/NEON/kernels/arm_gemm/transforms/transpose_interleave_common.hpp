@@ -23,6 +23,8 @@
  */
 #pragma once
 
+#include "../asmlib.hpp"
+
 template <unsigned int IntBy, typename TIn, typename TOut>
 struct TransposeInterleaveCommon {
   // Override the moveblock_1xY methods to improve performance

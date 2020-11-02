@@ -32,7 +32,7 @@ namespace arm_gemm {
 // Kernel definition
 void a64_gemm_u8_4x4(const uint8_t *Apanel, const uint8_t *Bpanel, uint32_t *Cpanel, int ablocks, int bblocks, int K);
 
-class gemm_u8_4x4 {
+class cls_a64_gemm_u8_4x4 {
 public:
     typedef uint8_t operand_type;
     typedef uint32_t result_type;
@@ -64,10 +64,11 @@ public:
 
     // Use the standard fixed size transforms.
     StdTransformsFixed<operand_type, result_type, 4, 4, 16> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 4, 4, 16, true> transforms_quantized = {};
 
     kern_type kernel = a64_gemm_u8_4x4;
 
-    gemm_u8_4x4(const CPUInfo *) { }
+    cls_a64_gemm_u8_4x4(const CPUInfo *) { }
 };
 
 } // namespace arm_gemm

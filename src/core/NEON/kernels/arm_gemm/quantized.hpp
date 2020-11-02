@@ -23,6 +23,8 @@
  */
 #pragma once
 
+#include "utils.hpp" // IndirectInputArg
+
 namespace arm_gemm {
 
 template<typename Tin, typename Tout>
@@ -38,5 +40,9 @@ template<typename T>
 void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int height,
                       const T *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth,
                       unsigned int multi, unsigned int first_col);
+
+template<typename T>
+void row_sums_indirect(unsigned int num_strings, const unsigned int *string_lengths, IndirectInputArg<T> A_arg,
+                       size_t M, int32_t *output_ptr, const Requantize32 *qp);
 
 } // namespace arm_gemm

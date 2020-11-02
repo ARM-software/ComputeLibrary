@@ -21,22 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "a32_interleave_6way_32bit.hpp"
 #include "a32_transpose_interleave_8way_32bit.hpp"
-#include "a64_block16_interleave4_8bit.hpp"
-#include "a64_interleave_8way_16bit.hpp"
-#include "a64_interleave_8way_32bit.hpp"
-#include "a64_interleave_8way_block4_8bit.hpp"
-#include "a64_interleave_8way_half_to_float.hpp"
-#include "a64_interleave_8way_s8_to_s16.hpp"
-#include "a64_interleave_8way_u8_to_u16.hpp"
 #include "a64_transpose_interleave_12way_16bit.hpp"
 #include "a64_transpose_interleave_12way_half_to_float.hpp"
 #include "a64_transpose_interleave_24way_16bit.hpp"
 #include "a64_transpose_interleave_8way_32bit.hpp"
-#include "sve_interleave_8way_32bit.hpp"
-#include "sve_interleave_8way_block2_16bit.hpp"
-#include "sve_interleave_8way_block2_32bit.hpp"
-#include "sve_interleave_8way_block4_16bit.hpp"
-#include "sve_interleave_8way_block4_8bit.hpp"
-#include "sve_interleave_8way_block8_8bit.hpp"

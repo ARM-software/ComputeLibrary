@@ -23,6 +23,9 @@
  */
 #ifndef ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
 #define ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
+
+#include "arm_compute/core/Types.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -47,6 +50,27 @@ struct FFT2DInfo
     unsigned int axis0{ 0 };                         /**< Axis to run first pass on. If same, multiple transforms are performed on single axis*/
     unsigned int axis1{ 1 };                         /**< Axis to run second pass on. If same, multiple transforms are performed on single axis*/
     FFTDirection direction{ FFTDirection::Forward }; /**< Direction of the FFT. */
+};
+
+/** Descriptor used by the Convolution function */
+struct Conv2dInfo
+{
+    Conv2dInfo() = default;
+
+    Conv2dInfo(const PadStrideInfo       &conv_info,
+               const Size2D              &dilation,
+               const ActivationLayerInfo &act_info,
+               bool                       enable_fast_math,
+               unsigned int               num_groups)
+        : conv_info(conv_info), dilation(dilation), act_info(act_info), enable_fast_math(enable_fast_math), num_groups(num_groups)
+    {
+    }
+
+    PadStrideInfo       conv_info{};
+    Size2D              dilation{ 1U, 1U };
+    ActivationLayerInfo act_info{};
+    bool                enable_fast_math{ false };
+    unsigned int        num_groups{ 1 };
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H */

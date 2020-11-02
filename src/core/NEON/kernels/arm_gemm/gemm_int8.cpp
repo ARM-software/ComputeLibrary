@@ -26,21 +26,22 @@
 #include "arm_gemm.hpp"
 #include "gemm_common.hpp"
 #include "gemm_hybrid.hpp"
+#include "gemm_hybrid_indirect.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
-#include "gemm_interleaved_pretransposed_2d.hpp"
 
-#include "kernels/a64_gemm_s16_12x8.hpp"
-#include "kernels/a64_gemm_s8_12x8.hpp"
+#include "kernels/a64_gemm_s16_8x12.hpp"
+#include "kernels/a64_gemm_s8_8x12.hpp"
 #include "kernels/a64_gemm_s8_4x4.hpp"
-#include "kernels/a64_hybrid_s8s32_dot_16x4.hpp"
-#include "kernels/a64_interleaved_s8s32_mmla_12x8.hpp"
-#include "kernels/a64_smallK_hybrid_s8s32_dot_4x6.hpp"
-#include "kernels/a64_smallK_hybrid_s8s32_dot_4x8.hpp"
-#include "kernels/sve_hybrid_s8s32_dot_4VLx4.hpp"
-#include "kernels/sve_interleaved_s8s32_dot_3VLx8.hpp"
-#include "kernels/sve_interleaved_s8s32_mmla_3VLx8.hpp"
-#include "kernels/sve_smallK_hybrid_s8s32_dot_1VLx8.hpp"
+#include "kernels/a64_hybrid_s8s32_dot_6x16.hpp"
+#include "kernels/a64_interleaved_s8s32_mmla_8x12.hpp"
+#include "kernels/a64_smallK_hybrid_s8s32_dot_6x4.hpp"
+#include "kernels/a64_smallK_hybrid_s8s32_dot_8x4.hpp"
+
+#include "kernels/sve_hybrid_s8s32_dot_6x4VL.hpp"
+#include "kernels/sve_interleaved_s8s32_dot_8x3VL.hpp"
+#include "kernels/sve_interleaved_s8s32_mmla_8x3VL.hpp"
+#include "kernels/sve_smallK_hybrid_s8s32_dot_8x1VL.hpp"
 
 namespace arm_gemm {
 
@@ -49,106 +50,84 @@ static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
 #ifdef MMLA_INT8
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "interleaved_s8s32_mmla_3VLx8",
+    "sve_interleaved_s8s32_mmla_8x3VL",
     [](const GemmArgs &args) { return (args._Ksize>8); },
     nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_s8s32_mmla_3VLx8, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int32_t>(args); }
 },
 #endif
 {
     GemmMethod::GEMM_HYBRID,
-    "smallK_hybrid_s8s32_dot_1VLx8",
-    [](const GemmArgs &args) { return args._Ksize<=64; },
+    "sve_smallK_hybrid_s8s32_dot_8x1VL",
+    [](const GemmArgs &args) { return args._Ksize<=64 && !args._indirect_input; },
     nullptr,
-    [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_s8s32_dot_1VLx8, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmHybrid<cls_sve_smallK_hybrid_s8s32_dot_8x1VL, int8_t, int32_t>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
-    "hybrid_s8s32_dot_4VLx4",
+    "sve_hybrid_s8s32_dot_6x4VL",
     [](const GemmArgs &args) { return args._Ksize>=16; },
     [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
-    [](const GemmArgs &args) { return new GemmHybrid<hybrid_s8s32_dot_4VLx4, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_s8s32_dot_6x4VL, int8_t, int32_t>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "interleaved_s8s32_dot_3VLx8",
+    "sve_interleaved_s8s32_dot_8x3VL",
     [](const GemmArgs &args) { return (args._Ksize>4); },
     nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_s8s32_dot_3VLx8, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_s8s32_dot_8x3VL, int8_t, int32_t>(args); }
 },
-#endif
+#endif // SVE
 #ifdef MMLA_INT8
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "interleaved_s8s32_mmla_12x8",
+    "a64_interleaved_s8s32_mmla_8x12",
     [](const GemmArgs &args) { return (args._Ksize>8); },
     nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_s8s32_mmla_12x8, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_interleaved_s8s32_mmla_8x12, int8_t, int32_t>(args); }
 },
 #endif
 {
     GemmMethod::GEMM_HYBRID,
-    "smallK_hybrid_s8s32_dot_4x8",
-    [](const GemmArgs &args) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32); },
+    "a64_smallK_hybrid_s8s32_dot_8x4",
+    [](const GemmArgs &args) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32) && !args._indirect_input; },
     nullptr,
-    [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_s8s32_dot_4x8, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmHybrid<cls_a64_smallK_hybrid_s8s32_dot_8x4, int8_t, int32_t>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
-    "smallK_hybrid_s8s32_dot_4x6",
-    [](const GemmArgs &args) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64); },
+    "a64_smallK_hybrid_s8s32_dot_6x4",
+    [](const GemmArgs &args) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64) && !args._indirect_input; },
     nullptr,
-    [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_s8s32_dot_4x6, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmHybrid<cls_a64_smallK_hybrid_s8s32_dot_6x4, int8_t, int32_t>(args); }
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "a64_gemm_s16_8x12",
+    nullptr,
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53 && args._Ksize>4; },
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_s16_8x12, int8_t, int32_t>(args); },
 },
 {
     GemmMethod::GEMM_HYBRID,
-    "hybrid_s8s32_dot_16x4",
-    [](const GemmArgs &args) { return args._ci->has_dotprod() && args._Ksize>=16; },
+    "a64_hybrid_s8s32_dot_6x16",
+    [](const GemmArgs &args) { return args._ci->has_dotprod(); },
     [](const GemmArgs &args) { return args._Nsize<=256 && args._Ksize>128; },
-    [](const GemmArgs &args) { return new GemmHybrid<hybrid_s8s32_dot_16x4, int8_t, int32_t>(args); }
-},
-{
-    GemmMethod::GEMM_INTERLEAVED_2D,
-    "gemm_s8_12x8_2d",
-    [](const GemmArgs &args) { return args._ci->has_dotprod(); },
-    [](const GemmArgs &args) { return (args._maxthreads >= 8) && (args._Msize >= 8) && (args._Nsize >= 8); },
-    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<gemm_s8_12x8, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmHybridIndirect<cls_a64_hybrid_s8s32_dot_6x16, int8_t, int32_t>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "gemm_s8_12x8_1d",
+    "a64_gemm_s8_8x12",
     [](const GemmArgs &args) { return args._ci->has_dotprod(); },
     nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<gemm_s8_12x8, int8_t, int32_t>(args); }
-},
-{
-    GemmMethod::GEMM_INTERLEAVED_2D,
-    "gemm_s16_12x8_2d",
-    nullptr,
-    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53 && args._Msize > 4 && (args._Msize / args._maxthreads) < 8; },
-    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<gemm_s16_12x8, int8_t, int32_t>(args); },
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_s8_8x12, int8_t, int32_t>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "gemm_s16_12x8_1d",
-    nullptr,
-    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53 && args._Msize > 4; },
-    [](const GemmArgs &args) { return new GemmInterleaved<gemm_s16_12x8, int8_t, int32_t>(args); },
-},
-{
-    GemmMethod::GEMM_INTERLEAVED_2D,
-    "gemm_s8_4x4_2d",
-    nullptr,
-    [](const GemmArgs &args) { return ((args._maxthreads >= 8) && (args._Msize >= 8) && (args._Nsize >= 8)) ||
-                                       ((args._Msize / args._maxthreads) < 4); },
-    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<gemm_s8_4x4, int8_t, int32_t>(args); }
-},
-{
-    GemmMethod::GEMM_INTERLEAVED,
-    "gemm_s8_4x4_1d",
+    "a64_gemm_s8_4x4",
     nullptr,
     nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<gemm_s8_4x4, int8_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_s8_4x4, int8_t, int32_t>(args); }
 },
 {
     GemmMethod::DEFAULT,

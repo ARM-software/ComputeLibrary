@@ -72,7 +72,6 @@
 #include "src/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "src/core/NEON/kernels/NEFloorKernel.h"
 #include "src/core/NEON/kernels/NEFuseBatchNormalizationKernel.h"
-#include "src/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"

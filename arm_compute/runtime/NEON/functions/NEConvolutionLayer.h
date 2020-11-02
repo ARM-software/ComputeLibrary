@@ -26,16 +26,15 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
+
 #include <memory>
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Basic function to simulate a convolution layer. This function calls one of the following NEON functions:
@@ -158,5 +157,5 @@ private:
     std::shared_ptr<IMemoryManager> _memory_manager;
     std::unique_ptr<IFunction>      _function; /**< Function to run */
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NECONVOLUTIONLAYER_H */

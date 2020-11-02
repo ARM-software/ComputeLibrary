@@ -141,8 +141,8 @@ namespace arm_compute
         - @ref NEGaussianPyramidOrb
     - @ref NEGEMM
     - @ref NEGEMMAssemblyDispatch
+    - @ref NEGEMMConv2d
     - @ref NEGEMMConvolutionLayer
-    - @ref NEGEMMLowpAssemblyMatrixMultiplyCore
     - @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEGenerateProposalsLayer
     - @ref NEHarrisCorners
@@ -173,7 +173,6 @@ namespace arm_compute
     - @ref NERNNLayer
     - @ref NEROIPoolingLayer
     - @ref NEScale
-    - @ref NESimpleAssemblyFunction
     - @ref NESobel5x5
     - @ref NESobel7x7
     - @ref NESoftmaxLayerGeneric &lt;IS_LOG&gt;

@@ -30,12 +30,12 @@
 // Generic unblocked transposed 8x32-bit sized specialisation
 template <>
 template <typename T>
-inline void TransformImpl<8, 1, true, 4, 4, false>::Transform(
+inline void TransformImpl<8, 1, true, 4, 4, VLType::None>::Transform(
     T* out, const T* const in, const int stride,
     const int x0, const int xmax, const int k0, const int kmax
 ) {
   // Redirect to a 16 x uint16_t specialisation
-  TransformImpl<16, 1, true, 2, 2, false>::Transform(
+  TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
     reinterpret_cast<uint16_t *>(out),
     reinterpret_cast<const uint16_t *>(in),
     stride*2, x0*2, xmax*2, k0, kmax
@@ -45,7 +45,7 @@ inline void TransformImpl<8, 1, true, 4, 4, false>::Transform(
 // Generic 16x16-bit sized specialisation
 template <>
 template <typename T>
-inline void TransformImpl<16, 1, true, 2, 2, false>::Transform(
+inline void TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
     T* out, const T* const in, const int stride,
     const int x0, const int xmax, const int k0, const int kmax
 ) {
@@ -137,7 +137,7 @@ inline void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x4(con
 
 template <>
 template <>
-inline void TransformImpl<16, 1, true, 2, 2, false>::Transform(
+inline void TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
     uint16_t* out, const uint16_t* const in, const int stride,
     const int x0, const int xmax, const int k0, const int kmax
 ) {

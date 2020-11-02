@@ -28,17 +28,17 @@
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 
-#include "kernels/a64_gemm_u16_12x8.hpp"
+#include "kernels/a64_gemm_u16_8x12.hpp"
 
 namespace arm_gemm {
 
 static const GemmImplementation<uint16_t, uint32_t> gemm_u16_methods[] = {
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "gemm_u16_12x8",
+    "a64_gemm_u16_8x12",
     nullptr,
     nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<gemm_u16_12x8, uint16_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_u16_8x12, uint16_t, uint32_t>(args); }
 },
 {
     GemmMethod::DEFAULT,
