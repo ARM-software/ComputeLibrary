@@ -78,66 +78,107 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
-    ARM_COMPUTE_UNUSED(k);
-
-    GEMMLHSMatrixInfo lhs_info_buf;
-    GEMMRHSMatrixInfo rhs_info_buf;
-    GEMMLHSMatrixInfo lhs_info_img;
-    GEMMRHSMatrixInfo rhs_info_img;
-
-    // Get lhs_info/rhs_info in case of OpenCL buffer
     if(m == 1)
     {
-        const unsigned int h0 = std::max(n / 4, 1U);
-        std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 1, 4, 4, 1, h0, false, true, false, true);
-    }
-    else
-    {
-        if(m > 256)
+        const float r_mn = static_cast<float>(m) / static_cast<float>(n);
+        const float r_mk = static_cast<float>(m) / static_cast<float>(k);
+
+        if(r_mk <= 0.0064484127797186375)
         {
-            const int v0 = std::max(std::min(static_cast<int>(n / 4), static_cast<int>(8)), static_cast<int>(1));
-            std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 1, v0, false, true, false, true);
+            if(r_mn <= 0.0028273810748942196)
+            {
+                GEMMLHSMatrixInfo lhs_info_buf;
+                GEMMRHSMatrixInfo rhs_info_buf;
+                GEMMLHSMatrixInfo lhs_info_img;
+                GEMMRHSMatrixInfo rhs_info_img;
+
+                const unsigned int h0 = std::max(n / 4, 1U);
+                std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 1, 4, 8, 1, 16, false, true, false, false, true);
+                std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 1, 4, 4, 1, h0, false, true, false, true, false);
+
+                return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                           std::make_pair(lhs_info_buf, rhs_info_buf),
+                                           n, k, b, DataType::F32);
+            }
+            else
+            {
+                return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 8, false, true, false, false, false);
+            }
         }
         else
         {
-            const int v0 = std::max(std::min(static_cast<int>(n / 4), static_cast<int>(8)), static_cast<int>(1));
-            std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 2, 4, 4, 1, v0, false, true, false, true);
+            if(r_mk <= 0.020312500186264515)
+            {
+                return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 4, false, true, false, false, false);
+            }
+            else
+            {
+                return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, 16, false, true, false, true, false);
+            }
         }
-    }
-
-    // Get lhs_info/rhs_info in case of OpenCL image
-    if(m == 1)
-    {
-        std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 1, 4, 4, 1, 8, true, true, false, false, true);
     }
     else
     {
-        if((m / 4) * (n / 4) > 4096)
+        const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
+        const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
+        const float r_mk = static_cast<float>(m) / static_cast<float>(k);
+
+        if(workload <= 1999.2000122070312)
         {
-            const int h0 = std::max(std::min(static_cast<int>(n / 4), static_cast<int>(8)), static_cast<int>(1));
-            std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 1, h0, false, true, false, false, true);
+            if(workload <= 747.1999816894531)
+            {
+                return configure_lhs_rhs_info(m, n, 2, 2, 4, 1, 8, false, true, false, true, false);
+            }
+            else
+            {
+                GEMMLHSMatrixInfo lhs_info_buf;
+                GEMMRHSMatrixInfo rhs_info_buf;
+                GEMMLHSMatrixInfo lhs_info_img;
+                GEMMRHSMatrixInfo rhs_info_img;
+                std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 2, 4, 8, 1, 2, false, false, false, true, true);
+                std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 2, 2, 4, 1, 8, false, true, false, true, false);
+
+                return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                           std::make_pair(lhs_info_buf, rhs_info_buf),
+                                           n, k, b, DataType::F32);
+            }
         }
         else
         {
-            const int h0 = std::max(std::min(static_cast<int>(n / 4), static_cast<int>(8)), static_cast<int>(1));
-            std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 2, 4, 4, 1, h0, false, true, false, false, true);
+            if(r_mn <= 0.03348214365541935)
+            {
+                if(r_mk <= 0.028125000186264515)
+                {
+                    return configure_lhs_rhs_info(m, n, 2, 2, 4, 1, 8, false, true, false, true, false);
+                }
+                else
+                {
+                    GEMMLHSMatrixInfo lhs_info_buf;
+                    GEMMRHSMatrixInfo rhs_info_buf;
+                    GEMMLHSMatrixInfo lhs_info_img;
+                    GEMMRHSMatrixInfo rhs_info_img;
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 2, 4, 8, 1, 2, false, false, false, true, true);
+                    std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 2, 2, 4, 1, 8, false, true, false, true, false);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F32);
+                }
+            }
+            else
+            {
+                GEMMLHSMatrixInfo lhs_info_buf;
+                GEMMRHSMatrixInfo rhs_info_buf;
+                GEMMLHSMatrixInfo lhs_info_img;
+                GEMMRHSMatrixInfo rhs_info_img;
+                std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 2, false, true, false, false, true);
+                std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 16, false, true, false, true, false);
+
+                return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                            std::make_pair(lhs_info_buf, rhs_info_buf),
+                                            n, k, b, DataType::F32);
+            }
         }
-    }
-
-    const TensorInfo  tensor_rhs_info(TensorShape(n, k, b), 1, DataType::F32);
-    const TensorShape shape = compute_rhs_reshaped_shape(tensor_rhs_info, rhs_info_img);
-    const TensorInfo  tensor_reshaped_info(shape, 1, DataType::F32);
-
-    // In case of small workloads, we use the OpenCL buffer rather than the OpenCL image2d
-    const bool use_cl_image2d = ((m / lhs_info_img.m0) * (n / rhs_info_img.n0)) * b < 1024 ? false : true;
-
-    if(bool(validate_image2d_support_on_rhs(tensor_reshaped_info, rhs_info_img)) && use_cl_image2d)
-    {
-        return std::make_pair(lhs_info_img, rhs_info_img);
-    }
-    else
-    {
-        return std::make_pair(lhs_info_buf, rhs_info_buf);
     }
 }
 

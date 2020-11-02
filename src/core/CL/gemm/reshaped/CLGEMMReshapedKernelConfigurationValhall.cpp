@@ -90,13 +90,88 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
 
-    if(n <= 4)
+    const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
+    const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
+    const float r_mk = static_cast<float>(m) / static_cast<float>(k);
+    const float r_nk = static_cast<float>(n) / static_cast<float>(k);
+
+    if(r_mk <= 0.11824845522642136)
     {
-        return configure_lhs_rhs_info(m, n, 4, 2, 8, 8, 2, true, true, true, false);
+        if(workload <= 880.0)
+        {
+            return configure_lhs_rhs_info(m, n, 2, 4, 4, 1, 4, false, false, true, false, false);
+        }
+        else
+        {
+            if(r_nk <= 0.42521367967128754)
+            {
+                if(workload <= 1726.4000244140625)
+                {
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 2, false, false, true, false, false);
+                }
+                else
+                {
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+                }
+            }
+            else
+            {
+                if(workload <= 1241.6000366210938)
+                {
+                    return configure_lhs_rhs_info(m, n, 2, 4, 4, 1, 4, false, false, true, false, false);
+                }
+                else
+                {
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, false, false, true, false, false);
+                }
+            }
+        }
     }
     else
     {
-        return configure_lhs_rhs_info(m, n, 4, 8, 4, 4, 2, true, true, true, false);
+        if(workload <= 11404.7998046875)
+        {
+            if(r_mk <= 1.0126488208770752)
+            {
+                if(r_mn <= 2.545312523841858)
+                {
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+                }
+                else
+                {
+                    return configure_lhs_rhs_info(m, n, 2, 4, 4, 1, 4, false, false, true, false, false);
+                }
+            }
+            else
+            {
+                if(workload <= 2881.199951171875)
+                {
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, false, false, true, false, true);
+                }
+                else
+                {
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+                }
+            }
+        }
+        else
+        {
+            if(r_nk <= 0.5765306055545807)
+            {
+                if(r_mn <= 6.010416746139526)
+                {
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+                }
+                else
+                {
+                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, false, true, false, true);
+                }
+            }
+            else
+            {
+                return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, false, true, false, true);
+            }
+        }
     }
 }
 

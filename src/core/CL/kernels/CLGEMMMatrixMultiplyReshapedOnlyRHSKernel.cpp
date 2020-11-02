@@ -247,13 +247,13 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileContext
     const unsigned int h_gemm_3d = _reinterpret_output_as_3d ? output->info()->dimension(1) : input0->info()->dimension(1);
     const unsigned int d_gemm_3d = _reinterpret_output_as_3d ? output->info()->dimension(2) : input0->info()->dimension(2);
 
-    // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
-    const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
-    const unsigned int partial_store_n0 = gemm_info.n % rhs_info.n0;
-
     // Shrink M0 to be always <= M (internal_m) to prevent out-of-bounds reads.
     // NOTE: This might have implications on heuristics and performance
     const unsigned int internal_m0 = std::min(internal_m, lhs_info.m0);
+
+    // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
+    const unsigned int partial_store_m0 = internal_m % internal_m0;
+    const unsigned int partial_store_n0 = gemm_info.n % rhs_info.n0;
 
     // Create build options
     CLBuildOptions build_opts;
