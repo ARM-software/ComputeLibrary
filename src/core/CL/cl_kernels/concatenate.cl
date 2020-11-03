@@ -57,6 +57,8 @@ inline VEC_QUANT requantize(VEC_QUANT input, float in_offset, float out_offset, 
 #define SEQ ((int)(0))
 #elif VEC_SIZE == 2
 #define SEQ ((int2)(0, 1))
+#elif VEC_SIZE == 3
+#define SEQ ((int3)(0, 1, 2))
 #elif VEC_SIZE == 4
 #define SEQ ((int4)(0, 1, 2, 3))
 #elif VEC_SIZE == 8
@@ -137,8 +139,8 @@ __kernel void concatenate_width_x2(
     const VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE) cond = CONVERT(x_coords < (VEC_DATA_TYPE(int, VEC_SIZE))(INPUT1_WIDTH), VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE));
 
     // Rotate src1/2_values, if values0 is a combination of src1_values and src2_values.
-    src1_values = (x < INPUT1_WIDTH && x1 == INPUT1_WIDTH - VEC_SIZE) ? ROTATE(src1_values, VEC_SIZE, INPUT1_ROTATE_N) : src1_values;
-    src2_values = (x < INPUT1_WIDTH && x1 == INPUT1_WIDTH - VEC_SIZE) ? ROTATE(src2_values, VEC_SIZE, INPUT1_ROTATE_N) : src2_values;
+    src1_values = (x < INPUT1_WIDTH && x > (INPUT1_WIDTH - VEC_SIZE)) ? ROTATE(src1_values, VEC_SIZE, INPUT1_ROTATE_N) : src1_values;
+    src2_values = (x < INPUT1_WIDTH && x > (INPUT1_WIDTH - VEC_SIZE)) ? ROTATE(src2_values, VEC_SIZE, INPUT1_ROTATE_N) : src2_values;
 
     const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) values0 = select(src2_values, src1_values, cond);
 
@@ -255,14 +257,14 @@ __kernel void concatenate_width_x4(
     const VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE) cond_in4 = CONVERT(x_coords < (VEC_DATA_TYPE(int, VEC_SIZE))(INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH), VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE));
 
     // Rotate src1/2_values, if values0 is a combination of src1_values and src2_values.
-    src1_values = (x < INPUT1_WIDTH && x1 == INPUT1_WIDTH - VEC_SIZE) ? ROTATE(src1_values, VEC_SIZE, INPUT1_ROTATE_N) : src1_values;
-    src2_values = (x < INPUT1_WIDTH && x1 == INPUT1_WIDTH - VEC_SIZE) ? ROTATE(src2_values, VEC_SIZE, INPUT1_ROTATE_N) : src2_values;
+    src1_values = (x < INPUT1_WIDTH && x > (INPUT1_WIDTH - VEC_SIZE)) ? ROTATE(src1_values, VEC_SIZE, INPUT1_ROTATE_N) : src1_values;
+    src2_values = (x < INPUT1_WIDTH && x > (INPUT1_WIDTH - VEC_SIZE)) ? ROTATE(src2_values, VEC_SIZE, INPUT1_ROTATE_N) : src2_values;
     // Rotate src2/3_values, if values0 is a combination of src2_values and src3_values.
-    src2_values = (x < INPUT1_WIDTH + INPUT2_WIDTH && x2 == INPUT2_WIDTH - VEC_SIZE) ? ROTATE(src2_values, VEC_SIZE, INPUT2_ROTATE_N) : src2_values;
-    src3_values = (x < INPUT1_WIDTH + INPUT2_WIDTH && x2 == INPUT2_WIDTH - VEC_SIZE) ? ROTATE(src3_values, VEC_SIZE, INPUT2_ROTATE_N) : src3_values;
+    src2_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH - VEC_SIZE)) ? ROTATE(src2_values, VEC_SIZE, INPUT2_ROTATE_N) : src2_values;
+    src3_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH - VEC_SIZE)) ? ROTATE(src3_values, VEC_SIZE, INPUT2_ROTATE_N) : src3_values;
     // Rotate src3/4_values, if values0 is a combination of src3_values and src4_values.
-    src3_values = (x < INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH && x3 == INPUT3_WIDTH - VEC_SIZE) ? ROTATE(src3_values, VEC_SIZE, INPUT3_ROTATE_N) : src3_values;
-    src4_values = (x < INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH && x3 == INPUT3_WIDTH - VEC_SIZE) ? ROTATE(src4_values, VEC_SIZE, INPUT3_ROTATE_N) : src4_values;
+    src3_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && x > (INPUT1_WIDTH + INPUT3_WIDTH + INPUT3_WIDTH - VEC_SIZE)) ? ROTATE(src3_values, VEC_SIZE, INPUT3_ROTATE_N) : src3_values;
+    src4_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && x > (INPUT1_WIDTH + INPUT3_WIDTH + INPUT3_WIDTH - VEC_SIZE)) ? ROTATE(src4_values, VEC_SIZE, INPUT3_ROTATE_N) : src4_values;
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     values0 = select(src2_values, src1_values, cond_in2);
