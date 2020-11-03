@@ -34,6 +34,9 @@ func globalFlags(ctx android.BaseContext) []string {
         if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QASYMM16" {
             cppflags = append(cppflags, "-DENABLE_QASYMM16_KERNELS")
         }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QSYMM16" {
+            cppflags = append(cppflags, "-DENABLE_QSYMM16_KERNELS")
+        }
         if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "FP16" {
             cppflags = append(cppflags, "-DENABLE_FP16_KERNELS")
         }
