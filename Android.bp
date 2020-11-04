@@ -42,7 +42,6 @@ cc_library_static {
     proprietary: true,
     local_include_dirs: ["build/android-arm64v8a/src/core",
                          "build/android-arm64v8a/src/core/CL",
-                         "arm_compute/core/NEON/kernels/assembly",
                          "src/core/common",
                          "src/core/helpers",
                          "src/core/NEON/kernels/assembly",
