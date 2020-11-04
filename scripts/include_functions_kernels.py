@@ -3,15 +3,29 @@ import glob
 import collections
 import os
 
-Target = collections.namedtuple('Target', 'name prefix')
-
-targets = [Target("NEON", "NE"), Target("CL", "CL"), Target("CPP", "CPP"), Target("GLES_COMPUTE", "GC")]
-
 armcv_path = "arm_compute"
-core_path = armcv_path + "/core/"
-runtime_path = armcv_path + "/runtime/"
-include_str = "#include \""
+src_path ="src"
 
+Target = collections.namedtuple('Target', 'name prefix basepath')
+
+core_targets = [
+    Target("NEON", "NE", src_path),             # NEON kernels are under src
+    Target("CL", "CL", src_path),               # CL kernels are under src
+    Target("CPP", "CPP", armcv_path),           # CPP kernels are under arm_compute
+    Target("GLES_COMPUTE", "GC", armcv_path)    # GLES kernels are under arm_compute
+    ]
+
+# All functions are under arm_compute
+runtime_targets = [
+    Target("NEON", "NE", armcv_path),
+    Target("CL", "CL", armcv_path),
+    Target("CPP", "CPP", armcv_path),
+    Target("GLES_COMPUTE", "GC", armcv_path)
+    ]
+
+core_path = "/core/"
+runtime_path = "/runtime/"
+include_str = "#include \""
 
 def read_file(file):
     with open(file, "r") as f:
@@ -43,9 +57,9 @@ def create_include_list(folder):
     return updated_files
 
 
-def include_components(path, header_prefix, folder, subfolders=None):
-    for t in targets:
-        target_path = path +  t.name + "/"
+def include_components(target, path, header_prefix, folder, subfolders=None):
+    for t in target:
+        target_path = t.basepath + path +  t.name + "/"
         components_file = target_path + t.prefix + header_prefix
         if os.path.exists(components_file):
             include_list = create_include_list(target_path + folder)
@@ -60,7 +74,7 @@ def include_components(path, header_prefix, folder, subfolders=None):
 
 if __name__ == "__main__":
     # Include kernels
-    include_components(core_path, "Kernels.h", "kernels", ["arm32", "arm64"])
+    include_components(core_targets, core_path, "Kernels.h", "kernels", ["arm32", "arm64"])
 
     # Include functions
-    include_components(runtime_path, "Functions.h", "functions")
+    include_components(runtime_targets, runtime_path, "Functions.h", "functions")
