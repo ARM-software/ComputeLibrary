@@ -263,8 +263,8 @@ __kernel void concatenate_width_x4(
     src2_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH - VEC_SIZE)) ? ROTATE(src2_values, VEC_SIZE, INPUT2_ROTATE_N) : src2_values;
     src3_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH - VEC_SIZE)) ? ROTATE(src3_values, VEC_SIZE, INPUT2_ROTATE_N) : src3_values;
     // Rotate src3/4_values, if values0 is a combination of src3_values and src4_values.
-    src3_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && x > (INPUT1_WIDTH + INPUT3_WIDTH + INPUT3_WIDTH - VEC_SIZE)) ? ROTATE(src3_values, VEC_SIZE, INPUT3_ROTATE_N) : src3_values;
-    src4_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && x > (INPUT1_WIDTH + INPUT3_WIDTH + INPUT3_WIDTH - VEC_SIZE)) ? ROTATE(src4_values, VEC_SIZE, INPUT3_ROTATE_N) : src4_values;
+    src3_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH - VEC_SIZE)) ? ROTATE(src3_values, VEC_SIZE, INPUT3_ROTATE_N) : src3_values;
+    src4_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH - VEC_SIZE)) ? ROTATE(src4_values, VEC_SIZE, INPUT3_ROTATE_N) : src4_values;
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     values0 = select(src2_values, src1_values, cond_in2);
