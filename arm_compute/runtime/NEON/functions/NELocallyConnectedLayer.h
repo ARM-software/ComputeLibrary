@@ -55,12 +55,12 @@ public:
     NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NELocallyConnectedLayer(const NELocallyConnectedLayer &) = delete;
-    /** Default move constructor */
-    NELocallyConnectedLayer(NELocallyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NELocallyConnectedLayer(NELocallyConnectedLayer &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NELocallyConnectedLayer &operator=(const NELocallyConnectedLayer &) = delete;
-    /** Default move assignment operator */
-    NELocallyConnectedLayer &operator=(NELocallyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NELocallyConnectedLayer &operator=(NELocallyConnectedLayer &&) = delete;
     /** Default destructor */
     ~NELocallyConnectedLayer();
     /** Set the input and output tensors.

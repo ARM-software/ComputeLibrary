@@ -44,12 +44,12 @@ public:
     NERNNLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NERNNLayer(const NERNNLayer &) = delete;
-    /** Default move constructor */
-    NERNNLayer(NERNNLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NERNNLayer(NERNNLayer &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NERNNLayer &operator=(const NERNNLayer &) = delete;
-    /** Default move assignment operator */
-    NERNNLayer &operator=(NERNNLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NERNNLayer &operator=(NERNNLayer &&) = delete;
     /** Default destructor */
     ~NERNNLayer();
     /** Initialize the function

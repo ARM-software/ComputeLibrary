@@ -82,10 +82,10 @@ public:
     NEDeconvolutionLayer(const NEDeconvolutionLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDeconvolutionLayer &operator=(const NEDeconvolutionLayer &) = delete;
-    /** Allow instances of this class to be moved */
-    NEDeconvolutionLayer(NEDeconvolutionLayer &&) = default;
-    /** Allow instances of this class to be moved */
-    NEDeconvolutionLayer &operator=(NEDeconvolutionLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NEDeconvolutionLayer(NEDeconvolutionLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NEDeconvolutionLayer &operator=(NEDeconvolutionLayer &&) = delete;
     /** Default destructor */
     virtual ~NEDeconvolutionLayer() = default;
 

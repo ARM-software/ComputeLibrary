@@ -54,12 +54,12 @@ public:
     NEConvolutionLayerReshapeWeights();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayerReshapeWeights(const NEConvolutionLayerReshapeWeights &) = delete;
-    /** Default move constructor */
-    NEConvolutionLayerReshapeWeights(NEConvolutionLayerReshapeWeights &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionLayerReshapeWeights(NEConvolutionLayerReshapeWeights &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayerReshapeWeights &operator=(const NEConvolutionLayerReshapeWeights &) = delete;
-    /** Default move assignment operator */
-    NEConvolutionLayerReshapeWeights &operator=(NEConvolutionLayerReshapeWeights &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionLayerReshapeWeights &operator=(NEConvolutionLayerReshapeWeights &&) = delete;
     /** Default destructor */
     ~NEConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
@@ -167,12 +167,12 @@ public:
     NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConvolutionLayer(const NEGEMMConvolutionLayer &) = delete;
-    /** Default move constructor */
-    NEGEMMConvolutionLayer(NEGEMMConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMConvolutionLayer(NEGEMMConvolutionLayer &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConvolutionLayer &operator=(const NEGEMMConvolutionLayer &) = delete;
-    /** Default move assignment operator */
-    NEGEMMConvolutionLayer &operator=(NEGEMMConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMConvolutionLayer &operator=(NEGEMMConvolutionLayer &&) = delete;
     /** Default destructor */
     ~NEGEMMConvolutionLayer();
     /** Set the input and output tensors.

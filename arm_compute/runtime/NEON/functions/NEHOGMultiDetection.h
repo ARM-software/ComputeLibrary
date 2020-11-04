@@ -62,12 +62,12 @@ public:
     NEHOGMultiDetection(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEHOGMultiDetection(const NEHOGMultiDetection &) = delete;
-    /** Default move constructor */
-    NEHOGMultiDetection(NEHOGMultiDetection &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NEHOGMultiDetection(NEHOGMultiDetection &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEHOGMultiDetection &operator=(const NEHOGMultiDetection &) = delete;
-    /** Default move assignment operator */
-    NEHOGMultiDetection &operator=(NEHOGMultiDetection &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NEHOGMultiDetection &operator=(NEHOGMultiDetection &&) = delete;
     /** Default destructor */
     ~NEHOGMultiDetection();
     /** Initialise the function's source, destination, detection window strides, border mode, threshold and non-maxima suppression

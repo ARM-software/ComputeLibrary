@@ -67,12 +67,12 @@ public:
     NEQLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEQLSTMLayer(const NEQLSTMLayer &) = delete;
-    /** Default move constructor */
-    NEQLSTMLayer(NEQLSTMLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NEQLSTMLayer(NEQLSTMLayer &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEQLSTMLayer &operator=(const NEQLSTMLayer &) = delete;
-    /** Default move assignment operator */
-    NEQLSTMLayer &operator=(NEQLSTMLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NEQLSTMLayer &operator=(NEQLSTMLayer &&) = delete;
     /** Default destructor */
     ~NEQLSTMLayer();
     /** Initialize function's tensors.
