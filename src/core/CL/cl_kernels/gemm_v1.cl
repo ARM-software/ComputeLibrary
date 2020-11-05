@@ -24,10 +24,14 @@
 #include "gemm_helpers.h"
 #include "repeat.h"
 
-#if defined(K) && defined(H0) && defined(V0)
+#if defined(M) && defined(N) && defined(K) && defined(H0) && defined(V0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 /** This OpenCL kernel is optimised for Midgard. It computes the matrix multiplication between matrix A reshaped (src0) and matrix B reshaped (src1)
  *
+ * @note The number of rows of destination matrix must be passed at compile time using -DM
+ * @note The number of columns of the destination matrix must be passed at compile time using -DN
  * @note The number of rows of the *un-reshaped* matrix B (K) must be passed at compile time using -DK
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note The multiplication factor for the transposition width (H0) must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DV0 (e.g. -DV0=2)
@@ -239,18 +243,20 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x4 block
-    vstore4(c0, 0, (__global float *)(dst_addr + 0 * dst_stride_y + zout.s0));
-    vstore4(c1, 0, (__global float *)(dst_addr + 1 * dst_stride_y + zout.s1));
-    vstore4(c2, 0, (__global float *)(dst_addr + 2 * dst_stride_y + zout.s2));
-    vstore4(c3, 0, (__global float *)(dst_addr + 3 * dst_stride_y + zout.s3));
+    const bool cond_y = ((get_global_id(1) + 1) * 4 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * 4 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(4, 4, float, c, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 
 /** This OpenCL kernel is optimized for Bifrost and tt computes the matrix multiplication between matrix A reshaped (src0) and matrix B reshaped (src1)
  *
+ * @note The number of rows of destination matrix must be passed at compile time using -DM
+ * @note The number of columns of the destination matrix must be passed at compile time using -DN
  * @note The number of rows of the *un-reshaped* matrix B (K) must be passed at compile time using -DK
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note The multiplication factor for the transposition width (H0) must be passed at compile time using -DH0 (e.g. -DH0=2)
- * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DV0 (e.g. -DV0=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DV0 (e.g. -DV0=2)
  * @note In case the matrix B has 3 dimensions and the matrix A more than 3, in order to avoid out-of-bounds reads, the number of channels of matrix B must be passed at compile time using MATRIX_B_DEPTH (e.g. -DMATRIX_B_DEPTH=16)
  *       This case can happen when GEMM is used to perform the element-wise multiplication through a batched matrix multiplication (2D Winograd) and we have multiple inputs (e.g. a = [K, M, 16, Batches], b = [N, K, 16])
@@ -566,16 +572,19 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x4 block
-    vstore4(c0, 0, (__global float *)(dst_addr + 0 * dst_stride_y + zout.s0));
-    vstore4(c1, 0, (__global float *)(dst_addr + 1 * dst_stride_y + zout.s1));
-    vstore4(c2, 0, (__global float *)(dst_addr + 2 * dst_stride_y + zout.s2));
-    vstore4(c3, 0, (__global float *)(dst_addr + 3 * dst_stride_y + zout.s3));
+    const bool cond_y = ((get_global_id(1) + 1) * 4 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * 4 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(4, 4, float, c, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 /** This OpenCL kernel computes the matrix multiplication between matrix A reshaped (src0) and matrix B reshaped (src1)
  *
+ * @note The number of rows of destination matrix must be passed at compile time using -DM
+ * @note The number of columns of the destination matrix must be passed at compile time using -DN
  * @note The number of rows of the *un-reshaped* matrix B (K) must be passed at compile time using -DK
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note The multiplication factor for the transposition width (H0) must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DV0 (e.g. -DV0=2)
@@ -788,15 +797,18 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x8 block
-    vstore8(c0, 0, (__global half *)(dst_addr + 0 * dst_stride_y + zout.s0));
-    vstore8(c1, 0, (__global half *)(dst_addr + 1 * dst_stride_y + zout.s1));
-    vstore8(c2, 0, (__global half *)(dst_addr + 2 * dst_stride_y + zout.s2));
-    vstore8(c3, 0, (__global half *)(dst_addr + 3 * dst_stride_y + zout.s3));
+    const bool cond_y = ((get_global_id(1) + 1) * 4 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * 8 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(4, 8, half, c, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 
 /** This OpenCL kernel computes the matrix multiplication between matrix A reshaped (src0) and matrix B reshaped (src1) while accumulating the result in a 32 floating point variable.
  *
+ * @note The number of rows of destination matrix must be passed at compile time using -DM
+ * @note The number of columns of the destination matrix must be passed at compile time using -DN
  * @note The number of rows of the *un-reshaped* matrix B (K) must be passed at compile time using -DK
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note The multiplication factor for the transposition width (H0) must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DV0 (e.g. -DV0=2)
@@ -1019,15 +1031,18 @@ __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x8 block
-    vstore8(c_h0, 0, (__global half *)(dst_addr + 0 * dst_stride_y + zout.s0));
-    vstore8(c_h1, 0, (__global half *)(dst_addr + 1 * dst_stride_y + zout.s1));
-    vstore8(c_h2, 0, (__global half *)(dst_addr + 2 * dst_stride_y + zout.s2));
-    vstore8(c_h3, 0, (__global half *)(dst_addr + 3 * dst_stride_y + zout.s3));
+    const bool cond_y = ((get_global_id(1) + 1) * 4 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * 8 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(4, 8, half, c_h, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 
 /** This OpenCL kernel optimized for Bifrost architectures computes the matrix multiplication between matrix A reshaped (src0) and matrix B reshaped (src1)
  *
+ * @note The number of rows of destination matrix must be passed at compile time using -DM
+ * @note The number of columns of the destination matrix must be passed at compile time using -DN
  * @note The number of rows of the *un-reshaped* matrix B (K) must be passed at compile time using -DK
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note The multiplication factor for the transposition width (H0) must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DV0 (e.g. -DV0=2)
@@ -1315,17 +1330,16 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
 #endif // defined(ACTIVATION_TYPE)
 
     // Store 4x8 block
-    vstore8(c0, 0, (__global half *)(dst_addr + 0 * dst_stride_y + zout.s0));
-    vstore8(c1, 0, (__global half *)(dst_addr + 1 * dst_stride_y + zout.s1));
-    vstore8(c2, 0, (__global half *)(dst_addr + 2 * dst_stride_y + zout.s2));
-    vstore8(c3, 0, (__global half *)(dst_addr + 3 * dst_stride_y + zout.s3));
+    const bool cond_y = ((get_global_id(1) + 1) * 4 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * 8 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(4, 8, half, c, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 
-#endif // defined(K) && defined(H0) && defined(V0)
+#endif // defined(M) && defined(N) && defined(K) && defined(H0) && defined(V0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
-#if defined(K) && defined(N0) && (M0)
+#if defined(N) && defined(K) && defined(M0) && defined(N0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 #if defined(DATA_TYPE)
 #define VECTOR_TYPE VEC_DATA_TYPE(DATA_TYPE, N0)
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not been reshaped.
@@ -1333,7 +1347,10 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
  * @note This OpenCL kernel works with floating point data types (F16/F32)
  * @note The floating point data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DN0 and -DM0
- * @note The number of matrix A columns and the optional alpha's value need to be passed at compile time using -DK and -DALPHA
+ * @note The number of columns of matrix A and the number of columns of the matrix B need to be passed at compile time using -DK and -DN
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
+ * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note In case the matrix B has 3 dimensions and the matrix A more than 3, in order to avoid out-of-bounds reads, the number of channels of matrix B must be passed at compile time using MATRIX_B_DEPTH (e.g. -DMATRIX_B_DEPTH=16)
  *       This case can happen when GEMM is used to perform the element-wise multiplication through a batched matrix multiplication (2D Winograd) and we have multiple inputs (e.g. a = [K, M, 16, Batches], b = [N, K, 16])
  *
@@ -1405,7 +1422,7 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
     int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
 
     // Update address for the matrix A
-    src_addr.s0 += get_global_id(1) * src0_stride_y * M0;
+    src_addr.s0 += COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0) * src0_stride_y;
 
     // Update address for the matrix B
     src_addr.s1 += idx * sizeof(DATA_TYPE);
@@ -1426,8 +1443,8 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zin) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zin) is calculated dividing row by HEIGHT_GEMM3D
+    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zin       = min(DEPTH_GEMM3D - 1, zin);
 
     // Add offset due to the cross plane paddings
@@ -1554,11 +1571,10 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
 
     int z = get_global_id(2);
 
-    // Compute destination address
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
-
     // Compute dst address
-    __global uchar *dst_addr = offset(&dst, 0, 0);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
+                               PARTIAL_STORE_M0)
+                               * dst_stride_y);
 
     uint4 zout = 0;
 
@@ -1579,8 +1595,8 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zout) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zout) is calculated dividing row by HEIGHT_GEMM3D
+    zout = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zout = min(DEPTH_GEMM3D - 1, zout);
 
     // Add offset due to the cross plane paddings
@@ -1616,8 +1632,10 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
     ADD_BLOCK_BROADCAST(M0, acc, bias0);
 
 #else // defined(BROADCAST_BIAS)
-    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * src2_stride_y) + get_global_id(
-                                    2) * src2_stride_z;
+    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
+                                PARTIAL_STORE_M0)
+                                * src2_stride_y)
+                                + z * src2_stride_z;
 
     LOAD_BLOCK(M0, N0, DATA_TYPE, bias, src2_addr, 0, src2_stride_y, zero);
 
@@ -1636,7 +1654,9 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
-    STORE_BLOCK(M0, N0, DATA_TYPE, acc, dst_addr, dst_stride_y, zout.s);
+    const bool cond_y = get_global_id(1) == 0;
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, acc, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 #endif // defined(DATA_TYPE)
 
@@ -1644,9 +1664,11 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
  *
  * @note This OpenCL kernel works with the 32-bit floating point data type (float) and uses the fma units.
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DN0 and -DM0.
- * This kernel optimally uses -DN0=4.
- * @note The number of matrix A columns must be passed at compile time using -DK.
- * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha
+ * @note This kernel processed a fixed number of elements along x: -DN0=4.
+ * @note The number of columns of matrix A and the number of columns of the matrix B need to be passed at compile time using -DK and -DN
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
+ * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note In case the matrix B has 3 dimensions and the matrix A more than 3, in order to avoid out-of-bounds reads, the number of channels of matrix B must be passed at compile time using MATRIX_B_DEPTH (e.g. -DMATRIX_B_DEPTH=16)
  *       This case can happen when GEMM is used to perform the element-wise multiplication through a batched matrix multiplication (2D Winograd) and we have multiple inputs (e.g. a = [K, M, 16, Batches], b = [N, K, 16])
  *
@@ -1718,7 +1740,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
     int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
 
     // Update address for matrix A
-    src_addr.s0 += get_global_id(1) * src0_stride_y * M0;
+    src_addr.s0 += COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0) * src0_stride_y;
 
     // Update address for matrix B
     src_addr.s1 += idx * sizeof(float);
@@ -1739,8 +1761,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zin) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zin) is calculated dividing row by HEIGHT_GEMM3D
+    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zin       = min(DEPTH_GEMM3D - 1, zin);
 
     // Add offset due to the cross plane paddings
@@ -1999,11 +2021,9 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
 
     int z = get_global_id(2);
 
-    // Compute destination address
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
-
     // Compute dst address
-    __global uchar *dst_addr = offset(&dst, 0, 0);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)4 * sizeof(float)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
+                               PARTIAL_STORE_M0) * dst_stride_y);
 
     uint4 zout = 0;
 
@@ -2023,8 +2043,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zout) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zout) is calculated dividing row by HEIGHT_GEMM3D
+    zout = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zout = min(DEPTH_GEMM3D - 1, zout);
 
     // Add offset due to the cross plane paddings
@@ -2060,8 +2080,10 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
     ADD_BLOCK_BROADCAST(M0, acc, bias0);
 
 #else // defined(BROADCAST_BIAS)
-    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)4 * sizeof(float)) + (get_global_id(1) * (uint)M0 * src2_stride_y) + get_global_id(
-                                    2) * src2_stride_z;
+    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)4 * sizeof(float)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
+                                PARTIAL_STORE_M0)
+                                * src2_stride_y)
+                                + z * src2_stride_z;
 
     LOAD_BLOCK(M0, 4, float, bias, src2_addr, 0, src2_stride_y, zero);
 
@@ -2080,16 +2102,9 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store the output block
-    vstore4(acc0, 0, (__global float *)(dst_addr + 0 * dst_stride_y + zout.s0));
-#if M0 > 1
-    vstore4(acc1, 0, (__global float *)(dst_addr + 1 * dst_stride_y + zout.s1));
-#endif // M0 > 1
-#if M0 > 2
-    vstore4(acc2, 0, (__global float *)(dst_addr + 2 * dst_stride_y + zout.s2));
-#endif // M0 > 2
-#if M0 > 3
-    vstore4(acc3, 0, (__global float *)(dst_addr + 3 * dst_stride_y + zout.s3));
-#endif // M0 > 3
+    const bool cond_y = get_global_id(1) == 0;
+    const bool cond_x = ((get_global_id(0) + 1) * 4 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, 4, float, acc, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not been reshaped
@@ -2097,9 +2112,11 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
  * @note This OpenCL kernel works with the 32-bit floating point data type (float) and uses the fma units.
  * This OpenCL kernel is optimized for Bifrost when the number of matrix B columns is less or equal to 1000.
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DN0 and -DM0.
- * This kernel optimally uses -DN0=2.
- * @note The number of matrix A columns must be passed at compile time using -DK.
- * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha if alpha!=1.0f.
+ * @note This kernel processed a fixed number of elements along x: -DN0=2.
+ * @note The number of columns of matrix A and the number of columns of the matrix B need to be passed at compile time using -DK and -DN
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
+ * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note In case the matrix B has 3 dimensions and the matrix A more than 3, in order to avoid out-of-bounds reads, the number of channels of matrix B must be passed at compile time using MATRIX_B_DEPTH (e.g. -DMATRIX_B_DEPTH=16)
  *       This case can happen when GEMM is used to perform the element-wise multiplication through a batched matrix multiplication (2D Winograd) and we have multiple inputs (e.g. a = [K, M, 16, Batches], b = [N, K, 16])
  *
@@ -2172,7 +2189,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
     int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
 
     // Update address for the matrix A
-    src_addr.s0 += get_global_id(1) * src0_stride_y * M0;
+    src_addr.s0 += COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0) * src0_stride_y;
 
     // Update address for the matrix B
     src_addr.s1 += idx * sizeof(float);
@@ -2193,8 +2210,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zin) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zin) is calculated dividing row by HEIGHT_GEMM3D
+    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zin       = min(DEPTH_GEMM3D - 1, zin);
 
     // Add offset due to the cross plane paddings
@@ -2408,11 +2425,9 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
 
     int z = get_global_id(2);
 
-    // Compute destination address
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
-
     // Compute dst address
-    __global uchar *dst_addr = offset(&dst, 0, 0);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)2 * sizeof(float)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
+                               PARTIAL_STORE_M0) * dst_stride_y);
 
     uint4 zout = 0;
 
@@ -2433,8 +2448,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zout) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zout) is calculated dividing row by HEIGHT_GEMM3D
+    zout = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zout = min(DEPTH_GEMM3D - 1, zout);
 
     // Add offset due to the cross plane paddings
@@ -2470,8 +2485,10 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
     ADD_BLOCK_BROADCAST(M0, acc, bias0);
 
 #else // defined(BROADCAST_BIAS)
-    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)2 * sizeof(float)) + (get_global_id(1) * (uint)M0 * src2_stride_y) + get_global_id(
-                                    2) * src2_stride_z;
+    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)2 * sizeof(float)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
+                                PARTIAL_STORE_M0)
+                                * src2_stride_y)
+                                + z * src2_stride_z;
 
     LOAD_BLOCK(M0, 2, float, bias, src2_addr, 0, src2_stride_y, zero);
 
@@ -2490,16 +2507,9 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store the output block
-    vstore2(acc0, 0, (__global float *)(dst_addr + 0 * dst_stride_y + zout.s0));
-#if M0 > 1
-    vstore2(acc1, 0, (__global float *)(dst_addr + 1 * dst_stride_y + zout.s1));
-#endif // M0 > 1
-#if M0 > 2
-    vstore2(acc2, 0, (__global float *)(dst_addr + 2 * dst_stride_y + zout.s2));
-#endif // M0 > 2
-#if M0 > 3
-    vstore2(acc3, 0, (__global float *)(dst_addr + 3 * dst_stride_y + zout.s3));
-#endif // M0 > 3
+    const bool cond_y = get_global_id(1) == 0;
+    const bool cond_x = ((get_global_id(0) + 1) * 2 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, 2, float, acc, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
@@ -2507,9 +2517,11 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
  *
  * @note This OpenCL kernel works with the 16-bit floating point data type (half) and accumulating the result in a 32 floating point variable.
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DN0 and -DM0.
- * This kernel optimally uses -DN0=4.
- * @note The number of matrix A columns must be passed at compile time using -DK.
- * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha
+ * @note This kernel processed a fixed number of elements along x: -DN0=8.
+ * @note The number of columns of matrix A and the number of columns of the matrix B need to be passed at compile time using -DK and -DN
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
+ * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note In case the matrix B has 3 dimensions and the matrix A more than 3, in order to avoid out-of-bounds reads, the number of channels of matrix B must be passed at compile time using MATRIX_B_DEPTH (e.g. -DMATRIX_B_DEPTH=16)
  *       This case can happen when GEMM is used to perform the element-wise multiplication through a batched matrix multiplication (2D Winograd) and we have multiple inputs (e.g. a = [K, M, 16, Batches], b = [N, K, 16])
  *
@@ -2581,7 +2593,7 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
     int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
 
     // Update address for the matrix A
-    src_addr.s0 += get_global_id(1) * src0_stride_y * M0;
+    src_addr.s0 += COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0) * src0_stride_y;
 
     // Update address for the matrix B
     src_addr.s1 += idx * sizeof(half);
@@ -2602,8 +2614,8 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zin) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zin) is calculated dividing row by HEIGHT_GEMM3D
+    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zin       = min(DEPTH_GEMM3D - 1, zin);
 
     // Add offset due to the cross plane paddings
@@ -2764,11 +2776,8 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
 
     int z = get_global_id(2);
 
-    // Compute destination address
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
-
     // Compute dst address
-    __global uchar *dst_addr = offset(&dst, 0, 0);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)8 * sizeof(half)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0) * dst_stride_y);
 
     uint4 zout = 0;
 
@@ -2789,8 +2798,8 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zout) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zout) is calculated dividing row by HEIGHT_GEMM3D
+    zout = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zout = min(DEPTH_GEMM3D - 1, zout);
 
     // Add offset due to the cross plane paddings
@@ -2827,8 +2836,10 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
     ADD_BLOCK_BROADCAST(M0, acc, bias_f0);
 
 #else // defined(BROADCAST_BIAS)
-    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)8 * sizeof(half)) + (get_global_id(1) * (uint)M0 * src2_stride_y) + get_global_id(
-                                    2) * src2_stride_z;
+    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)8 * sizeof(half)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
+                                PARTIAL_STORE_M0)
+                                * src2_stride_y)
+                                + z * src2_stride_z;
 
     LOAD_BLOCK(M0, 8, half, bias, src2_addr, 0, src2_stride_y, zero);
 
@@ -2869,16 +2880,20 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store the output block
-    STORE_BLOCK(M0, 8, half, acc_h, dst_addr, dst_stride_y, zout.s);
+    const bool cond_y = get_global_id(1) == 0;
+    const bool cond_x = ((get_global_id(0) + 1) * 8 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, 8, half, acc_h, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
  * @note This OpenCL kernel works with the 16-bit floating point data type (half) and uses the fma units.
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DN0 and -DM0.
- * This kernel optimally uses -DN0=4.
- * @note The number of matrix A columns must be passed at compile time using -DK.
- * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha
+ * @note This kernel processed a fixed number of elements along x: -DN0=8.
+ * @note The number of columns of matrix A and the number of columns of the matrix B need to be passed at compile time using -DK and -DN
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
+ * @note The optional alpha's value need to be passed at compile time using -DALPHA
  * @note In case the matrix B has 3 dimensions and the matrix A more than 3, in order to avoid out-of-bounds reads, the number of channels of matrix B must be passed at compile time using MATRIX_B_DEPTH (e.g. -DMATRIX_B_DEPTH=16)
  *       This case can happen when GEMM is used to perform the element-wise multiplication through a batched matrix multiplication (2D Winograd) and we have multiple inputs (e.g. a = [K, M, 16, Batches], b = [N, K, 16])
  *
@@ -2950,7 +2965,7 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
     int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
 
     // Update address for the matrix A
-    src_addr.s0 += get_global_id(1) * src0_stride_y * M0;
+    src_addr.s0 += COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0) * src0_stride_y;
 
     // Update address for the matrix B
     src_addr.s1 += idx * sizeof(half);
@@ -2971,8 +2986,8 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zin) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zin) is calculated dividing row by HEIGHT_GEMM3D
+    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zin       = min(DEPTH_GEMM3D - 1, zin);
 
     // Add offset due to the cross plane paddings
@@ -3133,11 +3148,8 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
 
     int z = get_global_id(2);
 
-    // Compute destination address
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
-
     // Compute dst address
-    __global uchar *dst_addr = offset(&dst, 0, 0);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)8 * sizeof(half)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0) * dst_stride_y);
 
     uint4 zout = 0;
 
@@ -3158,8 +3170,8 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
     //  |                  |
     //  |__________________|
 
-    // The plane (zout) is calculated dividing M (get_global_id(1) * M0) by HEIGHT_GEMM3D
-    zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * M0)) / (uint4)HEIGHT_GEMM3D;
+    // The plane (zout) is calculated dividing row by HEIGHT_GEMM3D
+    zout = ((uint4)(0, 1, 2, 3) + (uint4)(COMPUTE_M0_START_ROW(get_global_id(1), M0, PARTIAL_STORE_M0))) / (uint4)HEIGHT_GEMM3D;
     zout = min(DEPTH_GEMM3D - 1, zout);
 
     // Add offset due to the cross plane paddings
@@ -3195,8 +3207,10 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
     ADD_BLOCK_BROADCAST(M0, acc, bias0);
 
 #else // defined(BROADCAST_BIAS)
-    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)8 * sizeof(half)) + (get_global_id(1) * (uint)M0 * src2_stride_y) + get_global_id(
-                                    2) * src2_stride_z;
+    __global uchar *src2_addr = src2_ptr + src2_offset_first_element_in_bytes + (get_global_id(0) * (uint)8 * sizeof(half)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
+                                PARTIAL_STORE_M0)
+                                * src2_stride_y)
+                                + z * src2_stride_z;
 
     LOAD_BLOCK(M0, 8, half, bias, src2_addr, 0, src2_stride_y, zero);
 
@@ -3215,8 +3229,10 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store the output block
-    STORE_BLOCK(M0, 8, half, acc, dst_addr, dst_stride_y, zout.s);
+    const bool cond_y = get_global_id(1) == 0;
+    const bool cond_x = ((get_global_id(0) + 1) * 8 >= N);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, 8, half, acc, dst_addr, dst_stride_y, zout.s, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 
-#endif // defined(K) && defined(N0) && (M0)
+#endif // defined(N) && defined(K) && defined(M0) && defined(N0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
