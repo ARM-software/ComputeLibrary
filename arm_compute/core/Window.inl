@@ -197,15 +197,15 @@ inline Window Window::split_window(size_t dimension, size_t id, size_t total) co
     {
         if(d == dimension)
         {
-            int start        = _dims[d].start();
-            int end          = _dims[d].end();
-            const int step   = _dims[d].step();
+            int       start = _dims[d].start();
+            int       end   = _dims[d].end();
+            const int step  = _dims[d].step();
 
             const int num_it = num_iterations(d);
             const int rem    = num_it % total;
-            int work         = num_it / total;
+            int       work   = num_it / total;
 
-            int it_start     = work * id;
+            int it_start = work * id;
 
             if(int(id) < rem)
             {
@@ -277,7 +277,7 @@ inline void Window::use_tensor_dimensions(const TensorShape &shape, size_t first
 {
     for(unsigned int n = first_dimension; n < shape.num_dimensions(); ++n)
     {
-        set(n, Window::Dimension(0, std::max(shape[n], static_cast<uint32_t>(1))));
+        set(n, Window::Dimension(0, std::max(shape[n], static_cast<size_t>(1))));
     }
 }
 
