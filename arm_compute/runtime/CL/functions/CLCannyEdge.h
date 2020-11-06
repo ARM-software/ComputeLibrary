@@ -49,6 +49,8 @@ class ICLTensor;
  * -# @ref CLEdgeNonMaxSuppressionKernel
  * -# @ref CLEdgeTraceKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLCannyEdge : public IFunction
 {

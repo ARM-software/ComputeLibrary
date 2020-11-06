@@ -50,6 +50,8 @@ class ICLTensor;
  * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref CLConvolution3x3Kernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLConvolution3x3 : public ICLSimpleFunction
 {
@@ -82,6 +84,8 @@ public:
  * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref CLConvolutionKernel or<br/>
  *    @ref CLSeparableConvolutionHorKernel and @ref CLSeparableConvolutionVertKernel (if convolution matrix is separable)
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 template <unsigned int matrix_size>
@@ -148,6 +152,9 @@ using CLConvolution9x9 = CLConvolutionSquare<9>;
  * -# @ref CLConvolutionRectangleKernel or<br/>
  *
  * @note Convolution rectangle should have dimensions of 3, 5, 7, 9
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLConvolutionRectangle : public ICLSimpleFunction
 {

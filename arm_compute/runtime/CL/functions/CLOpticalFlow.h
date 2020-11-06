@@ -60,6 +60,9 @@ using CLOldValueArray = CLArray<CLOldValue>;
  * -# @ref CLLKTrackerStage0Kernel
  * -# @ref CLLKTrackerStage1Kernel
  * -# @ref CLLKTrackerFinalizeKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLOpticalFlow : public IFunction
 {

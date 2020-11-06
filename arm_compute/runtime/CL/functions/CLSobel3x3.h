@@ -39,6 +39,8 @@ class ICLTensor;
  * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref CLSobel3x3Kernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLSobel3x3 : public ICLSimpleFunction
 {

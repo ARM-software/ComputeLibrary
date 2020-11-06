@@ -32,7 +32,11 @@ namespace arm_compute
 class CLCompileContext;
 class ICLTensor;
 
-/** Basic function to run @ref CLMagnitudePhaseKernel. */
+/** Basic function to run @ref CLMagnitudePhaseKernel.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLMagnitude : public ICLSimpleFunction
 {
 public:

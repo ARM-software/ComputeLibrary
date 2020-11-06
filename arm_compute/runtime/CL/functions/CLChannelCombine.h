@@ -33,7 +33,11 @@ class ICLMultiImage;
 class ICLTensor;
 using ICLImage = ICLTensor;
 
-/** Basic function to run @ref CLChannelCombineKernel to perform channel combination. */
+/** Basic function to run @ref CLChannelCombineKernel to perform channel combination.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLChannelCombine : public ICLSimpleFunction
 {
 public:

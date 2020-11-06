@@ -47,6 +47,8 @@ class ICLTensor;
  * -# @ref CLSobel7x7HorKernel
  * -# @ref CLSobel7x7VertKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ * 
  */
 class CLSobel7x7 : public IFunction
 {

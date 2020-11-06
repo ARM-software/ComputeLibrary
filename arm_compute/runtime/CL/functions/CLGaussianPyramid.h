@@ -42,7 +42,11 @@ class CLGaussianPyramidHorKernel;
 class CLGaussianPyramidVertKernel;
 class CLScaleKernel;
 
-/** Common interface for all Gaussian pyramid functions */
+/** Common interface for all Gaussian pyramid functions
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLGaussianPyramid : public IFunction
 {
 public:

@@ -33,7 +33,11 @@ namespace arm_compute
 class CLCompileContext;
 class ICLTensor;
 
-/** Basic function to run @ref CLAccumulateKernel */
+/** Basic function to run @ref CLAccumulateKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLAccumulate : public ICLSimpleFunction
 {
 public:
@@ -52,7 +56,11 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum);
 };
 
-/** Basic function to run @ref CLAccumulateWeightedKernel */
+/** Basic function to run @ref CLAccumulateWeightedKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLAccumulateWeighted : public ICLSimpleFunction
 {
 public:
@@ -73,7 +81,11 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum);
 };
 
-/** Basic function to run @ref CLAccumulateSquaredKernel */
+/** Basic function to run @ref CLAccumulateSquaredKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLAccumulateSquared : public ICLSimpleFunction
 {
 public:

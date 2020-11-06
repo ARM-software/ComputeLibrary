@@ -45,6 +45,8 @@ using ICLImage = ICLTensor;
  * -# @ref CLHistogramKernel
  * -# @ref CLTableLookupKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLEqualizeHistogram : public IFunction
 {

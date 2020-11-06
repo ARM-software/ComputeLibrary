@@ -54,6 +54,9 @@ class CLHOGBlockNormalizationKernel;
          -# Normalization type
          -# L2 hysteresis threshold if the normalization type is L2HYS_NORM
  *
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLHOGMultiDetection : public IFunction
 {

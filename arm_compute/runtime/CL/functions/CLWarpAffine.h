@@ -34,7 +34,11 @@ namespace arm_compute
 class CLCompileContext;
 class ICLTensor;
 
-/** Basic function to run @ref CLWarpAffineKernel for AFFINE transformation */
+/** Basic function to run @ref CLWarpAffineKernel for AFFINE transformation
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLWarpAffine : public ICLSimpleFunction
 {
 public:

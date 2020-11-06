@@ -50,6 +50,8 @@ using ICLImage = ICLTensor;
  * -# @ref CLNonMaximaSuppression3x3Kernel (executed if nonmax_suppression == true)
  * -# @ref CLCopyToArrayKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLFastCorners : public IFunction
 {

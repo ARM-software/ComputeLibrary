@@ -42,6 +42,8 @@ class ICLHOG;
  *
  * -# @ref CLHOGDetectorKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLHOGDetector : public IFunction
 {

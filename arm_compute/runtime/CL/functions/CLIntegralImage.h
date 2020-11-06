@@ -40,6 +40,8 @@ class ICLTensor;
  * -# @ref CLIntegralImageHorKernel
  * -# @ref CLIntegralImageVertKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLIntegralImage : public IFunction
 {

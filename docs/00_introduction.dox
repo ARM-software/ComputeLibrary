@@ -123,10 +123,102 @@ v20.11 Public major release
    - @ref NEReductionOperationKernel
    - @ref NEGEMMLowpMatrixAReductionKernel
    - @ref NEGEMMLowpMatrixBReductionKernel
- - Deprecated OpenCL kernels / functions:
+ - Deprecated OpenCL kernels / functions (If a kernel is used only by the function that is being deprecated, the kernel is deprecated together):
      - CLLocallyConnectedLayer
      - CLLocallyConnectedMatrixMultiplyKernel
- - Deprecated NEON kernels / functions:
+     - CLAbsoluteDifference
+     - CLAbsoluteDifferenceKernel
+     - CLAccumulate
+     - CLAccumulateKernel
+     - CLAccumulateSquared
+     - CLAccumulateSquaredKernel
+     - CLAccumulateWeighted
+     - CLAccumulateWeightedKernel
+     - CLAccumulateWeightedFP16Kernel
+     - CLBox3x3
+     - CLBox3x3Kernel
+     - CLBox3x3FP16Kernel
+     - CLCannyEdge
+     - CLChannelCombine
+     - CLChannelCombineKernel
+     - CLChannelExtract
+     - CLChannelExtractKernel
+     - CLColorConvert
+     - CLColorConvertKernel
+     - CLConvolution3x3
+     - CLConvolutionRectangle
+     - CLConvolutionRectangleKernel
+     - CLConvolutionSquare
+     - CLConvolutionKernel
+     - CLDerivative
+     - CLDerivativeKernel
+     - CLDilate
+     - CLDilateKernel
+     - CLEqualizeHistogram
+     - CLErode
+     - CLErodeKernel
+     - CLFastCorners
+     - CLFastCornersKernel
+     - CLGaussian3x3
+     - CLGaussian3x3Kernel
+     - CLGaussian5x5
+     - CLGaussian5x5HorKernel
+     - CLGaussian5x5VertKernel
+     - CLGaussianPyramid
+     - CLGaussianPyramidHalf
+     - CLGaussianPyramidOrb
+     - CLHarrisCorners
+     - CLHarrisScoreKernel
+     - CLHarrisScoreFP16Kernel
+     - CLHistogram
+     - CLHistogramKernel
+     - CLHOGOrientationBinningKernel
+     - CLHOGBlockNormalizationKernel
+     - CLHOGDetectorKernel
+     - CLHOGNonMaximaSuppressionKernel
+     - CLHOGDescriptor
+     - CLHOGDetector
+     - CLHOGGradient
+     - CLHOGMultiDetection
+     - CLHOGOrientationBinningKernel
+     - CLHOGBlockNormalizationKernel
+     - CLHOGDetectorKernel
+     - CLIntegralImage
+     - CLIntegralImageKernel
+     - CLLaplacianReconstruct
+     - CLLaplacianPyramid
+     - CLMagnitude
+     - CLMagnitudePhaseKernel
+     - CLMedian3x3
+     - CLMedian3x3Kernel
+     - CLMinMaxLocation
+     - CLMinMaxLocationKernel
+     - CLNonLinearFilter
+     - CLNonLinearFilterKernel
+     - CLNonMaximaSuppression3x3
+     - CLNonMaximaSuppression3x3FP16Kernel
+     - CLNonMaximaSuppression3x3Kernel
+     - CLOpticalFlow
+     - CLPhase
+     - CLRemap
+     - CLRemapKernel
+     - CLScharr3x3
+     - CLScharr3x3Kernel
+     - CLSobel3x3
+     - CLSobel3x3Kernel
+     - CLSobel5x5
+     - CLSobel5x5HorKernel
+     - CLSobel5x5VertKernel
+     - CLSobel7x7
+     - CLSobel7x7HorKernel
+     - CLSobel7x7VertKernel
+     - CLThreshold
+     - CLThresholdKernel
+     - CLWarpAffine
+     - CLWarpAffineKernel
+     - CLWarpPerspective
+     - CLWarpPerspectiveKernel
+ - Deprecated NEON kernels / functions (If a kernel is used only by the function that is being deprecated, the kernel is deprecated together):
      - NELocallyConnectedLayer
      - NELocallyConnectedMatrixMultiplyKernel
      - NEAbsoluteDifference
