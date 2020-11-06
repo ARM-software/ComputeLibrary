@@ -839,7 +839,7 @@ public:
     SoftmaxLayerSmallShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 9U, 9U },
+        TensorShape{ 1U, 9U },
                      TensorShape{ 256U, 10U },
                      TensorShape{ 353U, 8U },
                      TensorShape{ 781U, 5U },
