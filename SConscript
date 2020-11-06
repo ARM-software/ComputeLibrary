@@ -48,20 +48,6 @@ def build_library(name, sources, static=False, libs=[]):
     else:
         if env['set_soname']:
             obj = arm_compute_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
-
-            symlinks = []
-            # Manually delete symlinks or SCons will get confused:
-            directory = os.path.dirname(obj[0].path)
-            library_prefix = obj[0].path[:-(1 + len(SONAME_VERSION))]
-            real_lib = "%s.%s" % (library_prefix, SONAME_VERSION)
-
-            for f in Glob("#%s.*" % library_prefix):
-                if str(f) != real_lib:
-                    symlinks.append("%s/%s" % (directory,str(f)))
-
-            clean = arm_compute_env.Command('clean-%s' % str(obj[0]), [], Delete(symlinks))
-            Default(clean)
-            Depends(obj, clean)
         else:
             obj = arm_compute_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
