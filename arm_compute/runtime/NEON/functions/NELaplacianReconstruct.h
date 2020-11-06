@@ -56,6 +56,9 @@ using IImage = ITensor;
  *  I(i-1) = upsample(I(i) + L(i))
  *
  *  output = I(0) + L(0)
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
 */
 class NELaplacianReconstruct : public IFunction
 {

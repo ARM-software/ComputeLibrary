@@ -38,7 +38,11 @@ class IDistribution1D;
 class NEHistogramKernel;
 using IImage = ITensor;
 
-/** Basic function to run @ref NEHistogramKernel. */
+/** Basic function to run @ref NEHistogramKernel.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ */
 class NEHistogram : public IFunction
 {
 public:

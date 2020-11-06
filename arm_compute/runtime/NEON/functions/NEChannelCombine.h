@@ -32,7 +32,11 @@ class IMultiImage;
 class ITensor;
 using IImage = ITensor;
 
-/**Basic function to run @ref NEChannelCombineKernel to perform channel combination. */
+/**Basic function to run @ref NEChannelCombineKernel to perform channel combination.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class NEChannelCombine : public INESimpleFunctionNoBorder
 {
 public:

@@ -42,7 +42,11 @@ class NEGaussianPyramidHorKernel;
 class NEGaussianPyramidVertKernel;
 class NEFillBorderKernel;
 
-/** Common interface for all Gaussian pyramid functions */
+/** Common interface for all Gaussian pyramid functions
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ */
 class NEGaussianPyramid : public IFunction
 {
 public:
@@ -81,6 +85,9 @@ protected:
  * -# @ref NEGaussianPyramidHorKernel
  * -# @ref NEGaussianPyramidVertKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ *
  */
 class NEGaussianPyramidHalf : public NEGaussianPyramid
 {
@@ -114,6 +121,9 @@ private:
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NEGaussian5x5
  * -# @ref NEScaleKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  *
  */
 class NEGaussianPyramidOrb : public NEGaussianPyramid

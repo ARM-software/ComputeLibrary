@@ -46,6 +46,8 @@ class NEFillBorderKernel;
  * -# @ref NESobel7x7HorKernel
  * -# @ref NESobel7x7VertKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NESobel7x7 : public IFunction
 {

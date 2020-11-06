@@ -40,6 +40,8 @@ class NEFillBorderKernel;
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NEDerivativeKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEDerivative : public IFunction
 {

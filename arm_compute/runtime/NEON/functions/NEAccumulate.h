@@ -32,7 +32,11 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref NEAccumulateKernel */
+/** Basic function to run @ref NEAccumulateKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class NEAccumulate : public INESimpleFunctionNoBorder
 {
 public:
@@ -56,7 +60,11 @@ public:
     void configure(const ITensor *input, ITensor *output);
 };
 
-/** Basic function to run @ref NEAccumulateWeightedKernel */
+/** Basic function to run @ref NEAccumulateWeightedKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class NEAccumulateWeighted : public INESimpleFunctionNoBorder
 {
 public:
@@ -82,7 +90,11 @@ public:
     void configure(const ITensor *input, float alpha, ITensor *output, bool use_fp16 = false);
 };
 
-/** Basic function to run @ref NEAccumulateSquaredKernel */
+/** Basic function to run @ref NEAccumulateSquaredKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class NEAccumulateSquared : public INESimpleFunctionNoBorder
 {
 public:

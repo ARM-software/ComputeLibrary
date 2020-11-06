@@ -32,7 +32,11 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEMagnitudePhaseKernel */
+/** Basic function to run @ref NEMagnitudePhaseKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class NEPhase : public INESimpleFunctionNoBorder
 {
 public:

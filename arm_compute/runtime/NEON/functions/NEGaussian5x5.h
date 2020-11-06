@@ -46,6 +46,8 @@ class NEFillBorderKernel;
  * -# @ref NEGaussian5x5HorKernel
  * -# @ref NEGaussian5x5VertKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEGaussian5x5 : public IFunction
 {

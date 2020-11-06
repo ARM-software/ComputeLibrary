@@ -34,6 +34,9 @@ class ITensor;
  *
  * @note The image data type for the inputs must be U8 or S16
  * @note The function calculates the absolute difference also when the 2 inputs have different image data types
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEAbsoluteDifference : public INESimpleFunctionNoBorder
 {

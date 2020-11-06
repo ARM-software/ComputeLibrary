@@ -38,6 +38,7 @@ class NERangeKernel;
  *
  * @note The tensor data type for the output must be U8/S8/U16/S16/U32/S32/F16/F32.
  * @note The function performs generates a sequence with the given start, end and step.
+ *
  */
 class NERange : public IFunction
 {

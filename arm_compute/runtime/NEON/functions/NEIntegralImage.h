@@ -30,7 +30,11 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run a @ref NEIntegralImageKernel */
+/** Basic function to run a @ref NEIntegralImageKernel
+ *
+* @deprecated This function is deprecated and is intended to be removed in 21.05 release
+*
+*/
 class NEIntegralImage : public INESimpleFunction
 {
 public:

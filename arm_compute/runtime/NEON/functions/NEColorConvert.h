@@ -32,7 +32,11 @@ class ITensor;
 class IMultiImage;
 using IImage = ITensor;
 
-/**Basic function to run @ref NEColorConvertKernel to perform color conversion */
+/**Basic function to run @ref NEColorConvertKernel to perform color conversion
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ */
 class NEColorConvert : public INESimpleFunctionNoBorder
 {
 public:

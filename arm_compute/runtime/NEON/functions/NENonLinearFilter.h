@@ -39,6 +39,9 @@ class ITensor;
  * -# @ref NENonLinearFilterKernel
  *
  * @note Supported mask dimensions squares of sizes 3, 5
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NENonLinearFilter : public INESimpleFunction
 {

@@ -44,6 +44,8 @@ using IImage = ITensor;
  * -# @ref NECumulativeDistributionKernel
  * -# @ref NETableLookupKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEEqualizeHistogram : public IFunction
 {

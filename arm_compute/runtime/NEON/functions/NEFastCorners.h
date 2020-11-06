@@ -49,6 +49,8 @@ using IImage = ITensor;
  * -# @ref NENonMaximaSuppression3x3Kernel (executed if nonmax_suppression == true)
  * -# @ref NEFillArrayKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEFastCorners : public IFunction
 {

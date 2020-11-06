@@ -33,7 +33,11 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref NEWarpAffineKernel */
+/** Basic function to run @ref NEWarpAffineKernel
+ *
+ * @deprecated This function is deprecated and will be removed in release 20.02
+ *
+*/
 class NEWarpAffine : public INESimpleFunction
 {
 public:

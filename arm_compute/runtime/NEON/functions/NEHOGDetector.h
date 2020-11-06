@@ -36,6 +36,8 @@ class ITensorInfo;
  *
  * -# @ref NEHOGDetectorKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEHOGDetector : public INESimpleFunctionNoBorder
 {

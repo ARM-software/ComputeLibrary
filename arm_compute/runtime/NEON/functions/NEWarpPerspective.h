@@ -33,7 +33,11 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref NEWarpPerspectiveKernel */
+/** Basic function to run @ref NEWarpPerspectiveKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class NEWarpPerspective : public INESimpleFunction
 {
 public:

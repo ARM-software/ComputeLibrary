@@ -44,6 +44,8 @@ class ICPPKernel;
  * -# @ref NEDerivative
  * -# NEMagnitudePhaseKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEHOGGradient : public IFunction
 {
