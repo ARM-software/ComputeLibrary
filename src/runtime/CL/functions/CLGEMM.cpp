@@ -116,7 +116,6 @@ CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *
       _dst(nullptr),
       _reshape_b_only_on_first_run(false),
       _is_prepared(false),
-      _has_pad_y(false),
       _gemm_kernel_type(CLGEMMKernelType::NATIVE_V1)
 {
 }
@@ -735,7 +734,13 @@ void CLGEMM::run()
                     CLScheduler::get().enqueue(*_reshape_rhs_kernel, false);
                 }
             }
-            if(_has_pad_y)
+            // In case of RESHAPED_ONLY_RHS, we need to check the padding requirement
+            // Check if the lhs or dst tensors have padding
+            const unsigned int cross_plane_pad_lhs = _lhs->info()->padding().top + _lhs->info()->padding().bottom;
+            const unsigned int cross_plane_pad_dst = _dst->info()->padding().top + _dst->info()->padding().bottom;
+
+            bool has_pad_y = (cross_plane_pad_lhs != 0) || (cross_plane_pad_dst != 0);
+            if(has_pad_y)
             {
                 CLScheduler::get().enqueue(*_mm_reshaped_only_rhs_fallback_kernel, true);
             }
@@ -756,16 +761,6 @@ void CLGEMM::prepare()
 {
     if(!_is_prepared)
     {
-        // In case of RESHAPED_ONLY_RHS, we need to check the padding requirement
-        if(_gemm_kernel_type == CLGEMMKernelType::RESHAPED_ONLY_RHS)
-        {
-            // Check if the lhs or dst tensors have padding
-            const unsigned int cross_plane_pad_lhs = _lhs->info()->padding().top + _lhs->info()->padding().bottom;
-            const unsigned int cross_plane_pad_dst = _dst->info()->padding().top + _dst->info()->padding().bottom;
-
-            _has_pad_y = (cross_plane_pad_lhs != 0) || (cross_plane_pad_dst != 0);
-        }
-
         if(_gemm_kernel_type != CLGEMMKernelType::NATIVE_V1 && _reshape_b_only_on_first_run)
         {
             if(_weights_manager && _weights_manager->are_weights_managed(_original_b))

@@ -212,7 +212,6 @@ private:
     ICLTensor                                                                    *_dst;
     bool                                                                          _reshape_b_only_on_first_run;
     bool                                                                          _is_prepared;
-    bool                                                                          _has_pad_y;
     CLGEMMKernelType                                                              _gemm_kernel_type;
 };
 } // namespace arm_compute
