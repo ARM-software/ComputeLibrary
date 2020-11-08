@@ -1157,9 +1157,12 @@ inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, const 
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 
-    output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_x + padding_left.x() + padding_right.x());
-    output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_y + padding_left.y() + padding_right.y());
-    output_shape.set(idx_batch, input->tensor_shape()[idx_batch] / (block_x * block_y));
+    ARM_COMPUTE_ERROR_ON((input->tensor_shape()[idx_width] + padding_left.x() + padding_right.x()) % block_x != 0);
+    ARM_COMPUTE_ERROR_ON((input->tensor_shape()[idx_height] + padding_left.y() + padding_right.y()) % block_y != 0);
+
+    output_shape.set(idx_width, (input->tensor_shape()[idx_width] + padding_left.x() + padding_right.x()) / block_x);
+    output_shape.set(idx_height, (input->tensor_shape()[idx_height] + padding_left.y() + padding_right.y()) / block_y);
+    output_shape.set(idx_batch, input->tensor_shape()[idx_batch] * block_x * block_y);
 
     return output_shape;
 }

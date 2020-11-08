@@ -55,8 +55,8 @@ public:
     /** Initialise the kernel's inputs and output.
      *
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
-     * @param[in]  block_shape 1-D tensor with shape [M]. Data types supported: S32
-     * @param[in]  paddings    2-D tensor with shape [2, M]. Data types supported: S32
+     * @param[in]  block_shape 1-D tensor with shape [M]. Supported M: 2. Data types supported: S32
+     * @param[in]  paddings    2-D tensor with shape [2, M] (First dimension is the fastest-changing dimension). Supported M: 2. Data types supported: S32
      * @param[out] output      Tensor output. Data types supported: same as @p input
      */
     void configure(const ITensor *input, const ITensor *block_shape, const ITensor *paddings, ITensor *output);
@@ -65,16 +65,16 @@ public:
      * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
-     * @param[in]  padding_left  The left padding of the output tensor.
-     * @param[in]  padding_right The right padding of the output tensor.
+     * @param[in]  padding_left  The padding at the beginning of every dimension of the output tensor.
+     * @param[in]  padding_right The padding at the end of every dimension of the output tensor.
      * @param[out] output        Tensor output. Data types supported: same as @p input
      */
     void configure(const ITensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NESpaceToBatchLayerKernel
      *
      * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: All.
-     * @param[in] block_shape 1-D tensor with shape [M]. Data types supported: S32
-     * @param[in] paddings    2-D tensor with shape [2, M]. Data types supported: S32
+     * @param[in] block_shape 1-D tensor with shape [M]. Supported M: 2. Data types supported: S32
+     * @param[in] paddings    2-D tensor with shape [2, M] (First dimension is the fastest-changing dimension). Supported M: 2. Data types supported: S32
      * @param[in] output      Tensor output. Data types supported: same as @p input
      *
      * @return a status
@@ -85,8 +85,8 @@ public:
      * @param[in] input         Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in] block_shape_x Block shape x value.
      * @param[in] block_shape_y Block shape y value.
-     * @param[in] padding_left  The left padding of the output tensor.
-     * @param[in] padding_right The right padding of the output tensor.
+     * @param[in] padding_left  The padding at the beginning of every dimension of the output tensor.
+     * @param[in] padding_right The padding at the end of every dimension of the output tensor.
      * @param[in] output        Tensor output. Data types supported: same as @p input
      *
      * @return a status
@@ -98,8 +98,8 @@ public:
 
 private:
     const ITensor *_input;       /**< Source tensor */
-    const ITensor *_block_shape; /**< Block shape tensor */
-    const ITensor *_paddings;    /**< Paddings tensor */
+    const ITensor *_block_shape; /**< Block shape tensor for dynamic evaluation */
+    const ITensor *_paddings;    /**< Paddings tensor for dynamic evaluation */
     ITensor       *_output;      /**< Destination tensor */
     DataLayout     _data_layout; /**< Data layout to be used at run-time */
 
