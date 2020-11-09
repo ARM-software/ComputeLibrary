@@ -58,10 +58,10 @@ public:
     CLConvolutionLayerReshapeWeights(const CLConvolutionLayerReshapeWeights &) = delete;
     /** Prevent instances of this class from being copied */
     CLConvolutionLayerReshapeWeights &operator=(const CLConvolutionLayerReshapeWeights &) = delete;
-    /** Prevent instances of this class to be moved */
-    CLConvolutionLayerReshapeWeights(CLConvolutionLayerReshapeWeights &&) = delete;
-    /** Prevent instances of this class to be moved */
-    CLConvolutionLayerReshapeWeights &operator=(CLConvolutionLayerReshapeWeights &&) = delete;
+    /** Default move constructor */
+    CLConvolutionLayerReshapeWeights(CLConvolutionLayerReshapeWeights &&) = default;
+    /** Default move assignment operator */
+    CLConvolutionLayerReshapeWeights &operator=(CLConvolutionLayerReshapeWeights &&) = default;
     /** Default destructor */
     ~CLConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
