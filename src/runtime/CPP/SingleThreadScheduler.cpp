@@ -37,11 +37,15 @@ void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
 
 void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
-    const Window      &max_window     = kernel->window();
-    const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
-    if(num_iterations < 1)
+    const Window &max_window = kernel->window();
+
+    if(hints.split_dimension() != IScheduler::split_dimensions_all)
     {
-        return;
+        const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
+        if(num_iterations < 1)
+        {
+            return;
+        }
     }
 
     ThreadInfo info;
