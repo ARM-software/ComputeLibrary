@@ -53,6 +53,10 @@ public:
     CLFFT1D(const CLFFT1D &) = delete;
     /** Prevent instances of this class from being copied */
     CLFFT1D &operator=(const CLFFT1D &) = delete;
+    /** Default move constructor */
+    CLFFT1D(CLFFT1D &&) = default;
+    /** Default move assignment operator */
+    CLFFT1D &operator=(CLFFT1D &&) = default;
     /** Default destructor */
     ~CLFFT1D();
     /** Initialise the function's source, destinations and border mode.
