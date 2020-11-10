@@ -135,7 +135,7 @@ public:
     Tiny4DShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 7U, 7U, 5U, 3U },
+        TensorShape{ 2U, 7U, 5U, 3U },
                      TensorShape{ 17U, 13U, 7U, 2U },
     })
     {
@@ -171,6 +171,26 @@ public:
     {
     }
 };
+/** Data set containing small tensor shapes with none of the dimensions equal to 1 (unit). */
+class SmallNoneUnitShapes final : public ShapeDataset
+{
+public:
+    SmallNoneUnitShapes()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 13U, 11U },
+                     TensorShape{ 16U, 16U },
+                     TensorShape{ 24U, 26U, 5U },
+                     TensorShape{ 7U, 7U, 17U, 2U },
+                     // Batch size 4
+                     TensorShape{ 27U, 13U, 2U, 4U },
+                     // Arbitrary batch size
+                     TensorShape{ 8U, 7U, 5U, 5U }
+    })
+    {
+    }
+};
 /** Data set containing small tensor shapes. */
 class SmallShapes final : public ShapeDataset
 {
@@ -179,8 +199,8 @@ public:
         : ShapeDataset("Shape",
     {
         // Batch size 1
-        TensorShape{ 11U, 11U },
-                     TensorShape{ 16U, 16U },
+        TensorShape{ 3U, 11U },
+                     TensorShape{ 1U, 16U },
                      TensorShape{ 27U, 13U, 7U },
                      TensorShape{ 7U, 7U, 17U, 2U },
                      // Batch size 4

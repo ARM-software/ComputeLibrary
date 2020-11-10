@@ -51,7 +51,7 @@ const auto PoolingLayerIndicesDatasetFPSmall = combine(combine(framework::datase
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
+FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
                                                                                                                    framework::dataset::make("DataType", DataType::F32))),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
@@ -63,7 +63,7 @@ FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framewor
 TEST_SUITE_END() // FP32
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
+FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
                                                                                                                   framework::dataset::make("DataType", DataType::F16))),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
