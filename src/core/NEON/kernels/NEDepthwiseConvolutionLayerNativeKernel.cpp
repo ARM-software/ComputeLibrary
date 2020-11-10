@@ -39,7 +39,6 @@ namespace arm_compute
 namespace
 {
 constexpr auto data_layout = DataLayout::NHWC;
-const size_t   batch_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 const size_t   width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
 const size_t   height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 const size_t   channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
