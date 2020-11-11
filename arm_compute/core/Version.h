@@ -27,12 +27,12 @@
 #include <string>
 
 /* Macro utilities */
-#define STRINGIFY2(s) #s
-#define STRINGIFY(s) STRINGIFY2(s)
+#define ARM_COMPUTE_STRINGIFY2(s) #s
+#define ARM_COMPUTE_STRINGIFY(s) ARM_COMPUTE_STRINGIFY2(s)
 
-#define ARM_COMPUTE_VERSION_STR          \
-    STRINGIFY(ARM_COMPUTE_VERSION_MAJOR) \
-    "." STRINGIFY(ARM_COMPUTE_VERSION_MINOR) "." STRINGIFY(ARM_COMPUTE_VERSION_PATCH)
+#define ARM_COMPUTE_VERSION_STR                      \
+    ARM_COMPUTE_STRINGIFY(ARM_COMPUTE_VERSION_MAJOR) \
+    "." ARM_COMPUTE_STRINGIFY(ARM_COMPUTE_VERSION_MINOR) "." ARM_COMPUTE_STRINGIFY(ARM_COMPUTE_VERSION_PATCH)
 
 namespace arm_compute
 {
@@ -44,5 +44,8 @@ namespace arm_compute
  */
 std::string build_information();
 } // namespace arm_compute
+
+#undef ARM_COMPUTE_STRINGIFY
+#undef ARM_COMPUTE_STRINGIFY2
 
 #endif /* ARM_COMPUTE_LIBRARY_VERSION_H */
