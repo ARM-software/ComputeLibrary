@@ -193,16 +193,16 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
                                                         ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, ITensorInfo *bias,
                                                         ITensorInfo *output_multipliers, ITensorInfo *output_shifts, ElementsProcessed &num_elements_processed)
 {
-    ARM_COMPUTE_UNUSED(vector_sum_row, vector_sum_col, output_multipliers, bias, output_shifts);
+    const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
 
-    const GEMMLowpOutputStageInfo output_stage                        = gemm_info.output_stage;
-    unsigned int                 &num_elems_processed_per_iteration_x = num_elements_processed[0];
-    unsigned int                 &num_elems_processed_per_iteration_y = num_elements_processed[1];
-    bool                          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d;
-    bool                          reinterpret_output_as_3d            = (gemm_info.depth_output_gemm3d != 0);
+    unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
+    unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
+    bool          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d;
+    bool          reinterpret_output_as_3d            = (gemm_info.depth_output_gemm3d != 0);
 
     Window win{};
     Window win_out{};
+    bool   window_changed = false;
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -240,11 +240,29 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-    AccessWindowStatic output_access(output, 0, 0,
-                                     output->dimension(0),
-                                     output->dimension(1));
+    if(output_stage.type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
+    {
+        if(gemm_info.a_offset != 0)
+        {
+            AccessWindowHorizontal vector_sum_col_access(vector_sum_col, 0, num_elems_processed_per_iteration_x);
+            window_changed = window_changed || update_window_and_padding(win_out, vector_sum_col_access);
+        }
+        // No access window needed for vector_sum_row
+        ARM_COMPUTE_UNUSED(vector_sum_row);
 
-    output_access.set_valid_region(win_out, ValidRegion(Coordinates(), output->tensor_shape()));
+        if(bias != nullptr)
+        {
+            AccessWindowHorizontal bias_access(bias, 0, num_elems_processed_per_iteration_x);
+            window_changed = window_changed || update_window_and_padding(win_out, bias_access);
+        }
+
+        if(output_multipliers != nullptr && output_multipliers->dimension(0) > 1)
+        {
+            AccessWindowHorizontal output_multipliers_access(output_multipliers, 0, num_elems_processed_per_iteration_x);
+            AccessWindowHorizontal output_shifts_access(output_shifts, 0, num_elems_processed_per_iteration_x);
+            window_changed = window_changed || update_window_and_padding(win_out, output_multipliers_access, output_shifts_access);
+        }
+    }
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS
@@ -252,7 +270,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(output->num_dimensions()), 2u);
     collapsed                                = win.collapse(win, dimension_to_collapse);
 
-    return std::make_pair(Status{}, collapsed);
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, collapsed);
 }
 } // namespace
 
@@ -297,7 +316,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
                                                   output_multipliers != nullptr ? output_multipliers->info() : nullptr,
                                                   output_shifts != nullptr ? output_shifts->info() : nullptr));
 
-    auto                          padding_info = get_padding_info({ input0, input1, output, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts });
+    auto                          padding_info = get_padding_info({ input0, input1, output, vector_sum_row });
     const GEMMRHSMatrixInfo       rhs_info     = gemm_info.rhs_info;
     const GEMMLHSMatrixInfo       lhs_info     = gemm_info.lhs_info;
     const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
@@ -349,8 +368,13 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     // we will dispatch a batched-GEMM to reduce the complexity of the address calculation within the OpenCL kernel.
     // This means that the actual m used by the kernel is given by output->info()->dimension(1) and not by gemm_info.m
     const unsigned int internal_m = _reinterpret_output_as_3d ? gemm_info.m : output->info()->dimension(1);
+
+    // Shrink M0 to be always <= M (internal_m) to prevent out-of-bounds reads.
+    // NOTE: This might have implications on heuristics and performance
+    const unsigned int internal_m0 = std::min(internal_m, lhs_info.m0);
+
     // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
-    const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
+    const unsigned int partial_store_m0 = internal_m % internal_m0;
     const unsigned int partial_store_n0 = gemm_info.n % rhs_info.n0;
 
     // Create build options
@@ -362,10 +386,10 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
     build_opts.add_option_if(rhs_info.interleave, "-DRHS_INTERLEAVE");
     build_opts.add_option_if(_use_dummy_work_items, "-DDUMMY_WORK_ITEMS");
-    build_opts.add_option("-DM=" + support::cpp11::to_string(input0->info()->dimension(1)));
+    build_opts.add_option("-DM=" + support::cpp11::to_string(internal_m));
     build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n));
     build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k));
-    build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
+    build_opts.add_option("-DM0=" + support::cpp11::to_string(internal_m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
     build_opts.add_option("-DH0=" + support::cpp11::to_string(rhs_info.h0));

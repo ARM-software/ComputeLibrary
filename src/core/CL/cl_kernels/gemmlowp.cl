@@ -610,7 +610,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
         LOAD_BLOCK(M0, 1, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
         // Load values from RHS reshaped matrix
-        LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zlhs);
+        LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
 
         ARM_MM_K0XN0XM0(M0, N0, 1, a, b, c);
         lhs_offset += 1;
@@ -842,7 +842,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
         LOAD_BLOCK(M0, 1, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
         // Load values from RHS reshaped matrix
-        LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zlhs);
+        LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
 
         ARM_MM_K0XN0XM0(M0, N0, 1, a, b, c);
         lhs_offset += 1;

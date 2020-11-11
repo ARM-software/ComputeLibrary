@@ -45,6 +45,16 @@ namespace validation
 {
 namespace
 {
+class SmallConvolutionLayerDatasetCases final : public datasets::ConvolutionLayerDataset
+{
+public:
+    SmallConvolutionLayerDatasetCases()
+    {
+        // 1D Kernel
+        add_config(TensorShape(1U, 130U, 2000U), TensorShape(1U, 1U, 2000U, 2000U), TensorShape(2000U), TensorShape(1U, 130U, 2000U), PadStrideInfo(1, 1, 0, 0));
+    }
+};
+
 RelativeTolerance<float>            tolerance_f32(0.1f);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr AbsoluteTolerance<float>  tolerance_qasymm8(1);                 /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
@@ -233,6 +243,18 @@ const auto QuantizationData = framework::dataset::make("QuantizationInfo",
     QuantizationInfo(1.1f, 10),
 });
 TEST_SUITE(QASYMM8)
+
+FIXTURE_DATA_TEST_CASE(RunSmallCases, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(SmallConvolutionLayerDatasetCases(),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       QuantizationData),
+                               QuantizedActivationFunctionsSmallDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
