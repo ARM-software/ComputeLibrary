@@ -391,15 +391,18 @@ struct RedOpX
 
     inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, const ReductionOperation op)
     {
-        const TensorInfo in_info = *(in->info());
+        const TensorInfo in_info        = *(in->info());
+        const int        window_step_x  = 16 / sizeof(T);
+        const auto       window_start_x = static_cast<int>(in_window.x().start());
+        const auto       window_end_x   = static_cast<int>(in_window.x().end());
 
-        Iterator   input(in, in_window);
-        Iterator   output(out, out_window);
-        const int  window_step_x  = 16 / sizeof(T);
-        const auto window_start_x = static_cast<int>(in_window.x().start());
-        const auto window_end_x   = static_cast<int>(in_window.x().end());
+        Window in_win_no_pad = in_window;
+        in_win_no_pad.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-        execute_window_loop(in_window, [&](const Coordinates &)
+        Iterator input(in, in_win_no_pad);
+        Iterator output(out, out_window);
+
+        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<const T *>(input.ptr());
 
@@ -603,13 +606,17 @@ struct RedOpX_quantized
         const TensorInfo              in_info = *(in->info());
         const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
 
-        Iterator   input(in, in_window);
-        Iterator   output(out, out_window);
         const int  window_step_x  = 16 / sizeof(T);
         const auto window_start_x = static_cast<int>(in_window.x().start());
         const auto window_end_x   = static_cast<int>(in_window.x().end());
 
-        execute_window_loop(in_window, [&](const Coordinates &)
+        Window in_win_no_pad = in_window;
+        in_win_no_pad.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input(in, in_win_no_pad);
+        Iterator output(out, out_window);
+
+        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<T *>(input.ptr());
 
@@ -858,15 +865,23 @@ struct RedOpYZW
 
     inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, int axis, const ReductionOperation op)
     {
-        const TensorInfo in_info = *(in->info());
+        const TensorInfo in_info            = *(in->info());
+        const int        window_step_x      = 16 / sizeof(T);
+        const auto       window_start_x_tmp = static_cast<int>(in_window.x().start());
+        const auto       window_end_x_tmp   = static_cast<int>(in_window.x().end());
+        // As it split over x-axis, need to set the correct spiltted window start and end.
+        const auto window_start_x = static_cast<int>(0);
+        const auto window_end_x   = static_cast<int>(in_window.shape().x());
 
-        Iterator   input(in, in_window);
-        Iterator   output(out, out_window);
-        const int  window_step_x  = 16 / sizeof(T);
-        const auto window_start_x = static_cast<int>(in_window.x().start());
-        const auto window_end_x   = static_cast<int>(in_window.x().end());
+        Window in_win_no_pad = in_window;
+        in_win_no_pad.set(Window::DimX, Window::Dimension(window_start_x_tmp, window_end_x_tmp, in_window.shape().x()));
+        Window out_win_no_pad = out_window;
+        out_win_no_pad.set(Window::DimX, Window::Dimension(window_start_x_tmp, window_end_x_tmp, out_window.shape().x()));
 
-        execute_window_loop(in_window, [&](const Coordinates &)
+        Iterator input(in, in_win_no_pad);
+        Iterator output(out, out_win_no_pad);
+
+        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<T *>(input.ptr());
 
@@ -1070,18 +1085,26 @@ struct RedOpYZW_complex
     inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, int, const ReductionOperation)
     {
         ARM_COMPUTE_ERROR_ON(axis != 2);
+        ARM_COMPUTE_ERROR_ON(op != ReductionOperation::SUM);
 
-        const TensorInfo in_info = *(in->info());
+        const TensorInfo in_info            = *(in->info());
+        const size_t     stride_z           = in_info.strides_in_bytes()[axis];
+        const int        window_step_x      = 16 / sizeof(T);
+        const auto       window_start_x_tmp = static_cast<int>(in_window.x().start());
+        const auto       window_end_x_tmp   = static_cast<int>(in_window.x().end());
+        // As it split over x-axis, need to set the correct spiltted window start and end.
+        const auto window_start_x = static_cast<int>(0);
+        const auto window_end_x   = static_cast<int>(in_window.shape().x());
 
-        Iterator   input(in, in_window);
-        Iterator   output(out, out_window);
-        const int  window_step_x  = 16 / sizeof(T);
-        const auto window_start_x = static_cast<int>(in_window.x().start());
-        const auto window_end_x   = static_cast<int>(in_window.x().end());
+        Window in_win_no_pad = in_window;
+        in_win_no_pad.set(Window::DimX, Window::Dimension(window_start_x_tmp, window_end_x_tmp, in_window.shape().x()));
+        Window out_win_no_pad = out_window;
+        out_win_no_pad.set(Window::DimX, Window::Dimension(window_start_x_tmp, window_end_x_tmp, out_window.shape().x()));
 
-        const size_t stride_z = in_info.strides_in_bytes()[axis];
+        Iterator input(in, in_win_no_pad);
+        Iterator output(out, out_win_no_pad);
 
-        execute_window_loop(in_window, [&](const Coordinates &)
+        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
         {
             // Compute window_step_x elements per iteration
             int x = window_start_x;
@@ -1096,29 +1119,14 @@ struct RedOpYZW_complex
                 T *out_ptr = reinterpret_cast<T *>(output.ptr() + 2 * x * sizeof(T));
                 for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
                 {
-                    T *in_ptr_0;
-                    T *in_ptr_1;
-                    switch(axis)
-                    {
-                        case 2:
-                            in_ptr_0 = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + stride_z * dim);
-                            in_ptr_1 = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + 16 + stride_z * dim);
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Not supported");
-                    }
+                    T *in_ptr_0 = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + stride_z * dim);
+                    T *in_ptr_1 = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + 16 + stride_z * dim);
+
                     const auto vec_elements_0 = wrapper::vloadq(in_ptr_0);
                     const auto vec_elements_1 = wrapper::vloadq(in_ptr_1);
 
-                    switch(op)
-                    {
-                        case ReductionOperation::SUM:
-                            vec_res_value_0 = wrapper::vadd(vec_elements_0, vec_res_value_0);
-                            vec_res_value_1 = wrapper::vadd(vec_elements_1, vec_res_value_1);
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Not supported");
-                    }
+                    vec_res_value_0 = wrapper::vadd(vec_elements_0, vec_res_value_0);
+                    vec_res_value_1 = wrapper::vadd(vec_elements_1, vec_res_value_1);
                 }
 
                 wrapper::vstore(out_ptr, vec_res_value_0);
@@ -1134,24 +1142,9 @@ struct RedOpYZW_complex
                 T *out_ptr = reinterpret_cast<T *>(output.ptr() + 2 * x * sizeof(T));
                 for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
                 {
-                    T *in_ptr;
-                    switch(axis)
-                    {
-                        case 2:
-                            in_ptr = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + stride_z * dim);
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Not supported");
-                    }
-                    switch(op)
-                    {
-                        case ReductionOperation::SUM:
-                            res_value_0 += *in_ptr;
-                            res_value_1 += *(in_ptr + 1);
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Not supported");
-                    }
+                    T *in_ptr = reinterpret_cast<T *>(input.ptr() + 2 * x * sizeof(T) + stride_z * dim);
+                    res_value_0 += *in_ptr;
+                    res_value_1 += *(in_ptr + 1);
                 }
                 *out_ptr       = res_value_0;
                 *(out_ptr + 1) = res_value_1;
@@ -1166,19 +1159,26 @@ struct RedOpYZW_quantized
 {
     inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, int axis, const ReductionOperation op)
     {
-        const TensorInfo in_info = *(in->info());
-
-        Iterator   input(in, in_window);
-        Iterator   output(out, out_window);
-        const int  window_step_x  = 16 / sizeof(T);
-        const auto window_start_x = static_cast<int>(in_window.x().start());
-        const auto window_end_x   = static_cast<int>(in_window.x().end());
-
-        using PromotedType = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
-
+        const TensorInfo              in_info = *(in->info());
         const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
+        using PromotedType                    = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
 
-        execute_window_loop(in_window, [&](const Coordinates &)
+        const int  window_step_x      = 16 / sizeof(T);
+        const auto window_start_x_tmp = static_cast<int>(in_window.x().start());
+        const auto window_end_x_tmp   = static_cast<int>(in_window.x().end());
+        // As it split over x-axis, need to set the correct spiltted window start and end.
+        const auto window_start_x = static_cast<int>(0);
+        const auto window_end_x   = static_cast<int>(in_window.shape().x());
+
+        Window in_win_no_pad = in_window;
+        in_win_no_pad.set(Window::DimX, Window::Dimension(window_start_x_tmp, window_end_x_tmp, in_window.shape().x()));
+        Window out_win_no_pad = out_window;
+        out_win_no_pad.set(Window::DimX, Window::Dimension(window_start_x_tmp, window_end_x_tmp, out_window.shape().x()));
+
+        Iterator input(in, in_win_no_pad);
+        Iterator output(out, out_win_no_pad);
+
+        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<T *>(input.ptr());
 
@@ -1672,7 +1672,7 @@ void NEReductionOperationKernel::configure(const ITensor *input, ITensor *output
     Coordinates coord;
     coord.set_num_dimensions(input->info()->num_dimensions());
     input->info()->set_valid_region(ValidRegion(coord, input->info()->tensor_shape()));
-    Window win = calculate_max_window(*input->info(), Steps(input->info()->dimension(0)));
+    Window win = calculate_max_window(*input->info(), Steps());
     INEKernel::configure(win);
 
     // Calculate output shape and set if empty
