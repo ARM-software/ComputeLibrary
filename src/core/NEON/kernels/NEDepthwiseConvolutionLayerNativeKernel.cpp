@@ -372,7 +372,7 @@ void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *w
                                                  out_of_bound_vector;
                     const auto weights_vals = wrapper::vload(reinterpret_cast<TW *>(weights_ptr + w * run_info.weights_stride_y) + x);
 
-                    for(size_t i = 0; i < run_info.x_step; ++i)
+                    for(size_t i = 0; i < element_per_vector; ++i)
                     {
                         acc.at(i) += input_vals[i] * weights_vals[i];
                         in_sum.at(i) += input_vals[i];
@@ -387,7 +387,7 @@ void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *w
             }
 
             VectorType out_vals = wrapper::vdup_n(static_cast<T>(0), TagType{});
-            for(size_t i = 0; i < run_info.x_step; ++i)
+            for(size_t i = 0; i < element_per_vector; ++i)
             {
                 acc.at(i) -= in_sum.at(i) * weights_qoffset;
                 acc.at(i) -= we_sum.at(i) * input_qoffset;
