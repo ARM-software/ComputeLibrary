@@ -156,7 +156,7 @@ void mul_saturate_quantized_8(const ITensor *in1, const ITensor *in2, ITensor *o
     const int  window_step_x         = 16 / sizeof(T);
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     const UniformQuantizationInfo output_qua_info = out->info()->quantization_info().uniform();
     const UniformQuantizationInfo tmp_qua_info    = { output_qua_info.scale / scale, output_qua_info.offset };
@@ -785,7 +785,7 @@ void mul_S32_S32_S32(const ITensor *in1, const ITensor *in2, ITensor *out, const
     const int  window_step_x         = 8;
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     if(is_broadcast_across_x)
     {
@@ -935,7 +935,7 @@ void mul_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const
     constexpr int window_step_x         = 16 / sizeof(float);
     const auto    window_start_x        = static_cast<int>(window.x().start());
     const auto    window_end_x          = static_cast<int>(window.x().end());
-    const bool    is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool    is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     using ExactTagType = typename wrapper::traits::neon_vector<float, window_step_x>::tag_type;
 
@@ -1033,7 +1033,7 @@ void c_mul_F32_F32_F32_n(const ITensor *in1, const ITensor *in2, ITensor *out, c
     constexpr int window_step_x         = 8 / sizeof(float);
     const auto    window_start_x        = static_cast<int>(window.x().start());
     const auto    window_end_x          = static_cast<int>(window.x().end());
-    const bool    is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool    is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     using ExactTagType = typename wrapper::traits::neon_vector<float, 2>::tag_type;
 

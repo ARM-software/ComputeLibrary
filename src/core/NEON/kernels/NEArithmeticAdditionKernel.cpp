@@ -56,7 +56,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, const Conver
     constexpr int window_step_x         = 16 / sizeof(T);
     const auto    window_start_x        = static_cast<int>(window.x().start());
     const auto    window_end_x          = static_cast<int>(window.x().end());
-    const bool    is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool    is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     if(is_broadcast_across_x)
     {
@@ -152,7 +152,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
     const int  window_step_x         = 16;
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
@@ -345,7 +345,7 @@ void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const 
     const int  window_step_x         = 16;
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
@@ -537,7 +537,7 @@ void add_QSYMM16_QSYMM16_QSYMM16(const ITensor *in1, const ITensor *in2, ITensor
     const int  window_step_x         = 8;
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
