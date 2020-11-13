@@ -55,7 +55,9 @@ void fp16_neon_floor(const void *src, void *dst, int len)
 
     for(; len > 0; --len)
     {
-        *pdst++ = std::floor(*psrc++);
+        *pdst = std::floor(*psrc);
+        ++psrc;
+        ++pdst;
     }
 }
 } // namespace cpu

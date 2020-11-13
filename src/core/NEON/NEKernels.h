@@ -100,6 +100,7 @@
 #include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "src/core/NEON/kernels/NELKTrackerKernel.h"
 #include "src/core/NEON/kernels/NELocallyConnectedMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NELogicalKernel.h"
 #include "src/core/NEON/kernels/NEMagnitudePhaseKernel.h"
 #include "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NEMeanStdDevKernel.h"

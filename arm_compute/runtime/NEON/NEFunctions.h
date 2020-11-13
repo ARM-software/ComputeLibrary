@@ -104,6 +104,7 @@
 #include "arm_compute/runtime/NEON/functions/NELaplacianPyramid.h"
 #include "arm_compute/runtime/NEON/functions/NELaplacianReconstruct.h"
 #include "arm_compute/runtime/NEON/functions/NELocallyConnectedLayer.h"
+#include "arm_compute/runtime/NEON/functions/NELogical.h"
 #include "arm_compute/runtime/NEON/functions/NEMagnitude.h"
 #include "arm_compute/runtime/NEON/functions/NEMaxUnpoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDev.h"

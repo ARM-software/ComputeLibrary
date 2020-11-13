@@ -21,42 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/NEMath.h"
-#include "src/core/common/StdTypes.h"
-#include "src/core/common/Validate.h"
-
-#include <arm_neon.h>
-#include <cmath>
-#include <cstddef>
+#ifndef ARM_COMPUTE_KERNEL_TYPES_H
+#define ARM_COMPUTE_KERNEL_TYPES_H
 
 namespace arm_compute
 {
-namespace cpu
+namespace kernels
 {
-constexpr int step = 4;
-
-void fp32_neon_floor(const void *src, void *dst, int len)
+/** List of supported logical operations */
+enum class LogicalOperation
 {
-    ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
-    ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
-    ARM_COMPUTE_ASSERT(len >= 0);
-
-    auto psrc = static_cast<const f32 *>(src);
-    auto pdst = static_cast<f32 *>(dst);
-
-    for(; len >= step; len -= step)
-    {
-        vst1q_f32(pdst, vfloorq_f32(vld1q_f32(psrc)));
-        psrc += step;
-        pdst += step;
-    }
-
-    for(; len > 0; --len)
-    {
-        *pdst = std::floor(*psrc);
-        ++pdst;
-        ++psrc;
-    }
-}
-} // namespace cpu
+    Unknown, /**< Unknown */
+    And,     /**< Logical And && */
+    Or,      /**< Logical Or || */
+    Not,     /**< Logical Not ! */
+};
+} // namespace kernels
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_KERNEL_TYPES_H */

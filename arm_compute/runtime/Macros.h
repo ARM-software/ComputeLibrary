@@ -21,42 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/NEMath.h"
-#include "src/core/common/StdTypes.h"
-#include "src/core/common/Validate.h"
+#ifndef ARM_COMPUTE_MACROS_H
+#define ARM_COMPUTE_MACROS_H
 
-#include <arm_neon.h>
-#include <cmath>
-#include <cstddef>
+#define ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE_INC(TypeName) \
+    TypeName(const TypeName &) = delete;                   \
+    TypeName &operator=(const TypeName &) = delete;        \
+    TypeName(TypeName &&)                 = default;       \
+    TypeName &operator                    =(TypeName &&);
 
-namespace arm_compute
-{
-namespace cpu
-{
-constexpr int step = 4;
-
-void fp32_neon_floor(const void *src, void *dst, int len)
-{
-    ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
-    ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
-    ARM_COMPUTE_ASSERT(len >= 0);
-
-    auto psrc = static_cast<const f32 *>(src);
-    auto pdst = static_cast<f32 *>(dst);
-
-    for(; len >= step; len -= step)
-    {
-        vst1q_f32(pdst, vfloorq_f32(vld1q_f32(psrc)));
-        psrc += step;
-        pdst += step;
-    }
-
-    for(; len > 0; --len)
-    {
-        *pdst = std::floor(*psrc);
-        ++pdst;
-        ++psrc;
-    }
-}
-} // namespace cpu
-} // namespace arm_compute
+#endif /* ARM_COMPUTE_MACROS_H */
