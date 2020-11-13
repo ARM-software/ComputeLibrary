@@ -514,6 +514,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectGEMMConv2dLayerFixture<float>, framewor
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
+#ifdef __aarch64__
 template <typename T>
 using NEDirectGEMMConv2dLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConv2d, T>;
 
@@ -568,6 +569,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallSigned, NEDirectGEMMConv2dLayerQuantizedPerChanne
 }
 TEST_SUITE_END() // QSYMM8_PER_CHANNEL
 TEST_SUITE_END() // Quantized
+#endif           // __aarch64__
 
 TEST_SUITE_END() // DirectGEMMConv2d
 
