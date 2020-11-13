@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/ICLKernel.h"
+#include "src/core/KernelTypes.h"
 
 namespace arm_compute
 {
@@ -97,6 +98,49 @@ private:
     const ITensorInfo *_input1; /**< Source tensor info 1 */
     const ITensorInfo *_input2; /**< Source tensor info 2 */
     ITensorInfo       *_output; /**< Destination tensor info */
+};
+
+class CLLogicalBinaryKernel : public CLElementwiseOperationKernel
+{
+public:
+    /** Default constructor */
+    CLLogicalBinaryKernel() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLLogicalBinaryKernel(const CLLogicalBinaryKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLLogicalBinaryKernel &operator=(const CLLogicalBinaryKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    CLLogicalBinaryKernel(CLLogicalBinaryKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    CLLogicalBinaryKernel &operator=(CLLogicalBinaryKernel &&) = default;
+    /** Default destructor */
+    ~CLLogicalBinaryKernel() = default;
+    /** Function to configure kernel
+     *
+     * @param[in] compile_context The compile context to be used.
+     * @param[in] op              Logical binary operation to be executed.
+     * @param[in] input1          First tensor input info. Data types supported: U8.
+     * @param[in] input2          Second tensor input info. Data types supported: U8.
+     * @param[in] output          Output tensor info. Data types supported: U8.
+     */
+    void configure(const CLCompileContext &compile_context, kernels::LogicalOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
+    /** Static function to check if the given configuration is valid for this kernel
+     *
+     * @param[in] op     Logical binary operation to be executed.
+     * @param[in] input1 First tensor input info. Data types supported: U8.
+     * @param[in] input2 Second tensor input info. Data types supported: U8.
+     * @param[in] output Output tensor info. Data types supported: U8.
+     */
+    static Status validate(kernels::LogicalOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+
+private:
+    // Inherited methods overridden:
+    std::string name() override;
+    std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output) override;
+    CLBuildOptions generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) override;
+    std::string generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &input1, const ITensorInfo &output) override;
+
+    kernels::LogicalOperation _op{ kernels::LogicalOperation::Unknown };
 };
 
 /** Addition operation */

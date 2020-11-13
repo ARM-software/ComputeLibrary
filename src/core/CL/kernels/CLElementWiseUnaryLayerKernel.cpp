@@ -34,16 +34,30 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo &input, const ITensorInfo &output)
+Status validate_arguments(const ITensorInfo &input, const ITensorInfo &output, const ElementWiseUnary op)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
+    if(op == ElementWiseUnary::LOGICAL_NOT)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::U8);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
+    }
 
     // Validate in case of configured output
     if(output.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::F16, DataType::F32);
+        if(op == ElementWiseUnary::LOGICAL_NOT)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::U8);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::F16, DataType::F32);
+        }
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &output);
     }
@@ -63,7 +77,7 @@ void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_co
 
     auto padding_info = get_padding_info({ input, output });
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input, *output));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input, *output, op));
 
     const std::string kernel_name    = "elementwise_unary";
     const int         vec_size_x     = 16 / output->element_size();
@@ -98,6 +112,9 @@ void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_co
         case ElementWiseUnary::ROUND:
             build_opts.add_option("-DOPERATION=round_op");
             break;
+        case ElementWiseUnary::LOGICAL_NOT:
+            build_opts.add_option("-DOPERATION=logical_not_op");
+            break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
     }
@@ -121,7 +138,7 @@ Status CLElementWiseUnaryLayerKernel::validate(const ITensorInfo *input, const I
 {
     ARM_COMPUTE_UNUSED(op);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input, *output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input, *output, op));
 
     return Status{};
 }

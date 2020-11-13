@@ -41,7 +41,7 @@ TEST_SUITE(NEON)
 
 TEST_SUITE(LogicalAnd)
 template <typename T>
-using NELogicalAndFixture = LogicalBinaryOperationValidationFixture<Tensor, Accessor, NELogicalAnd, reference::LogicalBinaryOperation::AND, T>;
+using NELogicalAndFixture = LogicalAndValidationFixture<Tensor, Accessor, NELogicalAnd, T>;
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NELogicalAndFixture<uint8_t>, framework::DatasetMode::ALL, zip(datasets::SmallShapes(), datasets::SmallShapes()))
 {
@@ -58,7 +58,7 @@ TEST_SUITE_END() // LogicalAnd
 
 TEST_SUITE(LogicalOr)
 template <typename T>
-using NELogicalOrFixture = LogicalBinaryOperationValidationFixture<Tensor, Accessor, NELogicalOr, reference::LogicalBinaryOperation::OR, T>;
+using NELogicalOrFixture = LogicalOrValidationFixture<Tensor, Accessor, NELogicalOr, T>;
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NELogicalOrFixture<uint8_t>, framework::DatasetMode::ALL, zip(datasets::SmallShapes(), datasets::SmallShapes()))
 {

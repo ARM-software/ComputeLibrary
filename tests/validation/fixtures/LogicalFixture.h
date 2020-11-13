@@ -46,10 +46,10 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        constexpr uint8_t zero              = 0;
-        constexpr uint8_t one               = 0x1;
-        constexpr uint8_t mixed             = 0xAA;
-        constexpr uint8_t mixed_bitwise_not = ~(0xAA);
+        constexpr auto zero              = (uint8_t)0;
+        constexpr auto one               = (uint8_t)0x1;
+        constexpr auto mixed             = (uint8_t)0xAA;
+        constexpr auto mixed_bitwise_not = (uint8_t) ~(0xAA);
 
         library->fill_static_values(tensor, i == 0 ?
                                     std::vector<uint8_t> { zero, one, zero, one, mixed, zero, mixed } :
@@ -70,7 +70,10 @@ protected:
     SimpleTensor<T> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, reference::LogicalBinaryOperation Op, typename T>
+template <typename T>
+using LogicalBinaryRefFunctionPtrType = SimpleTensor<T>(const SimpleTensor<T> &, const SimpleTensor<T> &);
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, LogicalBinaryRefFunctionPtrType<T> RefFunction>
 class LogicalBinaryOperationValidationFixture : public LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>
 {
     using Parent = LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>;
@@ -114,23 +117,17 @@ private:
         Parent::fill(src0, 0);
         Parent::fill(src1, 1);
 
-        switch(Op)
-        {
-            case reference::LogicalBinaryOperation::OR:
-                return reference::logical_or<T>(src0, src1);
-            case reference::LogicalBinaryOperation::AND:
-                return reference::logical_and<T>(src0, src1);
-            case reference::LogicalBinaryOperation::UNKNOWN:
-            /* fall-through */
-            default:
-                ARM_COMPUTE_ASSERT_FAIL("unknown logical binary operator is given");
-        }
-
-        return SimpleTensor<T> {};
+        return RefFunction(src0, src1);
     }
 
-    static constexpr auto _data_type{ DataType::U8 };
+    static constexpr auto _data_type = DataType::U8;
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+using LogicalOrValidationFixture = LogicalBinaryOperationValidationFixture<TensorType, AccessorType, FunctionType, T, &reference::logical_or<T>>;
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+using LogicalAndValidationFixture = LogicalBinaryOperationValidationFixture<TensorType, AccessorType, FunctionType, T, &reference::logical_and<T>>;
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class LogicalNotValidationFixture : public LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>

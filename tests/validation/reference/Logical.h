@@ -34,13 +34,6 @@ namespace validation
 {
 namespace reference
 {
-enum class LogicalBinaryOperation
-{
-    UNKNOWN = 0,
-    AND     = 1,
-    OR      = 2
-};
-
 template <typename T>
 SimpleTensor<T> logical_or(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2);
 template <typename T>

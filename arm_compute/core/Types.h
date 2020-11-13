@@ -546,13 +546,14 @@ enum class ArithmeticOperation
 /** Available element wise unary operations */
 enum class ElementWiseUnary
 {
-    RSQRT, /**< Reverse square root */
-    EXP,   /**< Exponential */
-    NEG,   /**< Negate */
-    LOG,   /**< Natural Logarithm */
-    ABS,   /**< Absolute value */
-    SIN,   /**< Sine */
-    ROUND, /**< Round */
+    RSQRT,       /**< Reverse square root */
+    EXP,         /**< Exponential */
+    NEG,         /**< Negate */
+    LOG,         /**< Natural Logarithm */
+    ABS,         /**< Absolute value */
+    SIN,         /**< Sine */
+    ROUND,       /**< Round */
+    LOGICAL_NOT, /**< Logical Not */
 };
 
 /** The normalization type used for the normalization layer */
