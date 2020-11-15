@@ -751,13 +751,13 @@ inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
     // Force width to be even for formats which require subsampling of the U and V channels
     if(has_format_horizontal_subsampling(format))
     {
-        output.set(0, output.x() & ~1U);
+        output.set(0, (output.x() + 1) & ~1U);
     }
 
     // Force height to be even for formats which require subsampling of the U and V channels
     if(has_format_vertical_subsampling(format))
     {
-        output.set(1, output.y() & ~1U);
+        output.set(1, (output.y() + 1) & ~1U);
     }
 
     return output;
