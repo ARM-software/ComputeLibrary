@@ -64,7 +64,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G52 =
     {
         { DataType::F32, &CLGEMMReshapedKernelConfigurationBifrost::configure_G52_f32 },
-        { DataType::F16, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_f16 },
+        { DataType::F16, &CLGEMMReshapedKernelConfigurationBifrost::configure_G52_f16 },
         { DataType::QASYMM8, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_u8 },
         { DataType::QSYMM8, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_u8 },
         { DataType::QASYMM8_SIGNED, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_u8 },
@@ -260,6 +260,22 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
                                            n, k, b, DataType::F32);
             }
         }
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure_G52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+
+    const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
+
+    if(workload <= 232.8000f)
+    {
+        return configure_lhs_rhs_info(m, n, 2, 4, 4, 4, 4, true, true, true, false, false);
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, true, true, true, false, false);
     }
 }
 

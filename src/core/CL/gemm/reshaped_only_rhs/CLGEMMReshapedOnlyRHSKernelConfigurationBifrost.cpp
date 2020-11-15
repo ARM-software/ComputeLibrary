@@ -65,7 +65,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G52 =
     {
         { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G52_f32 },
-        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_f16 },
+        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G52_f16 },
         { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
         { DataType::QSYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
         { DataType::QASYMM8_SIGNED, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
@@ -168,16 +168,25 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     GEMMRHSMatrixInfo rhs_info_img;
 
     const bool is_workload_big = ((m * n * b) / 16) >= 2048;
-    // Get lhs_info/rhs_info in case of OpenCL buffer
+
     if(m == 1)
     {
-        if(n <= 204.0)
+        if(n >= 8192)
         {
-            return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 16, false, true, false, true, false);
+            const unsigned int h0 = std::max(n / 4, 1U);
+            return configure_lhs_rhs_info(m, n, 1, 4, 8, 1, h0, false, true, false, true, false);
         }
         else
         {
-            return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, 32, false, true, false, true, false);
+            const unsigned int h0 = std::max(n / 2, 1U);
+            if(n <= 204)
+            {
+                return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, h0, false, true, false, true, false);
+            }
+            else
+            {
+                return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, h0, false, true, false, true, false);
+            }
         }
     }
     else
@@ -303,6 +312,72 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     else
     {
         return configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 4, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
+    const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
+    const float r_mk = static_cast<float>(m) / static_cast<float>(k);
+    const float r_nk = static_cast<float>(n) / static_cast<float>(k);
+
+    if(m == 1)
+    {
+        if(r_mk <= 0.0026f)
+        {
+            if(r_nk <= 0.4664f)
+            {
+                return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 32, false, true, false, true, false);
+            }
+            else
+            {
+                return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, 16, false, true, false, false, true);
+            }
+        }
+        else
+        {
+            if(r_mk <= 0.0148f)
+            {
+                return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 32, false, true, false, true, false);
+            }
+            else
+            {
+                return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, 16, false, true, false, false, true);
+            }
+        }
+    }
+    else
+    {
+        if(workload <= 362.6000f)
+        {
+            return configure_lhs_rhs_info(m, n, 2, 2, 8, 1, 16, false, false, false, true, false);
+        }
+        else
+        {
+            if(r_mn <= 22.6067f)
+            {
+                if(workload <= 708.8000f)
+                {
+                    return configure_lhs_rhs_info(m, n, 5, 4, 4, 1, 2, false, false, false, false, true);
+                }
+                else
+                {
+                    return configure_lhs_rhs_info(m, n, 5, 8, 2, 1, 16, false, false, false, false, false);
+                }
+            }
+            else
+            {
+                if(r_nk <= 0.0917f)
+                {
+                    return configure_lhs_rhs_info(m, n, 2, 2, 8, 1, 16, false, false, false, true, false);
+                }
+                else
+                {
+                    return configure_lhs_rhs_info(m, n, 5, 4, 4, 1, 2, false, false, false, false, true);
+                }
+            }
+        }
     }
 }
 
