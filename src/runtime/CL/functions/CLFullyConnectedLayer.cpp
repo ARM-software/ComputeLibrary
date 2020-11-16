@@ -84,23 +84,7 @@ Status construct_gemmlowp_output_stage(const ITensorInfo &input, const ITensorIn
 
         if(activation_info.enabled())
         {
-            switch(activation_info.activation())
-            {
-                case ActivationLayerInfo::ActivationFunction::RELU:
-                    type_min = PixelValue(oq_unif.offset);
-                    break;
-                case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                    type_min = PixelValue(oq_unif.offset);
-                    type_max = PixelValue(activation_info.a(), data_type, oq_info);
-                    break;
-                case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-                    type_min = PixelValue(activation_info.b(), data_type, oq_info);
-                    type_max = PixelValue(activation_info.a(), data_type, oq_info);
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Activation function not supported.");
-                    break;
-            }
+            std::tie(type_min, type_max) = get_quantized_activation_min_max(activation_info, data_type, output_quant_info);
         }
 
         // Set the GEMMLowp output stage info

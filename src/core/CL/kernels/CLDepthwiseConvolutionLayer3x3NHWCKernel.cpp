@@ -282,9 +282,11 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const CLCompileContext 
 
         if(act_info.enabled())
         {
-            const int a_val = quantize_qasymm8(act_info.a(), oq_info);
-            const int b_val = quantize_qasymm8(act_info.b(), oq_info);
-            const int o1    = oq_info.offset;
+            int a_val{};
+            int b_val{};
+            std::tie(b_val, a_val) = get_quantized_activation_min_max(act_info, input->info()->data_type(), oq_info);
+
+            const int o1 = oq_info.offset;
 
             build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
             build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));

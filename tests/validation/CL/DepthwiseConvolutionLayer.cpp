@@ -55,7 +55,8 @@ const auto large_depth_multipliers = framework::dataset::make("DepthMultiplier",
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f, 0.f)
 });
 } // namespace
 
