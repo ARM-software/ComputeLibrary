@@ -702,8 +702,11 @@ public:
                                      broadcast_bias ? 1 : m,
                                      broadcast_bias ? 1 : batch_size);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        _target = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
+        if(validate_result)
+        {
+            _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        }
     }
 
 protected:
@@ -748,6 +751,14 @@ protected:
         ReshapeLHSFunctionType reshape_lhs;
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
+
+        validate_result = bool(reshape_rhs.validate(rhs.info(), rhs_reshaped.info(), rhs_info));
+        validate_result = validate_result || !rhs_info.export_to_cl_image;
+        if(!validate_result)
+        {
+            return nullptr;
+        }
+
         reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
@@ -824,6 +835,7 @@ protected:
         }
     }
 
+    bool            validate_result = true;
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
@@ -859,8 +871,11 @@ public:
         const TensorShape rhs_shape(n, k, batch_size);
         const TensorShape bias_shape(n, 1, 1);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
+        _target = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
+        if(validate_result)
+        {
+            _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
+        }
     }
 
 protected:
@@ -901,6 +916,14 @@ protected:
         ReshapeLHSFunctionType reshape_lhs;
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
+
+        validate_result = bool(reshape_rhs.validate(rhs.info(), rhs_reshaped.info(), rhs_info));
+        validate_result = validate_result || !rhs_info.export_to_cl_image;
+        if(!validate_result)
+        {
+            return nullptr;
+        }
+
         reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
@@ -976,6 +999,7 @@ protected:
         }
     }
 
+    bool            validate_result = true;
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
@@ -1007,8 +1031,11 @@ public:
                                      broadcast_bias ? 1 : m,
                                      broadcast_bias ? 1 : batch_size);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        _target = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
+        if(validate_result)
+        {
+            _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        }
     }
 
 protected:
@@ -1050,6 +1077,14 @@ protected:
         // Create and configure function
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
+
+        validate_result = bool(reshape_rhs.validate(rhs.info(), rhs_reshaped.info(), rhs_info));
+        validate_result = validate_result || !rhs_info.export_to_cl_image;
+        if(!validate_result)
+        {
+            return nullptr;
+        }
+
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
@@ -1115,6 +1150,7 @@ protected:
         return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
+    bool            validate_result = true;
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
@@ -1147,8 +1183,11 @@ public:
         const TensorShape rhs_shape(n, k, batch_size);
         const TensorShape bias_shape(n, 1, 1);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info, has_pad_y);
-        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
+        _target = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info, has_pad_y);
+        if(validate_result)
+        {
+            _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
+        }
     }
 
 protected:
@@ -1187,6 +1226,14 @@ protected:
         // Create and configure function
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
+
+        validate_result = bool(reshape_rhs.validate(rhs.info(), rhs_reshaped.info(), rhs_info));
+        validate_result = validate_result || !rhs_info.export_to_cl_image;
+        if(!validate_result)
+        {
+            return nullptr;
+        }
+
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
@@ -1258,6 +1305,7 @@ protected:
         return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
+    bool            validate_result = true;
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };

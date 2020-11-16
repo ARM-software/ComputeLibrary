@@ -592,8 +592,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
                                                                    lhs_transpose_values),
                                                                    act_values))
 {
-    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
-    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+     // Validate output only if validate() is successful
+    if(validate_result)
     {
         validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
     }
@@ -626,8 +626,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
                                                                    lhs_transpose_values),
                                                                    act_values))
 {
-    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
-    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+     // Validate output only if validate() is successful
+    if(validate_result)
     {
         validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
     }
@@ -659,8 +659,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
                                                                    lhs_transpose_values),
                                                                    act_values))
 {
-    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
-    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+     // Validate output only if validate() is successful
+    if(validate_result)
     {
         validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
     }
@@ -692,8 +692,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
                                                                    lhs_transpose_values),
                                                                    act_values))
 {
-    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
-    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    // Validate output only if validate() is successful
+    if(validate_result)
     {
         validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
     }
@@ -963,8 +963,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
                                                                    lhs_transpose_values),
                                                                    act_values))
 {
-    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
-    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    // Validate output only if validate() is successful
+    if(validate_result)
     {
         validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
     }
@@ -997,8 +997,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
                                                                    lhs_transpose_values),
                                                                    act_values))
 {
-    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
-    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    // Validate output only if validate() is successful
+    if(validate_result)
     {
         validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
     }
@@ -1030,8 +1030,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
                                                                    lhs_transpose_values),
                                                                    act_values))
 {
-    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
-    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    // Validate output only if validate() is successful
+    if(validate_result)
     {
         validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
     }
@@ -1063,8 +1063,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
                                                                    lhs_transpose_values),
                                                                    act_values))
 {
-    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
-    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    // Validate output only if validate() is successful
+    if(validate_result)
     {
         validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
     }
