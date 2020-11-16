@@ -105,7 +105,7 @@ private:
 
             std::tuple<unsigned int, unsigned int> next_block(const T ** const row_ptr) {
                 if (finished()) {
-                    return { 0, 0 };
+                    return std::make_tuple(0, 0);
                 }
 
                 // "in_width" in the amount of data that will be read in (copied)
@@ -139,7 +139,7 @@ private:
                 m_current_pos++;
                 m_length_remaining-=out_width;
 
-                return { in_width, offset };
+                return std::make_tuple(in_width, offset);
             }
         }; // end of "row handler" class
 
