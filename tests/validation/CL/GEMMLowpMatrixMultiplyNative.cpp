@@ -53,8 +53,15 @@ namespace
 {
 // *INDENT-OFF*
 // clang-format off
-/** M values to test */
-const auto m_values = framework::dataset::make("M", 37);
+/** M, N combinations to test
+ *  1: Special 1x1 case
+ *  2: Special multples of processor size in both dimensions
+ *  3: Non multiples of processor size in both dimensions
+*/
+const auto m_n_values = zip(
+    framework::dataset::make("M", {1, 16, 37}),
+    framework::dataset::make("N", {1, 16, 51})
+    );
 
 /** M_W values to test */
 const auto m_w_values = framework::dataset::make("M_W", 5);
@@ -93,8 +100,7 @@ const auto k0_values_nightly = framework::dataset::make("K0", { 1, 2, 3, 4, 8, 1
 TEST_SUITE(CL)
 TEST_SUITE(GEMMLowpMatrixMultiplyNative)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyNativeFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(m_values,
-                                                                n_values),
+                combine(combine(combine(combine(combine(m_n_values,
                                                                 k_values),
                                                                 b_values),
                                                                 m0_values_precommit),
@@ -106,8 +112,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyNativeFixture, framewor
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyNativeFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(m_values,
-                                                                n_values),
+                combine(combine(combine(combine(combine(m_n_values,
                                                                 k_values),
                                                                 b_values),
                                                                 m0_values_nightly),

@@ -62,8 +62,19 @@ namespace
 {
 // *INDENT-OFF*
 // clang-format off
+
+/** M, N combinations to test
+ *  1: Special 1x1 case
+ *  2: Special multples of processor size in both dimensions
+ *  3: Non multiples of processor size in both dimensions
+*/
+const auto m_n_values = zip(
+    framework::dataset::make("M", {1, 16, 37}),
+    framework::dataset::make("N", {1, 16, 51})
+    );
+
 /** M values to test */
-const auto m_values = framework::dataset::make("M", 37);
+const auto m_values = framework::dataset::make("M", {1, 37});
 
 /** M_W values to test */
 const auto m_w_values = framework::dataset::make("M_W", 5);
@@ -72,7 +83,7 @@ const auto m_w_values = framework::dataset::make("M_W", 5);
 const auto m_h_values = framework::dataset::make("M_H", 7);
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", 51);
+const auto n_values = framework::dataset::make("N", {1, 51});
 
 /** K values to test */
 const auto k_values = framework::dataset::make("K", 23);
@@ -125,9 +136,8 @@ TEST_SUITE(QUANTIZED)
 
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyReshapedFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_n_values,
                                                                    k_values),
                                                                    b_values),
                                                                    m0_values_precommit_1),
@@ -205,9 +215,8 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyReshapedFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_n_values,
                                                                    k_values),
                                                                    b_values),
                                                                    m0_values_precommit_2),
