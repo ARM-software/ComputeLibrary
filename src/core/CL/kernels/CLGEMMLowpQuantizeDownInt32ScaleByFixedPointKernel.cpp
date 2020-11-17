@@ -84,6 +84,8 @@ void CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::configure(const CLCompi
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), info));
 
+    auto padding_info = get_padding_info({ input, bias, output });
+
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(info->output_data_type));
 
@@ -116,6 +118,8 @@ void CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::configure(const CLCompi
     // Configure kernel window
     auto win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::run(const Window &window, cl::CommandQueue &queue)

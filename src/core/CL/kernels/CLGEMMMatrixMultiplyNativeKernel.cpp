@@ -219,6 +219,7 @@ void CLGEMMMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), (input2 != nullptr ? input2->info() : nullptr), output->info(), alpha, beta, lhs_info, rhs_info, gemm_info));
 
+    auto padding_info         = get_padding_info({ input0, output });
     _input0                   = input0;
     _input1                   = input1;
     _input2                   = helpers::float_ops::is_zero(beta) ? nullptr : input2;
@@ -317,6 +318,8 @@ void CLGEMMMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile
     _config_id += support::cpp11::to_string(rhs_info.n0);
     _config_id += "_";
     _config_id += support::cpp11::to_string(rhs_info.k0);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMMatrixMultiplyNativeKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float alpha, float beta,

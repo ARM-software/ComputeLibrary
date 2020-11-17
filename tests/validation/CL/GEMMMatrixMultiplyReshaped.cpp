@@ -171,99 +171,10 @@ const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { 
 /** LHS transposed values */
 const auto lhs_transpose_values = framework::dataset::make("lhs_transpose", { false, true } );
 
-/** Zero padding test */
-bool validate_zero_padding(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value,
-                            unsigned int m0_value, unsigned int n0_value, unsigned int k0_value, unsigned int h0_value,
-                            bool i_value_rhs, bool t_value_rhs, bool export_to_cl_image, bool broadcast_bias, unsigned int depth_output_gemm3d, const ActivationLayerInfo &act_info,
-                            DataType dt_input0, DataType dt_input1, DataType dt_input2, DataType dt_output, float alpha, float beta)
-{
-    const unsigned int M = m_value;
-    const unsigned int N = n_value;
-    const unsigned int K = k_value;
-
-    GEMMLHSMatrixInfo lhs_info;
-    lhs_info.m0         = m0_value;
-    lhs_info.k0         = k0_value;
-
-    GEMMRHSMatrixInfo rhs_info;
-    rhs_info.n0         = n0_value;
-    rhs_info.k0         = k0_value;
-    rhs_info.h0         = h0_value;
-    rhs_info.interleave = i_value_rhs;
-    rhs_info.transpose  = t_value_rhs;
-    rhs_info.export_to_cl_image = export_to_cl_image;
-
-    GEMMKernelInfo kernel_info;
-    kernel_info.m                       = M;
-    kernel_info.n                       = N;
-    kernel_info.k                       = K;
-    kernel_info.depth_output_gemm3d     = depth_output_gemm3d;
-    kernel_info.reinterpret_input_as_3d = false;
-    kernel_info.broadcast_bias          = broadcast_bias;
-    kernel_info.activation_info         = act_info;
-
-    const TensorShape lhs_shape(K, M, b_value);
-    const TensorShape rhs_shape(N, K, b_value);
-    const TensorShape lhs_shape_reshaped = compute_lhs_reshaped_shape(TensorInfo(lhs_shape, 1, dt_input0),
-                                                                      lhs_info);
-    const TensorShape rhs_shape_reshaped = compute_rhs_reshaped_shape(TensorInfo(rhs_shape, 1, dt_input1),
-                                                                      rhs_info);
-
-    const TensorShape dst_shape = compute_mm_shape(TensorInfo(lhs_shape_reshaped, 1, dt_input0),
-                                                   TensorInfo(rhs_shape_reshaped, 1, dt_input1),
-                                                   kernel_info);
-
-    const TensorShape bias_shape(N,
-                                 M, // Correct calculation should be: broadcast_bias? 1 : M, it's wrong here on purpose just for validation test
-                                 broadcast_bias? 1 : b_value);
-
-    // Create tensors
-    CLTensor lhs_reshaped  = create_tensor<CLTensor>(lhs_shape_reshaped, dt_input0);
-    CLTensor rhs_reshaped  = create_tensor<CLTensor>(rhs_shape_reshaped, dt_input1);
-    CLTensor bias = create_tensor<CLTensor>(bias_shape, dt_input2);
-    CLTensor dst  = create_tensor<CLTensor>(dst_shape, dt_output);
-
-    ARM_COMPUTE_EXPECT(lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Validate zero-padding
-    CLGEMMMatrixMultiplyReshaped gemm;
-
-    gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
-
-    // Padding can be added along rhs and bias's X/Y dimension
-    return dst.info()->padding().empty() && lhs_reshaped.info()->padding().empty();
-}
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMMMatrixMultiplyReshaped)
-
-/** Validate zero padding tests
- *
- * A series of validation tests to check the zero padding requirement
- *
- * Checks performed in order:
- *     - No partial blocks in both x and y dimensions
- *     - Partial blocks in x dimension
- *     - Partial blocks in y dimension
- *     - Partial blocks in both x and y dimensions
- *     - Special case: partial_n0 == 9 (vstore1 should be invoked instead of vstore_partial_1)
- */
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(zip(zip(
-framework::dataset::make("M",                   { 24, 64, 101,   1, 103 }),
-framework::dataset::make("N",                   { 48, 29,  16, 121,  41 })),
-framework::dataset::make("M0",                  {  4,  8,   4,   2,   4 })),
-framework::dataset::make("N0",                  {  4,  4,  16,   2,  16 })),
-m_value, n_value, m0_value, n0_value)
-{
-    constexpr DataType dt = DataType::F32;
-
-    bool status = validate_zero_padding(m_value, n_value, 23, 1, m0_value, n0_value, 4, 1, false, false, false, 0, 0, ActivationLayerInfo(), dt, dt, dt, dt, 1.0f, 1.0f);
-    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
-}
 
 // *INDENT-OFF*
 // clang-format off

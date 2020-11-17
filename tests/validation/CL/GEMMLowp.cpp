@@ -47,25 +47,6 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_quant(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-
-bool validate_output_stage_zero_padding(const TensorShape shape, const DataType dt, const GEMMLowpOutputStageType type)
-{
-    // Create tensors
-    CLTensor src  = create_tensor<CLTensor>(shape, DataType::S32, 1);
-    CLTensor bias = create_tensor<CLTensor>(TensorShape(shape.x()), DataType::S32, 1);
-    CLTensor dst  = create_tensor<CLTensor>(shape, dt, 1);
-
-    GEMMLowpOutputStageInfo info;
-    info.type             = type;
-    info.output_data_type = dt;
-    std::tie(info.gemmlowp_min_bound, info.gemmlowp_max_bound) = quantization::get_min_max_values_from_quantized_data_type(dt);
-
-    // Create and configure function
-    CLGEMMLowpOutputStage output_stage;
-    output_stage.configure(&src, &bias, &dst, info);
-
-    return src.info()->padding().empty() && bias.info()->padding().empty() && dst.info()->padding().empty();
-}
 }
 TEST_SUITE(CL)
 TEST_SUITE(GEMMLowp)
@@ -147,13 +128,6 @@ TEST_SUITE(OutputStage)
 
 TEST_SUITE(QuantizeDownInt32Scale)
 
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8, DataType::QASYMM8_SIGNED })),
-               shape, data_type)
-{
-    bool status = validate_output_stage_zero_padding(shape, data_type, GEMMLowpOutputStageType::QUANTIZE_DOWN);
-    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
-}
-
 TEST_SUITE(QASYMM8)
 
 const auto quantize_down_int32_to_uint8_scale_cases = framework::dataset::make("result_offset", -2, 1) * framework::dataset::make("result_mult_int", 1, 2) * framework::dataset::make("result_shift", 2,
@@ -212,12 +186,6 @@ TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // QuantizeDownInt32Scale
 
 TEST_SUITE(QuantizeDownInt32ScaleByFixedPoint)
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16 })),
-               shape, data_type)
-{
-    bool status = validate_output_stage_zero_padding(shape, data_type, GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT);
-    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
-}
 
 TEST_SUITE(QASYMM8)
 
@@ -352,13 +320,6 @@ TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // QuantizeDownInt32ScaleByFixedPoint
 
 TEST_SUITE(QuantizeDownInt32ScaleByFloat)
-
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8, DataType::QASYMM8_SIGNED })),
-               shape, data_type)
-{
-    bool status = validate_output_stage_zero_padding(shape, data_type, GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT);
-    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
-}
 
 TEST_SUITE(QASYMM8)
 using CLGEMMLowpQuantizeDownInt32ScaleByFloatFixture =

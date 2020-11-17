@@ -333,11 +333,13 @@ void CLSaturatedArithmeticOperationKernel::configure(const CLCompileContext &com
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLSaturatedArithmeticOperationKernel::validate(op, input1, input2, output, policy, act_info));
+    auto padding_info = get_padding_info({ input1, input2, output });
 
     _policy   = policy;
     _op       = op;
     _act_info = act_info;
     configure_common(compile_context, input1, input2, output);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy,
@@ -389,10 +391,12 @@ void CLArithmeticOperationKernel::configure(const CLCompileContext &compile_cont
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLArithmeticOperationKernel::validate(op, input1, input2, output, act_info));
+    auto padding_info = get_padding_info({ input1, input2, output });
 
     _op       = op;
     _act_info = act_info;
     configure_common(compile_context, input1, input2, output);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)

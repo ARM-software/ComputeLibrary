@@ -138,45 +138,6 @@ using CLIm2ColFixture = Im2ColValidationFixture<CLTensor, CLAccessor, CLIm2Col, 
 
 TEST_SUITE(NHWC)
 
-/** Test that there's no padding added to input or output as part of configure
- *
- * @note 2 elements processed per iteration
- *
- * Three tests will be run:
- *  - Channels are multiple of elements processed
- *  - Channels larger and non multiple of elements used
- *  - Channels smaller and not multiple of elements used
- *
- */
-DATA_TEST_CASE(ValidateZeroPaddingNumElemsPerIterEqual2, framework::DatasetMode::ALL,
-               combine(combine(combine(combine(combine(
-                                                   framework::dataset::make("InputChannel",
-{
-    2, 9, 1,
-}),
-framework::dataset::make("DataType", { DataType::F32 })),
-framework::dataset::make("Kernel", { Size2D(3, 4) })),
-framework::dataset::make("PadStride", { PadStrideInfo(2, 1, 1, 2) })),
-framework::dataset::make("QInfo", { QuantizationInfo() })),
-framework::dataset::make("DataLayout", { DataLayout::NHWC })),
-input_channel, data_type, conv_size, pad_stride_info, qinfo, data_layout)
-{
-    TensorShape input_shape(input_channel, 10U, 30U, 3U);
-    const bool  has_bias = false;
-
-    const auto input_info   = TensorInfo(input_shape, 1, data_type, data_layout);
-    const auto output_shape = compute_im2col_conv_shape(&input_info, conv_size, pad_stride_info, has_bias, Size2D(1U, 1U), true);
-
-    CLTensor input  = create_tensor<CLTensor>(input_shape, data_type, 1, qinfo, data_layout);
-    CLTensor output = create_tensor<CLTensor>(output_shape, data_type, 1, qinfo, data_layout);
-
-    CLIm2ColKernel im2col;
-    im2col.configure(&input, &output, conv_size, pad_stride_info, has_bias);
-
-    // Ensure there're no paddings added at all
-    const bool no_padding = input.info()->padding().empty() && output.info()->padding().empty();
-    ARM_COMPUTE_EXPECT(no_padding, framework::LogLevel::ERRORS);
-}
 /** Test special kernel used for NHWC for 3x3 kernels
  *
  * @note 2 elements processed per iteration

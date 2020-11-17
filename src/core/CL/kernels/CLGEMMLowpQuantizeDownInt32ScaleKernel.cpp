@@ -92,6 +92,8 @@ void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(const CLCompileContext &c
                                                   output->info(),
                                                   output_stage));
 
+    auto padding_info = get_padding_info({ input, bias, output });
+
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(output_stage->output_data_type));
 
@@ -123,6 +125,8 @@ void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(const CLCompileContext &c
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window, cl::CommandQueue &queue)

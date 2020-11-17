@@ -124,21 +124,6 @@ TEST_CASE(FusedActivation, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
-TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL)
-{
-    CLTensor src1 = create_tensor<CLTensor>(TensorShape(3U, 3U), DataType::F32, 1, QuantizationInfo());
-    CLTensor src2 = create_tensor<CLTensor>(TensorShape(3U, 3U), DataType::F32, 1, QuantizationInfo());
-    CLTensor dst  = create_tensor<CLTensor>(TensorShape(3U, 3U), DataType::F32, 1, QuantizationInfo());
-
-    // Create and configure function
-    CLArithmeticAddition add;
-    add.configure(&src1, &src2, &dst, ConvertPolicy::WRAP);
-
-    validate(src1.info()->padding(), PaddingSize(0, 0, 0, 0));
-    validate(src2.info()->padding(), PaddingSize(0, 0, 0, 0));
-    validate(dst.info()->padding(), PaddingSize(0, 0, 0, 0));
-}
-
 template <typename T>
 using CLArithmeticAdditionFixture = ArithmeticAdditionValidationFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
 

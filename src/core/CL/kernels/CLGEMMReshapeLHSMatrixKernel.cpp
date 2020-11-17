@@ -125,6 +125,8 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const CLCompileContext &compile_con
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), lhs_info, reinterpret_input_as_3d));
 
+    auto padding_info = get_padding_info({ input });
+
     _input                   = input;
     _output                  = output;
     _reinterpret_input_as_3d = reinterpret_input_as_3d;
@@ -180,6 +182,8 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const CLCompileContext &compile_con
     _config_id += support::cpp11::to_string(lhs_info.interleave);
     _config_id += "_";
     _config_id += support::cpp11::to_string(lhs_info.transpose);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMReshapeLHSMatrixKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d)

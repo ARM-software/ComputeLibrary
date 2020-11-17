@@ -183,28 +183,6 @@ const auto ActivationFunctionsSmallDataset = framework::dataset::make("Activatio
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::SOFT_RELU)
 });
 
-/** Zero padding test */
-bool validate_zero_padding(unsigned int width, unsigned height)
-{
-    TensorShape shape(width, height, 11, 1);
-
-    WinogradInfo winograd_info = WinogradInfo(Size2D(4U, 4U), Size2D(5U, 5U), Size2D(width, height), PadStrideInfo(), DataLayout::NHWC);
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::F32, 1, QuantizationInfo(), DataLayout::NHWC);
-    CLTensor dst;
-
-    src.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
-    dst.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
-
-    CLWinogradInputTransform input_transform;
-
-    input_transform.configure(&src, &dst, winograd_info);
-
-        // Padding can be added along rhs and bias's X dimension
-    return src.info()->padding().empty() && dst.info()->padding().empty();
-}
-
 } // namespace
 
 using namespace arm_compute::misc::shape_calculator;
@@ -213,19 +191,6 @@ TEST_SUITE(CL)
 TEST_SUITE(Winograd)
 
 TEST_SUITE(InputTransform)
-
-/** Validate zero padding tests
- *
- * A series of validation tests to check that no padding is added
- */
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
-framework::dataset::make("Width",  { 32U, 37U, 12U, 1U }),
-framework::dataset::make("Height", { 13U, 27U, 19U, 1U })),
-width, height)
-{
-    bool status = validate_zero_padding(width, height);
-    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
-}
 
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 framework::dataset::make("InputInfo",{

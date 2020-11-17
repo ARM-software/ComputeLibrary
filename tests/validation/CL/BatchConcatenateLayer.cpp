@@ -39,37 +39,6 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
-/** Zero padding test */
-bool validate_zero_padding(unsigned int width, unsigned int height, unsigned int channels, unsigned int batches, DataType data_type)
-{
-    TensorShape src_shape(width, height, channels, batches);
-    TensorShape dst_shape(width, height, channels, batches * 2);
-
-    // Create tensors
-    CLTensor src0 = create_tensor<CLTensor>(src_shape, data_type);
-    CLTensor src1 = create_tensor<CLTensor>(src_shape, data_type);
-    CLTensor dst  = create_tensor<CLTensor>(dst_shape, data_type);
-
-    src0.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
-    src1.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
-    dst.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
-
-    ARM_COMPUTE_EXPECT(src0.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    std::vector<const ICLTensor *> srcs = { &src0, &src1 };
-
-    // Create and configure function
-    CLConcatenateLayer concat;
-    concat.configure(srcs, &dst, 3U);
-
-    // Padding can be added along rhs and bias's X dimension
-    return src0.info()->padding().empty() && src1.info()->padding().empty() && dst.info()->padding().empty();
-}
-}
 TEST_SUITE(CL)
 TEST_SUITE(BatchConcatenateLayer)
 
@@ -112,26 +81,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 
-/** Validate zero padding tests
- *
- * A series of validation tests to check that no padding is added as part of configuration for 4 different scenarios.
- *
- * Checks performed in order:
- *     - First dimension multiple of 16
- *     - First dimension non-multiple of 16
- *     - First dimension less than 16 (vec_size for qasymm8) but multiple
- *     - First dimension less than 16 (vec_size for qasymm8) non-multiple
- *     - Tensor with only one element
- */
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
-framework::dataset::make("Width",    { 32U, 37U, 12U, 13U, 1U }),
-framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 })),
-width, data_type)
-{
-    const bool one_elem = (width == 1U);
-    bool status = validate_zero_padding(width, one_elem ? 1U : 17U, one_elem ? 1U : 7U, one_elem ? 1U : 2U, data_type);
-    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
-}
 // clang-format on
 // *INDENT-ON*
 

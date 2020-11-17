@@ -65,6 +65,8 @@ void CLBatchConcatenateLayerKernel::configure(const CLCompileContext &compile_co
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, batch_offset, output));
 
+    auto padding_info = get_padding_info({ input, output });
+
     _batch_offset = batch_offset;
 
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->element_size(), input->dimension(0));
@@ -109,6 +111,8 @@ void CLBatchConcatenateLayerKernel::configure(const CLCompileContext &compile_co
     _config_id += support::cpp11::to_string(input->dimension(2));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->dimension(3));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLBatchConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,

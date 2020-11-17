@@ -123,13 +123,14 @@ void CLBatchNormalizationLayerKernel::configure(const CLCompileContext &compile_
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, mean, var);
 
-    _input   = input;
-    _output  = output;
-    _mean    = mean;
-    _var     = var;
-    _beta    = beta;
-    _gamma   = gamma;
-    _epsilon = epsilon;
+    auto padding_info = get_padding_info({ input, output, mean, var, beta, gamma });
+    _input            = input;
+    _output           = output;
+    _mean             = mean;
+    _var              = var;
+    _beta             = beta;
+    _gamma            = gamma;
+    _epsilon          = epsilon;
 
     _run_in_place = (output == nullptr) || (output == input);
 
@@ -185,6 +186,8 @@ void CLBatchNormalizationLayerKernel::configure(const CLCompileContext &compile_
         ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
         ICLKernel::configure_internal(win_config.second);
     }
+
+    ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::NHWC && has_padding_changed(padding_info));
 
     _config_id = "batch_normalization_layer_";
     _config_id += string_from_data_type(input->info()->data_type());

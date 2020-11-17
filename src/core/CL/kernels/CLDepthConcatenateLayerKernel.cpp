@@ -64,6 +64,8 @@ void CLDepthConcatenateLayerKernel::configure(const CLCompileContext &compile_co
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, depth_offset, output));
 
+    auto padding_info = get_padding_info({ input, output });
+
     _depth_offset = depth_offset;
 
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->element_size(), input->dimension(0));
@@ -94,6 +96,8 @@ void CLDepthConcatenateLayerKernel::configure(const CLCompileContext &compile_co
 
     // Set output valid region
     output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,

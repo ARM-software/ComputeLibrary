@@ -90,28 +90,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 /** Input data sets. */
 const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), datasets::ActivationFunctions()), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
-/** Zero padding test */
-bool validate_zero_padding(unsigned int width, unsigned int height, unsigned int channels, unsigned int batches, const ActivationLayerInfo &act_info, DataType data_type)
-{
-    TensorShape shape(width, height, channels, batches);
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type);
-
-    src.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
-    dst.info()->set_quantization_info(QuantizationInfo(1.f / 256.f, 0));
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLActivationLayer act;
-    act.configure(&src, &dst, act_info);
-
-    // Padding can be added along rhs and bias's X dimension
-    return src.info()->padding().empty() && dst.info()->padding().empty();
-}
 } // namespace
 
 TEST_SUITE(CL)
@@ -155,26 +133,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     ARM_COMPUTE_EXPECT(bool(CLActivationLayer::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), act_info)) == expected, framework::LogLevel::ERRORS);
 }
 
-/** Validate zero padding tests
- *
- * A series of validation tests to check that no padding is added as part of configuration for 4 different scenarios.
- *
- * Checks performed in order:
- *     - First dimension multiple of 16
- *     - First dimension non-multiple of 16
- *     - First dimension less than 16 (vec_size for qasymm8) but multiple
- *     - First dimension less than 16 (vec_size for qasymm8) non-multiple
- *     - Tensor with only one element
- */
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
-framework::dataset::make("Width",    { 32U, 37U, 12U, 13U, 1U }),
-framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 })),
-width, data_type)
-{
-    const bool one_elem = (width == 1U);
-    bool status = validate_zero_padding(width, one_elem ? 1U : 17U, one_elem ? 1U : 7U, one_elem ? 1U : 2U, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 1U, 6U), data_type);
-    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
-}
 // clang-format on
 // *INDENT-ON*
 

@@ -216,6 +216,8 @@ void CLPoolingLayerKernel::configure(const CLCompileContext &compile_context, co
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
+    auto padding_info = get_padding_info({ input, output, indices });
+
     // Set instance variables
     _input                              = input;
     _output                             = output;
@@ -419,6 +421,8 @@ void CLPoolingLayerKernel::configure(const CLCompileContext &compile_context, co
     _config_id += support::cpp11::to_string(output->info()->dimension(idx_channel));
     _config_id += "_";
     _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
+
+    ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::NHWC && has_padding_changed(padding_info));
 }
 
 Status CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)

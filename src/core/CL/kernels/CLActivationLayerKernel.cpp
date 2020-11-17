@@ -91,6 +91,8 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
+    auto padding_info = get_padding_info({ input, output });
+
     _run_in_place = (output == nullptr) || (output == input);
 
     if(output != nullptr)
@@ -207,6 +209,8 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     _config_id += support::cpp11::to_string(input->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->dimension(1));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)

@@ -115,6 +115,8 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), winograd_info));
 
+    auto padding_info = get_padding_info({ input, output });
+
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
@@ -203,6 +205,8 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     auto win_config = validate_and_configure_window(input->info(), output->info(), winograd_info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second, cl::NDRange(1, 1, 8));
+
+    ARM_COMPUTE_ERROR_ON((input->info()->data_layout() == DataLayout::NHWC) && has_padding_changed(padding_info));
 
     _config_id = kernel_name;
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
