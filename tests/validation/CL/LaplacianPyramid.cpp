@@ -43,8 +43,12 @@ namespace validation
 {
 namespace
 {
-const auto small_laplacian_pyramid_levels = framework::dataset::make("NumLevels", 2, 3);
-const auto large_laplacian_pyramid_levels = framework::dataset::make("NumLevels", 2, 5);
+/* Absolute tolerance value for comparing reference's output against implementation's output for DataType::S16
+ * Tolerance is needed for calculation uncertainties introduced from the layers
+ */
+AbsoluteTolerance<int16_t> tolerance_int16(1);
+const auto                 small_laplacian_pyramid_levels = framework::dataset::make("NumLevels", 2, 3);
+const auto                 large_laplacian_pyramid_levels = framework::dataset::make("NumLevels", 2, 5);
 
 const auto formats = combine(framework::dataset::make("FormatIn", Format::U8), framework::dataset::make("FormatOut", Format::S16));
 
@@ -68,7 +72,7 @@ inline void validate_laplacian_pyramid(const CLPyramid &target, const std::vecto
                                                                border_mode == BorderMode::UNDEFINED);
 
         // Validate level
-        validate(CLAccessor(*level_image), reference[lev], valid_region);
+        validate(CLAccessor(*level_image), reference[lev], valid_region, tolerance_int16);
     }
 }
 } // namespace
