@@ -70,7 +70,7 @@ public:
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
         switch (ci->get_cpu_model()) {
             case CPUModel::A55r1:
-                return { 3.724, 1.416, 1.113 };
+                return { 3.954, 1.252, 1.141 };
 
             case CPUModel::A53:
                 return { 2.777, 0.987, 0.898 };
@@ -79,7 +79,7 @@ public:
                 return { 2.885, 1.429, 1.163 };
 
             default:
-                return { 6.949, 4.149, 2.826 };
+                return { 7.2307, 3.876, 2.932 };
         }
     }
 

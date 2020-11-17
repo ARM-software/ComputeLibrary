@@ -71,6 +71,17 @@ public:
 
     StdTransformsFixed<operand_type, result_type, 6, 32, 1> transforms = {};
 
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    {
+        switch (ci->get_cpu_model()) {
+            case CPUModel::A55r1:
+                return { 5.22 };
+
+            default:
+                return { 14.53 };
+        }
+    }
+
     // Default to the generic kernel
     kern_type kernel=a64_hybrid_fp16_mla_6x32;
 

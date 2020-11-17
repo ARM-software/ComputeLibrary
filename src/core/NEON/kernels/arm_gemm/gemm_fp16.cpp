@@ -62,7 +62,7 @@ static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
 #endif
 
 #if defined(__aarch64__) && (defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) || defined(FP16_KERNELS))
-{
+GemmImplementation<__fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_fp16_mla_6x32",
 #ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -70,10 +70,10 @@ static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
 #else
     nullptr,
 #endif
-    [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs &args) { return GemmHybridIndirect<cls_a64_hybrid_fp16_mla_6x32, __fp16, __fp16>::estimate_cycles(args, cls_a64_hybrid_fp16_mla_6x32::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_a64_hybrid_fp16_mla_6x32, __fp16, __fp16>(args); }
-},
-{
+),
+GemmImplementation<__fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_hgemm_8x24",
 #ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -81,16 +81,16 @@ static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
 #else
     nullptr,
 #endif
-    nullptr,
+    [](const GemmArgs &args) { return GemmInterleaved<cls_a64_hgemm_8x24, __fp16, __fp16>::estimate_cycles(args, cls_a64_hgemm_8x24::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_hgemm_8x24, __fp16, __fp16>(args); }
-},
+),
 #endif // aarch64 && FP16
 #ifdef __aarch64__
 {
     GemmMethod::GEMM_INTERLEAVED,
     "a64_sgemm_8x12",
     nullptr,
-    nullptr,
+    [](const GemmArgs &args) { return !args._ci->has_fp16(); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_sgemm_8x12, __fp16, __fp16>(args); }
 },
 #elif defined(__arm__)

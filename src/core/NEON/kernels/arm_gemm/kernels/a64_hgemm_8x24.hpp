@@ -25,6 +25,7 @@
 
 #if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
+#include "../performance_parameters.hpp"
 #include "../std_transforms_fixed.hpp"
 
 namespace arm_gemm {
@@ -60,6 +61,17 @@ public:
 
     // Use the standard fixed size transforms.
     StdTransformsFixed<operand_type, result_type, 8, 24> transforms = {};
+
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    {
+        switch (ci->get_cpu_model()) {
+            case CPUModel::A55r1:
+                return { 7.16, 1.14, 0.67 };
+
+            default:
+                return { 12.67, 3.98, 1.16 };
+        }
+    }
 
     // Default to the generic kernel
     kern_type kernel = a64_hgemm_asimd_8x24;
