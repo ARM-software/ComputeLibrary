@@ -47,6 +47,9 @@ namespace validation
 {
 namespace
 {
+RelativeTolerance<float> tolerance_float_sqrt(0.0001f);
+    
+    
 /** Define relative tolerance of the activation layer.
  *
  * @param[in] data_type  The data type used.
@@ -161,7 +164,7 @@ void test_float_sqrt_boundary_value()
     library->fill_static_values(reference_src, boundary_value_vector);
     auto reference_dst = reference::activation_layer<T>(reference_src, info);
 
-    validate(Accessor(src), reference_dst);
+    validate(Accessor(src), reference_dst, tolerance_float_sqrt);
 }
 } // namespace
 
