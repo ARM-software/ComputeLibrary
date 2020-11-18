@@ -95,6 +95,13 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     const float r_mk = static_cast<float>(m) / static_cast<float>(k);
     const float r_nk = static_cast<float>(n) / static_cast<float>(k);
 
+    GEMMLHSMatrixInfo lhs_info_buf;
+    GEMMRHSMatrixInfo rhs_info_buf;
+    GEMMLHSMatrixInfo lhs_info_img;
+    GEMMRHSMatrixInfo rhs_info_img;
+
+    std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, false, false, true, false, false);
+
     if(r_mk <= 0.11824845522642136)
     {
         if(workload <= 880.0)
@@ -111,7 +118,11 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
                 }
                 else
                 {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F16);
                 }
             }
             else
@@ -135,7 +146,11 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
             {
                 if(r_mn <= 2.545312523841858)
                 {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F16);
                 }
                 else
                 {
@@ -146,11 +161,19 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
             {
                 if(workload <= 2881.199951171875)
                 {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, false, false, true, false, true);
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, false, false, true, false, true);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F16);
                 }
                 else
                 {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F16);
                 }
             }
         }
@@ -160,16 +183,28 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
             {
                 if(r_mn <= 6.010416746139526)
                 {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, false, true, true, false, true);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F16);
                 }
                 else
                 {
-                    return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, false, true, false, true);
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, false, true, false, true);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F16);
                 }
             }
             else
             {
-                return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, false, true, false, true);
+                std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, false, true, false, true);
+
+                return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                            std::make_pair(lhs_info_buf, rhs_info_buf),
+                                            n, k, b, DataType::F16);
             }
         }
     }
