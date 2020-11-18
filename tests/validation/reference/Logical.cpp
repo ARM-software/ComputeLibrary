@@ -44,9 +44,9 @@ T logical_binary_op(arm_compute::kernels::LogicalOperation op, T src1, T src2)
             return src1 || src2;
         // The following operators are either invalid or not binary operator
         case arm_compute::kernels::LogicalOperation::Not:
-        /* fall through */
+        // fall through
         case arm_compute::kernels::LogicalOperation::Unknown:
-        /* fall through */
+        // fall through
         default:
             ARM_COMPUTE_ASSERT(true);
     }

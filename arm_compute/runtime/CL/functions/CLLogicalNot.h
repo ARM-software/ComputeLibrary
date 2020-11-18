@@ -45,13 +45,13 @@ public:
      *
      * @param[in]      compile_context The compile context to be used.
      * @param[in, out] input           Tensor input. Data types supported: U8.
-     * @param[out]     output          Output tensor. Data types supported: U8.
+     * @param[out]     output          Output tensor. Data types supported: same as @p input.
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLElementWiseUnaryLayerKernel
      *
      * @param[in] input  Tensor input info. Data types supported: U8.
-     * @param[in] output Output tensor info. Data types supported: U8.
+     * @param[in] output Output tensor info. Data types supported: same as @p input.
      *
      * @return a status
      */
@@ -84,20 +84,20 @@ public:
     /** Initialize the function
      *
      * @param[in]  input  Input tensor. Data types supported: U8.
-     * @param[out] output Output tensor. Data types supported: U8.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Input tensor. Data types supported: U8.
-     * @param[out] output          Output tensor. Data types supported: U8.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration
      *
      * @param[in] input  Tensor input info. Data types supported: U8.
-     * @param[in] output Output tensor info. Data types supported: U8.
+     * @param[in] output Output tensor info. Data types supported: same as @p input.
      *
      * @return a status
      */

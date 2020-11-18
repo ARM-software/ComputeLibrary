@@ -120,16 +120,16 @@ public:
      * @param[in] compile_context The compile context to be used.
      * @param[in] op              Logical binary operation to be executed.
      * @param[in] input1          First tensor input info. Data types supported: U8.
-     * @param[in] input2          Second tensor input info. Data types supported: U8.
-     * @param[in] output          Output tensor info. Data types supported: U8.
+     * @param[in] input2          Second tensor input info. Data types supported: same as @p input1.
+     * @param[in] output          Output tensor info. Data types supported: same as @p input1.
      */
     void configure(const CLCompileContext &compile_context, kernels::LogicalOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
     /** Static function to check if the given configuration is valid for this kernel
      *
      * @param[in] op     Logical binary operation to be executed.
      * @param[in] input1 First tensor input info. Data types supported: U8.
-     * @param[in] input2 Second tensor input info. Data types supported: U8.
-     * @param[in] output Output tensor info. Data types supported: U8.
+     * @param[in] input2 Second tensor input info. Data types supported: same as @p input1.
+     * @param[in] output Output tensor info. Data types supported: same as @p input1.
      */
     static Status validate(kernels::LogicalOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
 

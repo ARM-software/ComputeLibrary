@@ -46,10 +46,10 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        constexpr auto zero              = (uint8_t)0;
-        constexpr auto one               = (uint8_t)0x1;
-        constexpr auto mixed             = (uint8_t)0xAA;
-        constexpr auto mixed_bitwise_not = (uint8_t) ~(0xAA);
+        constexpr auto zero              = static_cast<uint8_t>(0);
+        constexpr auto one               = static_cast<uint8_t>(0x1);
+        constexpr auto mixed             = static_cast<uint8_t>(0xAA);
+        constexpr auto mixed_bitwise_not = static_cast<uint8_t>((~0xAA));
 
         library->fill_static_values(tensor, i == 0 ?
                                     std::vector<uint8_t> { zero, one, zero, one, mixed, zero, mixed } :

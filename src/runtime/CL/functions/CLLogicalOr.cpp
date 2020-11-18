@@ -48,7 +48,7 @@ void CLLogicalOr::run(ITensorPack &tensors)
 {
     ICLOperator::run(tensors);
 }
-} /* namespace experimental */
+} // namespace experimental
 
 struct CLLogicalOr::Impl
 {

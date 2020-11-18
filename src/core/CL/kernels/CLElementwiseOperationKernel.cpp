@@ -333,6 +333,7 @@ void CLElementwiseOperationKernel::run_op(ITensorPack &tensors, const Window &wi
 }
 
 /** Logical binary */
+
 void CLLogicalBinaryKernel::configure(const CLCompileContext &compile_context, kernels::LogicalOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
