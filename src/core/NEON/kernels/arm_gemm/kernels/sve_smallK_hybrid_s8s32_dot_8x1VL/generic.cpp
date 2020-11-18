@@ -33,7 +33,7 @@
 
 namespace arm_gemm {
 
-void sve_smallK_hybrid_s8s32_dot_8x1VL(const int8_t *A, int lda, const int8_t *B, int32_t *C, int ldc, int M, int N, int K, const int32_t *bias, Activation act, bool) {
+void sve_smallK_hybrid_s8s32_dot_8x1VL(const int8_t *A, int lda, const int8_t *B, int32_t *C, int ldc, int M, int N, int K, const int32_t *, Activation, bool) {
     const long loops_count = iceildiv(N, (int)get_vector_length<int32_t>()) - 1;
     const long ldab = lda * sizeof(int8_t);
     const long ldcb = ldc * sizeof(int32_t);

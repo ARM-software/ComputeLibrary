@@ -43,8 +43,8 @@ vars.AddVariables(
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a",
-                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64",
-                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "x86")),
+                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
+                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
@@ -72,7 +72,8 @@ vars.AddVariables(
     ("compiler_prefix", "Override the compiler prefix", ""),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
-    ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
+    ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
+    ("specs_file", "Specs file to use (e.g. rdimon.specs)", "")
 )
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
@@ -202,7 +203,9 @@ if 'v7a' in env['arch']:
     else:
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
 elif 'v8' in env['arch']:
-    if 'sve' in env['arch']:
+    if 'sve2' in env['arch']:
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
+    elif 'sve' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
     elif 'v8.2-a' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
@@ -312,12 +315,16 @@ if env['os'] == 'android':
     env.Append(LINKFLAGS = ['-pie', '-static-libstdc++', '-ldl'])
 elif env['os'] == 'bare_metal':
     env.Append(LINKFLAGS = ['-static'])
-    env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
     env.Append(CXXFLAGS = ['-fPIC'])
+    if env['specs_file'] == "":
+        env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
     env.Append(CPPDEFINES = ['NO_MULTI_THREADING'])
     env.Append(CPPDEFINES = ['BARE_METAL'])
 if env['os'] == 'linux' and env['arch'] == 'armv7a':
     env.Append(CXXFLAGS = [ '-Wno-psabi' ])
+
+if env['specs_file'] != "":
+    env.Append(LINKFLAGS = ['-specs='+env['specs_file']])
 
 if env['opencl']:
     if env['os'] in ['bare_metal'] or env['standalone']:

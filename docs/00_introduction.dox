@@ -1309,85 +1309,169 @@ v16.12 Binary preview release
 scons 2.3 or above is required to build the library.
 To see the build options available simply run ```scons -h```:
 
-	debug: Debug (yes|no)
-		default: False
-		actual: False
+        debug: Debug (yes|no)
+            default: False
+            actual: False
 
-	asserts: Enable asserts (this flag is forced to 1 for debug=1) (yes|no)
-		default: False
-		actual: False
+        asserts: Enable asserts (this flag is forced to 1 for debug=1) (yes|no)
+            default: False
+            actual: False
 
-	arch: Target Architecture (armv7a|arm64-v8a|arm64-v8.2-a|x86_32|x86_64)
-		default: armv7a
-		actual: armv7a
+        logging: Logging (this flag is forced to 1 for debug=1) (yes|no)
+            default: False
+            actual: False
 
-	os: Target OS (linux|android|bare_metal)
-		default: linux
-		actual: linux
+        arch: Target Architecture (armv7a|arm64-v8a|arm64-v8.2-a|arm64-v8.2-a-sve|arm64-v8.2-a-sve2|x86_32|x86_64|armv8a|armv8.2-a|armv8.2-a-sve|armv8.6-a|armv8.6-a-sve|armv8.6-a-sve2|x86)
+            default: armv7a
+            actual: armv7a
 
-	build: Build type (native|cross_compile|embed_only)
-		default: cross_compile
-		actual: cross_compile
+        estate: Execution State (auto|32|64)
+            default: auto
+            actual: auto
 
-	examples: Build example programs (yes|no)
-		default: True
-		actual: True
+        os: Target OS (linux|android|tizen|bare_metal)
+            default: linux
+            actual: linux
 
-	Werror: Enable/disable the -Werror compilation flag (yes|no)
-		default: True
-		actual: True
+        build: Build type (native|cross_compile|embed_only)
+            default: cross_compile
+            actual: cross_compile
 
-	opencl: Enable OpenCL support (yes|no)
-		default: True
-		actual: True
+        examples: Build example programs (yes|no)
+            default: True
+            actual: True
 
-	neon: Enable Neon support (yes|no)
-		default: False
-		actual: False
+        gemm_tuner: Build gemm_tuner programs (yes|no)
+            default: True
+            actual: True
 
-	gles_compute: Enable OpenGL ES Compute Shader support (yes|no)
-		default: False
-		actual: False
+        Werror: Enable/disable the -Werror compilation flag (yes|no)
+            default: True
+            actual: True
 
-	embed_kernels: Embed OpenCL kernels and OpenGL ES compute shader in library binary (yes|no)
-		default: True
-		actual: True
+        standalone: Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute (yes|no)
+            default: False
+            actual: False
 
-	set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
-		default: False
-		actual: False
+        opencl: Enable OpenCL support (yes|no)
+            default: True
+            actual: True
 
-	openmp: Enable OpenMP backend (yes|no)
-		default: False
-		actual: False
+        neon: Enable Neon support (yes|no)
+            default: False
+            actual: False
 
-	cppthreads: Enable C++11 threads backend (yes|no)
-		default: True
-		actual: True
+        gles_compute: Enable OpenGL ES Compute Shader support (yes|no)
+            default: False
+            actual: False
 
-	build_dir: Specify sub-folder for the build ( /path/to/build_dir )
-		default: .
-		actual: .
+        embed_kernels: Embed OpenCL kernels and OpenGL ES compute shaders in library binary (yes|no)
+            default: True
+            actual: True
 
-	extra_cxx_flags: Extra CXX flags to be appended to the build command
-		default:
-		actual:
+        set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
+            default: False
+            actual: False
 
-	pmu: Enable PMU counters (yes|no)
-		default: False
-		actual: False
+        tracing: Enable runtime tracing (yes|no)
+            default: False
+            actual: False
 
-	mali: Enable Mali hardware counters (yes|no)
-		default: False
-		actual: False
+        openmp: Enable OpenMP backend (yes|no)
+            default: False
+            actual: False
 
-	validation_tests: Build validation test programs (yes|no)
-		default: False
-		actual: False
+        cppthreads: Enable C++11 threads backend (yes|no)
+            default: True
+            actual: True
 
-	benchmark_tests: Build benchmark test programs (yes|no)
-		default: False
-		actual: False
+        build_dir: Specify sub-folder for the build ( /path/to/build_dir )
+            default: .
+            actual: .
+
+        install_dir: Specify sub-folder for the install ( /path/to/install_dir )
+            default:
+            actual:
+
+        exceptions: Enable/disable C++ exception support (yes|no)
+            default: True
+            actual: True
+
+        linker_script: Use an external linker script ( /path/to/linker_script )
+            default:
+            actual:
+
+        internal_only: Enable ARM internal only tests (yes|no)
+            default: False
+            actual: False
+
+        custom_options: Custom options that can be used to turn on/off features
+            (all|none|comma-separated list of names)
+            allowed names: disable_mmla_fp
+            default: none
+            actual:
+
+        data_type_support: Enable a list of data types to support
+            (all|none|comma-separated list of names)
+            allowed names: qasymm8 qasymm8_signed qsymm16 fp16 fp32
+            default: all
+            actual: qasymm8 qasymm8_signed qsymm16 fp16 fp32
+
+        toolchain_prefix: Override the toolchain prefix
+            default:
+            actual:
+
+        compiler_prefix: Override the compiler prefix
+            default:
+            actual:
+
+        extra_cxx_flags: Extra CXX flags to be appended to the build command
+            default:
+            actual:
+
+        extra_link_flags: Extra LD flags to be appended to the build command
+            default:
+            actual:
+
+        compiler_cache: Command to prefix to the C and C++ compiler (e.g ccache)
+            default:
+            actual:
+
+        specs_file: Specs file to use
+            default: rdimon.specs
+            actual: rdimon.specs
+
+        benchmark_examples: Build benchmark examples programs (yes|no)
+            default: True
+            actual: True
+
+        validate_examples: Build validate examples programs (yes|no)
+            default: True
+            actual: True
+
+        reference_openmp: Build reference validation with openmp (yes|no)
+            default: True
+            actual: True
+
+        validation_tests: Build validation test programs (yes|no)
+            default: True
+            actual: True
+
+        benchmark_tests: Build benchmark test programs (yes|no)
+            default: True
+            actual: True
+
+        test_filter: Pattern to specify the tests' filenames to be compiled
+            default: *.cpp
+            actual: *.cpp
+
+        pmu: Enable PMU counters (yes|no)
+            default: False
+            actual: False
+
+        mali: Enable Mali hardware counters (yes|no)
+            default: False
+            actual: False
 
 @b debug / @b asserts:
  - With debug=1 asserts are enabled, and the library is built with symbols and no optimisations enabled.
@@ -1582,6 +1666,18 @@ For example:
 
 Below is a list of the common parameters among the graph examples :
 @snippet utils/CommonGraphOptions.h Common graph examples parameters
+
+@subsubsection S3_2_3_sve Build for SVE or SVE2
+
+In order to build for SVE or SVE2 you need a compiler that supports them. You can find more information in the following these links:
+    -# GCC: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/sve-support
+    -# LLVM: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/llvm-toolchain/sve-support
+
+@note You the need to indicate the toolchains using the scons "toolchain_prefix" parameter.
+
+An example build command with SVE is:
+
+        scons arch=arm64-v8.2-a-sve os=linux build_dir=arm64 -j55 standalone=0 opencl=0 openmp=0 validation_tests=1 neon=1 cppthreads=1 toolchain_prefix=aarch64-none-linux-gnu-
 
 @subsection S3_3_android Building for Android
 
