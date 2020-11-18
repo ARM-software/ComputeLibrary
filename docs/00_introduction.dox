@@ -1481,6 +1481,10 @@ To see the build options available simply run ```scons -h```:
             default: False
             actual: False
 
+        external_tests_dir: Add examples, benchmarks and tests to the tests suite from an external path ( /path/to/external_tests_dir )
+            default:
+            actual:
+
 @b debug / @b asserts:
  - With debug=1 asserts are enabled, and the library is built with symbols and no optimisations enabled.
  - With debug=0 and asserts=1: Optimisations are enabled and symbols are removed, however all the asserts are still present (This is about 20% slower than the release build)
@@ -1534,6 +1538,25 @@ Example:
 @b cppthreads Build in the C++11 scheduler for NEON.
 
 @sa Scheduler::set
+
+@b external_tests_dir Add examples, benchmarks and tests to the tests suite from an external path ( /path/to/external_tests_dir )
+
+In order to use this option, the external tests directory must have the following structure:
+
+    EXTERNAL_TESTS_DIR:
+    └── tests
+        ├── benchmark
+        │   ├── CL
+        │   ├── datasets
+        │   ├── fixtures
+        │   └── NEON
+        └── validation
+            ├── CL
+            ├── datasets
+            ├── fixtures
+            └── NEON
+
+Then, build the library with `external_tests_dir=<PATH_TO_EXTERNAL_TESTS_DIR>`.
 
 @subsection S3_2_linux Building for Linux
 

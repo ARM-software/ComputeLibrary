@@ -64,8 +64,7 @@ vars.AddVariables(
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
-    #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
-    BoolVariable("internal_only", "Enable ARM internal only tests", False),
+    PathVariable("external_tests_dir", "Add examples, benchmarks and tests to the tests suite", "", PathVariable.PathAccept),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
     ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32"]),
     ("toolchain_prefix", "Override the toolchain prefix", ""),
