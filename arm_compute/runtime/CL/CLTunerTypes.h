@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,12 @@ enum class CLTunerMode
     EXHAUSTIVE, /**< Searches all possible LWS configurations while tuning */
     NORMAL,     /**< Searches a subset of LWS configurations while tuning */
     RAPID       /**< Searches a minimal subset of LWS configurations while tuning */
+};
+
+/**< OpenCL tuner tuning information */
+struct CLTuningInfo
+{
+    bool tune_lws = true;
 };
 
 /** Converts a string to a strong types enumeration @ref CLTunerMode

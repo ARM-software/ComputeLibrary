@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,9 @@
 #define ARM_COMPUTE_CLTUNER_H
 
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/utils/misc/Macros.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
+#include "arm_compute/runtime/CL/CLTuningParams.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
 
 #include <unordered_map>
@@ -41,9 +43,10 @@ public:
     /** Constructor
      *
      * @param[in] tune_new_kernels Find the optimal local workgroup size for kernels which are not present in the table ?
+     * @param[in] tuning_info      (Optional) opencl parameters to tune
      *
      */
-    CLTuner(bool tune_new_kernels = true);
+    CLTuner(bool tune_new_kernels = true, CLTuningInfo tuning_info = CLTuningInfo());
 
     /** Destructor */
     ~CLTuner() = default;
@@ -53,21 +56,30 @@ public:
      * @param[in] tune_new_kernels Find the optimal local workgroup size for kernels which are not present in the table ?
      */
     void set_tune_new_kernels(bool tune_new_kernels);
-    /** Tune kernels that are not in the LWS table
+
+    /** Tune kernels that are not in the tuning parameters table
      *
      * @return True if tuning of new kernels is enabled.
      */
     bool tune_new_kernels() const;
 
+    /** Setter for tune parameters option
+     *
+     * @param[in] tuning_info opencl parameters to tune
+     */
+    void set_tuning_parameters(CLTuningInfo tuning_info);
+
     /** Set OpenCL tuner mode
      *
-     * @param[in] mode Indicates how exhaustive the search for the optimal LWS should be while tuning. Default is Exhaustive mode
+     * @param[in] mode Indicates how exhaustive the search for the optimal tuning parameters should be while tuning. Default is Exhaustive mode
      */
     void set_tuner_mode(CLTunerMode mode);
 
     /** Get the current OpenCL tuner mode
      *
-     * @return tuner_mode Indicates how exhaustive the search for the optimal LWS should be while tuning
+     * @return tuner_mode Indicates how exhaustive the search for the optimal tuning parameters should be while tuning
+     *
+     * @deprecated This function is deprecated and is intended to be removed in 21.05 release
      */
     CLTunerMode get_tuner_mode() const;
 
@@ -75,20 +87,48 @@ public:
      *
      * @param[in] kernel_id   Unique identifiant of the kernel
      * @param[in] optimal_lws Optimal local workgroup size to use for the given kernel
+     *
+     * @deprecated This function is deprecated and is intended to be removed in 21.05 release
      */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(21.02, add_tuning_params)
     void add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal_lws);
+
+    /** Manually add tuning parameters for a kernel
+     *
+     * @param[in] kernel_id             Unique identifiant of the kernel
+     * @param[in] optimal_tuning_params Optimal tuning parameters to use for the given kernel
+     */
+    void add_tuning_params(const std::string &kernel_id, CLTuningParams optimal_tuning_params);
 
     /** Import LWS table
      *
      * @param[in] lws_table The unordered_map container to import
+     *
+     * @deprecated This function is deprecated and is intended to be removed in 21.05 release
      */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(21.02, import_tuning_params)
     void import_lws_table(const std::unordered_map<std::string, cl::NDRange> &lws_table);
+
+    /** Import tuning parameters table
+     *
+     * @param[in] tuning_params_table The unordered_map container to import
+     */
+    void import_tuning_params(const std::unordered_map<std::string, CLTuningParams> &tuning_params_table);
 
     /** Give read access to the LWS table
      *
      * @return The lws table as unordered_map container
+     *
+     * @deprecated This function is deprecated and is intended to be removed in 21.05 release
      */
-    const std::unordered_map<std::string, cl::NDRange> &lws_table() const;
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(21.02, tuning_params_table)
+    const std::unordered_map<std::string, cl::NDRange> &lws_table();
+
+    /** Give read access to the tuning params table
+     *
+     * @return The tuning params table as unordered_map container
+     */
+    const std::unordered_map<std::string, CLTuningParams> &tuning_params_table() const;
 
     /** Set the OpenCL kernel event
      *
@@ -101,17 +141,20 @@ public:
     /** clEnqueueNDRangeKernel symbol */
     std::function<decltype(clEnqueueNDRangeKernel)> real_clEnqueueNDRangeKernel;
 
-    /** Load the LWS table from file
+    /** Load the tuning parameters table from file. It also sets up the tuning read from the file
      *
-     * @param[in] filename Load the LWS table from this file.(Must exist)
+     * @param[in] filename Load the tuning parameters table from this file.(Must exist)
+     *
      */
     void load_from_file(const std::string &filename);
 
-    /** Save the content of the LWS table to file
+    /** Save the content of the tuning parameters table to file
      *
-     * @param[in] filename Save the LWS table to this file. (Content will be overwritten)
+     * @param[in] filename Save the tuning parameters table to this file. (Content will be overwritten)
+     *
+     * @return true if the file was created
      */
-    void save_to_file(const std::string &filename) const;
+    bool save_to_file(const std::string &filename) const;
 
     // Inherited methods overridden:
     void tune_kernel_static(ICLKernel &kernel) override;
@@ -125,19 +168,21 @@ public:
     bool kernel_event_is_set() const;
 
 private:
-    /** Find optimal LWS using brute-force approach
+    /** Find optimal tuning parameters using brute-force approach
      *
-     * @param[in]     kernel  OpenCL kernel to be tuned with LWS
+     * @param[in]     kernel  OpenCL kernel to be tuned with tuning parameters
      * @param[in,out] tensors Tensors for the kernel to operate on
      *
-     * @return The optimal LWS to use
+     * @return The optimal tuning parameters to use
      */
-    cl::NDRange find_optimal_lws(ICLKernel &kernel, ITensorPack &tensors);
+    CLTuningParams find_optimal_tuning_params(ICLKernel &kernel, ITensorPack &tensors);
 
-    std::unordered_map<std::string, cl::NDRange> _lws_table;
-    cl::Event   _kernel_event;
-    bool        _tune_new_kernels;
-    CLTunerMode _tuner_mode;
+    std::unordered_map<std::string, CLTuningParams> _tuning_params_table;
+    std::unordered_map<std::string, cl::NDRange>    _lws_table;
+    cl::Event    _kernel_event;
+    bool         _tune_new_kernels;
+    CLTuningInfo _tuning_info;
+    CLTunerMode  _tuner_mode;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLTUNER_H */

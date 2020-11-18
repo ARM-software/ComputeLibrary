@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,6 @@
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "utils/TypePrinter.h"
 
 #include <arm_neon.h>
 #include <map>

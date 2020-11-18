@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,11 +71,7 @@ CLDeviceBackend::CLDeviceBackend()
 
 CLDeviceBackend::~CLDeviceBackend()
 {
-    // TODO (geopin01) : Shouldn't call non exception safe stuff here
-    if(_tuner.tune_new_kernels() && !_tuner.lws_table().empty() && !_tuner_file.empty())
-    {
-        _tuner.save_to_file(_tuner_file);
-    }
+    _tuner.save_to_file(_tuner_file);
 }
 
 void CLDeviceBackend::set_kernel_tuning(bool enable_tuning)
@@ -117,6 +113,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
 
     // Setup tuner
     _tuner_file = ctx.config().tuner_file;
+
     // Load tuner data if available
     if(file_exists(_tuner_file))
     {

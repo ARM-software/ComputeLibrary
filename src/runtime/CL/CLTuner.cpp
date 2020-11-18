@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/CLTuner.h"
-#include "arm_compute/runtime/CL/tuners/CLLWSList.h"
+#include "arm_compute/runtime/CL/tuners/CLTuningParametersList.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -38,8 +38,8 @@
 
 namespace arm_compute
 {
-CLTuner::CLTuner(bool tune_new_kernels)
-    : real_clEnqueueNDRangeKernel(nullptr), _lws_table(), _kernel_event(), _tune_new_kernels(tune_new_kernels), _tuner_mode(CLTunerMode::NORMAL)
+CLTuner::CLTuner(bool tune_new_kernels, CLTuningInfo tuning_info)
+    : real_clEnqueueNDRangeKernel(nullptr), _tuning_params_table(), _lws_table(), _kernel_event(), _tune_new_kernels(tune_new_kernels), _tuning_info(tuning_info), _tuner_mode(CLTunerMode::NORMAL)
 {
 }
 
@@ -65,6 +65,7 @@ void CLTuner::set_tuner_mode(CLTunerMode mode)
 {
     _tuner_mode = mode;
 }
+
 CLTunerMode CLTuner::get_tuner_mode() const
 {
     return _tuner_mode;
@@ -89,36 +90,41 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
     // Check if we need to find the Optimal LWS. If the kernel's config_id is equal to default_config_id, the kernel does not require to be tuned
     if(kernel.config_id() != arm_compute::default_config_id)
     {
-        auto p = _lws_table.find(config_id);
+        auto p = _tuning_params_table.find(config_id);
 
-        if(p == _lws_table.end())
+        if(p == _tuning_params_table.end())
         {
             if(_tune_new_kernels)
             {
                 // Find the optimal LWS for the kernel
-                cl::NDRange opt_lws = find_optimal_lws(kernel, tensors);
+                CLTuningParams opt_tuning_params = find_optimal_tuning_params(kernel, tensors);
 
                 // Insert the optimal LWS in the table
-                add_lws_to_table(config_id, opt_lws);
+                add_tuning_params(config_id, opt_tuning_params);
 
                 // Set Local-Workgroup-Size
-                kernel.set_lws_hint(opt_lws);
+                kernel.set_lws_hint(opt_tuning_params.get_lws());
             }
         }
         else
         {
             // Set Local-Workgroup-Size
-            kernel.set_lws_hint(p->second);
+            kernel.set_lws_hint(p->second.get_lws());
         }
     }
 }
 
 void CLTuner::add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal_lws)
 {
-    _lws_table.emplace(kernel_id, optimal_lws);
+    add_tuning_params(kernel_id, CLTuningParams(optimal_lws));
 }
 
-cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel, ITensorPack &tensors)
+void CLTuner::add_tuning_params(const std::string &kernel_id, CLTuningParams optimal_tuning_params)
+{
+    _tuning_params_table.emplace(kernel_id, optimal_tuning_params);
+}
+
+CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, ITensorPack &tensors)
 {
     // Profiling queue
     cl::CommandQueue queue_profiler;
@@ -185,11 +191,11 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel, ITensorPack &tensors)
 
     cl::NDRange opt_lws = cl::NullRange;
 
-    // Construct the list of LWS values to be tested based on the tuner mode.
-    auto lws_list = cl_tuner::CLLWSListFactory::get_lws_list(_tuner_mode, gws);
+    // Construct the list of tuning parameters values to be tested based on the tuner mode.
+    auto lws_list = cl_tuner::get_tuning_parameters_list(_tuner_mode, gws);
     for(size_t i = 0; i < lws_list->size(); ++i)
     {
-        cl::NDRange lws_test    = (*lws_list)[i];
+        cl::NDRange lws_test    = (*lws_list)[i].get_lws();
         auto        x           = lws_test[0];
         auto        y           = lws_test[1];
         auto        z           = lws_test[2];
@@ -223,19 +229,37 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel, ITensorPack &tensors)
 
     // Restore real function
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = real_clEnqueueNDRangeKernel;
-
-    return opt_lws;
+    return CLTuningParams(opt_lws);
 }
 
 void CLTuner::import_lws_table(const std::unordered_map<std::string, cl::NDRange> &lws_table)
 {
-    _lws_table.clear();
-    _lws_table = lws_table;
+    _tuning_params_table.clear();
+    for(auto && params : lws_table)
+    {
+        add_tuning_params(params.first, CLTuningParams(params.second));
+    }
 }
 
-const std::unordered_map<std::string, cl::NDRange> &CLTuner::lws_table() const
+const std::unordered_map<std::string, cl::NDRange> &CLTuner::lws_table()
 {
+    _lws_table.clear();
+    for(auto && params : _tuning_params_table)
+    {
+        _lws_table.emplace(params.first, params.second.get_lws());
+    }
     return _lws_table;
+}
+
+const std::unordered_map<std::string, CLTuningParams> &CLTuner::tuning_params_table() const
+{
+    return _tuning_params_table;
+}
+
+void CLTuner::import_tuning_params(const std::unordered_map<std::string, CLTuningParams> &tuning_params_table)
+{
+    _tuning_params_table.clear();
+    _tuning_params_table = tuning_params_table;
 }
 
 void CLTuner::load_from_file(const std::string &filename)
@@ -272,20 +296,28 @@ void CLTuner::load_from_file(const std::string &filename)
         {
             lws = cl::NullRange;
         }
-        add_lws_to_table(kernel_id, lws);
+        add_tuning_params(kernel_id, lws);
     }
     fs.close();
+    _tuning_info.tune_lws = true;
 }
 
-void CLTuner::save_to_file(const std::string &filename) const
+bool CLTuner::save_to_file(const std::string &filename) const
 {
+    if(!_tune_new_kernels || _tuning_params_table.empty() || filename.empty())
+    {
+        return false;
+    }
+
     std::ofstream fs;
     fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     fs.open(filename, std::ios::out);
-    for(auto const &kernel_data : _lws_table)
+    for(auto const &kernel_data : _tuning_params_table)
     {
-        fs << kernel_data.first << ";" << kernel_data.second[0] << ";" << kernel_data.second[1] << ";" << kernel_data.second[2] << std::endl;
+        const cl::NDRange lws = CLTuningParams(kernel_data.second).get_lws();
+        fs << kernel_data.first << ";" << lws[0] << ";" << lws[1] << ";" << lws[2] << std::endl;
     }
     fs.close();
+    return true;
 }
 } // namespace arm_compute

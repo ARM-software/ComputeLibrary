@@ -593,7 +593,7 @@ cc_library_static {
         "src/runtime/CL/gemm/CLGEMMDefaultTypeMidgard.cpp",
         "src/runtime/CL/gemm/CLGEMMDefaultTypeValhall.cpp",
         "src/runtime/CL/tuners/BifrostTuner.cpp",
-        "src/runtime/CL/tuners/CLLWSList.cpp",
+        "src/runtime/CL/tuners/CLTuningParametersList.cpp",
         "src/runtime/CL/tuners/MidgardTuner.cpp",
         "src/runtime/CPP/CPPScheduler.cpp",
         "src/runtime/CPP/ICPPSimpleFunction.cpp",
