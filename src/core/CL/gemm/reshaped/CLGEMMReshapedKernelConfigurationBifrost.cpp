@@ -333,13 +333,12 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
 {
     const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
     const float r_mk = static_cast<float>(m) / static_cast<float>(k);
-    const float r_nk = static_cast<float>(n) / static_cast<float>(k);
 
-    if(workload <= 1422.40f)
+    if(workload <= 1595.2000f)
     {
-        if(r_mk <= 2.45f)
+        if(r_mk <= 2.1044f)
         {
-            if(workload <= 801.60f)
+            if(workload <= 870.4000f)
             {
                 return configure_lhs_rhs_info(m, n, 2, 4, 4, 1, 2, true, false, true, false, false);
             }
@@ -350,19 +349,12 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
         }
         else
         {
-            if(r_nk <= 0.67f)
-            {
-                return configure_lhs_rhs_info(m, n, 4, 2, 4, 2, 2, false, false, true, false, false);
-            }
-            else
-            {
-                return configure_lhs_rhs_info(m, n, 2, 4, 4, 4, 1, false, true, false, true, false);
-            }
+            return configure_lhs_rhs_info(m, n, 4, 2, 4, 2, 2, false, false, true, false, false);
         }
     }
     else
     {
-        return configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 4, true, true, true, false, false);
+        return configure_lhs_rhs_info(m, n, 4, 8, 4, 4, 2, true, true, true, false, false);
     }
 }
 
