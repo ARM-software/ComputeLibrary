@@ -28,6 +28,7 @@
 
 #include "ValidateExample.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "arm_compute/runtime/CL/CLHelpers.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/framework/Framework.h"
@@ -149,6 +150,15 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
         }
     }
 
+#ifdef ARM_COMPUTE_CL
+    if(opencl_is_available())
+    {
+        auto ctx_dev_err = create_opencl_context_and_device();
+        ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
+        CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), nullptr);
+    }
+#endif /* ARM_COMPUTE_CL */
+
     if(options.log_level->value() >= framework::LogLevel::CONFIG)
     {
         for(auto &p : printers)
@@ -159,10 +169,6 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
 #ifdef ARM_COMPUTE_CL
             if(opencl_is_available())
             {
-                if(!CLScheduler::get().is_initialised())
-                {
-                    CLScheduler::get().default_init();
-                }
                 p->print_entry("CL_DEVICE_VERSION", CLKernelLibrary::get().get_device_version());
             }
             else
