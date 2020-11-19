@@ -316,6 +316,8 @@ elif env['os'] == 'bare_metal':
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(CPPDEFINES = ['NO_MULTI_THREADING'])
     env.Append(CPPDEFINES = ['BARE_METAL'])
+if env['os'] == 'linux' and env['arch'] == 'armv7a':
+    env.Append(CXXFLAGS = [ '-Wno-psabi' ])
 
 if env['opencl']:
     if env['os'] in ['bare_metal'] or env['standalone']:

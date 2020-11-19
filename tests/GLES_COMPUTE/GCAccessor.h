@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,8 +50,8 @@ public:
     GCAccessor &operator=(const GCAccessor &) = delete;
     /** Allow instances of this class to be move constructed */
     GCAccessor(GCAccessor &&) = default;
-    /** Allow instances of this class to be moved */
-    GCAccessor &operator=(GCAccessor &&) = default;
+    /** Prevent instances of this class to be moved */
+    GCAccessor &operator=(GCAccessor &&) = delete;
 
     /** Destructor that unmaps the GLES memory. */
     ~GCAccessor();
