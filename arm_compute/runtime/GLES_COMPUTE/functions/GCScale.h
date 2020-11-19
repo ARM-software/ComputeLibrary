@@ -33,7 +33,11 @@ namespace arm_compute
 {
 class IGCTensor;
 
-/** Basic function to run @ref GCScaleKernel */
+/** Basic function to run @ref GCScaleKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ */
 class GCScale : public IGCSimpleFunction
 {
 public:

@@ -42,6 +42,9 @@ class IGCTensor;
  * -# @ref GCLogits1DMaxKernel
  * -# @ref GCLogits1DShiftExpSumKernel
  * -# @ref GCLogits1DNormKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class GCSoftmaxLayer : public IFunction
 {

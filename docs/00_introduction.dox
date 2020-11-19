@@ -351,6 +351,30 @@ v20.11 Public major release
      - NEWarpAffineKernel
      - NEWarpPerspective
      - NEWarpPerspectiveKernel
+ - Deprecated GLES kernels / functions (If a kernel is used only by the function that is being deprecated, the kernel is deprecated together):
+     - GCAbsoluteDifference
+     - GCActivationLayer
+     - GCArithmeticAddition
+     - GCBatchNormalizationLayer
+     - GCConcatenateLayer
+     - GCConvolutionLayer
+     - GCDepthwiseConvolutionLayer
+     - GCDirectConvolutionLayer
+     - GCDropoutLayer
+     - GCFillBorder
+     - GCFullyConnectedLayer
+     - GCGEMM
+     - GCGEMMInterleave4x4
+     - GCGEMMTranspose1xW
+     - GCNormalizationLayer
+     - GCNormalizePlanarYUVLayer
+     - GCPixelWiseMultiplication
+     - GCPoolingLayer
+     - GCScale
+     - GCSoftmaxLayer
+     - GCTensorShift
+     - GCTranspose
+
 
 v20.08 Public major release
  - Various bug fixes.

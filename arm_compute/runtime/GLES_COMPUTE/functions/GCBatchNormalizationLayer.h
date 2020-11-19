@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,8 @@ class IGCTensor;
  *
  * Batch normalization is calculated by:
  * @f[ out_i = \gamma * (\frac{in_i - \mu_{B}}{\sqrt{\sigma^2_{B} + \epsilon}}) + \beta \equiv BN_{\gamma,\beta}(in_i) @f]
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class GCBatchNormalizationLayer : public IFunction

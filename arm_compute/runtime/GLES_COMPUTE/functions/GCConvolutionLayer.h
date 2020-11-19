@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,9 @@ class IGCTensor;
 
 /** Function to reshape and transpose the weights. This function calls the following kernels:
  * -# @ref GCWeightsReshapeKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class GCConvolutionLayerReshapeWeights : public IFunction
 {
@@ -72,6 +75,9 @@ private:
  * -# @ref GCIm2ColKernel
  * -# @ref GCGEMMInterleave4x4Kernel
  * -# @ref GCCol2ImKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class GCConvolutionLayer : public IFunction
 {

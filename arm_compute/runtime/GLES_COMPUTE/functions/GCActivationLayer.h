@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,9 @@ class IGCTensor;
 /** Basic function to run @ref GCActivationLayerKernel
  *
  * @note The function simulates an activation layer with the specified activation function.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class GCActivationLayer : public IGCSimpleFunction
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,8 @@ class ITensor;
 /** Basic function to execute GCGEMMInterleave4x4Kernel. This function calls the following OpenGL ES kernel:
  *
  *  -# @ref GCGEMMInterleave4x4Kernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class GCGEMMInterleave4x4 : public IGCSimpleFunction

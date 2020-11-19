@@ -35,6 +35,9 @@ class IGCTensor;
  *
  * @note The tensor data type for the inputs must be F16.
  * @note The function performs an arithmetic addition between two tensors.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class GCArithmeticAddition : public IGCSimpleFunction
 {

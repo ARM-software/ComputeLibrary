@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,9 @@ class IGCTensor;
  *
  * @note only axis z is supported
  * -# @ref GCDepthConcatenateLayerKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class GCConcatenateLayer : public IFunction
 {
