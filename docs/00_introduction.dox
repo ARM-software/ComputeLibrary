@@ -87,6 +87,8 @@ If there is more than one release in a month then an extra sequential number is 
 @subsection S2_2_changelog Changelog
 
 v20.11 Public major release
+ - Performance regressions can be noted when executing Depthwise Convolution on Neon with a multiplier > 1.
+   This is planned to be resolved in 21.02 release.
  - Added new data type S32 support for:
    - @ref NEArithmeticSubtraction
    - @ref NEArithmeticSubtractionKernel
@@ -106,6 +108,13 @@ v20.11 Public major release
       - @ref GCSoftmaxLayer
  - New OpenCL kernels / functions:
    - @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
+   - @ref CLLogicalNot
+   - @ref CLLogicalAnd
+   - @ref CLLogicalOr
+ - New NEON kernels / functions:
+   - @ref NELogicalNot
+   - @ref NELogicalAnd
+   - @ref NELogicalOr
  - Removed padding from NEON kernels:
    - @ref NEComplexPixelWiseMultiplicationKernel
    - @ref NENonMaximaSuppression3x3Kernel
