@@ -54,6 +54,9 @@ namespace arm_compute
         - @ref NEExpLayer
         - @ref NEGaussian3x3
         - @ref NEIntegralImage
+        - @ref NELogicalAnd
+        - @ref NELogicalNot
+        - @ref NELogicalOr
         - @ref NEMedian3x3
         - @ref NENonLinearFilter
         - @ref NENonMaximaSuppression3x3
@@ -230,6 +233,9 @@ namespace arm_compute
     - @ref CLLaplacianPyramid
     - @ref CLLaplacianReconstruct
     - @ref CLLocallyConnectedLayer
+    - @ref CLLogicalAnd
+    - @ref CLLogicalNot
+    - @ref CLLogicalOr
     - @ref CLLSTMLayer
     - @ref CLLSTMLayerQuantized
     - @ref CLQLSTMLayer
@@ -299,6 +305,7 @@ namespace arm_compute
         - @ref CLGaussian3x3
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
+        - @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
         - @ref CLMagnitude
         - @ref CLMeanStdDevNormalizationLayer
         - @ref CLMedian3x3
