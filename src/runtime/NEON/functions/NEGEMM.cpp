@@ -39,7 +39,6 @@
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "support/MemorySupport.h"
 
 #include <cmath>
 
@@ -110,7 +109,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             _memory_group.manage(&_tmp_d);
         }
 
-        _mm_kernel = arm_compute::support::cpp14::make_unique<NEGEMMMatrixMultiplyKernel>();
+        _mm_kernel = std::make_unique<NEGEMMMatrixMultiplyKernel>();
 
         // Select between GEMV and GEMM
         if(_run_vector_matrix_multiplication)
@@ -148,11 +147,11 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             int k = a->info()->dimension(0);
 
             // Configure interleave kernel
-            _interleave_kernel = arm_compute::support::cpp14::make_unique<NEGEMMInterleave4x4Kernel>();
+            _interleave_kernel = std::make_unique<NEGEMMInterleave4x4Kernel>();
             _interleave_kernel->configure(a, &_tmp_a);
 
             // Configure transpose kernel
-            _transpose_kernel = arm_compute::support::cpp14::make_unique<NEGEMMTranspose1xWKernel>();
+            _transpose_kernel = std::make_unique<NEGEMMTranspose1xWKernel>();
             _transpose_kernel->configure(b, &_tmp_b);
 
             // Configure matrix multiplication kernel
@@ -176,7 +175,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     // Configure matrix addition kernel
     if(_run_addition)
     {
-        _ma_kernel = arm_compute::support::cpp14::make_unique<NEGEMMMatrixAdditionKernel>();
+        _ma_kernel = std::make_unique<NEGEMMMatrixAdditionKernel>();
         _ma_kernel->configure(c, d, beta);
     }
 

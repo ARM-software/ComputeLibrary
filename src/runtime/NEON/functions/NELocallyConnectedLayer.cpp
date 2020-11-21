@@ -30,7 +30,6 @@
 #include "src/core/NEON/kernels/NEIm2ColKernel.h"
 #include "src/core/NEON/kernels/NELocallyConnectedMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
-#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <tuple>
@@ -160,9 +159,9 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
 
     // Configure kernels
     _input_im2col.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
-    _weights_reshape_kernel = arm_compute::support::cpp14::make_unique<NEWeightsReshapeKernel>();
+    _weights_reshape_kernel = std::make_unique<NEWeightsReshapeKernel>();
     _weights_reshape_kernel->configure(weights, biases, &_weights_reshaped);
-    _mm_kernel = arm_compute::support::cpp14::make_unique<NELocallyConnectedMatrixMultiplyKernel>();
+    _mm_kernel = std::make_unique<NELocallyConnectedMatrixMultiplyKernel>();
     _mm_kernel->configure(&_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
     _output_col2im.configure(&_gemm_output, output, Size2D(conv_w, conv_h));
 

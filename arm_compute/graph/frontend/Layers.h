@@ -300,12 +300,12 @@ public:
     ConcatLayer(SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
         : _sub_streams(), _concat_descriptor(DataLayoutDimension::CHANNEL)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream2)));
 
         utility::for_each([&](SubStream && sub_stream)
         {
-            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+            _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
     }
@@ -320,12 +320,12 @@ public:
     ConcatLayer(descriptors::ConcatLayerDescriptor concat_descriptor, SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
         : _sub_streams(), _concat_descriptor(concat_descriptor)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream2)));
 
         utility::for_each([&](SubStream && sub_stream)
         {
-            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+            _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
     }
@@ -337,7 +337,7 @@ public:
     ConcatLayer(SubStream &&sub_stream)
         : _sub_streams(), _concat_descriptor(DataLayoutDimension::CHANNEL)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
     }
     NodeID create_layer(IStream &s) override
     {
@@ -754,8 +754,8 @@ public:
         : _num_outputs(num_outputs),
           _weights(nullptr),
           _bias(nullptr),
-          _weights_ss(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream_weights))),
-          _bias_ss(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream_bias))),
+          _weights_ss(std::make_unique<SubStream>(std::move(sub_stream_weights))),
+          _bias_ss(std::make_unique<SubStream>(std::move(sub_stream_bias))),
           _fc_info(fc_info),
           _weights_quant_info(std::move(weights_quant_info)),
           _out_quant_info(std::move(out_quant_info))
@@ -1357,12 +1357,12 @@ public:
     StackLayer(SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
         : _sub_streams(), _axis(0)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream2)));
 
         utility::for_each([&](SubStream && sub_stream)
         {
-            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+            _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
     }
@@ -1377,12 +1377,12 @@ public:
     StackLayer(int axis, SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
         : _sub_streams(), _axis(axis)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream2)));
 
         utility::for_each([&](SubStream && sub_stream)
         {
-            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+            _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
     }
@@ -1394,7 +1394,7 @@ public:
     StackLayer(SubStream &&sub_stream)
         : _sub_streams(), _axis(0)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
     }
     NodeID create_layer(IStream &s) override
     {

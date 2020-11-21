@@ -26,8 +26,6 @@
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/kernels/CLMemsetKernel.h"
 
-#include "support/MemorySupport.h"
-
 #include <utility>
 
 namespace arm_compute
@@ -39,7 +37,7 @@ void CLFill::configure(ICLTensor *tensor, PixelValue constant_value)
 
 void CLFill::configure(const CLCompileContext &compile_context, ICLTensor *tensor, PixelValue constant_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
+    auto k = std::make_unique<CLMemsetKernel>();
     k->configure(compile_context, tensor, constant_value);
     _kernel = std::move(k);
 }

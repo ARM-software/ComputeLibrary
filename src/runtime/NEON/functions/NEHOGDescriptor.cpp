@@ -31,7 +31,6 @@
 #include "src/core/NEON/kernels/NEDerivativeKernel.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEHOGDescriptorKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -88,11 +87,11 @@ void NEHOGDescriptor::configure(ITensor *input, ITensor *output, const IHOG *hog
     _memory_group.manage(&_hog_space);
 
     // Initialise orientation binning kernel
-    _orient_bin = arm_compute::support::cpp14::make_unique<NEHOGOrientationBinningKernel>();
+    _orient_bin = std::make_unique<NEHOGOrientationBinningKernel>();
     _orient_bin->configure(&_mag, &_phase, &_hog_space, hog->info());
 
     // Initialize HOG norm kernel
-    _block_norm = arm_compute::support::cpp14::make_unique<NEHOGBlockNormalizationKernel>();
+    _block_norm = std::make_unique<NEHOGBlockNormalizationKernel>();
     _block_norm->configure(&_hog_space, output, hog->info());
 
     // Allocate intermediate tensors

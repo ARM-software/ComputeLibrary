@@ -30,7 +30,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEHistogramKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -51,7 +50,7 @@ void NEHistogram::configure(const IImage *input, IDistribution1D *output)
     _local_hist.resize(_local_hist_size);
 
     // Configure kernel
-    _histogram_kernel = arm_compute::support::cpp14::make_unique<NEHistogramKernel>();
+    _histogram_kernel = std::make_unique<NEHistogramKernel>();
     _histogram_kernel->configure(input, output, _local_hist.data(), _window_lut.data());
 }
 

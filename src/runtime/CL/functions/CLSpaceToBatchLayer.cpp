@@ -31,13 +31,12 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLMemsetKernel.h"
 #include "src/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLSpaceToBatchLayer::CLSpaceToBatchLayer()
-    : _space_to_batch_kernel(support::cpp14::make_unique<CLSpaceToBatchLayerKernel>()),
-      _memset_kernel(support::cpp14::make_unique<CLMemsetKernel>()),
+    : _space_to_batch_kernel(std::make_unique<CLSpaceToBatchLayerKernel>()),
+      _memset_kernel(std::make_unique<CLMemsetKernel>()),
       _has_padding(false)
 {
 }

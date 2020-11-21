@@ -26,10 +26,10 @@
 
 #include "Option.h"
 #include "arm_compute/core/utils/misc/Utility.h"
-#include "support/MemorySupport.h"
 
 #include <iostream>
 #include <map>
+#include <memory>
 #include <memory>
 #include <regex>
 #include <string>
@@ -102,14 +102,14 @@ private:
 template <typename T, typename... As>
 inline T *CommandLineParser::add_option(const std::string &name, As &&... args)
 {
-    auto result = _options.emplace(name, support::cpp14::make_unique<T>(name, std::forward<As>(args)...));
+    auto result = _options.emplace(name, std::make_unique<T>(name, std::forward<As>(args)...));
     return static_cast<T *>(result.first->second.get());
 }
 
 template <typename T, typename... As>
 inline T *CommandLineParser::add_positional_option(As &&... args)
 {
-    _positional_options.emplace_back(support::cpp14::make_unique<T>(std::forward<As>(args)...));
+    _positional_options.emplace_back(std::make_unique<T>(std::forward<As>(args)...));
     return static_cast<T *>(_positional_options.back().get());
 }
 

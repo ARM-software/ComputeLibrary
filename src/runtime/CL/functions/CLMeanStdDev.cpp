@@ -28,7 +28,6 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLMeanStdDevKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -43,8 +42,8 @@ CLMeanStdDev::CLMeanStdDev(std::shared_ptr<IMemoryManager> memory_manager) // NO
       _reduction_output_stddev(),
       _mean(nullptr),
       _stddev(nullptr),
-      _mean_stddev_kernel(support::cpp14::make_unique<CLMeanStdDevKernel>()),
-      _fill_border_kernel(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _mean_stddev_kernel(std::make_unique<CLMeanStdDevKernel>()),
+      _fill_border_kernel(std::make_unique<CLFillBorderKernel>()),
       _global_sum(),
       _global_sum_squared()
 {

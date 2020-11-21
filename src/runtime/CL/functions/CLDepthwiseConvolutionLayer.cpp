@@ -37,7 +37,6 @@
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -125,7 +124,7 @@ Status validate_arguments_3x3(const ITensorInfo *input, const ITensorInfo *weigh
 
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::CLDepthwiseConvolutionLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _dwc_native_kernel(support::cpp14::make_unique<CLDepthwiseConvolutionLayerNativeKernel>()),
+      _dwc_native_kernel(std::make_unique<CLDepthwiseConvolutionLayerNativeKernel>()),
       _permute_input_to_nhwc(),
       _permute_weights_to_nhwc(),
       _permute_output_to_nchw(),
@@ -351,11 +350,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::CLDepthwiseConvolutionLayerInternal3x3(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
       _kernel(nullptr),
-      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _border_handler(std::make_unique<CLFillBorderKernel>()),
       _permute_input_to_nchw(),
       _permute_weights_to_nchw(),
       _permute_output_to_nhwc(),
-      _reshape_weights(support::cpp14::make_unique<CLDepthwiseConvolutionLayerReshapeWeightsKernel>()),
+      _reshape_weights(std::make_unique<CLDepthwiseConvolutionLayerReshapeWeightsKernel>()),
       _permuted_input(),
       _permuted_weights(),
       _permuted_output(),
@@ -436,7 +435,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
         weights_to_use = &_permuted_weights;
         output_to_use  = &_permuted_output;
 
-        _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
+        _kernel = std::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
     }
     else if(is_nhwc)
     {
@@ -445,11 +444,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
             _reshape_weights->configure(compile_context, weights, &_permuted_weights, info);
             weights_to_use = &_permuted_weights;
         }
-        _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NHWCKernel>();
+        _kernel = std::make_unique<CLDepthwiseConvolutionLayer3x3NHWCKernel>();
     }
     else
     {
-        _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
+        _kernel = std::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
     }
 
     CLTensor *output_multipliers_to_use = nullptr;

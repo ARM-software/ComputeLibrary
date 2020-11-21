@@ -26,12 +26,10 @@
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 CLRuntimeContext::CLRuntimeContext()
-    : _gpu_owned_scheduler(support::cpp14::make_unique<CLScheduler>()), _gpu_scheduler(_gpu_owned_scheduler.get()), _symbols(), _core_context()
+    : _gpu_owned_scheduler(std::make_unique<CLScheduler>()), _gpu_scheduler(_gpu_owned_scheduler.get()), _symbols(), _core_context()
 {
     _symbols.load_default();
     auto ctx_dev_err = create_opencl_context_and_device();

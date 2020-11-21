@@ -26,13 +26,12 @@
 #include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Types.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 void GCGEMMTranspose1xW::configure(const IGCTensor *input, IGCTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCGEMMTranspose1xWKernel>();
+    auto k = std::make_unique<GCGEMMTranspose1xWKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

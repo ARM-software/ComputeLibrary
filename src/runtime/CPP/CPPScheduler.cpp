@@ -28,13 +28,13 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
 #include "src/runtime/CPUUtils.h"
-#include "support/MemorySupport.h"
 #include "support/Mutex.h"
 
 #include <atomic>
 #include <condition_variable>
 #include <iostream>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <system_error>
 #include <thread>
@@ -281,7 +281,7 @@ CPPScheduler &CPPScheduler::get()
 }
 
 CPPScheduler::CPPScheduler()
-    : _impl(support::cpp14::make_unique<Impl>(num_threads_hint()))
+    : _impl(std::make_unique<Impl>(num_threads_hint()))
 {
 }
 

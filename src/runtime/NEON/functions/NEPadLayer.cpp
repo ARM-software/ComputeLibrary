@@ -30,7 +30,6 @@
 #include "src/core/NEON/kernels/NECopyKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -59,7 +58,7 @@ NEPadLayer::NEPadLayer()
 
 void NEPadLayer::configure_constant_mode(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value)
 {
-    _pad_kernel = arm_compute::support::cpp14::make_unique<NEPadLayerKernel>();
+    _pad_kernel = std::make_unique<NEPadLayerKernel>();
     _pad_kernel->configure(input, output, padding, constant_value, PaddingMode::CONSTANT);
 }
 
@@ -201,7 +200,7 @@ void NEPadLayer::configure(ITensor *input, ITensor *output, const PaddingList &p
     else
     {
         // Copy the input to the whole output if no padding is applied
-        _copy_kernel = arm_compute::support::cpp14::make_unique<NECopyKernel>();
+        _copy_kernel = std::make_unique<NECopyKernel>();
         _copy_kernel->configure(input, output);
     }
 }

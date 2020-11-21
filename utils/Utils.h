@@ -38,7 +38,6 @@
 #pragma GCC diagnostic ignored "-Wstrict-overflow"
 #include "libnpy/npy.hpp"
 #pragma GCC diagnostic pop
-#include "support/MemorySupport.h"
 #include "support/StringSupport.h"
 
 #ifdef ARM_COMPUTE_CL
@@ -54,6 +53,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <random>
 #include <string>
 #include <tuple>
@@ -110,7 +110,7 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example);
 template <typename T>
 int run_example(int argc, char **argv)
 {
-    return run_example(argc, argv, support::cpp14::make_unique<T>());
+    return run_example(argc, argv, std::make_unique<T>());
 }
 
 /** Draw a RGB rectangular window for the detected object

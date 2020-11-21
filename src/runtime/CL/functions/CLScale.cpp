@@ -29,7 +29,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLScaleKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -46,7 +45,7 @@ void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy
 
 void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLScaleKernel>();
+    auto k = std::make_unique<CLScaleKernel>();
     k->set_target(CLScheduler::get().target());
     k->configure(compile_context, input, output, info);
     _kernel = std::move(k);

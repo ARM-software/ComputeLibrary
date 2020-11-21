@@ -44,7 +44,7 @@ namespace backends
 template <typename FunctionType, typename FunctionNameType, typename... ParameterType>
 std::tuple<std::unique_ptr<arm_compute::IFunction>, FunctionNameType> create_named_function(FunctionNameType name, ParameterType... args)
 {
-    auto f = arm_compute::support::cpp14::make_unique<FunctionType>();
+    auto f = std::make_unique<FunctionType>();
     f->configure(std::forward<ParameterType>(args)...);
     return std::make_pair(std::move(f), name);
 }
@@ -62,7 +62,7 @@ std::tuple<std::unique_ptr<arm_compute::IFunction>, FunctionNameType> create_nam
                                                                                                            MemoryManagerType mm,
                                                                                                            ParameterType... args)
 {
-    auto f = arm_compute::support::cpp14::make_unique<FunctionType>(mm);
+    auto f = std::make_unique<FunctionType>(mm);
     f->configure(std::forward<ParameterType>(args)...);
     return std::make_pair(std::move(f), name);
 }

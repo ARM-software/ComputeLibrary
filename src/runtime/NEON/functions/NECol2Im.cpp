@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/NEON/functions/NECol2Im.h"
 
 #include "src/core/NEON/kernels/NECol2ImKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void NECol2Im::configure(const ITensor *input, ITensor *output, const Size2D &convolved_dims)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NECol2ImKernel>();
+    auto k = std::make_unique<NECol2ImKernel>();
     k->configure(input, output, convolved_dims);
     _kernel = std::move(k);
 }

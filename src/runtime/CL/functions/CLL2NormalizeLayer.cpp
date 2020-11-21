@@ -32,7 +32,6 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -44,7 +43,7 @@ constexpr int max_input_tensor_dim = 3;
 CLL2NormalizeLayer::CLL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
       _reduce_func(),
-      _normalize_kernel(support::cpp14::make_unique<CLL2NormalizeLayerKernel>()),
+      _normalize_kernel(std::make_unique<CLL2NormalizeLayerKernel>()),
       _sumsq()
 {
 }

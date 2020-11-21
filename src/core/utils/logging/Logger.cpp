@@ -24,7 +24,8 @@
 #include "arm_compute/core/utils/logging/Logger.h"
 
 #include "arm_compute/core/Error.h"
-#include "support/MemorySupport.h"
+
+#include <memory>
 
 using namespace arm_compute::logging;
 
@@ -116,9 +117,9 @@ void Logger::add_decorator(std::unique_ptr<IDecorator> decorator)
 
 void Logger::set_default_decorators()
 {
-    _decorators.emplace_back(support::cpp14::make_unique<StringDecorator>(_name));
-    _decorators.emplace_back(support::cpp14::make_unique<DateDecorator>());
-    _decorators.emplace_back(support::cpp14::make_unique<LogLevelDecorator>());
+    _decorators.emplace_back(std::make_unique<StringDecorator>(_name));
+    _decorators.emplace_back(std::make_unique<DateDecorator>());
+    _decorators.emplace_back(std::make_unique<LogLevelDecorator>());
 }
 
 bool Logger::is_loggable(LogLevel log_level)

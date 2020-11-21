@@ -30,7 +30,6 @@
 #include "src/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "src/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -83,8 +82,8 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
     _memory_group.manage(&_tmp);
 
     // Configure kernels
-    _max_kernel     = arm_compute::support::cpp14::make_unique<NELogits1DMaxKernel>();
-    _softmax_kernel = arm_compute::support::cpp14::make_unique<NELogits1DSoftmaxKernel<IS_LOG>>();
+    _max_kernel     = std::make_unique<NELogits1DMaxKernel>();
+    _softmax_kernel = std::make_unique<NELogits1DSoftmaxKernel<IS_LOG>>();
     _max_kernel->configure(tmp_input, &_max);
     if(_needs_permute)
     {
@@ -104,7 +103,7 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
     else
     {
         // Softmax 2D case
-        _fill_border_kernel = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+        _fill_border_kernel = std::make_unique<NEFillBorderKernel>();
         _fill_border_kernel->configure(tmp_input, _max_kernel->border_size(), BorderMode::REPLICATE);
         _softmax_kernel->configure(tmp_input, &_max, output, beta, &_tmp);
     }

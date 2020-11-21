@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/kernels/CLYOLOLayerKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -36,7 +35,7 @@ void CLYOLOLayer::configure(ICLTensor *input, ICLTensor *output, const Activatio
 
 void CLYOLOLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLYOLOLayerKernel>();
+    auto k = std::make_unique<CLYOLOLayerKernel>();
     k->configure(compile_context, input, output, act_info, num_classes);
     _kernel = std::move(k);
 }

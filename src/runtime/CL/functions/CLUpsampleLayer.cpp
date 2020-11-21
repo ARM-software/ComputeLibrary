@@ -27,12 +27,11 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLUpsampleLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLUpsampleLayer::CLUpsampleLayer() // NOLINT
-    : _upsample(support::cpp14::make_unique<CLUpsampleLayerKernel>()),
+    : _upsample(std::make_unique<CLUpsampleLayerKernel>()),
       _output(nullptr)
 {
 }

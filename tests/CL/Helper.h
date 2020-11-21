@@ -33,7 +33,7 @@
 
 #include "src/core/CL/ICLKernel.h"
 
-#include "support/MemorySupport.h"
+#include <memory>
 
 namespace arm_compute
 {
@@ -51,7 +51,7 @@ public:
     template <typename... Args>
     void configure(Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->configure(std::forward<Args>(args)...);
         _kernel = std::move(k);
     }
@@ -63,7 +63,7 @@ public:
     template <typename... Args>
     void configure(GPUTarget gpu_target, Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->set_target(gpu_target);
         k->configure(std::forward<Args>(args)...);
         _kernel = std::move(k);
@@ -92,7 +92,7 @@ public:
     template <typename T, typename... Args>
     void configure(T first, Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
         _border_handler->configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
@@ -113,7 +113,7 @@ public:
     template <typename T, typename... Args>
     void configure(T first, T second, Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->set_target(CLScheduler::get().target());
         k->configure(first, second, std::forward<Args>(args)...);
         _kernel = std::move(k);

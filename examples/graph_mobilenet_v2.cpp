@@ -129,7 +129,7 @@ private:
         const std::string model_path = "/cnn_data/mobilenet_v2_1.0_224_model/";
 
         // Create a preprocessor object
-        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>();
+        std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>();
 
         // Get trainable parameters data path
         std::string data_path = common_params.data_path;

@@ -26,7 +26,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEIm2ColKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -41,7 +40,7 @@ void NEIm2Col::configure(const ITensor *input, ITensor *output, const Size2D &ke
 {
     _y_dim = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
 
-    _kernel = arm_compute::support::cpp14::make_unique<NEIm2ColKernel>();
+    _kernel = std::make_unique<NEIm2ColKernel>();
     _kernel->configure(input, output, kernel_dims, conv_info, has_bias, dilation, num_groups);
 }
 

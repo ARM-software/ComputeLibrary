@@ -27,7 +27,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "src/core/CL/kernels/CLActivationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -35,7 +34,7 @@ namespace experimental
 {
 void CLActivation::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>();
+    auto k = std::make_unique<CLActivationLayerKernel>();
     k->configure(compile_context, input, output, act_info);
     _kernel = std::move(k);
 }
@@ -55,7 +54,7 @@ struct CLActivationLayer::Impl
 };
 
 CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
     _impl->ctx = ctx;
 }
@@ -78,7 +77,7 @@ void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTe
     _impl->src = input;
     _impl->dst = output == nullptr ? input : output;
 
-    _impl->op = arm_compute::support::cpp14::make_unique<experimental::CLActivation>();
+    _impl->op = std::make_unique<experimental::CLActivation>();
     _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), act_info);
 }
 

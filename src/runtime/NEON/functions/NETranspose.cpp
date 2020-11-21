@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 
 #include "src/core/NEON/kernels/NETransposeKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,7 +31,7 @@ namespace arm_compute
 {
 void NETranspose::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NETransposeKernel>();
+    auto k = std::make_unique<NETransposeKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

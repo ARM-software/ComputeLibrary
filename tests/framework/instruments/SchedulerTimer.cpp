@@ -188,7 +188,7 @@ void           SchedulerClock<output_timestamps>::test_start()
         {
             if(user != nullptr && user->scheduler() != nullptr)
             {
-                user->intercept_scheduler(support::cpp14::make_unique<Interceptor<output_timestamps>>(_kernels, *user->scheduler(), _scale_factor));
+                user->intercept_scheduler(std::make_unique<Interceptor<output_timestamps>>(_kernels, *user->scheduler(), _scale_factor));
             }
         });
     }

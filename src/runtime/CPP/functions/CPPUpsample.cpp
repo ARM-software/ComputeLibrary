@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 
 #include "arm_compute/core/CPP/kernels/CPPUpsampleKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 void CPPUpsample::configure(const ITensor *input, ITensor *output, const PadStrideInfo &info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CPPUpsampleKernel>();
+    auto k = std::make_unique<CPPUpsampleKernel>();
     k->configure(input, output, info);
     _kernel = std::move(k);
 }

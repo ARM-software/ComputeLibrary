@@ -43,8 +43,6 @@
 #include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 namespace
@@ -106,7 +104,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
         _signed_a.allocator()->init(a_to_use->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction)));
         _memory_group.manage(&_signed_a);
-        _convert_to_signed_asymm = arm_compute::support::cpp14::make_unique<NEConvertQuantizedSignednessKernel>();
+        _convert_to_signed_asymm = std::make_unique<NEConvertQuantizedSignednessKernel>();
         _convert_to_signed_asymm->configure(a_to_use, &_signed_a);
         a_to_use  = &_signed_a;
         _a_offset = _signed_a.info()->quantization_info().uniform().offset;
@@ -182,11 +180,11 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         }
 
         // Configure interleave kernel
-        _mtx_a_reshape_kernel = arm_compute::support::cpp14::make_unique<NEGEMMInterleave4x4Kernel>();
+        _mtx_a_reshape_kernel = std::make_unique<NEGEMMInterleave4x4Kernel>();
         _mtx_a_reshape_kernel->configure(a_to_use, &_tmp_a);
 
         // Configure transpose kernel
-        _mtx_b_reshape_kernel = arm_compute::support::cpp14::make_unique<NEGEMMTranspose1xWKernel>();
+        _mtx_b_reshape_kernel = std::make_unique<NEGEMMTranspose1xWKernel>();
         _mtx_b_reshape_kernel->configure(b, &_tmp_b);
     }
 
@@ -207,7 +205,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             }
 
             // Configure Matrix B reduction kernel
-            _mtx_b_reduction_kernel = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixBReductionKernel>();
+            _mtx_b_reduction_kernel = std::make_unique<NEGEMMLowpMatrixBReductionKernel>();
             _mtx_b_reduction_kernel->configure(b, &_vector_sum_col, reduction_info);
         }
 
@@ -220,7 +218,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             _memory_group.manage(&_vector_sum_row);
 
             // Configure matrix A reduction kernel
-            _mtx_a_reduction_kernel = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+            _mtx_a_reduction_kernel = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
             _mtx_a_reduction_kernel->configure(a_to_use, &_vector_sum_row, reduction_info);
         }
 
@@ -229,11 +227,11 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             // Configure matrix multiply kernel
             if(!_assembly_path)
             {
-                _mm_kernel = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
+                _mm_kernel = std::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
                 _mm_kernel->configure(matrix_a, matrix_b, &_mm_result_s32);
             }
 
-            _offset_contribution_output_stage_kernel = arm_compute::support::cpp14::make_unique<NEGEMMLowpOffsetContributionOutputStageKernel>();
+            _offset_contribution_output_stage_kernel = std::make_unique<NEGEMMLowpOffsetContributionOutputStageKernel>();
             _offset_contribution_output_stage_kernel->configure(&_mm_result_s32,
                                                                 _a_offset == 0 ? nullptr : &_vector_sum_col,
                                                                 _b_offset == 0 ? nullptr : &_vector_sum_row, c,
@@ -243,7 +241,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
             if(_flip_signedness)
             {
-                _convert_from_signed_asymm = arm_compute::support::cpp14::make_unique<NEConvertQuantizedSignednessKernel>();
+                _convert_from_signed_asymm = std::make_unique<NEConvertQuantizedSignednessKernel>();
                 _convert_from_signed_asymm->configure(&_signed_output, output);
             }
         }
@@ -252,11 +250,11 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             // Configure matrix multiply kernel
             if(!_assembly_path)
             {
-                _mm_kernel = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
+                _mm_kernel = std::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
                 _mm_kernel->configure(matrix_a, matrix_b, output);
             }
             // Configure offset contribution kernel
-            _offset_contribution_kernel = arm_compute::support::cpp14::make_unique<NEGEMMLowpOffsetContributionKernel>();
+            _offset_contribution_kernel = std::make_unique<NEGEMMLowpOffsetContributionKernel>();
             _offset_contribution_kernel->configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a_to_use->info()->dimension(0), _a_offset, _b_offset);
         }
 

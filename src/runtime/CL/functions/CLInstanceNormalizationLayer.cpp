@@ -26,7 +26,6 @@
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -41,7 +40,7 @@ void CLInstanceNormalizationLayer::configure(ICLTensor *input, ICLTensor *output
 
 void CLInstanceNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLInstanceNormalizationLayerKernel>();
+    auto k = std::make_unique<CLInstanceNormalizationLayerKernel>();
     k->configure(compile_context, input, output, InstanceNormalizationLayerKernelInfo(gamma, beta, epsilon, use_mixed_precision));
     _kernel = std::move(k);
 }

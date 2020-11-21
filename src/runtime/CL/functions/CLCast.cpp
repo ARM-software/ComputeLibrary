@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLCast.h"
 
 #include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLCast::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy 
 
 void CLCast::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLDepthConvertLayerKernel>();
+    auto k = std::make_unique<CLDepthConvertLayerKernel>();
     k->configure(compile_context, input, output, policy, 0);
     _kernel = std::move(k);
 }

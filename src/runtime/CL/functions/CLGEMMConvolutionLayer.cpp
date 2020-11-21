@@ -46,7 +46,6 @@
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "support/Cast.h"
-#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <memory>
@@ -58,7 +57,7 @@ using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::utils::cast;
 
 CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights()
-    : _weights_reshape_kernel(support::cpp14::make_unique<CLWeightsReshapeKernel>())
+    : _weights_reshape_kernel(std::make_unique<CLWeightsReshapeKernel>())
 {
 }
 
@@ -117,9 +116,9 @@ void CLConvolutionLayerReshapeWeights::run()
 }
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(support::cpp14::make_unique<CLIm2ColKernel>()),
-      _mm_gemm(memory_manager, weights_manager), _mm_gemmlowp(memory_manager), _col2im_kernel(support::cpp14::make_unique<CLCol2ImKernel>()), _activationlayer_function(), _original_weights(nullptr),
-      _im2col_output(), _weights_reshaped(), _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _is_prepared(false)
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(std::make_unique<CLIm2ColKernel>()), _mm_gemm(memory_manager,
+            weights_manager), _mm_gemmlowp(memory_manager), _col2im_kernel(std::make_unique<CLCol2ImKernel>()), _activationlayer_function(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(),
+      _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _is_prepared(false)
 {
 }
 

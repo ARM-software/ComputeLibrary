@@ -26,7 +26,6 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -36,7 +35,7 @@ void NEStridedSlice::configure(const ITensorInfo *input, ITensorInfo *output,
                                const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEStridedSliceKernel>();
+    auto k = std::make_unique<NEStridedSliceKernel>();
     k->configure(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
     _kernel = std::move(k);
 }
@@ -57,7 +56,7 @@ struct NEStridedSlice::Impl
 };
 
 NEStridedSlice::NEStridedSlice()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEStridedSlice::NEStridedSlice(NEStridedSlice &&) = default;
@@ -70,7 +69,7 @@ void NEStridedSlice::configure(const ITensor *input, ITensor *output,
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::NEStridedSlice>();
+    _impl->op  = std::make_unique<experimental::NEStridedSlice>();
     _impl->op->configure(input->info(), output->info(), starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
 

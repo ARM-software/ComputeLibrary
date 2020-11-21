@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
 
 #include "src/core/NEON/kernels/NEElementwiseUnaryKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,7 +31,7 @@ namespace arm_compute
 {
 void NERsqrtLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    auto k = std::make_unique<NEElementwiseUnaryKernel>();
     k->configure(ElementWiseUnary::RSQRT, input, output);
     _kernel = std::move(k);
 }
@@ -43,7 +42,7 @@ Status NERsqrtLayer::validate(const ITensorInfo *input, const ITensorInfo *outpu
 
 void NEExpLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    auto k = std::make_unique<NEElementwiseUnaryKernel>();
     k->configure(ElementWiseUnary::EXP, input, output);
     _kernel = std::move(k);
 }
@@ -54,7 +53,7 @@ Status NEExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void NENegLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    auto k = std::make_unique<NEElementwiseUnaryKernel>();
     k->configure(ElementWiseUnary::NEG, input, output);
     _kernel = std::move(k);
 }
@@ -65,7 +64,7 @@ Status NENegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void NELogLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    auto k = std::make_unique<NEElementwiseUnaryKernel>();
     k->configure(ElementWiseUnary::LOG, input, output);
     _kernel = std::move(k);
 }
@@ -76,7 +75,7 @@ Status NELogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void NEAbsLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    auto k = std::make_unique<NEElementwiseUnaryKernel>();
     k->configure(ElementWiseUnary::ABS, input, output);
     _kernel = std::move(k);
 }
@@ -87,7 +86,7 @@ Status NEAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void NERoundLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    auto k = std::make_unique<NEElementwiseUnaryKernel>();
     k->configure(ElementWiseUnary::ROUND, input, output);
     _kernel = std::move(k);
 }
@@ -98,7 +97,7 @@ Status NERoundLayer::validate(const ITensorInfo *input, const ITensorInfo *outpu
 
 void NESinLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    auto k = std::make_unique<NEElementwiseUnaryKernel>();
     k->configure(ElementWiseUnary::SIN, input, output);
     _kernel = std::move(k);
 }

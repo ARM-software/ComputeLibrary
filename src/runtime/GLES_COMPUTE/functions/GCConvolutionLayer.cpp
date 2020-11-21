@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,6 @@
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 
 #include <cmath>
-#include <memory>
 #include <tuple>
 
 using namespace arm_compute;

@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "src/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void NEPixelWiseMultiplication::configure(ITensorInfo *input1, ITensorInfo *inpu
                                           const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
-    auto k = arm_compute::support::cpp14::make_unique<NEPixelWiseMultiplicationKernel>();
+    auto k = std::make_unique<NEPixelWiseMultiplicationKernel>();
     k->configure(input1, input2, output, scale, overflow_policy, rounding_policy);
     _kernel = std::move(k);
 }
@@ -51,7 +50,7 @@ Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITen
 void NEComplexPixelWiseMultiplication::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
-    auto k = arm_compute::support::cpp14::make_unique<NEComplexPixelWiseMultiplicationKernel>();
+    auto k = std::make_unique<NEComplexPixelWiseMultiplicationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }
@@ -72,7 +71,7 @@ struct NEPixelWiseMultiplication::Impl
 };
 
 NEPixelWiseMultiplication::NEPixelWiseMultiplication()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEPixelWiseMultiplication::NEPixelWiseMultiplication(NEPixelWiseMultiplication &&) = default;
@@ -91,7 +90,7 @@ void NEPixelWiseMultiplication::configure(const ITensor *input1, const ITensor *
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEPixelWiseMultiplication>();
+    _impl->op    = std::make_unique<experimental::NEPixelWiseMultiplication>();
     _impl->op->configure(input1->info(), input2->info(), output->info(), scale, overflow_policy, rounding_policy, act_info);
 }
 
@@ -113,7 +112,7 @@ struct NEComplexPixelWiseMultiplication::Impl
 };
 
 NEComplexPixelWiseMultiplication::NEComplexPixelWiseMultiplication()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEComplexPixelWiseMultiplication::NEComplexPixelWiseMultiplication(NEComplexPixelWiseMultiplication &&) = default;
@@ -130,7 +129,7 @@ void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEComplexPixelWiseMultiplication>();
+    _impl->op    = std::make_unique<experimental::NEComplexPixelWiseMultiplication>();
     _impl->op->configure(input1->info(), input2->info(), output->info(), act_info);
 }
 

@@ -25,13 +25,12 @@
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 
 #include "src/core/NEON/kernels/NEDequantizationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void NEDequantizationLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEDequantizationLayerKernel>();
+    auto k = std::make_unique<NEDequantizationLayerKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

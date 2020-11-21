@@ -36,7 +36,6 @@
 
 #include "src/core/utils/ScaleUtils.h"
 
-#include "support/MemorySupport.h"
 #include "support/Rounding.h"
 
 #include <cmath>
@@ -125,7 +124,7 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
     const auto policy_to_use = (info.interpolation_policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f) ? InterpolationPolicy::NEAREST_NEIGHBOR : info.interpolation_policy;
 
-    auto scale_kernel = arm_compute::support::cpp14::make_unique<NEScaleKernel>();
+    auto scale_kernel = std::make_unique<NEScaleKernel>();
     switch(policy_to_use)
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:

@@ -30,7 +30,7 @@
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "support/ToolchainSupport.h"
 
-#include "support/MemorySupport.h"
+#include <memory>
 
 namespace arm_compute
 {
@@ -199,11 +199,11 @@ public:
         switch(mode)
         {
             case CLTunerMode::EXHAUSTIVE:
-                return arm_compute::support::cpp14::make_unique<CLLWSListExhaustive>(gws);
+                return std::make_unique<CLLWSListExhaustive>(gws);
             case CLTunerMode::NORMAL:
-                return arm_compute::support::cpp14::make_unique<CLLWSListNormal>(gws);
+                return std::make_unique<CLLWSListNormal>(gws);
             case CLTunerMode::RAPID:
-                return arm_compute::support::cpp14::make_unique<CLLWSListRapid>(gws);
+                return std::make_unique<CLLWSListRapid>(gws);
             default:
                 return nullptr;
         }

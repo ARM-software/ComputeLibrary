@@ -89,7 +89,7 @@ public:
         const DataLayout weights_layout = DataLayout::NCHW;
 
         // Create preprocessor
-        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>(0);
+        std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>(0);
 
         graph << common_params.target
               << common_params.fast_math_hint

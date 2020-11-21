@@ -42,7 +42,6 @@
 #include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -114,7 +113,7 @@ void NERNNLayer::configure(const ITensor *input, const ITensor *weights, const I
     _activation.configure(&_add_output, hidden_state, info);
     _add_output.allocator()->allocate();
 
-    _copy_kernel = arm_compute::support::cpp14::make_unique<NECopyKernel>();
+    _copy_kernel = std::make_unique<NECopyKernel>();
     _copy_kernel->configure(hidden_state, output);
 }
 

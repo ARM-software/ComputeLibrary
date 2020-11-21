@@ -36,7 +36,6 @@
 #include "src/core/NEON/kernels/NEGaussian5x5Kernel.h"
 #include "src/core/NEON/kernels/NEGaussianPyramidKernel.h"
 #include "src/core/NEON/kernels/NEScaleKernel.h"
-#include "support/MemorySupport.h"
 
 #include <cstddef>
 
@@ -98,19 +97,19 @@ void NEGaussianPyramidHalf::configure(const ITensor *input, IPyramid *pyramid, B
         for(size_t i = 0; i < num_stages; ++i)
         {
             /* Configure horizontal kernel */
-            _horizontal_reduction[i] = arm_compute::support::cpp14::make_unique<NEGaussianPyramidHorKernel>();
+            _horizontal_reduction[i] = std::make_unique<NEGaussianPyramidHorKernel>();
             _horizontal_reduction[i]->configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
 
             /* Configure vertical kernel */
-            _vertical_reduction[i] = arm_compute::support::cpp14::make_unique<NEGaussianPyramidVertKernel>();
+            _vertical_reduction[i] = std::make_unique<NEGaussianPyramidVertKernel>();
             _vertical_reduction[i]->configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
 
             /* Configure border */
-            _horizontal_border_handler[i] = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+            _horizontal_border_handler[i] = std::make_unique<NEFillBorderKernel>();
             _horizontal_border_handler[i]->configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i]->border_size(), border_mode, PixelValue(constant_border_value));
 
             /* Configure border */
-            _vertical_border_handler[i] = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+            _vertical_border_handler[i] = std::make_unique<NEFillBorderKernel>();
             _vertical_border_handler[i]->configure(_tmp.get_pyramid_level(i), _vertical_reduction[i]->border_size(), border_mode, PixelValue(pixel_value_u16));
         }
 

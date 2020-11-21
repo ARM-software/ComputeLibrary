@@ -33,11 +33,11 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/NEON/kernels/convolution/common/utils.hpp"
+#include "src/core/NEON/kernels/convolution/winograd/winograd_layer.hpp"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "support/MemorySupport.h"
 
-#include "src/core/NEON/kernels/convolution/winograd/winograd_layer.hpp"
+#include <memory>
 
 namespace arm_compute
 {
@@ -225,7 +225,7 @@ void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, Ke
     _matrix_stride       = matrix_stride;
     _num_output_channels = num_output_channels;
     _num_input_channels  = num_input_channels;
-    _transform           = arm_compute::support::cpp14::make_unique<WeightsTransform>(num_output_channels, num_input_channels);
+    _transform           = std::make_unique<WeightsTransform>(num_output_channels, num_input_channels);
 
     Window win;
     auto   win_last = _transform->get_window();
@@ -348,7 +348,7 @@ void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Kern
     _padding_bottom = (padding == PADDING_SAME) ? iceildiv(KernelRows - 1, 2) : 0;
     _padding_right  = (padding == PADDING_SAME) ? iceildiv(KernelCols - 1, 2) : 0;
 
-    _transform = arm_compute::support::cpp14::make_unique<InputTransform>(
+    _transform = std::make_unique<InputTransform>(
                      KernelRows,
                      KernelCols,
                      num_batches,
@@ -492,7 +492,7 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     _num_cols           = num_cols;
     _num_channels       = num_channels;
     // We don't have the biases buffer at this stage as it hasn't been allocated, we pass in nullptr OutputTransform is only used here to compute the window
-    _transform = arm_compute::support::cpp14::make_unique<OutputTransform>(num_batches, num_rows, num_cols, num_channels, activation);
+    _transform = std::make_unique<OutputTransform>(num_batches, num_rows, num_cols, num_channels, activation);
     Window win;
     auto   win_last = _transform->get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));

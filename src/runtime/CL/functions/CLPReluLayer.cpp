@@ -26,7 +26,6 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLPReluLayer.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -38,7 +37,7 @@ CLPReluLayer::CLPReluLayer()
 
 void CLPReluLayer::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
+    auto k = std::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::PRELU, input, alpha, output);
     _kernel = std::move(k);
 }
@@ -63,7 +62,7 @@ struct CLPReluLayer::Impl
 };
 
 CLPReluLayer::CLPReluLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLPReluLayer::CLPReluLayer(CLPReluLayer &&) = default;
@@ -80,7 +79,7 @@ void CLPReluLayer::configure(const CLCompileContext &compile_context, ICLTensor 
     _impl->src_0 = input;
     _impl->src_1 = alpha;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLPReluLayer>();
+    _impl->op    = std::make_unique<experimental::CLPReluLayer>();
     _impl->op->configure(compile_context, input->info(), alpha->info(), output->info());
 }
 

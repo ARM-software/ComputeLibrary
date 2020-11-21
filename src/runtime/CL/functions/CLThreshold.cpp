@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLThreshold.h"
 
 #include "src/core/CL/kernels/CLThresholdKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -42,7 +41,7 @@ void CLThreshold::configure(const ICLTensor *input, ICLTensor *output, const Thr
 
 void CLThreshold::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ThresholdKernelInfo &info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLThresholdKernel>();
+    auto k = std::make_unique<CLThresholdKernel>();
     k->configure(compile_context, input, output, info);
     _kernel = std::move(k);
 }

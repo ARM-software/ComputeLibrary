@@ -25,7 +25,9 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include <set>
+
 namespace arm_compute
 {
 namespace

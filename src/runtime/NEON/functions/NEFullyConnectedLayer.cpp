@@ -43,8 +43,6 @@
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NETransposeKernel.h"
 
-#include "support/MemorySupport.h"
-
 #include <algorithm>
 #include <cmath>
 
@@ -148,7 +146,7 @@ Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const I
 
 void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NETransposeKernel>();
+    auto k = std::make_unique<NETransposeKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
@@ -215,7 +213,7 @@ void NEFullyConnectedLayer::configure_conv_fc(const ITensor *input, const ITenso
     // Configure flatten kernel
     _memory_group.manage(&_flatten_output);
 
-    _flatten_kernel = arm_compute::support::cpp14::make_unique<NEFlattenLayerKernel>();
+    _flatten_kernel = std::make_unique<NEFlattenLayerKernel>();
     _flatten_kernel->configure(input, &_flatten_output);
 
     // Configure matrix multiply kernel

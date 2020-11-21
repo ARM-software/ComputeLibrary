@@ -26,14 +26,13 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLHOGDetectorKernel.h"
-#include "support/MemorySupport.h"
 
 #include <algorithm>
 
 using namespace arm_compute;
 
 CLHOGDetector::CLHOGDetector()
-    : _hog_detector_kernel(support::cpp14::make_unique<CLHOGDetectorKernel>()), _detection_windows(nullptr), _num_detection_windows()
+    : _hog_detector_kernel(std::make_unique<CLHOGDetectorKernel>()), _detection_windows(nullptr), _num_detection_windows()
 {
 }
 

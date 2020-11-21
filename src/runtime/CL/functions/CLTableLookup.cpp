@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLTableLookup.h"
 
 #include "src/core/CL/kernels/CLTableLookupKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLTableLookup::configure(const ICLTensor *input, const ICLLut *lut, ICLTens
 
 void CLTableLookup::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLLut *lut, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLTableLookupKernel>();
+    auto k = std::make_unique<CLTableLookupKernel>();
     k->configure(compile_context, input, lut, output);
     _kernel = std::move(k);
 }

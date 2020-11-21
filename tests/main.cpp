@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "support/MemorySupport.h"
 #include "support/StringSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/framework/DatasetModes.h"
@@ -166,20 +165,20 @@ int main(int argc, char **argv)
         Scheduler::get().set_num_threads(threads->value());
 
         // Create CPU context
-        auto cpu_ctx = support::cpp14::make_unique<RuntimeContext>();
+        auto cpu_ctx = std::make_unique<RuntimeContext>();
         cpu_ctx->set_scheduler(&Scheduler::get());
 
         // Track CPU context
-        auto cpu_ctx_track = support::cpp14::make_unique<ContextSchedulerUser>(cpu_ctx.get());
+        auto cpu_ctx_track = std::make_unique<ContextSchedulerUser>(cpu_ctx.get());
 
         // Create parameters
-        parameters = support::cpp14::make_unique<ParametersLibrary>();
+        parameters = std::make_unique<ParametersLibrary>();
         parameters->set_cpu_ctx(std::move(cpu_ctx));
 
 #ifdef ARM_COMPUTE_GC
         // Setup OpenGL context
         {
-            auto gles_ctx = support::cpp14::make_unique<GCRuntimeContext>();
+            auto gles_ctx = std::make_unique<GCRuntimeContext>();
             ARM_COMPUTE_ERROR_ON(gles_ctx == nullptr);
             {
                 // Legacy singletons API: This has been deprecated and the singletons will be removed
@@ -312,8 +311,8 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        library       = support::cpp14::make_unique<AssetsLibrary>(assets->value(), seed->value());
-        fixed_library = support::cpp14::make_unique<AssetsLibrary>(assets->value(), fixed_seed);
+        library       = std::make_unique<AssetsLibrary>(assets->value(), seed->value());
+        fixed_library = std::make_unique<AssetsLibrary>(assets->value(), fixed_seed);
 
         if(!parser.validate())
         {

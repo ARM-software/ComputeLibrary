@@ -32,7 +32,6 @@
 #include "src/core/NEON/kernels/NEHistogramKernel.h"
 #include "src/core/NEON/kernels/NEHistogramKernel.h"
 #include "src/core/NEON/kernels/NETableLookupKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -50,9 +49,9 @@ void NEEqualizeHistogram::configure(const IImage *input, IImage *output)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
-    _histogram_kernel     = arm_compute::support::cpp14::make_unique<NEHistogramKernel>();
-    _cd_histogram_kernel  = arm_compute::support::cpp14::make_unique<NECumulativeDistributionKernel>();
-    _map_histogram_kernel = arm_compute::support::cpp14::make_unique<NETableLookupKernel>();
+    _histogram_kernel     = std::make_unique<NEHistogramKernel>();
+    _cd_histogram_kernel  = std::make_unique<NECumulativeDistributionKernel>();
+    _map_histogram_kernel = std::make_unique<NETableLookupKernel>();
 
     // Configure kernels
     _histogram_kernel->configure(input, &_hist);

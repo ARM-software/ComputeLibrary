@@ -25,7 +25,6 @@
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFlattenLayerKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -36,7 +35,7 @@ void CLFlattenLayer::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLFlattenLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLFlattenLayerKernel>();
+    auto k = std::make_unique<CLFlattenLayerKernel>();
     k->configure(compile_context, input, output);
     _kernel = std::move(k);
     CLScheduler::get().tune_kernel_static(*_kernel);

@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
-#include "support/MemorySupport.h"
 
 #include <vector>
 
@@ -73,7 +72,7 @@ MappingType BlobMemoryPool::mapping_type() const
 std::unique_ptr<IMemoryPool> BlobMemoryPool::duplicate()
 {
     ARM_COMPUTE_ERROR_ON(!_allocator);
-    return support::cpp14::make_unique<BlobMemoryPool>(_allocator, _blob_info);
+    return std::make_unique<BlobMemoryPool>(_allocator, _blob_info);
 }
 
 void BlobMemoryPool::allocate_blobs(const std::vector<BlobInfo> &blob_info)

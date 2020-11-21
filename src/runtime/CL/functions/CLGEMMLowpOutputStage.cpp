@@ -28,7 +28,6 @@
 #include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.h"
-#include "support/MemorySupport.h"
 
 #include <algorithm>
 
@@ -52,7 +51,7 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const CLComp
     info.gemmlowp_min_bound  = min;
     info.gemmlowp_max_bound  = max;
     info.output_data_type    = DataType::QASYMM8;
-    auto k                   = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
+    auto k                   = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
     k->configure(compile_context, input, bias, output, &info);
     _kernel = std::move(k);
 }
@@ -85,7 +84,7 @@ void CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::configure(const CLCompi
     info.gemmlowp_min_bound  = min;
     info.gemmlowp_max_bound  = max;
     info.output_data_type    = DataType::QASYMM8_SIGNED;
-    auto k                   = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
+    auto k                   = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
     k->configure(compile_context, input, bias, output, &info);
     _kernel = std::move(k);
 }
@@ -117,7 +116,7 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const CLComp
     info.gemmlowp_min_bound  = min;
     info.gemmlowp_max_bound  = max;
     info.output_data_type    = DataType::QSYMM16;
-    auto k                   = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
+    auto k                   = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
     k->configure(compile_context, input, bias, output, &info);
     _kernel = std::move(k);
 }
@@ -145,21 +144,21 @@ void CLGEMMLowpOutputStage::configure(const CLCompileContext &compile_context, c
     {
         case GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT:
         {
-            auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
+            auto k = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
             k->configure(compile_context, input, bias, output, &info);
             _kernel = std::move(k);
             break;
         }
         case GEMMLowpOutputStageType::QUANTIZE_DOWN:
         {
-            auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleKernel>();
+            auto k = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleKernel>();
             k->configure(compile_context, input, bias, output, &info);
             _kernel = std::move(k);
             break;
         }
         case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
         {
-            auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel>();
+            auto k = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel>();
             k->configure(compile_context, input, bias, output, &info);
             _kernel = std::move(k);
             break;

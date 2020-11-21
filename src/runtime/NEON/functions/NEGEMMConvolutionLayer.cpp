@@ -43,7 +43,6 @@
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NEIm2ColKernel.h"
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
-#include "support/MemorySupport.h"
 
 #include <set>
 #include <tuple>
@@ -68,7 +67,7 @@ void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const I
     const bool     append_biases = (biases != nullptr) && !is_data_type_quantized_asymmetric(weights->info()->data_type());
     const ITensor *biases_to_use = (append_biases) ? biases : nullptr;
 
-    _weights_reshape_kernel = arm_compute::support::cpp14::make_unique<NEWeightsReshapeKernel>();
+    _weights_reshape_kernel = std::make_unique<NEWeightsReshapeKernel>();
     _weights_reshape_kernel->configure(weights, biases_to_use, output);
 
     output->info()->set_quantization_info(weights->info()->quantization_info());
@@ -342,7 +341,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         _memory_group.manage(&_im2col_output);
 
         // Configure
-        _im2col_kernel = arm_compute::support::cpp14::make_unique<NEIm2ColKernel>();
+        _im2col_kernel = std::make_unique<NEIm2ColKernel>();
         _im2col_kernel->configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, false, dilation);
 
         // Update GEMM input
@@ -385,7 +384,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         if(_data_layout == DataLayout::NCHW)
         {
             // Configure col2im
-            _col2im_kernel = arm_compute::support::cpp14::make_unique<NECol2ImKernel>();
+            _col2im_kernel = std::make_unique<NECol2ImKernel>();
             _col2im_kernel->configure(gemm_output_to_use, output, Size2D(conv_w, conv_h));
         }
         else

@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLChannelExtract.h"
 
 #include "src/core/CL/kernels/CLChannelExtractKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLChannelExtract::configure(const ICLTensor *input, Channel channel, ICLTen
 
 void CLChannelExtract::configure(const CLCompileContext &compile_context, const ICLTensor *input, Channel channel, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLChannelExtractKernel>();
+    auto k = std::make_unique<CLChannelExtractKernel>();
     k->configure(compile_context, input, channel, output);
     _kernel = std::move(k);
 }
@@ -49,7 +48,7 @@ void CLChannelExtract::configure(const ICLMultiImage *input, Channel channel, IC
 
 void CLChannelExtract::configure(const CLCompileContext &compile_context, const ICLMultiImage *input, Channel channel, ICLImage *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLChannelExtractKernel>();
+    auto k = std::make_unique<CLChannelExtractKernel>();
     k->configure(compile_context, input, channel, output);
     _kernel = std::move(k);
 }

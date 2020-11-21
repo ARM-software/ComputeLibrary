@@ -31,8 +31,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 NEBatchNormalizationLayer::~NEBatchNormalizationLayer() = default;
@@ -46,7 +44,7 @@ void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const
                                           ActivationLayerInfo act_info)
 {
     // Configure kernel
-    _norm_kernel = arm_compute::support::cpp14::make_unique<NEBatchNormalizationLayerKernel>();
+    _norm_kernel = std::make_unique<NEBatchNormalizationLayerKernel>();
     _norm_kernel->configure(input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 

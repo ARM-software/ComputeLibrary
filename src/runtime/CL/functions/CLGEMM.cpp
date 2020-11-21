@@ -49,8 +49,6 @@
 #include "src/runtime/CL/gemm/CLGEMMKernelSelection.h"
 #include "support/Cast.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 using namespace arm_compute::misc::shape_calculator;
@@ -60,7 +58,7 @@ using namespace arm_compute::utils::cast;
 namespace weights_transformations
 {
 CLGEMMReshapeRHSMatrixKernelManaged::CLGEMMReshapeRHSMatrixKernelManaged()
-    : _kernel(support::cpp14::make_unique<CLGEMMReshapeRHSMatrixKernel>())
+    : _kernel(std::make_unique<CLGEMMReshapeRHSMatrixKernel>())
 {
 }
 
@@ -102,13 +100,13 @@ void CLGEMMReshapeRHSMatrixKernelManaged::configure(const CLCompileContext &comp
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _memory_group(std::move(memory_manager)),
       _weights_manager(weights_manager),
-      _mm_kernel(support::cpp14::make_unique<CLGEMMMatrixMultiplyKernel>()),
-      _reshape_lhs_kernel(support::cpp14::make_unique<CLGEMMReshapeLHSMatrixKernel>()),
-      _reshape_rhs_kernel(support::cpp14::make_unique<CLGEMMReshapeRHSMatrixKernel>()),
-      _reshape_rhs_kernel_managed(support::cpp14::make_unique<weights_transformations::CLGEMMReshapeRHSMatrixKernelManaged>()),
-      _mm_reshaped_kernel(support::cpp14::make_unique<CLGEMMMatrixMultiplyReshapedKernel>()),
-      _mm_reshaped_only_rhs_kernel(support::cpp14::make_unique<CLGEMMMatrixMultiplyReshapedOnlyRHSKernel>()),
-      _mm_reshaped_only_rhs_fallback_kernel(support::cpp14::make_unique<CLGEMMMatrixMultiplyReshapedOnlyRHSKernel>()),
+      _mm_kernel(std::make_unique<CLGEMMMatrixMultiplyKernel>()),
+      _reshape_lhs_kernel(std::make_unique<CLGEMMReshapeLHSMatrixKernel>()),
+      _reshape_rhs_kernel(std::make_unique<CLGEMMReshapeRHSMatrixKernel>()),
+      _reshape_rhs_kernel_managed(std::make_unique<weights_transformations::CLGEMMReshapeRHSMatrixKernelManaged>()),
+      _mm_reshaped_kernel(std::make_unique<CLGEMMMatrixMultiplyReshapedKernel>()),
+      _mm_reshaped_only_rhs_kernel(std::make_unique<CLGEMMMatrixMultiplyReshapedOnlyRHSKernel>()),
+      _mm_reshaped_only_rhs_fallback_kernel(std::make_unique<CLGEMMMatrixMultiplyReshapedOnlyRHSKernel>()),
       _tmp_a(),
       _tmp_b(),
       _original_b(nullptr),

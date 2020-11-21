@@ -36,8 +36,6 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/helpers/fft.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 namespace
@@ -161,7 +159,7 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
     _pad_weights_func.configure(&_flipped_weights, &_padded_weights, padding_w);
 
     // Transform weights
-    _transform_weights_func = support::cpp14::make_unique<NEFFT2D>();
+    _transform_weights_func = std::make_unique<NEFFT2D>();
     _transform_weights_func->configure(&_padded_weights, &_transformed_weights, FFT2DInfo());
 
     // Pad input

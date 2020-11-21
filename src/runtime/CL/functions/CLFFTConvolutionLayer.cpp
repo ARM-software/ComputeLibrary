@@ -39,8 +39,6 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/helpers/fft.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 namespace
@@ -168,7 +166,7 @@ void CLFFTConvolutionLayer::configure(const CLCompileContext &compile_context, I
     _pad_weights_func.configure(compile_context, &_flipped_weights, &_padded_weights, padding_w);
 
     // Transform weights
-    _transform_weights_func = support::cpp14::make_unique<CLFFT2D>();
+    _transform_weights_func = std::make_unique<CLFFT2D>();
     _transform_weights_func->configure(compile_context, &_padded_weights, &_transformed_weights, FFT2DInfo());
 
     // Pad input

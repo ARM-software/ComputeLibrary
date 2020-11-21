@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/kernels/CLReshapeLayerKernel.h"
-#include "support/MemorySupport.h"
 
 /** [CLReshapeLayer snippet] **/
 namespace arm_compute
@@ -34,7 +33,7 @@ namespace experimental
 {
 void CLReshape::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLReshapeLayerKernel>();
+    auto k = std::make_unique<CLReshapeLayerKernel>();
     k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }
@@ -53,7 +52,7 @@ struct CLReshapeLayer::Impl
 };
 
 CLReshapeLayer::CLReshapeLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -70,7 +69,7 @@ void CLReshapeLayer::configure(const CLCompileContext &compile_context, const IC
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLReshape>();
+    _impl->op  = std::make_unique<experimental::CLReshape>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 

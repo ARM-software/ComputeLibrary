@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLDepthConvertLayer.h"
 
 #include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLDepthConvertLayer::configure(const ICLTensor *input, ICLTensor *output, C
 
 void CLDepthConvertLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLDepthConvertLayerKernel>();
+    auto k = std::make_unique<CLDepthConvertLayerKernel>();
     k->configure(compile_context, input, output, policy, shift);
     _kernel = std::move(k);
 }

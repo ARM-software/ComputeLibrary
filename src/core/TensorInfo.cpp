@@ -29,7 +29,8 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/Utils.h"
-#include "support/MemorySupport.h"
+
+#include <memory>
 
 using namespace arm_compute;
 
@@ -314,7 +315,7 @@ bool TensorInfo::extend_padding(const PaddingSize &padding)
 
 std::unique_ptr<ITensorInfo> TensorInfo::clone() const
 {
-    return support::cpp14::make_unique<TensorInfo>(*this);
+    return std::make_unique<TensorInfo>(*this);
 }
 
 ITensorInfo &TensorInfo::set_data_type(DataType data_type)

@@ -29,13 +29,12 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "src/core/CL/kernels/CLMemsetKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLDeconvolutionLayerUpsample::CLDeconvolutionLayerUpsample() // NOLINT
-    : _upsample(support::cpp14::make_unique<CLDeconvolutionLayerUpsampleKernel>()),
-      _memset(support::cpp14::make_unique<CLMemsetKernel>()),
+    : _upsample(std::make_unique<CLDeconvolutionLayerUpsampleKernel>()),
+      _memset(std::make_unique<CLMemsetKernel>()),
       _output(nullptr)
 {
 }

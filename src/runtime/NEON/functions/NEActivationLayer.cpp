@@ -28,7 +28,6 @@
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "src/core/NEON/kernels/NEActivationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -38,7 +37,7 @@ NEActivationLayer::~NEActivationLayer() = default;
 
 void NEActivationLayer::configure(const ITensorInfo *input, ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEActivationLayerKernel>();
+    auto k = std::make_unique<NEActivationLayerKernel>();
     k->configure(input, output, activation_info);
     _kernel = std::move(k);
 }
@@ -58,7 +57,7 @@ struct NEActivationLayer::Impl
 };
 
 NEActivationLayer::NEActivationLayer(IRuntimeContext *ctx)
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
     _impl->ctx = ctx;
 }
@@ -76,7 +75,7 @@ void NEActivationLayer::configure(ITensor *input, ITensor *output, ActivationLay
     _impl->src = input;
     _impl->dst = output == nullptr ? input : output;
 
-    _impl->op = arm_compute::support::cpp14::make_unique<experimental::NEActivationLayer>();
+    _impl->op = std::make_unique<experimental::NEActivationLayer>();
     _impl->op->configure(_impl->src->info(), _impl->dst->info(), activation_info);
 }
 

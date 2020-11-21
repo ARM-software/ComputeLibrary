@@ -92,7 +92,7 @@ public:
         }
 
         // Create a preprocessor object
-        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>(0.f, 1.f);
+        std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>(0.f, 1.f);
 
         // Create input descriptor
         const auto        operation_layout = common_params.data_layout;
@@ -207,7 +207,7 @@ public:
                   get_weights_accessor(data_path, "Logits_Logits_weights.npy", weights_layout),
                   get_weights_accessor(data_path, "Logits_Logits_biases.npy"))
               .set_name("Logits/Logits")
-              << OutputLayer(arm_compute::support::cpp14::make_unique<DummyAccessor>(0));
+              << OutputLayer(std::make_unique<DummyAccessor>(0));
 
         // Finalize graph
         GraphConfig config;

@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 
 #include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 void CPPPermute::configure(const ITensor *input, ITensor *output, const PermutationVector &perm)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CPPPermuteKernel>();
+    auto k = std::make_unique<CPPPermuteKernel>();
     k->configure(input, output, perm);
     _kernel = std::move(k);
 }

@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLBitwiseNot.h"
 
 #include "src/core/CL/kernels/CLBitwiseNotKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLBitwiseNot::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLBitwiseNot::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLBitwiseNotKernel>();
+    auto k = std::make_unique<CLBitwiseNotKernel>();
     k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }

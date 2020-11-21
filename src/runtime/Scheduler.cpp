@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/Scheduler.h"
 
 #include "arm_compute/core/Error.h"
-#include "support/MemorySupport.h"
 
 #if ARM_COMPUTE_CPP_SCHEDULER
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
@@ -55,12 +54,12 @@ namespace
 std::map<Scheduler::Type, std::unique_ptr<IScheduler>> init()
 {
     std::map<Scheduler::Type, std::unique_ptr<IScheduler>> m;
-    m[Scheduler::Type::ST] = support::cpp14::make_unique<SingleThreadScheduler>();
+    m[Scheduler::Type::ST] = std::make_unique<SingleThreadScheduler>();
 #if defined(ARM_COMPUTE_CPP_SCHEDULER)
-    m[Scheduler::Type::CPP] = support::cpp14::make_unique<CPPScheduler>();
+    m[Scheduler::Type::CPP] = std::make_unique<CPPScheduler>();
 #endif // defined(ARM_COMPUTE_CPP_SCHEDULER)
 #if defined(ARM_COMPUTE_OPENMP_SCHEDULER)
-    m[Scheduler::Type::OMP] = support::cpp14::make_unique<OMPScheduler>();
+    m[Scheduler::Type::OMP] = std::make_unique<OMPScheduler>();
 #endif // defined(ARM_COMPUTE_OPENMP_SCHEDULER)
 
     return m;

@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCArithmeticAddition.h"
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCArithmeticAdditionKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -33,7 +32,7 @@ using namespace arm_compute;
 void GCArithmeticAddition::configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
-    auto k = arm_compute::support::cpp14::make_unique<GCArithmeticAdditionKernel>();
+    auto k = std::make_unique<GCArithmeticAdditionKernel>();
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
 }

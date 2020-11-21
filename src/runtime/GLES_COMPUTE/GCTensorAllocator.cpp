@@ -28,7 +28,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCMemoryRegion.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -46,7 +45,7 @@ void GCTensorAllocator::allocate()
 {
     if(_associated_memory_group == nullptr)
     {
-        _memory.set_owned_region(support::cpp14::make_unique<GCBufferMemoryRegion>(info().total_size()));
+        _memory.set_owned_region(std::make_unique<GCBufferMemoryRegion>(info().total_size()));
     }
     else
     {

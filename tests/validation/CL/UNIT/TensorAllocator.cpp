@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -135,10 +135,10 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
         const size_t total_size_in_bytes = tensor.info()->total_size();
         const size_t alignment           = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE>();
         size_t       space               = total_size_in_bytes + alignment;
-        auto         raw_data            = support::cpp14::make_unique<uint8_t[]>(space);
+        auto         raw_data            = std::make_unique<uint8_t[]>(space);
 
         void *aligned_ptr = raw_data.get();
-        support::cpp11::align(alignment, total_size_in_bytes, aligned_ptr, space);
+        std::align(alignment, total_size_in_bytes, aligned_ptr, space);
 
         cl::Buffer wrapped_buffer(import_malloc_memory_helper(aligned_ptr, total_size_in_bytes));
         ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(wrapped_buffer)), framework::LogLevel::ERRORS);

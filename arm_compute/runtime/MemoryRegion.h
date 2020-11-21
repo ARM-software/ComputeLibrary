@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/IMemoryRegion.h"
 
 #include "arm_compute/core/Error.h"
-#include "support/MemorySupport.h"
 
 #include <cstddef>
 
@@ -59,7 +58,7 @@ public:
             if(alignment != 0)
             {
                 void *aligned_ptr = _mem.get();
-                support::cpp11::align(alignment, size, aligned_ptr, space);
+                std::align(alignment, size, aligned_ptr, space);
                 _ptr = aligned_ptr;
             }
         }
@@ -94,7 +93,7 @@ public:
     {
         if(_ptr != nullptr && (offset < _size) && (_size - offset >= size))
         {
-            return support::cpp14::make_unique<MemoryRegion>(static_cast<uint8_t *>(_ptr) + offset, size);
+            return std::make_unique<MemoryRegion>(static_cast<uint8_t *>(_ptr) + offset, size);
         }
         else
         {

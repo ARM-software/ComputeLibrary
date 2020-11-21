@@ -32,22 +32,21 @@
 #include "src/core/CL/kernels/CLPermuteKernel.h"
 #include "src/core/CL/kernels/CLQuantizationLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager),
-      _permute_deltas_kernel(support::cpp14::make_unique<CLPermuteKernel>()),
+      _permute_deltas_kernel(std::make_unique<CLPermuteKernel>()),
       _flatten_deltas(),
-      _permute_scores_kernel(support::cpp14::make_unique<CLPermuteKernel>()),
+      _permute_scores_kernel(std::make_unique<CLPermuteKernel>()),
       _flatten_scores(),
-      _compute_anchors_kernel(support::cpp14::make_unique<CLComputeAllAnchorsKernel>()),
-      _bounding_box_kernel(support::cpp14::make_unique<CLBoundingBoxTransformKernel>()),
-      _pad_kernel(support::cpp14::make_unique<CLPadLayerKernel>()),
-      _dequantize_anchors(support::cpp14::make_unique<CLDequantizationLayerKernel>()),
-      _dequantize_deltas(support::cpp14::make_unique<CLDequantizationLayerKernel>()),
-      _quantize_all_proposals(support::cpp14::make_unique<CLQuantizationLayerKernel>()),
+      _compute_anchors_kernel(std::make_unique<CLComputeAllAnchorsKernel>()),
+      _bounding_box_kernel(std::make_unique<CLBoundingBoxTransformKernel>()),
+      _pad_kernel(std::make_unique<CLPadLayerKernel>()),
+      _dequantize_anchors(std::make_unique<CLDequantizationLayerKernel>()),
+      _dequantize_deltas(std::make_unique<CLDequantizationLayerKernel>()),
+      _quantize_all_proposals(std::make_unique<CLQuantizationLayerKernel>()),
       _cpp_nms(memory_manager),
       _is_nhwc(false),
       _is_qasymm8(false),

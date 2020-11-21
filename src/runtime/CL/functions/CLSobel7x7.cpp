@@ -31,15 +31,14 @@
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLSobel7x7Kernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLSobel7x7::CLSobel7x7(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _sobel_hor(support::cpp14::make_unique<CLSobel7x7HorKernel>()),
-      _sobel_vert(support::cpp14::make_unique<CLSobel7x7VertKernel>()),
-      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _sobel_hor(std::make_unique<CLSobel7x7HorKernel>()),
+      _sobel_vert(std::make_unique<CLSobel7x7VertKernel>()),
+      _border_handler(std::make_unique<CLFillBorderKernel>()),
       _tmp_x(),
       _tmp_y()
 {

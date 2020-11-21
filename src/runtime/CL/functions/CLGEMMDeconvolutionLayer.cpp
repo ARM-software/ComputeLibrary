@@ -43,7 +43,6 @@
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
-#include "support/MemorySupport.h"
 
 #include <tuple>
 
@@ -114,7 +113,7 @@ CLGEMMDeconvolutionLayer::CLGEMMDeconvolutionLayer(std::shared_ptr<IMemoryManage
       _permute_weights_to_nhwc(),
       _reshape_weights(),
       _transpose_weights(),
-      _deconv_reshape(support::cpp14::make_unique<CLDeconvolutionReshapeOutputKernel>()),
+      _deconv_reshape(std::make_unique<CLDeconvolutionReshapeOutputKernel>()),
       _slice_gemm(),
       _gemmlowp_final(),
       _reshaped_weights(),

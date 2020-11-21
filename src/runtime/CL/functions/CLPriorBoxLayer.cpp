@@ -31,7 +31,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLPriorBoxLayerKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -54,7 +53,7 @@ void CLPriorBoxLayer::configure(const CLCompileContext &compile_context, const I
         _max = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.max_sizes().size() * sizeof(float));
     }
 
-    auto k = arm_compute::support::cpp14::make_unique<CLPriorBoxLayerKernel>();
+    auto k = std::make_unique<CLPriorBoxLayerKernel>();
     k->configure(compile_context, input1, input2, output, info, &_min, &_max, &_aspect_ratios);
     _kernel = std::move(k);
 }

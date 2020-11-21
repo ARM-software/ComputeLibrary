@@ -28,7 +28,7 @@
 #include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
 #include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationValhall.h"
 
-#include "support/MemorySupport.h"
+#include <memory>
 
 namespace arm_compute
 {
@@ -50,9 +50,9 @@ public:
         {
             case GPUTarget::MIDGARD:
             case GPUTarget::BIFROST:
-                return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(gpu);
+                return std::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(gpu);
             case GPUTarget::VALHALL:
-                return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationValhall>(gpu);
+                return std::make_unique<CLGEMMReshapedKernelConfigurationValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
         }

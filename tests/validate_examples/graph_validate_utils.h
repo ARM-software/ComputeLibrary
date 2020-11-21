@@ -337,11 +337,11 @@ inline std::unique_ptr<graph::ITensorAccessor> get_accessor(const TensorParams &
 {
     if(!tensor.npy.empty())
     {
-        return arm_compute::support::cpp14::make_unique<arm_compute::graph_utils::NumPyBinLoader>(tensor.npy);
+        return std::make_unique<arm_compute::graph_utils::NumPyBinLoader>(tensor.npy);
     }
     else
     {
-        return arm_compute::support::cpp14::make_unique<arm_compute::graph_utils::RandomAccessor>(lower, upper, seed);
+        return std::make_unique<arm_compute::graph_utils::RandomAccessor>(lower, upper, seed);
     }
 }
 
@@ -607,17 +607,17 @@ inline std::unique_ptr<graph::ITensorAccessor> get_verify_accessor(ExampleParams
     {
         case DataType::QASYMM8:
         {
-            return arm_compute::support::cpp14::make_unique<VerifyAccessorT<uint8_t>>(
+            return std::make_unique<VerifyAccessorT<uint8_t>>(
                        params);
         }
         case DataType::F16:
         {
-            return arm_compute::support::cpp14::make_unique<VerifyAccessorT<half>>(
+            return std::make_unique<VerifyAccessorT<half>>(
                        params);
         }
         case DataType::F32:
         {
-            return arm_compute::support::cpp14::make_unique<VerifyAccessorT<float>>(
+            return std::make_unique<VerifyAccessorT<float>>(
                        params);
         }
         default:

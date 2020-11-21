@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
 
 #include "src/core/NEON/kernels/NEFloorKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void NEFloor::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEFloorKernel>();
+    auto k = std::make_unique<NEFloorKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

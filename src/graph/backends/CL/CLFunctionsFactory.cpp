@@ -143,7 +143,7 @@ std::unique_ptr<IFunction> create_detection_output_layer<CPPDetectionOutputLayer
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<CPPDetectionOutputLayer>();
+    auto func = std::make_unique<CPPDetectionOutputLayer>();
     func->configure(input0, input1, input2, output, detect_info);
 
     // Log info
@@ -159,7 +159,7 @@ std::unique_ptr<IFunction> create_detection_output_layer<CPPDetectionOutputLayer
                                << " DetectionOutputLayer info: " << detect_info
                                << std::endl);
 
-    auto wrap_function = support::cpp14::make_unique<CPPWrapperFunction>();
+    auto wrap_function = std::make_unique<CPPWrapperFunction>();
 
     wrap_function->register_function(std::move(func));
     wrap_function->register_tensor(input0);
@@ -193,7 +193,7 @@ std::unique_ptr<IFunction> create_detection_post_process_layer<CPPDetectionPostP
     ARM_COMPUTE_ERROR_ON(output3 == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<CPPDetectionPostProcessLayer>();
+    auto func = std::make_unique<CPPDetectionPostProcessLayer>();
     func->configure(input0, input1, input2, output0, output1, output2, output3, detect_info);
 
     // Log info
@@ -212,7 +212,7 @@ std::unique_ptr<IFunction> create_detection_post_process_layer<CPPDetectionPostP
                                << " DetectionPostProcessLayer info: " << detect_info
                                << std::endl);
 
-    auto wrap_function = support::cpp14::make_unique<CPPWrapperFunction>();
+    auto wrap_function = std::make_unique<CPPWrapperFunction>();
 
     wrap_function->register_function(std::move(func));
     wrap_function->register_tensor(input0);

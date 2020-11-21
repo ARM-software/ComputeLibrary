@@ -41,14 +41,13 @@
 #include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 using namespace arm_compute::misc::shape_calculator;
 
 CLRNNLayer::CLRNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected_kernel(), _copy_kernel(support::cpp14::make_unique<CLCopyKernel>()), _fully_connected_out(),
+    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected_kernel(), _copy_kernel(std::make_unique<CLCopyKernel>()), _fully_connected_out(),
       _gemm_output(), _add_output(), _is_prepared(false)
 {
 }

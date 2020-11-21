@@ -33,9 +33,8 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
-#include "support/MemorySupport.h"
-
 #include "arm_compute/runtime/common/LSTMParams.h"
+
 #include <memory>
 
 namespace arm_compute

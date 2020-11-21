@@ -44,7 +44,6 @@
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/runtime/CL/gemm/CLGEMMKernelSelection.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -79,14 +78,14 @@ inline bool is_gemm_reshaped(unsigned int m, unsigned int n, unsigned int k, Dat
 
 CLGEMMLowpMatrixMultiplyCore::CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _weights_to_qasymm8(support::cpp14::make_unique<CLDepthConvertLayerKernel>()),
-      _mm_native_kernel(support::cpp14::make_unique<CLGEMMLowpMatrixMultiplyNativeKernel>()),
-      _mm_reshaped_only_rhs_kernel(support::cpp14::make_unique<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel>()),
-      _mtx_b_reshape_kernel(support::cpp14::make_unique<CLGEMMReshapeRHSMatrixKernel>()),
-      _mtx_a_reduction_kernel(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _mtx_b_reduction_kernel(support::cpp14::make_unique<CLGEMMLowpMatrixBReductionKernel>()),
-      _offset_contribution_kernel(support::cpp14::make_unique<CLGEMMLowpOffsetContributionKernel>()),
-      _offset_contribution_output_stage_kernel(support::cpp14::make_unique<CLGEMMLowpOffsetContributionOutputStageKernel>()),
+      _weights_to_qasymm8(std::make_unique<CLDepthConvertLayerKernel>()),
+      _mm_native_kernel(std::make_unique<CLGEMMLowpMatrixMultiplyNativeKernel>()),
+      _mm_reshaped_only_rhs_kernel(std::make_unique<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel>()),
+      _mtx_b_reshape_kernel(std::make_unique<CLGEMMReshapeRHSMatrixKernel>()),
+      _mtx_a_reduction_kernel(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _mtx_b_reduction_kernel(std::make_unique<CLGEMMLowpMatrixBReductionKernel>()),
+      _offset_contribution_kernel(std::make_unique<CLGEMMLowpOffsetContributionKernel>()),
+      _offset_contribution_output_stage_kernel(std::make_unique<CLGEMMLowpOffsetContributionOutputStageKernel>()),
       _qasymm8_weights(),
       _vector_sum_col(),
       _vector_sum_row(),

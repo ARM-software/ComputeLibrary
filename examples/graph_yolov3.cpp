@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,7 @@ public:
         std::string data_path = common_params.data_path;
 
         // Create a preprocessor object
-        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>(0.f);
+        std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>(0.f);
 
         // Create input descriptor
         const TensorShape tensor_shape     = permute_shape(TensorShape(608U, 608U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);

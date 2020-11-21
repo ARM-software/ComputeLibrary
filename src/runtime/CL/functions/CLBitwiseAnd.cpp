@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLBitwiseAnd.h"
 
 #include "src/core/CL/kernels/CLBitwiseAndKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLBitwiseAnd::configure(const ICLTensor *input1, const ICLTensor *input2, I
 
 void CLBitwiseAnd::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLBitwiseAndKernel>();
+    auto k = std::make_unique<CLBitwiseAndKernel>();
     k->configure(compile_context, input1, input2, output);
     _kernel = std::move(k);
 }

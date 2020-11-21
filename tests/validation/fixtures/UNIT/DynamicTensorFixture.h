@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -264,7 +264,7 @@ public:
         _info          = info;
 
         // Create function
-        _f_target = support::cpp14::make_unique<ComplexFunctionType>(_ms.mm);
+        _f_target = std::make_unique<ComplexFunctionType>(_ms.mm);
     }
 
     void run_iteration(unsigned int idx)
@@ -425,7 +425,7 @@ protected:
 
         for(unsigned int i = 0; i < num_functions; ++i)
         {
-            _functions.emplace_back(support::cpp14::make_unique<ComplexFunctionType>(_ms.mm));
+            _functions.emplace_back(std::make_unique<ComplexFunctionType>(_ms.mm));
         }
 
         for(unsigned int i = 0; i < num_resizes; ++i)

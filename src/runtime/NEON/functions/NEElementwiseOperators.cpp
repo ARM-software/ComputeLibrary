@@ -26,7 +26,6 @@
 #include <src/core/NEON/kernels/NEElementwiseOperationKernel.h>
 
 #include "arm_compute/core/ITensor.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -36,7 +35,7 @@ namespace experimental
 {
 void NEElementwiseMax::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
+    auto k = std::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::MAX, input1, input2, output);
     _kernel = std::move(k);
 }
@@ -48,7 +47,7 @@ Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void NEElementwiseMin::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
+    auto k = std::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::MIN, input1, input2, output);
     _kernel = std::move(k);
 }
@@ -60,7 +59,7 @@ Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void NEElementwiseSquaredDiff::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
+    auto k = std::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
     _kernel = std::move(k);
 }
@@ -72,7 +71,7 @@ Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITens
 
 void NEElementwiseDivision::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEDivisionOperationKernel>();
+    auto k = std::make_unique<NEDivisionOperationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }
@@ -84,7 +83,7 @@ Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorI
 
 void NEElementwisePower::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEPowerOperationKernel>();
+    auto k = std::make_unique<NEPowerOperationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }
@@ -97,7 +96,7 @@ Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo
 template <ComparisonOperation COP>
 void NEElementwiseComparisonStatic<COP>::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEComparisonOperationKernel>();
+    auto k = std::make_unique<NEComparisonOperationKernel>();
     k->configure(COP, input1, input2, output);
     _kernel = std::move(k);
 }
@@ -110,7 +109,7 @@ Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1, c
 
 void NEElementwiseComparison::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ComparisonOperation op)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEComparisonOperationKernel>();
+    auto k = std::make_unique<NEComparisonOperationKernel>();
     k->configure(op, input1, input2, output);
     _kernel = std::move(k);
 }
@@ -138,7 +137,7 @@ struct NEElementwiseMax::Impl
 };
 
 NEElementwiseMax::NEElementwiseMax()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEElementwiseMax::NEElementwiseMax(NEElementwiseMax &&) = default;
@@ -151,7 +150,7 @@ void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *outp
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseMax>();
+    _impl->op    = std::make_unique<experimental::NEElementwiseMax>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
@@ -179,7 +178,7 @@ struct NEElementwiseMin::Impl
 };
 
 NEElementwiseMin::NEElementwiseMin()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEElementwiseMin::NEElementwiseMin(NEElementwiseMin &&) = default;
@@ -192,7 +191,7 @@ void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *outp
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseMin>();
+    _impl->op    = std::make_unique<experimental::NEElementwiseMin>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
@@ -220,7 +219,7 @@ struct NEElementwiseSquaredDiff::Impl
 };
 
 NEElementwiseSquaredDiff::NEElementwiseSquaredDiff()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEElementwiseSquaredDiff::NEElementwiseSquaredDiff(NEElementwiseSquaredDiff &&) = default;
@@ -233,7 +232,7 @@ void NEElementwiseSquaredDiff::configure(ITensor *input1, ITensor *input2, ITens
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseSquaredDiff>();
+    _impl->op    = std::make_unique<experimental::NEElementwiseSquaredDiff>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
@@ -261,7 +260,7 @@ struct NEElementwiseDivision::Impl
 };
 
 NEElementwiseDivision::NEElementwiseDivision()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEElementwiseDivision::NEElementwiseDivision(NEElementwiseDivision &&) = default;
@@ -274,7 +273,7 @@ void NEElementwiseDivision::configure(ITensor *input1, ITensor *input2, ITensor 
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseDivision>();
+    _impl->op    = std::make_unique<experimental::NEElementwiseDivision>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
@@ -302,7 +301,7 @@ struct NEElementwisePower::Impl
 };
 
 NEElementwisePower::NEElementwisePower()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEElementwisePower::NEElementwisePower(NEElementwisePower &&) = default;
@@ -315,7 +314,7 @@ void NEElementwisePower::configure(ITensor *input1, ITensor *input2, ITensor *ou
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwisePower>();
+    _impl->op    = std::make_unique<experimental::NEElementwisePower>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
@@ -345,7 +344,7 @@ struct NEElementwiseComparisonStatic<COP>::Impl
 
 template <ComparisonOperation COP>
 NEElementwiseComparisonStatic<COP>::NEElementwiseComparisonStatic()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 template <ComparisonOperation COP>
@@ -361,7 +360,7 @@ void NEElementwiseComparisonStatic<COP>::configure(ITensor *input1, ITensor *inp
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseComparisonStatic<COP>>();
+    _impl->op    = std::make_unique<experimental::NEElementwiseComparisonStatic<COP>>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
@@ -390,7 +389,7 @@ struct NEElementwiseComparison::Impl
 };
 
 NEElementwiseComparison::NEElementwiseComparison()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEElementwiseComparison::NEElementwiseComparison(NEElementwiseComparison &&) = default;
@@ -402,7 +401,7 @@ void NEElementwiseComparison::configure(ITensor *input1, ITensor *input2, ITenso
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEElementwiseComparison>();
+    _impl->op    = std::make_unique<experimental::NEElementwiseComparison>();
     _impl->op->configure(input1->info(), input2->info(), output->info(), op);
 }
 

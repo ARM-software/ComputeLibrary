@@ -27,7 +27,6 @@
 #include "arm_compute/core/Validate.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEWarpKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -42,14 +41,14 @@ void NEWarpPerspective::configure(ITensor *input, ITensor *output, const std::ar
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
         {
-            auto k = arm_compute::support::cpp14::make_unique<NEWarpPerspectiveKernel<InterpolationPolicy::NEAREST_NEIGHBOR>>();
+            auto k = std::make_unique<NEWarpPerspectiveKernel<InterpolationPolicy::NEAREST_NEIGHBOR>>();
             k->configure(input, output, matrix, border_mode, constant_border_value);
             _kernel = std::move(k);
             break;
         }
         case InterpolationPolicy::BILINEAR:
         {
-            auto k = arm_compute::support::cpp14::make_unique<NEWarpPerspectiveKernel<InterpolationPolicy::BILINEAR>>();
+            auto k = std::make_unique<NEWarpPerspectiveKernel<InterpolationPolicy::BILINEAR>>();
             k->configure(input, output, matrix, border_mode, constant_border_value);
             _kernel = std::move(k);
             break;
@@ -59,7 +58,7 @@ void NEWarpPerspective::configure(ITensor *input, ITensor *output, const std::ar
             ARM_COMPUTE_ERROR("Interpolation type not supported");
     }
 
-    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    auto b = std::make_unique<NEFillBorderKernel>();
     b->configure(input, _kernel->border_size(), border_mode, constant_border_value);
     _border_handler = std::move(b);
 }

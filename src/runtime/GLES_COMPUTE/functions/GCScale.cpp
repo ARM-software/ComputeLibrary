@@ -27,7 +27,6 @@
 #include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCScaleKernel.h"
 #include "arm_compute/core/Validate.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -39,7 +38,7 @@ void GCScale::configure(IGCTensor *input, IGCTensor *output, InterpolationPolicy
 
 void GCScale::configure(IGCTensor *input, IGCTensor *output, const ScaleKernelInfo &info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCScaleKernel>();
+    auto k = std::make_unique<GCScaleKernel>();
     k->configure(input, output, info);
     _kernel = std::move(k);
     _border_handler.configure(input, _kernel->border_size(), info.border_mode, info.constant_border_value);

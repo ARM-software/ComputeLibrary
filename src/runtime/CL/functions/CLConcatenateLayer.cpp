@@ -37,7 +37,6 @@
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -78,7 +77,7 @@ void CLConcatenation::configure(const CLCompileContext &compile_context, const s
                 case 2:
                 {
                     // Configure WidthConcatenate2Tensors kernel
-                    auto kernel = support::cpp14::make_unique<CLWidthConcatenate2TensorsKernel>();
+                    auto kernel = std::make_unique<CLWidthConcatenate2TensorsKernel>();
                     kernel->configure(compile_context, inputs_vector.at(0), inputs_vector.at(1), output);
                     _concat_kernels.emplace_back(std::move(kernel));
                     break;
@@ -86,7 +85,7 @@ void CLConcatenation::configure(const CLCompileContext &compile_context, const s
                 case 4:
                 {
                     // Configure WidthConcatenate4Tensors kernel
-                    auto kernel = support::cpp14::make_unique<CLWidthConcatenate4TensorsKernel>();
+                    auto kernel = std::make_unique<CLWidthConcatenate4TensorsKernel>();
                     kernel->configure(compile_context, inputs_vector.at(0), inputs_vector.at(1), inputs_vector.at(2), inputs_vector.at(3), output);
                     _concat_kernels.emplace_back(std::move(kernel));
                     break;
@@ -96,7 +95,7 @@ void CLConcatenation::configure(const CLCompileContext &compile_context, const s
                     // Configure generic case WidthConcatenate kernels
                     for(unsigned int i = 0; i < _num_inputs; ++i)
                     {
-                        auto kernel = support::cpp14::make_unique<CLWidthConcatenateLayerKernel>();
+                        auto kernel = std::make_unique<CLWidthConcatenateLayerKernel>();
                         kernel->configure(compile_context, inputs_vector.at(i), offset, output);
                         offset += inputs_vector.at(i)->dimension(_axis);
                         _concat_kernels.emplace_back(std::move(kernel));
@@ -110,7 +109,7 @@ void CLConcatenation::configure(const CLCompileContext &compile_context, const s
         {
             for(unsigned int i = 0; i < _num_inputs; ++i)
             {
-                auto kernel = support::cpp14::make_unique<CLHeightConcatenateLayerKernel>();
+                auto kernel = std::make_unique<CLHeightConcatenateLayerKernel>();
                 kernel->configure(compile_context, inputs_vector.at(i), offset, output);
                 offset += inputs_vector.at(i)->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
@@ -121,7 +120,7 @@ void CLConcatenation::configure(const CLCompileContext &compile_context, const s
         {
             for(unsigned int i = 0; i < _num_inputs; ++i)
             {
-                auto kernel = support::cpp14::make_unique<CLDepthConcatenateLayerKernel>();
+                auto kernel = std::make_unique<CLDepthConcatenateLayerKernel>();
                 kernel->configure(compile_context, inputs_vector.at(i), offset, output);
                 offset += inputs_vector.at(i)->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
@@ -132,7 +131,7 @@ void CLConcatenation::configure(const CLCompileContext &compile_context, const s
         {
             for(unsigned int i = 0; i < _num_inputs; ++i)
             {
-                auto kernel = support::cpp14::make_unique<CLBatchConcatenateLayerKernel>();
+                auto kernel = std::make_unique<CLBatchConcatenateLayerKernel>();
                 kernel->configure(compile_context, inputs_vector.at(i), offset, output);
                 offset += inputs_vector.at(i)->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
@@ -263,7 +262,7 @@ struct CLConcatenateLayer::Impl
 };
 
 CLConcatenateLayer::CLConcatenateLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -286,7 +285,7 @@ void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std:
     _impl->dst        = output;
     _impl->axis       = axis;
     _impl->num_inputs = inputs_vector.size();
-    _impl->op         = arm_compute::support::cpp14::make_unique<experimental::CLConcatenation>();
+    _impl->op         = std::make_unique<experimental::CLConcatenation>();
 
     std::vector<ITensorInfo *> inputs_vector_info;
     for(unsigned int i = 0; i < inputs_vector.size(); ++i)

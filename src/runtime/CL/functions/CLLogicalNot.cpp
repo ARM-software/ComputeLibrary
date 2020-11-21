@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLLogicalNot.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -34,7 +33,7 @@ namespace experimental
 {
 void CLLogicalNot::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
+    auto k = std::make_unique<CLElementWiseUnaryLayerKernel>();
     k->configure(compile_context, input, output, ElementWiseUnary::LOGICAL_NOT);
     _kernel = std::move(k);
 }
@@ -58,7 +57,7 @@ struct CLLogicalNot::Impl
 };
 
 CLLogicalNot::CLLogicalNot()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLLogicalNot::CLLogicalNot(CLLogicalNot &&) = default;
@@ -74,7 +73,7 @@ void CLLogicalNot::configure(const CLCompileContext &compile_context, const ICLT
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLLogicalNot>();
+    _impl->op  = std::make_unique<experimental::CLLogicalNot>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 

@@ -36,7 +36,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -68,28 +67,28 @@ void NEConcatenation::configure(const std::vector<const ITensorInfo *> &inputs_v
         {
             case Window::DimX:
             {
-                auto kernel = support::cpp14::make_unique<NEWidthConcatenateLayerKernel>();
+                auto kernel = std::make_unique<NEWidthConcatenateLayerKernel>();
                 kernel->configure(inputs_vector.at(i), offset, output);
                 _concat_kernels.emplace_back(std::move(kernel));
                 break;
             }
             case Window::DimY:
             {
-                auto kernel = support::cpp14::make_unique<NEHeightConcatenateLayerKernel>();
+                auto kernel = std::make_unique<NEHeightConcatenateLayerKernel>();
                 kernel->configure(inputs_vector.at(i), offset, output);
                 _concat_kernels.emplace_back(std::move(kernel));
                 break;
             }
             case Window::DimZ:
             {
-                auto kernel = support::cpp14::make_unique<NEDepthConcatenateLayerKernel>();
+                auto kernel = std::make_unique<NEDepthConcatenateLayerKernel>();
                 kernel->configure(inputs_vector.at(i), offset, output);
                 _concat_kernels.emplace_back(std::move(kernel));
                 break;
             }
             case 3:
             {
-                auto kernel = support::cpp14::make_unique<NEBatchConcatenateLayerKernel>();
+                auto kernel = std::make_unique<NEBatchConcatenateLayerKernel>();
                 kernel->configure(inputs_vector.at(i), offset, output);
                 _concat_kernels.emplace_back(std::move(kernel));
                 break;
@@ -181,7 +180,7 @@ struct NEConcatenateLayer::Impl
 };
 
 NEConcatenateLayer::NEConcatenateLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -199,7 +198,7 @@ void NEConcatenateLayer::configure(std::vector<const ITensor *> inputs_vector, I
     _impl->dst        = output;
     _impl->axis       = axis;
     _impl->num_inputs = inputs_vector.size();
-    _impl->op         = arm_compute::support::cpp14::make_unique<experimental::NEConcatenation>();
+    _impl->op         = std::make_unique<experimental::NEConcatenation>();
 
     std::vector<const ITensorInfo *> inputs_vector_info;
     for(unsigned int i = 0; i < inputs_vector.size(); ++i)

@@ -32,13 +32,12 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLNormalizationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLNormalizationLayer::CLNormalizationLayer()
-    : _norm_kernel(support::cpp14::make_unique<CLNormalizationLayerKernel>()),
-      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>())
+    : _norm_kernel(std::make_unique<CLNormalizationLayerKernel>()),
+      _border_handler(std::make_unique<CLFillBorderKernel>())
 {
 }
 

@@ -29,7 +29,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/kernels/CLCopyKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -42,7 +41,7 @@ void CLCopy::configure(ICLTensor *input, ICLTensor *output)
 
 void CLCopy::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLCopyKernel>();
+    auto k = std::make_unique<CLCopyKernel>();
     k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }

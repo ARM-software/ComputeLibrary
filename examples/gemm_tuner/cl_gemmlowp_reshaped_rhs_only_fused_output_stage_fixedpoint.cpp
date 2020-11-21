@@ -280,7 +280,7 @@ public:
             const TensorInfo info_vector_sum_row(compute_reductionB_shape(*lhs.info()), 1, DataType::S32);
             vector_sum_row.allocator()->init(info_vector_sum_row);
 
-            mtx_a_reduction = support::cpp14::make_unique<CLGEMMLowpMatrixAReduction>();
+            mtx_a_reduction = std::make_unique<CLGEMMLowpMatrixAReduction>();
 
             if(!mtx_a_reduction->validate(lhs.info(), vector_sum_row.info(), GEMMLowpReductionKernelInfo{}))
             {

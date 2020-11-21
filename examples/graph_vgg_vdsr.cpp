@@ -79,7 +79,7 @@ public:
         const std::string model_path = "/cnn_data/vdsr_model/";
 
         // Create a preprocessor object
-        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>();
+        std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>();
 
         // Create input descriptor
         const TensorShape tensor_shape     = permute_shape(TensorShape(image_width, image_height, 1U, 1U), DataLayout::NCHW, common_params.data_layout);
@@ -132,7 +132,7 @@ public:
 
         // Add residual to input
         graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name("add")
-              << OutputLayer(arm_compute::support::cpp14::make_unique<DummyAccessor>(0));
+              << OutputLayer(std::make_unique<DummyAccessor>(0));
 
         // Finalize graph
         GraphConfig config;

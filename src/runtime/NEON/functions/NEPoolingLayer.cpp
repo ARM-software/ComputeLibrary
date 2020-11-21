@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEPoolingLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -47,7 +46,7 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
 
     // Configure pooling kernel
-    _pooling_layer_kernel = arm_compute::support::cpp14::make_unique<NEPoolingLayerKernel>();
+    _pooling_layer_kernel = std::make_unique<NEPoolingLayerKernel>();
     _pooling_layer_kernel->configure(input, output, pool_info, indices);
 
     switch(_data_layout)
@@ -61,7 +60,7 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
             {
                 zero_value = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
             }
-            _border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+            _border_handler = std::make_unique<NEFillBorderKernel>();
             _border_handler->configure(input, _pooling_layer_kernel->border_size(), border_mode, zero_value);
             break;
         }

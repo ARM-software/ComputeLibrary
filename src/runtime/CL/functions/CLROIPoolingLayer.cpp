@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 #include "arm_compute/core/CL/ICLArray.h"
 #include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -36,7 +35,7 @@ void CLROIPoolingLayer::configure(const ICLTensor *input, const ICLTensor *rois,
 void CLROIPoolingLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     // Configure ROI pooling kernel
-    auto k = arm_compute::support::cpp14::make_unique<CLROIPoolingLayerKernel>();
+    auto k = std::make_unique<CLROIPoolingLayerKernel>();
     k->configure(compile_context, input, rois, output, pool_info);
     _kernel = std::move(k);
 }

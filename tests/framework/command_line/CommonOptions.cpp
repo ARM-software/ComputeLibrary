@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,7 +101,7 @@ std::vector<std::unique_ptr<Printer>> CommonOptions::create_printers()
 
     if(pretty_console->value() && (log_file->is_set() || log_format->value() != LogFormat::PRETTY))
     {
-        auto pretty_printer = support::cpp14::make_unique<PrettyPrinter>();
+        auto pretty_printer = std::make_unique<PrettyPrinter>();
         pretty_printer->set_color_output(color_output->value());
         printers.push_back(std::move(pretty_printer));
     }
@@ -110,13 +110,13 @@ std::vector<std::unique_ptr<Printer>> CommonOptions::create_printers()
     switch(log_format->value())
     {
         case LogFormat::JSON:
-            printer = support::cpp14::make_unique<JSONPrinter>();
+            printer = std::make_unique<JSONPrinter>();
             break;
         case LogFormat::NONE:
             break;
         case LogFormat::PRETTY:
         default:
-            auto pretty_printer = support::cpp14::make_unique<PrettyPrinter>();
+            auto pretty_printer = std::make_unique<PrettyPrinter>();
             // Don't use colours if we print to a file:
             pretty_printer->set_color_output((!log_file->is_set()) && color_output->value());
             printer = std::move(pretty_printer);
@@ -139,14 +139,14 @@ std::vector<std::unique_ptr<Printer>> CommonOptions::create_printers()
 
     if(json_file->is_set())
     {
-        printers.push_back(support::cpp14::make_unique<JSONPrinter>());
+        printers.push_back(std::make_unique<JSONPrinter>());
         log_streams.push_back(std::make_shared<std::ofstream>(json_file->value()));
         printers.back()->set_stream(*log_streams.back().get());
     }
 
     if(pretty_file->is_set())
     {
-        printers.push_back(support::cpp14::make_unique<PrettyPrinter>());
+        printers.push_back(std::make_unique<PrettyPrinter>());
         log_streams.push_back(std::make_shared<std::ofstream>(pretty_file->value()));
         printers.back()->set_stream(*log_streams.back().get());
     }

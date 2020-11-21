@@ -96,7 +96,7 @@ EdgeID Graph::add_connection(NodeID source, size_t source_idx, NodeID sink, size
 
     // Create connections
     EdgeID eid        = _edges.size();
-    auto   connection = arm_compute::support::cpp14::make_unique<Edge>(eid, source_node.get(), source_idx, sink_node.get(), sink_idx, tensor.get());
+    auto   connection = std::make_unique<Edge>(eid, source_node.get(), source_idx, sink_node.get(), sink_idx, tensor.get());
     _edges.push_back(std::move(connection));
 
     // Add connections to source and sink nodes
@@ -155,7 +155,7 @@ bool Graph::remove_connection(EdgeID eid)
 TensorID Graph::create_tensor(const TensorDescriptor &desc)
 {
     TensorID tid    = _tensors.size();
-    auto     tensor = support::cpp14::make_unique<Tensor>(tid, desc);
+    auto     tensor = std::make_unique<Tensor>(tid, desc);
     _tensors.push_back(std::move(tensor));
 
     return tid;

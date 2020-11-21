@@ -24,14 +24,13 @@
 #include "arm_compute/runtime/NEON/functions/NEComputeAllAnchors.h"
 
 #include "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void NEComputeAllAnchors::configure(const ITensor *anchors, ITensor *all_anchors, const ComputeAnchorsInfo &info)
 {
     // Configure ComputeAllAnchors kernel
-    auto k = arm_compute::support::cpp14::make_unique<NEComputeAllAnchorsKernel>();
+    auto k = std::make_unique<NEComputeAllAnchorsKernel>();
     k->configure(anchors, all_anchors, info);
     _kernel = std::move(k);
 }

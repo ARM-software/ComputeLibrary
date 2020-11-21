@@ -31,15 +31,14 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLHOGDescriptor::CLHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
       _gradient(),
-      _orient_bin(support::cpp14::make_unique<CLHOGOrientationBinningKernel>()),
-      _block_norm(support::cpp14::make_unique<CLHOGBlockNormalizationKernel>()),
+      _orient_bin(std::make_unique<CLHOGOrientationBinningKernel>()),
+      _block_norm(std::make_unique<CLHOGBlockNormalizationKernel>()),
       _mag(),
       _phase(),
       _hog_space()

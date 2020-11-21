@@ -27,7 +27,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 #include "src/core/CL/kernels/CLStridedSliceKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -40,7 +39,7 @@ void CLSlice::configure(const CLCompileContext &compile_context, const ITensorIn
     // Get absolute end coordinates
     const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);
 
-    auto k = arm_compute::support::cpp14::make_unique<CLStridedSliceKernel>();
+    auto k = std::make_unique<CLStridedSliceKernel>();
     k->configure(compile_context, input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
     _kernel = std::move(k);
 }
@@ -70,7 +69,7 @@ struct CLSlice::Impl
 };
 
 CLSlice::CLSlice()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLSlice::CLSlice(CLSlice &&) = default;
@@ -91,7 +90,7 @@ void CLSlice::configure(const CLCompileContext &compile_context, const ICLTensor
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLSlice>();
+    _impl->op  = std::make_unique<experimental::CLSlice>();
     _impl->op->configure(compile_context, input->info(), output->info(), starts, ends);
 }
 

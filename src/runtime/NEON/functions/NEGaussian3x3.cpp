@@ -26,7 +26,6 @@
 #include "arm_compute/core/PixelValue.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEGaussian3x3Kernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -34,11 +33,11 @@ namespace arm_compute
 {
 void NEGaussian3x3::configure(ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEGaussian3x3Kernel>();
+    auto k = std::make_unique<NEGaussian3x3Kernel>();
     k->configure(input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
 
-    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    auto b = std::make_unique<NEFillBorderKernel>();
     b->configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
     _border_handler = std::move(b);
 }

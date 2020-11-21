@@ -25,7 +25,6 @@
 
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLNonMaximaSuppression3x3Kernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -38,7 +37,7 @@ void CLNonMaximaSuppression3x3::configure(ICLTensor *input, ICLTensor *output, B
 
 void CLNonMaximaSuppression3x3::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, BorderMode border_mode)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLNonMaximaSuppression3x3Kernel>();
+    auto k = std::make_unique<CLNonMaximaSuppression3x3Kernel>();
     k->configure(compile_context, input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
 

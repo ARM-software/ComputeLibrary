@@ -16,7 +16,7 @@ def get_list_includes():
 
 def get_list_flags( filename, arch):
     assert arch in ["armv7", "aarch64"]
-    flags = ["-std=c++11"]
+    flags = ["-std=c++14"]
     flags.append("-DARM_COMPUTE_CPP_SCHEDULER=1")
     flags.append("-DARM_COMPUTE_CL")
     flags.append("-DARM_COMPUTE_GC")

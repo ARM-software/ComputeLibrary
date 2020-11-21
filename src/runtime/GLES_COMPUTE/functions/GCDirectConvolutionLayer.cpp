@@ -30,7 +30,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -46,19 +45,19 @@ void GCDirectConvolutionLayer::configure(IGCTensor *input, const IGCTensor *weig
 
     if(kernel_size == 1)
     {
-        auto k = arm_compute::support::cpp14::make_unique<GCDirectConvolutionLayer1x1Kernel>();
+        auto k = std::make_unique<GCDirectConvolutionLayer1x1Kernel>();
         k->configure(input, weights, biases, output, conv_info, act_info);
         _kernel = std::move(k);
     }
     else if(kernel_size == 3)
     {
-        auto k = arm_compute::support::cpp14::make_unique<GCDirectConvolutionLayer3x3Kernel>();
+        auto k = std::make_unique<GCDirectConvolutionLayer3x3Kernel>();
         k->configure(input, weights, biases, output, conv_info, act_info);
         _kernel = std::move(k);
     }
     else if(kernel_size == 5)
     {
-        auto k = arm_compute::support::cpp14::make_unique<GCDirectConvolutionLayer5x5Kernel>();
+        auto k = std::make_unique<GCDirectConvolutionLayer5x5Kernel>();
         k->configure(input, weights, biases, output, conv_info, act_info);
         _kernel = std::move(k);
     }

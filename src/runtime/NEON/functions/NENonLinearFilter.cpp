@@ -26,7 +26,6 @@
 #include "arm_compute/core/PixelValue.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NENonLinearFilterKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -36,11 +35,11 @@ void NENonLinearFilter::configure(ITensor *input, ITensor *output, NonLinearFilt
                                   BorderMode border_mode,
                                   uint8_t    constant_border_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NENonLinearFilterKernel>();
+    auto k = std::make_unique<NENonLinearFilterKernel>();
     k->configure(input, output, function, mask_size, pattern, mask, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
 
-    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    auto b = std::make_unique<NEFillBorderKernel>();
     b->configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
     _border_handler = std::move(b);
 }

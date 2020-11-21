@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLPoolingLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -40,7 +39,7 @@ void CLPoolingLayer::configure(const CLCompileContext &compile_context, ICLTenso
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     // Configure pooling kernel
-    auto k = arm_compute::support::cpp14::make_unique<CLPoolingLayerKernel>();
+    auto k = std::make_unique<CLPoolingLayerKernel>();
     k->set_target(CLScheduler::get().target());
     k->configure(compile_context, input, output, pool_info, indices);
     _kernel = std::move(k);

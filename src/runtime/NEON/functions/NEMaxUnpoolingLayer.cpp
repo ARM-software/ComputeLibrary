@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NEMemsetKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -42,8 +41,8 @@ NEMaxUnpoolingLayer::NEMaxUnpoolingLayer()
 void NEMaxUnpoolingLayer::configure(ITensor *input, ITensor *indices, ITensor *output, const PoolingLayerInfo &pool_info)
 {
     const PixelValue zero_value(0.f);
-    _memset_kernel          = arm_compute::support::cpp14::make_unique<NEMemsetKernel>();
-    _unpooling_layer_kernel = arm_compute::support::cpp14::make_unique<NEMaxUnpoolingLayerKernel>();
+    _memset_kernel          = std::make_unique<NEMemsetKernel>();
+    _unpooling_layer_kernel = std::make_unique<NEMaxUnpoolingLayerKernel>();
     _memset_kernel->configure(output, zero_value);
     _unpooling_layer_kernel->configure(input, indices, output, pool_info);
 }

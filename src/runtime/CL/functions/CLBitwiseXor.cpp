@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLBitwiseXor.h"
 
 #include "src/core/CL/kernels/CLBitwiseXorKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLBitwiseXor::configure(const ICLTensor *input1, const ICLTensor *input2, I
 
 void CLBitwiseXor::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLBitwiseXorKernel>();
+    auto k = std::make_unique<CLBitwiseXorKernel>();
     k->configure(compile_context, input1, input2, output);
     _kernel = std::move(k);
 }

@@ -355,7 +355,7 @@ private:
 template <typename T>
 inline void Framework::add_test_case(std::string test_name, DatasetMode mode, TestCaseFactory::Status status)
 {
-    _test_factories.emplace_back(support::cpp14::make_unique<SimpleTestCaseFactory<T>>(current_suite_name(), std::move(test_name), mode, status));
+    _test_factories.emplace_back(std::make_unique<SimpleTestCaseFactory<T>>(current_suite_name(), std::move(test_name), mode, status));
 }
 
 template <typename T, typename D>

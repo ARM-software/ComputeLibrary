@@ -29,7 +29,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <memory>
@@ -66,7 +65,7 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
         case ConvolutionMethod::WINOGRAD:
         {
             ARM_COMPUTE_ERROR_ON(num_groups != 1);
-            auto f = arm_compute::support::cpp14::make_unique<CLWinogradConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<CLWinogradConvolutionLayer>(_memory_manager);
             f->configure(compile_context, input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _function = std::move(f);
             break;
@@ -74,21 +73,21 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
         case ConvolutionMethod::DIRECT:
         {
             ARM_COMPUTE_ERROR_ON(num_groups != 1);
-            auto f = arm_compute::support::cpp14::make_unique<CLDirectConvolutionLayer>();
+            auto f = std::make_unique<CLDirectConvolutionLayer>();
             f->configure(compile_context, input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::GEMM:
         {
-            auto f = arm_compute::support::cpp14::make_unique<CLGEMMConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<CLGEMMConvolutionLayer>(_memory_manager);
             f->configure(compile_context, input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::FFT:
         {
-            auto f = arm_compute::support::cpp14::make_unique<CLFFTConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<CLFFTConvolutionLayer>(_memory_manager);
             f->configure(compile_context, input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
             break;

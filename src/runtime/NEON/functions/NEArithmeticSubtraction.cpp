@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "src/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -36,7 +35,7 @@ namespace experimental
 void NEArithmeticSubtraction::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
-    auto k = arm_compute::support::cpp14::make_unique<NEArithmeticSubtractionKernel>();
+    auto k = std::make_unique<NEArithmeticSubtractionKernel>();
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
 }
@@ -57,7 +56,7 @@ struct NEArithmeticSubtraction::Impl
 };
 
 NEArithmeticSubtraction::NEArithmeticSubtraction()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEArithmeticSubtraction::NEArithmeticSubtraction(NEArithmeticSubtraction &&) = default;
@@ -74,7 +73,7 @@ void NEArithmeticSubtraction::configure(const ITensor *input1, const ITensor *in
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEArithmeticSubtraction>();
+    _impl->op    = std::make_unique<experimental::NEArithmeticSubtraction>();
     _impl->op->configure(input1->info(), input2->info(), output->info(), policy, act_info);
 }
 

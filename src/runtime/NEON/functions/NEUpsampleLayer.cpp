@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEUpsampleLayer.h"
 
 #include "src/core/NEON/kernels/NEUpsampleLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -44,7 +43,7 @@ Status NEUpsampleLayer::validate(const ITensorInfo *input, const ITensorInfo *ou
 void NEUpsampleLayer::configure(const ITensor *input, ITensor *output, const Size2D &info, const InterpolationPolicy &policy)
 {
     _data_layout = input->info()->data_layout();
-    _kernel      = arm_compute::support::cpp14::make_unique<NEUpsampleLayerKernel>();
+    _kernel      = std::make_unique<NEUpsampleLayerKernel>();
     _kernel->configure(input, output, info, policy);
 }
 

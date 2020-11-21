@@ -27,8 +27,8 @@
 #include "utils/Utils.cpp"
 
 #include "ValidateExample.h"
-#include "arm_compute/runtime/Scheduler.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
+#include "arm_compute/runtime/Scheduler.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/framework/Framework.h"
@@ -139,8 +139,8 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
         g_example_argv.emplace_back(const_cast<char *>(arg.c_str())); // NOLINT
     }
 
-    library       = support::cpp14::make_unique<AssetsLibrary>("." /* Only using random values */, seed->value());
-    fixed_library = support::cpp14::make_unique<AssetsLibrary>(".", fixed_seed);
+    library       = std::make_unique<AssetsLibrary>("." /* Only using random values */, seed->value());
+    fixed_library = std::make_unique<AssetsLibrary>(".", fixed_seed);
 
     if(options.log_level->value() > framework::LogLevel::NONE)
     {

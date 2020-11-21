@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
 
 #include "src/core/CL/kernels/CLTransposeKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLTranspose::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLTranspose::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLTransposeKernel>();
+    auto k = std::make_unique<CLTransposeKernel>();
     k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }

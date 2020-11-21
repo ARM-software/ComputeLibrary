@@ -41,7 +41,6 @@
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -97,21 +96,21 @@ void CLQLSTMLayer::TensorCopyKernel::run()
 }
 
 CLQLSTMLayer::CLQLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _input_to_input_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _recurrent_to_input_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _input_to_forget_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _recurrent_to_forget_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _input_to_cell_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _recurrent_to_cell_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _input_to_output_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _recurrent_to_output_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _projection_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+    : _input_to_input_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_input_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_forget_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_forget_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_cell_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_cell_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_output_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_output_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _projection_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
       _layer_norms(),
-      _copy_output(support::cpp14::make_unique<CLCopyKernel>())
+      _copy_output(std::make_unique<CLCopyKernel>())
 {
     for(auto &norm : _layer_norms)
     {
-        norm = support::cpp14::make_unique<CLQLSTMLayerNormalizationKernel>();
+        norm = std::make_unique<CLQLSTMLayerNormalizationKernel>();
     }
 
     _memory_group = MemoryGroup(std::move(memory_manager));

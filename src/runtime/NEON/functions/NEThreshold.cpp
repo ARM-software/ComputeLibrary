@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEThreshold.h"
 
 #include "src/core/NEON/kernels/NEThresholdKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void NEThreshold::configure(const ITensor *input, ITensor *output, uint8_t thres
 
 void NEThreshold::configure(const ITensor *input, ITensor *output, const ThresholdKernelInfo &info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEThresholdKernel>();
+    auto k = std::make_unique<NEThresholdKernel>();
     k->configure(input, output, info);
     _kernel = std::move(k);
 }

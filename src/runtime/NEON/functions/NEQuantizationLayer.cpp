@@ -27,7 +27,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/NEON/kernels/NEQuantizationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -44,7 +43,7 @@ void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Configure quantize kernel
-    auto k = arm_compute::support::cpp14::make_unique<NEQuantizationLayerKernel>();
+    auto k = std::make_unique<NEQuantizationLayerKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

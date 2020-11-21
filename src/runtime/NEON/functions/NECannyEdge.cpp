@@ -36,7 +36,6 @@
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NESobel5x5Kernel.h"
 #include "src/core/NEON/kernels/NESobel7x7Kernel.h"
-#include "support/MemorySupport.h"
 
 #include <cstring>
 #include <inttypes.h>
@@ -105,19 +104,19 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     // Configure/Init sobelNxN
     if(gradient_size == 3)
     {
-        auto k = arm_compute::support::cpp14::make_unique<NESobel3x3>();
+        auto k = std::make_unique<NESobel3x3>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 5)
     {
-        auto k = arm_compute::support::cpp14::make_unique<NESobel5x5>();
+        auto k = std::make_unique<NESobel5x5>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 7)
     {
-        auto k = arm_compute::support::cpp14::make_unique<NESobel7x7>();
+        auto k = std::make_unique<NESobel7x7>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
@@ -131,7 +130,7 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _memory_group.manage(&_phase);
 
     // Configure gradient
-    auto k = arm_compute::support::cpp14::make_unique<NEGradientKernel>();
+    auto k = std::make_unique<NEGradientKernel>();
     k->configure(&_gx, &_gy, &_magnitude, &_phase, norm_type);
     _gradient = std::move(k);
 
@@ -143,12 +142,12 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _memory_group.manage(&_nonmax);
 
     // Configure non-maxima suppression
-    _non_max_suppr = arm_compute::support::cpp14::make_unique<NEEdgeNonMaxSuppressionKernel>();
+    _non_max_suppr = std::make_unique<NEEdgeNonMaxSuppressionKernel>();
     _non_max_suppr->configure(&_magnitude, &_phase, &_nonmax, upper_thr, lower_thr, border_mode == BorderMode::UNDEFINED);
 
     // Fill border around magnitude image as non-maxima suppression will access
     // it. If border mode is undefined filling the border is a nop.
-    _border_mag_gradient = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _border_mag_gradient = std::make_unique<NEFillBorderKernel>();
     _border_mag_gradient->configure(&_magnitude, _non_max_suppr->border_size(), border_mode, constant_border_value);
 
     // Allocate intermediate tensors
@@ -156,11 +155,11 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _magnitude.allocator()->allocate();
 
     // Configure edge tracing
-    _edge_trace = arm_compute::support::cpp14::make_unique<NEEdgeTraceKernel>();
+    _edge_trace = std::make_unique<NEEdgeTraceKernel>();
     _edge_trace->configure(&_nonmax, output);
 
     // Fill border with "No edge" to stop recursion in edge trace
-    _border_edge_trace = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _border_edge_trace = std::make_unique<NEFillBorderKernel>();
     _border_edge_trace->configure(&_nonmax, _edge_trace->border_size(), BorderMode::CONSTANT, static_cast<float>(0.f));
 
     // Allocate intermediate tensors

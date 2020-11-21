@@ -44,7 +44,6 @@
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLMemsetKernel.h"
 #include "src/core/CL/kernels/CLTransposeKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -54,10 +53,10 @@ using namespace arm_compute::utils::info_helpers;
 CLLSTMLayer::CLLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _fully_connected_input_gate(), _accum_input_gate1(), _subtract_input_gate(), _pixelwise_mul_input_gate(), _activation_input_gate(),
       _fully_connected_forget_gate(), _accum_forget_gate1(), _pixelwise_mul_forget_gate(), _activation_forget_gate(), _fully_connected_cell_state(), _gemm_cell_state1(),
-      _transpose_cell_state(support::cpp14::make_unique<CLTransposeKernel>()), _accum_cell_state1(), _accum_cell_state2(), _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(),
+      _transpose_cell_state(std::make_unique<CLTransposeKernel>()), _accum_cell_state1(), _accum_cell_state2(), _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(),
       _pixelwise_mul_cell_state2(), _fully_connected_output(), _pixelwise_mul_output_state1(), _accum_output1(), _activation_output(), _activation_output_state(), _pixelwise_mul_output_state2(),
-      _fully_connected_output_state(), _projection_clip(), _copy_cell_state(support::cpp14::make_unique<CLCopyKernel>()), _copy_output(support::cpp14::make_unique<CLCopyKernel>()), _concat_scratch_buffer(),
-      _concat_inputs_forget_gate(), _concat_weights_forget_gate(), _concat_weights_input_gate(), _concat_weights_output(), _ones_memset_kernel(support::cpp14::make_unique<CLMemsetKernel>()),
+      _fully_connected_output_state(), _projection_clip(), _copy_cell_state(std::make_unique<CLCopyKernel>()), _copy_output(std::make_unique<CLCopyKernel>()), _concat_scratch_buffer(),
+      _concat_inputs_forget_gate(), _concat_weights_forget_gate(), _concat_weights_input_gate(), _concat_weights_output(), _ones_memset_kernel(std::make_unique<CLMemsetKernel>()),
       _mean_std_norm_input_gate(), _pixelwise_mul_input_gate_coeff(), _accum_input_gate_bias(), _mean_std_norm_forget_gate(), _pixelwise_mul_forget_gate_coeff(), _accum_forget_gate_bias(),
       _mean_std_norm_cell_gate(), _pixelwise_mul_cell_gate_coeff(), _accum_cell_gate_bias(), _mean_std_norm_output_gate(), _pixelwise_mul_output_gate_coeff(), _accum_output_gate_bias(), _input_gate_out1(),
       _input_gate_out2(), _input_gate_out3(), _input_gate_out4(), _forget_gate_out1(), _forget_gate_out2(), _forget_gate_out3(), _forget_gate_out4(), _forget_gate_out5(), _forget_gate_out6(),

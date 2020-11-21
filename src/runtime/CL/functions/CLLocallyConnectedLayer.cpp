@@ -31,7 +31,6 @@
 #include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "src/core/CL/kernels/CLLocallyConnectedMatrixMultiplyKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
-#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <tuple>
@@ -84,10 +83,10 @@ void calculate_shapes(const ITensorInfo *input, const ITensorInfo *weights, cons
 
 CLLocallyConnectedLayer::CLLocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _input_im2col_kernel(support::cpp14::make_unique<CLIm2ColKernel>()),
-      _weights_reshape_kernel(support::cpp14::make_unique<CLWeightsReshapeKernel>()),
-      _mm_kernel(support::cpp14::make_unique<CLLocallyConnectedMatrixMultiplyKernel>()),
-      _output_col2im_kernel(support::cpp14::make_unique<CLCol2ImKernel>()),
+      _input_im2col_kernel(std::make_unique<CLIm2ColKernel>()),
+      _weights_reshape_kernel(std::make_unique<CLWeightsReshapeKernel>()),
+      _mm_kernel(std::make_unique<CLLocallyConnectedMatrixMultiplyKernel>()),
+      _output_col2im_kernel(std::make_unique<CLCol2ImKernel>()),
       _input_im2col_reshaped(),
       _weights_reshaped(),
       _gemm_output(),

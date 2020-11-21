@@ -31,7 +31,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEMemsetKernel.h"
 #include "src/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -49,10 +48,10 @@ void NESpaceToBatchLayer::configure(const ITensor *input, const ITensor *block_s
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding   = true;
-        _memset_kernel = arm_compute::support::cpp14::make_unique<NEMemsetKernel>();
+        _memset_kernel = std::make_unique<NEMemsetKernel>();
         _memset_kernel->configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
-    _space_to_batch_kernel = arm_compute::support::cpp14::make_unique<NESpaceToBatchLayerKernel>();
+    _space_to_batch_kernel = std::make_unique<NESpaceToBatchLayerKernel>();
     _space_to_batch_kernel->configure(input, block_shape, paddings, output);
 }
 
@@ -63,10 +62,10 @@ void NESpaceToBatchLayer::configure(const ITensor *input, const int block_shape_
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding   = true;
-        _memset_kernel = arm_compute::support::cpp14::make_unique<NEMemsetKernel>();
+        _memset_kernel = std::make_unique<NEMemsetKernel>();
         _memset_kernel->configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
-    _space_to_batch_kernel = arm_compute::support::cpp14::make_unique<NESpaceToBatchLayerKernel>();
+    _space_to_batch_kernel = std::make_unique<NESpaceToBatchLayerKernel>();
     _space_to_batch_kernel->configure(input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 }
 

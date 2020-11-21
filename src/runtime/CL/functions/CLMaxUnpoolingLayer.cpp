@@ -29,13 +29,12 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
 #include "src/core/CL/kernels/CLMemsetKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLMaxUnpoolingLayer::CLMaxUnpoolingLayer()
-    : _memset_kernel(support::cpp14::make_unique<CLMemsetKernel>()),
-      _unpooling_layer_kernel(support::cpp14::make_unique<CLMaxUnpoolingLayerKernel>())
+    : _memset_kernel(std::make_unique<CLMemsetKernel>()),
+      _unpooling_layer_kernel(std::make_unique<CLMaxUnpoolingLayerKernel>())
 {
 }
 

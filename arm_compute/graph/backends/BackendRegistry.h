@@ -26,7 +26,6 @@
 
 #include "arm_compute/graph/IDeviceBackend.h"
 #include "arm_compute/graph/Types.h"
-#include "support/MemorySupport.h"
 
 #include <map>
 #include <memory>
@@ -93,7 +92,7 @@ private:
 template <typename T>
 inline void BackendRegistry::add_backend(Target target)
 {
-    _registered_backends[target] = support::cpp14::make_unique<T>();
+    _registered_backends[target] = std::make_unique<T>();
 }
 } // namespace backends
 } // namespace graph

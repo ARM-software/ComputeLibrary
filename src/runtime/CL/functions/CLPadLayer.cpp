@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
 #include "src/core/CL/kernels/CLCopyKernel.h"
 #include "src/core/CL/kernels/CLPadLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLPadLayer::CLPadLayer()
-    : _pad_kernel(support::cpp14::make_unique<CLPadLayerKernel>()),
-      _copy_kernel(support::cpp14::make_unique<CLCopyKernel>()),
+    : _pad_kernel(std::make_unique<CLPadLayerKernel>()),
+      _copy_kernel(std::make_unique<CLCopyKernel>()),
       _perform_pad(false)
 {
 }

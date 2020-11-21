@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 
 #include "src/core/NEON/kernels/NEPermuteKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void NEPermute::configure(const ITensor *input, ITensor *output, const PermutationVector &perm)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEPermuteKernel>();
+    auto k = std::make_unique<NEPermuteKernel>();
     k->configure(input, output, perm);
     _kernel = std::move(k);
 }

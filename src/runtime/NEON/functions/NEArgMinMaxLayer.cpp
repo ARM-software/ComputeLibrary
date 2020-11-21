@@ -31,14 +31,12 @@
 #include "arm_compute/core/Validate.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 NEArgMinMaxLayer::~NEArgMinMaxLayer() = default;
 
 NEArgMinMaxLayer::NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _reduction_function(support::cpp14::make_unique<NEReductionOperation>())
+    : _reduction_function(std::make_unique<NEReductionOperation>())
 {
     ARM_COMPUTE_UNUSED(memory_manager);
 }

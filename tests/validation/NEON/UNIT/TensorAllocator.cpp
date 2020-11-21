@@ -29,8 +29,6 @@
 #include "arm_compute/runtime/MemoryRegion.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 
-#include "support/MemorySupport.h"
-
 #include "tests/Globals.h"
 #include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
@@ -58,7 +56,7 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
 
     // Allocate memory buffer
     const size_t total_size = info.total_size();
-    auto         data       = support::cpp14::make_unique<uint8_t[]>(total_size);
+    auto         data       = std::make_unique<uint8_t[]>(total_size);
 
     // Negative case : Import nullptr
     Tensor t1;
@@ -111,10 +109,10 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
     const size_t total_size_in_elems = tensor.info()->tensor_shape().total_size();
     const size_t total_size_in_bytes = tensor.info()->total_size();
     size_t       space               = total_size_in_bytes + required_alignment;
-    auto         raw_data            = support::cpp14::make_unique<uint8_t[]>(space);
+    auto         raw_data            = std::make_unique<uint8_t[]>(space);
 
     void *aligned_ptr = raw_data.get();
-    support::cpp11::align(required_alignment, total_size_in_bytes, aligned_ptr, space);
+    std::align(required_alignment, total_size_in_bytes, aligned_ptr, space);
 
     ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(aligned_ptr)), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -160,7 +158,7 @@ TEST_CASE(ImportMemoryMallocPadded, framework::DatasetMode::ALL)
 
     // Allocate and import tensor
     const size_t total_size_in_bytes = tensor.info()->total_size();
-    auto         raw_data            = support::cpp14::make_unique<uint8_t[]>(total_size_in_bytes);
+    auto         raw_data            = std::make_unique<uint8_t[]>(total_size_in_bytes);
 
     ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(raw_data.get())), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);

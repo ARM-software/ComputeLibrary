@@ -28,13 +28,12 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 void GCTensorShift::configure(IGCTensor *input)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCTensorShiftKernel>();
+    auto k = std::make_unique<GCTensorShiftKernel>();
     k->configure(input);
     _kernel = std::move(k);
 }

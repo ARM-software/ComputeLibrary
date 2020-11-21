@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCAbsoluteDifferenceKernel.h"
 #include "arm_compute/core/Helpers.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -34,7 +33,7 @@ using namespace arm_compute;
 
 void GCAbsoluteDifference::configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCAbsoluteDifferenceKernel>();
+    auto k = std::make_unique<GCAbsoluteDifferenceKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }

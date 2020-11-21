@@ -30,7 +30,6 @@
 #include "src/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
 #include "src/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -45,9 +44,9 @@ NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManage
 void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::UNKNOWN);
-    _output_stage_kernel  = arm_compute::support::cpp14::make_unique<NEDirectConvolutionLayerOutputStageKernel>();
-    _conv_kernel          = arm_compute::support::cpp14::make_unique<NEDirectConvolutionLayerKernel>();
-    _input_border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _output_stage_kernel  = std::make_unique<NEDirectConvolutionLayerOutputStageKernel>();
+    _conv_kernel          = std::make_unique<NEDirectConvolutionLayerKernel>();
+    _input_border_handler = std::make_unique<NEFillBorderKernel>();
 
     // Free accumulator
     if(_accumulator.buffer() != nullptr)

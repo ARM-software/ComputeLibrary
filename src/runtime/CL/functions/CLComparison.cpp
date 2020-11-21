@@ -27,7 +27,6 @@
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/kernels/CLComparisonKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -38,7 +37,7 @@ void CLComparison::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *ou
 
 void CLComparison::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLComparisonKernel>();
+    auto k = std::make_unique<CLComparisonKernel>();
     k->configure(compile_context, input1, input2, output, operation);
     _kernel = std::move(k);
 
@@ -67,7 +66,7 @@ void CLComparisonStatic<COP>::configure(ICLTensor *input1, ICLTensor *input2, IC
 template <ComparisonOperation COP>
 void CLComparisonStatic<COP>::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLComparisonKernel>();
+    auto k = std::make_unique<CLComparisonKernel>();
     k->configure(compile_context, input1, input2, output, COP);
     _kernel = std::move(k);
 

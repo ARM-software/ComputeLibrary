@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"
 
 #include "src/core/NEON/kernels/NEDepthConvertLayerKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,7 +31,7 @@ using namespace arm_compute;
 
 void NEDepthConvertLayer::configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEDepthConvertLayerKernel>();
+    auto k = std::make_unique<NEDepthConvertLayerKernel>();
     k->configure(input, output, policy, shift);
     _kernel = std::move(k);
 }

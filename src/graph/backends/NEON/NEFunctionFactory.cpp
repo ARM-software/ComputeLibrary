@@ -102,7 +102,7 @@ std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETa
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<NENormalizationLayer>(get_memory_manager(ctx, NETargetInfo::TargetType));
+    auto func = std::make_unique<NENormalizationLayer>(get_memory_manager(ctx, NETargetInfo::TargetType));
     func->configure(input, output, norm_info);
 
     // Log info

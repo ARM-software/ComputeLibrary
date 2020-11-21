@@ -26,7 +26,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEMeanStdDevKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -39,8 +38,8 @@ NEMeanStdDev::NEMeanStdDev()
 
 void NEMeanStdDev::configure(IImage *input, float *mean, float *stddev)
 {
-    _mean_stddev_kernel = arm_compute::support::cpp14::make_unique<NEMeanStdDevKernel>();
-    _fill_border_kernel = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _mean_stddev_kernel = std::make_unique<NEMeanStdDevKernel>();
+    _fill_border_kernel = std::make_unique<NEFillBorderKernel>();
 
     _mean_stddev_kernel->configure(input, mean, &_global_sum, stddev, &_global_sum_squared);
     _fill_border_kernel->configure(input, _mean_stddev_kernel->border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));

@@ -25,7 +25,6 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEMinMaxLocationKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -38,10 +37,10 @@ NEMinMaxLocation::NEMinMaxLocation()
 
 void NEMinMaxLocation::configure(const IImage *input, void *min, void *max, ICoordinates2DArray *min_loc, ICoordinates2DArray *max_loc, uint32_t *min_count, uint32_t *max_count)
 {
-    _min_max = arm_compute::support::cpp14::make_unique<NEMinMaxKernel>();
+    _min_max = std::make_unique<NEMinMaxKernel>();
     _min_max->configure(input, min, max);
 
-    _min_max_loc = arm_compute::support::cpp14::make_unique<NEMinMaxLocationKernel>();
+    _min_max_loc = std::make_unique<NEMinMaxLocationKernel>();
     _min_max_loc->configure(input, min, max, min_loc, max_loc, min_count, max_count);
 }
 

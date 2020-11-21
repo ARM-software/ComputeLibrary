@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Types.h"
 #include "src/core/NEON/kernels/NEReshapeLayerKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -39,7 +38,7 @@ NEReshape::~NEReshape() = default;
 
 void NEReshape::configure(const ITensorInfo *input, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();
+    auto k = std::make_unique<NEReshapeLayerKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
@@ -58,7 +57,7 @@ struct NEReshapeLayer::Impl
 };
 
 NEReshapeLayer::NEReshapeLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -72,7 +71,7 @@ void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::NEReshape>();
+    _impl->op  = std::make_unique<experimental::NEReshape>();
     _impl->op->configure(input->info(), output->info());
 }
 

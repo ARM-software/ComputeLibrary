@@ -26,7 +26,6 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLElementwiseOperationKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -40,7 +39,7 @@ CLArithmeticAddition::CLArithmeticAddition()
 
 void CLArithmeticAddition::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLSaturatedArithmeticOperationKernel>();
+    auto k = std::make_unique<CLSaturatedArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::ADD, input1, input2, output, policy, act_info);
     _kernel = std::move(k);
 }
@@ -61,7 +60,7 @@ CLArithmeticSubtraction::CLArithmeticSubtraction()
 void CLArithmeticSubtraction::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy,
                                         const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLSaturatedArithmeticOperationKernel>();
+    auto k = std::make_unique<CLSaturatedArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::SUB, input1, input2, output, policy, act_info);
     _kernel = std::move(k);
 }
@@ -83,7 +82,7 @@ CLArithmeticDivision::CLArithmeticDivision()
 
 void CLArithmeticDivision::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
+    auto k = std::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::DIV, input1, input2, output, act_info);
     _kernel = std::move(k);
 }
@@ -104,7 +103,7 @@ CLElementwiseMax::CLElementwiseMax()
 
 void CLElementwiseMax::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
+    auto k = std::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::MAX, input1, input2, output, act_info);
     _kernel = std::move(k);
 }
@@ -125,7 +124,7 @@ CLElementwiseMin::CLElementwiseMin()
 
 void CLElementwiseMin::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
+    auto k = std::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::MIN, input1, input2, output, act_info);
     _kernel = std::move(k);
 }
@@ -146,7 +145,7 @@ CLElementwiseSquaredDiff::CLElementwiseSquaredDiff()
 
 void CLElementwiseSquaredDiff::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
+    auto k = std::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::SQUARED_DIFF, input1, input2, output, act_info);
     _kernel = std::move(k);
 }
@@ -167,7 +166,7 @@ CLElementwisePower::CLElementwisePower()
 
 void CLElementwisePower::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
+    auto k = std::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::POWER, input1, input2, output, act_info);
     _kernel = std::move(k);
 }
@@ -192,7 +191,7 @@ struct CLArithmeticAddition::Impl
 };
 
 CLArithmeticAddition::CLArithmeticAddition()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLArithmeticAddition::CLArithmeticAddition(CLArithmeticAddition &&) = default;
@@ -210,7 +209,7 @@ void CLArithmeticAddition::configure(const CLCompileContext &compile_context, co
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLArithmeticAddition>();
+    _impl->op    = std::make_unique<experimental::CLArithmeticAddition>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), policy, act_info);
 }
 
@@ -238,7 +237,7 @@ struct CLArithmeticSubtraction::Impl
 };
 
 CLArithmeticSubtraction::CLArithmeticSubtraction()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLArithmeticSubtraction::CLArithmeticSubtraction(CLArithmeticSubtraction &&) = default;
@@ -256,7 +255,7 @@ void CLArithmeticSubtraction::configure(const CLCompileContext &compile_context,
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLArithmeticSubtraction>();
+    _impl->op    = std::make_unique<experimental::CLArithmeticSubtraction>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), policy, act_info);
 }
 
@@ -284,7 +283,7 @@ struct CLArithmeticDivision::Impl
 };
 
 CLArithmeticDivision::CLArithmeticDivision()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLArithmeticDivision::CLArithmeticDivision(CLArithmeticDivision &&) = default;
@@ -301,7 +300,7 @@ void CLArithmeticDivision::configure(const CLCompileContext &compile_context, co
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLArithmeticDivision>();
+    _impl->op    = std::make_unique<experimental::CLArithmeticDivision>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), act_info);
 }
 
@@ -329,7 +328,7 @@ struct CLElementwiseMax::Impl
 };
 
 CLElementwiseMax::CLElementwiseMax()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLElementwiseMax::CLElementwiseMax(CLElementwiseMax &&) = default;
@@ -346,7 +345,7 @@ void CLElementwiseMax::configure(const CLCompileContext &compile_context, ICLTen
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLElementwiseMax>();
+    _impl->op    = std::make_unique<experimental::CLElementwiseMax>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), act_info);
 }
 
@@ -374,7 +373,7 @@ struct CLElementwiseMin::Impl
 };
 
 CLElementwiseMin::CLElementwiseMin()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLElementwiseMin::CLElementwiseMin(CLElementwiseMin &&) = default;
@@ -391,7 +390,7 @@ void CLElementwiseMin::configure(const CLCompileContext &compile_context, ICLTen
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLElementwiseMin>();
+    _impl->op    = std::make_unique<experimental::CLElementwiseMin>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), act_info);
 }
 
@@ -419,7 +418,7 @@ struct CLElementwiseSquaredDiff::Impl
 };
 
 CLElementwiseSquaredDiff::CLElementwiseSquaredDiff()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLElementwiseSquaredDiff::CLElementwiseSquaredDiff(CLElementwiseSquaredDiff &&) = default;
@@ -436,7 +435,7 @@ void CLElementwiseSquaredDiff::configure(const CLCompileContext &compile_context
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLElementwiseSquaredDiff>();
+    _impl->op    = std::make_unique<experimental::CLElementwiseSquaredDiff>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), act_info);
 }
 
@@ -464,7 +463,7 @@ struct CLElementwisePower::Impl
 };
 
 CLElementwisePower::CLElementwisePower()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLElementwisePower::CLElementwisePower(CLElementwisePower &&) = default;
@@ -481,7 +480,7 @@ void CLElementwisePower::configure(const CLCompileContext &compile_context, ICLT
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLElementwisePower>();
+    _impl->op    = std::make_unique<experimental::CLElementwisePower>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), act_info);
 }
 

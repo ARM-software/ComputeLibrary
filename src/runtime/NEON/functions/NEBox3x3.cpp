@@ -26,7 +26,6 @@
 #include "arm_compute/core/PixelValue.h"
 #include "src/core/NEON/kernels/NEBox3x3Kernel.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -36,17 +35,17 @@ void NEBox3x3::configure(ITensor *input, ITensor *output, BorderMode border_mode
 {
     if(use_fp16)
     {
-        auto k = arm_compute::support::cpp14::make_unique<NEBox3x3FP16Kernel>();
+        auto k = std::make_unique<NEBox3x3FP16Kernel>();
         k->configure(input, output, border_mode == BorderMode::UNDEFINED);
         _kernel = std::move(k);
     }
     else
     {
-        auto k = arm_compute::support::cpp14::make_unique<NEBox3x3Kernel>();
+        auto k = std::make_unique<NEBox3x3Kernel>();
         k->configure(input, output, border_mode == BorderMode::UNDEFINED);
         _kernel = std::move(k);
     }
-    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    auto b = std::make_unique<NEFillBorderKernel>();
     b->configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
     _border_handler = std::move(b);
 }

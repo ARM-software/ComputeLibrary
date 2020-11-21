@@ -113,7 +113,7 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
     const ActivationLayerInfo        act_info = node.activation_info();
 
     // Create function
-    auto func = support::cpp14::make_unique<ActivationLayerFunction>();
+    auto func = std::make_unique<ActivationLayerFunction>();
     func->configure(input, output, act_info);
 
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -152,7 +152,7 @@ std::unique_ptr<IFunction> create_arg_min_max_layer(ArgMinMaxLayerNode &node)
     unsigned int                     axis   = node.axis();
 
     // Create function
-    auto func = support::cpp14::make_unique<ArgMinMaxLayerFunction>();
+    auto func = std::make_unique<ArgMinMaxLayerFunction>();
     func->configure(input, axis, output, op);
 
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -194,7 +194,7 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
     const ActivationLayerInfo        fused_act = node.fused_activation();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<BatchNormalizationLayerFunction>();
+    auto func = std::make_unique<BatchNormalizationLayerFunction>();
     func->configure(input, output, mean, var, beta, gamma, epsilon, fused_act);
 
     // Log info
@@ -346,7 +346,7 @@ std::unique_ptr<IFunction> create_bounding_box_transform_layer(BoundingBoxTransf
     const BoundingBoxTransformInfo   bbox_info = node.info();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<BoundingBoxTransformLayerFunction>();
+    auto func = std::make_unique<BoundingBoxTransformLayerFunction>();
     func->configure(input, output, deltas, bbox_info);
 
     // Log info
@@ -383,7 +383,7 @@ std::unique_ptr<IFunction> create_channel_shuffle_layer(ChannelShuffleLayerNode 
     const unsigned int               num_groups = node.num_groups();
 
     // Create function
-    auto func = support::cpp14::make_unique<ChannelShuffleLayerFunction>();
+    auto func = std::make_unique<ChannelShuffleLayerFunction>();
     func->configure(input, output, num_groups);
 
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -430,7 +430,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
     const size_t                     concat_axis = get_dimension_idx(data_layout, node.concatenation_axis());
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ConcatenateLayerFunction>();
+    auto func = std::make_unique<ConcatenateLayerFunction>();
     func->configure(inputs, output, concat_axis);
 
     // Log info
@@ -673,7 +673,7 @@ std::unique_ptr<IFunction> create_depth_to_space_layer(DepthToSpaceLayerNode &no
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<DepthToSpaceLayerFunction>();
+    auto func = std::make_unique<DepthToSpaceLayerFunction>();
     func->configure(input, output, node.block_shape());
 
     // Log info
@@ -712,7 +712,7 @@ std::unique_ptr<IFunction> create_dequantization_layer(DequantizationLayerNode &
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<DequantizationLayerFunction>();
+    auto func = std::make_unique<DequantizationLayerFunction>();
     func->configure(input, output);
 
     // Log info
@@ -755,7 +755,7 @@ std::unique_ptr<IFunction> create_detection_output_layer(DetectionOutputLayerNod
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<DetectionOutputLayerFunction>();
+    auto func = std::make_unique<DetectionOutputLayerFunction>();
     func->configure(input0, input1, input2, output, detect_info);
 
     // Log info
@@ -807,7 +807,7 @@ std::unique_ptr<IFunction> create_detection_post_process_layer(DetectionPostProc
     ARM_COMPUTE_ERROR_ON(output3 == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<DetectionPostProcessLayerFunction>();
+    auto func = std::make_unique<DetectionPostProcessLayerFunction>();
     func->configure(input0, input1, input2, output0, output1, output2, output3, detect_info);
 
     // Log info
@@ -968,7 +968,7 @@ std::unique_ptr<IFunction> create_flatten_layer(FlattenLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<FlattenLayerFunction>();
+    auto func = std::make_unique<FlattenLayerFunction>();
     func->configure(input, output);
 
     // Log info
@@ -1013,7 +1013,7 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     // Create and configure function
     auto wm   = get_weights_manager(ctx, TargetInfo::TargetType);
     auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
-    auto func = support::cpp14::make_unique<FullyConnectedLayerFunction>(mm, wm.get());
+    auto func = std::make_unique<FullyConnectedLayerFunction>(mm, wm.get());
     func->configure(input, weights, biases, output, fc_info);
 
     const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
@@ -1071,7 +1071,7 @@ std::unique_ptr<IFunction> create_generate_proposals_layer(GenerateProposalsLaye
     ARM_COMPUTE_ERROR_ON(scores_out == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<GenerateProposalsLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    auto func = std::make_unique<GenerateProposalsLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
     func->configure(scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
 
     // Log info
@@ -1115,7 +1115,7 @@ std::unique_ptr<IFunction> create_l2_normalize_layer(L2NormalizeLayerNode &node,
 
     // Create and configure function
     auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
-    auto func = support::cpp14::make_unique<L2NormalizeLayerFunction>(mm);
+    auto func = std::make_unique<L2NormalizeLayerFunction>(mm);
     func->configure(input, output, axis, epsilon);
 
     // Log info
@@ -1158,7 +1158,7 @@ std::unique_ptr<IFunction> create_normalization_layer(NormalizationLayerNode &no
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<NormalizationLayerFunction>();
+    auto func = std::make_unique<NormalizationLayerFunction>();
     func->configure(input, output, norm_info);
 
     // Log info
@@ -1200,7 +1200,7 @@ std::unique_ptr<IFunction> create_normalize_planar_yuv_layer(NormalizePlanarYUVL
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<NormalizePlanarYUVLayerFunction>();
+    auto func = std::make_unique<NormalizePlanarYUVLayerFunction>();
     func->configure(input, output, mean, std);
 
     // Log info
@@ -1238,7 +1238,7 @@ std::unique_ptr<IFunction> create_pad_layer(PadLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PadLayerFunction>();
+    auto func = std::make_unique<PadLayerFunction>();
     func->configure(input, output, padding, pad_value);
 
     // Log info
@@ -1276,7 +1276,7 @@ std::unique_ptr<IFunction> create_permute_layer(PermuteLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PermuteLayerFunction>();
+    auto func = std::make_unique<PermuteLayerFunction>();
     func->configure(input, output, perm);
 
     // Log info
@@ -1315,7 +1315,7 @@ std::unique_ptr<IFunction> create_pooling_layer(PoolingLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PoolingLayerFunction>();
+    auto func = std::make_unique<PoolingLayerFunction>();
     func->configure(input, output, pool_info);
 
     // Log info
@@ -1354,7 +1354,7 @@ std::unique_ptr<IFunction> create_prelu_layer(PReluLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PReluFunction>();
+    auto func = std::make_unique<PReluFunction>();
     func->configure(input, alpha, output);
 
     // Log info
@@ -1423,7 +1423,7 @@ std::unique_ptr<IFunction> create_priorbox_layer(PriorBoxLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PriorBoxLayerFunction>();
+    auto func = std::make_unique<PriorBoxLayerFunction>();
     func->configure(input0, input1, output, prior_info);
 
     // Log info
@@ -1462,7 +1462,7 @@ std::unique_ptr<IFunction> create_quantization_layer(QuantizationLayerNode &node
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<QuantizationLayerFunction>();
+    auto func = std::make_unique<QuantizationLayerFunction>();
     func->configure(input, output);
 
     // Log info
@@ -1503,7 +1503,7 @@ std::unique_ptr<IFunction> create_reduction_operation_layer(ReductionLayerNode &
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ReductionOperationFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    auto func = std::make_unique<ReductionOperationFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
     func->configure(input, output, axis, op, keep_dims);
 
     // Log info
@@ -1543,7 +1543,7 @@ std::unique_ptr<IFunction> create_reorg_layer(ReorgLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ReorgLayerFunction>();
+    auto func = std::make_unique<ReorgLayerFunction>();
     func->configure(input, output, node.stride());
 
     // Log info
@@ -1580,7 +1580,7 @@ std::unique_ptr<IFunction> create_reshape_layer(ReshapeLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ReshapeLayerFunction>();
+    auto func = std::make_unique<ReshapeLayerFunction>();
     func->configure(input, output);
 
     // Log info
@@ -1618,7 +1618,7 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
     const InterpolationPolicy policy = node.policy();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ResizeLayerFunction>();
+    auto func = std::make_unique<ResizeLayerFunction>();
     func->configure(input, output, ScaleKernelInfo{ policy, BorderMode::CONSTANT });
 
     // Log info
@@ -1660,7 +1660,7 @@ std::unique_ptr<IFunction> create_roi_align_layer(ROIAlignLayerNode &node)
     const ROIPoolingLayerInfo pool_info = node.pooling_info();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ROIAlignLayerFunction>();
+    auto func = std::make_unique<ROIAlignLayerFunction>();
 
     func->configure(input, rois, output, pool_info);
 
@@ -1701,7 +1701,7 @@ std::unique_ptr<IFunction> create_slice_layer(SliceLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<SliceLayerFunction>();
+    auto func = std::make_unique<SliceLayerFunction>();
     func->configure(input, output, node.starts(), node.ends());
 
     // Log info
@@ -1740,7 +1740,7 @@ std::unique_ptr<IFunction> create_softmax_layer(SoftmaxLayerNode &node, GraphCon
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<SoftmaxLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    auto func = std::make_unique<SoftmaxLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
     func->configure(input, output, beta);
 
     // Log info
@@ -1781,7 +1781,7 @@ std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
     const int                        axis   = node.axis();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<StackLayerFunction>();
+    auto func = std::make_unique<StackLayerFunction>();
     func->configure(inputs, axis, output);
 
     // Log info
@@ -1825,7 +1825,7 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<StridedSliceLayerFunction>();
+    auto func = std::make_unique<StridedSliceLayerFunction>();
     func->configure(input, output, starts, ends, strides, info.begin_mask(), info.end_mask(), info.shrink_axis_mask());
 
     // Log info
@@ -1868,7 +1868,7 @@ std::unique_ptr<IFunction> create_upsample_layer(UpsampleLayerNode &node, GraphC
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<UpsampleLayerFunction>();
+    auto func = std::make_unique<UpsampleLayerFunction>();
     func->configure(input, output, info, upsampling_policy);
 
     // Log info
@@ -1911,7 +1911,7 @@ std::unique_ptr<IFunction> create_yolo_layer(YOLOLayerNode &node, GraphContext &
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<YOLOlayerFunction>();
+    auto func = std::make_unique<YOLOlayerFunction>();
     func->configure(input, output, act_info, num_classes);
 
     // Log info

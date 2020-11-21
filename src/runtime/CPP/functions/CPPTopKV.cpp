@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
 
 #include "arm_compute/core/CPP/kernels/CPPTopKVKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void CPPTopKV::configure(const ITensor *predictions, const ITensor *targets, ITensor *output, const unsigned int k)
 {
-    auto kernel = arm_compute::support::cpp14::make_unique<CPPTopKVKernel>();
+    auto kernel = std::make_unique<CPPTopKVKernel>();
     kernel->configure(predictions, targets, output, k);
     _kernel = std::move(kernel);
 }

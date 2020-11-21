@@ -30,7 +30,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NESpaceToDepthLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -44,7 +43,7 @@ NESpaceToDepthLayer::NESpaceToDepthLayer()
 void NESpaceToDepthLayer::configure(const ITensor *input, ITensor *output, int32_t block_shape)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    _space_to_depth_kernel = arm_compute::support::cpp14::make_unique<NESpaceToDepthLayerKernel>();
+    _space_to_depth_kernel = std::make_unique<NESpaceToDepthLayerKernel>();
     _space_to_depth_kernel->configure(input, output, block_shape);
 }
 

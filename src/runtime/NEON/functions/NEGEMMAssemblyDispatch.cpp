@@ -28,8 +28,6 @@
 #include "src/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
 #include "src/core/NEON/kernels/assembly/arm_gemm.hpp"
 
-#include "support/MemorySupport.h"
-
 #include <arm_neon.h>
 #include <cstdlib>
 
@@ -485,7 +483,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensor *a, c
     }
 
     // arm_compute wrapper for the Gemm object (see above)
-    std::unique_ptr<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>> acl_gemm_wrapper = support::cpp14::make_unique<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>>();
+    std::unique_ptr<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>> acl_gemm_wrapper = std::make_unique<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>>();
     ARM_COMPUTE_ERROR_ON(acl_gemm_wrapper == nullptr);
     acl_gemm_wrapper->configure(_gemm_kernel_asm.get(), gemm_cfg.filter);
     const size_t workspace_size = _gemm_kernel_asm->get_working_size();
@@ -691,7 +689,7 @@ void create_arm_gemm(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &arm_gem
     arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads);
 
     // Create arm_gemm fallback
-    auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput>>();
+    auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput>>();
     fallback->configure(a, b, c, d, args, info, memory_group, weights_manager);
     arm_gemm = std::move(fallback);
 }
@@ -709,7 +707,7 @@ void create_arm_gemm_quant(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &a
     arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads);
 
     // Create arm_gemm fallback
-    auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();
+    auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();
 
     // Configure requantization info
     const int32_t                 negation = info.negated_offsets ? 1 : -1;

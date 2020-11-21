@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/kernels/CLElementwiseOperationKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -34,7 +33,7 @@ namespace experimental
 {
 void CLLogicalOr::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLLogicalBinaryKernel>();
+    auto k = std::make_unique<CLLogicalBinaryKernel>();
     k->configure(compile_context, kernels::LogicalOperation::Or, input1, input2, output);
     _kernel = std::move(k);
 }
@@ -59,7 +58,7 @@ struct CLLogicalOr::Impl
 };
 
 CLLogicalOr::CLLogicalOr()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLLogicalOr::CLLogicalOr(CLLogicalOr &&) = default;
@@ -76,7 +75,7 @@ void CLLogicalOr::configure(const CLCompileContext &compile_context, ICLTensor *
     _impl->src0 = input1;
     _impl->src1 = input2;
     _impl->dst  = output;
-    _impl->op   = arm_compute::support::cpp14::make_unique<experimental::CLLogicalOr>();
+    _impl->op   = std::make_unique<experimental::CLLogicalOr>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info());
 }
 

@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#include "support/MemorySupport.h"
 
 #include <algorithm>
 
@@ -33,7 +32,7 @@ using namespace arm_compute;
 
 void GCFullyConnectedLayerReshapeWeights::configure(const IGCTensor *input, IGCTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCTransposeKernel>();
+    auto k = std::make_unique<GCTransposeKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

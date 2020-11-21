@@ -31,7 +31,6 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NESobel7x7Kernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -50,9 +49,9 @@ void NESobel7x7::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
     const bool run_sobel_y = output_y != nullptr;
 
     TensorInfo tensor_info(input->info()->tensor_shape(), Format::S32);
-    _sobel_hor      = arm_compute::support::cpp14::make_unique<NESobel7x7HorKernel>();
-    _sobel_vert     = arm_compute::support::cpp14::make_unique<NESobel7x7VertKernel>();
-    _border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _sobel_hor      = std::make_unique<NESobel7x7HorKernel>();
+    _sobel_vert     = std::make_unique<NESobel7x7VertKernel>();
+    _border_handler = std::make_unique<NEFillBorderKernel>();
 
     if(run_sobel_x && run_sobel_y)
     {

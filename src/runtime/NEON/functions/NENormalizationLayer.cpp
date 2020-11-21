@@ -30,7 +30,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -52,7 +51,7 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, cons
     _memory_group.manage(&_input_squared);
 
     // Configure kernels
-    _norm_kernel = arm_compute::support::cpp14::make_unique<NENormalizationLayerKernel>();
+    _norm_kernel = std::make_unique<NENormalizationLayerKernel>();
     _norm_kernel->configure(input, &_input_squared, output, norm_info);
     _multiply_f.configure(input, input, &_input_squared, 1.0f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
 

@@ -32,13 +32,11 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 void NEPriorBoxLayer::configure(const ITensor *input1, const ITensor *input2, ITensor *output, const PriorBoxLayerInfo &info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEPriorBoxLayerKernel>();
+    auto k = std::make_unique<NEPriorBoxLayerKernel>();
     k->configure(input1, input2, output, info);
     _kernel = std::move(k);
 }

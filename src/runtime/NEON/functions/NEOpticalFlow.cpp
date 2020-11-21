@@ -34,7 +34,6 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NELKTrackerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -114,7 +113,7 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
         _func_scharr[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
 
         // Init Lucas-Kanade kernel
-        _kernel_tracker[i] = arm_compute::support::cpp14::make_unique<NELKTrackerKernel>();
+        _kernel_tracker[i] = std::make_unique<NELKTrackerKernel>();
         _kernel_tracker[i]->configure(old_ith_input, new_ith_input, &_scharr_gx[i], &_scharr_gy[i],
                                       old_points, new_points_estimates, new_points,
                                       &_old_points_internal, &_new_points_internal,

@@ -27,8 +27,6 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPoolingLayerKernel.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 GCPoolingLayer::GCPoolingLayer()
@@ -39,7 +37,7 @@ GCPoolingLayer::GCPoolingLayer()
 void GCPoolingLayer::configure(IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info, IGCTensor *indices)
 {
     // Configure pooling kernel
-    auto k = arm_compute::support::cpp14::make_unique<GCPoolingLayerKernel>();
+    auto k = std::make_unique<GCPoolingLayerKernel>();
     k->configure(input, output, pool_info, indices);
     _kernel = std::move(k);
 

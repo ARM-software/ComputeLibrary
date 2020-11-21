@@ -28,7 +28,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <memory>
@@ -57,14 +56,14 @@ void CLDeconvolutionLayer::configure(const CLCompileContext &compile_context, IC
     {
         case DeconvolutionMethod::DIRECT:
         {
-            auto f = arm_compute::support::cpp14::make_unique<CLDirectDeconvolutionLayer>();
+            auto f = std::make_unique<CLDirectDeconvolutionLayer>();
             f->configure(compile_context, input, weights, bias, output, deconv_info, weights_info);
             _function = std::move(f);
             break;
         }
         case DeconvolutionMethod::GEMM:
         {
-            auto f = arm_compute::support::cpp14::make_unique<CLGEMMDeconvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<CLGEMMDeconvolutionLayer>(_memory_manager);
             f->configure(compile_context, input, weights, bias, output, deconv_info);
             _function = std::move(f);
             break;

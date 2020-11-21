@@ -28,7 +28,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -129,7 +128,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     ARM_COMPUTE_ERROR_THROW_ON(NEReductionOperation::validate(input->info(), output->info(), axis, op, keep_dims));
 
     // Configure reduction kernel
-    _reduction_kernel = arm_compute::support::cpp14::make_unique<NEReductionOperationKernel>();
+    _reduction_kernel = std::make_unique<NEReductionOperationKernel>();
     _reduction_kernel->configure(input, output_internal, axis, op);
     _window_split   = reduction_window_split_dimension(axis);
     _reduction_axis = axis;

@@ -24,14 +24,12 @@
 #include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
 #include "src/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 void NEBoundingBoxTransform::configure(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, const BoundingBoxTransformInfo &info)
 {
     // Configure Bounding Box kernel
-    auto k = arm_compute::support::cpp14::make_unique<NEBoundingBoxTransformKernel>();
+    auto k = std::make_unique<NEBoundingBoxTransformKernel>();
     k->configure(boxes, pred_boxes, deltas, info);
     _kernel = std::move(k);
 }

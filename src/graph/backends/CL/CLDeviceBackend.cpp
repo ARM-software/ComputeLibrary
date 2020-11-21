@@ -93,7 +93,7 @@ void CLDeviceBackend::initialize_backend()
     // Setup Scheduler
     CLScheduler::get().default_init(&_tuner);
     // Create allocator with new context
-    _allocator = support::cpp14::make_unique<CLBufferAllocator>(nullptr /* legacy path for CLCoreRuntimeContext */);
+    _allocator = std::make_unique<CLBufferAllocator>(nullptr /* legacy path for CLCoreRuntimeContext */);
 }
 
 void CLDeviceBackend::release_backend_context(GraphContext &ctx)
@@ -170,7 +170,7 @@ std::unique_ptr<ITensorHandle> CLDeviceBackend::create_tensor(const Tensor &tens
     TensorInfo info(tensor_desc.shape, 1, tensor_desc.data_type, tensor_desc.quant_info);
     info.set_data_layout(tensor_desc.layout);
 
-    return support::cpp14::make_unique<CLTensorHandle>(info);
+    return std::make_unique<CLTensorHandle>(info);
 }
 
 std::unique_ptr<ITensorHandle> CLDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent)
@@ -180,7 +180,7 @@ std::unique_ptr<ITensorHandle> CLDeviceBackend::create_subtensor(ITensorHandle *
         return nullptr;
     }
 
-    return support::cpp14::make_unique<CLSubTensorHandle>(parent, shape, coords, extend_parent);
+    return std::make_unique<CLSubTensorHandle>(parent, shape, coords, extend_parent);
 }
 
 std::unique_ptr<arm_compute::IFunction> CLDeviceBackend::configure_node(INode &node, GraphContext &ctx)
