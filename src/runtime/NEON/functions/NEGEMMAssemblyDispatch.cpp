@@ -61,6 +61,7 @@ Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *d, 
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
 
     Params p;
+    p.M        = d->info()->tensor_shape().y();
     p.K        = a->info()->tensor_shape().x();
     p.N        = d->info()->tensor_shape().x();
     p.multis   = 1;
@@ -74,7 +75,6 @@ Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *d, 
     }
     else
     {
-        p.M       = d->info()->tensor_shape().y();
         p.multis  = b->info()->tensor_shape().z();
         p.batches = d->info()->tensor_shape().total_size_upper(2) / p.multis; //COMPMID-1423: Agree on and document the layout of gemm inputs/outputs
     }
