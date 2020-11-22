@@ -61,7 +61,6 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
     switch(activation)
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::ELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
@@ -69,9 +68,25 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
+#if defined(__ARM_FEATURE_SVE)
+                    return RelativeTolerance<float>(0.25f);
+#else  // !defined(__ARM_FEATURE_SVE)
                     return RelativeTolerance<float>(0.1f);
+#endif // defined(__ARM_FEATURE_SVE)
                 default:
                     return RelativeTolerance<float>(0.05f);
+            }
+        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+            switch(data_type)
+            {
+                case DataType::F16:
+#if defined(__ARM_FEATURE_SVE)
+                    return RelativeTolerance<float>(0.9f);
+#else  // !defined(__ARM_FEATURE_SVE)
+                    return RelativeTolerance<float>(0.01f);
+#endif // defined(__ARM_FEATURE_SVE)
+                default:
+                    return RelativeTolerance<float>(0.00001f);
             }
         default:
             return RelativeTolerance<float>(0.f);
@@ -90,14 +105,29 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
     switch(activation)
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
         case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
             switch(data_type)
             {
                 case DataType::F16:
+#if defined(__ARM_FEATURE_SVE)
+                    return AbsoluteTolerance<float>(0.25f);
+#else  // !defined(__ARM_FEATURE_SVE)
                     return AbsoluteTolerance<float>(0.01f);
+#endif // defined(__ARM_FEATURE_SVE)
+                default:
+                    return AbsoluteTolerance<float>(0.00001f);
+            }
+        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+            switch(data_type)
+            {
+                case DataType::F16:
+#if defined(__ARM_FEATURE_SVE)
+                    return AbsoluteTolerance<float>(0.9f);
+#else  // !defined(__ARM_FEATURE_SVE)
+                    return AbsoluteTolerance<float>(0.01f);
+#endif // defined(__ARM_FEATURE_SVE)
                 default:
                     return AbsoluteTolerance<float>(0.00001f);
             }
@@ -107,10 +137,10 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
 }
 
 /** Tolerance for quantized asymmetric operations */
-#if defined(__aarch64__)
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
-#else  // defined(__aarch64__)
+#if(!defined(__aarch64__) || defined(__ARM_FEATURE_SVE2))
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+#else  // !(!defined(__aarch64__) || defined(__ARM_FEATURE_SVE2))
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
 #endif // defined(__aarch64__)
 
 constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1);

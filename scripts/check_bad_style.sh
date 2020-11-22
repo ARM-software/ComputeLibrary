@@ -37,7 +37,7 @@ then
     exit -1
 fi
 
-grep -HnR --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "float32_t" $FILES | tee bad_style.log
+grep -HnR --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "/^float32_t/" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""

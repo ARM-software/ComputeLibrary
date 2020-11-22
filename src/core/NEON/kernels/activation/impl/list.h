@@ -32,10 +32,15 @@ namespace cpu
     void func_name(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 
 DECLARE_ACTIVATION_KERNEL(qasymm8_neon_activation);
+DECLARE_ACTIVATION_KERNEL(qasymm8_sve_activation);
 DECLARE_ACTIVATION_KERNEL(qasymm8_signed_neon_activation);
+DECLARE_ACTIVATION_KERNEL(qasymm8_signed_sve_activation);
 DECLARE_ACTIVATION_KERNEL(qsymm16_neon_activation);
+DECLARE_ACTIVATION_KERNEL(qsymm16_sve_activation);
 DECLARE_ACTIVATION_KERNEL(fp16_neon_activation);
+DECLARE_ACTIVATION_KERNEL(fp16_sve_activation);
 DECLARE_ACTIVATION_KERNEL(fp32_neon_activation);
+DECLARE_ACTIVATION_KERNEL(fp32_sve_activation);
 
 #undef DECLARE_ACTIVATION_KERNEL
 } // namespace cpu

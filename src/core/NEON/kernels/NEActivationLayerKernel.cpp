@@ -56,6 +56,18 @@ struct ActivationKernel
 
 static const ActivationKernel available_kernels[] =
 {
+#if defined(__ARM_FEATURE_SVE)
+    {
+        "fp16_sve_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_SVE(arm_compute::cpu::fp16_sve_activation)
+    },
+    {
+        "fp32_sve_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_activation)
+    },
+#else  /* !defined(__ARM_FEATURE_SVE) */
     {
         "fp16_neon_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
@@ -66,6 +78,25 @@ static const ActivationKernel available_kernels[] =
         [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_activation)
     },
+#endif /* defined(__ARM_FEATURE_SVE)  */
+
+#if defined(__ARM_FEATURE_SVE2) /* defined(__ARM_FEATURE_SVE2) */
+    {
+        "qasymm8_sve_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        REGISTER_QASYMM8_SVE(arm_compute::cpu::qasymm8_sve_activation)
+    },
+    {
+        "qasymm8_signed_sve_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::qasymm8_signed_sve_activation)
+    },
+    {
+        "qsymm16_sve_activation",
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
+        REGISTER_QSYMM16_SVE(arm_compute::cpu::qsymm16_sve_activation)
+    },
+#else  /* !defined(__ARM_FEATURE_SVE2) */
     {
         "qasymm8_neon_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
@@ -81,6 +112,7 @@ static const ActivationKernel available_kernels[] =
         [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::qsymm16_neon_activation)
     },
+#endif /* defined(__ARM_FEATURE_SVE2) */
 };
 
 const ActivationKernel *get_implementation(const ActivationSelectorData &data)
@@ -159,7 +191,6 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input
         // Output auto inizialitation if not yet initialized
         auto_init_if_empty(*output, *input->clone());
 
-        // NEActivationLayerKernel doesn't need padding so update_window_and_padding() can be skipped
         Coordinates coord;
         coord.set_num_dimensions(output->num_dimensions());
         output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
