@@ -445,8 +445,6 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f16(unsigned int m, unsigned 
 
 CLGEMMKernelType CLGEMMKernelSelectionBifrost::g52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
-    ARM_COMPUTE_UNUSED(b);
-
     if (!is_rhs_constant)
     {
         return CLGEMMKernelType::NATIVE_V1;
@@ -457,26 +455,60 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g52_f16(unsigned int m, unsigned 
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
 
-    const float r_mn  = static_cast<float>(m) / static_cast<float>(n);
-    const float r_mk  = static_cast<float>(m) / static_cast<float>(k);
-    const float r_nk  = static_cast<float>(n) / static_cast<float>(k);
-    const float r_mnk = static_cast<float>(m) / (static_cast<float>(n) * static_cast<float>(k));
-
-    if(r_mn <= 22.9200f)
+    if(n <= 127.0000f)
     {
-        if(r_mk <= 0.0157f)
+        if(n <= 63.5000f)
         {
             return CLGEMMKernelType::RESHAPED_ONLY_RHS;
         }
         else
         {
-            if(r_mnk <= 7809.3750f)
+            if(m <= 3616.0000f)
             {
-                if(r_mnk <= 101.7937f)
+                if(b <= 18.5000f)
                 {
-                    if(r_mn <= 0.4594f)
+                    if(m <= 2970.5000f)
                     {
-                        if(r_mk <= 0.0557f)
+                        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+                    }
+                    else
+                    {
+                        if(k <= 104.0000f)
+                        {
+                            return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+                        }
+                        else
+                        {
+                            return CLGEMMKernelType::RESHAPED;
+                        }
+                    }
+                }
+                else
+                {
+                    return CLGEMMKernelType::RESHAPED;
+                }
+            }
+            else
+            {
+                return CLGEMMKernelType::RESHAPED;
+            }
+        }
+    }
+    else
+    {
+        if(m <= 12.5000f)
+        {
+            return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+        }
+        else
+        {
+            if(k <= 104.0000f)
+            {
+                if(b <= 18.5000f)
+                {
+                    if(m <= 490.0000f)
+                    {
+                        if(n <= 272.0000f)
                         {
                             return CLGEMMKernelType::RESHAPED_ONLY_RHS;
                         }
@@ -487,78 +519,39 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g52_f16(unsigned int m, unsigned 
                     }
                     else
                     {
-                        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+                        return CLGEMMKernelType::RESHAPED;
                     }
                 }
                 else
                 {
-                    if(r_nk <= 0.4396f)
+                    return CLGEMMKernelType::RESHAPED;
+                }
+            }
+            else
+            {
+                if(m <= 226.0000f)
+                {
+                    if(n <= 140.0000f)
                     {
-                        if(r_mn <= 1.5182f)
-                        {
-                            if(r_mnk <= 1709.9167f)
-                            {
-                                return CLGEMMKernelType::RESHAPED;
-                            }
-                            else
-                            {
-                                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-                            }
-                        }
-                        else
-                        {
-                            if(r_mnk <= 1330.6000f)
-                            {
-                                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-                            }
-                            else
-                            {
-                                return CLGEMMKernelType::RESHAPED;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if(r_mn <= 2.5896f)
+                        if(m <= 179.5000f)
                         {
                             return CLGEMMKernelType::RESHAPED;
                         }
                         else
                         {
-                            if(r_mnk <= 326.6667f)
-                            {
-                                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-                            }
-                            else
-                            {
-                                return CLGEMMKernelType::RESHAPED;
-                            }
+                            return CLGEMMKernelType::RESHAPED_ONLY_RHS;
                         }
                     }
+                    else
+                    {
+                        return CLGEMMKernelType::RESHAPED;
+                    }
+                }
+                else
+                {
+                    return CLGEMMKernelType::RESHAPED;
                 }
             }
-            else
-            {
-                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-            }
-        }
-    }
-    else
-    {
-        if(r_mn <= 86.7578f)
-        {
-            if(r_mnk <= 11231.6406f)
-            {
-                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-            }
-            else
-            {
-                return CLGEMMKernelType::RESHAPED;
-            }
-        }
-        else
-        {
-            return CLGEMMKernelType::RESHAPED_ONLY_RHS;
         }
     }
 }

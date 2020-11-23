@@ -269,13 +269,13 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
 
     const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
 
-    if(workload <= 232.8000f)
+    if(workload <= 323.4000f)
     {
-        return configure_lhs_rhs_info(m, n, 2, 4, 4, 4, 4, true, true, true, false, false);
+        return configure_lhs_rhs_info(m, n, 2, 2, 8, 4, 8, false, false, false, true, false);
     }
     else
     {
-        return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 4, true, true, true, false, false);
+        return configure_lhs_rhs_info(m, n, 4, 8, 4, 2, 2, true, true, true, false, false);
     }
 }
 
