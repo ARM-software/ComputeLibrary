@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Arm Limited.
+# Copyright (c) 2019-2020 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -35,6 +35,8 @@ ALL_STRATEGY_OPTIONS=("native" "reshaped_rhs_only" "reshaped")
 EXAMPLE_BIN_NATIVE="benchmark_cl_gemm_native"
 EXAMPLE_BIN_RESHAPED_RHS_ONLY="benchmark_cl_gemm_reshaped_rhs_only"
 EXAMPLE_BIN_RESHAPED="benchmark_cl_gemm_reshaped"
+EXAMPLE_BIN_RESHAPED_RHS_ONLY_LOWP="benchmark_cl_gemmlowp_reshaped_rhs_only_fused_output_stage_fixedpoint"
+EXAMPLE_BIN_RESHAPED_LOWP="benchmark_cl_gemmlowp_reshaped"
 
 # Default data type
 DEFAULT_DATA_TYPE="F32"
@@ -131,7 +133,7 @@ Gemm config file (Strategy reshaped_rhs_only):
   h0 - Number of horizontal blocks of size (k0xn0) stored on the same output row
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
   transpose_rhs - Transpose rhs matrix (1) / Do not transpose rhs matrix (0)
-  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0). Can only be true
+  export_to_cl_image_rhs - (Not supported for quantized types) Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0). Can only be true
                            with certain combinations of the GEMMParams and other configs. Please refer to CLGEMMReshapeRHSMatrixKernel
                            for more details
 
@@ -172,7 +174,7 @@ Gemm config file (Strategy reshaped):
   interleave_lhs - Interleave lhs matrix (1) / Do not interleave lhs matrix (0)
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
   transpose_rhs - Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do transpose lhs matrix (0)
-  export_to_cl_image_rhs - Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0). Can only be true
+  export_to_cl_image_rhs - (Not supported for quantized types) Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0). Can only be true
                            with certain combinations of the GEMMParams and other configs. Please refer to CLGEMMReshapeRHSMatrixKernel
                            for more details
 
@@ -238,8 +240,8 @@ Options:
         Supported options:
         Strategy            :    Data Types
         Native              :    F32
-        Reshaped            :    F16, F32
-        Reshaped RHS Only   :    F16, F32
+        Reshaped            :    F16, F32, QASYMM8
+        Reshaped RHS Only   :    F16, F32, QASYMM8
 
         -o <out_dir>
         Path to output directory that holds output json files
@@ -436,7 +438,7 @@ while getopts "hs:e:g:c:d:o:" opt; do
     e) EXAMPLE_BIN_DIR="${OPTARG}";;
     g) GEMM_SHAPES_FILE="${OPTARG}";;
     c) GEMM_CONFIGS_FILE="${OPTARG}";;
-    d) DATA_TYPE="${OPTARG}";;
+    d) DATA_TYPE=$(to_lower "${OPTARG}");;
     o) OUT_DIR="${OPTARG}";;
   esac
 done
@@ -482,10 +484,16 @@ date +%s > ${OUT_DIR}/start_time_unix_seconds
 
 # Run selected strategy with all configurations
 # Restart the built-in timer
-SECONDS=0
-[ "${STRATEGY_OPTION}" == "native" ] && run $EXAMPLE_BIN_NATIVE
-[ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] && run $EXAMPLE_BIN_RESHAPED_RHS_ONLY
-[ "${STRATEGY_OPTION}" == "reshaped" ] && run $EXAMPLE_BIN_RESHAPED
-
-date +%s > ${OUT_DIR}/end_time_unix_seconds
+if [ "$DATA_TYPE" == "qasymm8" ]; then
+  SECONDS=0
+  [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] && run $EXAMPLE_BIN_RESHAPED_RHS_ONLY_LOWP
+  [ "${STRATEGY_OPTION}" == "reshaped" ] && run $EXAMPLE_BIN_RESHAPED_LOWP
+  date +%s > ${OUT_DIR}/end_time_unix_seconds
+else
+  SECONDS=0
+  [ "${STRATEGY_OPTION}" == "native" ] && run $EXAMPLE_BIN_NATIVE
+  [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] && run $EXAMPLE_BIN_RESHAPED_RHS_ONLY
+  [ "${STRATEGY_OPTION}" == "reshaped" ] && run $EXAMPLE_BIN_RESHAPED
+  date +%s > ${OUT_DIR}/end_time_unix_seconds
+fi
 # Main: Main script }}}

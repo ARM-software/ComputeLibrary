@@ -50,6 +50,7 @@ CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser)
     {
         DataType::F16,
         DataType::F32,
+        DataType::QASYMM8,
     };
 
     data_type = parser.add_option<EnumOption<DataType>>("type", supported_data_types, DataType::F32);
