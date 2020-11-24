@@ -41,11 +41,11 @@
 // Calculate round (Cannot use round function as it rounds halfway cases away from zero).
 #if defined(VEC_SIZE)
 #define round_op(input) CONVERT(CONVERT_SAT_ROUND(input, VEC_DATA_TYPE(int, VEC_SIZE), rte), VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))
+#define logical_not_op(input) CONVERT((!input) & 0x1, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))
 #else // defined(VEC_SIZE)
 #define round_op(input) CONVERT(CONVERT_SAT_ROUND(input, int, rte), DATA_TYPE)
-#endif // defined(VEC_SIZE)
-// Calculate logical NOT
 #define logical_not_op(input) ((!input) & 0x1)
+#endif // defined(VEC_SIZE)
 
 /** Applies element wise unary operator in a tensor.
  *
