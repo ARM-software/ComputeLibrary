@@ -40,8 +40,8 @@ TEST_SUITE(IntegralImage)
 template <typename T>
 using CLIntegralImageFixture = IntegralImageValidationFixture<CLTensor, CLAccessor, CLIntegralImage, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLIntegralImageFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                             DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLIntegralImageFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                           DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

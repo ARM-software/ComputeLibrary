@@ -56,9 +56,9 @@ TEST_SUITE(WarpAffine)
 template <typename T>
 using NEWarpAffineFixture = WarpAffineValidationFixture<Tensor, Accessor, NEWarpAffine, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEWarpAffineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)),
-                                                                                                                  framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                          datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWarpAffineFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)),
+                                                                                                                framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                        datasets::BorderModes()))
 {
     // Validate output
     validate(Accessor(_target), _reference, _valid_mask, tolerance, 0.02f);

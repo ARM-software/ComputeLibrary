@@ -58,7 +58,7 @@ using NEAbsoluteDifferenceFixture = AbsoluteDifferenceValidationFixture<Tensor, 
 
 TEST_SUITE(U8)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -72,7 +72,7 @@ TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);

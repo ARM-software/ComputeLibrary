@@ -52,9 +52,9 @@ TEST_SUITE(Median3x3)
 template <typename T>
 using CLMedian3x3Fixture = Median3x3ValidationFixture<CLTensor, CLAccessor, CLMedian3x3, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMedian3x3Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
-                                                                                                         datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMedian3x3Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                               DataType::U8)),
+                                                                                                       datasets::BorderModes()))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));

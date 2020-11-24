@@ -53,9 +53,9 @@ TEST_SUITE(Gaussian5x5)
 template <typename T>
 using NEGaussian5x5Fixture = Gaussian5x5ValidationFixture<Tensor, Accessor, NEGaussian5x5, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGaussian5x5Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                           datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGaussian5x5Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::U8)),
+                                                                                                         datasets::BorderModes()))
 {
     // Validate output
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));

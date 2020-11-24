@@ -41,8 +41,8 @@ TEST_SUITE(EqualizeHistogram)
 template <typename T>
 using NEEqualizeHistogramFixture = EqualizeHistogramValidationFixture<Tensor, Accessor, NEEqualizeHistogram, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEEqualizeHistogramFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEEqualizeHistogramFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                               DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

@@ -68,7 +68,7 @@ using GCFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<GCTens
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCFullyConnectedLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, GCFullyConnectedLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
                        FullyConnectedParameters),
                        framework::dataset::make("DataType", DataType::F16)),
                        ActivationFunctionsDataset))
@@ -87,9 +87,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCFullyConnectedLayerFixture<half_float::half>,
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                 ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
+                                                                                                               ActivationFunctionsDataset))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, rel_tolerance_f32);

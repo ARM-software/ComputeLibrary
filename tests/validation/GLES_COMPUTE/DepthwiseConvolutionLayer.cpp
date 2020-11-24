@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,12 +61,12 @@ using GCDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidatio
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                                   depth_multipliers),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::F16)),
-                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)),
-                                                                                                                   ActivationFunctionsEmptyDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                       depth_multipliers),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
+                                                                                                                       ActivationFunctionsEmptyDataset))
 {
     validate(GCAccessor(_target), _reference, tolerance_fp16, tolerance_num);
 }

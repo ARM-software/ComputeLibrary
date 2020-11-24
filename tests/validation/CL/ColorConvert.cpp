@@ -80,7 +80,7 @@ template <typename T>
 using CLColorConvertFixture = ColorConvertValidationFixture<CLMultiImage, CLTensor, CLAccessor, CLColorConvert, T>;
 
 TEST_SUITE(RGBA)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGBA_to_RGB))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ColorConvert_RGBA_to_RGB))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
@@ -100,7 +100,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(RGB)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_RGBA))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_RGBA))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
@@ -119,7 +119,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(RGBtoU8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_U8))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_U8))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
@@ -138,7 +138,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(YUV)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_YUYV_to_RGBDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ColorConvert_YUYV_to_RGBDataset))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
@@ -157,7 +157,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(YUVPlanar)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_YUVPlanar_to_RGBDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ColorConvert_YUVPlanar_to_RGBDataset))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
@@ -176,7 +176,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(NV)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGBDataset_to_NVDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ColorConvert_RGBDataset_to_NVDataset))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
@@ -195,7 +195,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(YUYVtoNV)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_NVDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_NVDataset))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
@@ -215,7 +215,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(NVtoYUV)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_NVDataset_to_YUVDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ColorConvert_NVDataset_to_YUVDataset))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)

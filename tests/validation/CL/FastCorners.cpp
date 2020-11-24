@@ -54,9 +54,9 @@ TEST_SUITE(FastCorners)
 template <typename T>
 using CLFastCornersFixture = FastCornersValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLFastCorners, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFastCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallImageFiles(), framework::dataset::make("Format", Format::U8)),
-                                                                                                                   framework::dataset::make("SuppressNonMax", { false, true })),
-                                                                                                           framework::dataset::make("BorderMode", BorderMode::UNDEFINED)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFastCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallImageFiles(), framework::dataset::make("Format", Format::U8)),
+                                                                                                                 framework::dataset::make("SuppressNonMax", { false, true })),
+                                                                                                         framework::dataset::make("BorderMode", BorderMode::UNDEFINED)))
 {
     // Validate output
     CLArrayAccessor<KeyPoint> array(_target);

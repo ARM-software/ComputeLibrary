@@ -49,8 +49,8 @@ template <typename T>
 using NEPhaseFixture = PhaseValidationFixture<Tensor, Accessor, NEPhase, T>;
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPhaseFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::S16)),
-                                                                                                     framework::dataset::make("PhaseType", { PhaseType::UNSIGNED, PhaseType::SIGNED })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPhaseFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::S16)),
+                                                                                                   framework::dataset::make("PhaseType", { PhaseType::UNSIGNED, PhaseType::SIGNED })))
 {
     // Validate output
     validate_wrap(Accessor(_target), _reference, tolerance_value, 0);

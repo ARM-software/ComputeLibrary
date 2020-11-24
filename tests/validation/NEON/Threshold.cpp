@@ -43,9 +43,9 @@ TEST_SUITE(Threshold)
 template <typename T>
 using ThresholdFixture = ThresholdValidationFixture<Tensor, Accessor, NEThreshold, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, ThresholdFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), datasets::MixedThresholdDataset()),
-                                                                                                       framework::dataset::make("DataType",
-                                                                                                               DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, ThresholdFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), datasets::MixedThresholdDataset()),
+                                                                                                     framework::dataset::make("DataType",
+                                                                                                             DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

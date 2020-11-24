@@ -54,9 +54,9 @@ TEST_SUITE(FastCorners)
 template <typename T>
 using NEFastCornersFixture = FastCornersValidationFixture<Tensor, Accessor, KeyPointArray, NEFastCorners, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFastCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallImageFiles(), framework::dataset::make("Format", Format::U8)),
-                                                                                                                   framework::dataset::make("SuppressNonMax", { false, true })),
-                                                                                                           framework::dataset::make("BorderMode", BorderMode::UNDEFINED)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFastCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallImageFiles(), framework::dataset::make("Format", Format::U8)),
+                                                                                                                 framework::dataset::make("SuppressNonMax", { false, true })),
+                                                                                                         framework::dataset::make("BorderMode", BorderMode::UNDEFINED)))
 {
     // Validate output
     ArrayAccessor<KeyPoint> array(_target);

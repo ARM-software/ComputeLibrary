@@ -59,7 +59,7 @@ TEST_SUITE(CannyEdge)
 template <typename T>
 using CLCannyEdgeFixture = CannyEdgeValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLCannyEdge, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLCannyEdgeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format", Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLCannyEdgeFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format", Format::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, AbsoluteTolerance<uint8_t>(0), allowed_mismatch_ratio);

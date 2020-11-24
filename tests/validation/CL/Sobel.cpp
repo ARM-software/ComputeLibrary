@@ -50,9 +50,9 @@ TEST_SUITE(W3x3)
 using CLSobel3x3Fixture = SobelValidationFixture<CLTensor, CLAccessor, CLSobel3x3, uint8_t, int16_t>;
 
 TEST_SUITE(X)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel3x3Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_X)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel3x3Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_X)))
 {
     // Validate output
     ValidRegion valid_region_x = shape_to_valid_region(_reference.first.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
@@ -70,9 +70,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSobel3x3Fixture, framework::DatasetMode::NIGH
 TEST_SUITE_END()
 
 TEST_SUITE(Y)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel3x3Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_Y)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel3x3Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_Y)))
 {
     // Validate output
     ValidRegion valid_region_y = shape_to_valid_region(_reference.second.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
@@ -90,9 +90,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSobel3x3Fixture, framework::DatasetMode::NIGH
 TEST_SUITE_END()
 
 TEST_SUITE(XY)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel3x3Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_XY)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel3x3Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_XY)))
 {
     // Validate output
     ValidRegion valid_region_x = shape_to_valid_region(_reference.first.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
@@ -120,9 +120,9 @@ TEST_SUITE(W5x5)
 using CLSobel5x5Fixture = SobelValidationFixture<CLTensor, CLAccessor, CLSobel5x5, uint8_t, int16_t>;
 
 TEST_SUITE(X)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel5x5Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_X)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel5x5Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_X)))
 {
     // Validate output
     ValidRegion valid_region_x = shape_to_valid_region(_reference.first.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(2));
@@ -139,9 +139,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSobel5x5Fixture, framework::DatasetMode::NIGH
 }
 TEST_SUITE_END()
 TEST_SUITE(Y)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel5x5Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_Y)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel5x5Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_Y)))
 {
     // Validate output
     ValidRegion valid_region_y = shape_to_valid_region(_reference.second.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(2));
@@ -158,9 +158,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSobel5x5Fixture, framework::DatasetMode::NIGH
 }
 TEST_SUITE_END()
 TEST_SUITE(XY)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel5x5Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_XY)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel5x5Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_XY)))
 {
     // Validate output
     ValidRegion valid_region_x = shape_to_valid_region(_reference.first.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(2));
@@ -188,9 +188,9 @@ TEST_SUITE(W7x7)
 using CLSobel7x7Fixture = SobelValidationFixture<CLTensor, CLAccessor, CLSobel7x7, uint8_t, int32_t>;
 
 TEST_SUITE(X)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel7x7Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_X)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel7x7Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_X)))
 {
     // Validate output
     ValidRegion valid_region_x = shape_to_valid_region(_reference.first.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(3));
@@ -207,9 +207,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSobel7x7Fixture, framework::DatasetMode::NIGH
 }
 TEST_SUITE_END()
 TEST_SUITE(Y)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel7x7Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_Y)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel7x7Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_Y)))
 {
     // Validate output
     ValidRegion valid_region_y = shape_to_valid_region(_reference.second.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(3));
@@ -226,9 +226,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSobel7x7Fixture, framework::DatasetMode::NIGH
 }
 TEST_SUITE_END()
 TEST_SUITE(XY)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel7x7Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                       Format::U8)),
-                                                                                               framework::dataset::make("GradientDimension", GradientDimension::GRAD_XY)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSobel7x7Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                     Format::U8)),
+                                                                                             framework::dataset::make("GradientDimension", GradientDimension::GRAD_XY)))
 {
     // Validate output
     ValidRegion valid_region_x = shape_to_valid_region(_reference.first.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(3));

@@ -41,8 +41,8 @@ TEST_SUITE(IntegralImage)
 template <typename T>
 using NEIntegralImageFixture = IntegralImageValidationFixture<Tensor, Accessor, NEIntegralImage, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEIntegralImageFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                             DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEIntegralImageFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                           DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

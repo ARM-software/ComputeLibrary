@@ -53,9 +53,9 @@ TEST_SUITE(Gaussian5x5)
 template <typename T>
 using CLGaussian5x5Fixture = Gaussian5x5ValidationFixture<CLTensor, CLAccessor, CLGaussian5x5, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGaussian5x5Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                           datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGaussian5x5Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::U8)),
+                                                                                                         datasets::BorderModes()))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));

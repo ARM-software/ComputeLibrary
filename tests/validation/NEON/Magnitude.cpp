@@ -53,8 +53,8 @@ template <typename T>
 using NEMagnitudeFixture = MagnitudeValidationFixture<Tensor, Accessor, NEMagnitude, T>;
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::S16)),
-                                                                                                         framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::S16)),
+                                                                                                       framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
 
 {
     // Validate output

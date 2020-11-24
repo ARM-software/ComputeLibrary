@@ -80,7 +80,7 @@ TEST_SUITE(LaplacianPyramid)
 
 using NELaplacianPyramidFixture = LaplacianPyramidValidationFixture<Tensor, Accessor, NELaplacianPyramid, uint8_t, int16_t, Pyramid>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NELaplacianPyramidFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NELaplacianPyramidFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        datasets::Medium2DShapes(),
                        datasets::BorderModes()),

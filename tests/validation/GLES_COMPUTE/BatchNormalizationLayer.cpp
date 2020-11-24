@@ -69,7 +69,7 @@ using GCBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixtur
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomBatchNormalizationLayerDataset(), data_f16))
+FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallRandomBatchNormalizationLayerDataset(), data_f16))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16, 0);
@@ -77,7 +77,7 @@ FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<half>, framework
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::LargeRandomBatchNormalizationLayerDataset(), data_f32))
+FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomBatchNormalizationLayerDataset(), data_f32))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f, 0);

@@ -56,7 +56,7 @@ using CLOpticalFlowFixture = OpticalFlowValidationFixture<CLTensor,
                                                           CLGaussianPyramidHalf,
                                                           uint8_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLOpticalFlowFixture, framework::DatasetMode::PRECOMMIT, combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, CLOpticalFlowFixture, framework::DatasetMode::NIGHTLY, combine(combine(
                        datasets::SmallOpticalFlowDataset(),
                        framework::dataset::make("Format", Format::U8)),
                        datasets::BorderModes()))

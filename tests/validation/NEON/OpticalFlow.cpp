@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,7 @@ using NEOpticalFlowFixture = OpticalFlowValidationFixture<Tensor,
                                                           NEGaussianPyramidHalf,
                                                           uint8_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEOpticalFlowFixture, framework::DatasetMode::PRECOMMIT, combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NEOpticalFlowFixture, framework::DatasetMode::NIGHTLY, combine(combine(
                        datasets::SmallOpticalFlowDataset(),
                        framework::dataset::make("Format", Format::U8)),
                        datasets::BorderModes()))

@@ -45,8 +45,8 @@ using NEMinMaxLocationFixture = MinMaxLocationValidationFixture<Tensor, Accessor
 
 TEST_SUITE(U8)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                              DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                            DataType::U8)))
 {
     validate_min_max_loc(_target, _reference);
 }
@@ -61,8 +61,8 @@ TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                              DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                            DataType::S16)))
 {
     validate_min_max_loc(_target, _reference);
 }
@@ -77,8 +77,8 @@ TEST_SUITE_END() // S16
 
 TEST_SUITE(Float)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                            DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMinMaxLocationFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                          DataType::F32)))
 {
     validate_min_max_loc(_target, _reference);
 }

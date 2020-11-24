@@ -44,9 +44,9 @@ TEST_SUITE(Scharr)
 TEST_SUITE(W3x3)
 using NEScharr3x3Fixture = ScharrValidationFixture<Tensor, Accessor, NEScharr3x3, uint8_t, int16_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScharr3x3Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                                                        Format::U8)),
-                                                                                                datasets::GradientDimensions()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScharr3x3Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
+                                                                                                      Format::U8)),
+                                                                                              datasets::GradientDimensions()))
 {
     // Validate output
     ValidRegion valid_region_x = shape_to_valid_region(_reference.first.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));

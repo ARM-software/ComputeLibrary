@@ -60,7 +60,7 @@ template <typename T>
 using CLChannelExtractFixture = ChannelExtractValidationFixture<CLMultiImage, CLTensor, CLAccessor, CLChannelExtract, T>;
 
 TEST_SUITE(RGBA)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -73,7 +73,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelExtractFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // RGBA
 
 TEST_SUITE(YUV)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -86,7 +86,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelExtractFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // YUV
 
 TEST_SUITE(YUVPlanar)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

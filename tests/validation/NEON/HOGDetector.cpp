@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,7 @@ using NEHOGDetectorFixture = HOGDetectorValidationFixture<Tensor,
                                                           uint8_t,
                                                           float>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEHOGDetectorFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEHOGDetectorFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        DetectionWindowStrideDataset,
                        datasets::SmallHOGDescriptorDataset()),

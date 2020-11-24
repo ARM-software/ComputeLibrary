@@ -49,7 +49,7 @@ template <typename T>
 using NEChannelCombineFixture = ChannelCombineValidationFixture<MultiImage, Tensor, Accessor, NEChannelCombine, T>;
 
 TEST_SUITE(RGBA)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelCombineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelCombineFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 })))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _num_planes; ++plane_idx)
@@ -68,7 +68,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelCombineFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // RGBA
 
 TEST_SUITE(YUV)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelCombineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::YUYV422, Format::UYVY422 })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelCombineFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::YUYV422, Format::UYVY422 })))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _num_planes; ++plane_idx)
@@ -87,7 +87,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelCombineFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // YUV
 
 TEST_SUITE(YUVPlanar)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelCombineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::NV12, Format::NV21, Format::IYUV, Format::YUV444 })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelCombineFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::NV12, Format::NV21, Format::IYUV, Format::YUV444 })))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _num_planes; ++plane_idx)

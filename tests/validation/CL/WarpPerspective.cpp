@@ -53,10 +53,10 @@ TEST_SUITE(WarpPerspective)
 template <typename T>
 using CLWarpPerspectiveFixture = WarpPerspectiveValidationFixture<CLTensor, CLAccessor, CLWarpPerspective, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWarpPerspectiveFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                       DataType::U8)),
-                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                               datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWarpPerspectiveFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                     DataType::U8)),
+                                                                                                                     framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                             datasets::BorderModes()))
 {
     validate(CLAccessor(_target), _reference, _valid_mask, tolerance_value, tolerance_number);
 }

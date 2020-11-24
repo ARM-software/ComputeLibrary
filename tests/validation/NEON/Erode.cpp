@@ -53,9 +53,9 @@ TEST_SUITE(Erode)
 template <typename T>
 using NEErodeFixture = ErodeValidationFixture<Tensor, Accessor, NEErode, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEErodeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                             DataType::U8)),
-                                                                                                     datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEErodeFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                           DataType::U8)),
+                                                                                                   datasets::BorderModes()))
 {
     // Validate output
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));

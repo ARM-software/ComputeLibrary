@@ -57,9 +57,9 @@ TEST_SUITE(WarpAffine)
 template <typename T>
 using CLWarpAffineFixture = WarpAffineValidationFixture<CLTensor, CLAccessor, CLWarpAffine, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWarpAffineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)),
-                                                                                                                  framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                          datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWarpAffineFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)),
+                                                                                                                framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                        datasets::BorderModes()))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, _valid_mask, tolerance, 0.02f);

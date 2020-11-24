@@ -57,7 +57,7 @@ TEST_SUITE(U8)
 template <typename T1>
 using NEAccumulateFixture = AccumulateValidationFixture<Tensor, Accessor, NEAccumulate, T1, int16_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAccumulateFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AccumulateS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAccumulateFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AccumulateS16Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance);
@@ -78,7 +78,7 @@ TEST_SUITE(U8)
 template <typename T1>
 using NEAccumulateWeightedFixture = AccumulateWeightedValidationFixture<Tensor, Accessor, NEAccumulateWeighted, T1, uint8_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAccumulateWeightedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AccumulateU8Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAccumulateWeightedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AccumulateU8Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance);
@@ -99,7 +99,7 @@ TEST_SUITE(U8)
 template <typename T1>
 using NEAccumulateSquaredFixture = AccumulateSquaredValidationFixture<Tensor, Accessor, NEAccumulateSquared, T1, int16_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAccumulateSquaredFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AccumulateS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAccumulateSquaredFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AccumulateS16Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance);

@@ -59,8 +59,8 @@ TEST_SUITE(HarrisCorners)
 template <typename T>
 using NEHarrisCornersFixture = HarrisCornersValidationFixture<Tensor, Accessor, KeyPointArray, NEHarrisCorners, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format",
-                                                                                                             Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format",
+                                                                                                           Format::U8)))
 {
     // Validate output
     ArrayAccessor<KeyPoint> array(_target);
