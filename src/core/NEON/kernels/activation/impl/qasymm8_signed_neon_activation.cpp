@@ -50,23 +50,26 @@ void qasymm8_signed_neon_activation(const ITensor *src, ITensor *dst, const Acti
     Iterator input(src, win_collapsed);
     Iterator output(dst, win_collapsed);
 
-    const UniformQuantizationInfo qi_in           = src->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out          = dst->info()->quantization_info().uniform();
-    const qasymm8x16_signed_t     va              = vdupq_n_s8(quantize_qasymm8_signed(act_info.a(), qi_in));
-    const qasymm8x16_signed_t     vb              = vdupq_n_s8(quantize_qasymm8_signed(act_info.b(), qi_in));
-    const qasymm8_signed_t        a               = quantize_qasymm8_signed(act_info.a(), qi_in);
-    const qasymm8_signed_t        b               = quantize_qasymm8_signed(act_info.b(), qi_in);
-    const qasymm8_signed_t        const_0         = quantize_qasymm8_signed(0.f, qi_in);
-    const qasymm8x16_signed_t     vconst_0        = vdupq_n_s8(const_0);
-    const auto                    vconst_1        = vdupq_n_f32(1.f);
-    const float32x4_t             va_f32          = vdupq_n_f32(act_info.a());
-    const float32x4_t             vb_f32          = vdupq_n_f32(act_info.b());
-    const float                   a_f32           = act_info.a();
-    const float                   b_f32           = act_info.b();
-    const auto                    const_6_f32     = vdupq_n_f32(6.f);
-    const auto                    const_0_f32     = vdupq_n_f32(0.f);
-    const auto                    const_3_f32     = vdupq_n_f32(3.f);
-    const auto                    const_inv_6_f32 = vdupq_n_f32(0.166666667f);
+    const UniformQuantizationInfo qi_in    = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out   = dst->info()->quantization_info().uniform();
+    const qasymm8x16_signed_t     va       = vdupq_n_s8(quantize_qasymm8_signed(act_info.a(), qi_in));
+    const qasymm8x16_signed_t     vb       = vdupq_n_s8(quantize_qasymm8_signed(act_info.b(), qi_in));
+    const qasymm8_signed_t        a        = quantize_qasymm8_signed(act_info.a(), qi_in);
+    const qasymm8_signed_t        b        = quantize_qasymm8_signed(act_info.b(), qi_in);
+    const qasymm8_signed_t        const_0  = quantize_qasymm8_signed(0.f, qi_in);
+    const qasymm8x16_signed_t     vconst_0 = vdupq_n_s8(const_0);
+    const auto                    vconst_1 = vdupq_n_f32(1.f);
+#ifndef __aarch64__
+    const auto vconst_0_f32 = vdupq_n_f32(1.f);
+#endif // __aarch64__
+    const float32x4_t va_f32          = vdupq_n_f32(act_info.a());
+    const float32x4_t vb_f32          = vdupq_n_f32(act_info.b());
+    const float       a_f32           = act_info.a();
+    const float       b_f32           = act_info.b();
+    const auto        const_6_f32     = vdupq_n_f32(6.f);
+    const auto        const_0_f32     = vdupq_n_f32(0.f);
+    const auto        const_3_f32     = vdupq_n_f32(3.f);
+    const auto        const_inv_6_f32 = vdupq_n_f32(0.166666667f);
 
     // Initialise scale/offset for re-quantization
     float       s  = qi_in.scale / qi_out.scale;
@@ -158,6 +161,44 @@ void qasymm8_signed_neon_activation(const ITensor *src, ITensor *dst, const Acti
                 // Re-quantize to new output space
                 tmp = vquantize_signed(tmp_dep, qi_out);
             }
+            else if(act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
+            {
+                const auto vin_deq = vdequantize(vin, qi_in);
+
+#ifdef __aarch64__
+                const uint32x4x4_t pos_mask =
+                {
+                    {
+                        wrapper::vcgtz(vin_deq.val[0]),
+                        wrapper::vcgtz(vin_deq.val[1]),
+                        wrapper::vcgtz(vin_deq.val[2]),
+                        wrapper::vcgtz(vin_deq.val[3]),
+                    }
+                };
+#else  // __aarch64__
+                const uint32x4x4_t pos_mask =
+                {
+                    {
+                        wrapper::vcgt(vin_deq.val[0], vconst_0_f32),
+                        wrapper::vcgt(vin_deq.val[1], vconst_0_f32),
+                        wrapper::vcgt(vin_deq.val[2], vconst_0_f32),
+                        wrapper::vcgt(vin_deq.val[3], vconst_0_f32),
+                    }
+                };
+#endif // __aarch64__
+
+                const float32x4x4_t tmp_dep =
+                {
+                    {
+                        wrapper::vbsl(pos_mask.val[0], vin_deq.val[0], wrapper::vmul(va_f32, vin_deq.val[0])),
+                        wrapper::vbsl(pos_mask.val[1], vin_deq.val[1], wrapper::vmul(va_f32, vin_deq.val[1])),
+                        wrapper::vbsl(pos_mask.val[2], vin_deq.val[2], wrapper::vmul(va_f32, vin_deq.val[2])),
+                        wrapper::vbsl(pos_mask.val[3], vin_deq.val[3], wrapper::vmul(va_f32, vin_deq.val[3])),
+                    }
+                };
+
+                tmp = vquantize_signed(tmp_dep, qi_out);
+            }
             else
             {
                 ARM_COMPUTE_ERROR("Unsupported activation function");
@@ -201,6 +242,12 @@ void qasymm8_signed_neon_activation(const ITensor *src, ITensor *dst, const Acti
             {
                 float tmp_f = dequantize_qasymm8_signed(in, qi_in);
                 tmp_f       = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
+                tmp         = quantize_qasymm8_signed(tmp_f, qi_out);
+            }
+            else if(act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
+            {
+                float tmp_f = dequantize_qasymm8_signed(in, qi_in);
+                tmp_f       = tmp_f > 0 ? tmp_f : tmp_f * a_f32;
                 tmp         = quantize_qasymm8_signed(tmp_f, qi_out);
             }
             else

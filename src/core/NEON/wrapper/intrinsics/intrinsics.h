@@ -31,6 +31,7 @@
 #include "src/core/NEON/wrapper/intrinsics/ceq.h"
 #include "src/core/NEON/wrapper/intrinsics/cge.h"
 #include "src/core/NEON/wrapper/intrinsics/cgt.h"
+#include "src/core/NEON/wrapper/intrinsics/cgtz.h"
 #include "src/core/NEON/wrapper/intrinsics/cle.h"
 #include "src/core/NEON/wrapper/intrinsics/clt.h"
 #include "src/core/NEON/wrapper/intrinsics/combine.h"

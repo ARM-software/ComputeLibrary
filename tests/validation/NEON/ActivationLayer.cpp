@@ -48,8 +48,7 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_float_sqrt(0.0001f);
-    
-    
+
 /** Define relative tolerance of the activation layer.
  *
  * @param[in] data_type  The data type used.
@@ -234,12 +233,15 @@ template <typename T>
 using NEActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<Tensor, Accessor, NEActivationLayer, T>;
 
 /** Input data sets. */
-const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::LOGISTIC,
-                                                                                                  ActivationLayerInfo::ActivationFunction::TANH
-                                                                                                });
+const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction",
+{
+    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+    ActivationLayerInfo::ActivationFunction::RELU,
+    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+    ActivationLayerInfo::ActivationFunction::LOGISTIC,
+    ActivationLayerInfo::ActivationFunction::TANH,
+    ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
+});
 
 const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }),
                                                         concat(QuantizedActivationFunctionsDataset, framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH))),

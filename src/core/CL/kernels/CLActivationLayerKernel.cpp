@@ -53,14 +53,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
         ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::LOGISTIC,
         ActivationLayerInfo::ActivationFunction::TANH,
-        ActivationLayerInfo::ActivationFunction::HARD_SWISH
+        ActivationLayerInfo::ActivationFunction::HARD_SWISH,
+        ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
     };
     const DataType                                data_type = input->data_type();
     const QuantizationInfo                       &oq_info   = (output != nullptr) ? output->quantization_info() : input->quantization_info();
     const ActivationLayerInfo::ActivationFunction f_act     = act_info.activation();
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(data_type) && (quantized_supported_activations.count(f_act) == 0),
-                                    "For Quantized data type only tanh, logistic, relu and lower/upper bounded relu are supported");
+                                    "For Quantized data type only hard swish, leaky relu, tanh, logistic, relu and lower/upper bounded relu are supported");
 
     ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8 && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 128.f, 128)));
     ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8 && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 256.f, 0)));
@@ -112,7 +113,10 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     const ActivationLayerInfo::ActivationFunction f_act        = act_info.activation();
     const bool                                    is_quantized = is_data_type_quantized(dt);
     const bool                                    perform_activation_in_float =
-        (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) || (f_act == ActivationLayerInfo::ActivationFunction::TANH) || (f_act == ActivationLayerInfo::ActivationFunction::HARD_SWISH);
+        (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
+        || (f_act == ActivationLayerInfo::ActivationFunction::TANH)
+        || (f_act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
+        || (f_act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU);
 
     // Set build options
     CLBuildOptions build_opts;

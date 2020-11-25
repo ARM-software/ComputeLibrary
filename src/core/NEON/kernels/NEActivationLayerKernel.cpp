@@ -110,7 +110,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
         ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::LOGISTIC,
         ActivationLayerInfo::ActivationFunction::TANH,
-        ActivationLayerInfo::ActivationFunction::HARD_SWISH
+        ActivationLayerInfo::ActivationFunction::HARD_SWISH,
+        ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
     };
     const static std::set<ActivationLayerInfo::ActivationFunction> qsymm16_supported_activations =
     {
@@ -123,7 +124,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     const ActivationLayerInfo::ActivationFunction f_act     = activation_info.activation();
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized_asymmetric(data_type) && (qasymm8_supported_activations.count(f_act) == 0),
-                                    "For QASYMM8 only tanh, logistic, relu and lower/upper bounded relu are supported");
+                                    "For QASYMM8 only hard swish, leaky relu, tanh, logistic, relu and lower/upper bounded relu are supported");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized_symmetric(data_type) && (qsymm16_supported_activations.count(f_act) == 0),
                                     "For QSYMM16 only tanh and logistic are supported");
