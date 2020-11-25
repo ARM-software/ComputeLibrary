@@ -23,9 +23,11 @@
  */
 #include "helpers.h"
 
+#if defined(VEC_SIZE)
+#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
+
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
 #define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
-#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
 #define VEC_QUANT VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
 #define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
@@ -38,36 +40,14 @@ inline VEC_QUANT requantize(VEC_QUANT input, float in_offset, float out_offset, 
 }
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
-#if defined(DATA_TYPE) && defined(VEC_SIZE)
-#if defined(DEPTH) && defined(ELEMENT_SIZE)
+#if defined(DATA_TYPE)
+#define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
+#if defined(DEPTH) && defined(ELEMENT_SIZE)
 #if defined(INPUT1_WIDTH)
 
-#if ELEMENT_SIZE == 1
-#define COND_DATA_TYPE char
-#elif ELEMENT_SIZE == 2
-#define COND_DATA_TYPE short
-#elif ELEMENT_SIZE == 4
-#define COND_DATA_TYPE int
-#else // ELEMENT_SIZE
-#error "Element size not supported"
-#endif // ELEMENT_SIZE
-
-#if VEC_SIZE == 1
-#define SEQ ((int)(0))
-#elif VEC_SIZE == 2
-#define SEQ ((int2)(0, 1))
-#elif VEC_SIZE == 3
-#define SEQ ((int3)(0, 1, 2))
-#elif VEC_SIZE == 4
-#define SEQ ((int4)(0, 1, 2, 3))
-#elif VEC_SIZE == 8
-#define SEQ ((int8)(0, 1, 2, 3, 4, 5, 6, 7))
-#elif VEC_SIZE == 16
-#define SEQ ((int16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15))
-#else // VEC_SIZE
-#error "Vector size not supported"
-#endif // VEC_SIZE
+#define SELECT_TYPE SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#define SEQ VEC_OFFS(int, VEC_SIZE)
 
 /** This kernel concatenates two input tensors into the output tensor along the first dimension
  *
@@ -126,23 +106,22 @@ __kernel void concatenate_width_x2(
     const __global uchar *src1_addr = src1_ptr + (int)src1_offset_first_element_in_bytes + x1 * sizeof(DATA_TYPE) + y * (int)src1_stride_y + z * (int)src1_stride_z + w * (int)src1_stride_w;
     const __global uchar *src2_addr = src2_ptr + (int)src2_offset_first_element_in_bytes + x2 * sizeof(DATA_TYPE) + y * (int)src2_stride_y + z * (int)src2_stride_z + w * (int)src2_stride_w;
 
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    src1_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src1_addr);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src2_addr);
+    VEC_TYPE src1_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src1_addr);
+    VEC_TYPE src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src2_addr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT)
     src1_values = requantize(src1_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
     src2_values = requantize(src2_values, OFFSET_IN2, OFFSET_OUT, SCALE_IN2, SCALE_OUT);
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1)  && defined(SCALE_IN2) && defined(SCALE_OUT) */
-    const VEC_DATA_TYPE(int, VEC_SIZE) x_coords        = SEQ + (VEC_DATA_TYPE(int, VEC_SIZE))(x);
-    const VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE) cond = CONVERT(x_coords < (VEC_DATA_TYPE(int, VEC_SIZE))(INPUT1_WIDTH), VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE));
+    const VEC_INT x_coords = SEQ + (VEC_INT)(x);
 
     // Rotate src1/2_values, if values0 is a combination of src1_values and src2_values.
-    src1_values = (x < INPUT1_WIDTH && x > (INPUT1_WIDTH - VEC_SIZE)) ? ROTATE(src1_values, VEC_SIZE, INPUT1_ROTATE_N) : src1_values;
-    src2_values = (x < INPUT1_WIDTH && x > (INPUT1_WIDTH - VEC_SIZE)) ? ROTATE(src2_values, VEC_SIZE, INPUT1_ROTATE_N) : src2_values;
+    SELECT_TYPE cond = CONVERT(((VEC_INT)x < (VEC_INT)INPUT1_WIDTH) && ((VEC_INT)x > (VEC_INT)(INPUT1_WIDTH - VEC_SIZE)), SELECT_TYPE);
+    src1_values      = select(src1_values, ROTATE(src1_values, VEC_SIZE, INPUT1_ROTATE_N), cond);
+    src2_values      = select(src2_values, ROTATE(src2_values, VEC_SIZE, INPUT1_ROTATE_N), cond);
 
-    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) values0 = select(src2_values, src1_values, cond);
+    cond                   = CONVERT(x_coords < (VEC_INT)(INPUT1_WIDTH), SELECT_TYPE);
+    const VEC_TYPE values0 = select(src2_values, src1_values, cond);
 
     STORE_VECTOR_SELECT(values, DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
@@ -234,14 +213,10 @@ __kernel void concatenate_width_x4(
     const __global uchar *src3_addr = src3_ptr + (int)src3_offset_first_element_in_bytes + x3 * sizeof(DATA_TYPE) + y * (int)src3_stride_y + z * (int)src3_stride_z + w * (int)src3_stride_w;
     const __global uchar *src4_addr = src4_ptr + (int)src4_offset_first_element_in_bytes + x4 * sizeof(DATA_TYPE) + y * (int)src4_stride_y + z * (int)src4_stride_z + w * (int)src4_stride_w;
 
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    src1_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src1_addr);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src2_addr);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    src3_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src3_addr);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    src4_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src4_addr);
+    VEC_TYPE src1_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src1_addr);
+    VEC_TYPE src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src2_addr);
+    VEC_TYPE src3_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src3_addr);
+    VEC_TYPE src4_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src4_addr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) && defined(OFFSET_IN2) && defined(SCALE_IN2) && defined(OFFSET_IN3) && defined(SCALE_IN3) && defined(OFFSET_IN4) && defined(SCALE_IN4)
     src1_values = requantize(src1_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
@@ -250,26 +225,29 @@ __kernel void concatenate_width_x4(
     src4_values = requantize(src4_values, OFFSET_IN4, OFFSET_OUT, SCALE_IN4, SCALE_OUT);
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) && defined(OFFSET_IN2) && defined(SCALE_IN2) && defined(OFFSET_IN3) && defined(SCALE_IN3) && defined(OFFSET_IN4) && defined(SCALE_IN4) */
 
-    const VEC_DATA_TYPE(int, VEC_SIZE) x_coords = SEQ + (VEC_DATA_TYPE(int, VEC_SIZE))(x);
+    const VEC_INT x_coords = SEQ + (VEC_INT)(x);
 
-    const VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE) cond_in2 = CONVERT(x_coords < (VEC_DATA_TYPE(int, VEC_SIZE))(INPUT1_WIDTH), VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE));
-    const VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE) cond_in3 = CONVERT(x_coords < (VEC_DATA_TYPE(int, VEC_SIZE))(INPUT1_WIDTH + INPUT2_WIDTH), VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE));
-    const VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE) cond_in4 = CONVERT(x_coords < (VEC_DATA_TYPE(int, VEC_SIZE))(INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH), VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE));
+    SELECT_TYPE cond_in2 = CONVERT(((VEC_INT)x < (VEC_INT)INPUT1_WIDTH && (VEC_INT)x > (VEC_INT)(INPUT1_WIDTH - VEC_SIZE)), SELECT_TYPE);
+    SELECT_TYPE cond_in3 = CONVERT(((VEC_INT)x < (VEC_INT)(INPUT1_WIDTH + INPUT2_WIDTH) && (VEC_INT)x > (VEC_INT)(INPUT1_WIDTH + INPUT2_WIDTH - VEC_SIZE)), SELECT_TYPE);
+    SELECT_TYPE cond_in4 = CONVERT(((VEC_INT)x < (VEC_INT)(INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && (VEC_INT)x > (VEC_INT)(INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH - VEC_SIZE)), SELECT_TYPE);
 
     // Rotate src1/2_values, if values0 is a combination of src1_values and src2_values.
-    src1_values = (x < INPUT1_WIDTH && x > (INPUT1_WIDTH - VEC_SIZE)) ? ROTATE(src1_values, VEC_SIZE, INPUT1_ROTATE_N) : src1_values;
-    src2_values = (x < INPUT1_WIDTH && x > (INPUT1_WIDTH - VEC_SIZE)) ? ROTATE(src2_values, VEC_SIZE, INPUT1_ROTATE_N) : src2_values;
+    src1_values = select(src1_values, ROTATE(src1_values, VEC_SIZE, INPUT1_ROTATE_N), cond_in2);
+    src2_values = select(src2_values, ROTATE(src2_values, VEC_SIZE, INPUT1_ROTATE_N), cond_in2);
     // Rotate src2/3_values, if values0 is a combination of src2_values and src3_values.
-    src2_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH - VEC_SIZE)) ? ROTATE(src2_values, VEC_SIZE, INPUT2_ROTATE_N) : src2_values;
-    src3_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH - VEC_SIZE)) ? ROTATE(src3_values, VEC_SIZE, INPUT2_ROTATE_N) : src3_values;
+    src2_values = select(src2_values, ROTATE(src2_values, VEC_SIZE, INPUT2_ROTATE_N), cond_in3);
+    src3_values = select(src3_values, ROTATE(src3_values, VEC_SIZE, INPUT2_ROTATE_N), cond_in3);
     // Rotate src3/4_values, if values0 is a combination of src3_values and src4_values.
-    src3_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH - VEC_SIZE)) ? ROTATE(src3_values, VEC_SIZE, INPUT3_ROTATE_N) : src3_values;
-    src4_values = (x < (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH) && x > (INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH - VEC_SIZE)) ? ROTATE(src4_values, VEC_SIZE, INPUT3_ROTATE_N) : src4_values;
+    src3_values = select(src3_values, ROTATE(src3_values, VEC_SIZE, INPUT3_ROTATE_N), cond_in4);
+    src4_values = select(src4_values, ROTATE(src4_values, VEC_SIZE, INPUT3_ROTATE_N), cond_in4);
 
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    values0 = select(src2_values, src1_values, cond_in2);
-    values0 = select(src3_values, values0, cond_in3);
-    values0 = select(src4_values, values0, cond_in4);
+    cond_in2 = CONVERT(x_coords < (VEC_INT)(INPUT1_WIDTH), SELECT_TYPE);
+    cond_in3 = CONVERT(x_coords < (VEC_INT)(INPUT1_WIDTH + INPUT2_WIDTH), SELECT_TYPE);
+    cond_in4 = CONVERT(x_coords < (VEC_INT)(INPUT1_WIDTH + INPUT2_WIDTH + INPUT3_WIDTH), SELECT_TYPE);
+
+    VEC_TYPE values0 = select(src2_values, src1_values, cond_in2);
+    values0          = select(src3_values, values0, cond_in3);
+    values0          = select(src4_values, values0, cond_in4);
 
     STORE_VECTOR_SELECT(values, DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
@@ -321,8 +299,7 @@ __kernel void concatenate_width(
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * src_stride_y + z * src_stride_z + w * src_stride_w;
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * dst_stride_y + z * dst_stride_z + w * dst_stride_w;
 
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    source_values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
+    VEC_TYPE source_values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
     const VEC_QUANT out0 = requantize(source_values0, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
@@ -379,8 +356,7 @@ __kernel void concatenate_height(
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offs + get_global_id(1) * dst_stride_y + (get_global_id(2) % DEPTH) * dst_stride_z + (get_global_id(
                                    2) / DEPTH) * dst_stride_w;
 
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    source_values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
+    VEC_TYPE source_values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
     const VEC_QUANT out0 = requantize(source_values0, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
@@ -426,8 +402,7 @@ __kernel void concatenate(
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offs + get_global_id(1) * src_stride_y + get_global_id(2) * src_stride_z;
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offs + get_global_id(1) * dst_stride_y + get_global_id(2) * dst_stride_z;
 
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    source_values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
+    VEC_TYPE source_values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
     source_values0 = requantize(source_values0, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
@@ -436,4 +411,5 @@ __kernel void concatenate(
     STORE_VECTOR_SELECT(source_values, DATA_TYPE, dst_addr + offset, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif /* defined(VEC_SIZE_LEFTOVER) */
-#endif /* defined(DATA_TYPE) && defined(VEC_SIZE) */
+#endif /* defined(DATA_TYPE) */
+#endif /* defined(VEC_SIZE) */
