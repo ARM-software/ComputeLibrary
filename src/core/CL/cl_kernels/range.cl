@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,13 +23,29 @@
  */
 #include "helpers.h"
 
-#if defined(VECTOR_SIZE) && defined(START) && defined(STEP) && defined(DATA_TYPE)
+#if defined(VECTOR_SIZE) && defined(START) && defined(STEP) && defined(DATA_TYPE) && defined(VEC_SIZE_LEFTOVER)
+
+#if !defined(OFFSET_OUT) && !defined(SCALE_OUT)
+
+#if VECTOR_SIZE == 2
+#define STEP_VEC ((VEC_DATA_TYPE(DATA_TYPE, 2))(0, STEP))
+#elif VECTOR_SIZE == 3
+#define STEP_VEC ((VEC_DATA_TYPE(DATA_TYPE, 3))(0, STEP, 2 * STEP))
+#elif VECTOR_SIZE == 4
+#define STEP_VEC ((VEC_DATA_TYPE(DATA_TYPE, 4))(0, STEP, 2 * STEP, 3 * STEP))
+#elif VECTOR_SIZE == 8
+#define STEP_VEC ((VEC_DATA_TYPE(DATA_TYPE, 8))(0, STEP, 2 * STEP, 3 * STEP, 4 * STEP, 5 * STEP, 6 * STEP, 7 * STEP))
+#elif VECTOR_SIZE == 16
+#define STEP_VEC ((VEC_DATA_TYPE(DATA_TYPE, 16))(0, STEP, 2 * STEP, 3 * STEP, 4 * STEP, 5 * STEP, 6 * STEP, 7 * STEP, 8 * STEP, 9 * STEP, 10 * STEP, 11 * STEP, 12 * STEP, 13 * STEP, 14 * STEP, 15 * STEP))
+#endif // VECTOR_SIZE == 2
+
 /** Generates a sequence of numbers starting from START and extends by increments of 'STEP' up to but not including 'END'.
  *
  * @note starting value of the sequence must be given as a preprocessor argument using -DSTART=value. e.g. -DSTART=0
  * @note difference between consequtive elements of the sequence must be given as a preprocessor argument using -DSTEP=value. e.g. -DSTEP=1
  * @note Datatype must be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note vector size supported by the device must be given as a preprocessor argument using -DVECTOR_SIZE=value. e.g. -DDATA_TYPE=4
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVECTOR_SIZE=3. It is defined as the remainder between the input's first dimension and VECTOR_SIZE
  *
  * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8/S8/U16/S16/U32/S32/F16/F32.
  * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
@@ -39,45 +55,34 @@
 __kernel void range(
     VECTOR_DECLARATION(out))
 {
-    uint           id      = get_global_id(0) * VECTOR_SIZE;
-    __global void *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
+    uint     id                 = max((int)(get_global_id(0) * VECTOR_SIZE - (VECTOR_SIZE - VEC_SIZE_LEFTOVER) % VECTOR_SIZE), 0);
+    __global DATA_TYPE *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
 #if VECTOR_SIZE == 1
     DATA_TYPE seq;
     seq = (DATA_TYPE)START + (DATA_TYPE)id * (DATA_TYPE)STEP;
 
-    *((__global DATA_TYPE *)dst_ptr) = seq;
-#else // VECTOR_SIZE == 1
+    *dst_ptr = seq;
+#else  // VECTOR_SIZE == 1
     VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
-    seq;
-
-    seq.s0 = ((DATA_TYPE)START + (DATA_TYPE)id * (DATA_TYPE)STEP);
-#if VECTOR_SIZE > 1
-    seq.s1 = seq.s0 + (DATA_TYPE)STEP;
-#if VECTOR_SIZE > 2
-    seq.s2 = seq.s1 + (DATA_TYPE)STEP;
-#if VECTOR_SIZE > 3
-    seq.s3 = seq.s2 + (DATA_TYPE)STEP;
-#if VECTOR_SIZE > 4
-    seq.s4 = seq.s3 + (DATA_TYPE)STEP;
-#if VECTOR_SIZE > 5
-    seq.s5 = seq.s4 + (DATA_TYPE)STEP;
-#if VECTOR_SIZE > 6
-    seq.s6 = seq.s5 + (DATA_TYPE)STEP;
-#if VECTOR_SIZE > 7
-    seq.s7 = seq.s6 + (DATA_TYPE)STEP;
-#endif // VECTOR_SIZE > 7
-#endif // VECTOR_SIZE > 6
-#endif // VECTOR_SIZE > 5
-#endif // VECTOR_SIZE > 4
-#endif // VECTOR_SIZE > 3
-#endif // VECTOR_SIZE > 2
-#endif // VECTOR_SIZE > 1
-    VSTORE(VECTOR_SIZE)
-    (seq, 0, ((__global DATA_TYPE *)dst_ptr));
+    seq0 = ((DATA_TYPE)START + (DATA_TYPE)id * (DATA_TYPE)STEP);
+    seq0 = seq0 + STEP_VEC;
+    STORE_VECTOR_SELECT(seq, DATA_TYPE, dst_ptr, VECTOR_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif //VECTOR_SIZE == 1
 }
 
-#if defined(OFFSET_OUT) && defined(SCALE_OUT)
+#else // !defined(OFFSET_OUT) && !defined(SCALE_OUT)
+
+#if VECTOR_SIZE == 2
+#define STEP_VEC ((VEC_DATA_TYPE(float, 2))(0, STEP))
+#elif VECTOR_SIZE == 3
+#define STEP_VEC ((VEC_DATA_TYPE(float, 3))(0, STEP, 2 * STEP))
+#elif VECTOR_SIZE == 4
+#define STEP_VEC ((VEC_DATA_TYPE(float, 4))(0, STEP, 2 * STEP, 3 * STEP))
+#elif VECTOR_SIZE == 8
+#define STEP_VEC ((VEC_DATA_TYPE(float, 8))(0, STEP, 2 * STEP, 3 * STEP, 4 * STEP, 5 * STEP, 6 * STEP, 7 * STEP))
+#elif VECTOR_SIZE == 16
+#define STEP_VEC ((VEC_DATA_TYPE(float, 16))(0, STEP, 2 * STEP, 3 * STEP, 4 * STEP, 5 * STEP, 6 * STEP, 7 * STEP, 8 * STEP, 9 * STEP, 10 * STEP, 11 * STEP, 12 * STEP, 13 * STEP, 14 * STEP, 15 * STEP))
+#endif // VECTOR_SIZE == 2
 
 #define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
 #define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
@@ -99,47 +104,25 @@ __kernel void range(
 __kernel void range_quantized(
     VECTOR_DECLARATION(out))
 {
-    size_t         id      = get_global_id(0) * VECTOR_SIZE;
-    __global void *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
+    uint     id                 = max((int)(get_global_id(0) * VECTOR_SIZE - (VECTOR_SIZE - VEC_SIZE_LEFTOVER) % VECTOR_SIZE), 0);
+    __global DATA_TYPE *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
 #if VECTOR_SIZE == 1
-    float seq;
-    seq                          = (float)START + (float)id * (float)STEP;
-    seq                          = (DATA_TYPE)(int)(seq / ((float)SCALE_OUT) + (float)OFFSET_OUT);
-    seq                          = max(0.0f, min(seq, 255.0f));
-    *((__global uchar *)dst_ptr) = CONVERT_SAT(CONVERT_DOWN(seq, int), uchar);
-#else // VECTOR_SIZE == 1
+    float               seq;
+    seq      = (float)START + (float)id * (float)STEP;
+    seq      = (DATA_TYPE)(int)(seq / ((float)SCALE_OUT) + (float)OFFSET_OUT);
+    seq      = max(0.0f, min(seq, 255.0f));
+    *dst_ptr = CONVERT_SAT(CONVERT_DOWN(seq, int), uchar);
+#else  // VECTOR_SIZE == 1
     VEC_DATA_TYPE(float, VECTOR_SIZE)
-    seq;
-    seq.s0 = (float)START + id * (float)STEP;
-#if VECTOR_SIZE > 1
-    seq.s1 = seq.s0 + (float)STEP;
-#if VECTOR_SIZE > 2
-    seq.s2 = seq.s1 + (float)STEP;
-#if VECTOR_SIZE > 3
-    seq.s3 = seq.s2 + (float)STEP;
-#if VECTOR_SIZE > 4
-    seq.s4 = seq.s3 + (float)STEP;
-#if VECTOR_SIZE > 5
-    seq.s5 = seq.s4 + (float)STEP;
-#if VECTOR_SIZE > 6
-    seq.s6 = seq.s5 + (float)STEP;
-#if VECTOR_SIZE > 7
-    seq.s7 = seq.s6 + (float)STEP;
-#endif // VECTOR_SIZE > 7
-#endif // VECTOR_SIZE > 6
-#endif // VECTOR_SIZE > 5
-#endif // VECTOR_SIZE > 4
-#endif // VECTOR_SIZE > 3
-#endif // VECTOR_SIZE > 2
-#endif // VECTOR_SIZE > 1
-    seq    = seq / ((VEC_DATA_TYPE(float, VECTOR_SIZE))((float)SCALE_OUT)) + ((VEC_DATA_TYPE(float, VECTOR_SIZE))((float)OFFSET_OUT));
-    seq    = max((VEC_DATA_TYPE(float, VECTOR_SIZE))(0.0f), min(seq, (VEC_DATA_TYPE(float, VECTOR_SIZE))(255.0f)));
+    seq = (float)START + id * (float)STEP;
+    seq = seq + STEP_VEC;
+    seq = seq / ((VEC_DATA_TYPE(float, VECTOR_SIZE))((float)SCALE_OUT)) + ((VEC_DATA_TYPE(float, VECTOR_SIZE))((float)OFFSET_OUT));
+    seq = max((VEC_DATA_TYPE(float, VECTOR_SIZE))(0.0f), min(seq, (VEC_DATA_TYPE(float, VECTOR_SIZE))(255.0f)));
     VEC_DATA_TYPE(uchar, VECTOR_SIZE)
-    res = CONVERT_SAT(CONVERT_DOWN(seq, VEC_DATA_TYPE(int, VECTOR_SIZE)), VEC_DATA_TYPE(uchar, VECTOR_SIZE));
-    VSTORE(VECTOR_SIZE)
-    (res, 0, ((__global DATA_TYPE *)dst_ptr));
+    res0 = CONVERT_SAT(CONVERT_DOWN(seq, VEC_DATA_TYPE(int, VECTOR_SIZE)), VEC_DATA_TYPE(uchar, VECTOR_SIZE));
+    STORE_VECTOR_SELECT(res, DATA_TYPE, dst_ptr, VECTOR_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif // VECTOR_SIZE == 1
 }
-#endif // defined(OFFSET_OUT) && defined(SCALE_OUT)
+#endif // !defined(OFFSET_OUT) && !defined(SCALE_OUT)
 
-#endif // defined(VECTOR_SIZE) && defined(START) && defined(STEP) && defined(DATA_TYPE)
+#endif // defined(VECTOR_SIZE) && defined(START) && defined(STEP) && defined(DATA_TYPE) && defined(VEC_SIZE_LEFTOVER)
