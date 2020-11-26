@@ -43,6 +43,8 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
+AbsoluteTolerance<int> tolerance_zero_s32(1); // Tolerance for S32 division
+
 /** Input data sets **/
 const auto ElementwiseDivisionS32Dataset = combine(combine(framework::dataset::make("DataType", DataType::S32),
                                                            framework::dataset::make("DataType", DataType::S32)),
@@ -126,7 +128,7 @@ TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseDivisionFixture<int32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseDivisionS32Dataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(Accessor(_target), _reference, tolerance_zero_s32);
 }
 TEST_SUITE_END() // S32
 TEST_SUITE_END() // Integer
