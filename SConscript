@@ -55,6 +55,17 @@ def build_library(name, sources, static=False, libs=[]):
     Default(obj)
     return obj
 
+def remove_incode_comments(code):
+    def replace_with_empty(match):
+        s = match.group(0)
+        if s.startswith('/'):
+            return " "
+        else:
+            return s
+
+    comment_regex = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE)
+    return re.sub(comment_regex, replace_with_empty, code)
+
 def resolve_includes(target, source, env):
     # File collection
     FileEntry = collections.namedtuple('FileEntry', 'target_name file_contents')
@@ -67,7 +78,8 @@ def resolve_includes(target, source, env):
     for i in range(len(source)):
         src = source[i]
         dst = target[i]
-        contents = src.get_contents().decode('utf-8').splitlines()
+        contents = src.get_contents().decode('utf-8')
+        contents = remove_incode_comments(contents).splitlines()
         entry = FileEntry(target_name=dst, file_contents=contents)
         files.append((os.path.basename(src.get_path()),entry))
 
