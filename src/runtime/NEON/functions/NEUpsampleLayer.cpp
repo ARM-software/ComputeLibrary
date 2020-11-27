@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,13 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEUpsampleLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEUpsampleLayerKernel.h"
+#include "src/core/NEON/kernels/NEUpsampleLayerKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+NEUpsampleLayer::~NEUpsampleLayer() = default;
+
 NEUpsampleLayer::NEUpsampleLayer()
     : _kernel(), _data_layout()
 {
@@ -41,12 +44,13 @@ Status NEUpsampleLayer::validate(const ITensorInfo *input, const ITensorInfo *ou
 void NEUpsampleLayer::configure(const ITensor *input, ITensor *output, const Size2D &info, const InterpolationPolicy &policy)
 {
     _data_layout = input->info()->data_layout();
-    _kernel.configure(input, output, info, policy);
+    _kernel      = arm_compute::support::cpp14::make_unique<NEUpsampleLayerKernel>();
+    _kernel->configure(input, output, info, policy);
 }
 
 void NEUpsampleLayer::run()
 {
     const auto win = (_data_layout == DataLayout::NCHW) ? Window::DimZ : Window::DimX;
-    NEScheduler::get().schedule(&_kernel, win);
+    NEScheduler::get().schedule(_kernel.get(), win);
 }
 } // namespace arm_compute

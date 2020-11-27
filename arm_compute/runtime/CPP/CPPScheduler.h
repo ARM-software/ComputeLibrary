@@ -62,7 +62,6 @@ protected:
     void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
-    void schedule_common(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors);
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

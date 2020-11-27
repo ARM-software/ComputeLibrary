@@ -21,20 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
+#include "src/core/CL/kernels/CLReshapeLayerKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 
 #include <string>
 
@@ -61,6 +61,8 @@ void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, co
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output));
+
+    auto padding_info = get_padding_info({ input, output });
 
     // Create kernel
     std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->element_size()) };
@@ -91,6 +93,8 @@ void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, co
     // Set the output valid region
     output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLReshapeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)

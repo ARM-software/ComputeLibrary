@@ -31,7 +31,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following OpenCL kernels:
  *

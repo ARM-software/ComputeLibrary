@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,13 @@
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDev.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEMeanStdDevKernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEMeanStdDev::~NEMeanStdDev() = default;
 
 NEMeanStdDev::NEMeanStdDev()
     : _mean_stddev_kernel(), _fill_border_kernel(), _global_sum(0), _global_sum_squared(0)
@@ -34,8 +39,11 @@ NEMeanStdDev::NEMeanStdDev()
 
 void NEMeanStdDev::configure(IImage *input, float *mean, float *stddev)
 {
-    _mean_stddev_kernel.configure(input, mean, &_global_sum, stddev, &_global_sum_squared);
-    _fill_border_kernel.configure(input, _mean_stddev_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
+    _mean_stddev_kernel = arm_compute::support::cpp14::make_unique<NEMeanStdDevKernel>();
+    _fill_border_kernel = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+
+    _mean_stddev_kernel->configure(input, mean, &_global_sum, stddev, &_global_sum_squared);
+    _fill_border_kernel->configure(input, _mean_stddev_kernel->border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
 }
 
 void NEMeanStdDev::run()
@@ -43,6 +51,7 @@ void NEMeanStdDev::run()
     _global_sum         = 0;
     _global_sum_squared = 0;
 
-    NEScheduler::get().schedule(&_fill_border_kernel, Window::DimZ);
-    NEScheduler::get().schedule(&_mean_stddev_kernel, Window::DimY);
+    NEScheduler::get().schedule(_fill_border_kernel.get(), Window::DimZ);
+    NEScheduler::get().schedule(_mean_stddev_kernel.get(), Window::DimY);
 }
+} // namespace arm_compute

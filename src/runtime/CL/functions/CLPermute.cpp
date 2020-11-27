@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
 #include "arm_compute/core/Error.h"
+#include "src/core/CL/kernels/CLPermuteKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

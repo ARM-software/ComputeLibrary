@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CPUUtils.h"
+#include "src/runtime/CPUUtils.h"
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Error.h"
@@ -352,6 +352,10 @@ int get_max_cpus()
 
 namespace arm_compute
 {
+namespace utils
+{
+namespace cpu
+{
 void get_cpu_configuration(CPUInfo &cpuinfo)
 {
 #if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
@@ -460,5 +464,6 @@ unsigned int get_threads_hint()
 
     return num_threads_hint;
 }
-
+} // namespace cpu
+} // namespace utils
 } // namespace arm_compute

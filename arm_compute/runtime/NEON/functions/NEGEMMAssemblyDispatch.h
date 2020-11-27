@@ -32,6 +32,28 @@
 
 namespace arm_compute
 {
+/* Convolution method supported by the assembly gemm interface */
+enum class AsmConvMethod
+{
+    Im2Col,
+    Indirect,
+    Conv
+};
+
+struct AsmGemmInfo
+{
+    AsmConvMethod           method{ AsmConvMethod::Im2Col };
+    PadStrideInfo           ps_info{};
+    ActivationLayerInfo     activation_info{};
+    GEMMLowpOutputStageInfo output_stage{};
+    bool                    negated_offsets{ true };
+    bool                    reinterpret_input_as_3d{ false };
+    bool                    depth_output_gemm3d{ false };
+    int64_t                 padding_top{ 0 };
+    int64_t                 padding_left{ 0 };
+    float                   padding_value{ 0.f };
+};
+
 /** Assembly kernel glue */
 class NEGEMMAssemblyDispatch : public IFunction
 {
@@ -55,33 +77,28 @@ public:
         virtual ~IFallback()               = default;
     };
 
-private:
-    /** Interface for the arm_gemm fallback */
-    std::unique_ptr<IFallback> _arm_gemm;
-    MemoryGroup                _memory_group;    /**< Function memory group */
-    IWeightsManager           *_weights_manager; /**< Pointer to the weights manager */
 public:
-    /** If supported create an ACL function else fallback to the arm_gemm function.
+    /** If supported create a Compute Library function else fallback to the arm_gemm function.
      *
-     * @param[in]  a         Input tensor (Matrix A)
-     * @param[in]  b         Input tensor (Matrix B)
-     * @param[in]  c         Input tensor (Matrix C) used to pass the bias for quantized calculations
-     * @param[out] d         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
-     * @param[in]  gemm_info GEMM meta-data
+     * @param[in]  a    Input tensor (Matrix A)
+     * @param[in]  b    Input tensor (Matrix B)
+     * @param[in]  c    Input tensor (Matrix C) used to pass the bias for quantized calculations
+     * @param[out] d    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in]  info GEMM meta-data
      */
-    void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, const GEMMInfo &gemm_info);
+    void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, const AsmGemmInfo &info);
 
     /** Indicates whether or not this function can be used to process the given parameters.
      *
-     * @param[in] a         Input tensor info (Matrix A)
-     * @param[in] b         Input tensor info (Matrix B)
-     * @param[in] c         Input tensor info (Matrix C) used to pass the bias for quantized calculations
-     * @param[in] d         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
-     * @param[in] gemm_info GEMM meta-data
+     * @param[in] a    Input tensor info (Matrix A)
+     * @param[in] b    Input tensor info (Matrix B)
+     * @param[in] c    Input tensor info (Matrix C) used to pass the bias for quantized calculations
+     * @param[in] d    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in] info GEMM meta-data
      *
      * @return a status.
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const GEMMInfo &gemm_info);
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info);
     /** Checks if activation is supported by the gemm assembly dispatcher
      *
      * @param[in] activation Activation to check
@@ -94,10 +111,15 @@ public:
      * @return True if the function is configured and ready to run
      */
     bool is_configured() const;
+
     // Inherited methods overridden:
-    /** Runs a preparation step, usually for pre-transposing matrix b */
     void prepare() override;
     void run() override;
+
+private:
+    std::unique_ptr<IFallback> _arm_gemm;        /** Interface for the arm_gemm fallback */
+    MemoryGroup                _memory_group;    /**< Function memory group */
+    IWeightsManager           *_weights_manager; /**< Pointer to the weights manager */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEGEMMASSEMBLYDISPATCH_H */

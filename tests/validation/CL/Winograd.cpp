@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
-#include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -30,6 +28,8 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
+#include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
+#include "src/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -182,6 +182,7 @@ const auto ActivationFunctionsSmallDataset = framework::dataset::make("Activatio
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::SOFT_RELU)
 });
+
 } // namespace
 
 using namespace arm_compute::misc::shape_calculator;
@@ -190,6 +191,7 @@ TEST_SUITE(CL)
 TEST_SUITE(Winograd)
 
 TEST_SUITE(InputTransform)
+
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 framework::dataset::make("InputInfo",{
                                                                                         TensorInfo(TensorShape(53U, 21U, 5U, 3U), 1, DataType::F16),     // F16 not supported

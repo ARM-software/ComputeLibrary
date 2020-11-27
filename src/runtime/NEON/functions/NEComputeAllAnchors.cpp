@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEComputeAllAnchors.h"
 
+#include "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -23,12 +23,14 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEAccumulate.h"
 
-#include "arm_compute/core/NEON/kernels/NEAccumulateKernel.h"
+#include "src/core/NEON/kernels/NEAccumulateKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEAccumulate::~NEAccumulate() = default;
 
 void NEAccumulate::configure(const ITensor *input, ITensor *output)
 {
@@ -36,6 +38,8 @@ void NEAccumulate::configure(const ITensor *input, ITensor *output)
     k->configure(input, output);
     _kernel = std::move(k);
 }
+
+NEAccumulateWeighted::~NEAccumulateWeighted() = default;
 
 void NEAccumulateWeighted::configure(const ITensor *input, float alpha, ITensor *output, bool use_fp16)
 {
@@ -53,9 +57,12 @@ void NEAccumulateWeighted::configure(const ITensor *input, float alpha, ITensor 
     }
 }
 
+NEAccumulateSquared::~NEAccumulateSquared() = default;
+
 void NEAccumulateSquared::configure(const ITensor *input, uint32_t shift, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEAccumulateSquaredKernel>();
     k->configure(input, shift, output);
     _kernel = std::move(k);
 }
+} // namespace arm_compute

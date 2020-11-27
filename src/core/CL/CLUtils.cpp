@@ -26,12 +26,26 @@
 
 #include "src/core/CL/CLUtils.h"
 
-cl::Image2D arm_compute::create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, cl_channel_type data_type, size_t image_row_pitch)
+cl::Image2D arm_compute::create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch)
 {
+    cl_channel_type cl_data_type;
+
+    switch(data_type)
+    {
+        case DataType::F32:
+            cl_data_type = CL_FLOAT;
+            break;
+        case DataType::F16:
+            cl_data_type = CL_HALF_FLOAT;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Data type not support with OpenCL image2d");
+    }
+
     cl_mem cl_image;
     cl_int err = CL_SUCCESS;
 
-    const cl_image_format format = { CL_RGBA, data_type };
+    const cl_image_format format = { CL_RGBA, cl_data_type };
 
     cl_image_desc desc;
     memset(&desc, 0, sizeof(desc));

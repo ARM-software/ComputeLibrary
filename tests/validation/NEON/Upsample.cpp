@@ -41,31 +41,6 @@ namespace validation
 TEST_SUITE(NEON)
 TEST_SUITE(UpsampleLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32))),
-               input_shape, data_type)
-{
-    InterpolationPolicy policy = InterpolationPolicy::NEAREST_NEIGHBOR;
-    Size2D              info   = Size2D(2, 2);
-
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(input_shape, data_type, 1);
-    Tensor dst;
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEUpsampleLayer upsample;
-    upsample.configure(&src, &dst, info, policy);
-
-    // Validate valid region
-    const ValidRegion src_valid_region = shape_to_valid_region(src.info()->tensor_shape());
-    const ValidRegion dst_valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-
-    validate(src.info()->valid_region(), src_valid_region);
-    validate(dst.info()->valid_region(), dst_valid_region);
-}
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(

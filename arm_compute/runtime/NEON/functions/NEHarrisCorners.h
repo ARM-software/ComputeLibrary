@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,6 @@
 
 #include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -42,6 +40,8 @@
 namespace arm_compute
 {
 class ITensor;
+class NEFillBorderKernel;
+class INEHarrisScoreKernel;
 using IImage = ITensor;
 
 /** Basic function to execute harris corners detection. This function calls the following NEON kernels and functions:
@@ -57,6 +57,8 @@ using IImage = ITensor;
  * -# @ref CPPCornerCandidatesKernel
  * -# @ref CPPSortEuclideanDistanceKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEHarrisCorners : public IFunction
 {
@@ -68,6 +70,16 @@ public:
      * @param[in] memory_manager (Optional) Memory manager.
      */
     NEHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEHarrisCorners(const NEHarrisCorners &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEHarrisCorners &operator=(const NEHarrisCorners &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHarrisCorners(NEHarrisCorners &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHarrisCorners &operator=(NEHarrisCorners &&) = delete;
+    /** Default destructor */
+    ~NEHarrisCorners();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in, out] input                 Source image. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -94,8 +106,8 @@ private:
     NENonMaximaSuppression3x3             _non_max_suppr;         /**< Non-maxima suppression function */
     CPPCornerCandidatesKernel             _candidates;            /**< Sort kernel */
     CPPSortEuclideanDistanceKernel        _sort_euclidean;        /**< Euclidean distance kernel */
-    NEFillBorderKernel                    _border_gx;             /**< Border handler before running harris score */
-    NEFillBorderKernel                    _border_gy;             /**< Border handler before running harris score */
+    std::unique_ptr<NEFillBorderKernel>   _border_gx;             /**< Border handler before running harris score */
+    std::unique_ptr<NEFillBorderKernel>   _border_gy;             /**< Border handler before running harris score */
     Image                                 _gx;                    /**< Source image - Gx component */
     Image                                 _gy;                    /**< Source image - Gy component */
     Image                                 _score;                 /**< Source image - Harris score */

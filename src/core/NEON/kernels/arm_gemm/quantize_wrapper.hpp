@@ -110,7 +110,7 @@ public:
     QuantizeWrapper operator=(const QuantizeWrapper &) = delete;
 
     QuantizeWrapper(const GemmArgs &args, const Requantize32 &qp) : _params(qp), _args(args), _barrier(args._maxthreads) {
-        GemmArgs newargs = GemmArgs(args._ci, args._Msize, args._Nsize, args._Ksize, args._nbatches, args._nmulti, Activation(), args._maxthreads, nullptr);
+        GemmArgs newargs = GemmArgs(args._ci, args._Msize, args._Nsize, args._Ksize, args._Ksections, args._nbatches, args._nmulti, args._indirect_input, Activation(), args._maxthreads);
         _subgemm = gemm<To, Tgemm>(newargs);
 
         if (_subgemm == nullptr) {

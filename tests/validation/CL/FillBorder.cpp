@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"
 #include "tests/datasets/BorderModeDataset.h"

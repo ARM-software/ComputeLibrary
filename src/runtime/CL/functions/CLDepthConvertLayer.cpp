@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLDepthConvertLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

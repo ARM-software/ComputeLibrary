@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEThreshold.h"
 
-#include "arm_compute/core/NEON/kernels/NEThresholdKernel.h"
+#include "src/core/NEON/kernels/NEThresholdKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

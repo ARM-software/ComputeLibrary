@@ -29,15 +29,17 @@
 
 #include "gemm_common.hpp"
 #include "gemm_hybrid.hpp"
+#include "gemm_hybrid_indirect.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 #include "gemm_interleaved_pretransposed_2d.hpp"
 
 #include "kernels/a32_sgemm_8x6.hpp"
-#include "kernels/a64_hgemm_24x8.hpp"
-#include "kernels/a64_sgemm_12x8.hpp"
-#include "kernels/sve_hybrid_fp16_mla_4VLx4.hpp"
-#include "kernels/sve_interleaved_fp16_mla_3VLx8.hpp"
+#include "kernels/a64_hgemm_8x24.hpp"
+#include "kernels/a64_hybrid_fp16_mla_6x32.hpp"
+#include "kernels/a64_sgemm_8x12.hpp"
+#include "kernels/sve_hybrid_fp16_mla_6x4VL.hpp"
+#include "kernels/sve_interleaved_fp16_mla_8x3VL.hpp"
 
 namespace arm_gemm {
 
@@ -45,61 +47,51 @@ static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
 #if defined(__ARM_FEATURE_SVE)
 {
     GemmMethod::GEMM_HYBRID,
-    "hybrid_fp16_mla_4VLx4",
-    [](const GemmArgs &args) { return (args._Ksize >= 8); },
+    "sve_hybrid_fp16_mla_6x4VL",
+    nullptr,
     [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
-    [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp16_mla_4VLx4, __fp16, __fp16>(args); }
+    [](const GemmArgs &args) { return new GemmHybridIndirect<cls_a64_hybrid_fp16_mla_6x32, __fp16, __fp16>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "interleaved_fp16_mla_3VLx8",
+    "sve_interleaved_fp16_mla_8x3VL",
     [](const GemmArgs &args) { return (args._Ksize > 4); },
     nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_fp16_mla_3VLx8, __fp16, __fp16>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_fp16_mla_8x3VL, __fp16, __fp16>(args); }
 },
 #endif
 
 #if defined(__aarch64__) && (defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) || defined(FP16_KERNELS))
-{
-    GemmMethod::GEMM_INTERLEAVED_2D,
-    "hgemm_24x8_2d",
+GemmImplementation<__fp16, __fp16>::with_estimate(
+    GemmMethod::GEMM_HYBRID,
+    "a64_hybrid_fp16_mla_6x32",
 #ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     [](const GemmArgs &args) { return args._ci->has_fp16(); },
 #else
     nullptr,
 #endif
-    [](const GemmArgs &args) { return args._maxthreads >= 8; },
-    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<hgemm_24x8, __fp16, __fp16>(args); }
-},
-{
+    [](const GemmArgs &args) { return GemmHybridIndirect<cls_a64_hybrid_fp16_mla_6x32, __fp16, __fp16>::estimate_cycles(args, cls_a64_hybrid_fp16_mla_6x32::get_performance_parameters(args._ci)); },
+    [](const GemmArgs &args) { return new GemmHybridIndirect<cls_a64_hybrid_fp16_mla_6x32, __fp16, __fp16>(args); }
+),
+GemmImplementation<__fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
-    "hgemm_24x8_1d",
+    "a64_hgemm_8x24",
 #ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     [](const GemmArgs &args) { return args._ci->has_fp16(); },
 #else
     nullptr,
 #endif
-    nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<hgemm_24x8, __fp16, __fp16>(args); }
-},
-
+    [](const GemmArgs &args) { return GemmInterleaved<cls_a64_hgemm_8x24, __fp16, __fp16>::estimate_cycles(args, cls_a64_hgemm_8x24::get_performance_parameters(args._ci)); },
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_hgemm_8x24, __fp16, __fp16>(args); }
+),
 #endif // aarch64 && FP16
 #ifdef __aarch64__
-//Pretranpose, 2D split
-{
-    GemmMethod::GEMM_INTERLEAVED_2D,
-    "sgemm_12x8_2d",
-    nullptr,
-    [](const GemmArgs &args) { return args._maxthreads >= 8; },
-    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<sgemm_12x8, __fp16, __fp16>(args); }
-},
-//Tranpose, 1D split, with blockmanager
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "sgemm_12x8_1d",
+    "a64_sgemm_8x12",
     nullptr,
-    nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<sgemm_12x8, __fp16, __fp16>(args); }
+    [](const GemmArgs &args) { return !args._ci->has_fp16(); },
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_sgemm_8x12, __fp16, __fp16>(args); }
 },
 #elif defined(__arm__)
 {

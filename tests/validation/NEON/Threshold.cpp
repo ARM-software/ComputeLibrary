@@ -40,30 +40,6 @@ namespace validation
 TEST_SUITE(NEON)
 TEST_SUITE(Threshold)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), datasets::MixedThresholdDataset()),
-                                                                   framework::dataset::make("DataType", DataType::U8)),
-               shape, threshold, false_value, true_value, type, upper, data_type)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEThreshold thrsh;
-    thrsh.configure(&src, &dst, ThresholdKernelInfo(threshold, false_value, true_value, type, upper));
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(src.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
-
 template <typename T>
 using ThresholdFixture = ThresholdValidationFixture<Tensor, Accessor, NEThreshold, T>;
 

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_GRAPH_NODES_H
 
 #include "arm_compute/graph/nodes/ActivationLayerNode.h"
+#include "arm_compute/graph/nodes/ArgMinMaxLayerNode.h"
 #include "arm_compute/graph/nodes/BatchNormalizationLayerNode.h"
 #include "arm_compute/graph/nodes/BoundingBoxTransformLayerNode.h"
 #include "arm_compute/graph/nodes/ChannelShuffleLayerNode.h"
@@ -32,6 +33,7 @@
 #include "arm_compute/graph/nodes/ConstNode.h"
 #include "arm_compute/graph/nodes/ConvolutionLayerNode.h"
 #include "arm_compute/graph/nodes/DeconvolutionLayerNode.h"
+#include "arm_compute/graph/nodes/DepthToSpaceLayerNode.h"
 #include "arm_compute/graph/nodes/DepthwiseConvolutionLayerNode.h"
 #include "arm_compute/graph/nodes/DequantizationLayerNode.h"
 #include "arm_compute/graph/nodes/DetectionOutputLayerNode.h"
@@ -44,6 +46,7 @@
 #include "arm_compute/graph/nodes/FusedDepthwiseConvolutionBatchNormalizationNode.h"
 #include "arm_compute/graph/nodes/GenerateProposalsLayerNode.h"
 #include "arm_compute/graph/nodes/InputNode.h"
+#include "arm_compute/graph/nodes/L2NormalizeLayerNode.h"
 #include "arm_compute/graph/nodes/NormalizationLayerNode.h"
 #include "arm_compute/graph/nodes/NormalizePlanarYUVLayerNode.h"
 #include "arm_compute/graph/nodes/OutputNode.h"
@@ -55,6 +58,7 @@
 #include "arm_compute/graph/nodes/PriorBoxLayerNode.h"
 #include "arm_compute/graph/nodes/QuantizationLayerNode.h"
 #include "arm_compute/graph/nodes/ROIAlignLayerNode.h"
+#include "arm_compute/graph/nodes/ReductionLayerNode.h"
 #include "arm_compute/graph/nodes/ReorgLayerNode.h"
 #include "arm_compute/graph/nodes/ReshapeLayerNode.h"
 #include "arm_compute/graph/nodes/ResizeLayerNode.h"
@@ -62,6 +66,7 @@
 #include "arm_compute/graph/nodes/SoftmaxLayerNode.h"
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
 #include "arm_compute/graph/nodes/StackLayerNode.h"
+#include "arm_compute/graph/nodes/StridedSliceLayerNode.h"
 #include "arm_compute/graph/nodes/UpsampleLayerNode.h"
 #include "arm_compute/graph/nodes/YOLOLayerNode.h"
 

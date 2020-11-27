@@ -21,21 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
+#include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
-#include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -316,9 +316,11 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const CLCompileContext 
 
         if(act_info.enabled())
         {
-            const int a_val = quantize_qasymm8(act_info.a(), oq_info);
-            const int b_val = quantize_qasymm8(act_info.b(), oq_info);
-            const int o1    = oq_info.offset;
+            int a_val{};
+            int b_val{};
+            std::tie(b_val, a_val) = get_quantized_activation_min_max(act_info, input->info()->data_type(), oq_info);
+
+            const int o1 = oq_info.offset;
 
             build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
             build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));

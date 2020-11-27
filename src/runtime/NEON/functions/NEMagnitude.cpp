@@ -23,13 +23,15 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEMagnitude.h"
 
-#include "arm_compute/core/NEON/kernels/NEMagnitudePhaseKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/NEON/kernels/NEMagnitudePhaseKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEMagnitude::~NEMagnitude() = default;
 
 void NEMagnitude::configure(const ITensor *input1, const ITensor *input2, ITensor *output, MagnitudeType mag_type)
 {
@@ -46,3 +48,4 @@ void NEMagnitude::configure(const ITensor *input1, const ITensor *input2, ITenso
         _kernel = std::move(k);
     }
 }
+} // namespace arm_compute

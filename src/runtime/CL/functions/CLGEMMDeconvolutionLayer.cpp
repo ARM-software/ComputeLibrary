@@ -28,8 +28,23 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
+#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLIm2ColKernel.h"
+#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
+#include "support/MemorySupport.h"
 
-#include <memory>
 #include <tuple>
 
 namespace arm_compute
@@ -99,7 +114,7 @@ CLGEMMDeconvolutionLayer::CLGEMMDeconvolutionLayer(std::shared_ptr<IMemoryManage
       _permute_weights_to_nhwc(),
       _reshape_weights(),
       _transpose_weights(),
-      _deconv_reshape(),
+      _deconv_reshape(support::cpp14::make_unique<CLDeconvolutionReshapeOutputKernel>()),
       _slice_gemm(),
       _gemmlowp_final(),
       _reshaped_weights(),
@@ -115,6 +130,8 @@ CLGEMMDeconvolutionLayer::CLGEMMDeconvolutionLayer(std::shared_ptr<IMemoryManage
       _is_quantized(false)
 {
 }
+
+CLGEMMDeconvolutionLayer::~CLGEMMDeconvolutionLayer() = default;
 
 Status CLGEMMDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &deconv_info)
 {
@@ -317,7 +334,7 @@ void CLGEMMDeconvolutionLayer::configure(const CLCompileContext &compile_context
     }
 
     // Configure a Col2Im call to reshape the output of GEMM
-    _deconv_reshape.configure(compile_context, &_gemm_output, bias, deconv_reshape_output, input->info(), weights->info(), deconv_info);
+    _deconv_reshape->configure(compile_context, &_gemm_output, bias, deconv_reshape_output, input->info(), weights->info(), deconv_info);
     _gemm_output.allocator()->allocate();
 
     if(_is_quantized)
@@ -357,7 +374,7 @@ void CLGEMMDeconvolutionLayer::run()
         _mm_gemm.run();
     }
 
-    CLScheduler::get().enqueue(_deconv_reshape, false);
+    CLScheduler::get().enqueue(*_deconv_reshape, false);
 
     if(_is_quantized)
     {

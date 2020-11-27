@@ -358,6 +358,52 @@ std::memcpy(out.ptr(), in.ptr(), element_size);
 - **Sanitize data sent to other systems**. Sanitize all data passed to complex subsystems such as command shells, relational databases, and commercial off-the-shelf (COTS) components. Attackers may be able to invoke unused functionality in these components through the use of various injection attacks. This is not necessarily an input validation problem because the complex subsystem being invoked does not understand the context in which the call is made. Because the calling process understands the context, it is responsible for sanitizing the data before invoking the subsystem.
 - **Practice defense in depth**. Manage risk with multiple defensive strategies, so that if one layer of defense turns out to be inadequate, another layer of defense can prevent a security flaw from becoming an exploitable vulnerability and/or limit the consequences of a successful exploit. For example, combining secure programming techniques with secure runtime environments should reduce the likelihood that vulnerabilities remaining in the code at deployment time can be exploited in the operational environment.
 
+@subsection S5_1_5_guidelines_for_stable_api_abi Guidelines for stable API/ABI
+
+The Application Programming Interface (API) and Application Binary Interface (ABI) are the interfaces exposed
+to users so their programs can interact with the library efficiently and effectively. Even though changing API/ABI
+in a way that does not give backward compatibility is not necessarily bad if it can improve other users' experience and the library,
+contributions should be made with the awareness of API/ABI stability. If you'd like to make changes that affects
+the library's API/ABI, please review and follow the guidelines shown in this section. Also, please note that
+these guidelines are not exhaustive list but discussing things that might be easily overlooked.
+
+@subsubsection S5_1_5_1_guidelines_for_api Guidelines for API
+
+- When adding new arguments, consider grouping arguments (including the old ones) into a struct rather than adding arguments with default values.
+Introducing a new struct might break the API/ABI once, but it will be helpful to keep the stability.
+- When new member variables are added, please make sure they are initialized.
+- Avoid adding enum elements in the middle.
+- When removing arguments, follow the deprecation process described in the following section.
+- When changing behavior affecting API contracts, follow the deprecation process described in the following section.
+
+@subsubsection S5_1_5_2_guidelines_for_abi Guidelines for ABI
+
+We recommend to read through <a href="https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B">this page</a>
+and double check your contributions to see if they include the changes listed.
+
+Also, for classes that requires strong ABI stability, consider using <a href="https://en.cppreference.com/w/cpp/language/pimpl">pImpl idiom</a>.
+
+@subsubsection S5_1_5_3_api_deprecation_process API deprecation process
+
+In order to deprecate an existing API, these rules should be followed.
+
+- Removal of a deprecated API should wait at least for one official release.
+- Deprecation of runtime APIs should strictly follow the aforementioned period, whereas core APIs can have more flexibility as they are mostly used internally rather than user-facing.
+- Any API changes (update, addition and deprecation) in all components should be well documented by the contribution itself.
+
+Also, it is recommended to use the following utility macros which is designed to work with both clang and gcc using C++11 and later.
+
+- ARM_COMPUTE_DEPRECATED: Just deprecate the wrapped function
+- ARM_COMPUTE_DEPRECATED_REL: Deprecate the wrapped function and also capture the release that was deprecated
+- ARM_COMPUTE_DEPRECATED_REL_REPLACE: Deprecate the wrapped function and also capture the release that was deprecated along with a possible replacement candidate
+
+@code{.cpp}
+ARM_COMPUTE_DEPRECATED_REL_REPLACE(20.08, DoNewThing)
+void DoOldThing();
+
+void DoNewThing();
+@endcode
+
 @section S5_2_how_to_submit_a_patch How to submit a patch
 
 To be able to submit a patch to our development repository you need to have a GitHub account. With that, you will be able to sign in to Gerrit where your patch will be reviewed.

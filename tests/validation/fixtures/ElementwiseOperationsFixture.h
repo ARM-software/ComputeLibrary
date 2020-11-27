@@ -59,16 +59,23 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(_op)
+        if(is_data_type_float(tensor.data_type()))
         {
-            case ArithmeticOperation::DIV:
-                library->fill_tensor_uniform_ranged(tensor, i, { std::pair<float, float>(-0.001f, 0.001f) });
-                break;
-            case ArithmeticOperation::POWER:
-                library->fill_tensor_uniform(tensor, i, 0.0f, 5.0f);
-                break;
-            default:
-                library->fill_tensor_uniform(tensor, i);
+            switch(_op)
+            {
+                case ArithmeticOperation::DIV:
+                    library->fill_tensor_uniform_ranged(tensor, i, { std::pair<float, float>(-0.001f, 0.001f) });
+                    break;
+                case ArithmeticOperation::POWER:
+                    library->fill_tensor_uniform(tensor, i, 0.0f, 5.0f);
+                    break;
+                default:
+                    library->fill_tensor_uniform(tensor, i);
+            }
+        }
+        else
+        {
+            library->fill_tensor_uniform(tensor, i);
         }
     }
 

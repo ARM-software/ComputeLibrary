@@ -24,11 +24,11 @@
 #include "arm_compute/runtime/CL/functions/CLCopy.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/CL/kernels/CLCopyKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

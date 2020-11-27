@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,47 +52,6 @@ const auto data_precommit = combine(framework::dataset::make("GradientSize", { 3
 
 TEST_SUITE(CL)
 TEST_SUITE(HarrisCorners)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), data_nightly), framework::dataset::make("Format", Format::U8)), shape,
-               gradient_size, block_size, border_mode, format)
-{
-    std::mt19937                          gen(library->seed());
-    std::uniform_real_distribution<float> real_dist(0.f, 0.01f);
-
-    const float threshold   = real_dist(gen);
-    const float sensitivity = real_dist(gen);
-
-    constexpr float max_euclidean_distance = 30.f;
-    real_dist                              = std::uniform_real_distribution<float>(0.f, max_euclidean_distance);
-    const float min_dist                   = real_dist(gen);
-
-    // Generate a random constant value
-    std::uniform_int_distribution<uint8_t> int_dist(0, 255);
-    const uint8_t                          constant_border_value = int_dist(gen);
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type_from_format(format));
-    src.info()->set_format(format);
-    CLKeyPointArray corners;
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create harris corners configure function
-    CLHarrisCorners harris_corners;
-    harris_corners.configure(&src, threshold, min_dist, sensitivity, gradient_size, block_size, &corners, border_mode, constant_border_value);
-
-    // Validate padding
-    PaddingCalculator calculator(shape.x(), 8);
-
-    calculator.set_border_mode(border_mode);
-    calculator.set_border_size(gradient_size / 2);
-    calculator.set_access_offset(-gradient_size / 2);
-    calculator.set_accessed_elements(16);
-
-    const PaddingSize padding = calculator.required_padding();
-
-    validate(src.info()->padding(), padding);
-}
 
 template <typename T>
 using CLHarrisCornersFixture = HarrisCornersValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLHarrisCorners, T>;

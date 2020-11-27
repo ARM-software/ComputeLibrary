@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H
 #define ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -37,6 +36,7 @@
 namespace arm_compute
 {
 class ITensor;
+class NEInstanceNormalizationLayerKernel;
 
 /** Basic function to perform a Instance normalization.
  *
@@ -48,6 +48,16 @@ class NEInstanceNormalizationLayer : public IFunction
 public:
     /** Constructor */
     NEInstanceNormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEInstanceNormalizationLayer(const NEInstanceNormalizationLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEInstanceNormalizationLayer &operator=(const NEInstanceNormalizationLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEInstanceNormalizationLayer(NEInstanceNormalizationLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEInstanceNormalizationLayer &operator=(NEInstanceNormalizationLayer &&) = delete;
+    /** Default destructor */
+    ~NEInstanceNormalizationLayer();
     /** Set the input and output tensors.
      *
      * @param[in, out] input   Source tensor. In case of @p output tensor = nullptr this tensor will store the result of the normalization.
@@ -75,13 +85,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                        _memory_group;
-    NEInstanceNormalizationLayerKernel _normalization_kernel;
-    bool                               _is_nchw;
-    NEPermute                          _permute_input;
-    NEPermute                          _permute_output;
-    Tensor                             _permuted_input;
-    Tensor                             _permuted_output;
+    MemoryGroup                                         _memory_group;
+    std::unique_ptr<NEInstanceNormalizationLayerKernel> _normalization_kernel;
+    bool                                                _is_nchw;
+    NEPermute                                           _permute_input;
+    NEPermute                                           _permute_output;
+    Tensor                                              _permuted_input;
+    Tensor                                              _permuted_output;
 };
 }
 #endif /* ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H */

@@ -177,8 +177,6 @@ DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip
                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Invalid output size
                                                         TensorInfo(TensorShape(27U, 13U, 8U), 1, DataType::F32),     // Patch size bigger than input width
                                                         TensorInfo(TensorShape(27U, 13U, 8U), 1, DataType::F32),     // Dilation < 1
-                                                        TensorInfo(TensorShape(27U, 13U, 8U), 1, DataType::F32),     // Window shrinking
-                                                        TensorInfo(TensorShape(32U, 13U, 8U), 1, DataType::QASYMM8), // Window shrinking
                                                       }),
                 framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F16),
                                                           TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
@@ -188,8 +186,6 @@ DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip
                                                           TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(3U, 3U, 16U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(3U, 3U, 16U), 1, DataType::F32),
-                                                          TensorInfo(TensorShape(3U, 3U, 16U), 1, DataType::F32),
-                                                          TensorInfo(TensorShape(3U, 3U, 24U), 1, DataType::QASYMM8),
                                                         })),
                 framework::dataset::make("BiasesInfo", { TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                          TensorInfo(TensorShape(2U), 1, DataType::F32),
@@ -199,8 +195,6 @@ DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip
                                                          TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                          TensorInfo(TensorShape(16U), 1, DataType::F32),
                                                          TensorInfo(TensorShape(16U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(16U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(24U), 1, DataType::S32),
                                                        })),
                 framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
                                                          TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
@@ -210,8 +204,6 @@ DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip
                                                          TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                          TensorInfo(TensorShape(25U, 11U, 16U), 1, DataType::F32),
                                                          TensorInfo(TensorShape(25U, 11U, 16U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(25U, 11U, 16U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(32U, 11U, 24U), 1, DataType::QASYMM8),
                                                        })),
                 framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
@@ -221,8 +213,6 @@ DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip
                                                        PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
-                                                       PadStrideInfo(1, 1, 0, 0),
-                                                       PadStrideInfo(1, 1, 1, 0),
                                                       })),
                 framework::dataset::make("DepthMultiplier", { 1,
                                                               1,
@@ -232,8 +222,6 @@ DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip
                                                               1,
                                                               2,
                                                               2,
-                                                              2,
-                                                              3,
                                                              })),
                 framework::dataset::make("Dilation", { Size2D(1U, 1U),
                                                        Size2D(1U, 1U),
@@ -243,10 +231,8 @@ DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip
                                                        Size2D(1U, 1U),
                                                        Size2D(25U, 1U),
                                                        Size2D(0U, 1U),
-                                                       Size2D(1U, 1U),
-                                                       Size2D(1U, 1U),
                                                              })),
-                framework::dataset::make("Expected", { false, false, false, false, false, false,false, false, false, false })),
+                framework::dataset::make("Expected", { false, false, false, false, false, false, false, false})),
                 input_info, weights_info, biases_info, output_info, conv_info, depth_multiplier,dilation, expected)
 {
     bool is_valid = bool(NEDepthwiseConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, depth_multiplier, ActivationLayerInfo(), dilation));

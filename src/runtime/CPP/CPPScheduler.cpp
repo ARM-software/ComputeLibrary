@@ -27,7 +27,8 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/runtime/CPUUtils.h"
+#include "src/runtime/CPUUtils.h"
+#include "support/MemorySupport.h"
 #include "support/Mutex.h"
 
 #include <atomic>
@@ -70,61 +71,6 @@ private:
     std::atomic_uint   _atomic_counter;
     const unsigned int _end;
 };
-
-/** Given two dimensions and a maxium number of threads to utilise, calcualte the best
- * combination of threads that fit in (mutliplied together) max_threads.
- *
- * This algorithm assumes that work in either of the dimensions is equally difficult
- * to compute
- *
- * @returns [m_nthreads, n_nthreads] A pair of the threads that should be used in each dimension
- */
-std::pair<unsigned, unsigned> split_2d(unsigned max_threads, std::size_t m, std::size_t n)
-{
-    /*
-     * We want the same ratio of threads in M & N to the ratio of m and n problem size
-     *
-     * Therefore:    mt/nt == m/n    where mt*nt == max_threads
-     *
-     *             max_threads/nt = mt    &    (max_threads/nt) * (m/n) = nt
-     *          nt^2 = max_threads * (m/n)
-     *          nt = sqrt( max_threads * (m/n) )
-     */
-    //ratio of m to n in problem dimensions
-    double ratio = m / static_cast<double>(n);
-
-    // nt = sqrt(max_threads * (m / n) )
-    const unsigned adjusted = std::round(
-                                  std::sqrt(max_threads * ratio));
-
-    //find the nearest factor of max_threads
-    for(unsigned i = 0; i != adjusted; ++i)
-    {
-        //try down
-        const unsigned adj_down = adjusted - i;
-        if(max_threads % adj_down == 0)
-        {
-            return { adj_down, max_threads / adj_down };
-        }
-
-        //try up
-        const unsigned adj_up = adjusted + i;
-        if(max_threads % adj_up == 0)
-        {
-            return { adj_up, max_threads / adj_up };
-        }
-    }
-
-    //we didn't find anything so lets bail out with maxes biased to the largest dimension
-    if(m > n)
-    {
-        return { std::min<unsigned>(m, max_threads), 1 };
-    }
-    else
-    {
-        return { 1, std::min<unsigned>(n, max_threads) };
-    }
-}
 
 /** Execute workloads[info.thread_id] first, then call the feeder to get the index of the next workload to run.
  *
@@ -404,116 +350,6 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 }
 #endif /* DOXYGEN_SKIP_THIS */
-
-void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
-
-    const Window &max_window = kernel->window();
-
-    if(hints.split_dimension() == IScheduler::split_dimensions_all)
-    {
-        /*
-         * if the split dim is size_t max then this signals we should parallelise over
-         * all dimensions
-         */
-        const std::size_t m = max_window.num_iterations(Window::DimX);
-        const std::size_t n = max_window.num_iterations(Window::DimY);
-
-        //in c++17 this can be swapped for   auto [ m_threads, n_threads ] = split_2d(...
-        unsigned m_threads, n_threads;
-        std::tie(m_threads, n_threads) = split_2d(_impl->_num_threads, m, n);
-
-        std::vector<IScheduler::Workload> workloads;
-        for(unsigned int ni = 0; ni != n_threads; ++ni)
-        {
-            for(unsigned int mi = 0; mi != m_threads; ++mi)
-            {
-                workloads.push_back(
-                    [ni, mi, m_threads, n_threads, &max_window, &kernel](const ThreadInfo & info)
-                {
-                    //narrow the window to our mi-ni workload
-                    Window win = max_window.split_window(Window::DimX, mi, m_threads)
-                                 .split_window(Window::DimY, ni, n_threads);
-
-                    win.validate();
-
-                    Window thread_locator;
-                    thread_locator.set(Window::DimX, Window::Dimension(mi, m_threads));
-                    thread_locator.set(Window::DimY, Window::Dimension(ni, n_threads));
-
-                    thread_locator.validate();
-
-                    kernel->run_nd(win, info, thread_locator);
-                });
-            }
-        }
-        run_workloads(workloads);
-    }
-    else
-    {
-        const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
-        const unsigned int num_threads    = std::min(num_iterations, _impl->_num_threads);
-
-        if(num_iterations == 0)
-        {
-            return;
-        }
-
-        if(!kernel->is_parallelisable() || num_threads == 1)
-        {
-            ThreadInfo info;
-            info.cpu_info = &_cpu_info;
-            if(tensors.empty())
-            {
-                kernel->run(max_window, info);
-            }
-            else
-            {
-                kernel->run_op(tensors, max_window, info);
-            }
-        }
-        else
-        {
-            unsigned int num_windows = 0;
-            switch(hints.strategy())
-            {
-                case StrategyHint::STATIC:
-                    num_windows = num_threads;
-                    break;
-                case StrategyHint::DYNAMIC:
-                {
-                    const unsigned int granule_threshold = (hints.threshold() <= 0) ? num_threads : static_cast<unsigned int>(hints.threshold());
-                    // Make sure we don't use some windows which are too small as this might create some contention on the ThreadFeeder
-                    num_windows = num_iterations > granule_threshold ? granule_threshold : num_iterations;
-                    break;
-                }
-                default:
-                    ARM_COMPUTE_ERROR("Unknown strategy");
-            }
-            std::vector<IScheduler::Workload> workloads(num_windows);
-            for(unsigned int t = 0; t < num_windows; t++)
-            {
-                //Capture 't' by copy, all the other variables by reference:
-                workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &tensors](const ThreadInfo & info)
-                {
-                    Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
-                    win.validate();
-
-                    if(tensors.empty())
-                    {
-                        kernel->run(win, info);
-                    }
-                    else
-                    {
-                        kernel->run_op(tensors, win, info);
-                    }
-                };
-            }
-            run_workloads(workloads);
-        }
-    }
-}
 
 void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
 {

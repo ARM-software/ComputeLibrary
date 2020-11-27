@@ -24,16 +24,18 @@
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "src/core/NEON/kernels/NEActivationLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 namespace experimental
 {
+NEActivationLayer::~NEActivationLayer() = default;
+
 void NEActivationLayer::configure(const ITensorInfo *input, ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEActivationLayerKernel>();

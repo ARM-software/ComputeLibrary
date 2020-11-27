@@ -21,13 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
+#include "src/core/CL/kernels/CLStridedSliceKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/utils/helpers/bit_ops.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/core/utils/helpers/bit_ops.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute

@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -46,9 +46,6 @@ namespace
 {
 // *INDENT-OFF*
 // clang-format off
-/** Data types */
-const auto data_types = framework::dataset::make("DataType", { DataType::QASYMM8, DataType::F16, DataType::F32 });
-
 /** Batch size values to test */
 const auto b_values = framework::dataset::make("batchsize", 1, 3);
 
@@ -124,19 +121,20 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(ValidatePadding, framework::DatasetMode::ALL, combine(combine(combine(
+DATA_TEST_CASE(ValidatePadding, framework::DatasetMode::ALL, combine(combine(combine(combine(
                framework::dataset::make("InputShape", { TensorShape(32U, 16U, 1U),
                                                         TensorShape(32U, 16U, 2U)
                                                      }),
                 framework::dataset::make("N0",{ 4 })),
                 framework::dataset::make("K0",{ 4, 8, 16 })),
                 framework::dataset::make("H0",{ 1, 2, 4 })),
-               input_shape, n0, k0, h0)
+                framework::dataset::make("DataType",{ DataType::F32, DataType::F16 })),
+               input_shape, n0, k0, h0, data_type)
 {
     CLTensor input;
     CLTensor output;
 
-    input.info()->init(input_shape, 1, DataType::F32);
+    input.info()->init(input_shape, 1, data_type);
 
     unsigned int padding = 0;
 

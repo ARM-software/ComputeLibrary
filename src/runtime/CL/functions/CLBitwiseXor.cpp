@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLBitwiseXor.h"
 
-#include "arm_compute/core/CL/kernels/CLBitwiseXorKernel.h"
+#include "src/core/CL/kernels/CLBitwiseXorKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

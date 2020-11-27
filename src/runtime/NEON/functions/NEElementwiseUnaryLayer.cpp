@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEElementwiseUnaryKernel.h"
+#include "src/core/NEON/kernels/NEElementwiseUnaryKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

@@ -24,7 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"
 
 #include "arm_compute/core/CL/ICLArray.h"
-#include "arm_compute/core/CL/kernels/CLROIAlignLayerKernel.h"
+#include "src/core/CL/kernels/CLROIAlignLayerKernel.h"
+#include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

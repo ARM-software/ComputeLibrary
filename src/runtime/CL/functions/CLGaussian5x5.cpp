@@ -24,21 +24,29 @@
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLGaussian5x5Kernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLGaussian5x5Kernel.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
 using namespace arm_compute;
 
 CLGaussian5x5::CLGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _kernel_hor(), _kernel_vert(), _border_handler(), _tmp()
+    : _memory_group(std::move(memory_manager)),
+      _kernel_hor(support::cpp14::make_unique<CLGaussian5x5HorKernel>()),
+      _kernel_vert(support::cpp14::make_unique<CLGaussian5x5VertKernel>()),
+      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _tmp()
 {
 }
+
+CLGaussian5x5::~CLGaussian5x5() = default;
 
 void CLGaussian5x5::configure(ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
@@ -55,9 +63,9 @@ void CLGaussian5x5::configure(const CLCompileContext &compile_context, ICLTensor
     _memory_group.manage(&_tmp);
 
     // Configure kernels
-    _kernel_hor.configure(compile_context, input, &_tmp, border_mode == BorderMode::UNDEFINED);
-    _kernel_vert.configure(compile_context, &_tmp, output, border_mode == BorderMode::UNDEFINED);
-    _border_handler.configure(compile_context, input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
+    _kernel_hor->configure(compile_context, input, &_tmp, border_mode == BorderMode::UNDEFINED);
+    _kernel_vert->configure(compile_context, &_tmp, output, border_mode == BorderMode::UNDEFINED);
+    _border_handler->configure(compile_context, input, _kernel_hor->border_size(), border_mode, PixelValue(constant_border_value));
 
     // Allocate intermediate buffers
     _tmp.allocator()->allocate();
@@ -65,10 +73,10 @@ void CLGaussian5x5::configure(const CLCompileContext &compile_context, ICLTensor
 
 void CLGaussian5x5::run()
 {
-    CLScheduler::get().enqueue(_border_handler, false);
+    CLScheduler::get().enqueue(*_border_handler, false);
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    CLScheduler::get().enqueue(_kernel_hor, false);
-    CLScheduler::get().enqueue(_kernel_vert);
+    CLScheduler::get().enqueue(*_kernel_hor, false);
+    CLScheduler::get().enqueue(*_kernel_vert);
 }

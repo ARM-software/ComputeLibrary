@@ -24,14 +24,15 @@
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEWarpKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEWarpPerspective::configure(ITensor *input, ITensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
@@ -58,5 +59,8 @@ void NEWarpPerspective::configure(ITensor *input, ITensor *output, const std::ar
             ARM_COMPUTE_ERROR("Interpolation type not supported");
     }
 
-    _border_handler.configure(input, _kernel->border_size(), border_mode, constant_border_value);
+    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    b->configure(input, _kernel->border_size(), border_mode, constant_border_value);
+    _border_handler = std::move(b);
 }
+} // namespace arm_compute

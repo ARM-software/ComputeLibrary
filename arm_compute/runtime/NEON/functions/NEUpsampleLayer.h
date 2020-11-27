@@ -24,15 +24,17 @@
 #ifndef ARM_COMPUTE_NEUPSAMPLELAYER_H
 #define ARM_COMPUTE_NEUPSAMPLELAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEUpsampleLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include <memory>
+
 namespace arm_compute
 {
 class ITensor;
+class NEUpsampleLayerKernel;
 
 /** Function to run upsample layer */
 class NEUpsampleLayer : public IFunction
@@ -40,6 +42,16 @@ class NEUpsampleLayer : public IFunction
 public:
     /** Constructor */
     NEUpsampleLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEUpsampleLayer(const NEUpsampleLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEUpsampleLayer &operator=(const NEUpsampleLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEUpsampleLayer(NEUpsampleLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEUpsampleLayer &operator=(NEUpsampleLayer &&) = delete;
+    /** Default destructor */
+    ~NEUpsampleLayer();
     /** Set the input output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/F16/F32.
@@ -66,8 +78,8 @@ public:
     void run() override;
 
 private:
-    NEUpsampleLayerKernel _kernel;
-    DataLayout            _data_layout;
+    std::unique_ptr<NEUpsampleLayerKernel> _kernel;
+    DataLayout                             _data_layout;
 };
 } // arm_compute
 #endif /* ARM_COMPUTE_NEUPSAMPLELAYER_H */

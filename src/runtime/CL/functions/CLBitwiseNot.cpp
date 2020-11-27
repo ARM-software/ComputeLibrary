@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLBitwiseNot.h"
 
-#include "arm_compute/core/CL/kernels/CLBitwiseNotKernel.h"
+#include "src/core/CL/kernels/CLBitwiseNotKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

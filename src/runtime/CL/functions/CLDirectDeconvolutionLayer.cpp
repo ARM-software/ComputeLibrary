@@ -23,11 +23,18 @@
  */
 #include "arm_compute/runtime/CL/functions/CLDirectDeconvolutionLayer.h"
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLMemsetKernel.h"
+#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 #include <memory>
 #include <tuple>

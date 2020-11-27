@@ -31,12 +31,15 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute first order derivative operator. This function calls the following CL kernels:
  *
  * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref CLDerivativeKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class CLDerivative : public ICLSimpleFunction

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,30 +71,6 @@ constexpr float          tolerance_num = 0.07f; /**< Tolerance number */
 TEST_SUITE(CL)
 TEST_SUITE(FFT1D)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(shapes_1d, data_types),
-               shape, data_type)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 2);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 2);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLFFT1D fft1d;
-    fft1d.configure(&src, &dst, FFT1DInfo());
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(src.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
@@ -140,30 +116,6 @@ TEST_SUITE_END() // Float
 TEST_SUITE_END() // FFT1D
 
 TEST_SUITE(FFT2D)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(shapes_2d, data_types),
-               shape, data_type)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 2);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 2);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLFFT2D fft2d;
-    fft2d.configure(&src, &dst, FFT2DInfo());
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(src.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
 
 // *INDENT-OFF*
 // clang-format off

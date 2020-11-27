@@ -26,13 +26,17 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLUpsampleLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 
+#include <memory>
+
 namespace arm_compute
 {
+class CLCompileContext;
+class CLUpsampleLayerKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLUpsampleLayerKernel */
 class CLUpsampleLayer : public IFunction
@@ -49,7 +53,7 @@ public:
     /** Allow instances of this class to be moved */
     CLUpsampleLayer &operator=(CLUpsampleLayer &&) = default;
     /** Default destructor */
-    virtual ~CLUpsampleLayer() = default;
+    ~CLUpsampleLayer();
 
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
@@ -86,8 +90,8 @@ public:
     void run() override;
 
 private:
-    CLUpsampleLayerKernel _upsample;
-    ICLTensor            *_output;
+    std::unique_ptr<CLUpsampleLayerKernel> _upsample;
+    ICLTensor                             *_output;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLUPSAMPLELAYER_H */

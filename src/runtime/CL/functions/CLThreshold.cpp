@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLThreshold.h"
 
-#include "arm_compute/core/CL/kernels/CLThresholdKernel.h"
+#include "src/core/CL/kernels/CLThresholdKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

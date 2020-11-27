@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
+#include "src/core/CL/kernels/CLElementwiseOperationKernel.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -30,43 +30,9 @@
 
 namespace arm_compute
 {
-namespace
-{
-void configure_border_handler(const CLCompileContext &compile_context, CLFillBorderKernel &border_handler, BorderSize border_size, ITensorInfo *input1, ITensorInfo *input2, const ITensorInfo *output)
-{
-    if(output->dimension(0) > 1)
-    {
-        ITensorInfo *broadcasted_info = (input1->dimension(0) == 1) ? input1 : input2;
-
-        if(broadcasted_info->dimension(0) == 1)
-        {
-            border_handler.configure(compile_context, broadcasted_info, border_size, BorderMode::REPLICATE);
-        }
-    }
-}
-
-ITensorPack select_border_input(ITensorPack &tensors)
-{
-    ITensorPack pack;
-    if(tensors.get_tensor(TensorType::ACL_DST)->info()->dimension(0) > 1)
-    {
-        if(tensors.get_const_tensor(TensorType::ACL_SRC_1)->info()->dimension(0) == 1)
-        {
-            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(TensorType::ACL_SRC_1));
-        }
-        else
-        {
-            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(TensorType::ACL_SRC_0));
-        }
-    }
-    return pack;
-}
-} // namespace
-
 namespace experimental
 {
 CLPReluLayer::CLPReluLayer()
-    : _border_handler()
 {
 }
 
@@ -75,7 +41,6 @@ void CLPReluLayer::configure(const CLCompileContext &compile_context, ITensorInf
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::PRELU, input, alpha, output);
     _kernel = std::move(k);
-    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input, alpha, output);
 }
 
 Status CLPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
@@ -85,8 +50,6 @@ Status CLPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha
 
 void CLPReluLayer::run(ITensorPack &tensors)
 {
-    auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 } // namespace experimental

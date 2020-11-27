@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,6 @@
 #ifndef ARM_COMPUTE_NEEQUALIZEHISTOGRAM_H
 #define ARM_COMPUTE_NEEQUALIZEHISTOGRAM_H
 
-#include "arm_compute/core/NEON/kernels/NECumulativeDistributionKernel.h"
-#include "arm_compute/core/NEON/kernels/NEHistogramKernel.h"
-#include "arm_compute/core/NEON/kernels/NETableLookupKernel.h"
 #include "arm_compute/runtime/Distribution1D.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/Lut.h"
@@ -36,6 +33,9 @@
 namespace arm_compute
 {
 class ITensor;
+class NEHistogramKernel;
+class NECumulativeDistributionKernel;
+class NETableLookupKernel;
 using IImage = ITensor;
 
 /** Basic function to execute histogram equalization. This function calls the following NEON kernels:
@@ -44,12 +44,24 @@ using IImage = ITensor;
  * -# @ref NECumulativeDistributionKernel
  * -# @ref NETableLookupKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEEqualizeHistogram : public IFunction
 {
 public:
     /** Default Constructor. */
     NEEqualizeHistogram();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEEqualizeHistogram(const NEEqualizeHistogram &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEEqualizeHistogram &operator=(const NEEqualizeHistogram &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEEqualizeHistogram(NEEqualizeHistogram &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEEqualizeHistogram &operator=(NEEqualizeHistogram &&) = delete;
+    /** Default destructor */
+    ~NEEqualizeHistogram();
     /** Initialise the kernel's inputs.
      *
      * @note Currently the width of the input image must be a multiple of 16.
@@ -63,15 +75,15 @@ public:
     void run() override;
 
 private:
-    NEHistogramKernel              _histogram_kernel;        /**< Kernel that calculates the histogram of input. */
-    NECumulativeDistributionKernel _cd_histogram_kernel;     /**< Kernel that calculates the cumulative distribution
+    std::unique_ptr<NEHistogramKernel>              _histogram_kernel;        /**< Kernel that calculates the histogram of input. */
+    std::unique_ptr<NECumulativeDistributionKernel> _cd_histogram_kernel;     /**< Kernel that calculates the cumulative distribution
                                                                   and creates the relevant LookupTable. */
-    NETableLookupKernel            _map_histogram_kernel;    /**< Kernel that maps the input to output using the lut. */
-    Distribution1D                 _hist;                    /**< Distribution that holds the histogram of the input image. */
-    Distribution1D                 _cum_dist;                /**< Distribution that holds the cummulative distribution of the input histogram. */
-    Lut                            _cd_lut;                  /**< Holds the equalization lookuptable. */
-    static constexpr uint32_t      nr_bins{ 256 };           /**< Histogram bins of the internal histograms. */
-    static constexpr uint32_t      max_range{ nr_bins - 1 }; /**< Histogram range of the internal histograms. */
+    std::unique_ptr<NETableLookupKernel>            _map_histogram_kernel;    /**< Kernel that maps the input to output using the lut. */
+    Distribution1D                                  _hist;                    /**< Distribution that holds the histogram of the input image. */
+    Distribution1D                                  _cum_dist;                /**< Distribution that holds the cummulative distribution of the input histogram. */
+    Lut                                             _cd_lut;                  /**< Holds the equalization lookuptable. */
+    static constexpr uint32_t                       nr_bins{ 256 };           /**< Histogram bins of the internal histograms. */
+    static constexpr uint32_t                       max_range{ nr_bins - 1 }; /**< Histogram range of the internal histograms. */
 };
 }
 #endif /*ARM_COMPUTE_NEEQUALIZEHISTOGRAM_H */

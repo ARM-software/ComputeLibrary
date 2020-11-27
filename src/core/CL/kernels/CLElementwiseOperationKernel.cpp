@@ -21,12 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
+#include "src/core/CL/kernels/CLElementwiseOperationKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/common/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 #include <map>
 
@@ -34,7 +37,7 @@ namespace arm_compute
 {
 namespace
 {
-constexpr unsigned int num_elems_processed_per_iteration = 16;
+constexpr unsigned int vector_size_byte_opencl = 16;
 
 std::map<ArithmeticOperation, std::string> supported_arithmetic_ops =
 {
@@ -150,10 +153,15 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &i
 {
     CLBuildOptions build_opts;
 
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / output.element_size(), output.dimension(0));
+
     build_opts.add_option("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(input1.data_type()));
     build_opts.add_option("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(input2.data_type()));
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output.data_type()));
-    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_IN1=" + support::cpp11::to_string(input1.dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_IN2=" + support::cpp11::to_string(input2.dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_OUT=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(output.dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DOP=" + operation_string);
     if(is_data_type_quantized(input1.data_type()))
     {
@@ -171,31 +179,17 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &i
     return build_opts;
 }
 
-std::pair<Status, Window> configure_window_arithmetic_common(const ValidRegion &valid_region, ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
+std::pair<Status, Window> configure_window_arithmetic_common(ITensorInfo &output)
 {
-    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration));
-    Window win_input1 = win.broadcast_if_dimension_le_one(input1);
-    Window win_input2 = win.broadcast_if_dimension_le_one(input2);
-
-    AccessWindowHorizontal input1_access(&input1, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal input2_access(&input2, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win_input1, input1_access)
-                          || update_window_and_padding(win_input2, input2_access)
-                          || update_window_and_padding(win, output_access);
-
-    output_access.set_valid_region(win, valid_region);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / output.element_size(), output.dimension(0));
+    Window             win                               = calculate_max_window(output, Steps(num_elems_processed_per_iteration));
+    return std::make_pair(Status{}, win);
 }
 
 std::pair<Status, Window> validate_and_configure_window_for_arithmetic_operators(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input1, input2);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = broadcast_pair.first;
 
     set_shape_if_empty(output, out_shape);
 
@@ -224,16 +218,27 @@ std::pair<Status, Window> validate_and_configure_window_for_arithmetic_operators
         set_data_type_if_unknown(output, DataType::QSYMM16);
     }
 
-    return configure_window_arithmetic_common(valid_region, input1, input2, output);
+    return configure_window_arithmetic_common(output);
+}
+
+std::pair<Status, Window> validate_and_configure_window_for_logical_binary_operators(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
+{
+    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input1, input2);
+    const TensorShape &out_shape = broadcast_pair.first;
+
+    set_shape_if_empty(output, out_shape);
+    set_data_type_if_unknown(output, DataType::U8);
+
+    // The arithmetic utility functions can be share
+    return configure_window_arithmetic_common(output);
 }
 
 std::pair<Status, Window> validate_and_configure_window_for_division(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input1, input2);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = broadcast_pair.first;
     auto_init_if_empty(output, out_shape, 1, input1.data_type());
-    return configure_window_arithmetic_common(valid_region, input1, input2, output);
+    return configure_window_arithmetic_common(output);
 }
 } // namespace
 
@@ -313,28 +318,74 @@ void CLElementwiseOperationKernel::run_op(ITensorPack &tensors, const Window &wi
     Window slice        = collapsed.first_slice_window_3D();
     Window slice_input1 = slice.broadcast_if_dimension_le_one(in_shape1_collapsed);
     Window slice_input2 = slice.broadcast_if_dimension_le_one(in_shape2_collapsed);
-
     do
     {
         unsigned int idx = 0;
-
         add_3D_tensor_argument(idx, src_0, slice_input1);
         add_3D_tensor_argument(idx, src_1, slice_input2);
         add_3D_tensor_argument(idx, dst, slice);
 
         enqueue(queue, *this, slice, lws_hint());
-
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
 
-BorderSize CLElementwiseOperationKernel::border_size() const
+/** Logical binary */
+void CLLogicalBinaryKernel::configure(const CLCompileContext &compile_context, kernels::LogicalOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
-    const unsigned int replicateSize = _output->dimension(0) - std::min(_input1->dimension(0), _input2->dimension(0));
-    const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
-    return BorderSize{ 0, border, 0, 0 };
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_ERROR_THROW_ON(CLLogicalBinaryKernel::validate(op, input1, input2, output));
+    _op = op;
+    configure_common(compile_context, input1, input2, output);
+}
+
+Status CLLogicalBinaryKernel::validate(kernels::LogicalOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+{
+    ARM_COMPUTE_UNUSED(op);
+    ARM_COMPUTE_ASSERT(op != kernels::LogicalOperation::Unknown && op != kernels::LogicalOperation::Not);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2);
+
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_with_arithmetic_rules(*input1, *input2, *output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_for_logical_binary_operators(*input1->clone(), *input2->clone(), *output->clone()).first);
+
+    return Status{};
+}
+
+std::string CLLogicalBinaryKernel::name()
+{
+    switch(_op)
+    {
+        case kernels::LogicalOperation::And:
+            return "AND";
+        case kernels::LogicalOperation::Or:
+            return "OR";
+        case kernels::LogicalOperation::Not:
+        /* fall through */
+        default:
+            ARM_COMPUTE_ASSERT(true);
+    }
+    return "";
+}
+
+std::pair<Status, Window> CLLogicalBinaryKernel::validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
+{
+    return validate_and_configure_window_for_logical_binary_operators(input1, input2, output);
+}
+
+CLBuildOptions CLLogicalBinaryKernel::generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
+{
+    // The arithmetic utility functions can be share
+    return generate_build_options_with_arithmetic_rules(input1, input2, output, name());
+}
+
+std::string CLLogicalBinaryKernel::generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &input1, const ITensorInfo &output)
+{
+    return generate_id_for_tuning_common(kernel_name, input1, output);
 }
 
 /** Arithmetic operations with saturation*/
@@ -351,11 +402,13 @@ void CLSaturatedArithmeticOperationKernel::configure(const CLCompileContext &com
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLSaturatedArithmeticOperationKernel::validate(op, input1, input2, output, policy, act_info));
+    auto padding_info = get_padding_info({ input1, input2, output });
 
     _policy   = policy;
     _op       = op;
     _act_info = act_info;
     configure_common(compile_context, input1, input2, output);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy,
@@ -407,10 +460,12 @@ void CLArithmeticOperationKernel::configure(const CLCompileContext &compile_cont
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLArithmeticOperationKernel::validate(op, input1, input2, output, act_info));
+    auto padding_info = get_padding_info({ input1, input2, output });
 
     _op       = op;
     _act_info = act_info;
     configure_common(compile_context, input1, input2, output);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)

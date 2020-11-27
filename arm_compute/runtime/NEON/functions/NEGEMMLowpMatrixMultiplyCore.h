@@ -25,15 +25,6 @@
 #define ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H
 
 #include "NEActivationLayer.h"
-#include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
-#include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -45,6 +36,15 @@
 namespace arm_compute
 {
 class ITensor;
+class NEConvertQuantizedSignednessKernel;
+class NEConvertQuantizedSignednessKernel;
+class NEGEMMInterleave4x4Kernel;
+class NEGEMMLowpMatrixMultiplyKernel;
+class NEGEMMLowpOffsetContributionKernel;
+class NEGEMMLowpOffsetContributionOutputStageKernel;
+class NEGEMMLowpMatrixAReductionKernel;
+class NEGEMMLowpMatrixBReductionKernel;
+class NEGEMMTranspose1xWKernel;
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on NEON. This function calls the following NEON kernels if the DOT product instruction is not available:
  *
@@ -72,6 +72,8 @@ public:
     NEGEMMLowpMatrixMultiplyCore &operator=(const NEGEMMLowpMatrixMultiplyCore &) = delete;
     /** Default move assignment operator */
     NEGEMMLowpMatrixMultiplyCore &operator=(NEGEMMLowpMatrixMultiplyCore &&) = default;
+    /** Default destructor */
+    ~NEGEMMLowpMatrixMultiplyCore();
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM_LOWP:  low precision GEMM kernel
@@ -111,19 +113,19 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                                   _memory_group;
-    IWeightsManager                              *_weights_manager;
-    NEGEMMAssemblyDispatch                        _asm_glue;
-    NEGEMMLowpMatrixMultiplyKernel                _mm_kernel;
-    NEGEMMInterleave4x4Kernel                     _mtx_a_reshape_kernel;
-    NEGEMMTranspose1xWKernel                      _mtx_b_reshape_kernel;
-    NEGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
-    NEGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;
-    NEGEMMLowpOffsetContributionKernel            _offset_contribution_kernel;
-    NEGEMMLowpOffsetContributionOutputStageKernel _offset_contribution_output_stage_kernel;
-    NEActivationLayer                             _activation_func;
-    NEConvertQuantizedSignednessKernel            _convert_to_signed_asymm;
-    NEConvertQuantizedSignednessKernel            _convert_from_signed_asymm;
+    MemoryGroup                                                    _memory_group;
+    IWeightsManager                                               *_weights_manager;
+    NEGEMMAssemblyDispatch                                         _asm_glue;
+    std::unique_ptr<NEGEMMLowpMatrixMultiplyKernel>                _mm_kernel;
+    std::unique_ptr<NEGEMMInterleave4x4Kernel>                     _mtx_a_reshape_kernel;
+    std::unique_ptr<NEGEMMTranspose1xWKernel>                      _mtx_b_reshape_kernel;
+    std::unique_ptr<NEGEMMLowpMatrixAReductionKernel>              _mtx_a_reduction_kernel;
+    std::unique_ptr<NEGEMMLowpMatrixBReductionKernel>              _mtx_b_reduction_kernel;
+    std::unique_ptr<NEGEMMLowpOffsetContributionKernel>            _offset_contribution_kernel;
+    std::unique_ptr<NEGEMMLowpOffsetContributionOutputStageKernel> _offset_contribution_output_stage_kernel;
+    NEActivationLayer                                              _activation_func;
+    std::unique_ptr<NEConvertQuantizedSignednessKernel>            _convert_to_signed_asymm;
+    std::unique_ptr<NEConvertQuantizedSignednessKernel>            _convert_from_signed_asymm;
 
     Tensor         _vector_sum_col;
     Tensor         _vector_sum_row;

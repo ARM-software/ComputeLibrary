@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,12 +56,25 @@ using IImage = ITensor;
  *  I(i-1) = upsample(I(i) + L(i))
  *
  *  output = I(0) + L(0)
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
 */
 class NELaplacianReconstruct : public IFunction
 {
 public:
     /** Constructor */
     NELaplacianReconstruct();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELaplacianReconstruct(const NELaplacianReconstruct &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELaplacianReconstruct &operator=(const NELaplacianReconstruct &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELaplacianReconstruct(NELaplacianReconstruct &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELaplacianReconstruct &operator=(NELaplacianReconstruct &&) = delete;
+    /** Default destructor */
+    ~NELaplacianReconstruct();
     /** Initialise the function's source, destinations and border mode.
      *
      * The Output image must have the same size as the first level of the pyramid.

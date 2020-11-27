@@ -21,28 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
+#include "src/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo &input, const ITensorInfo &output)
+Status validate_arguments(const ITensorInfo &input, const ITensorInfo &output, const ElementWiseUnary op)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
+    if(op == ElementWiseUnary::LOGICAL_NOT)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::U8);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
+    }
 
     // Validate in case of configured output
     if(output.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::F16, DataType::F32);
+        if(op == ElementWiseUnary::LOGICAL_NOT)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::U8);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::F16, DataType::F32);
+        }
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &output);
     }
@@ -59,20 +74,15 @@ void CLElementWiseUnaryLayerKernel::configure(const ITensorInfo *input, ITensorI
 void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const ElementWiseUnary &op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input, *output));
+
+    auto padding_info = get_padding_info({ input, output });
+
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input, *output, op));
 
     const std::string kernel_name    = "elementwise_unary";
     const int         vec_size_x     = 16 / output->element_size();
     const int         output_width_x = output->tensor_shape().x();
     const bool        multi_access_x = (output_width_x / vec_size_x > 0);
-
-    Window win = calculate_max_window(*output);
-    if(multi_access_x)
-    {
-        win.set(Window::DimX,
-                Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
-    }
-    ICLKernel::configure_internal(win);
 
     // Set kernel build options
     CLBuildOptions build_opts;
@@ -102,19 +112,33 @@ void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_co
         case ElementWiseUnary::ROUND:
             build_opts.add_option("-DOPERATION=round_op");
             break;
+        case ElementWiseUnary::LOGICAL_NOT:
+            build_opts.add_option("-DOPERATION=logical_not_op");
+            break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
     }
 
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
+
+    // Configure kernel window
+    Window win = calculate_max_window(*output);
+    if(multi_access_x)
+    {
+        win.set(Window::DimX,
+                Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
+    }
+    ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLElementWiseUnaryLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ElementWiseUnary &op)
 {
     ARM_COMPUTE_UNUSED(op);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input, *output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input, *output, op));
 
     return Status{};
 }

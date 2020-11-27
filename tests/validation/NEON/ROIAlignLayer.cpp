@@ -129,10 +129,10 @@ FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerHalf, NEROIAlignLayerHalfFixture, frame
 TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
-TEST_SUITE(QASYMM8)
 template <typename T>
 using NEROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<Tensor, Accessor, NEROIAlignLayer, T, uint16_t>;
 
+TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(datasets::SmallROIDataset(),
                                                        framework::dataset::make("DataType", { DataType::QASYMM8 })),
@@ -144,6 +144,19 @@ FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<uint8_t>, framewor
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(datasets::SmallROIDataset(),
+                                                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) })),
+                               framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // RoiAlign

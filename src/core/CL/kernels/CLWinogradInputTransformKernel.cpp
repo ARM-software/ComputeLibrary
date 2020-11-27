@@ -21,12 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLWinogradInputTransformKernel.h"
+#include "src/core/CL/kernels/CLWinogradInputTransformKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
@@ -34,6 +32,10 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 using namespace arm_compute;
@@ -87,11 +89,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         AccessWindowRectangle input_access(input, -conv_info.pad_left(), -conv_info.pad_top(), num_elems_read_per_iteration_x, num_elems_read_per_iteration_y);
         window_changed = update_window_and_padding(win, input_access);
     }
-    else
-    {
-        AccessWindowStatic input_access(input, 0, -1, input->dimension(0), input->dimension(1) + 1);
-        window_changed = update_window_and_padding(win, input_access);
-    }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
@@ -118,6 +115,8 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), winograd_info));
 
+    auto padding_info = get_padding_info({ input, output });
+
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
@@ -141,7 +140,7 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     }
     else
     {
-        _border_size = BorderSize(1U, 0U, 1U, 0);
+        _border_size = BorderSize();
     }
 
     // Compute the number of output tiles along the x and y direction of size "output_tile_size"
@@ -206,6 +205,8 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     auto win_config = validate_and_configure_window(input->info(), output->info(), winograd_info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second, cl::NDRange(1, 1, 8));
+
+    ARM_COMPUTE_ERROR_ON((input->info()->data_layout() == DataLayout::NHWC) && has_padding_changed(padding_info));
 
     _config_id = kernel_name;
     _config_id += support::cpp11::to_string(input->info()->dimension(0));

@@ -65,6 +65,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::ActivationLayer:
             os << "ActivationLayer";
             break;
+        case NodeType::ArgMinMaxLayer:
+            os << "ArgMinMaxLayer";
+            break;
         case NodeType::BatchNormalizationLayer:
             os << "BatchNormalizationLayer";
             break;
@@ -82,6 +85,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::DeconvolutionLayer:
             os << "DeconvolutionLayer";
+            break;
+        case NodeType::DepthToSpaceLayer:
+            os << "DepthToSpaceLayer";
             break;
         case NodeType::DequantizationLayer:
             os << "DequantizationLayer";
@@ -116,6 +122,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::GenerateProposalsLayer:
             os << "GenerateProposalsLayer";
             break;
+        case NodeType::L2NormalizeLayer:
+            os << "L2NormalizeLayer";
+            break;
         case NodeType::NormalizationLayer:
             os << "NormalizationLayer";
             break;
@@ -143,6 +152,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::QuantizationLayer:
             os << "QuantizationLayer";
             break;
+        case NodeType::ReductionOperationLayer:
+            os << "ReductionOperationLayer";
+            break;
         case NodeType::ReorgLayer:
             os << "ReorgLayer";
             break;
@@ -166,6 +178,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::StackLayer:
             os << "StackLayer";
+            break;
+        case NodeType::StridedSliceLayer:
+            os << "StridedSliceLayer";
             break;
         case NodeType::UpsampleLayer:
             os << "UpsampleLayer";

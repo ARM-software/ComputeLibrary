@@ -26,12 +26,16 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/Types.h"
+
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
+class CLBatchNormalizationLayerKernel;
 
 /** Basic function to run @ref CLNormalizationLayerKernel and simulate a batch normalization layer.
  *
@@ -44,6 +48,16 @@ class CLBatchNormalizationLayer : public IFunction
 public:
     /** Default constructor */
     CLBatchNormalizationLayer();
+    /** Prevent instances of this class from being copied */
+    CLBatchNormalizationLayer(const CLBatchNormalizationLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLBatchNormalizationLayer &operator=(const CLBatchNormalizationLayer &) = delete;
+    /** Prevent instances of this class to be moved */
+    CLBatchNormalizationLayer(CLBatchNormalizationLayer &&) = delete;
+    /** Prevent instances of this class to be moved */
+    CLBatchNormalizationLayer &operator=(CLBatchNormalizationLayer &&) = delete;
+    /** Default destructor */
+    ~CLBatchNormalizationLayer();
     /** Set the input and output tensors.
      *
      * @note If the output tensor is a nullptr or is equal to the input, the batch normalization function will be performed in-place
@@ -104,7 +118,7 @@ public:
     void run() override;
 
 private:
-    CLBatchNormalizationLayerKernel _norm_kernel; /**< BatchNormalization layer kernel to run */
+    std::unique_ptr<CLBatchNormalizationLayerKernel> _norm_kernel; /**< BatchNormalization layer kernel to run */
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLBATCHNORMALIZATIONLAYER_H */

@@ -21,25 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLUtils.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/CL/gemm/CLGEMMHelpers.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/core/utils/helpers/float_ops.h"
 #include "support/StringSupport.h"
 
 #include <cstddef>
@@ -226,6 +225,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compi
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), (input2 != nullptr ? input2->info() : nullptr), output->info(), alpha, beta, lhs_info, rhs_info, gemm_info));
 
+    auto padding_info         = get_padding_info({ input0, output });
     _input0                   = input0;
     _input1                   = input1;
     _input2                   = helpers::float_ops::is_zero(beta) ? nullptr : input2;
@@ -329,6 +329,8 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compi
     _config_id += support::cpp11::to_string(lhs_info.interleave);
     _config_id += "_";
     _config_id += support::cpp11::to_string(rhs_info.interleave);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMMatrixMultiplyReshapedKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float alpha, float beta,
@@ -376,7 +378,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
         const TensorShape shape2d(_input1->info()->dimension(0) / 4, _input1->info()->dimension(1) * _input1->info()->dimension(2));
         const size_t      image_row_pitch = _input1->info()->strides_in_bytes()[1];
 
-        input1_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), _input1->cl_buffer(), shape2d, CL_FLOAT, image_row_pitch);
+        input1_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), _input1->cl_buffer(), shape2d, _input1->info()->data_type(), image_row_pitch);
     }
 
     do

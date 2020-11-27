@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,16 @@
 #include "arm_compute/runtime/NEON/functions/NEDerivative.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/NEON/kernels/NEDerivativeKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEDerivativeKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEDerivative::~NEDerivative() = default;
 
 NEDerivative::NEDerivative()
     : _kernel(), _border_handler()
@@ -41,12 +45,16 @@ void NEDerivative::configure(ITensor *input, ITensor *output_x, ITensor *output_
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON((output_x == nullptr) && (output_y == nullptr));
 
-    _kernel.configure(input, output_x, output_y, border_mode == BorderMode::UNDEFINED);
-    _border_handler.configure(input, BorderSize(1), border_mode, PixelValue(constant_border_value));
+    _kernel         = arm_compute::support::cpp14::make_unique<NEDerivativeKernel>();
+    _border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+
+    _kernel->configure(input, output_x, output_y, border_mode == BorderMode::UNDEFINED);
+    _border_handler->configure(input, BorderSize(1), border_mode, PixelValue(constant_border_value));
 }
 
 void NEDerivative::run()
 {
-    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
-    NEScheduler::get().schedule(&_kernel, Window::DimY);
+    NEScheduler::get().schedule(_border_handler.get(), Window::DimZ);
+    NEScheduler::get().schedule(_kernel.get(), Window::DimY);
 }
+} // namespace arm_compute

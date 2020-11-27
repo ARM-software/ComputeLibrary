@@ -29,7 +29,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to execute mean and standard deviation normalization by calling @ref CLMeanStdDevNormalizationKernel */
 class CLMeanStdDevNormalizationLayer : public ICLSimpleFunction

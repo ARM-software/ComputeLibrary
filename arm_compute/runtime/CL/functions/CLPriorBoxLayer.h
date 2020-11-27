@@ -24,13 +24,16 @@
 #ifndef ARM_COMPUTE_CLPRIORBOXLAYER_H
 #define ARM_COMPUTE_CLPRIORBOXLAYER_H
 
-#include "arm_compute/core/CL/kernels/CLPriorBoxLayerKernel.h"
+#include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLPriorBoxLayerKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLPriorBoxLayerKernel. */
 class CLPriorBoxLayer : public ICLSimpleFunction

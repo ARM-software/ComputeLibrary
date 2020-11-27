@@ -24,12 +24,16 @@
 #ifndef ARM_COMPUTE_CLMINMAXLOCATION_H
 #define ARM_COMPUTE_CLMINMAXLOCATION_H
 
-#include "arm_compute/core/CL/kernels/CLMinMaxLocationKernel.h"
 #include "arm_compute/runtime/CL/CLArray.h"
 #include "arm_compute/runtime/IFunction.h"
 
+#include <memory>
+
 namespace arm_compute
 {
+class CLCompileContext;
+class CLMinMaxKernel;
+class CLMinMaxLocationKernel;
 class ICLTensor;
 using ICLImage = ICLTensor;
 
@@ -37,6 +41,9 @@ using ICLImage = ICLTensor;
  *
  * -# @ref CLMinMaxKernel
  * -# @ref CLMinMaxLocationKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLMinMaxLocation : public IFunction
 {
@@ -51,6 +58,8 @@ public:
     CLMinMaxLocation(CLMinMaxLocation &&) = default;
     /** Allow instances of this class to be moved */
     CLMinMaxLocation &operator=(CLMinMaxLocation &&) = default;
+    /** Default destructor */
+    ~CLMinMaxLocation();
     /** Initialise the kernel's inputs and outputs.
      *
      * @note When locations of min and max occurrences are requested, the reported number of locations is limited to the given array size.
@@ -87,16 +96,16 @@ public:
     void run() override;
 
 private:
-    CLMinMaxKernel         _min_max_kernel;     /**< Kernel that performs min/max */
-    CLMinMaxLocationKernel _min_max_loc_kernel; /**< Kernel that counts min/max occurrences and identifies their positions */
-    cl::Buffer             _min_max_vals;       /**< Buffer to collect min, max values */
-    cl::Buffer             _min_max_count_vals; /**< Buffer to collect min, max values */
-    void                  *_min;                /**< Minimum value. */
-    void                  *_max;                /**< Maximum value. */
-    uint32_t              *_min_count;          /**< Minimum value occurrences. */
-    uint32_t              *_max_count;          /**< Maximum value occurrences. */
-    CLCoordinates2DArray *_min_loc;             /**< Minimum value occurrences coordinates. */
-    CLCoordinates2DArray *_max_loc;             /**< Maximum value occurrences  coordinates. */
+    std::unique_ptr<CLMinMaxKernel>         _min_max_kernel;     /**< Kernel that performs min/max */
+    std::unique_ptr<CLMinMaxLocationKernel> _min_max_loc_kernel; /**< Kernel that counts min/max occurrences and identifies their positions */
+    cl::Buffer                              _min_max_vals;       /**< Buffer to collect min, max values */
+    cl::Buffer                              _min_max_count_vals; /**< Buffer to collect min, max values */
+    void                                   *_min;                /**< Minimum value. */
+    void                                   *_max;                /**< Maximum value. */
+    uint32_t                               *_min_count;          /**< Minimum value occurrences. */
+    uint32_t                               *_max_count;          /**< Maximum value occurrences. */
+    CLCoordinates2DArray                   *_min_loc;            /**< Minimum value occurrences coordinates. */
+    CLCoordinates2DArray                   *_max_loc;            /**< Maximum value occurrences  coordinates. */
 };
 }
 #endif /*ARM_COMPUTE_CLMINMAXLOCATION_H */

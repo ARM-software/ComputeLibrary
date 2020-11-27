@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,12 +50,25 @@ class ITensor;
  *  difference between the two tensors is the corresponding level L(i) of the Laplacian pyramid.
  *  L(i) = I(i) - Gaussian5x5(I(i))
  *  Level 0 has always the same first two dimensions as the input tensor.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
 */
 class NELaplacianPyramid : public IFunction
 {
 public:
     /** Constructor */
     NELaplacianPyramid();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELaplacianPyramid(const NELaplacianPyramid &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELaplacianPyramid &operator=(const NELaplacianPyramid &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELaplacianPyramid(NELaplacianPyramid &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELaplacianPyramid &operator=(NELaplacianPyramid &&) = delete;
+    /** Default destructor */
+    ~NELaplacianPyramid();
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in]  input                 Source tensor. Data type supported: U8.

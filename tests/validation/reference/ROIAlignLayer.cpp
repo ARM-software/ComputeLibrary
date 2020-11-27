@@ -40,21 +40,20 @@ namespace reference
 namespace
 {
 /** Average pooling over an aligned window */
-template <typename T>
-inline T roi_align_1x1(const T *input, TensorShape input_shape,
-                       float region_start_x,
-                       float bin_size_x,
-                       int   grid_size_x,
-                       float region_end_x,
-                       float region_start_y,
-                       float bin_size_y,
-                       int   grid_size_y,
-                       float region_end_y,
-                       int   pz)
+inline float roi_align_1x1(const float *input, TensorShape input_shape,
+                           float region_start_x,
+                           float bin_size_x,
+                           int   grid_size_x,
+                           float region_end_x,
+                           float region_start_y,
+                           float bin_size_y,
+                           int   grid_size_y,
+                           float region_end_y,
+                           int   pz)
 {
     if((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
     {
-        return T(0);
+        return 0;
     }
     else
     {
@@ -85,16 +84,16 @@ inline T roi_align_1x1(const T *input, TensorShape input_shape,
                 const float w4 = ly * lx;
 
                 const size_t idx1  = coord2index(input_shape, Coordinates(x_low, y_low, pz));
-                T            data1 = input[idx1];
+                float        data1 = input[idx1];
 
                 const size_t idx2  = coord2index(input_shape, Coordinates(x_high, y_low, pz));
-                T            data2 = input[idx2];
+                float        data2 = input[idx2];
 
                 const size_t idx3  = coord2index(input_shape, Coordinates(x_low, y_high, pz));
-                T            data3 = input[idx3];
+                float        data3 = input[idx3];
 
                 const size_t idx4  = coord2index(input_shape, Coordinates(x_high, y_high, pz));
-                T            data4 = input[idx4];
+                float        data4 = input[idx4];
 
                 avg += w1 * data1 + w2 * data2 + w3 * data3 + w4 * data4;
             }
@@ -102,15 +101,22 @@ inline T roi_align_1x1(const T *input, TensorShape input_shape,
 
         avg /= grid_size_x * grid_size_y;
 
-        return T(avg);
+        return avg;
     }
 }
 
-/** Clamp the value between lower and upper */
-template <typename T>
-T clamp(T value, T lower, T upper)
+template <typename TI, typename TO>
+SimpleTensor<TO> float_converter(const SimpleTensor<TI> &tensor, DataType dst_dt)
 {
-    return std::max(lower, std::min(value, upper));
+    SimpleTensor<TO> dst{ tensor.shape(), dst_dt, 1, QuantizationInfo(), tensor.data_layout() };
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
+    for(int i = 0; i < tensor.num_elements(); ++i)
+    {
+        dst[i] = tensor[i];
+    }
+    return dst;
 }
 
 SimpleTensor<float> convert_rois_from_asymmetric(SimpleTensor<uint16_t> rois)
@@ -129,8 +135,9 @@ SimpleTensor<float> convert_rois_from_asymmetric(SimpleTensor<uint16_t> rois)
     return dst;
 }
 } // namespace
-template <typename T, typename TRois>
-SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<TRois> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+
+template <>
+SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
 {
     ARM_COMPUTE_UNUSED(output_qinfo);
 
@@ -138,11 +145,11 @@ SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<T
     const size_t num_rois       = rois.shape()[1];
     DataType     dst_data_type  = src.data_type();
 
-    const auto *rois_ptr = static_cast<const TRois *>(rois.data());
+    const auto *rois_ptr = static_cast<const float *>(rois.data());
 
-    TensorShape     input_shape = src.shape();
-    TensorShape     output_shape(pool_info.pooled_width(), pool_info.pooled_height(), src.shape()[2], num_rois);
-    SimpleTensor<T> dst(output_shape, dst_data_type);
+    TensorShape         input_shape = src.shape();
+    TensorShape         output_shape(pool_info.pooled_width(), pool_info.pooled_height(), src.shape()[2], num_rois);
+    SimpleTensor<float> dst(output_shape, dst_data_type);
 
     // Iterate over every pixel of the input image
     for(size_t px = 0; px < pool_info.pooled_width(); ++px)
@@ -169,10 +176,10 @@ SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<T
                 float region_end_x   = (px + 1) * bin_size_x + roi_anchor_x;
                 float region_end_y   = (py + 1) * bin_size_y + roi_anchor_y;
 
-                region_start_x = clamp(region_start_x, 0.0f, float(input_shape[0]));
-                region_start_y = clamp(region_start_y, 0.0f, float(input_shape[1]));
-                region_end_x   = clamp(region_end_x, 0.0f, float(input_shape[0]));
-                region_end_y   = clamp(region_end_y, 0.0f, float(input_shape[1]));
+                region_start_x = utility::clamp(region_start_x, 0.0f, float(input_shape[0]));
+                region_start_y = utility::clamp(region_start_y, 0.0f, float(input_shape[1]));
+                region_end_x   = utility::clamp(region_end_x, 0.0f, float(input_shape[0]));
+                region_end_y   = utility::clamp(region_end_y, 0.0f, float(input_shape[1]));
 
                 const int roi_bin_grid_x = (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_x));
                 const int roi_bin_grid_y = (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_y));
@@ -180,8 +187,8 @@ SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<T
                 // Move input and output pointer across the fourth dimension
                 const size_t input_stride_w  = input_shape[0] * input_shape[1] * input_shape[2];
                 const size_t output_stride_w = output_shape[0] * output_shape[1] * output_shape[2];
-                const T     *input_ptr       = src.data() + roi_batch * input_stride_w;
-                T           *output_ptr      = dst.data() + px + py * output_shape[0] + pw * output_stride_w;
+                const float *input_ptr       = src.data() + roi_batch * input_stride_w;
+                float       *output_ptr      = dst.data() + px + py * output_shape[0] + pw * output_stride_w;
 
                 for(int pz = 0; pz < int(input_shape[2]); ++pz)
                 {
@@ -202,8 +209,15 @@ SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<T
     return dst;
 }
 
-template SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo);
-template SimpleTensor<half> roi_align_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo);
+template <>
+SimpleTensor<half> roi_align_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+{
+    SimpleTensor<float> src_tmp  = float_converter<half, float>(src, DataType::F32);
+    SimpleTensor<float> rois_tmp = float_converter<half, float>(rois, DataType::F32);
+    SimpleTensor<float> dst_tmp  = roi_align_layer<float, float>(src_tmp, rois_tmp, pool_info, output_qinfo);
+    SimpleTensor<half>  dst      = float_converter<float, half>(dst_tmp, DataType::F16);
+    return dst;
+}
 
 template <>
 SimpleTensor<uint8_t> roi_align_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint16_t> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)

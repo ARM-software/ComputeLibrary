@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
+#include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute

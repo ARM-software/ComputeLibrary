@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"

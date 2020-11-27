@@ -24,12 +24,14 @@
 
 #include "arm_compute/runtime/CL/functions/CLPriorBoxLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLPriorBoxLayerKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLPriorBoxLayerKernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 

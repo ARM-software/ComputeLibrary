@@ -23,13 +23,15 @@
  */
 #include "arm_compute/runtime/NEON/functions/NECopy.h"
 
-#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
+#include "src/core/NEON/kernels/NECopyKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
 namespace arm_compute
 {
+NECopy::~NECopy() = default;
+
 void NECopy::configure(ITensor *input, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NECopyKernel>();

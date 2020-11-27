@@ -24,9 +24,6 @@
 #ifndef ARM_COMPUTE_CLHOGGRADIENT_H
 #define ARM_COMPUTE_CLHOGGRADIENT_H
 
-#include "arm_compute/core/CL/ICLKernel.h"
-
-#include "arm_compute/core/CL/kernels/CLMagnitudePhaseKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLDerivative.h"
@@ -39,10 +36,15 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLMagnitudePhaseKernel;
+class ITensorInfo;
 /** Basic function to calculate the gradient for HOG. This function calls the following OpenCL kernels:
  *
  * -# @ref CLDerivative
  * -# @ref CLMagnitudePhaseKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class CLHOGGradient : public IFunction
@@ -79,11 +81,11 @@ public:
     void run() override;
 
 private:
-    MemoryGroup            _memory_group;
-    CLDerivative           _derivative;
-    CLMagnitudePhaseKernel _mag_phase;
-    CLTensor               _gx;
-    CLTensor               _gy;
+    MemoryGroup                             _memory_group;
+    CLDerivative                            _derivative;
+    std::unique_ptr<CLMagnitudePhaseKernel> _mag_phase;
+    CLTensor                                _gx;
+    CLTensor                                _gy;
 };
 }
 #endif /*ARM_COMPUTE_CLHOGGRADIENT_H */

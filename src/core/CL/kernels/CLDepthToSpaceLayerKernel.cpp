@@ -21,12 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
+#include "src/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 using namespace arm_compute::misc::shape_calculator;
@@ -74,8 +76,10 @@ void CLDepthToSpaceLayerKernel::configure(const CLCompileContext &compile_contex
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    TensorShape output_shape = compute_depth_to_space_shape(input->info(), block_shape);
+    TensorShape output_shape = compute_depth_to_space_shape(input->info()->tensor_shape(), input->info()->data_layout(), block_shape);
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+
+    auto padding_info = get_padding_info({ input, output });
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), block_shape));
 
@@ -97,6 +101,8 @@ void CLDepthToSpaceLayerKernel::configure(const CLCompileContext &compile_contex
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLDepthToSpaceLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)

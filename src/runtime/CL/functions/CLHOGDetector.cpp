@@ -23,18 +23,21 @@
  */
 #include "arm_compute/runtime/CL/functions/CLHOGDetector.h"
 
-#include "arm_compute/core/CL/kernels/CLHOGDetectorKernel.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLHOGDetectorKernel.h"
+#include "support/MemorySupport.h"
 
 #include <algorithm>
 
 using namespace arm_compute;
 
 CLHOGDetector::CLHOGDetector()
-    : _hog_detector_kernel(), _detection_windows(nullptr), _num_detection_windows()
+    : _hog_detector_kernel(support::cpp14::make_unique<CLHOGDetectorKernel>()), _detection_windows(nullptr), _num_detection_windows()
 {
 }
+
+CLHOGDetector::~CLHOGDetector() = default;
 
 void CLHOGDetector::configure(const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, const Size2D &detection_window_stride, float threshold, size_t idx_class)
 {
@@ -50,7 +53,7 @@ void CLHOGDetector::configure(const CLCompileContext &compile_context, const ICL
     _num_detection_windows = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(unsigned int));
 
     // Configure HOGDetectorKernel
-    _hog_detector_kernel.configure(compile_context, input, hog, detection_windows, &_num_detection_windows, detection_window_stride, threshold, idx_class);
+    _hog_detector_kernel->configure(compile_context, input, hog, detection_windows, &_num_detection_windows, detection_window_stride, threshold, idx_class);
 }
 
 void CLHOGDetector::run()
@@ -62,7 +65,7 @@ void CLHOGDetector::run()
     q.enqueueWriteBuffer(_num_detection_windows, CL_FALSE, 0, sizeof(unsigned int), &init_num_detection_windows);
 
     // Run CLHOGDetectorKernel
-    CLScheduler::get().enqueue(_hog_detector_kernel);
+    CLScheduler::get().enqueue(*_hog_detector_kernel);
 
     // Read number of detections
     unsigned int num_detection_windows = 0;

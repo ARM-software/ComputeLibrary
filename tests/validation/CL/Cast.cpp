@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -18,7 +18,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
@@ -142,22 +142,6 @@ using CLCastToF32Fixture = CastValidationFixture<CLTensor, CLAccessor, CLCast, T
 
 #define CAST_SUITE(NAME, idt, odt, type, dataset, tolerance)                                                                     \
     TEST_SUITE(NAME)                                                                                                             \
-    DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), datasets::ConvertPolicies()),    \
-                   shape, policy)                                                                                                \
-    {                                                                                                                            \
-        CLTensor src = create_tensor<CLTensor>(shape, idt, 1);                                                                   \
-        CLTensor dst = create_tensor<CLTensor>(shape, odt, 1);                                                                   \
-        \
-        CLCast cast;                                                                                                             \
-        cast.configure(&src, &dst, policy);                                                                                      \
-        \
-        const ValidRegion valid_region = shape_to_valid_region(shape);                                                           \
-        validate(dst.info()->valid_region(), valid_region);                                                                      \
-        \
-        const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();                                         \
-        validate(src.info()->padding(), padding);                                                                                \
-        validate(dst.info()->padding(), padding);                                                                                \
-    }                                                                                                                            \
     FIXTURE_DATA_TEST_CASE(RunSmall, type, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), dataset), \
                                                                                       datasets::ConvertPolicies()))              \
     {                                                                                                                            \

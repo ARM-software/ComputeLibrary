@@ -126,7 +126,7 @@ protected:
         // Fill reference
         fill(src);
 
-        return reference::reduction_operation<T, T>(src, dst_shape, axis, op);
+        return reference::reduction_operation<T, T>(src, dst_shape, axis, op, quantization_info);
     }
 
     TensorType      _target{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,6 +74,15 @@ T arithm_op(ArithmeticOperation op, T src1, T src2, ConvertPolicy convert_policy
         case ArithmeticOperation::DIV:
         {
             val = (static_cast<intermediate_type>(src1) / static_cast<intermediate_type>(src2));
+            if(std::is_integral<T>::value)
+            {
+                // Implement flooring division
+                val = (src2 == 0) ? 0 : val;
+                if(static_cast<int32_t>(src1) % static_cast<int32_t>(src2) != 0 && ((src1 < 0) != (src2 < 0)))
+                {
+                    --val;
+                }
+            }
             break;
         }
         case ArithmeticOperation::POWER:

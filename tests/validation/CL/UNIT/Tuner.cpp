@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/tuners/BifrostTuner.h"
+#include "src/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
 #include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"

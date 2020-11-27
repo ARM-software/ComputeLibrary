@@ -104,6 +104,7 @@ enum class EltwiseOperation
     Add, /**< Arithmetic addition */
     Sub, /**< Arithmetic subtraction */
     Mul, /**< Arithmetic multiplication */
+    Max, /**< Arithmetic maximum */
 };
 
 /** Supported Unary Element-wise operations */
@@ -140,12 +141,14 @@ enum class FastMathHint
 enum class NodeType
 {
     ActivationLayer,
+    ArgMinMaxLayer,
     BatchNormalizationLayer,
     BoundingBoxTransformLayer,
     ChannelShuffleLayer,
     ConcatenateLayer,
     ConvolutionLayer,
     DeconvolutionLayer,
+    DepthToSpaceLayer,
     DepthwiseConvolutionLayer,
     DequantizationLayer,
     DetectionOutputLayer,
@@ -156,6 +159,7 @@ enum class NodeType
     FusedConvolutionBatchNormalizationLayer,
     FusedDepthwiseConvolutionBatchNormalizationLayer,
     GenerateProposalsLayer,
+    L2NormalizeLayer,
     NormalizationLayer,
     NormalizePlanarYUVLayer,
     PadLayer,
@@ -165,6 +169,7 @@ enum class NodeType
     PrintLayer,
     PriorBoxLayer,
     QuantizationLayer,
+    ReductionOperationLayer,
     ReorgLayer,
     ReshapeLayer,
     ResizeLayer,
@@ -173,6 +178,7 @@ enum class NodeType
     SliceLayer,
     SplitLayer,
     StackLayer,
+    StridedSliceLayer,
     UpsampleLayer,
     UnaryEltwiseLayer,
     YOLOLayer,

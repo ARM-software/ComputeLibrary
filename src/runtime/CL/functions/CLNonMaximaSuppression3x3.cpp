@@ -23,7 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
 
-#include "arm_compute/core/CL/kernels/CLNonMaximaSuppression3x3Kernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLNonMaximaSuppression3x3Kernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
@@ -43,10 +44,10 @@ void CLNonMaximaSuppression3x3::configure(const CLCompileContext &compile_contex
 
     if(border_mode != BorderMode::UNDEFINED)
     {
-        _border_handler.configure(compile_context, input, _kernel->border_size(), BorderMode::CONSTANT);
+        _border_handler->configure(compile_context, input, _kernel->border_size(), BorderMode::CONSTANT);
     }
     else
     {
-        _border_handler.configure(compile_context, input, _kernel->border_size(), BorderMode::UNDEFINED);
+        _border_handler->configure(compile_context, input, _kernel->border_size(), BorderMode::UNDEFINED);
     }
 }

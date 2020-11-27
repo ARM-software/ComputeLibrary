@@ -23,6 +23,7 @@
  */
 #pragma once
 
+#include "convolution_parameters.hpp"
 #include "ndrange.hpp"
 
 #include <cstddef>
@@ -77,7 +78,7 @@ public:
         return false;
     }
 
-    /** Main execute member function
+    /** Main execute member fucntion
      * @param [in] work_range     specifies the range of work we want to be computed, total range defined by get_window_size()
      * @param [in] thread_locator where are we inside of the thread space
      * @naram [in] threadid       a unique threadid
@@ -120,6 +121,19 @@ public:
     /*** "Quantized bias" interface (optional) ***/
     /* Set the bias vector for quantized GEMMs */
     virtual void set_quantized_bias(const int32_t *, size_t)
+    {
+    }
+
+    /*** Indirect interface (optional) ***/
+    /* Set the indirect table.  This comprises a number of values per kernel point, and a densely packed array of pointers,
+     * multis * batches * kernel_points */
+    virtual void set_indirect_parameters_generic(size_t, const void *const *const *)
+    {
+    }
+
+    /*** Convolution interface (optional) ***/
+    /* Set the convolution parameters. */
+    virtual void set_convolution_parameters(ConvolutionParameters)
     {
     }
 
@@ -199,6 +213,16 @@ public:
     void pretranspose_B_array_generic(void *out, const void *in, const int row_stride, const int multi_stride) override
     {
         pretranspose_B_array(out, static_cast<const To *>(in), row_stride, multi_stride);
+    }
+
+    /*** Indirect interface ***/
+    virtual void set_indirect_parameters(size_t, const To *const *const *)
+    {
+    }
+
+    void set_indirect_parameters_generic(size_t sz, const void *const *const *ptr) override
+    {
+        set_indirect_parameters(sz, reinterpret_cast<const To *const *const *>(ptr));
     }
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H
 #define ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 
@@ -32,6 +31,8 @@
 
 namespace arm_compute
 {
+class ICPPKernel;
+using INEKernel = ICPPKernel;
 /** Basic interface for functions which have a single NEON kernel and no border */
 class INESimpleFunctionNoBorder : public IFunction
 {
@@ -49,6 +50,8 @@ public:
     INESimpleFunctionNoBorder &operator=(const INESimpleFunctionNoBorder &) = delete;
     /** Default move assignment operator */
     INESimpleFunctionNoBorder &operator=(INESimpleFunctionNoBorder &&) = default;
+    /** Default destructor */
+    ~INESimpleFunctionNoBorder();
 
     // Inherited methods overridden:
     void run() override final;

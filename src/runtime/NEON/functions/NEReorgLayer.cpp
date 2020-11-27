@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEReorgLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEReorgLayerKernel.h"
+#include "src/core/NEON/kernels/NEReorgLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

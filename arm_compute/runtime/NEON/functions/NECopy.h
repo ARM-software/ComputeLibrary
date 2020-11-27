@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,11 +30,24 @@
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NECopyKernel */
 class NECopy : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NECopy() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NECopy(const NECopy &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NECopy &operator=(const NECopy &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NECopy(NECopy &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NECopy &operator=(NECopy &&) = delete;
+    /** Default destructor */
+    ~NECopy();
     /** Initialise the function's source and destination.
      *
      * @param[in]  input  Source tensor. Data types supported: All

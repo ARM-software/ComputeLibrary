@@ -26,7 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -41,6 +40,7 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class ICPPKernel;
 
 /** Basic function to simulate a convolution layer. This function calls the following NEON kernels:
  * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
@@ -56,6 +56,12 @@ class NEWinogradConvolutionLayer : public IFunction
 public:
     /** Constructor */
     NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEWinogradConvolutionLayer(NEWinogradConvolutionLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEWinogradConvolutionLayer &operator=(NEWinogradConvolutionLayer &&) = delete;
+    /** Default destructor */
+    ~NEWinogradConvolutionLayer() = default;
 
     /** Set the input and output tensors.
      *
@@ -105,12 +111,12 @@ public:
     NEWinogradConvolutionLayer &operator=(const NEWinogradConvolutionLayer &) = delete;
 
 private:
-    MemoryGroup                _memory_group;
-    NEGEMM                     _gemm_function;
-    std::unique_ptr<INEKernel> _transform_input_kernel;
-    std::unique_ptr<INEKernel> _transform_output_kernel;
-    std::unique_ptr<INEKernel> _transform_weights_kernel;
-    NEActivationLayer          _activationlayer_function;
+    MemoryGroup                 _memory_group;
+    NEGEMM                      _gemm_function;
+    std::unique_ptr<ICPPKernel> _transform_input_kernel;
+    std::unique_ptr<ICPPKernel> _transform_output_kernel;
+    std::unique_ptr<ICPPKernel> _transform_weights_kernel;
+    NEActivationLayer           _activationlayer_function;
 
     CPPPermute     _permute_input;
     CPPPermute     _permute_weights;

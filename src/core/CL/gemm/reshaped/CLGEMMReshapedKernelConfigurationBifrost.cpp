@@ -21,15 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
+#include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/CL/gemm/CLGEMMHelpers.h"
 
 #include <map>
 #include <utility>
@@ -58,6 +58,17 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
         { DataType::QSYMM8, &CLGEMMReshapedKernelConfigurationBifrost::configure_G76_u8 },
         { DataType::QASYMM8_SIGNED, &CLGEMMReshapedKernelConfigurationBifrost::configure_G76_u8 },
         { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedKernelConfigurationBifrost::configure_G76_u8 }
+    };
+
+    // Configurations for Mali-G52
+    static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G52 =
+    {
+        { DataType::F32, &CLGEMMReshapedKernelConfigurationBifrost::configure_G52_f32 },
+        { DataType::F16, &CLGEMMReshapedKernelConfigurationBifrost::configure_G52_f16 },
+        { DataType::QASYMM8, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_u8 },
+        { DataType::QSYMM8, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_u8 }
     };
 
     // Configurations for Mali-G7x
@@ -153,6 +164,121 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     }
 }
 
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure_G52_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
+    const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
+    const float r_mk     = static_cast<float>(m) / static_cast<float>(k);
+    const float r_nk     = static_cast<float>(n) / static_cast<float>(k);
+
+    GEMMLHSMatrixInfo lhs_info_buf;
+    GEMMRHSMatrixInfo rhs_info_buf;
+    GEMMLHSMatrixInfo lhs_info_img;
+    GEMMRHSMatrixInfo rhs_info_img;
+
+    if(workload <= 274.4000f)
+    {
+        if(r_nk <= 0.7461f)
+        {
+            if(r_mn <= 21.1667f)
+            {
+                return configure_lhs_rhs_info(m, n, 4, 2, 4, 4, 4, false, true, true, false, false);
+            }
+            else
+            {
+                std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, true);
+                std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, false);
+
+                return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                           std::make_pair(lhs_info_buf, rhs_info_buf),
+                                           n, k, b, DataType::F32);
+            }
+        }
+        else
+        {
+            std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, true);
+            std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, false);
+
+            return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                       std::make_pair(lhs_info_buf, rhs_info_buf),
+                                       n, k, b, DataType::F32);
+        }
+    }
+    else
+    {
+        if(r_mk <= 17.3926f)
+        {
+            if(workload <= 542.4000f)
+            {
+                std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, true);
+                std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, false);
+
+                return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                           std::make_pair(lhs_info_buf, rhs_info_buf),
+                                           n, k, b, DataType::F32);
+            }
+            else
+            {
+                std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, true, false, true, true);
+                std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, true, false, true, false);
+
+                return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                           std::make_pair(lhs_info_buf, rhs_info_buf),
+                                           n, k, b, DataType::F32);
+            }
+        }
+        else
+        {
+            if(r_nk <= 0.5463f)
+            {
+                if(workload <= 11767.6001f)
+                {
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, true);
+                    std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, false);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F32);
+                }
+                else
+                {
+                    std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, true, false, true, true);
+                    std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 2, 1, true, true, false, true, false);
+
+                    return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                               std::make_pair(lhs_info_buf, rhs_info_buf),
+                                               n, k, b, DataType::F32);
+                }
+            }
+            else
+            {
+                std::tie(lhs_info_img, rhs_info_img) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, true);
+                std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 2, true, true, false, true, false);
+
+                return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
+                                           std::make_pair(lhs_info_buf, rhs_info_buf),
+                                           n, k, b, DataType::F32);
+            }
+        }
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure_G52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+
+    const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
+
+    if(workload <= 323.4000f)
+    {
+        return configure_lhs_rhs_info(m, n, 2, 2, 8, 4, 8, false, false, false, true, false);
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 8, 4, 2, 2, true, true, true, false, false);
+    }
+}
+
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
@@ -205,16 +331,30 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure_G76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
-    ARM_COMPUTE_UNUSED(k);
-    ARM_COMPUTE_UNUSED(b);
+    const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
+    const float r_mk = static_cast<float>(m) / static_cast<float>(k);
 
-    if(n <= 4)
+    if(workload <= 1595.2000f)
     {
-        return configure_lhs_rhs_info(m, n, 4, 4, 4, 8, 2, true, true, true, false);
+        if(r_mk <= 2.1044f)
+        {
+            if(workload <= 870.4000f)
+            {
+                return configure_lhs_rhs_info(m, n, 2, 4, 4, 1, 2, true, false, true, false, false);
+            }
+            else
+            {
+                return configure_lhs_rhs_info(m, n, 4, 2, 4, 2, 2, false, false, true, false, false);
+            }
+        }
+        else
+        {
+            return configure_lhs_rhs_info(m, n, 4, 2, 4, 2, 2, false, false, true, false, false);
+        }
     }
     else
     {
-        return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 8, true, true, true, false);
+        return configure_lhs_rhs_info(m, n, 4, 8, 4, 4, 2, true, true, true, false, false);
     }
 }
 

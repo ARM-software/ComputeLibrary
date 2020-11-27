@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,57 +43,6 @@ TEST_SUITE(Scharr)
 
 TEST_SUITE(W3x3)
 using CLScharr3x3Fixture = ScharrValidationFixture<CLTensor, CLAccessor, CLScharr3x3, uint8_t, int16_t>;
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
-                                                                   Format::U8)),
-               shape, border_mode, format)
-{
-    // Generate a random constant value
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<uint8_t> int_dist(0, 255);
-    const uint8_t                          constant_border_value = int_dist(gen);
-
-    // Create tensors
-    CLTensor src   = create_tensor<CLTensor>(shape, data_type_from_format(format));
-    CLTensor dst_x = create_tensor<CLTensor>(shape, DataType::S16);
-    CLTensor dst_y = create_tensor<CLTensor>(shape, DataType::S16);
-
-    src.info()->set_format(format);
-    dst_x.info()->set_format(Format::S16);
-    dst_y.info()->set_format(Format::S16);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst_x.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst_y.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create scharr 3x3 configure function
-    CLScharr3x3 scharr;
-    scharr.configure(&src, &dst_x, &dst_y, border_mode, constant_border_value);
-
-    // Validate valid region
-    constexpr BorderSize border_size{ 1 };
-    const ValidRegion    dst_valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size);
-
-    validate(dst_x.info()->valid_region(), dst_valid_region);
-    validate(dst_y.info()->valid_region(), dst_valid_region);
-
-    // Validate padding
-    PaddingCalculator calculator(shape.x(), 8);
-
-    calculator.set_border_mode(border_mode);
-    calculator.set_border_size(1);
-
-    const PaddingSize dst_padding = calculator.required_padding();
-
-    calculator.set_accessed_elements(16);
-    calculator.set_access_offset(-1);
-
-    const PaddingSize src_padding = calculator.required_padding();
-
-    validate(src.info()->padding(), src_padding);
-    validate(dst_x.info()->padding(), dst_padding);
-    validate(dst_y.info()->padding(), dst_padding);
-}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLScharr3x3Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
                                                                                                         Format::U8)),

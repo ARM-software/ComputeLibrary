@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEChannelExtract.h"
 
-#include "arm_compute/core/NEON/kernels/NEChannelExtractKernel.h"
+#include "src/core/NEON/kernels/NEChannelExtractKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

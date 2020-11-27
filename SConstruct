@@ -25,12 +25,14 @@ import os
 import subprocess
 
 def version_at_least(version, required):
-    end = min(len(version), len(required))
 
-    for i in range(0, end, 2):
-        if int(version[i]) < int(required[i]):
+    version_list = version.split('.')
+    required_list = required.split('.')
+    end = min(len(version_list), len(required_list))
+    for i in range(0, end):
+        if int(version_list[i]) < int(required_list[i]):
             return False
-        elif int(version[i]) > int(required[i]):
+        elif int(version_list[i]) > int(required_list[i]):
             return True
 
     return True
@@ -42,7 +44,7 @@ vars.AddVariables(
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a",
                   allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64",
-                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "x86")),
+                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
@@ -62,6 +64,8 @@ vars.AddVariables(
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
+    ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
+    ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32"]),
     ("toolchain_prefix", "Override the toolchain prefix", ""),
     ("compiler_prefix", "Override the compiler prefix", ""),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
@@ -204,7 +208,9 @@ elif 'v8' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8-a'])
 
     if 'v8.6-a' in env['arch']:
-        env.Append(CPPDEFINES = ['MMLA_INT8', 'MMLA_FP32', 'V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
+        env.Append(CPPDEFINES = ['MMLA_INT8', 'V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
+        if "disable_mmla_fp" not in env['custom_options']:
+            env.Append(CPPDEFINES = ['MMLA_FP32'])
 
 elif 'x86' in env['arch']:
     if env['estate'] == '32':
@@ -256,7 +262,7 @@ env['RANLIB'] = prefix + "ranlib"
 
 if not GetOption("help"):
     try:
-        compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).strip()
+        compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
     except OSError:
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
@@ -277,6 +283,21 @@ if not GetOption("help"):
         if compiler_ver == '4.8.3':
             env.Append(CXXFLAGS = ['-Wno-array-bounds'])
 
+        if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
+            env.Append(LINKFLAGS = ['-fstack-protector-strong'])
+
+if env['data_type_support']:
+    if any(i in env['data_type_support'] for i in ['all', 'fp16']):
+        env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'fp32']):
+        env.Append(CXXFLAGS = ['-DENABLE_FP32_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
+        env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
+        env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_SIGNED_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
+        env.Append(CXXFLAGS = ['-DENABLE_QSYMM16_KERNELS'])
+
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
@@ -293,6 +314,8 @@ elif env['os'] == 'bare_metal':
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(CPPDEFINES = ['NO_MULTI_THREADING'])
     env.Append(CPPDEFINES = ['BARE_METAL'])
+if env['os'] == 'linux' and env['arch'] == 'armv7a':
+    env.Append(CXXFLAGS = [ '-Wno-psabi' ])
 
 if env['opencl']:
     if env['os'] in ['bare_metal'] or env['standalone']:
@@ -337,7 +360,6 @@ for dirname in os.listdir("./include"):
     Default( install_include("include/%s" % dirname))
 
 Export('version_at_least')
-
 
 if env['gles_compute'] and env['os'] != 'android':
     env.Append(CPPPATH = ['#/include/linux'])

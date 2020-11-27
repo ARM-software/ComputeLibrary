@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLGather.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLGatherKernel.h"
+#include "src/core/CL/kernels/CLGatherKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,31 +37,6 @@ namespace validation
 {
 TEST_SUITE(NEON)
 TEST_SUITE(IntegralImage)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::U32);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEIntegralImage integral_image;
-    integral_image.configure(&src, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize src_padding = PaddingCalculator(shape.x(), 16).required_padding();
-    const PaddingSize dst_padding(1, src_padding.right, 0, 1);
-
-    validate(src.info()->padding(), src_padding);
-    validate(dst.info()->padding(), dst_padding);
-}
 
 template <typename T>
 using NEIntegralImageFixture = IntegralImageValidationFixture<Tensor, Accessor, NEIntegralImage, T>;

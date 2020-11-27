@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/AccessWindowAutoPadding.h"
+#include "src/core/AccessWindowAutoPadding.h"
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Window.h"

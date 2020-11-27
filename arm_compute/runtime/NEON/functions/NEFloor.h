@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEFloorKernel */
 class NEFloor : public INESimpleFunctionNoBorder

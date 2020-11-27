@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,8 @@
  */
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
 
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <algorithm>
 #include <cmath>

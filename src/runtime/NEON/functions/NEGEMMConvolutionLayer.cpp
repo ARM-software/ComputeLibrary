@@ -30,6 +30,21 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include "src/core/NEON/kernels/NECol2ImKernel.h"
+#include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/NEON/kernels/NEIm2ColKernel.h"
+#include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
+#include "support/MemorySupport.h"
+
 #include <set>
 #include <tuple>
 
@@ -37,6 +52,7 @@ namespace arm_compute
 {
 using namespace arm_compute::misc::shape_calculator;
 
+NEConvolutionLayerReshapeWeights::~NEConvolutionLayerReshapeWeights() = default;
 NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights()
     : _weights_reshape_kernel()
 {
@@ -52,7 +68,8 @@ void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const I
     const bool     append_biases = (biases != nullptr) && !is_data_type_quantized_asymmetric(weights->info()->data_type());
     const ITensor *biases_to_use = (append_biases) ? biases : nullptr;
 
-    _weights_reshape_kernel.configure(weights, biases_to_use, output);
+    _weights_reshape_kernel = arm_compute::support::cpp14::make_unique<NEWeightsReshapeKernel>();
+    _weights_reshape_kernel->configure(weights, biases_to_use, output);
 
     output->info()->set_quantization_info(weights->info()->quantization_info());
 }
@@ -86,8 +103,10 @@ Status NEConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
 
 void NEConvolutionLayerReshapeWeights::run()
 {
-    NEScheduler::get().schedule(&_weights_reshape_kernel, 3);
+    NEScheduler::get().schedule(_weights_reshape_kernel.get(), 3);
 }
+
+NEGEMMConvolutionLayer::~NEGEMMConvolutionLayer() = default;
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager),
@@ -323,7 +342,8 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         _memory_group.manage(&_im2col_output);
 
         // Configure
-        _im2col_kernel.configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, false, dilation);
+        _im2col_kernel = arm_compute::support::cpp14::make_unique<NEIm2ColKernel>();
+        _im2col_kernel->configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, false, dilation);
 
         // Update GEMM input
         gemm_input_to_use = &_im2col_output;
@@ -365,7 +385,8 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         if(_data_layout == DataLayout::NCHW)
         {
             // Configure col2im
-            _col2im_kernel.configure(gemm_output_to_use, output, Size2D(conv_w, conv_h));
+            _col2im_kernel = arm_compute::support::cpp14::make_unique<NECol2ImKernel>();
+            _col2im_kernel->configure(gemm_output_to_use, output, Size2D(conv_w, conv_h));
         }
         else
         {
@@ -538,7 +559,7 @@ void NEGEMMConvolutionLayer::run()
     {
         // Run input reshaping
         unsigned int y_dim = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-        NEScheduler::get().schedule(&_im2col_kernel, y_dim);
+        NEScheduler::get().schedule(_im2col_kernel.get(), y_dim);
     }
 
     // Runs NEGEMM or NEGEMMLowpMatrixMultiplyCore functions
@@ -558,7 +579,7 @@ void NEGEMMConvolutionLayer::run()
     {
         if(_data_layout == DataLayout::NCHW)
         {
-            NEScheduler::get().schedule(&_col2im_kernel, Window::DimY);
+            NEScheduler::get().schedule(_col2im_kernel.get(), Window::DimY);
         }
         else
         {

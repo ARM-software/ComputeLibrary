@@ -30,8 +30,8 @@
 #include "arm_compute/graph/backends/BackendRegistry.h"
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
-#include "arm_compute/core/utils/misc/Iterable.h"
+#include "support/Cast.h"
+#include "support/Iterable.h"
 
 namespace arm_compute
 {

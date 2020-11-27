@@ -23,13 +23,13 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEPhase.h"
 
-#include "arm_compute/core/NEON/kernels/NEMagnitudePhaseKernel.h"
+#include "src/core/NEON/kernels/NEMagnitudePhaseKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEPhase::configure(const ITensor *input1, const ITensor *input2, ITensor *output, PhaseType phase_type)
 {
     if(phase_type == PhaseType::UNSIGNED)
@@ -45,3 +45,4 @@ void NEPhase::configure(const ITensor *input1, const ITensor *input2, ITensor *o
         _kernel = std::move(k);
     }
 }
+} // namespace arm_compute

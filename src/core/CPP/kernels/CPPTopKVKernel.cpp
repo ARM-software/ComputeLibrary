@@ -22,15 +22,13 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CPP/kernels/CPPTopKVKernel.h"
-#include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/Error.h"
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {

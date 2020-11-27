@@ -36,7 +36,7 @@ namespace experimental
 {
 /** Basic function to run @ref NEArithmeticSubtractionKernel
  *
- * @note The tensor data type for the inputs must be U8/QASYMM8/S16/F16/F32.
+ * @note The tensor data type for the inputs must be U8/QASYMM8/S16/S32/F16/F32.
  * @note The function performs an arithmetic subtraction between two tensors.
  *
  *  This function calls the following kernels:
@@ -56,12 +56,13 @@ public:
      *   - (S16,U8)                         -> S16
      *   - (U8,S16)                         -> S16
      *   - (S16,S16)                        -> S16
+     *   - (S32,S32)                        -> S32
      *   - (F16,F16)                        -> F16
      *   - (F32,F32)                        -> F32
      *
-     * @param[in]  input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[in]  input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[out] output   Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
+     * @param[in]  input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[in]  input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[out] output   Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
      * @param[in]  policy   Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
      * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
@@ -77,12 +78,13 @@ public:
      *   - (S16,U8)                         -> S16
      *   - (U8,S16)                         -> S16
      *   - (S16,S16)                        -> S16
+     *   - (S32,S32)                        -> S32
      *   - (F16,F16)                        -> F16
      *   - (F32,F32)                        -> F32
      *
-     * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
+     * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
+     * @param[in] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
+     * @param[in] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
      * @param[in] policy   Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
@@ -94,7 +96,7 @@ public:
 
 /** Basic function to run @ref NEArithmeticSubtractionKernel
  *
- * @note The tensor data type for the inputs must be U8/QASYMM8/S16/F16/F32.
+ * @note The tensor data type for the inputs must be U8/QASYMM8/S16/S32/F16/F32.
  * @note The function performs an arithmetic subtraction between two tensors.
  *
  *  This function calls the following kernels:
@@ -117,18 +119,18 @@ public:
     NEArithmeticSubtraction &operator=(NEArithmeticSubtraction &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in]  input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[in]  input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
-     * @param[out] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
+     * @param[in]  input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[in]  input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
+     * @param[out] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
      * @param[in]  policy   Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
      * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticSubtraction
      *
-     * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
+     * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
+     * @param[in] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
+     * @param[in] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
      * @param[in] policy   Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *

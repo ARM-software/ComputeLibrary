@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,27 +67,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32 })),
-               shape, data_type)
-{
-    // Make rows the columns of the original shape
-    TensorShape output_shape{ shape[1], shape[0] };
-
-    // Create tensors
-    CLTensor ref_src = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst     = create_tensor<CLTensor>(output_shape, data_type);
-
-    // Create and Configure function
-    CLTranspose trans;
-    trans.configure(&ref_src, &dst);
-
-    // Validate dst region
-    const ValidRegion valid_region = shape_to_valid_region(output_shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // TODO(bsgcomp): Add padding validation (COMPMID-659)
-}
 
 template <typename T>
 using CLTransposeFixture = TransposeValidationFixture<CLTensor, CLAccessor, CLTranspose, T>;

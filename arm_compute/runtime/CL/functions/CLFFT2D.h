@@ -46,6 +46,16 @@ class CLFFT2D : public IFunction
 public:
     /** Default Constructor */
     CLFFT2D(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied */
+    CLFFT2D(const CLFFT2D &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLFFT2D &operator=(const CLFFT2D &) = delete;
+    /** Default move constructor */
+    CLFFT2D(CLFFT2D &&) = default;
+    /** Default move assignment operator */
+    CLFFT2D &operator=(CLFFT2D &&) = default;
+    /** Default destructor */
+    ~CLFFT2D();
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in]  input  Source tensor. Data types supported: F32.

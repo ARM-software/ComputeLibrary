@@ -10,6 +10,10 @@ Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
 
 **Make sure you are using the latest version of the library before opening an issue. Thanks**
 
+Deprecation notice:
+- We have deprecated the GLES backend and it will be removed from the library in the release 21.05
+- We have deprecated the NEON and OpenCL computer vision functions and they will be removed in 21.05
+
 News:
 
 - [Gian Marco's talk on Performance Analysis for Optimizing Embedded Deep Learning Inference Software](https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2019-embedded-vision-summit)
@@ -44,6 +48,3 @@ To indicate that you agree to the the terms of the DCO, you "sign off" your cont
 ```Signed-off-by: John Doe <john.doe@example.org>```
 
 You must use your real name, no pseudonyms or anonymous contributions are accepted.
-
-### Security Issues
-If you believe you have discovered a security issue please contact MLG-Security@arm.com

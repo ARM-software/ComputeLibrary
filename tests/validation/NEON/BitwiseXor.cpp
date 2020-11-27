@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,34 +42,6 @@ namespace validation
 {
 TEST_SUITE(NEON)
 TEST_SUITE(BitwiseXor)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
-{
-    // Create tensors
-    Tensor src1 = create_tensor<Tensor>(shape, data_type);
-    Tensor src2 = create_tensor<Tensor>(shape, data_type);
-    Tensor dst  = create_tensor<Tensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEBitwiseXor bitwise_xor;
-    bitwise_xor.configure(&src1, &src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src1.info()->valid_region(), valid_region);
-    validate(src2.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src1.info()->padding(), padding);
-    validate(src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 template <typename T>
 using NEBitwiseXorFixture = BitwiseXorValidationFixture<Tensor, Accessor, NEBitwiseXor, T>;

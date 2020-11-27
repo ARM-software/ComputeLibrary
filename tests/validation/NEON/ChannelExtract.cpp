@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,34 +51,6 @@ const auto ChannelExtractYUVDataset = combine(framework::dataset::make("FormatTy
                                               framework::dataset::make("ChannelType", { Channel::Y, Channel::U, Channel::V }));
 const auto ChannelExtractYUVPlanarDataset = combine(framework::dataset::make("FormatType", { Format::IYUV, Format::YUV444, Format::NV12, Format::NV21 }),
                                                     framework::dataset::make("ChannelType", { Channel::Y, Channel::U, Channel::V }));
-
-inline void validate_configuration(const TensorShape &shape, Format format, Channel channel)
-{
-    const unsigned int num_planes = num_planes_from_format(format);
-
-    TensorShape dst_shape = adjust_odd_shape(shape, format);
-    dst_shape             = calculate_subsampled_shape(dst_shape, format, channel);
-
-    // Create tensors
-    MultiImage ref_src = create_multi_image<MultiImage>(shape, format);
-    Tensor     dst     = create_tensor<Tensor>(dst_shape, Format::U8);
-
-    // Create and Configure function
-    NEChannelExtract channel_extract;
-
-    if(1U == num_planes)
-    {
-        const Tensor *plane_src = ref_src.plane(0);
-
-        channel_extract.configure(plane_src, channel, &dst);
-    }
-    else
-    {
-        channel_extract.configure(&ref_src, channel, &dst);
-    }
-
-    // TODO(bsgcomp): Add validation for padding and shape (COMPMID-659)
-}
 } // namespace
 
 TEST_SUITE(NEON)
@@ -86,25 +58,6 @@ TEST_SUITE(ChannelExtract)
 
 template <typename T>
 using NEChannelExtractFixture = ChannelExtractValidationFixture<MultiImage, Tensor, Accessor, NEChannelExtract, T>;
-
-TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset),
-               shape, format, channel)
-{
-    validate_configuration(shape, format, channel);
-}
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset),
-               shape, format, channel)
-{
-    validate_configuration(shape, format, channel);
-}
-
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset),
-               shape, format, channel)
-{
-    validate_configuration(shape, format, channel);
-}
-TEST_SUITE_END() // Configuration
 
 TEST_SUITE(RGBA)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset))

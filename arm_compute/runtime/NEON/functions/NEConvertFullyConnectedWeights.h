@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,16 +24,17 @@
 #ifndef ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTS_H
 #define ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTS_H
 
-#include "arm_compute/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/ITransformWeights.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
+#include <memory>
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class NEConvertFullyConnectedWeightsKernel;
 
 /** Basic function to run @ref NEConvertFullyConnectedWeightsKernel. */
 class NEConvertFullyConnectedWeights : public IFunction
@@ -41,6 +42,16 @@ class NEConvertFullyConnectedWeights : public IFunction
 public:
     /** Default constructor */
     NEConvertFullyConnectedWeights();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvertFullyConnectedWeights(const NEConvertFullyConnectedWeights &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvertFullyConnectedWeights &operator=(const NEConvertFullyConnectedWeights &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvertFullyConnectedWeights(NEConvertFullyConnectedWeights &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvertFullyConnectedWeights &operator=(NEConvertFullyConnectedWeights &&) = delete;
+    /** Default destructor */
+    ~NEConvertFullyConnectedWeights();
     /** Initialize the function.
      *
      * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: All.
@@ -64,7 +75,7 @@ public:
     void run() override;
 
 private:
-    NEConvertFullyConnectedWeightsKernel _kernel;
+    std::unique_ptr<NEConvertFullyConnectedWeightsKernel> _kernel;
 };
 
 namespace weights_transformations

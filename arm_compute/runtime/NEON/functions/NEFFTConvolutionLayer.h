@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,12 +63,14 @@ public:
     NEFFTConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEFFTConvolutionLayer(const NEFFTConvolutionLayer &) = delete;
-    /** Default move constructor */
-    NEFFTConvolutionLayer(NEFFTConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEFFTConvolutionLayer(NEFFTConvolutionLayer &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEFFTConvolutionLayer &operator=(const NEFFTConvolutionLayer &) = delete;
-    /** Default move assignment operator */
-    NEFFTConvolutionLayer &operator=(NEFFTConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEFFTConvolutionLayer &operator=(NEFFTConvolutionLayer &&) = delete;
+    /** Default destructor */
+    ~NEFFTConvolutionLayer();
     /** Set the input and output tensors.
      *
      * @note: This function only works with any square kernel size and unit strides for both NCHW and NHWC data layout

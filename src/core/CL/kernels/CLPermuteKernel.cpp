@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
+#include "src/core/CL/kernels/CLPermuteKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 using namespace arm_compute;
@@ -75,15 +76,15 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
 void CLPermuteKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    const TensorShape output_shape = get_output_shape(input->info(), perm);
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), perm));
 
     _input  = input;
     _output = output;
     _perm   = perm;
-
-    const TensorShape output_shape = get_output_shape(input->info(), perm);
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     // Create kernel
     CLBuildOptions build_opts;

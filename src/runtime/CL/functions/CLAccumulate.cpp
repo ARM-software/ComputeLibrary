@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLAccumulate.h"
 
-#include "arm_compute/core/CL/kernels/CLAccumulateKernel.h"
+#include "src/core/CL/kernels/CLAccumulateKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

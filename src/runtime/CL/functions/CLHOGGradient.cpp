@@ -26,11 +26,18 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLHOGGradient::CLHOGGradient(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _derivative(), _mag_phase(), _gx(), _gy()
+    : _memory_group(std::move(memory_manager)),
+      _derivative(),
+      _mag_phase(support::cpp14::make_unique<CLMagnitudePhaseKernel>()),
+      _gx(),
+      _gy()
 {
 }
 
@@ -63,11 +70,11 @@ void CLHOGGradient::configure(const CLCompileContext &compile_context, ICLTensor
     // Initialise magnitude/phase kernel
     if(PhaseType::UNSIGNED == phase_type)
     {
-        _mag_phase.configure(compile_context, &_gx, &_gy, output_magnitude, output_phase, MagnitudeType::L2NORM, PhaseType::UNSIGNED);
+        _mag_phase->configure(compile_context, &_gx, &_gy, output_magnitude, output_phase, MagnitudeType::L2NORM, PhaseType::UNSIGNED);
     }
     else
     {
-        _mag_phase.configure(compile_context, &_gx, &_gy, output_magnitude, output_phase, MagnitudeType::L2NORM, PhaseType::SIGNED);
+        _mag_phase->configure(compile_context, &_gx, &_gy, output_magnitude, output_phase, MagnitudeType::L2NORM, PhaseType::SIGNED);
     }
 
     // Allocate intermediate tensors
@@ -83,5 +90,5 @@ void CLHOGGradient::run()
     _derivative.run();
 
     // Run magnitude/phase kernel
-    CLScheduler::get().enqueue(_mag_phase);
+    CLScheduler::get().enqueue(*_mag_phase);
 }

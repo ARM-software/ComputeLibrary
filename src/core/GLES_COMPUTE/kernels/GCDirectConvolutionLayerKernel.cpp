@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDirectConvolutionLayerKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
 #include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
@@ -33,6 +32,9 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 using namespace arm_compute;
@@ -44,7 +46,7 @@ GCDirectConvolutionLayerKernel<kernel_size>::GCDirectConvolutionLayerKernel()
 }
 
 template <unsigned int kernel_size>
-BorderSize GCDirectConvolutionLayerKernel<kernel_size>::border_size() const
+BorderSize             GCDirectConvolutionLayerKernel<kernel_size>::border_size() const
 {
     return _border_size;
 }
@@ -70,8 +72,8 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
     }
 
     // Get convolved dimensions
-    unsigned int owidth       = 0;
-    unsigned int oheight      = 0;
+    unsigned int owidth  = 0;
+    unsigned int oheight = 0;
     std::tie(owidth, oheight) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_size, kernel_size, conv_info);
 
     TensorShape output_shape = input->info()->tensor_shape();
@@ -238,20 +240,20 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
                 num_elems_written_per_iteration_x = 4;
 #elif defined(PROCESS_4X_2Y_1Z)
                 options.emplace("#define PROCESS_4X_2Y_1Z");
-                num_elems_read_per_iteration_x = 4;
-                num_elems_read_per_iteration_y = 2;
+                num_elems_read_per_iteration_x    = 4;
+                num_elems_read_per_iteration_y    = 2;
                 num_elems_written_per_iteration_x = 4;
                 num_elems_written_per_iteration_y = 2;
 #elif defined(PROCESS_4X_3Y_1Z)
                 options.emplace("#define PROCESS_4X_3Y_1Z");
-                num_elems_read_per_iteration_x = 4;
-                num_elems_read_per_iteration_y = 3;
+                num_elems_read_per_iteration_x    = 4;
+                num_elems_read_per_iteration_y    = 3;
                 num_elems_written_per_iteration_x = 4;
                 num_elems_written_per_iteration_y = 3;
 #elif defined(PROCESS_4X_4Y_1Z)
                 options.emplace("#define PROCESS_4X_4Y_1Z");
-                num_elems_read_per_iteration_x = 4;
-                num_elems_read_per_iteration_y = 4;
+                num_elems_read_per_iteration_x    = 4;
+                num_elems_read_per_iteration_y    = 4;
                 num_elems_written_per_iteration_x = 4;
                 num_elems_written_per_iteration_y = 4;
 #elif defined(PROCESS_4X_2Y_2Z)

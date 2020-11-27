@@ -1616,7 +1616,7 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
 
 #endif // defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && ((defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)) || defined(REAL_MULTIPLIER))
 
-#if defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_SHIFT) && defined(OUTPUT_MULTIPLIER)
+#if defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_SHIFT) && defined(OUTPUT_MULTIPLIER) && defined(VEC_SIZE_LEFTOVER)
 /** This function computes the depthwise convolution for NHWC data layout. This kernel assumes that the weights tensor is NOT reshaped
  *
  * @note The number of elements processed must be passed at compile time using -DN0 (e.g. -DN0=2)
@@ -1629,6 +1629,7 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
  * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
  * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
@@ -1685,8 +1686,8 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
 #endif // defined(HAS_BIAS)
 )
 {
-    int x = get_global_id(0); // channels
-    int y = get_global_id(1); // spatial coordinate x
+    int x_offs = max((int)(get_global_id(0) * N0 - (N0 - VEC_SIZE_LEFTOVER) % N0), 0);
+    int y      = get_global_id(1); // spatial coordinate x
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
@@ -1694,19 +1695,19 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
     int z = get_global_id(2); // spatial coordinate y
 #endif                                         // defined(DST_DEPTH)
 
-    __global uchar *s_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)N0;
+    __global uchar *s_addr = src_ptr + src_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE);
 
-    __global uchar *d_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0 + y * dst_stride_y + z * dst_stride_z;
+    __global uchar *d_addr = dst_ptr + dst_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER + y * dst_stride_y + z * dst_stride_z;
 
-    __global uchar *w_addr = weights_ptr + weights_offset_first_element_in_bytes + x * sizeof(WEIGHTS_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0;
+    __global uchar *w_addr = weights_ptr + weights_offset_first_element_in_bytes + x_offs * sizeof(WEIGHTS_TYPE) * (int)DEPTH_MULTIPLIER;
 
 #if defined(HAS_BIAS)
-    __global uchar *b_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int) * (int)DEPTH_MULTIPLIER * (int)N0;
+    __global uchar *b_addr = biases_ptr + biases_offset_first_element_in_bytes + x_offs * sizeof(int) * (int)DEPTH_MULTIPLIER;
 #endif // defined(HAS_BIAS)
 
 #if defined(PER_CHANNEL_QUANTIZATION)
-    __global uchar *out_mul_addr   = output_multipliers_ptr + output_multipliers_offset_first_element_in_bytes + x * sizeof(int) * (int)DEPTH_MULTIPLIER * (int)N0;
-    __global uchar *out_shift_addr = output_shifts_ptr + output_shifts_offset_first_element_in_bytes + x * sizeof(int) * (int)DEPTH_MULTIPLIER * (int)N0;
+    __global uchar *out_mul_addr   = output_multipliers_ptr + output_multipliers_offset_first_element_in_bytes + x_offs * sizeof(int) * (int)DEPTH_MULTIPLIER;
+    __global uchar *out_shift_addr = output_shifts_ptr + output_shifts_offset_first_element_in_bytes + x_offs * sizeof(int) * (int)DEPTH_MULTIPLIER;
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
 #if defined(DST_DEPTH)
@@ -1772,10 +1773,10 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
         res += (VEC_INT)OUTPUT_OFFSET;
 
         VEC_TYPE(VEC_SIZE)
-        res1 = CONVERT_SAT(res, VEC_TYPE(VEC_SIZE));
+        res0 = CONVERT_SAT(res, VEC_TYPE(VEC_SIZE));
+        res0 = ACTIVATION_FUNC(res0);
 
-        VSTORE(N0)
-        (ACTIVATION_FUNC(res1), 0, (__global DATA_TYPE *)(d_addr));
+        STORE_VECTOR_SELECT(res, DATA_TYPE, d_addr, N0, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 
 #if DEPTH_MULTIPLIER > 1
         w_addr += sizeof(WEIGHTS_TYPE);
@@ -1790,5 +1791,5 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
     }
 #endif // DEPTH_MULTIPLIER > 1
 }
-#endif // defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defiend(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_SHIFT) && defined(OUTPUT_MULTIPLIER)
+#endif // defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defiend(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_SHIFT) && defined(OUTPUT_MULTIPLIER) && defined(VEC_SIZE_LEFTOVER)
 #endif // defined(DATA_TYPE) && defined(WEIGHTS_TYPE)

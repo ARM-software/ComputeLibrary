@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGather.h"
 
-#include "arm_compute/core/NEON/kernels/NEGatherKernel.h"
+#include "src/core/NEON/kernels/NEGatherKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

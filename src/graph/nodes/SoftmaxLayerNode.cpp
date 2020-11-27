@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@ TensorDescriptor SoftmaxLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
     TensorDescriptor out_desc = src->desc();
-    out_desc.quant_info       = QuantizationInfo(1.f / 256.f, 0);
+    out_desc.quant_info       = get_softmax_output_quantization_info(out_desc.data_type, false);
 
     return out_desc;
 }

@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_EXAMPLES_GEMM_TUNER_COMMON_GEMM_EXAMPLE_OPTIONS
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/graph/TypeLoader.h"
+#include "arm_compute/core/Utils.h"
 #include "utils/TypePrinter.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"

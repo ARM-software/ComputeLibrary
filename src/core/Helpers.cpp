@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,166 +23,10 @@
  */
 #include "arm_compute/core/Helpers.h"
 
-using namespace arm_compute;
-
-Window arm_compute::calculate_max_window(const ValidRegion &valid_region, const Steps &steps, bool skip_border, BorderSize border_size)
+namespace arm_compute
 {
-    if(!skip_border)
-    {
-        border_size = BorderSize(0);
-    }
-
-    const Coordinates &anchor = valid_region.anchor;
-    const TensorShape &shape  = valid_region.shape;
-
-    Window window;
-
-    window.set(0, Window::Dimension(
-                   // Skip the border left of the image
-                   anchor[0] + border_size.left,
-                   // Skip the border right of the image
-                   // Make sure the window width is a multiple of the step size
-                   anchor[0] + border_size.left + ceil_to_multiple(std::max(0, static_cast<int>(shape[0]) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right)), steps[0]),
-                   steps[0]));
-
-    size_t n = 1;
-
-    if(anchor.num_dimensions() > 1)
-    {
-        window.set(1, Window::Dimension(
-                       // Skip the border above the image
-                       anchor[1] + border_size.top,
-                       // Skip the border below the image
-                       anchor[1] + border_size.top + ceil_to_multiple(std::max(0, static_cast<int>(shape[1]) - static_cast<int>(border_size.top) - static_cast<int>(border_size.bottom)), steps[1]),
-                       steps[1]));
-
-        ++n;
-    }
-
-    if(anchor.num_dimensions() > 2)
-    {
-        window.set(2, Window::Dimension(anchor[2], std::max<size_t>(1, shape[2]), steps[2]));
-
-        ++n;
-    }
-
-    for(; n < anchor.num_dimensions(); ++n)
-    {
-        window.set(n, Window::Dimension(anchor[n], std::max<size_t>(1, shape[n])));
-    }
-
-    for(; n < Coordinates::num_max_dimensions; ++n)
-    {
-        window.set(n, Window::Dimension(0, 1));
-    }
-
-    return window;
-}
-
-Window arm_compute::calculate_max_enlarged_window(const ValidRegion &valid_region, const Steps &steps, BorderSize border_size)
-{
-    const Coordinates &anchor = valid_region.anchor;
-    const TensorShape &shape  = valid_region.shape;
-
-    Window window;
-
-    window.set(0, Window::Dimension(
-                   // move the anchor to the start from the border
-                   anchor[0] - border_size.left,
-                   // move the anchor to include the right end border
-                   // Make sure the window width is a multiple of the step size
-                   anchor[0] - border_size.left + ceil_to_multiple(shape[0] + border_size.left + border_size.right, steps[0]),
-                   steps[0]));
-
-    size_t n = 1;
-
-    if(anchor.num_dimensions() > 1)
-    {
-        window.set(1, Window::Dimension(
-                       // Include the border above the image
-                       anchor[1] - border_size.top,
-                       // Include the border below the image
-                       anchor[1] - border_size.top + ceil_to_multiple(shape[1] + border_size.top + border_size.bottom, steps[1]),
-                       steps[1]));
-
-        ++n;
-    }
-
-    if(anchor.num_dimensions() > 2)
-    {
-        window.set(2, Window::Dimension(0, std::max<size_t>(1, shape[n]), steps[2]));
-
-        ++n;
-    }
-
-    for(; n < anchor.num_dimensions(); ++n)
-    {
-        window.set(n, Window::Dimension(anchor[n], std::max<size_t>(1, shape[n])));
-    }
-
-    for(; n < Coordinates::num_max_dimensions; ++n)
-    {
-        window.set(n, Window::Dimension(0, 1));
-    }
-
-    return window;
-}
-
-Window arm_compute::calculate_max_window_horizontal(const ValidRegion &valid_region, const Steps &steps, bool skip_border, BorderSize border_size)
-{
-    if(skip_border)
-    {
-        border_size.top    = 0;
-        border_size.bottom = 0;
-    }
-    else
-    {
-        border_size.left  = 0;
-        border_size.right = 0;
-    }
-
-    const Coordinates &anchor = valid_region.anchor;
-    const TensorShape &shape  = valid_region.shape;
-
-    Window window;
-
-    window.set(0, Window::Dimension(
-                   // Skip the border left of the image
-                   anchor[0] + border_size.left,
-                   // Skip the border right of the image
-                   // Make sure the window width is a multiple of the step size
-                   anchor[0] + border_size.left + ceil_to_multiple(std::max(0, static_cast<int>(shape[0]) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right)), steps[0]),
-                   steps[0]));
-
-    size_t n = 1;
-
-    if(anchor.num_dimensions() > 1)
-    {
-        window.set(1, Window::Dimension(
-                       // Skip the border above the image
-                       anchor[1] - border_size.top,
-                       // Skip the border below the image
-                       anchor[1] + shape[1] + border_size.bottom,
-                       1));
-
-        ++n;
-    }
-
-    for(; n < anchor.num_dimensions(); ++n)
-    {
-        window.set(n, Window::Dimension(anchor[n], std::max<size_t>(1, shape[n])));
-    }
-
-    for(; n < Coordinates::num_max_dimensions; ++n)
-    {
-        window.set(n, Window::Dimension(0, 1));
-    }
-
-    return window;
-}
-
-ValidRegion arm_compute::calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
-                                                      InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined)
+ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
+                                         InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined)
 {
     const DataLayout data_layout = src_info.data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -246,7 +90,7 @@ ValidRegion arm_compute::calculate_valid_region_scale(const ITensorInfo &src_inf
     }
 
     // Setup output valid region
-    ValidRegion valid_region{ Coordinates(), dst_shape, src_info.tensor_shape().num_dimensions() };
+    ValidRegion valid_region{ Coordinates(), dst_shape, dst_shape.num_dimensions() };
 
     valid_region.anchor.set(idx_width, std::max(0, valid_start_out_x));
     valid_region.anchor.set(idx_height, std::max(0, valid_start_out_y));
@@ -256,3 +100,4 @@ ValidRegion arm_compute::calculate_valid_region_scale(const ITensorInfo &src_inf
 
     return valid_region;
 }
+} // namespace arm_compute

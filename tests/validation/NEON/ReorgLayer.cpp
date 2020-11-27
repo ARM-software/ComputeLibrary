@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,44 +68,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallReorgLayerDataset(), datasets::LargeReorgLayerDataset()),
-                                                                           framework::dataset::make("DataType", { DataType::F32, DataType::F16, DataType::QASYMM8 })),
-                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-               shape, stride, data_type, data_layout)
-{
-    // Permute the tensor shape in case of NHWC data layout
-    TensorShape shape_to_use = shape;
-    if(data_layout == DataLayout::NHWC)
-    {
-        permute(shape_to_use, PermutationVector(2U, 0U, 1U));
-    }
-
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape_to_use, data_type, 1, QuantizationInfo(), data_layout);
-    Tensor dst;
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEReorgLayer reorg_layer;
-
-    // Auto-initialize the output within the function
-    reorg_layer.configure(&src, &dst, stride);
-
-    // Validate valid region
-    const ValidRegion src_valid_region = shape_to_valid_region(shape_to_use);
-    const ValidRegion dst_valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-    validate(src.info()->valid_region(), src_valid_region);
-    validate(dst.info()->valid_region(), dst_valid_region);
-
-    // Validate padding
-    const int         step        = 1;
-    const PaddingSize src_padding = PaddingCalculator(shape_to_use.x(), step).required_padding();
-    const PaddingSize dst_padding = PaddingCalculator(dst.info()->tensor_shape().x(), step).required_padding();
-    validate(src.info()->padding(), src_padding);
-    validate(dst.info()->padding(), dst_padding);
-}
 
 template <typename T>
 using NEReorgLayerFixture = ReorgLayerValidationFixture<Tensor, Accessor, NEReorgLayer, T>;

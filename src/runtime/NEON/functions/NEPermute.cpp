@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 
-#include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
+#include "src/core/NEON/kernels/NEPermuteKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

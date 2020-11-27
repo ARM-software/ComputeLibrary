@@ -26,6 +26,8 @@
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
+#include "support/MemorySupport.h"
+
 namespace arm_compute
 {
 CLRuntimeContext::CLRuntimeContext()

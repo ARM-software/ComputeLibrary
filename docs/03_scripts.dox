@@ -143,6 +143,11 @@ The arm_compute::utils::load_trained_data shows how one could load
 the weights and biases into tensor from the .npy file by the help of Accessor.
 
 @section validate_examples Validating examples
+
+Compute Library provides a list of graph examples that are used in the context of integration and performance testing.
+The provenance of each model is part of its documentation and no structural or data alterations have been applied to any
+of them unless explicitly specified otherwise in the documentation.
+
 Using one of the provided scripts will generate files containing the trainable parameters.
 
 You can validate a given graph example on a list of inputs by running:

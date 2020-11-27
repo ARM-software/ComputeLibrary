@@ -23,11 +23,10 @@
  */
 #include "helpers.h"
 
-#if defined(DATA_TYPE) && defined(SELECT_DATA_TYPE) && defined(VEC_SIZE)
+#if defined(DATA_TYPE) && defined(VEC_SIZE)
 /** This function perform a select operation between two tensors when condition tensor has the same rank.
  *
  * @attention The data_type need to be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=uchar
- * @attention The select operation data_type need to be passed at compile time using -DSELECT_DATA_TYPE: e.g. -DSELECT_DATA_TYPE=uchar
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
  * @param[in]  c_ptr                             Pointer to the source tensor. Supported data types: U8
@@ -76,8 +75,8 @@ __kernel void select_same_rank(
     Tensor3D out_t = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load values
-    VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
-    in_c = CONVERT((VLOAD(VEC_SIZE)(0, (__global uchar *)c_t.ptr)), VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE));
+    SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    in_c = CONVERT((VLOAD(VEC_SIZE)(0, (__global uchar *)c_t.ptr)), SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_t.ptr);
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
@@ -85,13 +84,12 @@ __kernel void select_same_rank(
 
     // Calculate and store result
     VSTORE(VEC_SIZE)
-    (select(in_y, in_x, in_c > (SELECT_DATA_TYPE)0), 0, (__global DATA_TYPE *)out_t.ptr);
+    (select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0), 0, (__global DATA_TYPE *)out_t.ptr);
 }
 
 /** This function perform a select operation between two tensors when condition tensor has a different rank.
  *
  * @attention The data_type need to be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=uchar
- * @attention The select operation data_type need to be passed at compile time using -DSELECT_DATA_TYPE: e.g. -DSELECT_DATA_TYPE=uchar
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
  * @param[in]  c_ptr                             Pointer to the source tensor. Supported data types: U8
@@ -138,7 +136,7 @@ __kernel void select_different_rank_2(
     Tensor3D out_t = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load values
-    VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
+    SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     in_c = *((__global uchar *)(c_t.ptr + c_idx * c_t.stride_x));
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_t.ptr);
@@ -147,15 +145,14 @@ __kernel void select_different_rank_2(
 
     // Calculate and store result
     VSTORE(VEC_SIZE)
-    (select(in_y, in_x, in_c > (SELECT_DATA_TYPE)0), 0, (__global DATA_TYPE *)out_t.ptr);
+    (select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0), 0, (__global DATA_TYPE *)out_t.ptr);
 }
-#endif /* defined(DATA_TYPE) && defined(SELECT_DATA_TYPE) && defined(VEC_SIZE) */
+#endif /* defined(DATA_TYPE) && defined(VEC_SIZE) */
 
-#if defined(DATA_TYPE) && defined(SELECT_DATA_TYPE) && defined(VEC_SIZE) && defined(DEPTH_SIZE)
+#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(DEPTH_SIZE)
 /** This function perform a select operation between two tensors when condition tensor has a different rank.
  *
  * @attention The data_type need to be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=uchar
- * @attention The select operation data_type need to be passed at compile time using -DSELECT_DATA_TYPE: e.g. -DSELECT_DATA_TYPE=uchar
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
  * @param[in]  c_ptr                             Pointer to the source tensor. Supported data types: U8
@@ -202,7 +199,7 @@ __kernel void select_different_rank_n(
     Tensor3D out_t = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load values
-    VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
+    SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     in_c = *((__global uchar *)(c_t.ptr + c_idx * c_t.stride_x));
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_t.ptr);
@@ -211,6 +208,6 @@ __kernel void select_different_rank_n(
 
     // Calculate and store result
     VSTORE(VEC_SIZE)
-    (select(in_y, in_x, in_c > (SELECT_DATA_TYPE)0), 0, (__global DATA_TYPE *)out_t.ptr);
+    (select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0), 0, (__global DATA_TYPE *)out_t.ptr);
 }
-#endif /* defined(DATA_TYPE) && defined(SELECT_DATA_TYPE) && defined(VEC_SIZE) && defined(DEPTH_SIZE) */
+#endif /* defined(DATA_TYPE) && defined(VEC_SIZE) && defined(DEPTH_SIZE) */

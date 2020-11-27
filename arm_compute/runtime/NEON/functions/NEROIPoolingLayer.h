@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,13 @@
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/IArray.h"
-#include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
+class NEROIPoolingLayerKernel;
+class ROIPoolingLayerInfo;
 
 /** Basic function to run @ref NEROIPoolingLayerKernel.
  *
@@ -44,6 +46,16 @@ class NEROIPoolingLayer : public IFunction
 public:
     /** Constructor */
     NEROIPoolingLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEROIPoolingLayer(const NEROIPoolingLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEROIPoolingLayer &operator=(const NEROIPoolingLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEROIPoolingLayer(NEROIPoolingLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEROIPoolingLayer &operator=(NEROIPoolingLayer &&) = delete;
+    /** Default destructor */
+    ~NEROIPoolingLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. Data types supported: F32.
@@ -63,7 +75,7 @@ public:
     void run() override;
 
 private:
-    NEROIPoolingLayerKernel _roi_kernel;
+    std::unique_ptr<NEROIPoolingLayerKernel> _roi_kernel;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEROIPOOLINGLAYER_H */

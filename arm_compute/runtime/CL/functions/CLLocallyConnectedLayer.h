@@ -26,10 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
-#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
-#include "arm_compute/core/CL/kernels/CLLocallyConnectedMatrixMultiplyKernel.h"
-#include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -39,7 +35,13 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLCol2ImKernel;
+class CLIm2ColKernel;
+class CLWeightsReshapeKernel;
+class CLLocallyConnectedMatrixMultiplyKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to compute the locally connected layer. This function calls the following OpenCL kernels:
  *
@@ -72,6 +74,7 @@ public:
      *                       Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.11)
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
     /** Set the input and output tensors.
      *
@@ -85,6 +88,7 @@ public:
      *                             Data types supported: Same as @p input.
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.11)
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLocallyConnectedLayer
      *
@@ -106,16 +110,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                            _memory_group;
-    CLIm2ColKernel                         _input_im2col_kernel;
-    CLWeightsReshapeKernel                 _weights_reshape_kernel;
-    CLLocallyConnectedMatrixMultiplyKernel _mm_kernel;
-    CLCol2ImKernel                         _output_col2im_kernel;
-    CLTensor                               _input_im2col_reshaped;
-    CLTensor                               _weights_reshaped;
-    CLTensor                               _gemm_output;
-    bool                                   _is_prepared;
-    const ICLTensor                       *_original_weights;
+    MemoryGroup                                             _memory_group;
+    std::unique_ptr<CLIm2ColKernel>                         _input_im2col_kernel;
+    std::unique_ptr<CLWeightsReshapeKernel>                 _weights_reshape_kernel;
+    std::unique_ptr<CLLocallyConnectedMatrixMultiplyKernel> _mm_kernel;
+    std::unique_ptr<CLCol2ImKernel>                         _output_col2im_kernel;
+    CLTensor                                                _input_im2col_reshaped;
+    CLTensor                                                _weights_reshaped;
+    CLTensor                                                _gemm_output;
+    bool                                                    _is_prepared;
+    const ICLTensor                                        *_original_weights;
 };
 }
 #endif /* ARM_COMPUTE_CLLOCALLYCONNECTEDLAYER_H */

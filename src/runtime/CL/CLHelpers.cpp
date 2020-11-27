@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
 
 namespace

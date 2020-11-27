@@ -25,8 +25,13 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEPoolingLayerKernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEPoolingLayer::~NEPoolingLayer() = default;
 
 NEPoolingLayer::NEPoolingLayer()
     : _pooling_layer_kernel(), _border_handler(), _is_global_pooling_layer(false), _data_layout(DataLayout::NCHW)
@@ -42,7 +47,8 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
 
     // Configure pooling kernel
-    _pooling_layer_kernel.configure(input, output, pool_info, indices);
+    _pooling_layer_kernel = arm_compute::support::cpp14::make_unique<NEPoolingLayerKernel>();
+    _pooling_layer_kernel->configure(input, output, pool_info, indices);
 
     switch(_data_layout)
     {
@@ -55,7 +61,8 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
             {
                 zero_value = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
             }
-            _border_handler.configure(input, _pooling_layer_kernel.border_size(), border_mode, zero_value);
+            _border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+            _border_handler->configure(input, _pooling_layer_kernel->border_size(), border_mode, zero_value);
             break;
         }
         case DataLayout::NHWC:
@@ -76,16 +83,18 @@ void NEPoolingLayer::run()
     {
         case DataLayout::NCHW:
             // Fill border
-            NEScheduler::get().schedule(&_border_handler, Window::DimY);
+            NEScheduler::get().schedule(_border_handler.get(), Window::DimY);
 
             // Run pooling layer
-            NEScheduler::get().schedule(&_pooling_layer_kernel, _is_global_pooling_layer ? Window::DimZ : Window::DimY);
+            NEScheduler::get().schedule(_pooling_layer_kernel.get(), _is_global_pooling_layer ? Window::DimZ : Window::DimY);
             break;
         case DataLayout::NHWC:
             // Run pooling layer
-            NEScheduler::get().schedule(&_pooling_layer_kernel, Window::DimX);
+            NEScheduler::get().schedule(_pooling_layer_kernel.get(), Window::DimX);
             break;
         default:
             ARM_COMPUTE_ERROR("Data layout not supported");
     }
 }
+
+} // namespace arm_compute

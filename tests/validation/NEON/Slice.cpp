@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,24 +62,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(arm_compute::test::datasets::SmallSliceDataset(), framework::dataset::make("DataType", { DataType::QASYMM8, DataType::F32 })),
-               shape, starts, ends, data_type)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst;
-
-    // Create and Configure function
-    NESlice slice;
-    slice.configure(&src, &dst, starts, ends);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 template <typename T>
 using NESliceFixture = SliceFixture<Tensor, Accessor, NESlice, T>;

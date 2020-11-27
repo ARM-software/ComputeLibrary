@@ -37,6 +37,12 @@
 #pragma GCC diagnostic ignored "-Wswitch-default"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wstrict-overflow"
+#if (defined(__GNUC__) && (__GNUC__ >= 7))
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif // (defined(__GNUC__) && (__GNUC__ >= 7))
+#if defined(__clang__)
+#pragma GCC diagnostic ignored "-Wparentheses-equality"
+#endif // defined(__clang__)
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #pragma GCC diagnostic pop

@@ -34,8 +34,13 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class ITensorInfo;
 
-/** Basic function to run @ref NEThresholdKernel */
+/** Basic function to run @ref NEThresholdKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class NEThreshold : public INESimpleFunctionNoBorder
 {
 public:

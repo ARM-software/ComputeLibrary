@@ -26,9 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLFFTDigitReverseKernel.h"
-#include "arm_compute/core/CL/kernels/CLFFTRadixStageKernel.h"
-#include "arm_compute/core/CL/kernels/CLFFTScaleKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -36,6 +33,9 @@
 namespace arm_compute
 {
 // Forward declaration
+class CLFFTDigitReverseKernel;
+class CLFFTRadixStageKernel;
+class CLFFTScaleKernel;
 class ICLTensor;
 
 /** Basic function to execute one dimensional FFT. This function calls the following OpenCL kernels:
@@ -49,6 +49,16 @@ class CLFFT1D : public IFunction
 public:
     /** Default Constructor */
     CLFFT1D(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied */
+    CLFFT1D(const CLFFT1D &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLFFT1D &operator=(const CLFFT1D &) = delete;
+    /** Default move constructor */
+    CLFFT1D(CLFFT1D &&) = default;
+    /** Default move assignment operator */
+    CLFFT1D &operator=(CLFFT1D &&) = default;
+    /** Default destructor */
+    ~CLFFT1D();
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in]  input  Source tensor. Data types supported: F32.
@@ -78,14 +88,14 @@ public:
     void run() override;
 
 protected:
-    MemoryGroup                        _memory_group;
-    CLFFTDigitReverseKernel            _digit_reverse_kernel;
-    std::vector<CLFFTRadixStageKernel> _fft_kernels;
-    CLFFTScaleKernel                   _scale_kernel;
-    CLTensor                           _digit_reversed_input;
-    CLTensor                           _digit_reverse_indices;
-    unsigned int                       _num_ffts;
-    bool                               _run_scale;
+    MemoryGroup                                         _memory_group;
+    std::unique_ptr<CLFFTDigitReverseKernel>            _digit_reverse_kernel;
+    std::vector<std::unique_ptr<CLFFTRadixStageKernel>> _fft_kernels;
+    std::unique_ptr<CLFFTScaleKernel>                   _scale_kernel;
+    CLTensor                                            _digit_reversed_input;
+    CLTensor                                            _digit_reverse_indices;
+    unsigned int                                        _num_ffts;
+    bool                                                _run_scale;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLFFT1D_H */

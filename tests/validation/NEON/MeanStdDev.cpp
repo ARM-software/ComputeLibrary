@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,26 +43,6 @@ RelativeTolerance<float> tolerance_rel_low_error(0.0005f);
 
 TEST_SUITE(NEON)
 TEST_SUITE(MeanStdDev)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-
-    // Create output variables
-    float mean    = 0.f;
-    float std_dev = 0.f;
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create configure function
-    NEMeanStdDev mean_std_dev_image;
-    mean_std_dev_image.configure(&src, &mean, &std_dev);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-}
 
 template <typename T>
 using NEMeanStdDevFixture = MeanStdDevValidationFixture<Tensor, Accessor, NEMeanStdDev, T>;

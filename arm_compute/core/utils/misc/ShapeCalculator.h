@@ -47,13 +47,13 @@ namespace shape_calculator
  *
  * @return the calculated shape
  */
-inline TensorShape calculate_reduce_mean_shape(ITensor *input, const Coordinates &reduction_axis, bool keep_dims)
+inline TensorShape calculate_reduce_mean_shape(ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims)
 {
     const int   reduction_ops = reduction_axis.num_dimensions();
     Coordinates axis_local    = reduction_axis;
-    const int   input_dims    = input->info()->num_dimensions();
+    const int   input_dims    = input->num_dimensions();
     convert_negative_axis(axis_local, input_dims);
-    TensorShape out_shape = input->info()->tensor_shape();
+    TensorShape out_shape = input->tensor_shape();
     // Configure reshape layer if we want to drop the dimensions
     if(!keep_dims)
     {
@@ -1083,24 +1083,24 @@ inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const 
 
 /** Calculate the depth to space output shape of a tensor
  *
- * @param[in] input Input tensor info
- * @param[in] block Block shape value
+ * @param[in] input_shape Input tensor shape
+ * @param[in] data_layout Operation data layout
+ * @param[in] block       Block shape value
  *
  * @return the calculated shape
  */
-inline TensorShape compute_depth_to_space_shape(const ITensorInfo *input, int block)
+inline TensorShape compute_depth_to_space_shape(const TensorShape &input_shape, DataLayout data_layout, int block)
 {
     ARM_COMPUTE_ERROR_ON(block < 2);
 
-    const DataLayout data_layout = input->data_layout();
-    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const int idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
-    TensorShape output_shape{ input->tensor_shape() };
-    output_shape.set(idx_width, input->dimension(idx_width) * block);
-    output_shape.set(idx_height, input->dimension(idx_height) * block);
-    output_shape.set(idx_channel, input->dimension(idx_channel) / (block * block));
+    TensorShape output_shape{ input_shape };
+    output_shape.set(idx_width, input_shape[idx_width] * block);
+    output_shape.set(idx_height, input_shape[idx_height] * block);
+    output_shape.set(idx_channel, input_shape[idx_channel] / (block * block));
 
     return output_shape;
 }
@@ -1157,9 +1157,12 @@ inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, const 
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 
-    output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_x + padding_left.x() + padding_right.x());
-    output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_y + padding_left.y() + padding_right.y());
-    output_shape.set(idx_batch, input->tensor_shape()[idx_batch] / (block_x * block_y));
+    ARM_COMPUTE_ERROR_ON((input->tensor_shape()[idx_width] + padding_left.x() + padding_right.x()) % block_x != 0);
+    ARM_COMPUTE_ERROR_ON((input->tensor_shape()[idx_height] + padding_left.y() + padding_right.y()) % block_y != 0);
+
+    output_shape.set(idx_width, (input->tensor_shape()[idx_width] + padding_left.x() + padding_right.x()) / block_x);
+    output_shape.set(idx_height, (input->tensor_shape()[idx_height] + padding_left.y() + padding_right.y()) / block_y);
+    output_shape.set(idx_batch, input->tensor_shape()[idx_batch] * block_x * block_y);
 
     return output_shape;
 }

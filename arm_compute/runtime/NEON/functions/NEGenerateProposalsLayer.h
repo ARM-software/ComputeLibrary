@@ -24,17 +24,17 @@
 #ifndef ARM_COMPUTE_NEGENERATEPROPOSALSLAYER_H
 #define ARM_COMPUTE_NEGENERATEPROPOSALSLAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDequantizationLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEPadLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
-#include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
+#include "arm_compute/runtime/NEON/functions/NEComputeAllAnchors.h"
+#include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEPadLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEPermute.h"
+#include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -67,6 +67,8 @@ public:
     NEGenerateProposalsLayer(const NEGenerateProposalsLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGenerateProposalsLayer &operator=(const NEGenerateProposalsLayer &) = delete;
+    /** Default destructor */
+    ~NEGenerateProposalsLayer();
 
     /** Set the input and output tensors.
      *
@@ -112,16 +114,16 @@ private:
     MemoryGroup _memory_group;
 
     // Neon kernels
-    NEPermuteKernel              _permute_deltas_kernel;
-    NEReshapeLayer               _flatten_deltas;
-    NEPermuteKernel              _permute_scores_kernel;
-    NEReshapeLayer               _flatten_scores;
-    NEComputeAllAnchorsKernel    _compute_anchors_kernel;
-    NEBoundingBoxTransformKernel _bounding_box_kernel;
-    NEPadLayerKernel             _pad_kernel;
-    NEDequantizationLayerKernel  _dequantize_anchors;
-    NEDequantizationLayerKernel  _dequantize_deltas;
-    NEQuantizationLayerKernel    _quantize_all_proposals;
+    NEPermute              _permute_deltas;
+    NEReshapeLayer         _flatten_deltas;
+    NEPermute              _permute_scores;
+    NEReshapeLayer         _flatten_scores;
+    NEComputeAllAnchors    _compute_anchors;
+    NEBoundingBoxTransform _bounding_box;
+    NEPadLayer             _pad;
+    NEDequantizationLayer  _dequantize_anchors;
+    NEDequantizationLayer  _dequantize_deltas;
+    NEQuantizationLayer    _quantize_all_proposals;
 
     // CPP functions
     CPPBoxWithNonMaximaSuppressionLimit _cpp_nms;

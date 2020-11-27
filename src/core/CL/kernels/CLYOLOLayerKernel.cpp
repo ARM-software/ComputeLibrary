@@ -21,20 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLYOLOLayerKernel.h"
+#include "src/core/CL/kernels/CLYOLOLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/Types.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -123,7 +125,6 @@ void CLYOLOLayerKernel::configure(const CLCompileContext &compile_context, ICLTe
     CLBuildOptions build_opts;
     build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
-    build_opts.add_option("-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(dt));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DA_VAL=" + float_to_string_with_full_precision(a_const));
     build_opts.add_option("-DB_VAL=" + float_to_string_with_full_precision(b_const));

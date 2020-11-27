@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
+#include "src/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

@@ -31,12 +31,15 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute scharr 3x3 filter. This function calls the following OpenCL kernels:
  *
  * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref CLScharr3x3Kernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class CLScharr3x3 : public ICLSimpleFunction

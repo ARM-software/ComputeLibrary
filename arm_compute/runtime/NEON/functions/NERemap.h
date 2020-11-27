@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,9 @@ class ITensor;
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NERemapKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NERemap : public INESimpleFunction
 {

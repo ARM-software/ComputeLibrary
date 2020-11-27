@@ -23,7 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEROIAlignLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEROIAlignLayerKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEROIAlignLayerKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

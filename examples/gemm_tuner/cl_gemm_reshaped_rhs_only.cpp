@@ -26,15 +26,14 @@
 #endif /* ARM_COMPUTE_CL */
 
 #include "CommonGemmExampleOptions.h"
-#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "GemmTunerHelpers.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "tests/CL/Helper.h"
 #include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"
@@ -224,11 +223,11 @@ public:
         kernel_info.activation_info         = act_info;
 
         // Initialise rhs_reshaped tensor info
-        auto_init_if_empty(*rhs_reshaped.info(), rhs.info()->clone()->set_tensor_shape(compute_rhs_reshaped_shape(*rhs.info(), rhs_info)));
+        rhs_reshaped.allocator()->init(TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));
 
         if(rhs_info.export_to_cl_image)
         {
-            arm_compute::cl_gemm::update_padding_for_cl_image(rhs_reshaped.info());
+            examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info());
         }
 
         // Validate argments

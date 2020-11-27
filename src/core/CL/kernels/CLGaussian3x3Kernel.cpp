@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGaussian3x3Kernel.h"
+#include "src/core/CL/kernels/CLGaussian3x3Kernel.h"
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <set>
 #include <string>

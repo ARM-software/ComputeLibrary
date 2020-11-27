@@ -118,6 +118,14 @@ public:
     {
         return _name;
     }
+    /** Returns program binary data.
+     *
+     * @return Program's binary data.
+     */
+    const std::vector<unsigned char> &binary() const
+    {
+        return _binary;
+    }
     /** User-defined conversion to the underlying CL program.
      *
      * @return The CL program object.

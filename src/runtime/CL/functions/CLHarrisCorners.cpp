@@ -24,8 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLHarrisCorners.h"
 
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
@@ -35,6 +33,10 @@
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLHarrisCornersKernel.h"
+#include "src/core/CL/kernels/CLSobel5x5Kernel.h"
+#include "src/core/CL/kernels/CLSobel7x7Kernel.h"
 #include "support/MemorySupport.h"
 
 #include <cmath>
@@ -45,12 +47,12 @@ using namespace arm_compute;
 CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
       _sobel(nullptr),
-      _harris_score(),
+      _harris_score(support::cpp14::make_unique<CLHarrisScoreKernel>()),
       _non_max_suppr(),
       _candidates(),
       _sort_euclidean(),
-      _border_gx(),
-      _border_gy(),
+      _border_gx(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _border_gy(support::cpp14::make_unique<CLFillBorderKernel>()),
       _gx(),
       _gy(),
       _score(),
@@ -60,6 +62,8 @@ CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager)
       _corners(nullptr)
 {
 }
+
+CLHarrisCorners::~CLHarrisCorners() = default;
 
 void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist,
                                 float sensitivity, int32_t gradient_size, int32_t block_size, ICLKeyPointArray *corners,
@@ -133,11 +137,11 @@ void CLHarrisCorners::configure(const CLCompileContext &compile_context, ICLImag
     _memory_group.manage(&_score);
 
     // Set/init Harris Score kernel accordingly with block_size
-    _harris_score.configure(compile_context, &_gx, &_gy, &_score, block_size, pow4_normalization_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
+    _harris_score->configure(compile_context, &_gx, &_gy, &_score, block_size, pow4_normalization_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
 
     // Configure border filling using harris score kernel's block size
-    _border_gx.configure(compile_context, &_gx, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
-    _border_gy.configure(compile_context, &_gy, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_gx->configure(compile_context, &_gx, _harris_score->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_gy->configure(compile_context, &_gy, _harris_score->border_size(), border_mode, PixelValue(constant_border_value));
 
     // Allocate intermediate buffers
     _gx.allocator()->allocate();
@@ -175,11 +179,11 @@ void CLHarrisCorners::run()
     _sobel->run();
 
     // Fill border before harris score kernel
-    CLScheduler::get().enqueue(_border_gx, false);
-    CLScheduler::get().enqueue(_border_gy, false);
+    CLScheduler::get().enqueue(*_border_gx, false);
+    CLScheduler::get().enqueue(*_border_gy, false);
 
     // Run harris score kernel
-    CLScheduler::get().enqueue(_harris_score, false);
+    CLScheduler::get().enqueue(*_harris_score, false);
 
     // Run non-maxima suppression
     _non_max_suppr.run();

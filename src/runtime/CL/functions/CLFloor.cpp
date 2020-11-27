@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLFloor.h"
 
-#include "arm_compute/core/CL/kernels/CLFloorKernel.h"
+#include "src/core/CL/kernels/CLFloorKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

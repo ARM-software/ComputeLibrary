@@ -29,7 +29,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to execute flatten. This function calls the following OpenCL kernel:
 *

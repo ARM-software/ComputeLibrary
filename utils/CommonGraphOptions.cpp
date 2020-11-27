@@ -23,6 +23,7 @@
  */
 #include "CommonGraphOptions.h"
 
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/graph/TypeLoader.h"
 #include "arm_compute/graph/TypePrinter.h"
 
@@ -169,7 +170,11 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     data_layout->set_help("Data layout to use");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
     enable_cl_cache->set_help("Enable OpenCL program caches");
-    tuner_mode->set_help("Configures the time taken by the tuner to tune. Slow tuner produces the most performant LWS configuration");
+    tuner_mode->set_help(
+        "Configures the time taken by the tuner to tune. "
+        "Exhaustive: slowest but produces the most performant LWS configuration. "
+        "Normal: slow but produces the LWS configurations on par with Exhaustive most of the time. "
+        "Rapid: fast but produces less performant LWS configurations");
     fast_math_hint->set_help("Enable fast math");
     data_path->set_help("Path where graph parameters reside");
     image->set_help("Input image for the graph");

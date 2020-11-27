@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,30 +29,6 @@
 
 namespace arm_compute
 {
-arm_compute::DataType data_type_from_name(const std::string &name)
-{
-    static const std::map<std::string, arm_compute::DataType> data_types =
-    {
-        { "f16", DataType::F16 },
-        { "f32", DataType::F32 },
-        { "qasymm8", DataType::QASYMM8 },
-    };
-
-#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
-    try
-    {
-#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
-        return data_types.at(arm_compute::utility::tolower(name));
-
-#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
-    }
-    catch(const std::out_of_range &)
-    {
-        throw std::invalid_argument(name);
-    }
-#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
-}
-
 arm_compute::DataLayout data_layout_from_name(const std::string &name)
 {
     static const std::map<std::string, arm_compute::DataLayout> data_layouts =

@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLTile.h"
 
-#include "arm_compute/core/CL/kernels/CLTileKernel.h"
+#include "src/core/CL/kernels/CLTileKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -29,11 +29,16 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLMultiImage;
 class ICLTensor;
 using ICLImage = ICLTensor;
 
-/** Basic function to run @ref CLChannelExtractKernel to perform channel extraction. */
+/** Basic function to run @ref CLChannelExtractKernel to perform channel extraction.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLChannelExtract : public ICLSimpleFunction
 {
 public:

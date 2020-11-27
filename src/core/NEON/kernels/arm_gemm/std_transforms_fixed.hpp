@@ -23,8 +23,10 @@
  */
 #pragma once
 
+#include "convolver.hpp"
 #include "mergeresults.hpp"
 #include "transform.hpp"
+#include "interleave_indirect.hpp"
 
 namespace arm_gemm {
 
@@ -39,14 +41,26 @@ namespace arm_gemm {
  * The optional 'block' parameter is for kernels using dot-product type
  * instructions like UDOT and SDOT.
  */
-template<typename TOperand, typename TResult, unsigned int height, unsigned int width, unsigned int block=1>
+template<typename TOperand, typename TResult, unsigned int height, unsigned int width, unsigned int block=1, bool integrate_sums=false>
 class StdTransformsFixed
 {
 public:
     template<typename TIn>
     void PrepareA(TOperand *out, const TIn *in, const int stride, const int y0,
-                  const int ymax, const int k0, const int kmax) const {
-        Transform<height, block, false>(out, in, stride, y0, ymax, k0, kmax);
+                  const int ymax, const int k0, const int kmax, int32_t row_sum_multiplier) const {
+        Interleave<height, block, VLType::None>(out, in, stride, y0, ymax, k0, kmax, integrate_sums, row_sum_multiplier);
+    }
+
+    template<typename TIn>
+    void PrepareA_indirect(TOperand *out, const TIn * const * const *ptr, size_t stringlen, size_t rounded_stringlen, const int y0,
+                           const int ymax, const int k0, const int kmax, int32_t row_sum_multiplier) {
+        IndirectInterleave<height, block, VLType::None>(out, ptr, stringlen, rounded_stringlen, y0, ymax, k0, kmax, integrate_sums, row_sum_multiplier);
+    }
+
+    template<typename TIn>
+    void PrepareA_convolution(TOperand *out, const TIn *ptr, size_t stride, const convolver<TIn> &conv, size_t rounded_stringlen,
+                              const int y0, const int ymax, const int k0, const int kmax, int32_t row_sum_multiplier) {
+        ConvolutionInterleave<height, block, VLType::None>(out, ptr, stride, conv, rounded_stringlen, y0, ymax, k0, kmax, integrate_sums, row_sum_multiplier);
     }
 
     template<typename TIn>

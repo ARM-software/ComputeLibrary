@@ -23,7 +23,7 @@
  */
 #include "UpsampleLayer.h"
 
-#include "arm_compute/core/utils/misc/Requires.h"
+#include "support/Requires.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute

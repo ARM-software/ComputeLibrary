@@ -21,24 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
+#include "src/core/NEON/kernels/NEPoolingLayerKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
-#include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/NEFixedPoint.h"
+#include "src/core/NEON/NEMath.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/ToolchainSupport.h"
 
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 #include <algorithm>
 #include <arm_neon.h>
 #include <cmath>
@@ -53,6 +55,20 @@ using namespace misc::shape_calculator;
 
 namespace
 {
+template <typename T>
+inline typename std::enable_if<std::is_same<T, int8_t>::value, int8_t>::type
+quantize(float val, const UniformQuantizationInfo &info)
+{
+    return quantize_qasymm8_signed(val, info);
+}
+
+template <typename T>
+inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8_t>::type
+quantize(float val, const UniformQuantizationInfo &info)
+{
+    return quantize_qasymm8(val, info);
+}
+
 inline float calculate_avg_scale(bool exclude_padding, DataLayout data_layout, const Coordinates &id, const int pool_size_x, const int pool_size_y, const int upper_bound_w, const int upper_bound_h,
                                  const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
@@ -215,19 +231,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     num_elems_processed_per_iteration = 1;
     num_elems_horizontal_window       = 1;
 
-    const bool is_nhwc = data_layout == DataLayout::NHWC;
-
     if(is_square)
     {
         switch(input->data_type())
         {
             case DataType::QASYMM8:
             case DataType::QASYMM8_SIGNED:
-                if(is_nhwc)
-                {
-                    num_elems_processed_per_iteration = 16;
-                    break;
-                }
                 switch(pool_size_x)
                 {
                     case 2:
@@ -246,11 +255,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                 break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
-                if(is_nhwc)
-                {
-                    num_elems_processed_per_iteration = 8;
-                    break;
-                }
                 switch(pool_size_x)
                 {
                     case 2:
@@ -265,11 +269,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                 break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::F32:
-                if(is_nhwc)
-                {
-                    num_elems_processed_per_iteration = 4;
-                    break;
-                }
                 switch(pool_size_x)
                 {
                     case 2:
@@ -290,13 +289,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
             default:
                 ARM_COMPUTE_ERROR("Element size not supported");
                 break;
-        }
-    }
-    else
-    {
-        if(is_nhwc)
-        {
-            num_elems_processed_per_iteration = 16 / input->element_size();
         }
     }
 
@@ -322,26 +314,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         if(indices)
         {
             AccessWindowHorizontal indices_access(indices, 0, num_elems_horizontal_window);
-            window_changed = update_window_and_padding(win, input_access, output_access, indices_access);
-        }
-        else
-        {
-            window_changed = update_window_and_padding(win, input_access, output_access);
-        }
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-    }
-    else
-    {
-        TensorShape output_shape{ input->tensor_shape() };
-        output_shape.set(1, pooled_w);
-        output_shape.set(2, pooled_h);
-        TensorInfo output_info(input->clone()->set_tensor_shape(output_shape));
-        win = calculate_max_window(output_info, Steps(num_elems_processed_per_iteration));
-        AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-        if(indices)
-        {
-            AccessWindowHorizontal indices_access(indices, 0, num_elems_processed_per_iteration);
             window_changed = update_window_and_padding(win, input_access, output_access, indices_access);
         }
         else
@@ -522,207 +494,141 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
 
     if(data_type == DataType::QASYMM8)
     {
-        if(pool_size.x() == 2 && pool_stride_x < 3 && _is_square)
+        if(!is_nchw)
         {
-            if(is_nchw)
+            _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<uint8_t>;
+        }
+        else
+        {
+            if(pool_size.x() == 2 && pool_stride_x < 3 && _is_square)
             {
                 _func = &NEPoolingLayerKernel::pooling2_q8_nchw<uint8_t>;
             }
-            else
-            {
-                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<uint8_t>;
-            }
-        }
-        else if(pool_size.x() == 3 && pool_stride_x < 3 && _is_square)
-        {
-            if(is_nchw)
+            else if(pool_size.x() == 3 && pool_stride_x < 3 && _is_square)
             {
                 _func = &NEPoolingLayerKernel::pooling3_q8_nchw<uint8_t>;
             }
             else
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<uint8_t>;
-            }
-        }
-        else
-        {
-            if(is_nchw)
-            {
                 _func = &NEPoolingLayerKernel::poolingMxN_q8_nchw<uint8_t>;
-            }
-            else
-            {
-                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<uint8_t>;
             }
         }
     }
     else if(data_type == DataType::QASYMM8_SIGNED)
     {
-        if(pool_size.x() == 2 && pool_stride_x < 3 && _is_square)
+        if(!is_nchw)
         {
-            if(is_nchw)
+            _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<int8_t>;
+        }
+        else
+        {
+            if(pool_size.x() == 2 && pool_stride_x < 3 && _is_square)
             {
                 _func = &NEPoolingLayerKernel::pooling2_q8_nchw<int8_t>;
             }
-            else
-            {
-                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<int8_t>;
-            }
-        }
-        else if(pool_size.x() == 3 && pool_stride_x < 3 && _is_square)
-        {
-            if(is_nchw)
+            else if(pool_size.x() == 3 && pool_stride_x < 3 && _is_square)
             {
                 _func = &NEPoolingLayerKernel::pooling3_q8_nchw<int8_t>;
             }
             else
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<int8_t>;
-            }
-        }
-        else
-        {
-            if(is_nchw)
-            {
                 _func = &NEPoolingLayerKernel::poolingMxN_q8_nchw<int8_t>;
-            }
-            else
-            {
-                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<int8_t>;
             }
         }
     }
     else if(data_type == DataType::F16)
     {
-        if(_is_square)
+        if(!is_nchw)
         {
-            switch(pool_size.x())
-            {
-                case 2:
-                {
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::pooling2_f16_nchw;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
-                    }
-                }
-                break;
-                case 3:
-                {
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::pooling3_f16_nchw;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
-                    }
-                }
-                break;
-                default:
-                {
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nchw;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
-                    }
-                    break;
-                }
-                break;
-            }
+            _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
         }
         else
         {
-            if(is_nchw)
+            if(_is_square)
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_f16_nchw;
+                switch(pool_size.x())
+                {
+                    case 2:
+                    {
+                        _func = &NEPoolingLayerKernel::pooling2_f16_nchw;
+                    }
+                    break;
+                    case 3:
+                    {
+                        _func = &NEPoolingLayerKernel::pooling3_f16_nchw;
+                    }
+                    break;
+                    default:
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nchw;
+                        break;
+                    }
+                }
             }
             else
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
+                _func = &NEPoolingLayerKernel::poolingMxN_f16_nchw;
             }
         }
     }
     else if(data_type == DataType::F32)
     {
-        if(_is_square)
+        if(!is_nchw)
         {
-            switch(pool_size.x())
-            {
-                case 2:
-                {
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::pooling2_f32_nchw;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
-                    }
-                    break;
-                }
-                case 3:
-                {
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::pooling3_f32_nchw;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
-                    }
-                    break;
-                }
-                case 7:
-                {
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::pooling7_f32_nchw;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
-                    }
-                    break;
-                }
-                default:
-                {
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nchw;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
-                    }
-                    break;
-                }
-            }
+            _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
         }
         else
         {
-            if(is_nchw)
+            if(_is_square)
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_f32_nchw;
+                switch(pool_size.x())
+                {
+                    case 2:
+                    {
+                        _func = &NEPoolingLayerKernel::pooling2_f32_nchw;
+                        break;
+                    }
+                    case 3:
+                    {
+                        _func = &NEPoolingLayerKernel::pooling3_f32_nchw;
+                        break;
+                    }
+                    case 7:
+                    {
+                        _func = &NEPoolingLayerKernel::pooling7_f32_nchw;
+                        break;
+                    }
+                    default:
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nchw;
+                        break;
+                    }
+                }
             }
             else
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
+                _func = &NEPoolingLayerKernel::poolingMxN_f32_nchw;
             }
         }
     }
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), (indices) ? indices->info() : nullptr,
-                                                    pool_info, _num_elems_processed_per_iteration, _border_size, pooled_w, pooled_h, pool_size.x(), pool_size.y());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    if(!is_nchw)
+    {
+        // Configure kernel window
+        Window      win = calculate_max_window(*output->info(), Steps());
+        Coordinates coord;
+        coord.set_num_dimensions(output->info()->num_dimensions());
+        output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+        INEKernel::configure(win);
+    }
+    else
+    {
+        // Configure kernel window
+        auto win_config = validate_and_configure_window(input->info(), output->info(), (indices) ? indices->info() : nullptr,
+                                                        pool_info, _num_elems_processed_per_iteration, _border_size, pooled_w, pooled_h, pool_size.x(), pool_size.y());
+        ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+        INEKernel::configure(win_config.second);
+    }
 }
 
 template <typename T>
@@ -1371,9 +1277,16 @@ void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 void NEPoolingLayerKernel::pooling2_f16_nhwc_maxpool_indices(const Window &window_input, const Window &window)
 {
+    const int window_start_x = window.x().start();
+    const int window_end_x   = window.x().end();
+    const int window_step_x  = 8;
+
+    Window window_out = window;
+    window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
+
     Iterator input(_input, window_input);
-    Iterator output(_output, window);
-    Iterator indices(_indices, window);
+    Iterator output(_output, window_out);
+    Iterator indices(_indices, window_out);
 
     const int pool_pad_top  = _pool_info.pad_stride_info.pad_top();
     const int pool_pad_left = _pool_info.pad_stride_info.pad_left();
@@ -1386,7 +1299,7 @@ void NEPoolingLayerKernel::pooling2_f16_nhwc_maxpool_indices(const Window &windo
     const int in_stride_y = static_cast<int>(_input->info()->strides_in_bytes().y());
     const int in_stride_z = static_cast<int>(_input->info()->strides_in_bytes().z());
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates & id)
     {
         const int idx_width    = id.y() * pool_stride_x;
         const int idx_height   = id.z() * pool_stride_y;
@@ -1399,50 +1312,77 @@ void NEPoolingLayerKernel::pooling2_f16_nhwc_maxpool_indices(const Window &windo
                                  (_input->info()->strides_in_bytes().z());
         const int in_x1_offset = (pool_start_x + 1 - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (pool_start_y - pool_pad_top) * static_cast<int>
                                  (_input->info()->strides_in_bytes().z());
-
         const int in_x2_offset = (pool_start_x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (pool_start_y + 1 - pool_pad_top) * static_cast<int>
                                  (_input->info()->strides_in_bytes().z());
-
         const int in_x3_offset = (pool_start_x + 1 - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (pool_start_y + 1 - pool_pad_top) * static_cast<int>
                                  (_input->info()->strides_in_bytes().z());
 
-        const auto  in_x0_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x0_offset);
-        const auto  in_x1_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x1_offset);
-        const auto  in_x2_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x2_offset);
-        const auto  in_x3_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x3_offset);
-        const auto  v_x0      = vld1q_f16(in_x0_ptr);
-        const auto  v_x1      = vld1q_f16(in_x1_ptr);
-        const auto  v_x2      = vld1q_f16(in_x2_ptr);
-        const auto  v_x3      = vld1q_f16(in_x3_ptr);
-        float16x8_t vres      = vmaxq_f16(vmaxq_f16(v_x2, v_x3), vmaxq_f16(v_x0, v_x1));
-        // Store result
-        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vres);
+        int x_off = window_start_x;
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
+        {
+            const auto  in_x0_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x0_offset) + x_off;
+            const auto  in_x1_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x1_offset) + x_off;
+            const auto  in_x2_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x2_offset) + x_off;
+            const auto  in_x3_ptr = reinterpret_cast<const float16_t *>(input.ptr() + in_x3_offset) + x_off;
+            const auto  v_x0      = vld1q_f16(in_x0_ptr);
+            const auto  v_x1      = vld1q_f16(in_x1_ptr);
+            const auto  v_x2      = vld1q_f16(in_x2_ptr);
+            const auto  v_x3      = vld1q_f16(in_x3_ptr);
+            float16x8_t vres      = vmaxq_f16(vmaxq_f16(v_x2, v_x3), vmaxq_f16(v_x0, v_x1));
+            // Store result
+            vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + x_off, vres);
 
-        const uint32_t   offset_base    = offset_no_padding<float16_t>(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
-        const uint32_t   offset_x0      = (uint32_t)offset_base / sizeof(float16_t);
-        const uint32_t   offset_x1      = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_right;
-        const uint32_t   offset_x2      = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_right * _input->info()->tensor_shape()[1];
-        const uint32_t   offset_x3      = (uint32_t)offset_x2 + in_stride_y / sizeof(float16_t) - pad_right;
-        const uint32x4_t voffset_x0_0   = { offset_x0, offset_x0 + 1, offset_x0 + 2, offset_x0 + 3 };
-        const uint32x4_t voffset_x0_1   = { offset_x0 + 4, offset_x0 + 5, offset_x0 + 6, offset_x0 + 7 };
-        const uint16x8_t voffset_x0     = vcombine_u16(vmovn_u32(voffset_x0_0), vmovn_u32(voffset_x0_1));
-        const uint32x4_t voffset_x1_0   = { offset_x1, offset_x1 + 1, offset_x1 + 2, offset_x1 + 3 };
-        const uint32x4_t voffset_x1_1   = { offset_x1 + 4, offset_x1 + 5, offset_x1 + 6, offset_x1 + 7 };
-        const uint16x8_t voffset_x1     = vcombine_u16(vmovn_u32(voffset_x1_0), vmovn_u32(voffset_x1_1));
-        const uint32x4_t voffset_x2_0   = { offset_x2, offset_x2 + 1, offset_x2 + 2, offset_x2 + 3 };
-        const uint32x4_t voffset_x2_1   = { offset_x2 + 4, offset_x2 + 5, offset_x2 + 6, offset_x2 + 7 };
-        const uint16x8_t voffset_x2     = vcombine_u16(vmovn_u32(voffset_x2_0), vmovn_u32(voffset_x2_1));
-        const uint32x4_t voffset_x3_0   = { offset_x3, offset_x3 + 1, offset_x3 + 2, offset_x3 + 3 };
-        const uint32x4_t voffset_x3_1   = { offset_x3 + 4, offset_x3 + 5, offset_x3 + 6, offset_x3 + 7 };
-        const uint16x8_t voffset_x3     = vcombine_u16(vmovn_u32(voffset_x3_0), vmovn_u32(voffset_x3_1));
-        const uint16x8_t tmp_indices0   = vbslq_u16(vcgeq_f16(v_x0, v_x1), voffset_x0, voffset_x1);
-        const uint16x8_t tmp_indices1   = vbslq_u16(vcgeq_f16(v_x2, v_x3), voffset_x2, voffset_x3);
-        const uint16x8_t tmp_indices2   = vbslq_u16(vcgeq_f16(vmaxq_f16(v_x0, v_x1), vmaxq_f16(v_x2, v_x3)), tmp_indices0, tmp_indices1);
-        const uint32x4_t tmp_indeces3_0 = vmovl_u16(vget_low_u16(tmp_indices2));
-        const uint32x4_t tmp_indeces3_1 = vmovl_u16(vget_high_u16(tmp_indices2));
-        // Store indicies
-        vst1q_u32(reinterpret_cast<uint32_t *>(indices.ptr()), tmp_indeces3_0);
-        vst1q_u32(reinterpret_cast<uint32_t *>(indices.ptr() + 16), tmp_indeces3_1);
+            const uint32_t   offset_base    = offset_no_padding<float16_t>(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
+            const uint32_t   offset_x0      = (uint32_t)offset_base / sizeof(float16_t) + x_off;
+            const uint32_t   offset_x1      = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_right;
+            const uint32_t   offset_x2      = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_right * _input->info()->tensor_shape()[1];
+            const uint32_t   offset_x3      = (uint32_t)offset_x2 + in_stride_y / sizeof(float16_t) - pad_right;
+            const uint32x4_t voffset_x0_0   = { offset_x0, offset_x0 + 1, offset_x0 + 2, offset_x0 + 3 };
+            const uint32x4_t voffset_x0_1   = { offset_x0 + 4, offset_x0 + 5, offset_x0 + 6, offset_x0 + 7 };
+            const uint16x8_t voffset_x0     = vcombine_u16(vmovn_u32(voffset_x0_0), vmovn_u32(voffset_x0_1));
+            const uint32x4_t voffset_x1_0   = { offset_x1, offset_x1 + 1, offset_x1 + 2, offset_x1 + 3 };
+            const uint32x4_t voffset_x1_1   = { offset_x1 + 4, offset_x1 + 5, offset_x1 + 6, offset_x1 + 7 };
+            const uint16x8_t voffset_x1     = vcombine_u16(vmovn_u32(voffset_x1_0), vmovn_u32(voffset_x1_1));
+            const uint32x4_t voffset_x2_0   = { offset_x2, offset_x2 + 1, offset_x2 + 2, offset_x2 + 3 };
+            const uint32x4_t voffset_x2_1   = { offset_x2 + 4, offset_x2 + 5, offset_x2 + 6, offset_x2 + 7 };
+            const uint16x8_t voffset_x2     = vcombine_u16(vmovn_u32(voffset_x2_0), vmovn_u32(voffset_x2_1));
+            const uint32x4_t voffset_x3_0   = { offset_x3, offset_x3 + 1, offset_x3 + 2, offset_x3 + 3 };
+            const uint32x4_t voffset_x3_1   = { offset_x3 + 4, offset_x3 + 5, offset_x3 + 6, offset_x3 + 7 };
+            const uint16x8_t voffset_x3     = vcombine_u16(vmovn_u32(voffset_x3_0), vmovn_u32(voffset_x3_1));
+            const uint16x8_t tmp_indices0   = vbslq_u16(vcgeq_f16(v_x0, v_x1), voffset_x0, voffset_x1);
+            const uint16x8_t tmp_indices1   = vbslq_u16(vcgeq_f16(v_x2, v_x3), voffset_x2, voffset_x3);
+            const uint16x8_t tmp_indices2   = vbslq_u16(vcgeq_f16(vmaxq_f16(v_x0, v_x1), vmaxq_f16(v_x2, v_x3)), tmp_indices0, tmp_indices1);
+            const uint32x4_t tmp_indeces3_0 = vmovl_u16(vget_low_u16(tmp_indices2));
+            const uint32x4_t tmp_indeces3_1 = vmovl_u16(vget_high_u16(tmp_indices2));
+            // Store indicies
+            vst1q_u32(reinterpret_cast<uint32_t *>(indices.ptr()) + x_off, tmp_indeces3_0);
+            vst1q_u32(reinterpret_cast<uint32_t *>(indices.ptr() + 16) + x_off, tmp_indeces3_1);
+        }
+
+        // Left-overs loop
+        for(; x_off < window_end_x; ++x_off)
+        {
+            const auto x0  = *(reinterpret_cast<const float16_t *>(input.ptr() + in_x0_offset) + x_off);
+            const auto x1  = *(reinterpret_cast<const float16_t *>(input.ptr() + in_x1_offset) + x_off);
+            const auto x2  = *(reinterpret_cast<const float16_t *>(input.ptr() + in_x2_offset) + x_off);
+            const auto x3  = *(reinterpret_cast<const float16_t *>(input.ptr() + in_x3_offset) + x_off);
+            float16_t  res = std::max(std::max(x2, x3), std::max(x0, x1));
+
+            // Store result
+            *(reinterpret_cast<float16_t *>(output.ptr()) + x_off) = res;
+
+            const uint32_t offset_base = offset_no_padding<float16_t>(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
+            const uint32_t offset_x0   = (uint32_t)offset_base / sizeof(float16_t) + x_off;
+            const uint32_t offset_x1   = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_right;
+            const uint32_t offset_x2   = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_right * _input->info()->tensor_shape()[1];
+            const uint32_t offset_x3   = (uint32_t)offset_x2 + in_stride_y / sizeof(float16_t) - pad_right;
+            const uint32_t tmp_idx0    = (x0 >= x1) ? offset_x0 : offset_x1;
+            const uint32_t tmp_idx1    = (x2 >= x3) ? offset_x2 : offset_x3;
+            const uint32_t tmp_idx2    = (std::max(x0, x1) >= std::max(x2, x3)) ? tmp_idx0 : tmp_idx1;
+
+            // Store indices
+            *(reinterpret_cast<uint32_t *>(indices.ptr()) + x_off) = tmp_idx2;
+        }
     },
     input, output, indices);
 }
@@ -1457,8 +1397,15 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
     {
         pooling2_f16_nhwc_maxpool_indices(window_input, window);
     }
+    const int window_start_x = window.x().start();
+    const int window_end_x   = window.x().end();
+    const int window_step_x  = 8;
+
+    Window window_out = window;
+    window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
+
     Iterator input(_input, window_input);
-    Iterator output(_output, window);
+    Iterator output(_output, window_out);
 
     const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.width;
     const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().z() : _pool_info.pool_size.height;
@@ -1474,7 +1421,7 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
 
     float16x8_t vres;
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates & id)
     {
         const int idx_width    = id.y() * pool_stride_x;
         const int idx_height   = id.z() * pool_stride_y;
@@ -1486,60 +1433,121 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
         const int pool_start_x = std::max(0, window_input.y().start() + pool_limit_x);
         const int pool_end_x   = std::min(pool_size_x, window_input.y().end() + pool_limit_x);
 
-        if(pooling_type != PoolingType::MAX)
+        int x_off = window_start_x;
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
         {
-            // Calculate scale
-            const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                    pool_stride_y);
-            const float16x8_t scale_v = vdupq_n_f16(scale);
-
-            // Perform pooling
-            vres = vdupq_n_f16(0.0f);
-            for(int y = pool_start_y; y < pool_end_y; ++y)
+            if(pooling_type != PoolingType::MAX)
             {
-                for(int x = pool_start_x; x < pool_end_x; ++x)
-                {
-                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) +
-                                                                                           (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().z())));
+                // Calculate scale
+                const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                        pool_stride_y);
+                const float16x8_t scale_v = vdupq_n_f16(scale);
 
-                    // Get power of 2 in case of l2 pooling and accumulate
-                    if(pooling_type == PoolingType::L2)
+                // Perform pooling
+                vres = vdupq_n_f16(0.0f);
+                for(int y = pool_start_y; y < pool_end_y; ++y)
+                {
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
                     {
-                        vres = vaddq_f16(vres, vmulq_f16(data, data));
+                        const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) +
+                                                                                               (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().z())) + x_off);
+
+                        // Get power of 2 in case of l2 pooling and accumulate
+                        if(pooling_type == PoolingType::L2)
+                        {
+                            vres = vaddq_f16(vres, vmulq_f16(data, data));
+                        }
+                        else
+                        {
+                            vres = vaddq_f16(vres, data);
+                        }
                     }
-                    else
+                }
+                // Divide by scale
+                vres = vmulq_f16(vres, scale_v);
+            }
+            else
+            {
+                vres = vdupq_n_f16(std::numeric_limits<float>::lowest());
+
+                for(int y = pool_start_y; y < pool_end_y; ++y)
+                {
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
                     {
-                        vres = vaddq_f16(vres, data);
+                        const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) +
+                                                                                               (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().z())) + x_off);
+                        vres                   = vmaxq_f16(vres, data);
                     }
                 }
             }
-            // Divide by scale
-            vres = vmulq_f16(vres, scale_v);
-        }
-        else
-        {
-            vres = vdupq_n_f16(std::numeric_limits<float>::lowest());
 
-            for(int y = pool_start_y; y < pool_end_y; ++y)
+            // Calculate square-root in case of l2 pooling
+            if(pooling_type == PoolingType::L2)
             {
-                for(int x = pool_start_x; x < pool_end_x; ++x)
+                float16x8_t sqrt_reciprocal = vrsqrteq_f16(vres);
+                vres                        = vmulq_f16(vres, vmulq_f16(vrsqrtsq_f16(vmulq_f16(vres, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal));
+            }
+
+            // Store result
+            vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + x_off, vres);
+        }
+
+        // Left-overs loop
+        for(; x_off < window_end_x; ++x_off)
+        {
+            float16_t res = 0.0f;
+
+            if(pooling_type != PoolingType::MAX)
+            {
+                // Calculate scale
+                const float16_t scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                            pool_stride_y);
+
+                for(int y = pool_start_y; y < pool_end_y; ++y)
                 {
-                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) +
-                                                                                           (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().z())));
-                    vres                   = vmaxq_f16(vres, data);
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
+                    {
+                        const float data = *(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                 (_input->info()->strides_in_bytes().z())) + x_off);
+
+                        // Get power of 2 in case of l2 pooling and accumulate
+                        if(pooling_type == PoolingType::L2)
+                        {
+                            res += data * data;
+                        }
+                        else
+                        {
+                            res += data;
+                        }
+                    }
+                }
+
+                // Divide by scale
+                res *= scale;
+            }
+            else
+            {
+                res = std::numeric_limits<float>::lowest();
+                for(int y = pool_start_y; y < pool_end_y; ++y)
+                {
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
+                    {
+                        const float16_t data = *(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                     (_input->info()->strides_in_bytes().z())) + x_off);
+                        res                  = std::max(res, data);
+                    }
                 }
             }
-        }
 
-        // Calculate square-root in case of l2 pooling
-        if(pooling_type == PoolingType::L2)
-        {
-            float16x8_t sqrt_reciprocal = vrsqrteq_f16(vres);
-            vres                        = vmulq_f16(vres, vmulq_f16(vrsqrtsq_f16(vmulq_f16(vres, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal));
-        }
+            // Calculate square-root in case of l2 pooling
+            if(pooling_type == PoolingType::L2)
+            {
+                res = std::sqrt(res);
+            }
 
-        // Store result
-        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vres);
+            // Store result
+            *(reinterpret_cast<float16_t *>(output.ptr()) + x_off) = res;
+        }
     },
     input, output);
 
@@ -1900,8 +1908,15 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
     }
     else
     {
+        const int window_start_x = window.x().start();
+        const int window_end_x   = window.x().end();
+        const int window_step_x  = 4;
+
+        Window window_out = window;
+        window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
+
         Iterator input(_input, window_input);
-        Iterator output(_output, window);
+        Iterator output(_output, window_out);
 
         const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.width;
         const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().z() : _pool_info.pool_size.height;
@@ -1917,7 +1932,7 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
 
         float32x4_t vres;
 
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window_out, [&](const Coordinates & id)
         {
             const int idx_width    = id.y() * pool_stride_x;
             const int idx_height   = id.z() * pool_stride_y;
@@ -1929,64 +1944,125 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
             const int pool_start_x = std::max(0, window_input.y().start() + pool_limit_x);
             const int pool_end_x   = std::min(pool_size_x, window_input.y().end() + pool_limit_x);
 
-            if(pooling_type != PoolingType::MAX)
+            int x_off = window_start_x;
+            for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
             {
-                // Calculate scale
-                const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                        pool_stride_y);
-                const float32x4_t scale_v = vdupq_n_f32(scale);
-
-                // Perform pooling
-                vres = vdupq_n_f32(0.0f);
-
-                for(int y = pool_start_y; y < pool_end_y; ++y)
+                if(pooling_type != PoolingType::MAX)
                 {
-                    for(int x = pool_start_x; x < pool_end_x; ++x)
-                    {
-                        const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
-                                                                                           (_input->info()->strides_in_bytes().z())));
+                    // Calculate scale
+                    const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                            pool_stride_y);
+                    const float32x4_t scale_v = vdupq_n_f32(scale);
 
-                        // Get power of 2 in case of l2 pooling and accumulate
-                        if(pooling_type == PoolingType::L2)
+                    // Perform pooling
+                    vres = vdupq_n_f32(0.0f);
+
+                    for(int y = pool_start_y; y < pool_end_y; ++y)
+                    {
+                        for(int x = pool_start_x; x < pool_end_x; ++x)
                         {
-                            vres = vmlaq_f32(vres, data, data);
+                            const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                               (_input->info()->strides_in_bytes().z())) + x_off);
+
+                            // Get power of 2 in case of l2 pooling and accumulate
+                            if(pooling_type == PoolingType::L2)
+                            {
+                                vres = vmlaq_f32(vres, data, data);
+                            }
+                            else
+                            {
+                                vres = vaddq_f32(vres, data);
+                            }
                         }
-                        else
+                    }
+                    // Divide by scale
+                    vres = vmulq_f32(vres, scale_v);
+                }
+                else
+                {
+                    vres = vdupq_n_f32(std::numeric_limits<float>::lowest());
+                    for(int y = pool_start_y; y < pool_end_y; ++y)
+                    {
+                        for(int x = pool_start_x; x < pool_end_x; ++x)
                         {
-                            vres = vaddq_f32(vres, data);
+                            const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                               (_input->info()->strides_in_bytes().z())) + x_off);
+                            vres                   = vmaxq_f32(vres, data);
                         }
                     }
                 }
-                // Divide by scale
-                vres = vmulq_f32(vres, scale_v);
-            }
-            else
-            {
-                vres = vdupq_n_f32(std::numeric_limits<float>::lowest());
-                for(int y = pool_start_y; y < pool_end_y; ++y)
+
+                // Calculate square-root in case of l2 pooling
+                if(pooling_type == PoolingType::L2)
                 {
-                    for(int x = pool_start_x; x < pool_end_x; ++x)
+                    float32x4_t l2_res = { static_cast<float>(sqrt(vgetq_lane_f32(vres, 0))),
+                                           static_cast<float>(sqrt(vgetq_lane_f32(vres, 1))),
+                                           static_cast<float>(sqrt(vgetq_lane_f32(vres, 2))),
+                                           static_cast<float>(sqrt(vgetq_lane_f32(vres, 3)))
+                                         };
+                    vres = l2_res;
+                }
+
+                // Store result
+                vst1q_f32(reinterpret_cast<float *>(output.ptr()) + x_off, vres);
+            }
+
+            // Left-overs loop
+            for(; x_off < window_end_x; ++x_off)
+            {
+                float res = 0.0f;
+
+                if(pooling_type != PoolingType::MAX)
+                {
+                    // Calculate scale
+                    const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                            pool_stride_y);
+
+                    for(int y = pool_start_y; y < pool_end_y; ++y)
                     {
-                        const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
-                                                                                           (_input->info()->strides_in_bytes().z())));
-                        vres                   = vmaxq_f32(vres, data);
+                        for(int x = pool_start_x; x < pool_end_x; ++x)
+                        {
+                            const float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                 (_input->info()->strides_in_bytes().z())) + x_off);
+
+                            // Get power of 2 in case of l2 pooling and accumulate
+                            if(pooling_type == PoolingType::L2)
+                            {
+                                res += data * data;
+                            }
+                            else
+                            {
+                                res += data;
+                            }
+                        }
+                    }
+
+                    // Divide by scale
+                    res *= scale;
+                }
+                else
+                {
+                    res = std::numeric_limits<float>::lowest();
+                    for(int y = pool_start_y; y < pool_end_y; ++y)
+                    {
+                        for(int x = pool_start_x; x < pool_end_x; ++x)
+                        {
+                            const float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                 (_input->info()->strides_in_bytes().z())) + x_off);
+                            res              = std::max(res, data);
+                        }
                     }
                 }
-            }
 
-            // Calculate square-root in case of l2 pooling
-            if(pooling_type == PoolingType::L2)
-            {
-                float32x4_t l2_res = { static_cast<float>(sqrt(vgetq_lane_f32(vres, 0))),
-                                       static_cast<float>(sqrt(vgetq_lane_f32(vres, 1))),
-                                       static_cast<float>(sqrt(vgetq_lane_f32(vres, 2))),
-                                       static_cast<float>(sqrt(vgetq_lane_f32(vres, 3)))
-                                     };
-                vres = l2_res;
-            }
+                // Calculate square-root in case of l2 pooling
+                if(pooling_type == PoolingType::L2)
+                {
+                    res = std::sqrt(res);
+                }
 
-            // Store result
-            vst1q_f32(reinterpret_cast<float *>(output.ptr()), vres);
+                // Store result
+                *(reinterpret_cast<float *>(output.ptr()) + x_off) = res;
+            }
         },
         input, output);
     }
@@ -1994,9 +2070,16 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
 
 void NEPoolingLayerKernel::pooling2_f32_nhwc_maxpool_indices(const Window &window_input, const Window &window)
 {
+    const int window_start_x = window.x().start();
+    const int window_end_x   = window.x().end();
+    const int window_step_x  = 4;
+
+    Window window_out = window;
+    window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
+
     Iterator input(_input, window_input);
-    Iterator output(_output, window);
-    Iterator indices(_indices, window);
+    Iterator output(_output, window_out);
+    Iterator indices(_indices, window_out);
 
     const int pool_pad_top  = _pool_info.pad_stride_info.pad_top();
     const int pool_pad_left = _pool_info.pad_stride_info.pad_left();
@@ -2006,12 +2089,13 @@ void NEPoolingLayerKernel::pooling2_f32_nhwc_maxpool_indices(const Window &windo
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
 
     float32x4_t vres;
+    float       res;
 
     const int pad_right   = _input->info()->padding().right;
     const int in_stride_y = static_cast<int>(_input->info()->strides_in_bytes().y());
     const int in_stride_z = static_cast<int>(_input->info()->strides_in_bytes().z());
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates & id)
     {
         const int idx_width    = id.y() * pool_stride_x;
         const int idx_height   = id.z() * pool_stride_y;
@@ -2020,43 +2104,72 @@ void NEPoolingLayerKernel::pooling2_f32_nhwc_maxpool_indices(const Window &windo
 
         const int pool_start_y = std::max(0, window_input.z().start() + pool_limit_y);
         const int pool_start_x = std::max(0, window_input.y().start() + pool_limit_x);
+
         const int in_x0_offset = (pool_start_x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (pool_start_y - pool_pad_top) * static_cast<int>
                                  (_input->info()->strides_in_bytes().z());
         const int in_x1_offset = (pool_start_x + 1 - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (pool_start_y - pool_pad_top) * static_cast<int>
                                  (_input->info()->strides_in_bytes().z());
-
         const int in_x2_offset = (pool_start_x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (pool_start_y + 1 - pool_pad_top) * static_cast<int>
                                  (_input->info()->strides_in_bytes().z());
-
         const int in_x3_offset = (pool_start_x + 1 - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (pool_start_y + 1 - pool_pad_top) * static_cast<int>
                                  (_input->info()->strides_in_bytes().z());
 
-        const auto in_x0_ptr = reinterpret_cast<const float *>(input.ptr() + in_x0_offset);
-        const auto in_x1_ptr = reinterpret_cast<const float *>(input.ptr() + in_x1_offset);
-        const auto in_x2_ptr = reinterpret_cast<const float *>(input.ptr() + in_x2_offset);
-        const auto in_x3_ptr = reinterpret_cast<const float *>(input.ptr() + in_x3_offset);
-        const auto v_x0      = vld1q_f32(in_x0_ptr);
-        const auto v_x1      = vld1q_f32(in_x1_ptr);
-        const auto v_x2      = vld1q_f32(in_x2_ptr);
-        const auto v_x3      = vld1q_f32(in_x3_ptr);
-        vres                 = vmaxq_f32(vmaxq_f32(v_x2, v_x3), vmaxq_f32(v_x0, v_x1));
-        // Store result
-        vst1q_f32(reinterpret_cast<float *>(output.ptr()), vres);
+        int x_off = window_start_x;
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
+        {
+            const auto in_x0_ptr = reinterpret_cast<const float *>(input.ptr() + in_x0_offset);
+            const auto in_x1_ptr = reinterpret_cast<const float *>(input.ptr() + in_x1_offset);
+            const auto in_x2_ptr = reinterpret_cast<const float *>(input.ptr() + in_x2_offset);
+            const auto in_x3_ptr = reinterpret_cast<const float *>(input.ptr() + in_x3_offset);
+            const auto v_x0      = vld1q_f32(in_x0_ptr + x_off);
+            const auto v_x1      = vld1q_f32(in_x1_ptr + x_off);
+            const auto v_x2      = vld1q_f32(in_x2_ptr + x_off);
+            const auto v_x3      = vld1q_f32(in_x3_ptr + x_off);
+            vres                 = vmaxq_f32(vmaxq_f32(v_x2, v_x3), vmaxq_f32(v_x0, v_x1));
+            // Store result
+            vst1q_f32(reinterpret_cast<float *>(output.ptr()) + x_off, vres);
 
-        const uint32_t   offset_base  = offset_no_padding<float>(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
-        const uint32_t   offset_x0    = (uint32_t)offset_base / sizeof(float);
-        const uint32_t   offset_x1    = (uint32_t)offset_x0 + in_stride_y / sizeof(float) - pad_right;
-        const uint32_t   offset_x2    = (uint32_t)offset_x0 + in_stride_z / sizeof(float) - pad_right * _input->info()->tensor_shape()[1];
-        const uint32_t   offset_x3    = (uint32_t)offset_x2 + in_stride_y / sizeof(float) - pad_right;
-        const uint32x4_t voffset_x0   = { offset_x0, offset_x0 + 1, offset_x0 + 2, offset_x0 + 3 };
-        const uint32x4_t voffset_x1   = { offset_x1, offset_x1 + 1, offset_x1 + 2, offset_x1 + 3 };
-        const uint32x4_t voffset_x2   = { offset_x2, offset_x2 + 1, offset_x2 + 2, offset_x2 + 3 };
-        const uint32x4_t voffset_x3   = { offset_x3, offset_x3 + 1, offset_x3 + 2, offset_x3 + 3 };
-        const uint32x4_t tmp_indices0 = vbslq_u32(vcgeq_f32(v_x0, v_x1), voffset_x0, voffset_x1);
-        const uint32x4_t tmp_indices1 = vbslq_u32(vcgeq_f32(v_x2, v_x3), voffset_x2, voffset_x3);
-        const uint32x4_t tmp_indices2 = vbslq_u32(vcgeq_f32(vmaxq_f32(v_x0, v_x1), vmaxq_f32(v_x2, v_x3)), tmp_indices0, tmp_indices1);
-        // Store indices
-        vst1q_u32(reinterpret_cast<uint32_t *>(indices.ptr()), tmp_indices2);
+            const uint32_t   offset_base  = offset_no_padding<float>(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
+            const uint32_t   offset_x0    = (uint32_t)offset_base / sizeof(float) + x_off;
+            const uint32_t   offset_x1    = (uint32_t)offset_x0 + in_stride_y / sizeof(float) - pad_right;
+            const uint32_t   offset_x2    = (uint32_t)offset_x0 + in_stride_z / sizeof(float) - pad_right * _input->info()->tensor_shape()[1];
+            const uint32_t   offset_x3    = (uint32_t)offset_x2 + in_stride_y / sizeof(float) - pad_right;
+            const uint32x4_t voffset_x0   = { offset_x0, offset_x0 + 1, offset_x0 + 2, offset_x0 + 3 };
+            const uint32x4_t voffset_x1   = { offset_x1, offset_x1 + 1, offset_x1 + 2, offset_x1 + 3 };
+            const uint32x4_t voffset_x2   = { offset_x2, offset_x2 + 1, offset_x2 + 2, offset_x2 + 3 };
+            const uint32x4_t voffset_x3   = { offset_x3, offset_x3 + 1, offset_x3 + 2, offset_x3 + 3 };
+            const uint32x4_t tmp_indices0 = vbslq_u32(vcgeq_f32(v_x0, v_x1), voffset_x0, voffset_x1);
+            const uint32x4_t tmp_indices1 = vbslq_u32(vcgeq_f32(v_x2, v_x3), voffset_x2, voffset_x3);
+            const uint32x4_t tmp_indices2 = vbslq_u32(vcgeq_f32(vmaxq_f32(v_x0, v_x1), vmaxq_f32(v_x2, v_x3)), tmp_indices0, tmp_indices1);
+
+            // Store indices
+            vst1q_u32(reinterpret_cast<uint32_t *>(indices.ptr()) + x_off, tmp_indices2);
+        }
+
+        // Left-overs loop
+        for(; x_off < window_end_x; ++x_off)
+        {
+            const auto x0 = *(reinterpret_cast<const float *>(input.ptr() + in_x0_offset) + x_off);
+            const auto x1 = *(reinterpret_cast<const float *>(input.ptr() + in_x1_offset) + x_off);
+            const auto x2 = *(reinterpret_cast<const float *>(input.ptr() + in_x2_offset) + x_off);
+            const auto x3 = *(reinterpret_cast<const float *>(input.ptr() + in_x3_offset) + x_off);
+            res           = std::max(std::max(x2, x3), std::max(x0, x1));
+
+            // Store result
+            *(reinterpret_cast<float *>(output.ptr()) + x_off) = res;
+
+            const uint32_t offset_base = offset_no_padding<float>(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
+            const uint32_t offset_x0   = (uint32_t)offset_base / sizeof(float) + x_off;
+            const uint32_t offset_x1   = (uint32_t)offset_x0 + in_stride_y / sizeof(float) - pad_right;
+            const uint32_t offset_x2   = (uint32_t)offset_x0 + in_stride_z / sizeof(float) - pad_right * _input->info()->tensor_shape()[1];
+            const uint32_t offset_x3   = (uint32_t)offset_x2 + in_stride_y / sizeof(float) - pad_right;
+            const uint32_t tmp_idx0    = (x0 >= x1) ? offset_x0 : offset_x1;
+            const uint32_t tmp_idx1    = (x2 >= x3) ? offset_x2 : offset_x3;
+            const uint32_t tmp_idx2    = (std::max(x0, x1) >= std::max(x2, x3)) ? tmp_idx0 : tmp_idx1;
+
+            // Store indices
+            *(reinterpret_cast<uint32_t *>(indices.ptr()) + x_off) = tmp_idx2;
+        }
     },
     input, output, indices);
 }
@@ -2170,8 +2283,16 @@ void NEPoolingLayerKernel::poolingMxN_q8_nchw(const Window &window_input, const 
 template <typename T>
 void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
+    const int window_start_x     = window.x().start();
+    const int window_end_x       = window.x().end();
+    const int window_step_x      = 16;
+    const int window_half_step_x = window_step_x / 2;
+
+    Window window_out = window;
+    window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
+
     Iterator input(_input, window_input);
-    Iterator output(_output, window);
+    Iterator output(_output, window_out);
 
     using q8x8_t  = typename wrapper::traits::neon_vector<T, 8>::type;
     using q8x16_t = typename wrapper::traits::neon_vector<T, 16>::type;
@@ -2206,7 +2327,7 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
     const int32_t                 requant_offset = output_qinfo.offset - static_cast<int32_t>(static_cast<float>(input_qinfo.offset) / requant_scale);
     const UniformQuantizationInfo requant_qinfo  = UniformQuantizationInfo(requant_scale, requant_offset);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates & id)
     {
         const int idx_width    = id.y() * pool_stride_x;
         const int idx_height   = id.z() * pool_stride_y;
@@ -2218,83 +2339,178 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
         const int pool_start_x = std::max(0, window_input.y().start() + pool_limit_x);
         const int pool_end_x   = std::min(pool_size_x, window_input.y().end() + pool_limit_x);
 
-        if(pooling_type != PoolingType::MAX)
+        int x_off = window_start_x;
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
         {
-            q32x4_t vres1 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
-            q32x4_t vres2 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
-            q32x4_t vres3 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
-            q32x4_t vres4 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
-
-            // Calculate scale
-            const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                    pool_stride_y);
-
-            // Perform pooling
-            for(int y = pool_start_y; y < pool_end_y; ++y)
+            if(pooling_type != PoolingType::MAX)
             {
-                for(int x = pool_start_x; x < pool_end_x; ++x)
-                {
-                    const q8x16_t data = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
-                                                                                     (_input->info()->strides_in_bytes().z())));
+                q32x4_t vres1 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
+                q32x4_t vres2 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
+                q32x4_t vres3 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
+                q32x4_t vres4 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
 
-                    const q16x8_t data_q16  = wrapper::vmovl(wrapper::vgetlow(data));
-                    const q16x8_t data2_q16 = wrapper::vmovl(wrapper::vgethigh(data));
-                    vres1                   = wrapper::vadd(vres1, wrapper::vmovl(wrapper::vgetlow(data_q16)));
-                    vres2                   = wrapper::vadd(vres2, wrapper::vmovl(wrapper::vgethigh(data_q16)));
-                    vres3                   = wrapper::vadd(vres3, wrapper::vmovl(wrapper::vgetlow(data2_q16)));
-                    vres4                   = wrapper::vadd(vres4, wrapper::vmovl(wrapper::vgethigh(data2_q16)));
-                }
-            }
+                // Calculate scale
+                const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                        pool_stride_y);
 
-            if(input_qinfo != output_qinfo)
-            {
-                const float32x4x4_t vres =
+                // Perform pooling
+                for(int y = pool_start_y; y < pool_end_y; ++y)
                 {
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
                     {
-                        vcvtq_f32_q32(vres1),
-                        vcvtq_f32_q32(vres2),
-                        vcvtq_f32_q32(vres3),
-                        vcvtq_f32_q32(vres4),
+                        const q8x16_t data = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                         (_input->info()->strides_in_bytes().z())) + x_off);
+
+                        const q16x8_t data_q16  = wrapper::vmovl(wrapper::vgetlow(data));
+                        const q16x8_t data2_q16 = wrapper::vmovl(wrapper::vgethigh(data));
+                        vres1                   = wrapper::vadd(vres1, wrapper::vmovl(wrapper::vgetlow(data_q16)));
+                        vres2                   = wrapper::vadd(vres2, wrapper::vmovl(wrapper::vgethigh(data_q16)));
+                        vres3                   = wrapper::vadd(vres3, wrapper::vmovl(wrapper::vgetlow(data2_q16)));
+                        vres4                   = wrapper::vadd(vres4, wrapper::vmovl(wrapper::vgethigh(data2_q16)));
                     }
-                };
-                const auto requantized_output = vrequantize_pooling_with_scale<q8x16_t>(vres, quant_rescale, scale, new_offset);
-                // Store result
-                wrapper::vstore(reinterpret_cast<T *>(output.ptr()), wrapper::vgetlow(requantized_output));
-                wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + 8, wrapper::vgethigh(requantized_output));
+                }
+
+                if(input_qinfo != output_qinfo)
+                {
+                    const float32x4x4_t vres =
+                    {
+                        {
+                            vcvtq_f32_q32(vres1),
+                            vcvtq_f32_q32(vres2),
+                            vcvtq_f32_q32(vres3),
+                            vcvtq_f32_q32(vres4),
+                        }
+                    };
+                    const auto requantized_output = vrequantize_pooling_with_scale<q8x16_t>(vres, quant_rescale, scale, new_offset);
+                    // Store result
+                    wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + x_off, wrapper::vgetlow(requantized_output));
+                    wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + x_off + 8, wrapper::vgethigh(requantized_output));
+                }
+                else
+                {
+                    const float32x4_t scale_v = vdupq_n_f32(scale);
+                    // Divide by scale and add 0.5f to round to nearest instead of rounding towards zero
+                    vres1 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres1), scale_v));
+                    vres2 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres2), scale_v));
+                    vres3 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres3), scale_v));
+                    vres4 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres4), scale_v));
+
+                    const q8x8_t res1 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres1), wrapper::vmovn(vres2)));
+                    const q8x8_t res2 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres3), wrapper::vmovn(vres4)));
+                    // Store result
+                    wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + x_off, res1);
+                    wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + x_off + 8, res2);
+                }
             }
             else
             {
-                const float32x4_t scale_v = vdupq_n_f32(scale);
-                // Divide by scale and add 0.5f to round to nearest instead of rounding towards zero
-                vres1 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres1), scale_v));
-                vres2 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres2), scale_v));
-                vres3 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres3), scale_v));
-                vres4 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres4), scale_v));
+                q8x16_t vres = wrapper::vdup_n(std::numeric_limits<T>::min(), wrapper::traits::vector_128_tag{});
 
-                const q8x8_t res1 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres1), wrapper::vmovn(vres2)));
-                const q8x8_t res2 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres3), wrapper::vmovn(vres4)));
+                for(int y = pool_start_y; y < pool_end_y; ++y)
+                {
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
+                    {
+                        const q8x16_t data = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                         (_input->info()->strides_in_bytes().z())) + x_off);
+                        vres               = wrapper::vmax(vres, data);
+                    }
+                }
+
                 // Store result
-                wrapper::vstore(reinterpret_cast<T *>(output.ptr()), res1);
-                wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + 8, res2);
+                wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + x_off, (input_qinfo != output_qinfo) ? vrequantize_pooling<q8x8_t, q8x16_t>(wrapper::vgetlow(vres), wrapper::vgethigh(vres),
+                                requant_qinfo) :
+                                vres);
             }
         }
-        else
-        {
-            q8x16_t vres = wrapper::vdup_n(std::numeric_limits<T>::min(), wrapper::traits::vector_128_tag{});
 
-            for(int y = pool_start_y; y < pool_end_y; ++y)
+        if(pooling_type == PoolingType::MAX)
+        {
+            for(; x_off <= (window_end_x - window_half_step_x); x_off += window_half_step_x)
             {
-                for(int x = pool_start_x; x < pool_end_x; ++x)
+                q8x8_t vres = wrapper::vdup_n(std::numeric_limits<T>::min(), wrapper::traits::vector_64_tag{});
+                for(int y = pool_start_y; y < pool_end_y; ++y)
                 {
-                    const q8x16_t data = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
-                                                                                     (_input->info()->strides_in_bytes().z())));
-                    vres               = wrapper::vmax(vres, data);
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
+                    {
+                        const q8x8_t data = wrapper::vload(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                       (_input->info()->strides_in_bytes().z())) + x_off);
+                        vres              = wrapper::vmax(vres, data);
+                    }
+                }
+
+                // Store result
+                wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + x_off,
+                                (input_qinfo != output_qinfo) ? vrequantize_pooling<q8x8_t>(vres, requant_qinfo) : vres);
+            }
+        }
+
+        // Left-overs loop
+        for(; x_off < window_end_x; ++x_off)
+        {
+            if(pooling_type != PoolingType::MAX)
+            {
+                q32_t res = static_cast<q32_t>(0.f);
+
+                // Calculate scale
+                const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                        pool_stride_y);
+
+                // Perform pooling
+                for(int y = pool_start_y; y < pool_end_y; ++y)
+                {
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
+                    {
+                        const T data = *(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                     (_input->info()->strides_in_bytes().z())) + x_off);
+                        res += data;
+                    }
+                }
+
+                if(input_qinfo != output_qinfo)
+                {
+                    const float res_f              = static_cast<float>(res);
+                    const float new_scale          = quant_rescale / scale;
+                    const auto  requantized_output = quantize<T>(res_f, UniformQuantizationInfo(new_scale, new_offset));
+
+                    // Store result
+                    *(reinterpret_cast<T *>(output.ptr()) + x_off) = requantized_output;
+                }
+                else
+                {
+                    // Divide by scale and add 0.5f to round to nearest instead of rounding towards zero
+                    res = static_cast<T>(0.5f + static_cast<float>(res) * scale);
+
+                    // Store result
+                    *(reinterpret_cast<T *>(output.ptr()) + x_off) = res;
                 }
             }
+            else
+            {
+                T res = std::numeric_limits<T>::min();
 
-            // Store result
-            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), (input_qinfo != output_qinfo) ? vrequantize_pooling<q8x8_t, q8x16_t>(wrapper::vgetlow(vres), wrapper::vgethigh(vres), requant_qinfo) : vres);
+                for(int y = pool_start_y; y < pool_end_y; ++y)
+                {
+                    for(int x = pool_start_x; x < pool_end_x; ++x)
+                    {
+                        const T data = *(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                     (_input->info()->strides_in_bytes().z())) + x_off);
+                        res          = std::max(res, data);
+                    }
+                }
+
+                // Store result
+                if(input_qinfo != output_qinfo)
+                {
+                    const float res_f                              = static_cast<float>(res);
+                    *(reinterpret_cast<T *>(output.ptr()) + x_off) = quantize<T>(res_f, requant_qinfo);
+                }
+                else
+                {
+                    *(reinterpret_cast<T *>(output.ptr()) + x_off) = res;
+                }
+            }
         }
+
     },
     input, output);
 }
@@ -2385,7 +2601,7 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     }
     else
     {
-        window_input.set(Window::DimX, Window::Dimension(window.x().start(), window.x().end(), _num_elems_processed_per_iteration));
+        window_input.set(Window::DimX, Window::Dimension(0, 1, 1));
         window_input.set(Window::DimY, Window::Dimension(0, _input->info()->dimension(1), pool_stride_x));
         window_input.set(Window::DimZ, Window::Dimension(0, _input->info()->dimension(2), pool_stride_y));
     }

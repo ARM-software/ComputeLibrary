@@ -25,9 +25,9 @@
 #include "Scale.h"
 
 #include "Utils.h"
-#include "arm_compute/core/utils/misc/Rounding.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "src/core/utils/ScaleUtils.h"
+#include "support/Rounding.h"
 
 namespace arm_compute
 {

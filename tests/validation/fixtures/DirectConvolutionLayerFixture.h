@@ -51,13 +51,10 @@ class DirectConvolutionValidationGenericFixture : public framework::Fixture
 public:
     using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
 
-public:
     template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels,
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout)
     {
-        ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
-
         _quantization_info = quantization_info;
         _data_type         = data_type;
 

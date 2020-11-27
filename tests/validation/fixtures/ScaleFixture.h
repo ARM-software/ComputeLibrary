@@ -137,7 +137,7 @@ protected:
         // Create and configure function
         FunctionType scale;
 
-        scale.configure(&src, &dst, ScaleKernelInfo{ _policy, _border_mode, _constant_border_value, _sampling_policy, /* use_padding */ true, _align_corners });
+        scale.configure(&src, &dst, ScaleKernelInfo{ _policy, _border_mode, _constant_border_value, _sampling_policy, /* use_padding */ false, _align_corners });
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);

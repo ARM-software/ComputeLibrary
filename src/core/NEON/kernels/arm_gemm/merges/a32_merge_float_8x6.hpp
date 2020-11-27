@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 #pragma once
+#if (defined(__GNUC__) && (__GNUC__ >= 7))
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
 
 #ifdef __arm__
 

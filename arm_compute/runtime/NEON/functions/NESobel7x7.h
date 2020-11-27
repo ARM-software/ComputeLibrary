@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_NESOBEL7x7_H
 #define ARM_COMPUTE_NESOBEL7x7_H
 
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NESobel7x7Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -38,6 +36,9 @@
 namespace arm_compute
 {
 class ITensor;
+class NESobel7x7HorKernel;
+class NESobel7x7VertKernel;
+class NEFillBorderKernel;
 
 /** Basic function to execute sobel 7x7 filter. This function calls the following NEON kernels:
  *
@@ -45,12 +46,24 @@ class ITensor;
  * -# @ref NESobel7x7HorKernel
  * -# @ref NESobel7x7VertKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NESobel7x7 : public IFunction
 {
 public:
     /** Default constructor */
     NESobel7x7(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NESobel7x7(const NESobel7x7 &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NESobel7x7 &operator=(const NESobel7x7 &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NESobel7x7(NESobel7x7 &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NESobel7x7 &operator=(NESobel7x7 &&) = delete;
+    /** Default destructor */
+    ~NESobel7x7();
     /** Initialise the function's source, destinations and border mode.
      *
      * @note At least one of output_x or output_y must be not NULL.
@@ -68,12 +81,12 @@ public:
     void run() override;
 
 protected:
-    MemoryGroup          _memory_group;   /**< Function memory group */
-    NESobel7x7HorKernel  _sobel_hor;      /**< Sobel Horizontal 7x7 kernel */
-    NESobel7x7VertKernel _sobel_vert;     /**< Sobel Vertical 7x7 kernel */
-    Tensor               _tmp_x;          /**< Temporary buffer for Sobel X */
-    Tensor               _tmp_y;          /**< Temporary buffer for Sobel Y */
-    NEFillBorderKernel   _border_handler; /**< Kernel to handle tensor borders */
+    MemoryGroup                           _memory_group;   /**< Function memory group */
+    std::unique_ptr<NESobel7x7HorKernel>  _sobel_hor;      /**< Sobel Horizontal 7x7 kernel */
+    std::unique_ptr<NESobel7x7VertKernel> _sobel_vert;     /**< Sobel Vertical 7x7 kernel */
+    Tensor                                _tmp_x;          /**< Temporary buffer for Sobel X */
+    Tensor                                _tmp_y;          /**< Temporary buffer for Sobel Y */
+    std::unique_ptr<NEFillBorderKernel>   _border_handler; /**< Kernel to handle tensor borders */
 };
 }
 #endif /*ARM_COMPUTE_NESOBEL7x7_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,9 @@ class IGCTensor;
  *
  * @note Supported kernel size: 1x1, 3x3, and 5x5
  * @note This OpenGL ES implementation works with stride_x = 1 and 2
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class GCDirectConvolutionLayer : public IFunction
 {

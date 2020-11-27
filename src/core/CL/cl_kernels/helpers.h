@@ -24,6 +24,8 @@
 #ifndef ARM_COMPUTE_HELPER_H
 #define ARM_COMPUTE_HELPER_H
 
+#include "load_store_utility.h"
+
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
@@ -170,12 +172,12 @@
  * @return The vector filled with offset values
  * @{
  */
-#define V_OFFS1(dt) (dt)(0)
-#define V_OFFS2(dt) (dt)(0, 1)
-#define V_OFFS3(dt) (dt)(0, 1, 3)
-#define V_OFFS4(dt) (dt)(0, 1, 2, 3)
-#define V_OFFS8(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7)
-#define V_OFFS16(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+#define V_OFFS1(dt) (dt##1)(0)
+#define V_OFFS2(dt) (dt##2)(0, 1)
+#define V_OFFS3(dt) (dt##3)(0, 1, 2)
+#define V_OFFS4(dt) (dt##4)(0, 1, 2, 3)
+#define V_OFFS8(dt) (dt##8)(0, 1, 2, 3, 4, 5, 6, 7)
+#define V_OFFS16(dt) (dt##16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
 /** @} */ // end of group V_OFFSn
 
 /** Create a vector filled with offset values corresponding to the location of each element.
@@ -273,21 +275,84 @@
 #define VSTORE_PARTIAL_STR(size, store_size) vstore_partial_##size##_##store_size
 #define VSTORE_PARTIAL(size, store_size) VSTORE_PARTIAL_STR(size, store_size)
 
+#define NO_STORE(data, offs, ptr) \
+    {                             \
+    }
+
 // Size == 1 (scalar)
+#define vstore_partial_1_0 NO_STORE
 #define vstore_partial_1_1 vstore1
+#define vstore_partial_1_2 NO_STORE
+#define vstore_partial_1_3 NO_STORE
+#define vstore_partial_1_4 NO_STORE
+#define vstore_partial_1_5 NO_STORE
+#define vstore_partial_1_6 NO_STORE
+#define vstore_partial_1_7 NO_STORE
+#define vstore_partial_1_8 NO_STORE
+#define vstore_partial_1_9 NO_STORE
+#define vstore_partial_1_10 NO_STORE
+#define vstore_partial_1_11 NO_STORE
+#define vstore_partial_1_12 NO_STORE
+#define vstore_partial_1_13 NO_STORE
+#define vstore_partial_1_14 NO_STORE
+#define vstore_partial_1_15 NO_STORE
+#define vstore_partial_1_16 NO_STORE
 // Size == 2
+#define vstore_partial_2_0 NO_STORE
 #define vstore_partial_2_1 vstore_partial_1
 #define vstore_partial_2_2 vstore_partial_2
+#define vstore_partial_2_3 NO_STORE
+#define vstore_partial_2_4 NO_STORE
+#define vstore_partial_2_5 NO_STORE
+#define vstore_partial_2_6 NO_STORE
+#define vstore_partial_2_7 NO_STORE
+#define vstore_partial_2_8 NO_STORE
+#define vstore_partial_2_9 NO_STORE
+#define vstore_partial_2_10 NO_STORE
+#define vstore_partial_2_11 NO_STORE
+#define vstore_partial_2_12 NO_STORE
+#define vstore_partial_2_13 NO_STORE
+#define vstore_partial_2_14 NO_STORE
+#define vstore_partial_2_15 NO_STORE
+#define vstore_partial_2_16 NO_STORE
 // Size == 3
+#define vstore_partial_3_0 NO_STORE
 #define vstore_partial_3_1 vstore_partial_1
 #define vstore_partial_3_2 vstore_partial_2
 #define vstore_partial_3_3 vstore_partial_3
+#define vstore_partial_3_4 NO_STORE
+#define vstore_partial_3_5 NO_STORE
+#define vstore_partial_3_6 NO_STORE
+#define vstore_partial_3_7 NO_STORE
+#define vstore_partial_3_8 NO_STORE
+#define vstore_partial_3_9 NO_STORE
+#define vstore_partial_3_10 NO_STORE
+#define vstore_partial_3_11 NO_STORE
+#define vstore_partial_3_12 NO_STORE
+#define vstore_partial_3_13 NO_STORE
+#define vstore_partial_3_14 NO_STORE
+#define vstore_partial_3_15 NO_STORE
+#define vstore_partial_3_16 NO_STORE
 // Size == 4
+#define vstore_partial_4_0 NO_STORE
 #define vstore_partial_4_1 vstore_partial_1
 #define vstore_partial_4_2 vstore_partial_2
 #define vstore_partial_4_3 vstore_partial_3
 #define vstore_partial_4_4 vstore_partial_4
+#define vstore_partial_4_5 NO_STORE
+#define vstore_partial_4_6 NO_STORE
+#define vstore_partial_4_7 NO_STORE
+#define vstore_partial_4_8 NO_STORE
+#define vstore_partial_4_9 NO_STORE
+#define vstore_partial_4_10 NO_STORE
+#define vstore_partial_4_11 NO_STORE
+#define vstore_partial_4_12 NO_STORE
+#define vstore_partial_4_13 NO_STORE
+#define vstore_partial_4_14 NO_STORE
+#define vstore_partial_4_15 NO_STORE
+#define vstore_partial_4_16 NO_STORE
 // Size == 8
+#define vstore_partial_8_0 NO_STORE
 #define vstore_partial_8_1 vstore_partial_1
 #define vstore_partial_8_2 vstore_partial_2
 #define vstore_partial_8_3 vstore_partial_3
@@ -296,7 +361,16 @@
 #define vstore_partial_8_6 vstore_partial_6
 #define vstore_partial_8_7 vstore_partial_7
 #define vstore_partial_8_8 vstore_partial_8
+#define vstore_partial_8_9 NO_STORE
+#define vstore_partial_8_10 NO_STORE
+#define vstore_partial_8_11 NO_STORE
+#define vstore_partial_8_12 NO_STORE
+#define vstore_partial_8_13 NO_STORE
+#define vstore_partial_8_14 NO_STORE
+#define vstore_partial_8_15 NO_STORE
+#define vstore_partial_8_16 NO_STORE
 // Size == 16
+#define vstore_partial_16_0 NO_STORE
 #define vstore_partial_16_1 vstore_partial_1
 #define vstore_partial_16_2 vstore_partial_2
 #define vstore_partial_16_3 vstore_partial_3
@@ -376,15 +450,15 @@
 
 #define vstore_partial_13(DATA, OFFSET, PTR)       \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vstore_partial_5(DATA.s89abc, OFFSET, PTR + 8);
+    vstore_partial_5(DATA.s89abcdef, OFFSET, PTR + 8);
 
 #define vstore_partial_14(DATA, OFFSET, PTR)       \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vstore_partial_6(DATA.s89abcd, OFFSET, PTR + 8);
+    vstore_partial_6(DATA.s89abcdef, OFFSET, PTR + 8);
 
 #define vstore_partial_15(DATA, OFFSET, PTR)       \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vstore_partial_7(DATA.s89abcde, OFFSET, PTR + 8);
+    vstore_partial_7(DATA.s89abcdef, OFFSET, PTR + 8);
 
 #define vstore_partial_16(DATA, OFFSET, PTR) \
     vstore16(DATA, OFFSET, PTR);
@@ -433,9 +507,6 @@
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
 
-#define CL_VEC_DATA_TYPE_STR(type, size) type##size
-#define CL_VEC_DATA_TYPE(type, size) CL_VEC_DATA_TYPE_STR(type, size)
-
 #define CONVERT_STR(x, type) (convert_##type((x)))
 #define CONVERT(x, type) CONVERT_STR(x, type)
 
@@ -444,6 +515,41 @@
 
 #define CONVERT_SAT_ROUND_STR(x, type, round) (convert_##type##_sat_##round((x)))
 #define CONVERT_SAT_ROUND(x, type, round) CONVERT_SAT_ROUND_STR(x, type, round)
+
+#define select_vec_dt_uchar(size) uchar##size
+#define select_vec_dt_char(size) char##size
+#define select_vec_dt_ushort(size) ushort##size
+#define select_vec_dt_short(size) short##size
+#define select_vec_dt_half(size) short##size
+#define select_vec_dt_uint(size) uint##size
+#define select_vec_dt_int(size) int##size
+#define select_vec_dt_float(size) int##size
+#define select_vec_dt_ulong(size) ulong##size
+#define select_vec_dt_long(size) long##size
+
+#define SELECT_VEC_DATA_TYPE_STR(type, size) select_vec_dt_##type(size)
+#define SELECT_VEC_DATA_TYPE(type, size) SELECT_VEC_DATA_TYPE_STR(type, size)
+#define SELECT_DATA_TYPE(type) SELECT_VEC_DATA_TYPE_STR(type, 1)
+
+#define sum_reduce_1(x) (x)
+#define sum_reduce_2(x) ((x).s0) + ((x).s1)
+#define sum_reduce_3(x) sum_reduce_2((x).s01) + ((x).s2)
+#define sum_reduce_4(x) sum_reduce_2((x).s01) + sum_reduce_2((x).s23)
+#define sum_reduce_8(x) sum_reduce_4((x).s0123) + sum_reduce_4((x).s4567)
+#define sum_reduce_16(x) sum_reduce_8((x).s01234567) + sum_reduce_8((x).s89ABCDEF)
+
+#define SUM_REDUCE_STR(x, size) sum_reduce_##size(x)
+#define SUM_REDUCE(x, size) SUM_REDUCE_STR(x, size)
+
+#define max_reduce_1(x) (x)
+#define max_reduce_2(x) max(((x).s0), ((x).s1))
+#define max_reduce_3(x) max(max_reduce_2((x).s01), ((x).s2))
+#define max_reduce_4(x) max(max_reduce_2((x).s01), max_reduce_2((x).s23))
+#define max_reduce_8(x) max(max_reduce_4((x).s0123), max_reduce_4((x).s4567))
+#define max_reduce_16(x) max(max_reduce_8((x).s01234567), max_reduce_8((x).s89ABCDEF))
+
+#define MAX_REDUCE_STR(x, size) max_reduce_##size(x)
+#define MAX_REDUCE(x, size) MAX_REDUCE_STR(x, size)
 
 #define VECTOR_DECLARATION(name)     \
     __global uchar *name##_ptr,      \

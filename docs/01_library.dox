@@ -43,7 +43,34 @@ The Runtime library is a very basic wrapper around the Core library which can be
 
 For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between NEON and OpenCL, etc.)
 
-@section S4_1_2 Thread-safety
+@section S4_1_2 Data-type and Data-layout support
+
+Compute Library supports a wide list of data-types, information can been directly found in the documentation of each kernel/function.
+The main data-types that the Machine Learning functions support are the following:
+- BFLOAT16: 16-bit non-standard brain floating point
+- F16: 16-bit half precision floating point
+- F32: 32-bit single precision floating point
+- QASYMM8: 8-bit unsigned asymmetric quantized
+- QASYMM8_SIGNED: 8-bit signed asymmetric quantized
+- QSYMM8_PER_CHANNEL: 8-bit signed symmetric quantized (Used for the weights)
+
+Moreover, Compute Library supports the following data layouts (fast changing dimension from right to left):
+- NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension
+- NCHW: Legacy layout where width is in the fastest changing dimension
+where N = batches, C = channels, H = height, W = width
+
+@section S4_1_3 Fast-math support
+
+Compute Library supports different types of convolution methods, fast-math flag is only used for the Winograd algorithm.
+When the fast-math flag is enabled, both NEON and CL convolution layers will try to dispatch the fastest implementation available, which may introduce a drop in accuracy as well. The different scenarios involving the fast-math flag are presented below:
+- For FP32:
+    - no-fast-math: Only supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7
+    - fast-math: Supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7,5x5,7x7
+- For fp16:
+    - no-fast-math: No Winograd support
+    - fast-math: Supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7,5x5,7x7
+
+@section S4_1_4 Thread-safety
 
 Although the library supports multi-threading during workload dispatch, thus parallelizing the execution of the workload at multiple threads, the current runtime module implementation is not thread-safe in the sense of executing different functions from separate threads.
 This lies to the fact that the provided scheduling mechanism wasn't designed with thread-safety in mind.

@@ -24,8 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEHarrisCorners.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Array.h"
@@ -34,12 +32,19 @@
 #include "arm_compute/runtime/NEON/functions/NESobel5x5.h"
 #include "arm_compute/runtime/NEON/functions/NESobel7x7.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEHarrisCornersKernel.h"
+#include "src/core/NEON/kernels/NESobel5x5Kernel.h"
+#include "src/core/NEON/kernels/NESobel7x7Kernel.h"
 #include "support/MemorySupport.h"
 
 #include <cmath>
 #include <utility>
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEHarrisCorners::~NEHarrisCorners() = default;
 
 NEHarrisCorners::NEHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
@@ -154,8 +159,10 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     }
 
     // Configure border filling before harris score
-    _border_gx.configure(&_gx, _harris_score->border_size(), border_mode, constant_border_value);
-    _border_gy.configure(&_gy, _harris_score->border_size(), border_mode, constant_border_value);
+    _border_gx = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _border_gy = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _border_gx->configure(&_gx, _harris_score->border_size(), border_mode, constant_border_value);
+    _border_gy->configure(&_gy, _harris_score->border_size(), border_mode, constant_border_value);
 
     // Allocate once all the configure methods have been called
     _gx.allocator()->allocate();
@@ -193,8 +200,8 @@ void NEHarrisCorners::run()
     _sobel->run();
 
     // Fill border before harris score kernel
-    NEScheduler::get().schedule(&_border_gx, Window::DimZ);
-    NEScheduler::get().schedule(&_border_gy, Window::DimZ);
+    NEScheduler::get().schedule(_border_gx.get(), Window::DimZ);
+    NEScheduler::get().schedule(_border_gy.get(), Window::DimZ);
 
     // Run harris score kernel
     NEScheduler::get().schedule(_harris_score.get(), Window::DimY);
@@ -208,3 +215,4 @@ void NEHarrisCorners::run()
     // Run sort & euclidean distance
     NEScheduler::get().schedule(&_sort_euclidean, Window::DimY);
 }
+} // namespace arm_compute

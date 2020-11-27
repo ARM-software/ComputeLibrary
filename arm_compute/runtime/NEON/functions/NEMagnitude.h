@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,16 +24,33 @@
 #ifndef ARM_COMPUTE_NEMAGNITUDE_H
 #define ARM_COMPUTE_NEMAGNITUDE_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref NEMagnitudePhaseKernel */
+/** Basic function to run @ref NEMagnitudePhaseKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ */
 class NEMagnitude : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NEMagnitude() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEMagnitude(const NEMagnitude &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEMagnitude &operator=(const NEMagnitude &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMagnitude(NEMagnitude &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMagnitude &operator=(NEMagnitude &&) = delete;
+    /** Default destructor */
+    ~NEMagnitude();
     /** Initialise the kernel's inputs.
      *
      * @param[in]  input1   First tensor input. Data type supported: S16.

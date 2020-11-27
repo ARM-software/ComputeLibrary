@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/NEON/INEKernel.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 #include <cstddef>
@@ -61,113 +63,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    unsigned int           num_elems_processed_per_iteration_x = (input->element_size() == 1) ? 8 : 4;
-    constexpr unsigned int num_elems_processed_per_iteration_y = 4;
-    bool                   window_changed                      = false;
-
-    // Configure kernel window
-    Window                win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-    window_changed = window_changed || update_window_and_padding(win, input_access);
-
-    // Configure window in case of configured output
-    if(output->total_size() != 0)
-    {
-        AccessWindowRectangle output_access(output, 0, 0, num_elems_processed_per_iteration_x * num_elems_processed_per_iteration_y, 1, 4.0f, 0.25f);
-        window_changed = window_changed || update_window_and_padding(win, output_access);
-        output_access.set_valid_region(win, input->valid_region());
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-
-void gemm_interleave_8bit_elements(const ITensor *input, ITensor *output, const Window &window)
-{
-    const size_t in_stride = input->info()->strides_in_bytes()[1];
-
-    // Set window for output tensor
-    Window win_out(window);
-    win_out.scale(Window::DimY, 0.25f);
-    Iterator in(input, window);
-
-    win_out.set_dimension_step(Window::DimX, 32);
-    Iterator out(output, win_out);
-
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        const uint8x8x4_t data =
-        {
-            {
-                vld1_u8(in.ptr() + 0 * in_stride),
-                vld1_u8(in.ptr() + 1 * in_stride),
-                vld1_u8(in.ptr() + 2 * in_stride),
-                vld1_u8(in.ptr() + 3 * in_stride),
-            }
-        };
-        vst4_u8(out.ptr(), data);
-    },
-    in, out);
-}
-
-void gemm_interleave_16bit_elements(const ITensor *input, ITensor *output, const Window &window)
-{
-    const size_t in_stride = input->info()->strides_in_bytes()[1];
-
-    // Set window for output tensor
-    Window win_out(window);
-    win_out.scale(Window::DimY, 0.25f);
-    Iterator in(input, window);
-
-    win_out.set_dimension_step(Window::DimX, 16);
-    Iterator out(output, win_out);
-
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        const uint16x4x4_t data =
-        {
-            {
-                vld1_u16(reinterpret_cast<const uint16_t *>(in.ptr() + 0 * in_stride)),
-                vld1_u16(reinterpret_cast<const uint16_t *>(in.ptr() + 1 * in_stride)),
-                vld1_u16(reinterpret_cast<const uint16_t *>(in.ptr() + 2 * in_stride)),
-                vld1_u16(reinterpret_cast<const uint16_t *>(in.ptr() + 3 * in_stride)),
-            }
-        };
-        vst4_u16(reinterpret_cast<uint16_t *>(out.ptr()), data);
-    },
-    in, out);
-}
-
-void gemm_interleave_32bit_elements(const ITensor *input, ITensor *output, const Window &window)
-{
-    const size_t in_stride = input->info()->strides_in_bytes()[1];
-
-    // Set window for output tensor
-    Window win_out(window);
-    win_out.scale(Window::DimY, 0.25f);
-    Iterator in(input, window);
-
-    win_out.set_dimension_step(Window::DimX, 16);
-    Iterator out(output, win_out);
-
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        const uint32x4x4_t data =
-        {
-            {
-                vld1q_u32(reinterpret_cast<const uint32_t *>(in.ptr() + 0 * in_stride)),
-                vld1q_u32(reinterpret_cast<const uint32_t *>(in.ptr() + 1 * in_stride)),
-                vld1q_u32(reinterpret_cast<const uint32_t *>(in.ptr() + 2 * in_stride)),
-                vld1q_u32(reinterpret_cast<const uint32_t *>(in.ptr() + 3 * in_stride))
-            }
-        };
-        vst4q_u32(reinterpret_cast<uint32_t *>(out.ptr()), data);
-    },
-    in, out);
-}
 } // namespace
 
 NEGEMMInterleave4x4Kernel::NEGEMMInterleave4x4Kernel()
@@ -191,31 +86,90 @@ void NEGEMMInterleave4x4Kernel::configure(const ITensor *input, ITensor *output)
     switch(input->info()->element_size())
     {
         case 1:
-            _func = &gemm_interleave_8bit_elements;
+            _func = &NEGEMMInterleave4x4Kernel::gemm_interleave4x4<uint8_t>;
             break;
         case 2:
-            _func = &gemm_interleave_16bit_elements;
+            _func = &NEGEMMInterleave4x4Kernel::gemm_interleave4x4<uint16_t>;
             break;
         case 4:
-            _func = &gemm_interleave_32bit_elements;
+            _func = &NEGEMMInterleave4x4Kernel::gemm_interleave4x4<uint32_t>;
             break;
         default:
             ARM_COMPUTE_ERROR_ON("Element size not supported");
             break;
     }
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Window win = calculate_max_window(*input->info(), Steps(1, 4));
+
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+
+    INEKernel::configure(win);
 }
 
 Status NEGEMMInterleave4x4Kernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
 
     return Status{};
+}
+
+template <typename ScalarType>
+void NEGEMMInterleave4x4Kernel::gemm_interleave4x4(const ITensor *input, ITensor *output, const Window &window)
+{
+    const size_t window_start_x = window.x().start();
+    const size_t window_end_x   = window.x().end();
+
+    const size_t in_height = input->info()->dimension(1);
+    const size_t in_stride = input->info()->strides_in_bytes()[1];
+
+    const size_t partial_y = in_height % 4;
+
+    // Set window for the input tensor
+    Window win = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    // Set window for the output tensor
+    Window win_out(window);
+    win_out.set(Window::DimX, Window::Dimension(0, 1, 1));
+    win_out.scale(Window::DimY, 0.25f);
+
+    Iterator in(input, win);
+    Iterator out(output, win_out);
+
+    execute_window_loop(win, [&](const Coordinates & id)
+    {
+        if(id.y() + 4 <= static_cast<int>(in_height))
+        {
+            for(size_t x = window_start_x; x < window_end_x; ++x)
+            {
+                const ScalarType data[4] =
+                {
+                    *(reinterpret_cast<const ScalarType *>(in.ptr() + 0 * in_stride) + x),
+                    *(reinterpret_cast<const ScalarType *>(in.ptr() + 1 * in_stride) + x),
+                    *(reinterpret_cast<const ScalarType *>(in.ptr() + 2 * in_stride) + x),
+                    *(reinterpret_cast<const ScalarType *>(in.ptr() + 3 * in_stride) + x),
+                };
+                std::memcpy(out.ptr() + x * 4 * sizeof(ScalarType), data, 4 * sizeof(ScalarType));
+            }
+        }
+        else
+        {
+            for(size_t x = window_start_x; x < window_end_x; ++x)
+            {
+                ScalarType data[4] = { 0, 0, 0, 0 };
+
+                for(size_t y = 0; y < partial_y; ++y)
+                {
+                    data[y] = *(reinterpret_cast<const ScalarType *>(in.ptr() + y * in_stride) + x);
+                }
+
+                std::memcpy(out.ptr() + x * 4 * sizeof(ScalarType), data, 4 * sizeof(ScalarType));
+            }
+        }
+    },
+    in, out);
 }
 
 void NEGEMMInterleave4x4Kernel::run(const Window &window, const ThreadInfo &info)
@@ -233,5 +187,5 @@ void NEGEMMInterleave4x4Kernel::run(const Window &window, const ThreadInfo &info
     *
     *         After this operation, the output matrix will have the following shape: [ height * 4, ceil(width / 4.0f) ]
     */
-    (*_func)(_input, _output, window);
+    (this->*_func)(_input, _output, window);
 }

@@ -27,21 +27,27 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-
-#include <cmath>
-#include <tuple>
+#include "src/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
+#include "src/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+NEDirectConvolutionLayer::~NEDirectConvolutionLayer() = default;
+
 NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _output_stage_kernel(), _conv_kernel(), _input_border_handler(), _activationlayer_function(), _accumulator(), _has_bias(false),
-      _is_activationlayer_enabled(false), _dim_split(Window::DimZ)
+      _is_activationlayer_enabled(false), _dim_split(Window::DimZ), _is_padding_required()
 {
 }
 
 void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::UNKNOWN);
+    _output_stage_kernel  = arm_compute::support::cpp14::make_unique<NEDirectConvolutionLayerOutputStageKernel>();
+    _conv_kernel          = arm_compute::support::cpp14::make_unique<NEDirectConvolutionLayerKernel>();
+    _input_border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
 
     // Free accumulator
     if(_accumulator.buffer() != nullptr)
@@ -54,14 +60,18 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
     // Check if bias should be added in the convolution result
     _has_bias = (bias != nullptr);
 
-    _conv_kernel.configure(input, weights, output, conv_info);
+    _conv_kernel->configure(input, weights, output, conv_info);
     if(_has_bias)
     {
-        _output_stage_kernel.configure(output, bias);
+        _output_stage_kernel->configure(output, bias);
     }
+    _is_padding_required = !_conv_kernel->border_size().empty();
 
-    // Add zero padding XY
-    _input_border_handler.configure(input, _conv_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
+    if(_is_padding_required)
+    {
+        // Add zero padding XY
+        _input_border_handler->configure(input, _conv_kernel->border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
+    }
 
     //Configure Activation Layer
     _is_activationlayer_enabled = act_info.enabled();
@@ -104,14 +114,16 @@ Status NEDirectConvolutionLayer::validate(const ITensorInfo *input, const ITenso
 
 void NEDirectConvolutionLayer::run()
 {
-    NEScheduler::get().schedule(&_input_border_handler, Window::DimZ);
-
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    NEScheduler::get().schedule(&_conv_kernel, _dim_split);
+    if(_is_padding_required)
+    {
+        NEScheduler::get().schedule(_input_border_handler.get(), Window::DimZ);
+    }
+    NEScheduler::get().schedule(_conv_kernel.get(), _dim_split);
     if(_has_bias)
     {
-        NEScheduler::get().schedule(&_output_stage_kernel, Window::DimY);
+        NEScheduler::get().schedule(_output_stage_kernel.get(), Window::DimY);
     }
 
     if(_is_activationlayer_enabled)

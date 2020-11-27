@@ -65,50 +65,6 @@ RelativeTolerance<half> tolerance_f16(half(0.1));
 TEST_SUITE(GC)
 TEST_SUITE(Scale)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::MediumShapes(), datasets::LargeShapes()), ScaleDataTypes),
-                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
-                                                                           datasets::BorderModes()),
-                                                                   datasets::SamplingPolicies()),
-               shape, data_type, policy, border_mode, sampling_policy)
-{
-    std::mt19937                           generator(library->seed());
-    std::uniform_real_distribution<float>  distribution_float(0.25, 2);
-    const float                            scale_x = distribution_float(generator);
-    const float                            scale_y = distribution_float(generator);
-    std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
-    uint8_t                                constant_border_value = distribution_u8(generator);
-
-    // Create tensors
-    GCTensor    src = create_tensor<GCTensor>(shape, data_type);
-    TensorShape shape_scaled(shape);
-    shape_scaled.set(0, shape[0] * scale_x);
-    shape_scaled.set(1, shape[1] * scale_y);
-    GCTensor dst = create_tensor<GCTensor>(shape_scaled, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    GCScale gcscale;
-    gcscale.configure(&src, &dst, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy });
-
-    // Get border size depending on border mode
-    const BorderSize border_size(border_mode == BorderMode::UNDEFINED ? 0 : 1);
-
-    // Validate valid region
-    const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, sampling_policy, (border_mode == BorderMode::UNDEFINED));
-    validate(dst.info()->valid_region(), dst_valid_region);
-
-    // Validate padding
-    PaddingCalculator calculator(shape_scaled.x(), 4);
-    calculator.set_border_mode(border_mode);
-
-    //const PaddingSize read_padding(border_size);
-    const PaddingSize write_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
-    //validate(src.info()->padding(), read_padding);
-    validate(dst.info()->padding(), write_padding);
-}
-
 template <typename T>
 using GCScaleFixture = ScaleValidationFixture<GCTensor, GCAccessor, GCScale, T>;
 

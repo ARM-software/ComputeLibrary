@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {

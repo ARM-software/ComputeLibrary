@@ -25,6 +25,14 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLCopyKernel.h"
+#include "src/core/CL/kernels/CLCropKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLMemsetKernel.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+
+#include "support/MemorySupport.h"
 
 #include <cstddef>
 
@@ -56,6 +64,8 @@ CLCropResize::CLCropResize()
     : _input(nullptr), _boxes(nullptr), _box_ind(nullptr), _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _scale(), _copy(), _crop_results(), _scaled_results(), _internal_kernels()
 {
 }
+
+CLCropResize::~CLCropResize() = default;
 
 Status CLCropResize::validate(const ITensorInfo *input, ITensorInfo *boxes, ITensorInfo *box_ind, const ITensorInfo *output,
                               Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value)
@@ -142,7 +152,7 @@ void CLCropResize::configure(const CLCompileContext &compile_context, const ICLT
         win.set(3, Window::Dimension(num_box, num_box + 1, 1));
 
         auto copy_kernel = support::cpp14::make_unique<CLCopyKernel>();
-        copy_kernel->configure(compile_context, _scaled_results[num_box].get(), _output, PaddingList(), &win);
+        copy_kernel->configure(compile_context, _scaled_results[num_box].get(), _output, &win);
         _copy.emplace_back(std::move(copy_kernel));
 
         _crop_results[num_box]->allocator()->allocate();

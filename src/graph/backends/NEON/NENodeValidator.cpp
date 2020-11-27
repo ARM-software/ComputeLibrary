@@ -26,9 +26,22 @@
 #include "arm_compute/graph/backends/ValidateHelpers.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
+#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
+#include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
+#include "src/core/NEON/kernels/NEReshapeLayerKernel.h"
+#include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
+#include "support/Cast.h"
 
 using namespace arm_compute::utils::cast;
 
@@ -44,6 +57,7 @@ struct NEEltwiseLayerFunctions
     using ArithmeticAddition      = NEArithmeticAddition;
     using ArithmeticSubtraction   = NEArithmeticSubtraction;
     using PixelWiseMultiplication = NEPixelWiseMultiplication;
+    using ElementwiseMax          = NEElementwiseMax;
 };
 
 /** Collection of NEON unary element-wise functions */
@@ -62,6 +76,8 @@ Status NENodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::ArgMinMaxLayer:
+            return detail::validate_arg_min_max_layer<NEArgMinMaxLayer>(*polymorphic_downcast<ArgMinMaxLayerNode *>(node));
         case NodeType::BoundingBoxTransformLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : BoundingBoxTransformLayer");
         case NodeType::ChannelShuffleLayer:
@@ -71,6 +87,8 @@ Status NENodeValidator::validate(INode *node)
                    NEDirectConvolutionLayer,
                    NEGEMMConvolutionLayer,
                    NEWinogradConvolutionLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
+        case NodeType::DepthToSpaceLayer:
+            return detail::validate_depth_to_space_layer<NEDepthToSpaceLayer>(*polymorphic_downcast<DepthToSpaceLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DequantizationLayer:
@@ -81,6 +99,8 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_detection_post_process_layer<NEDetectionPostProcessLayer>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::GenerateProposalsLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : GenerateProposalsLayer");
+        case NodeType::L2NormalizeLayer:
+            return detail::validate_l2_normalize_layer<NEL2NormalizeLayer>(*polymorphic_downcast<L2NormalizeLayerNode *>(node));
         case NodeType::NormalizePlanarYUVLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : NormalizePlanarYUVLayer");
         case NodeType::PadLayer:
@@ -93,6 +113,8 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_priorbox_layer<NEPriorBoxLayer>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:
             return detail::validate_quantization_layer<NEQuantizationLayer>(*polymorphic_downcast<QuantizationLayerNode *>(node));
+        case NodeType::ReductionOperationLayer:
+            return detail::validate_reduction_operation_layer<NEReductionOperation>(*polymorphic_downcast<ReductionLayerNode *>(node));
         case NodeType::ReorgLayer:
             return detail::validate_reorg_layer<NEReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:
@@ -101,6 +123,8 @@ Status NENodeValidator::validate(INode *node)
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ROIAlignLayer");
         case NodeType::SliceLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : SliceLayer");
+        case NodeType::StridedSliceLayer:
+            return detail::validate_strided_slice_layer<NEStridedSlice>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
         case NodeType::UpsampleLayer:
             return detail::validate_upsample_layer<NEUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
         case NodeType::YOLOLayer:

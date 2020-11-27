@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include "arm_gemm.hpp"
+
 #include <cstddef>
 
 // Macro for unreachable code (e.g. impossible default cases on switch)
@@ -31,6 +33,8 @@
 
 // Paranoid option for the above with assert
 // #define UNREACHABLE(why)   assert(0 && why)
+
+namespace arm_gemm {
 
 template<typename T>
 inline T iceildiv(const T a, const T b) {
@@ -48,7 +52,94 @@ inline T roundup(const T a, const T b) {
     }
 }
 
-namespace arm_gemm {
+enum class VLType {
+    None,
+    SVE,
+};
+
+template<typename T>
+struct IndirectOutputArg {
+    struct {
+        T       *base;
+        size_t   stride;
+    } direct = {};
+    struct {
+        T * const *ptr;
+        size_t     offset;
+    } indirect = {};
+    bool is_indirect;
+
+    // Direct
+    IndirectOutputArg(T *base, size_t stride) : is_indirect(false) {
+        direct.base = base;
+        direct.stride = stride;
+    }
+
+    // Indirect
+    IndirectOutputArg(T * const * ptr, size_t offset) : is_indirect(true) {
+        indirect.ptr = ptr;
+        indirect.offset = offset;
+    }
+
+    IndirectOutputArg() : is_indirect(false) {
+        direct.base = nullptr;
+        direct.stride = 0;
+    }
+};
+
+// Check that the provided Requantize32 doesn't have a left shift.
+inline bool quant_no_left_shift(const Requantize32 &qp) {
+    if (qp.per_channel_requant) {
+        return (qp.per_channel_left_shifts == nullptr);
+    } else {
+        return (qp.per_layer_left_shift == 0);
+    }
+}
+
+// Check that the provided Requantize32 is compatible with the "symmetric" hybrid kernels.  These don't include row
+// sums, so the 'b_offset' has to be zero.
+inline bool quant_hybrid_symmetric(const Requantize32 &qp) {
+    return quant_no_left_shift(qp) && qp.b_offset == 0;
+}
+
+// Check that the provided Requantize32 is compatible with the "asymmetric" hybrid kernels.  These don't support per
+// channel quantization.  Technically b_offset==0 cases would work, but it is a waste to sum and then multiply by 0...
+inline bool quant_hybrid_asymmetric(const Requantize32 &qp) {
+    return quant_no_left_shift(qp) /*  && qp.b_offset != 0 */ && qp.per_channel_requant==false;
+}
+
+template<typename T>
+struct IndirectInputArg {
+    struct {
+        const T *base;
+        size_t   stride;
+    } direct = {};
+    struct {
+        const T * const * const * ptr;
+        unsigned int start_row;
+        unsigned int start_col;
+    } indirect = {};
+    bool is_indirect;
+
+    // Direct
+    IndirectInputArg(const T *base, size_t stride) : is_indirect(false) {
+        direct.base = base;
+        direct.stride = stride;
+    }
+
+    // Indirect
+    IndirectInputArg(const T * const * const *ptr, unsigned int start_row, unsigned int start_col) : is_indirect(true) {
+        indirect.ptr = ptr;
+        indirect.start_row = start_row;
+        indirect.start_col = start_col;
+    }
+
+    IndirectInputArg() : is_indirect(false) {
+        direct.base = nullptr;
+        direct.stride = 0;
+    }
+};
+
 namespace utils {
 namespace {
 

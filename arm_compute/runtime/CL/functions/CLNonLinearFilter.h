@@ -31,6 +31,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute non linear filter. This function calls the following OpenCL kernels:
@@ -39,6 +40,9 @@ class ICLTensor;
  * -# @ref CLNonLinearFilterKernel
  *
  * @note Supported mask dimensions squares of sizes 3, 5
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLNonLinearFilter : public ICLSimpleFunction
 {

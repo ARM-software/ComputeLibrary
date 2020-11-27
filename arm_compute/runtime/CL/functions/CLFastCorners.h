@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_CLFASTCORNERS_H
 
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/CL/kernels/CLFastCornersKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/CL/CLArray.h"
@@ -40,6 +39,8 @@
 
 namespace arm_compute
 {
+class CLFastCornersKernel;
+class CLCopyToArrayKernel;
 class ICLTensor;
 using ICLImage = ICLTensor;
 
@@ -48,6 +49,8 @@ using ICLImage = ICLTensor;
  * -# @ref CLFastCornersKernel
  * -# @ref CLNonMaximaSuppression3x3Kernel (executed if nonmax_suppression == true)
  * -# @ref CLCopyToArrayKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class CLFastCorners : public IFunction
@@ -59,6 +62,8 @@ public:
     CLFastCorners(const CLFastCorners &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     const CLFastCorners &operator=(const CLFastCorners &) = delete;
+    /** Default destructor */
+    ~CLFastCorners();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in]     input                 Source image. Data types supported: U8.
@@ -88,18 +93,18 @@ public:
     void run() override;
 
 private:
-    MemoryGroup               _memory_group;
-    CLFastCornersKernel       _fast_corners_kernel;
-    CLNonMaximaSuppression3x3 _suppr_func;
-    CLCopyToArrayKernel       _copy_array_kernel;
-    CLImage                   _output;
-    CLImage                   _suppr;
-    Window                    _win;
-    bool                      _non_max;
-    unsigned int             *_num_corners;
-    cl::Buffer                _num_buffer;
-    ICLKeyPointArray         *_corners;
-    uint8_t                   _constant_border_value;
+    MemoryGroup                          _memory_group;
+    std::unique_ptr<CLFastCornersKernel> _fast_corners_kernel;
+    CLNonMaximaSuppression3x3            _suppr_func;
+    std::unique_ptr<CLCopyToArrayKernel> _copy_array_kernel;
+    CLImage                              _output;
+    CLImage                              _suppr;
+    Window                               _win;
+    bool                                 _non_max;
+    unsigned int                        *_num_corners;
+    cl::Buffer                           _num_buffer;
+    ICLKeyPointArray                    *_corners;
+    uint8_t                              _constant_border_value;
 };
 }
 #endif /*ARM_COMPUTE_CLFASTCORNERS_H */

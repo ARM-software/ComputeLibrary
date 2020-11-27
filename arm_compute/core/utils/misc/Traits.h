@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_UTILS_TRAITS_TRAITS_H
 #define ARM_COMPUTE_UTILS_TRAITS_TRAITS_H
 
+#include "arm_compute/core/Types.h"
 #include <type_traits>
 
 namespace arm_compute

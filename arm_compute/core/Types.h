@@ -137,10 +137,11 @@ enum class DataLayoutDimension
 /** Available ConvolutionMethod*/
 enum class ConvolutionMethod
 {
-    GEMM,     /**< Convolution using GEMM */
-    DIRECT,   /**< Direct convolution */
-    WINOGRAD, /**< Convolution using Winograd */
-    FFT       /**< Convolution using FFT */
+    GEMM,        /**< Convolution using GEMM */
+    GEMM_CONV2D, /**< Direct 2D GEMM convolution */
+    DIRECT,      /**< Direct convolution */
+    WINOGRAD,    /**< Convolution using Winograd */
+    FFT          /**< Convolution using FFT */
 };
 
 /** Available DepthwiseConvolutionFunction*/
@@ -337,6 +338,28 @@ struct BorderSize
         return size;
     }
 
+    /** Check equality with another BorderSize struct
+     *
+     * @param[in] rhs other struct to check against
+     *
+     * @return true if they are equal
+     */
+    bool operator==(const BorderSize &rhs)
+    {
+        return (top == rhs.top) && (right == rhs.right) && (bottom == rhs.bottom) && (left == rhs.left);
+    }
+
+    /** Check non-equality with another BorderSize struct
+     *
+     * @param[in] rhs other struct to check against
+     *
+     * @return true if they are different
+     */
+    bool operator!=(const BorderSize &rhs)
+    {
+        return !(*this == rhs);
+    }
+
     /** Limit this border size.
      *
      * @param[in] limit Border size to limit this border size to.
@@ -523,13 +546,14 @@ enum class ArithmeticOperation
 /** Available element wise unary operations */
 enum class ElementWiseUnary
 {
-    RSQRT, /**< Reverse square root */
-    EXP,   /**< Exponential */
-    NEG,   /**< Negate */
-    LOG,   /**< Natural Logarithm */
-    ABS,   /**< Absolute value */
-    SIN,   /**< Sine */
-    ROUND, /**< Round */
+    RSQRT,       /**< Reverse square root */
+    EXP,         /**< Exponential */
+    NEG,         /**< Negate */
+    LOG,         /**< Natural Logarithm */
+    ABS,         /**< Absolute value */
+    SIN,         /**< Sine */
+    ROUND,       /**< Round */
+    LOGICAL_NOT, /**< Logical Not */
 };
 
 /** The normalization type used for the normalization layer */
@@ -1690,6 +1714,44 @@ private:
     bool     _is_scaled;
 };
 
+class StridedSliceLayerInfo
+{
+public:
+    /** Default Constructor
+     *
+     * @param[in] begin_mask       (Optional) If the ith bit of begin_mask is set, starts[i] is ignored and the fullest possible range in that dimension is used instead.
+     * @param[in] end_mask         (Optional) If the ith bit of end_mask is set, ends[i] is ignored and the fullest possible range in that dimension is used instead.
+     * @param[in] shrink_axis_mask (Optional) If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
+     */
+    StridedSliceLayerInfo(int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0)
+        : _begin_mask(begin_mask), _end_mask(end_mask), _shrink_axis_mask(shrink_axis_mask)
+    {
+    }
+
+    /* Get the begin mask value */
+    int32_t begin_mask() const
+    {
+        return _begin_mask;
+    }
+
+    /* Get the end mask value */
+    int32_t end_mask() const
+    {
+        return _end_mask;
+    }
+
+    /* Get the shrink axis mask value */
+    int32_t shrink_axis_mask() const
+    {
+        return _shrink_axis_mask;
+    }
+
+private:
+    int32_t _begin_mask;
+    int32_t _end_mask;
+    int32_t _shrink_axis_mask;
+};
+
 /** Convolution Layer Weights Information class. This class stores the necessary information to compute convolution layer when the weights are already reshaped */
 class WeightsInfo
 {
@@ -1741,11 +1803,11 @@ public:
     }
 
 private:
-    const bool         _are_reshaped;
-    const unsigned int _kernel_width;
-    const unsigned int _kernel_height;
-    const unsigned int _num_kernels;
-    const bool         _retain_internal_weights;
+    bool         _are_reshaped;
+    unsigned int _kernel_width;
+    unsigned int _kernel_height;
+    unsigned int _num_kernels;
+    bool         _retain_internal_weights;
 };
 
 /** GEMM reshape information class. This class stores the necessary information about matrix A and matrix B reshape.
@@ -1852,14 +1914,14 @@ public:
     };
 
 private:
-    const int  _m;
-    const int  _n;
-    const int  _k;
-    const int  _mult_transpose1xW_width;
-    const int  _mult_interleave4x4_height;
-    const int  _depth_output_gemm3d;
-    const bool _reinterpret_input_as_3d;
-    const bool _broadcast_bias;
+    int  _m;
+    int  _n;
+    int  _k;
+    int  _mult_transpose1xW_width;
+    int  _mult_interleave4x4_height;
+    int  _depth_output_gemm3d;
+    bool _reinterpret_input_as_3d;
+    bool _broadcast_bias;
 };
 
 struct DepthwiseConvolutionReshapeInfo
@@ -2186,5 +2248,14 @@ struct IOFormatInfo
     /** Align columns */
     bool align_columns;
 };
+
+/** Internal keypoint class for Lucas-Kanade Optical Flow */
+struct NELKInternalKeypoint
+{
+    float x{ 0.f };                 /**< x coordinate of the keypoint */
+    float y{ 0.f };                 /**< y coordinate of the keypoint */
+    bool  tracking_status{ false }; /**< the tracking status of the keypoint */
+};
+
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TYPES_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,57 +48,13 @@ namespace
 /* Allowed ratio of mismatches between target and reference (1.0 = 100%) */
 const float allowed_mismatch_ratio = 0.1f;
 
-const auto data = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }),
-                          combine(framework::dataset::make("Normalization", { MagnitudeType::L1NORM, MagnitudeType::L2NORM }), datasets::BorderModes()));
+const auto data = combine(framework::dataset::make("GradientSize",
+{ 3, 5, 7 }),
+combine(framework::dataset::make("Normalization", { MagnitudeType::L1NORM, MagnitudeType::L2NORM }), datasets::BorderModes()));
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(CannyEdge)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), data), framework::dataset::make("Format", Format::U8)),
-               shape, gradient_size, normalization, border_mode, format)
-{
-    CannyEdgeParameters params = canny_edge_parameters();
-    // Convert normalisation type to integer
-    const auto norm_type = static_cast<int>(normalization) + 1;
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type_from_format(format));
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type_from_format(format));
-    src.info()->set_format(format);
-    dst.info()->set_format(format);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create Canny edge configure function
-    CLCannyEdge canny_edge;
-    canny_edge.configure(&src, &dst, params.upper_thresh, params.lower_thresh, gradient_size, norm_type, border_mode, params.constant_border_value);
-
-    // Validate valid region
-    validate(src.info()->valid_region(), shape_to_valid_region(shape, (BorderMode::UNDEFINED == border_mode)));
-
-    //TODO(COMPMID-568): dst region validation fails when Shape=7x7 and GradientSize=7 and BorderMode=UNDEFINED (integer underflow)
-    if(!(shape == TensorShape{ 7u, 7u } && gradient_size == 7 && border_mode == BorderMode::UNDEFINED))
-    {
-        validate(dst.info()->valid_region(), shape_to_valid_region(shape, (BorderMode::UNDEFINED == border_mode), BorderSize(gradient_size / 2 + 1)));
-    }
-
-    // Validate padding
-    PaddingCalculator calculator(shape.x(), 1);
-    calculator.set_border_mode(border_mode);
-    calculator.set_border_size(1);
-    const PaddingSize dst_padding = calculator.required_padding();
-
-    calculator.set_border_size(gradient_size / 2);
-    calculator.set_access_offset(-gradient_size / 2);
-    calculator.set_accessed_elements(16);
-    calculator.set_processed_elements(8);
-    const PaddingSize src_padding = calculator.required_padding();
-
-    validate(src.info()->padding(), src_padding);
-    validate(dst.info()->padding(), dst_padding);
-}
 
 template <typename T>
 using CLCannyEdgeFixture = CannyEdgeValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLCannyEdge, T>;

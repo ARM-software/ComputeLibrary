@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLComputeAllAnchors.h"
+#include "src/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
 
 #include "support/MemorySupport.h"
 

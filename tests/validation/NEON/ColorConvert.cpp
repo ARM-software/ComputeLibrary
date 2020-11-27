@@ -70,62 +70,6 @@ const auto ColorConvert_YUYVDataset_to_NVDataset = combine(YUYVDataset,
 
 const auto ColorConvert_NVDataset_to_YUVDataset = combine(framework::dataset::make("FormatType", { Format::NV12, Format::NV21 }),
                                                           framework::dataset::make("FormatType", { Format::IYUV, Format::YUV444 }));
-
-inline void validate_configuration(const TensorShape &shape, Format src_format, Format dst_format)
-{
-    const unsigned int src_num_planes = num_planes_from_format(src_format);
-    const unsigned int dst_num_planes = num_planes_from_format(dst_format);
-
-    TensorShape input = adjust_odd_shape(shape, src_format);
-    input             = adjust_odd_shape(input, dst_format);
-
-    // Create tensors
-    MultiImage ref_src = create_multi_image<MultiImage>(input, src_format);
-    MultiImage ref_dst = create_multi_image<MultiImage>(input, dst_format);
-
-    // Create and Configure function
-    NEColorConvert color_convert;
-
-    if(1U == src_num_planes)
-    {
-        const Tensor *src_plane = ref_src.plane(0);
-
-        if(1U == dst_num_planes)
-        {
-            Tensor *dst_plane = ref_dst.plane(0);
-            color_convert.configure(src_plane, dst_plane);
-        }
-        else
-        {
-            color_convert.configure(src_plane, &ref_dst);
-        }
-    }
-    else
-    {
-        if(1U == dst_num_planes)
-        {
-            Tensor *dst_plane = ref_dst.plane(0);
-            color_convert.configure(&ref_src, dst_plane);
-        }
-        else
-        {
-            color_convert.configure(&ref_src, &ref_dst);
-        }
-    }
-
-    for(unsigned int plane_idx = 0; plane_idx < src_num_planes; ++plane_idx)
-    {
-        const Tensor *src_plane = ref_src.plane(plane_idx);
-
-        ARM_COMPUTE_EXPECT(src_plane->info()->is_resizable(), framework::LogLevel::ERRORS);
-    }
-    for(unsigned int plane_idx = 0; plane_idx < dst_num_planes; ++plane_idx)
-    {
-        const Tensor *dst_plane = ref_dst.plane(plane_idx);
-
-        ARM_COMPUTE_EXPECT(dst_plane->info()->is_resizable(), framework::LogLevel::ERRORS);
-    }
-}
 } // namespace
 
 TEST_SUITE(NEON)
@@ -133,56 +77,6 @@ TEST_SUITE(ColorConvert)
 
 template <typename T>
 using NEColorConvertFixture = ColorConvertValidationFixture<MultiImage, Tensor, Accessor, NEColorConvert, T>;
-
-TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGBA_to_RGB),
-               shape, src_format, dst_format)
-{
-    validate_configuration(shape, src_format, dst_format);
-}
-
-DATA_TEST_CASE(RGB, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_RGBA),
-               shape, src_format, dst_format)
-{
-    validate_configuration(shape, src_format, dst_format);
-}
-
-DATA_TEST_CASE(RGBtoU8, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_U8),
-               shape, src_format, dst_format)
-{
-    validate_configuration(shape, src_format, dst_format);
-}
-
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_RGBDataset),
-               shape, src_format, dst_format)
-{
-    validate_configuration(shape, src_format, dst_format);
-}
-
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUVPlanar_to_RGBDataset),
-               shape, src_format, dst_format)
-{
-    validate_configuration(shape, src_format, dst_format);
-}
-
-DATA_TEST_CASE(NV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGBDataset_to_NVDataset),
-               shape, src_format, dst_format)
-{
-    validate_configuration(shape, src_format, dst_format);
-}
-
-DATA_TEST_CASE(YUYVtoNV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_NVDataset),
-               shape, src_format, dst_format)
-{
-    validate_configuration(shape, src_format, dst_format);
-}
-
-DATA_TEST_CASE(NVtoYUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_NVDataset_to_YUVDataset),
-               shape, src_format, dst_format)
-{
-    validate_configuration(shape, src_format, dst_format);
-}
-TEST_SUITE_END() // Configuration
 
 TEST_SUITE(RGBA)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGBA_to_RGB))

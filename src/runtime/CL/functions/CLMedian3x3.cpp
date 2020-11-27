@@ -23,8 +23,9 @@
  */
 #include "arm_compute/runtime/CL/functions/CLMedian3x3.h"
 
-#include "arm_compute/core/CL/kernels/CLMedian3x3Kernel.h"
 #include "arm_compute/core/PixelValue.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLMedian3x3Kernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
@@ -41,5 +42,5 @@ void CLMedian3x3::configure(const CLCompileContext &compile_context, ICLTensor *
     auto k = arm_compute::support::cpp14::make_unique<CLMedian3x3Kernel>();
     k->configure(compile_context, input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
 }

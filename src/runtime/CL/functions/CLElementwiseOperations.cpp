@@ -24,51 +24,17 @@
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-namespace
-{
-void configure_border_handler(const CLCompileContext &compile_context, CLFillBorderKernel &border_handler, BorderSize border_size, ITensorInfo *input1, ITensorInfo *input2, const ITensorInfo *output)
-{
-    if(output->dimension(0) > 1)
-    {
-        ITensorInfo *broadcasted_info = (input1->dimension(0) == 1) ? input1 : input2;
-
-        if(broadcasted_info->dimension(0) == 1)
-        {
-            border_handler.configure(compile_context, broadcasted_info, border_size, BorderMode::REPLICATE);
-        }
-    }
-}
-
-ITensorPack select_border_input(ITensorPack &tensors)
-{
-    ITensorPack pack;
-    if(tensors.get_tensor(TensorType::ACL_DST)->info()->dimension(0) > 1)
-    {
-        if(tensors.get_const_tensor(TensorType::ACL_SRC_1)->info()->dimension(0) == 1)
-        {
-            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(TensorType::ACL_SRC_1));
-        }
-        else
-        {
-            pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(TensorType::ACL_SRC_0));
-        }
-    }
-    return pack;
-}
-} // namespace
-
 namespace experimental
 {
 CLArithmeticAddition::CLArithmeticAddition()
-    : _border_handler()
 {
 }
 
@@ -77,7 +43,6 @@ void CLArithmeticAddition::configure(const CLCompileContext &compile_context, IT
     auto k = arm_compute::support::cpp14::make_unique<CLSaturatedArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::ADD, input1, input2, output, policy, act_info);
     _kernel = std::move(k);
-    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
@@ -87,13 +52,10 @@ Status CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorIn
 
 void CLArithmeticAddition::run(ITensorPack &tensors)
 {
-    auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 
 CLArithmeticSubtraction::CLArithmeticSubtraction()
-    : _border_handler()
 {
 }
 void CLArithmeticSubtraction::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy,
@@ -102,7 +64,6 @@ void CLArithmeticSubtraction::configure(const CLCompileContext &compile_context,
     auto k = arm_compute::support::cpp14::make_unique<CLSaturatedArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::SUB, input1, input2, output, policy, act_info);
     _kernel = std::move(k);
-    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
@@ -113,13 +74,10 @@ Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITenso
 
 void CLArithmeticSubtraction::run(ITensorPack &tensors)
 {
-    auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 
 CLArithmeticDivision::CLArithmeticDivision()
-    : _border_handler()
 {
 }
 
@@ -128,7 +86,6 @@ void CLArithmeticDivision::configure(const CLCompileContext &compile_context, IT
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::DIV, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLArithmeticDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -138,13 +95,10 @@ Status CLArithmeticDivision::validate(const ITensorInfo *input1, const ITensorIn
 
 void CLArithmeticDivision::run(ITensorPack &tensors)
 {
-    auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 
 CLElementwiseMax::CLElementwiseMax()
-    : _border_handler()
 {
 }
 
@@ -153,7 +107,6 @@ void CLElementwiseMax::configure(const CLCompileContext &compile_context, ITenso
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::MAX, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -163,13 +116,10 @@ Status CLElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void CLElementwiseMax::run(ITensorPack &tensors)
 {
-    auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 
 CLElementwiseMin::CLElementwiseMin()
-    : _border_handler()
 {
 }
 
@@ -178,7 +128,6 @@ void CLElementwiseMin::configure(const CLCompileContext &compile_context, ITenso
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::MIN, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -188,13 +137,10 @@ Status CLElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void CLElementwiseMin::run(ITensorPack &tensors)
 {
-    auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 
 CLElementwiseSquaredDiff::CLElementwiseSquaredDiff()
-    : _border_handler()
 {
 }
 
@@ -203,7 +149,6 @@ void CLElementwiseSquaredDiff::configure(const CLCompileContext &compile_context
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::SQUARED_DIFF, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -213,13 +158,10 @@ Status CLElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITens
 
 void CLElementwiseSquaredDiff::run(ITensorPack &tensors)
 {
-    auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 
 CLElementwisePower::CLElementwisePower()
-    : _border_handler()
 {
 }
 
@@ -228,7 +170,6 @@ void CLElementwisePower::configure(const CLCompileContext &compile_context, ITen
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
     k->configure(compile_context, ArithmeticOperation::POWER, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -238,8 +179,6 @@ Status CLElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo
 
 void CLElementwisePower::run(ITensorPack &tensors)
 {
-    auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 } // namespace experimental
@@ -477,7 +416,6 @@ struct CLElementwiseSquaredDiff::Impl
     const ICLTensor                                        *src_1{ nullptr };
     ICLTensor                                              *dst{ nullptr };
     std::unique_ptr<experimental::CLElementwiseSquaredDiff> op{ nullptr };
-    std::unique_ptr<CLFillBorderKernel>                     _border_handler{ nullptr };
 };
 
 CLElementwiseSquaredDiff::CLElementwiseSquaredDiff()

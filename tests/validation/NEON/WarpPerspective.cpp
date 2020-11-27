@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,54 +49,6 @@ constexpr float                      tolerance_number = 0.2f;
 
 TEST_SUITE(NEON)
 TEST_SUITE(WarpPerspective)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)),
-                                                                           framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                   datasets::BorderModes()),
-               shape, data_type, policy, border_mode)
-{
-    uint8_t constant_border_value = 0;
-
-    // Generate a random constant value if border_mode is constant
-    if(border_mode == BorderMode::CONSTANT)
-    {
-        std::mt19937                           gen(library->seed());
-        std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
-        constant_border_value = distribution_u8(gen);
-    }
-
-    // Create the matrix
-    std::array<float, 9> matrix = { { 0 } };
-    fill_warp_matrix<9>(matrix);
-
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEWarpPerspective warp_perspective;
-    warp_perspective.configure(&src, &dst, matrix, policy, border_mode, constant_border_value);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-
-    validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    PaddingCalculator calculator(shape.x(), 1);
-    calculator.set_border_mode(border_mode);
-    calculator.set_border_size(1);
-
-    const PaddingSize read_padding(1);
-    const PaddingSize write_padding = calculator.required_padding();
-
-    validate(src.info()->padding(), read_padding);
-    validate(dst.info()->padding(), write_padding);
-}
 
 template <typename T>
 using NEWarpPerspectiveFixture = WarpPerspectiveValidationFixture<Tensor, Accessor, NEWarpPerspective, T>;

@@ -277,7 +277,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_
 FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data_precommit_9x9,
                        framework::dataset::make("DataType",
                                                 DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(3.f / 255, 10), QuantizationInfo(1.1f, 10) })),
                        QuantizedActivationFunctionsDataset),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
@@ -296,7 +296,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerQuantizedFixture<uint8_
 FIXTURE_DATA_TEST_CASE(RunLarge9x9, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data_nightly_9x9,
                        framework::dataset::make("DataType",
                                                 DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(3.f / 255, 10), QuantizationInfo(1.1f, 10) })),
                        QuantizedActivationFunctionsDataset),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {

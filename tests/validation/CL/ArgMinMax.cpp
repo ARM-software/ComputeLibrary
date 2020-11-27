@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLArgMinMaxLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
-
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/SplitDataset.h"
@@ -54,7 +53,8 @@ const auto ArgMinMaxSmallDataset = framework::dataset::make("Shape",
     TensorShape{ 2560, 2U, 2U, 2U },
 });
 
-const auto ArgMinMaxLargeDataset = framework::dataset::make("Shape", { TensorShape{ 517U, 123U, 13U, 2U } });
+const auto ArgMinMaxLargeDataset = framework::dataset::make("Shape",
+{ TensorShape{ 517U, 123U, 13U, 2U } });
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(ArgMinMax)

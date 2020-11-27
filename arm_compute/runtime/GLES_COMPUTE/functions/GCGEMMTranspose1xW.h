@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,8 @@ namespace arm_compute
 /** Basic function to execute GCGEMMTranspose1xWKernel. This function calls the following OpenGLES kernels:
  *
  *  -# @ref GCGEMMTranspose1xWKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class GCGEMMTranspose1xW : public IGCSimpleFunction

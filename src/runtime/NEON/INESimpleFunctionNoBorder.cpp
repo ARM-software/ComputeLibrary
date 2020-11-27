@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,11 +23,15 @@
  */
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
+#include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "arm_compute/runtime/Utils.h"
+#include "src/core/NEON/INEKernel.h"
+#include "src/runtime/Utils.h"
 
 namespace arm_compute
 {
+INESimpleFunctionNoBorder::~INESimpleFunctionNoBorder() = default;
+
 INESimpleFunctionNoBorder::INESimpleFunctionNoBorder(IRuntimeContext *ctx)
     : _kernel(),
       _ctx(ctx)
@@ -36,6 +40,6 @@ INESimpleFunctionNoBorder::INESimpleFunctionNoBorder(IRuntimeContext *ctx)
 
 void INESimpleFunctionNoBorder::run()
 {
-    schedule_kernel_on_ctx(_ctx, _kernel.get(), Window::DimY);
+    utils::schedule_kernel_on_ctx(_ctx, _kernel.get(), Window::DimY);
 }
 } // namespace arm_compute

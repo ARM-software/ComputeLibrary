@@ -26,9 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
-#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
-#include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -43,6 +41,9 @@
 
 namespace arm_compute
 {
+class CLCol2ImKernel;
+class CLIm2ColKernel;
+class CLWeightsReshapeKernel;
 class ICLTensor;
 
 /** Function to reshape and transpose the weights. This function calls the following kernels:
@@ -53,6 +54,16 @@ class CLConvolutionLayerReshapeWeights : public IFunction
 public:
     /** Constructor */
     CLConvolutionLayerReshapeWeights();
+    /** Prevent instances of this class from being copied */
+    CLConvolutionLayerReshapeWeights(const CLConvolutionLayerReshapeWeights &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLConvolutionLayerReshapeWeights &operator=(const CLConvolutionLayerReshapeWeights &) = delete;
+    /** Default move constructor */
+    CLConvolutionLayerReshapeWeights(CLConvolutionLayerReshapeWeights &&) = default;
+    /** Default move assignment operator */
+    CLConvolutionLayerReshapeWeights &operator=(CLConvolutionLayerReshapeWeights &&) = default;
+    /** Default destructor */
+    ~CLConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
      *
      * @param[in]  weights    Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
@@ -87,7 +98,7 @@ public:
     void run() override;
 
 private:
-    CLWeightsReshapeKernel _weights_reshape_kernel;
+    std::unique_ptr<CLWeightsReshapeKernel> _weights_reshape_kernel;
 };
 
 namespace weights_transformations
@@ -158,8 +169,8 @@ private:
  *
  * -# @ref CLIm2ColKernel
  * -# @ref CLGEMM (if the data type is FP32 or FP16)
- * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
+ * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
+ * -# @ref CLGEMMLowpOutputStage with QUANTIZE_DOWN_FIXEDPOINT type of quantization (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref CLCol2ImKernel (if NCHW data layout)
  */
 class CLGEMMConvolutionLayer : public IFunction
@@ -179,6 +190,8 @@ public:
     CLGEMMConvolutionLayer &operator=(const CLGEMMConvolutionLayer &) = delete;
     /** Default move assignment operator */
     CLGEMMConvolutionLayer &operator=(CLGEMMConvolutionLayer &&) = default;
+    /**Default destructor */
+    ~CLGEMMConvolutionLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -288,10 +301,10 @@ private:
     IWeightsManager                                                   *_weights_manager;
     CLConvolutionLayerReshapeWeights                                   _reshape_weights;
     weights_transformations::CLConvolutionLayerReshapeWeightsTransform _reshape_weights_managed;
-    CLIm2ColKernel                                                     _im2col_kernel;
+    std::unique_ptr<CLIm2ColKernel>                                    _im2col_kernel;
     CLGEMM                                                             _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                                       _mm_gemmlowp;
-    CLCol2ImKernel                                                     _col2im_kernel;
+    std::unique_ptr<CLCol2ImKernel>                                    _col2im_kernel;
     CLActivationLayer                                                  _activationlayer_function;
 
     const ICLTensor *_original_weights;

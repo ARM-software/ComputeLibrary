@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,10 +58,12 @@ const auto                         act_infos = framework::dataset::make("Activat
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
 });
 
-const auto common_fusion_dataset = combine(combine(combine(framework::dataset::make("UseBias", { false, true }),
-                                                           framework::dataset::make("UseBeta", { false, true })),
-                                                   framework::dataset::make("UseGamma", { false, true })),
-                                           framework::dataset::make("Epsilon", { 0.001f }));
+const auto common_fusion_dataset = combine(combine(combine(framework::dataset::make("UseBias",
+{ false, true }),
+framework::dataset::make("UseBeta", { false, true })),
+framework::dataset::make("UseGamma", { false, true })),
+framework::dataset::make("Epsilon", { 0.001f }));
+
 } // namespace
 
 TEST_SUITE(CL)
@@ -69,38 +71,6 @@ TEST_SUITE(BatchNormalizationLayer)
 
 template <typename T>
 using CLBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixture<CLTensor, CLAccessor, CLBatchNormalizationLayer, T>;
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                   combine(framework::dataset::make("UseBeta", { false, true }),
-                                                                                           framework::dataset::make("UseGamma", { false, true }))),
-                                                                           framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-               shape0, shape1, epsilon, use_gamma, use_beta, dt, data_layout)
-{
-    TensorShape src_dst_shapes = shape0;
-    if(data_layout == DataLayout::NHWC)
-    {
-        permute(src_dst_shapes, PermutationVector(2U, 0U, 1U));
-    }
-
-    // Create tensors
-    CLTensor src   = create_tensor<CLTensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
-    CLTensor dst   = create_tensor<CLTensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
-    CLTensor mean  = create_tensor<CLTensor>(shape1, dt, 1);
-    CLTensor var   = create_tensor<CLTensor>(shape1, dt, 1);
-    CLTensor beta  = create_tensor<CLTensor>(shape1, dt, 1);
-    CLTensor gamma = create_tensor<CLTensor>(shape1, dt, 1);
-
-    // Create and Configure function
-    CLBatchNormalizationLayer norm;
-    CLTensor                 *beta_ptr  = use_beta ? &beta : nullptr;
-    CLTensor                 *gamma_ptr = use_gamma ? &gamma : nullptr;
-    norm.configure(&src, &dst, &mean, &var, beta_ptr, gamma_ptr, epsilon);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(src_dst_shapes);
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 // *INDENT-OFF*
 // clang-format off
@@ -153,8 +123,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                                                   combine(framework::dataset::make("UseBeta", { false, true }),
-                                                                                                                           framework::dataset::make("UseGamma", { false, true }))),
+                                                                                                                   combine(framework::dataset::make("UseBeta", { false, true }), framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                    act_infos),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -166,9 +135,9 @@ TEST_SUITE_END() //FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                                                  combine(framework::dataset::make("UseBeta", { false, true }),
-                                                                                                                          framework::dataset::make("UseGamma", { false, true }))),
-                                                                                                                  framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
+                                                                                                                  combine(framework::dataset::make("UseBeta", { false, true }), framework::dataset::make("UseGamma", { false, true }))),
+                                                                                                                  framework::dataset::make("ActivationInfo",
+                                                                                                                          ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {

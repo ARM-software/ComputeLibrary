@@ -21,22 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/core/utils/helpers/float_ops.h"
 #include "support/StringSupport.h"
 
 #include <set>
@@ -97,7 +96,7 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
         const int         k                         = reshape_info.k();
         const int         mult_transpose1xW_width   = reshape_info.mult_transpose1xW_width();
         const int         mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
-        rhs_info.n0                                 = 16 / input1->element_size();
+        rhs_info.n0                                 = max_cl_vector_width / input1->element_size();
         rhs_info.k0                                 = 1;
         rhs_info.h0                                 = mult_transpose1xW_width;
         rhs_info.interleave                         = false;
@@ -198,22 +197,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(data_type);
         num_elems_processed_per_iteration_y = 4;
 
-        // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
-        // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-        const int m          = reshape_info.m();
-        const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
-
-        win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-        win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-
-        AccessWindowStatic input0_access(input0, 0, 0, input0->dimension(0), input0->dimension(1));
-        AccessWindowStatic input1_access(input1, 0, 0,
-                                         ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
-                                         ceil_to_multiple(input1->dimension(1), num_elems_processed_per_iteration_y));
-        AccessWindowStatic output_access(output, 0, 0,
-                                         ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
-                                         output->dimension(1) + bottom_pad);
-
+        win = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
         if(input2 != nullptr)
         {
             const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
@@ -224,27 +208,14 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
                                              ceil_to_multiple(input2->dimension(0), bias_processed_per_iteration_x),
                                              ceil_to_multiple(input2->dimension(1), bias_processed_per_iteration_y));
 
-            window_changed = update_window_and_padding(win, input0_access, input1_access, input2_access) || // window used by the execute_window_loop
-                             update_window_and_padding(win_out, output_access);                             // window used to update the padding requirements of output tensor
+            window_changed = update_window_and_padding(win, input2_access); // window used by the execute_window_loop
         }
-        else
-        {
-            window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
-                             update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
-        }
-
-        output_access.set_valid_region(win_out, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
     }
     else // The input tensors have not been reshaped
     {
         // Special case for 1xN, 2xN, 3xN and 4xN input0 tensor. num_elems_processed_per_iteration_x is set up for the default case.
         num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(data_type);
         num_elems_processed_per_iteration_y = std::min(static_cast<int>(output->dimension(1)), 4);
-
-        // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
-        // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-        const int m          = reinterpret_input_as_3d ? input0->tensor_shape()[1] * input0->tensor_shape()[2] : input0->tensor_shape()[1];
-        const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
 
         // Create kernels according to the architecture, data type and input size.
         GPUTarget arch_target = get_arch_from_target(gpu_target);
@@ -256,22 +227,19 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         // Configure window
         win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
         win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-
-        AccessWindowStatic input0_access(input0, 0, 0, input0->dimension(0), input0->dimension(1) + bottom_pad);
+        AccessWindowStatic input0_access(input0, 0, 0, input0->dimension(0), input0->dimension(1));
         AccessWindowStatic input1_access(input1, 0, 0, ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x), input1->dimension(1));
         AccessWindowStatic output_access(output, 0, 0,
-                                         ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
-                                         output->dimension(1) + bottom_pad);
+                                         output->dimension(0),
+                                         output->dimension(1));
 
         if(input2 != nullptr)
         {
             const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
 
-            const int bias_processed_per_iteration_y = reshape_info.broadcast_bias() ? 1 : num_elems_processed_per_iteration_y;
-
             AccessWindowStatic input2_access(input2, 0, 0,
                                              ceil_to_multiple(input2->dimension(0), bias_processed_per_iteration_x),
-                                             ceil_to_multiple(input2->dimension(1), bias_processed_per_iteration_y));
+                                             input2->dimension(1));
 
             window_changed = update_window_and_padding(win, input0_access, input1_access, input2_access) || // window used by the execute_window_loop
                              update_window_and_padding(win_out, output_access);                             // window used to update the padding requirements of output tensor
@@ -310,7 +278,8 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     configure(CLKernelLibrary::get().get_compile_context(), input0, input1, input2, output, alpha, beta, is_interleaved_transposed, reshape_info, fp_mixed_precision, activation_info);
 }
 
-void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
+void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha,
+                                           float beta,
                                            bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, bool fp_mixed_precision, const ActivationLayerInfo &activation_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
@@ -318,6 +287,8 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), (input2 != nullptr) ? input2->info() : nullptr, output->info(), beta,
                                                   is_interleaved_transposed, reshape_info, fp_mixed_precision));
+
+    auto padding_info = is_interleaved_transposed ? get_padding_info({ input0, input1, output }) : get_padding_info({ input0, output });
 
     _input0                   = input0;
     _input1                   = input1;
@@ -354,6 +325,22 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
+    // If _reinterpret_input_as_3d = _reinterpret_output_as_3d = true, both will be turned off (false)
+    // in which case we will dispatch a batched-GEMM to reduce the complexity of the address calculation within the OpenCL kernel.
+    // This means that the actual m used by the kernel is given by output->info()->dimension(1)
+    const unsigned int internal_m = _reinterpret_output_as_3d ? output->info()->dimension(1) * output->info()->dimension(2) : output->info()->dimension(1);
+    const unsigned int n          = output->info()->dimension(0);
+
+    const unsigned int h_gemm_3d = _reinterpret_output_as_3d ? output->info()->dimension(1) : input0->info()->dimension(1);
+    const unsigned int d_gemm_3d = _reinterpret_output_as_3d ? output->info()->dimension(2) : input0->info()->dimension(2);
+
+    const unsigned int m0 = num_elements_processed.y();
+    const unsigned int n0 = num_elements_processed.x();
+
+    // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
+    const unsigned int partial_store_m0 = internal_m % m0;
+    const unsigned int partial_store_n0 = n % n0;
+
     // Create build options
     CLBuildOptions build_opts;
 
@@ -363,8 +350,8 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
     build_opts.add_option_if(reshape_info.broadcast_bias(), "-DBROADCAST_BIAS");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DREINTERPRET_OUTPUT_AS_3D");
-    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(1)));
-    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(2)));
+    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(h_gemm_3d));
+    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(d_gemm_3d));
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
     build_opts.add_option_if(activation_info.enabled(), "-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(activation_info.activation())));
     build_opts.add_option_if(activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(activation_info.a()));
@@ -378,9 +365,13 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
         const int mult_transpose1xW_width   = reshape_info.mult_transpose1xW_width();
         const int mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
 
-        build_opts.add_option("-DCOLS_B=" + support::cpp11::to_string(input1->info()->dimension(0)));
-        build_opts.add_option("-DMULT_TRANSPOSE1XW_WIDTH=" + support::cpp11::to_string(mult_transpose1xW_width));
-        build_opts.add_option("-DMULT_INTERLEAVE4X4_HEIGHT=" + support::cpp11::to_string(mult_interleave4x4_height));
+        build_opts.add_option("-DM=" + support::cpp11::to_string(internal_m));
+        build_opts.add_option("-DN=" + support::cpp11::to_string(n));
+        build_opts.add_option("-DK=" + support::cpp11::to_string(input1->info()->dimension(0) / (n0 * mult_transpose1xW_width)));
+        build_opts.add_option("-DH0=" + support::cpp11::to_string(mult_transpose1xW_width));
+        build_opts.add_option("-DV0=" + support::cpp11::to_string(mult_interleave4x4_height));
+        build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
+        build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
 
         if(is_data_type_float(data_type) && is_bifrost)
         {
@@ -398,8 +389,13 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
     }
     else // The input tensors have not been reshaped
     {
-        build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0)));
+        build_opts.add_option("-DN=" + support::cpp11::to_string(n));
+        build_opts.add_option("-DK=" + support::cpp11::to_string(input0->info()->dimension(0)));
         build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+        build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
+        build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
+        build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
+        build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
 
         // Create kernels according to the architecture, data type and input size.
         if(is_data_type_float(data_type) && is_bifrost)
@@ -431,8 +427,6 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
         {
             kernel_name = "gemm_mm_floating_point";
         }
-        build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_Y=" + support::cpp11::to_string(num_elements_processed.y()));
-        build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_X=" + support::cpp11::to_string(num_elements_processed.x()));
     }
 
     // Create kernel
@@ -457,6 +451,8 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
     _config_id += support::cpp11::to_string(output->info()->dimension(3));
     _config_id += "_";
     _config_id += (is_interleaved_transposed ? support::cpp11::to_string(input1->info()->dimension(0)) : support::cpp11::to_string(input1->info()->dimension(1)));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float alpha, float beta,

@@ -21,14 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEThresholdKernel.h"
+#include "src/core/NEON/kernels/NEThresholdKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {

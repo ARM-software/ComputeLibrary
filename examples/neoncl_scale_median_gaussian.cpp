@@ -26,8 +26,9 @@
 #endif /* ARM_COMPUTE_CL */
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
+#include "arm_compute/runtime/CL/functions/CLScale.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 #include "utils/ImageLoader.h"
 #include "utils/Utils.h"

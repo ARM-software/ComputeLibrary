@@ -24,21 +24,24 @@
 #ifndef ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
 #define ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
 
-#include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
 class IMemoryManager;
 class ICLTensor;
+class ITensorInfo;
+class CLDepthConvertLayerKernel;
+class CLGEMMLowpMatrixMultiplyNativeKernel;
+class CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel;
+class CLGEMMLowpOffsetContributionKernel;
+class CLGEMMLowpOffsetContributionOutputStageKernel;
+class CLGEMMLowpMatrixAReductionKernel;
+class CLGEMMLowpMatrixBReductionKernel;
+class CLGEMMReshapeRHSMatrixKernel;
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. */
 class CLGEMMLowpMatrixMultiplyCore : public IFunction
@@ -54,6 +57,8 @@ public:
     CLGEMMLowpMatrixMultiplyCore &operator=(const CLGEMMLowpMatrixMultiplyCore &) = delete;
     /** Default move assignment operator */
     CLGEMMLowpMatrixMultiplyCore &operator=(CLGEMMLowpMatrixMultiplyCore &&) = default;
+    /** Default destructor */
+    ~CLGEMMLowpMatrixMultiplyCore();
     /** Initialise the kernel's inputs, output
      *
      * @note GEMMLowp:  low precision GEMM kernel. [A * B + C]
@@ -112,14 +117,14 @@ private:
     MemoryGroup _memory_group;
 
     // Kernels used
-    CLDepthConvertLayerKernel                     _weights_to_qasymm8;
-    CLGEMMLowpMatrixMultiplyNativeKernel          _mm_native_kernel;
-    CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel _mm_reshaped_only_rhs_kernel;
-    CLGEMMReshapeRHSMatrixKernel                  _mtx_b_reshape_kernel;
-    CLGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
-    CLGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;
-    CLGEMMLowpOffsetContributionKernel            _offset_contribution_kernel;
-    CLGEMMLowpOffsetContributionOutputStageKernel _offset_contribution_output_stage_kernel;
+    std::unique_ptr<CLDepthConvertLayerKernel>                     _weights_to_qasymm8;
+    std::unique_ptr<CLGEMMLowpMatrixMultiplyNativeKernel>          _mm_native_kernel;
+    std::unique_ptr<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel> _mm_reshaped_only_rhs_kernel;
+    std::unique_ptr<CLGEMMReshapeRHSMatrixKernel>                  _mtx_b_reshape_kernel;
+    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel>              _mtx_a_reduction_kernel;
+    std::unique_ptr<CLGEMMLowpMatrixBReductionKernel>              _mtx_b_reduction_kernel;
+    std::unique_ptr<CLGEMMLowpOffsetContributionKernel>            _offset_contribution_kernel;
+    std::unique_ptr<CLGEMMLowpOffsetContributionOutputStageKernel> _offset_contribution_output_stage_kernel;
 
     // Temporary tensors
     CLTensor _qasymm8_weights;

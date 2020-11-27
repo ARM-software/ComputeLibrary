@@ -38,6 +38,18 @@ namespace experimental
 class NEArithmeticAddition : public INEOperator
 {
 public:
+    /** Constructor */
+    NEArithmeticAddition() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEArithmeticAddition(const NEArithmeticAddition &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEArithmeticAddition &operator=(const NEArithmeticAddition &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEArithmeticAddition(NEArithmeticAddition &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEArithmeticAddition &operator=(NEArithmeticAddition &&) = delete;
+    /** Default destructor */
+    ~NEArithmeticAddition();
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * Valid configurations (Input1,Input2) -> Output :

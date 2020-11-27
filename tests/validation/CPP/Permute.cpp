@@ -58,29 +58,6 @@ const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteVectors;
 TEST_SUITE(CPP)
 TEST_SUITE(Permute)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32, DataType::QASYMM8_SIGNED })),
-               shape, data_type)
-{
-    // Define permutation vector
-    const PermutationVector perm(2U, 0U, 1U);
-
-    // Permute shapes
-    TensorShape output_shape = shape;
-    permute(output_shape, perm);
-
-    // Create tensors
-    Tensor ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst     = create_tensor<Tensor>(output_shape, data_type);
-
-    // Create and Configure function
-    CPPPermute perm_func;
-    perm_func.configure(&ref_src, &dst, perm);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(output_shape);
-    validate(dst.info()->valid_region(), valid_region);
-}
-
 template <typename T>
 using CPPPermuteFixture = PermuteValidationFixture<Tensor, Accessor, CPPPermute, T>;
 

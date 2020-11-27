@@ -33,9 +33,14 @@
 namespace arm_compute
 {
 // Forward declarations
+class CLCompileContext;
 class ICLTensor;
 
-/** Basic function to run @ref CLThresholdKernel */
+/** Basic function to run @ref CLThresholdKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLThreshold : public ICLSimpleFunction
 {
 public:

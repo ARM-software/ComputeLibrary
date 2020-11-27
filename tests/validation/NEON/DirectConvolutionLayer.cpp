@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -78,12 +79,12 @@ const auto data_f16 = combine(datasets::SmallDirectConvolutionShapes(),
                                       combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
                                               data_pad_f16)));
 
-const auto data = combine(datasets::SmallDirectConvolutionShapes(),
-                          combine(framework::dataset::make("StrideX", { 1 }),
-                                  combine(framework::dataset::make("StrideY", { 1 }),
-                                          combine(framework::dataset::make("PadX", { 1 }),
-                                                  combine(framework::dataset::make("PadY", { 1 }),
-                                                          framework::dataset::make("KernelSize", 3))))));
+const auto data_prec = combine(datasets::SmallDirectConvolutionShapes(),
+                               combine(framework::dataset::make("StrideX", { 1 }),
+                                       combine(framework::dataset::make("StrideY", { 1 }),
+                                               combine(framework::dataset::make("PadX", { 1 }),
+                                                       combine(framework::dataset::make("PadY", { 1 }),
+                                                               framework::dataset::make("KernelSize", 3))))));
 
 const auto data9x9 = combine(datasets::SmallDirectConvolutionShapes(),
                              combine(framework::dataset::make("StrideX", { 1 }),
@@ -95,7 +96,7 @@ const auto data9x9 = combine(datasets::SmallDirectConvolutionShapes(),
 const auto data_f32_nightly = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4 }));
 const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4 }));
 
-const auto data_precommit    = combine(data, framework::dataset::make("NumKernels", { 1 }));
+const auto data_precommit    = combine(data_prec, framework::dataset::make("NumKernels", { 1 }));
 const auto data_precommit9x9 = combine(data9x9, framework::dataset::make("NumKernels", { 4 }));
 
 /* The following tests is from real use-case that made DirectConvolution
@@ -195,7 +196,42 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-//TODO(COMPMID-415): Configuration tests?
+DATA_TEST_CASE(NoPaddingNHWCKernel, framework::DatasetMode::ALL, combine(combine(combine(data_precommit,
+                                                                                         framework::dataset::make("DataType", DataType::F32)),
+                                                                                 ActivationFunctionsDataset),
+                                                                         framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+
+               shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, act_info, data_layout)
+{
+    TensorShape         input_shape = TensorShape(shape);
+    TensorShape         weights_shape(kernel_size, kernel_size, input_shape.z(), num_kernels);
+    const PadStrideInfo info(stride_x, stride_y, pad_x, pad_y, DimensionRoundingType::FLOOR);
+
+    TensorInfo input_info   = TensorInfo(input_shape, 1, data_type);
+    TensorInfo weights_info = TensorInfo(weights_shape, 1, data_type);
+
+    TensorShape output_shape = compute_deep_convolution_shape(input_info, weights_info, info);
+
+    if(data_layout == DataLayout::NHWC)
+    {
+        permute(input_shape, PermutationVector(2U, 0U, 1U));
+        permute(weights_shape, PermutationVector(2U, 0U, 1U));
+        permute(output_shape, PermutationVector(2U, 0U, 1U));
+    }
+
+    // Create tensors
+    Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+    Tensor weights = create_tensor<Tensor>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
+    Tensor dst     = create_tensor<Tensor>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
+
+    // Create and configure function
+    NEDirectConvolutionLayer conv;
+    conv.configure(&src, &weights, nullptr, &dst, info, act_info);
+
+    validate(src.info()->padding(), PaddingSize(0, 0, 0, 0));
+    validate(weights.info()->padding(), PaddingSize(0, 0, 0, 0));
+    validate(dst.info()->padding(), PaddingSize(0, 0, 0, 0));
+}
 
 template <typename T>
 using NEDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<Tensor, Accessor, NEDirectConvolutionLayer, T>;

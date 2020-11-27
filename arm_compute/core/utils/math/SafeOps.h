@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,9 @@
 #define ARM_COMPUTE_UTILS_MATH_SAFE_OPS
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/utils/misc/Requires.h"
+#include "support/Requires.h"
+
+#include <limits>
 
 namespace arm_compute
 {

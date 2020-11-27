@@ -24,8 +24,9 @@
 #include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
@@ -55,7 +56,7 @@ ITensorPack select_border_input(ITensorPack &tensors)
 namespace experimental
 {
 CLPixelWiseMultiplication::CLPixelWiseMultiplication()
-    : _border_handler()
+    : _border_handler(support::cpp14::make_unique<CLFillBorderKernel>())
 {
 }
 
@@ -72,7 +73,7 @@ void CLPixelWiseMultiplication::configure(const CLCompileContext &compile_contex
 
         if(broadcasted_info->dimension(0) == 1)
         {
-            _border_handler.configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+            _border_handler->configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
         }
     }
 }
@@ -86,12 +87,12 @@ Status CLPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITen
 void CLPixelWiseMultiplication::run(ITensorPack &tensors)
 {
     auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    CLScheduler::get().enqueue_op(*_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 
 CLComplexPixelWiseMultiplication::CLComplexPixelWiseMultiplication()
-    : _border_handler()
+    : _border_handler(support::cpp14::make_unique<CLFillBorderKernel>())
 {
 }
 
@@ -107,7 +108,7 @@ void CLComplexPixelWiseMultiplication::configure(const CLCompileContext &compile
 
         if(broadcasted_info->dimension(0) == 1)
         {
-            _border_handler.configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+            _border_handler->configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
         }
     }
 }
@@ -120,7 +121,7 @@ Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, con
 void CLComplexPixelWiseMultiplication::run(ITensorPack &tensors)
 {
     auto border_pack = select_border_input(tensors);
-    CLScheduler::get().enqueue_op(_border_handler, border_pack);
+    CLScheduler::get().enqueue_op(*_border_handler, border_pack);
     ICLOperator::run(tensors);
 }
 } // namespace experimental

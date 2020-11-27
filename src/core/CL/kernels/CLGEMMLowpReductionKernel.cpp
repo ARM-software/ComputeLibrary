@@ -21,12 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -58,27 +60,6 @@ Status validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITe
     }
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window_matrix_b_reduction(ITensorInfo *input, ITensorInfo *output)
-{
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output, TensorShape(input->dimension(0)), 1, DataType::S32);
-
-    // Configure kernel window
-    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowStatic     input_access(input, 0, 0, ceil_to_multiple(input->dimension(0), num_elems_processed_per_iteration), input->dimension(1));
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 ICLGEMMLowpReductionKernel::ICLGEMMLowpReductionKernel()
@@ -99,6 +80,8 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const CLCompileContext &compile
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*vector_sum_row->info(), TensorShape(mtx_a->info()->dimension(1)), 1, DataType::S32);
+
+    auto padding_info = get_padding_info({ mtx_a, vector_sum_row });
 
     _input  = mtx_a;
     _output = vector_sum_row;
@@ -129,6 +112,8 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const CLCompileContext &compile
     _config_id += support::cpp11::to_string(_input->info()->dimension(1));
     _config_id += "_";
     _config_id += support::cpp11::to_string(_input->info()->dimension(2));
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
@@ -176,8 +161,17 @@ void CLGEMMLowpMatrixBReductionKernel::configure(const CLCompileContext &compile
     _input  = mtx_b;
     _output = vector_sum_col;
 
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*_output->info(), TensorShape(mtx_b->info()->dimension(0)), 1, DataType::S32);
+
+    auto padding_info = get_padding_info({ mtx_b, vector_sum_col });
+
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16, mtx_b->info()->dimension(0));
+
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(mtx_b->info()->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DCOLS_B=" + support::cpp11::to_string(mtx_b->info()->dimension(0)));
     build_opts.add_option("-DROWS_B=" + support::cpp11::to_string(mtx_b->info()->dimension(1)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(mtx_b->info()->data_type()));
@@ -188,16 +182,16 @@ void CLGEMMLowpMatrixBReductionKernel::configure(const CLCompileContext &compile
     _kernel = create_kernel(compile_context, "gemmlowp_matrix_b_reduction", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window_matrix_b_reduction(_input->info(), _output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*_output->info(), Steps(num_elems_processed_per_iteration));
+    ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_b_reduction(mtx_b, vector_sum_col));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_matrix_b_reduction(mtx_b->clone().get(), vector_sum_col->clone().get()).first);
 
     return Status{};
 }

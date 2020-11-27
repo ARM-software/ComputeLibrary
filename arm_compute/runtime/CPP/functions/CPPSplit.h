@@ -106,7 +106,10 @@ public:
 
             // Output auto inizialitation if not yet initialized
             TensorInfo tmp_output_info = *output->clone();
-            auto_init_if_empty(tmp_output_info, input->clone()->set_is_resizable(true).set_tensor_shape(output_shape));
+            if(tmp_output_info.tensor_shape().total_size() == 0)
+            {
+                tmp_output_info = input->clone()->set_is_resizable(true).set_tensor_shape(output_shape);
+            }
 
             // Update coordinate on axis
             start_coords.set(axis, axis_offset);

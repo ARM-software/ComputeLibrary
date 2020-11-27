@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/CLMemory.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "support/Cast.h"
 
 namespace arm_compute
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
+#include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+
 #include <arm_neon.h>
 #include <cstdint>
 
@@ -71,7 +74,7 @@ NEDepthToSpaceLayerKernel::NEDepthToSpaceLayerKernel()
 void NEDepthToSpaceLayerKernel::configure(const ITensor *input, ITensor *output, int32_t block_shape)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    TensorShape output_shape = compute_depth_to_space_shape(input->info(), block_shape);
+    TensorShape output_shape = compute_depth_to_space_shape(input->info()->tensor_shape(), input->info()->data_layout(), block_shape);
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 

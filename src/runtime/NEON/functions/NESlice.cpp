@@ -24,10 +24,10 @@
 #include "arm_compute/runtime/NEON/functions/NESlice.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEStridedSliceKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
+#include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
 #include "support/MemorySupport.h"
 

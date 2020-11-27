@@ -24,10 +24,11 @@
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLScaleKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLScaleKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute
@@ -60,7 +61,7 @@ void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *inpu
     {
         border_mode_to_use = BorderMode::CONSTANT;
     }
-    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode_to_use, info.constant_border_value);
+    _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode_to_use, info.constant_border_value);
 }
 
 void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value,

@@ -30,7 +30,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLFloorKernel */
 class CLFloor : public ICLSimpleFunction

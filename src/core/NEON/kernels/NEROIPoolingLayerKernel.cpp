@@ -21,12 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
+#include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/ToolchainSupport.h"
 
 #include <cfloat>

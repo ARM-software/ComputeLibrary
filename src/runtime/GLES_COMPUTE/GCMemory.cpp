@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/GLES_COMPUTE/GCMemory.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCMemoryRegion.h"
+#include "support/Cast.h"
 
 namespace arm_compute
 {

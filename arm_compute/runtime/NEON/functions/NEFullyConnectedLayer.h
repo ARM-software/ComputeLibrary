@@ -26,25 +26,36 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
+#include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
 {
+class NEFlattenLayerKernel;
+
 /** Basic function to reshape the weights of Fully Connected layer with NEON. This function calls the following kernels:
- *
- *  -# @ref NETransposeKernel
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
 class NEFullyConnectedLayerReshapeWeights : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor */
+    NEFullyConnectedLayerReshapeWeights() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFullyConnectedLayerReshapeWeights(const NEFullyConnectedLayerReshapeWeights &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFullyConnectedLayerReshapeWeights &operator=(const NEFullyConnectedLayerReshapeWeights &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEFullyConnectedLayerReshapeWeights(NEFullyConnectedLayerReshapeWeights &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEFullyConnectedLayerReshapeWeights &operator=(NEFullyConnectedLayerReshapeWeights &&) = delete;
+    /** Default destructor */
+    ~NEFullyConnectedLayerReshapeWeights() = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -116,12 +127,14 @@ public:
     NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEFullyConnectedLayer(const NEFullyConnectedLayer &) = delete;
-    /** Default move constructor */
-    NEFullyConnectedLayer(NEFullyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NEFullyConnectedLayer(NEFullyConnectedLayer &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEFullyConnectedLayer &operator=(const NEFullyConnectedLayer &) = delete;
-    /** Default move assignment operator */
-    NEFullyConnectedLayer &operator=(NEFullyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NEFullyConnectedLayer &operator=(NEFullyConnectedLayer &&) = delete;
+    /** Default destructor */
+    ~NEFullyConnectedLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input   Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -168,7 +181,7 @@ private:
 
     MemoryGroup                                                         _memory_group;
     IWeightsManager                                                    *_weights_manager;
-    NEFlattenLayerKernel                                                _flatten_kernel;
+    std::unique_ptr<NEFlattenLayerKernel>                               _flatten_kernel;
     NEConvertFullyConnectedWeights                                      _convert_weights;
     weights_transformations::NEConvertFullyConnectedWeightsManaged      _convert_weights_managed;
     NEFullyConnectedLayerReshapeWeights                                 _reshape_weights_function;

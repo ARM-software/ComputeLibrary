@@ -31,7 +31,11 @@ namespace arm_compute
 {
 class IGCTensor;
 
-/** Basic function to run @ref GCPixelWiseMultiplicationKernel. */
+/** Basic function to run @ref GCPixelWiseMultiplicationKernel.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ */
 class GCPixelWiseMultiplication : public IGCSimpleFunction
 {
 public:

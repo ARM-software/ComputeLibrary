@@ -38,11 +38,15 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 namespace arm_compute
 {
+class ITensor;
+class ITensorInfo;
+
 /** Calculate the rounded up quotient of val / m.
  *
  * @param[in] val Value to divide and round up.
@@ -747,13 +751,13 @@ inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
     // Force width to be even for formats which require subsampling of the U and V channels
     if(has_format_horizontal_subsampling(format))
     {
-        output.set(0, output.x() & ~1U);
+        output.set(0, (output.x() + 1) & ~1U);
     }
 
     // Force height to be even for formats which require subsampling of the U and V channels
     if(has_format_vertical_subsampling(format))
     {
-        output.set(1, output.y() & ~1U);
+        output.set(1, (output.y() + 1) & ~1U);
     }
 
     return output;
@@ -1084,6 +1088,49 @@ const std::string &string_from_gemmlowp_output_stage(GEMMLowpOutputStageType out
  * @return String representation of the PixelValue through the given data type.
  */
 std::string string_from_pixel_value(const PixelValue &value, const DataType data_type);
+/** Convert a string to DataType
+ *
+ * @param[in] name The name of the data type
+ *
+ * @return DataType
+ */
+DataType data_type_from_name(const std::string &name);
+/** Stores padding information before configuring a kernel
+ *
+ * @param[in] infos list of tensor infos to store the padding info for
+ *
+ * @return An unordered map where each tensor info pointer is paired with its original padding info
+ */
+std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initializer_list<const ITensorInfo *> infos);
+/** Stores padding information before configuring a kernel
+ *
+ * @param[in] tensors list of tensors to store the padding info for
+ *
+ * @return An unordered map where each tensor info pointer is paired with its original padding info
+ */
+std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initializer_list<const ITensor *> tensors);
+/** Check if the previously stored padding info has changed after configuring a kernel
+ *
+ * @param[in] padding_map an unordered map where each tensor info pointer is paired with its original padding info
+ *
+ * @return true if any of the tensor infos has changed its paddings
+ */
+bool has_padding_changed(const std::unordered_map<const ITensorInfo *, PaddingSize> &padding_map);
+
+/** Input Stream operator for @ref DataType
+ *
+ * @param[in]  stream    Stream to parse
+ * @param[out] data_type Output data type
+ *
+ * @return Updated stream
+ */
+inline ::std::istream &operator>>(::std::istream &stream, DataType &data_type)
+{
+    std::string value;
+    stream >> value;
+    data_type = data_type_from_name(value);
+    return stream;
+}
 /** Lower a given string.
  *
  * @param[in] val Given string to lower.
@@ -1299,6 +1346,30 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
             ARM_COMPUTE_ERROR("Data type not supported");
             return false;
     }
+}
+
+/** Returns the adjusted vector size in case it is less than the input's first dimension, getting rounded down to its closest valid vector size
+ *
+ * @param[in] vec_size vector size to be adjusted
+ * @param[in] dim0     size of the first dimension
+ *
+ * @return the number of element processed along the X axis per thread
+ */
+inline unsigned int adjust_vec_size(unsigned int vec_size, size_t dim0)
+{
+    ARM_COMPUTE_ERROR_ON(vec_size > 16);
+
+    if((vec_size >= dim0) && (dim0 == 3))
+    {
+        return dim0;
+    }
+
+    while(vec_size > dim0)
+    {
+        vec_size >>= 1;
+    }
+
+    return vec_size;
 }
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED

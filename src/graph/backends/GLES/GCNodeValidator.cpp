@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,8 @@
 #include "arm_compute/graph/backends/ValidateHelpers.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCFunctions.h"
+#include "support/Cast.h"
 
 using namespace arm_compute::utils::cast;
 

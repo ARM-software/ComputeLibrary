@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/ICLSimple2DKernel.h"
+#include "src/core/CL/ICLSimple2DKernel.h"
 
-#include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 using namespace arm_compute;
 

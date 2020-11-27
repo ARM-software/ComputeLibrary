@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGEMMInterleave4x4.h"
 
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

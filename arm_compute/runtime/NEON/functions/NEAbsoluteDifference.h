@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_NEABSOLUTEDIFFERENCE_H
 #define ARM_COMPUTE_NEABSOLUTEDIFFERENCE_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -34,10 +34,25 @@ class ITensor;
  *
  * @note The image data type for the inputs must be U8 or S16
  * @note The function calculates the absolute difference also when the 2 inputs have different image data types
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
-class NEAbsoluteDifference : public INESimpleFunction
+class NEAbsoluteDifference : public INESimpleFunctionNoBorder
 {
 public:
+    /** Default constructor */
+    NEAbsoluteDifference() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEAbsoluteDifference(const NEAbsoluteDifference &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEAbsoluteDifference &operator=(const NEAbsoluteDifference &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEAbsoluteDifference(NEAbsoluteDifference &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEAbsoluteDifference &operator=(NEAbsoluteDifference &&) = delete;
+    /** Default destructor */
+    ~NEAbsoluteDifference();
     /** Set the inputs and output images
      *
      * @param[in]  input1 Source tensor. Data types supported: U8/S16.

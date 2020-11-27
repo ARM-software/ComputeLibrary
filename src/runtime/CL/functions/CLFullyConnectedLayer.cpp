@@ -25,10 +25,23 @@
 
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLTransposeKernel.h"
+#include "support/Cast.h"
 #include "support/MemorySupport.h"
 
 #include <algorithm>
@@ -71,23 +84,7 @@ Status construct_gemmlowp_output_stage(const ITensorInfo &input, const ITensorIn
 
         if(activation_info.enabled())
         {
-            switch(activation_info.activation())
-            {
-                case ActivationLayerInfo::ActivationFunction::RELU:
-                    type_min = PixelValue(oq_unif.offset);
-                    break;
-                case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                    type_min = PixelValue(oq_unif.offset);
-                    type_max = PixelValue(activation_info.a(), data_type, oq_info);
-                    break;
-                case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-                    type_min = PixelValue(activation_info.b(), data_type, oq_info);
-                    type_max = PixelValue(activation_info.a(), data_type, oq_info);
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Activation function not supported.");
-                    break;
-            }
+            std::tie(type_min, type_max) = get_quantized_activation_min_max(activation_info, data_type, output_quant_info);
         }
 
         // Set the GEMMLowp output stage info

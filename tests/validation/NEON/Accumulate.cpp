@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,26 +53,6 @@ TEST_SUITE(NEON)
 TEST_SUITE(Accumulate)
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AccumulateS16Dataset),
-               shape, data_type, output_data_type)
-{
-    // Create tensors
-    Tensor ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst     = create_tensor<Tensor>(shape, output_data_type);
-
-    // Create and Configure function
-    NEAccumulate accum;
-    accum.configure(&ref_src, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 template <typename T1>
 using NEAccumulateFixture = AccumulateValidationFixture<Tensor, Accessor, NEAccumulate, T1, int16_t>;
@@ -94,31 +74,6 @@ TEST_SUITE_END() // Accumulate
 TEST_SUITE(AccumulateWeighted)
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AccumulateU8Dataset),
-               shape, data_type, output_data_type)
-{
-    // Generate a random alpha value
-    std::mt19937                     gen(library->seed());
-    std::uniform_real_distribution<> float_dist(0, 1);
-    const float                      alpha = float_dist(gen);
-
-    // Create tensors
-    Tensor ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst     = create_tensor<Tensor>(shape, output_data_type);
-
-    // Create and Configure function
-    NEAccumulateWeighted accum_weight;
-    accum_weight.configure(&ref_src, alpha, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 template <typename T1>
 using NEAccumulateWeightedFixture = AccumulateWeightedValidationFixture<Tensor, Accessor, NEAccumulateWeighted, T1, uint8_t>;
@@ -140,31 +95,6 @@ TEST_SUITE_END() // AccumulateWeighted
 TEST_SUITE(AccumulateSquared)
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AccumulateS16Dataset),
-               shape, data_type, output_data_type)
-{
-    // Generate a random shift value
-    std::mt19937                            gen(library->seed());
-    std::uniform_int_distribution<uint32_t> int_dist(0, 15);
-    const uint32_t                          shift = int_dist(gen);
-
-    // Create tensors
-    Tensor ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst     = create_tensor<Tensor>(shape, output_data_type);
-
-    // Create and Configure function
-    NEAccumulateSquared accum_square;
-    accum_square.configure(&ref_src, shift, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
 
 template <typename T1>
 using NEAccumulateSquaredFixture = AccumulateSquaredValidationFixture<Tensor, Accessor, NEAccumulateSquared, T1, int16_t>;

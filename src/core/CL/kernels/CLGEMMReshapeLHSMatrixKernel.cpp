@@ -21,21 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -126,6 +125,8 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const CLCompileContext &compile_con
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), lhs_info, reinterpret_input_as_3d));
 
+    auto padding_info = get_padding_info({ input });
+
     _input                   = input;
     _output                  = output;
     _reinterpret_input_as_3d = reinterpret_input_as_3d;
@@ -181,6 +182,8 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const CLCompileContext &compile_con
     _config_id += support::cpp11::to_string(lhs_info.interleave);
     _config_id += "_";
     _config_id += support::cpp11::to_string(lhs_info.transpose);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGEMMReshapeLHSMatrixKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d)

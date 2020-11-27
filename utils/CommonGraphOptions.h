@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,10 @@ namespace utils
  * --validation-range : The range of the images to validate from the validation file (e.g 0,9).
  *                      If not specified all the images will be validated.
  * --tuner-file       : The file to store the OpenCL dynamic tuner tuned parameters.
+ * --tuner-mode       : Select tuner mode. Supported modes: Exhaustive,Normal,Rapid
+ *                      * Exhaustive: slowest but produces the most performant LWS configuration.
+ *                      * Normal: slow but produces the LWS configurations on par with Exhaustive most of the time.
+ *                      * Rapid: fast but produces less performant LWS configurations
  *
  * Note that data, image and labels options should be provided to perform an inference run on an image.
  * Note that validation-file and validation-path should be provided to perform a graph accuracy estimation.

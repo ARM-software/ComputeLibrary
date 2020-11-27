@@ -25,10 +25,10 @@
 #include <stdio.h>
 #include <vector>
 
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/Pyramid.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
+#include "src/core/NEON/kernels/assembly/arm_gemm.hpp"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute

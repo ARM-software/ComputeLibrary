@@ -78,23 +78,20 @@ TEST_SUITE(ArithmeticAddition)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                       }),
                framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                      })),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                      })),
-               framework::dataset::make("Expected", { true, true, false, false, false})),
+               framework::dataset::make("Expected", { true, true, false, false})),
                input1_info, input2_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLArithmeticAddition::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), ConvertPolicy::WRAP)) == expected, framework::LogLevel::ERRORS);
@@ -163,6 +160,18 @@ using CLArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantiz
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                       ArithmeticAdditionQASYMM8Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+template <typename T>
+using CLArithmeticAdditionBroadcastQuantizedFixture = ArithmeticAdditionValidationQuantizedBroadcastFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLArithmeticAdditionBroadcastQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapesBroadcast(),
                        ArithmeticAdditionQASYMM8Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                        framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),

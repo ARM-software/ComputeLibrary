@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,31 +62,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", { DataType::U8 })), shape,
-               data_type)
-{
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type);
-
-    // Create output variables
-    float mean    = 0.f;
-    float std_dev = 0.f;
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create configure function
-    CLMeanStdDev mean_std_dev_image;
-    mean_std_dev_image.configure(&src, &mean, &std_dev);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 8).required_padding();
-    validate(src.info()->padding(), padding);
-}
 
 template <typename T>
 using CLMeanStdDevFixture = MeanStdDevValidationFixture<CLTensor, CLAccessor, CLMeanStdDev, T>;

@@ -24,9 +24,6 @@
 #ifndef ARM_COMPUTE_CLGAUSSIANPYRAMID_H
 #define ARM_COMPUTE_CLGAUSSIANPYRAMID_H
 
-#include "arm_compute/core/CL/kernels/CLGaussianPyramidKernel.h"
-
-#include "arm_compute/core/CL/kernels/CLScaleKernel.h"
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLPyramid.h"
@@ -38,9 +35,18 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLFillBorderKernel;
 class ICLTensor;
+class CLGaussianPyramidHorKernel;
+class CLGaussianPyramidVertKernel;
+class CLScaleKernel;
 
-/** Common interface for all Gaussian pyramid functions */
+/** Common interface for all Gaussian pyramid functions
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+*/
 class CLGaussianPyramid : public IFunction
 {
 public:
@@ -55,7 +61,7 @@ public:
     /** Allow instances of this class to be moved */
     CLGaussianPyramid &operator=(CLGaussianPyramid &&) = default;
     /** Default destructor */
-    virtual ~CLGaussianPyramid() = default;
+    ~CLGaussianPyramid();
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in, out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -93,6 +99,12 @@ class CLGaussianPyramidHalf : public CLGaussianPyramid
 public:
     /** Constructor */
     CLGaussianPyramidHalf();
+    /** Prevent instances of this class from being copied */
+    CLGaussianPyramidHalf(const CLGaussianPyramidHalf &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLGaussianPyramidHalf &operator=(const CLGaussianPyramidHalf &) = delete;
+    /** Default destructor */
+    ~CLGaussianPyramidHalf();
 
     // Inherited methods overridden:
     void configure(ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value) override;
@@ -100,10 +112,10 @@ public:
     void run() override;
 
 private:
-    std::vector<CLFillBorderKernel>          _horizontal_border_handler;
-    std::vector<CLFillBorderKernel>          _vertical_border_handler;
-    std::vector<CLGaussianPyramidHorKernel>  _horizontal_reduction;
-    std::vector<CLGaussianPyramidVertKernel> _vertical_reduction;
+    std::vector<std::unique_ptr<CLFillBorderKernel>>          _horizontal_border_handler;
+    std::vector<std::unique_ptr<CLFillBorderKernel>>          _vertical_border_handler;
+    std::vector<std::unique_ptr<CLGaussianPyramidHorKernel>>  _horizontal_reduction;
+    std::vector<std::unique_ptr<CLGaussianPyramidVertKernel>> _vertical_reduction;
 };
 
 /** Basic function to execute gaussian pyramid with ORB scale factor. This function calls the following OpenCL kernels and functions:
@@ -124,8 +136,8 @@ public:
     void run() override;
 
 private:
-    std::vector<CLGaussian5x5> _gauss5x5;
-    std::vector<CLScaleKernel> _scale_nearest;
+    std::vector<CLGaussian5x5>                  _gauss5x5;
+    std::vector<std::unique_ptr<CLScaleKernel>> _scale_nearest;
 };
 }
 #endif /*ARM_COMPUTE_CLGAUSSIANPYRAMID_H */

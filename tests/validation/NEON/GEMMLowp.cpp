@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMLowpAssemblyMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -53,28 +52,6 @@ const auto data_matrix_multiply = framework::dataset::make("M", 12, 20) * framew
 } // namespace
 
 TEST_SUITE(NEON)
-TEST_SUITE(ASSEMBLY_MATRIX_MULTIPLY)
-
-using NEGEMMAssemblyFixture_S8 = GEMMLowpAssemblyFixture<Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore, int8_t>;
-using NEGEMMAssemblyFixture_U8 = GEMMLowpAssemblyFixture<Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore, uint8_t>;
-
-TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAssemblyFixture_S8, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAssemblyFixture_U8, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
-
 TEST_SUITE(GEMMLowp)
 TEST_SUITE(MatrixMultiplyCore)
 using NEGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
@@ -97,6 +74,11 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
     // Create and configure function
     NEGEMMLowpMatrixMultiplyCore gemmlowp_mm;
     gemmlowp_mm.configure(&a, &b, nullptr, &c);
+
+    // Validate padding is zero
+    validate(a.info()->padding(), PaddingSize());
+    validate(b.info()->padding(), PaddingSize());
+    validate(c.info()->padding(), PaddingSize());
 }
 
 // *INDENT-OFF*
@@ -120,7 +102,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(8U, 11U), 1, DataType::S32),
                                             TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),
                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, true })),
+    framework::dataset::make("Expected", { true, false, false, false, true })),
     a_info, b_info, output_info, expected)
 {
     // Lock tensors
@@ -216,6 +198,27 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+
+TEST_CASE(NoPaddingAdded, framework::DatasetMode::PRECOMMIT)
+{
+    Tensor input1 = create_tensor<Tensor>(TensorShape(21U, 13U), DataType::S32);
+    Tensor input2 = create_tensor<Tensor>(TensorShape(21U, 1U), DataType::S32);
+    Tensor output = create_tensor<Tensor>(TensorShape(21U, 13U), DataType::QASYMM8);
+
+    GEMMLowpOutputStageInfo output_stage = GEMMLowpOutputStageInfo();
+    output_stage.type                    = GEMMLowpOutputStageType::QUANTIZE_DOWN;
+    output_stage.gemmlowp_min_bound      = 0;
+    output_stage.gemmlowp_max_bound      = 205;
+    output_stage.output_data_type        = DataType::QASYMM8;
+
+    NEGEMMLowpOutputStage f;
+    f.configure(&input1, &input2, &output, output_stage);
+
+    // Validate padding is zero
+    validate(input1.info()->padding(), PaddingSize());
+    validate(input2.info()->padding(), PaddingSize());
+    validate(output.info()->padding(), PaddingSize());
+}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ScaleFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_cases))
 {
@@ -355,48 +358,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                   quantize_down_int32_to_uint8_scale_by_fixedpoint_cases),
-               shape, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max, add_bias)
-{
-    TensorShape shape_bias(shape[0]);
-
-    // Create tensors
-    Tensor in   = create_tensor<Tensor>(shape, DataType::S32);
-    Tensor bias = create_tensor<Tensor>(shape_bias, DataType::S32);
-    Tensor out  = create_tensor<Tensor>(shape, DataType::QASYMM8);
-
-    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint output_stage;
-    output_stage.configure(&in, add_bias ? &bias : nullptr, &out, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
-
-    // Validate valid region input and output
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(in.info()->valid_region(), valid_region);
-    validate(out.info()->valid_region(), valid_region);
-
-    // Validate valid region bias
-    if(add_bias)
-    {
-        const ValidRegion valid_region_bias = shape_to_valid_region(shape_bias);
-        validate(bias.info()->valid_region(), valid_region_bias);
-    }
-
-    // Validate padding
-    const PaddingSize padding(0);
-    validate(in.info()->padding(), padding);
-    validate(out.info()->padding(), padding);
-
-    if(add_bias)
-    {
-        validate(bias.info()->padding(), padding);
-    }
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
                        quantize_down_int32_to_uint8_scale_by_fixedpoint_cases))
 {
@@ -479,47 +440,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                   quantize_down_int32_to_int8_scale_by_fixedpoint_cases),
-               shape, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max, add_bias)
-{
-    TensorShape shape_bias(shape[0]);
-
-    // Create tensors
-    Tensor in   = create_tensor<Tensor>(shape, DataType::S32);
-    Tensor bias = create_tensor<Tensor>(shape_bias, DataType::S32);
-    Tensor out  = create_tensor<Tensor>(shape, DataType::QASYMM8_SIGNED);
-
-    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint output_stage;
-    output_stage.configure(&in, add_bias ? &bias : nullptr, &out, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
-
-    // Validate valid region input and output
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(in.info()->valid_region(), valid_region);
-    validate(out.info()->valid_region(), valid_region);
-
-    // Validate valid region bias
-    if(add_bias)
-    {
-        const ValidRegion valid_region_bias = shape_to_valid_region(shape_bias);
-        validate(bias.info()->valid_region(), valid_region_bias);
-    }
-
-    // Validate padding
-    const PaddingSize padding(0);
-    validate(in.info()->padding(), padding);
-    validate(out.info()->padding(), padding);
-
-    if(add_bias)
-    {
-        validate(bias.info()->padding(), padding);
-    }
-}
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
                        quantize_down_int32_to_int8_scale_by_fixedpoint_cases))
 {
@@ -593,47 +513,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                   quantize_down_int32_to_int16_scale_by_fixedpoint_cases),
-               shape, result_fixedpoint_multiplier, result_shift, min, max, add_bias)
-{
-    TensorShape shape_bias(shape[0]);
-
-    // Create tensors
-    Tensor in   = create_tensor<Tensor>(shape, DataType::S32);
-    Tensor bias = create_tensor<Tensor>(shape_bias, DataType::S32);
-    Tensor out  = create_tensor<Tensor>(shape, DataType::QSYMM16);
-
-    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint output_stage;
-    output_stage.configure(&in, add_bias ? &bias : nullptr, &out, result_fixedpoint_multiplier, result_shift, min, max);
-
-    // Validate valid region input and output
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(in.info()->valid_region(), valid_region);
-    validate(out.info()->valid_region(), valid_region);
-
-    // Validate valid region bias
-    if(add_bias)
-    {
-        const ValidRegion valid_region_bias = shape_to_valid_region(shape_bias);
-        validate(bias.info()->valid_region(), valid_region_bias);
-    }
-
-    // Validate padding
-    const PaddingSize padding(0);
-    validate(in.info()->padding(), padding);
-    validate(out.info()->padding(), padding);
-
-    if(add_bias)
-    {
-        validate(bias.info()->padding(), padding);
-    }
-}
 TEST_SUITE(NoRelu)
 TEST_SUITE(MultSmallerEq1)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),

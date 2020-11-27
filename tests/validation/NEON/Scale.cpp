@@ -79,7 +79,7 @@ const auto QuantizationInfoSet = framework::dataset::make("QuantizationInfo",
 /** Tolerance */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
-RelativeTolerance<float>             tolerance_f32(0.01);
+RelativeTolerance<float>             tolerance_f32(0.05);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 RelativeTolerance<half> tolerance_f16(half(0.1));
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -117,9 +117,8 @@ const auto output_shape = TensorShape{ 4, 6, 3, 2 };
 constexpr auto default_data_type            = DataType::U8;
 constexpr auto default_data_layout          = DataLayout::NHWC;
 constexpr auto default_interpolation_policy = InterpolationPolicy::NEAREST_NEIGHBOR;
-constexpr auto default_border_mode          = BorderMode::UNDEFINED;
+constexpr auto default_border_mode          = BorderMode::CONSTANT;
 constexpr auto default_sampling_policy      = SamplingPolicy::CENTER;
-constexpr bool default_use_padding          = false;
 
 TEST_CASE(NullPtr, framework::DatasetMode::ALL)
 {
@@ -128,11 +127,11 @@ TEST_CASE(NullPtr, framework::DatasetMode::ALL)
     Status     result{};
 
     // nullptr is given as input
-    result = NEScale::validate(nullptr, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
+    result = NEScale::validate(nullptr, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode, PixelValue(), SamplingPolicy::CENTER, false });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 
     // nullptr is given as output
-    result = NEScale::validate(&input, nullptr, ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
+    result = NEScale::validate(&input, nullptr, ScaleKernelInfo{ default_interpolation_policy, default_border_mode, PixelValue(), SamplingPolicy::CENTER, false });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
@@ -170,7 +169,7 @@ TEST_CASE(SupportDataType, framework::DatasetMode::ALL)
         const auto input  = TensorInfo{ input_shape, 1, kv.first, default_data_layout };
         const auto output = TensorInfo{ output_shape, 1, kv.first, default_data_layout };
 
-        result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
+        result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode, PixelValue(), SamplingPolicy::CENTER, false });
         ARM_COMPUTE_EXPECT(bool(result) == kv.second, framework::LogLevel::ERRORS);
     }
 }
@@ -183,7 +182,7 @@ TEST_CASE(MissmatchingDataType, framework::DatasetMode::ALL)
     const auto output = TensorInfo{ output_shape, 1, non_default_data_type, default_data_layout };
     Status     result{};
 
-    result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode, PixelValue(), SamplingPolicy::CENTER, false });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
@@ -193,9 +192,9 @@ TEST_CASE(UsePadding, framework::DatasetMode::ALL)
     const auto output = TensorInfo{ output_shape, 1, default_data_type, default_data_layout };
     Status     result{};
 
-    // When use padding is false, border mode should be constant
-    constexpr auto border_mode = BorderMode::UNDEFINED;
-    constexpr bool use_padding = false;
+    // Padding is not supported anymore
+    constexpr auto border_mode = BorderMode::CONSTANT;
+    constexpr bool use_padding = true;
 
     result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, border_mode, PixelValue(), default_sampling_policy, use_padding });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
@@ -211,7 +210,7 @@ TEST_CASE(AreaWithNHWC, framework::DatasetMode::ALL)
     const auto output = TensorInfo{ output_shape, 1, default_data_type, data_layout };
     Status     result{};
 
-    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode });
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), SamplingPolicy::CENTER, false });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
@@ -226,7 +225,7 @@ TEST_CASE(AreaWithNonU8, framework::DatasetMode::ALL)
     const auto output = TensorInfo{ output_shape, 1, data_type, data_layout };
     Status     result{};
 
-    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode });
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), SamplingPolicy::CENTER, false });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
@@ -241,10 +240,79 @@ TEST_CASE(AlignedCornerNotSupported, framework::DatasetMode::ALL)
     const auto output = TensorInfo{ output_shape, 1, default_data_type, default_data_layout };
     Status     result{};
 
-    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), sampling_policy, default_use_padding, align_corners });
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), sampling_policy, false, align_corners });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 TEST_SUITE_END() // Validate
+
+DATA_TEST_CASE(CheckNoPadding, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::Medium4DShapes(),
+                                                                                            framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 })),
+                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::BILINEAR, InterpolationPolicy::NEAREST_NEIGHBOR })),
+                                                                            framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT })),
+                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
+               shape, data_type, interpolation_policy, sampling_policy, data_layout)
+{
+    constexpr auto  default_border_mode = BorderMode::CONSTANT;
+    ScaleKernelInfo info(interpolation_policy, default_border_mode, PixelValue(), sampling_policy, false);
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    src.info()->set_data_layout(data_layout);
+
+    const float scale_x = 0.5f;
+    const float scale_y = 0.5f;
+    TensorShape shape_scaled(shape);
+    const int   idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int   idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    shape_scaled.set(idx_width, shape[idx_width] * scale_x, /* apply_dim_correction = */ false);
+    shape_scaled.set(idx_height, shape[idx_height] * scale_y, /* apply_dim_correction = */ false);
+    Tensor dst = create_tensor<Tensor>(shape_scaled, data_type);
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NEScale scale;
+    scale.configure(&src, &dst, info);
+
+    validate(src.info()->padding(), PaddingSize(0, 0, 0, 0));
+    validate(dst.info()->padding(), PaddingSize(0, 0, 0, 0));
+}
+
+DATA_TEST_CASE(CheckNoPaddingInterpAREA, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::Medium4DShapes(),
+                                                                                                      framework::dataset::make("DataType", { DataType::U8 })),
+                                                                                              framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::AREA })),
+                                                                                      framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT })),
+                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+               shape, data_type, interpolation_policy, sampling_policy, data_layout)
+{
+    constexpr auto  default_border_mode = BorderMode::CONSTANT;
+    ScaleKernelInfo info(interpolation_policy, default_border_mode, PixelValue(), sampling_policy, false);
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    src.info()->set_data_layout(data_layout);
+
+    const float scale_x = 0.5f;
+    const float scale_y = 0.5f;
+    TensorShape shape_scaled(shape);
+    const int   idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int   idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    shape_scaled.set(idx_width, shape[idx_width] * scale_x, /* apply_dim_correction = */ false);
+    shape_scaled.set(idx_height, shape[idx_height] * scale_y, /* apply_dim_correction = */ false);
+
+    Tensor dst = create_tensor<Tensor>(shape, data_type);
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NEScale scale;
+    scale.configure(&src, &dst, info);
+
+    validate(src.info()->padding(), PaddingSize(0, 0, 0, 0));
+    validate(dst.info()->padding(), PaddingSize(0, 0, 0, 0));
+}
 
 template <typename T>
 using NEScaleFixture = ScaleValidationFixture<Tensor, Accessor, NEScale, T>;

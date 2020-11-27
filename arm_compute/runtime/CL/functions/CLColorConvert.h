@@ -28,6 +28,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLMultiImage;
 class ICLTensor;
 using ICLImage = ICLTensor;
@@ -35,6 +36,9 @@ using ICLImage = ICLTensor;
 /** Basic function to run @ref CLColorConvertKernel
  *
  * @note The function performs color convert between images.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLColorConvert : public ICLSimpleFunction
 {

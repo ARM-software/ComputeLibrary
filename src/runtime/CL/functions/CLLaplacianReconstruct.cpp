@@ -23,11 +23,13 @@
  */
 #include "arm_compute/runtime/CL/functions/CLLaplacianReconstruct.h"
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 
 #include <cstddef>
 

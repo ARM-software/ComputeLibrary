@@ -106,6 +106,28 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                         keep_dims));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
+
+DATA_TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis",
+{ 0, 1 })), framework::dataset::make("ReductionOperation", {ReductionOperation::SUM,})), KeepDims),
+               shape, data_type, axis, op, keep_dims)
+{
+    TensorShape         input_shape = TensorShape(shape);
+    TensorInfo input_info   = TensorInfo(input_shape, 1, data_type);
+    const bool is_arg_min_max = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
+    const bool _keep_dims = keep_dims && !is_arg_min_max;
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(shape, axis, keep_dims);
+
+    // Create tensors
+    Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1, QuantizationInfo());
+    Tensor dst     = create_tensor<Tensor>(output_shape, data_type, 1, QuantizationInfo());
+
+    // Create and configure function
+    NEReductionOperation reduction;
+    reduction.configure(&src, &dst, axis, op, _keep_dims);
+
+    validate(src.info()->padding(), PaddingSize(0, 0, 0, 0));
+    validate(dst.info()->padding(), PaddingSize(0, 0, 0, 0));
+}
 // clang-format on
 // *INDENT-ON*
 

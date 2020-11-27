@@ -29,12 +29,16 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute non-maxima suppression over a 3x3 window. This function calls the following CL kernels:
  *
  * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref CLNonMaximaSuppression3x3Kernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLNonMaximaSuppression3x3 : public ICLSimpleFunction
 {

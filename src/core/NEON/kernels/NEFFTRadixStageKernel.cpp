@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,21 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEFFTRadixStageKernel.h"
+#include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/NEON/wrapper/traits.h"
+#include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 #include <cmath>
 #include <complex>
 #include <map>
-
-#include "arm_compute/core/NEON/wrapper/traits.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {

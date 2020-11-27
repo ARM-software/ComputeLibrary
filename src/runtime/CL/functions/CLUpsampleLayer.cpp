@@ -26,14 +26,18 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLUpsampleLayerKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLUpsampleLayer::CLUpsampleLayer() // NOLINT
-    : _upsample(),
+    : _upsample(support::cpp14::make_unique<CLUpsampleLayerKernel>()),
       _output(nullptr)
 {
 }
+
+CLUpsampleLayer::~CLUpsampleLayer() = default;
 
 Status CLUpsampleLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
                                  const Size2D &info, const InterpolationPolicy upsampling_policy)
@@ -53,11 +57,11 @@ void CLUpsampleLayer::configure(const CLCompileContext &compile_context, ICLTens
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _output = output;
-    _upsample.configure(compile_context, input, _output, info, upsampling_policy);
+    _upsample->configure(compile_context, input, _output, info, upsampling_policy);
 }
 
 void CLUpsampleLayer::run()
 {
-    CLScheduler::get().enqueue(_upsample, false);
+    CLScheduler::get().enqueue(*_upsample, false);
 }
 } // namespace arm_compute

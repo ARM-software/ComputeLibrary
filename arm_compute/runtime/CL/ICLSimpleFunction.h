@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_ICLSIMPLEFUNCTION_H
 #define ARM_COMPUTE_ICLSIMPLEFUNCTION_H
 
-#include "arm_compute/core/CL/ICLKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
@@ -34,6 +32,8 @@ namespace arm_compute
 {
 // Forward declarations
 class CLRuntimeContext;
+class CLFillBorderKernel;
+class ICLKernel;
 
 /** Basic interface for functions which have a single OpenCL kernel */
 class ICLSimpleFunction : public IFunction
@@ -53,14 +53,16 @@ public:
     ICLSimpleFunction &operator=(const ICLSimpleFunction &) = delete;
     /** Default move assignment operator */
     ICLSimpleFunction &operator=(ICLSimpleFunction &&) = default;
+    /** Default destructor */
+    ~ICLSimpleFunction();
 
     // Inherited methods overridden:
     void run() override final;
 
 protected:
-    std::unique_ptr<ICLKernel> _kernel;         /**< Kernel to run */
-    CLFillBorderKernel         _border_handler; /**< Kernel to handle  borders */
-    CLRuntimeContext          *_ctx;            /**< Context to use */
+    std::unique_ptr<ICLKernel>          _kernel;         /**< Kernel to run */
+    std::unique_ptr<CLFillBorderKernel> _border_handler; /**< Kernel to handle  borders */
+    CLRuntimeContext                   *_ctx;            /**< Context to use */
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_ICLSIMPLEFUNCTION_H */

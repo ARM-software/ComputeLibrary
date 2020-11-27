@@ -134,6 +134,10 @@
 #define REPEAT_VAR_INIT_TO_CONST(N, TYPE, VAR, VAL) REPEAT_3_N(N, VAR_INIT_TO_CONST, TYPE, VAR, VAL)
 
 // Macro for initializing N variables by converting the data type. Generates N statements that defines VAR##N = RHS_ACCESSOR_DEF(...)
+#define VAR_INIT_CONVERT_DEF(ID, TYPE_OUT, VAR_IN, VAR_OUT) TYPE_OUT VAR_OUT##ID = CONVERT(VAR_IN##ID, TYPE_OUT)
+#define REPEAT_VAR_INIT_CONVERT(N, TYPE_OUT, VAR_IN, VAR_OUT) REPEAT_3_N(N, VAR_INIT_CONVERT, TYPE_OUT, VAR_IN, VAR_OUT)
+
+// Macro for initializing N variables by converting the data type with saturation. Generates N statements that defines VAR##N = RHS_ACCESSOR_DEF(...)
 #define VAR_INIT_CONVERT_SAT_DEF(ID, TYPE_OUT, VAR_IN, VAR_OUT) TYPE_OUT VAR_OUT##ID = CONVERT_SAT(VAR_IN##ID, TYPE_OUT)
 #define REPEAT_VAR_INIT_CONVERT_SAT(N, TYPE_OUT, VAR_IN, VAR_OUT) REPEAT_3_N(N, VAR_INIT_CONVERT_SAT, TYPE_OUT, VAR_IN, VAR_OUT)
 

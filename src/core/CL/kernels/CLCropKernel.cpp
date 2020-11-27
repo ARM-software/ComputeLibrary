@@ -21,21 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLCropKernel.h"
+#include "src/core/CL/kernels/CLCropKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Window.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/helpers/WindowHelpers.h"
 
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/helpers/bit_ops.h"
-#include "arm_compute/core/utils/helpers/tensor_transform.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/StringSupport.h"
 
 #include <map>

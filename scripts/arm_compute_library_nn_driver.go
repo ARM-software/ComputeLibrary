@@ -8,6 +8,7 @@ package arm_compute_library_nn_driver
 import (
     "android/soong/android"
     "android/soong/cc"
+    "strings"
 )
 
 func globalFlags(ctx android.BaseContext) []string {
@@ -19,6 +20,29 @@ func globalFlags(ctx android.BaseContext) []string {
 
     if ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11" {
         cppflags = append(cppflags, "-fno-addrsig")
+    }
+
+    data_types := strings.Split(ctx.AConfig().GetenvWithDefault("COMPUTE_LIB_DATA_TYPE", "ALL"), ",")
+
+    for _, x := range data_types {
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QASYMM8" {
+            cppflags = append(cppflags, "-DENABLE_QASYMM8_KERNELS")
+        }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QASYMM8_SIGNED" {
+            cppflags = append(cppflags, "-DENABLE_QASYMM8_SIGNED_KERNELS")
+        }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QASYMM16" {
+            cppflags = append(cppflags, "-DENABLE_QASYMM16_KERNELS")
+        }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QSYMM16" {
+            cppflags = append(cppflags, "-DENABLE_QSYMM16_KERNELS")
+        }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "FP16" {
+            cppflags = append(cppflags, "-DENABLE_FP16_KERNELS")
+        }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "FP32" {
+            cppflags = append(cppflags, "-DENABLE_FP32_KERNELS")
+        }
     }
 
     return cppflags

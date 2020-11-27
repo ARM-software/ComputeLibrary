@@ -21,14 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/NEON/INEKernel.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 
@@ -60,28 +62,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-
-    // Configure kernel window
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-
-    // Configure window in case of configured output
-    if(output->total_size() != 0)
-    {
-        AccessWindowStatic output_access(output, 0, 0, output->dimension(0), output->dimension(1));
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-    }
-
-    const bool window_changed = update_window_and_padding(win, input_access);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
@@ -97,16 +77,21 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
     _input  = input;
     _output = output;
 
+    const size_t vector_size = 16 / input->info()->element_size();
+
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Window win = calculate_max_window(*input->info(), Steps(vector_size));
+
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+
+    INEKernel::configure(win);
 }
 
 Status NEGEMMTranspose1xWKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
 
     return Status{};
 }
@@ -136,52 +121,29 @@ void NEGEMMTranspose1xWKernel::run(const Window &window, const ThreadInfo &info)
     Iterator in(_input, window);
     Iterator out(_output, win_out);
 
-    switch(_input->info()->element_size())
+    const size_t in_width     = _input->info()->dimension(0);
+    const size_t element_size = _input->info()->element_size();
+    const size_t out_stride   = _output->info()->strides_in_bytes()[1];
+    const size_t vector_size  = 16 / element_size;
+
+    execute_window_loop(window, [&](const Coordinates & id)
     {
-        case 1:
+        const uint8_t *in_ptr  = in.ptr();
+        uint8_t *const out_ptr = out.ptr() + (id.y() * vector_size) * element_size + (id.x() / vector_size) * out_stride;
+
+        for(size_t k = 0; k < vector_size; ++k)
         {
-            const size_t out_stride = _output->info()->strides_in_bytes()[1];
-            execute_window_loop(window, [&](const Coordinates & id)
+            // If the input width is not multiple of W, we fill the reference with 0s
+            if((id.x() + k) >= in_width)
             {
-                // Output address = base addr + (y * 16) + (x / 16 ) * stride
-                const uint8_t *in_ptr  = in.ptr();
-                uint8_t *const out_ptr = out.ptr() + (id.y() << 4) + (id.x() >> 4) * out_stride;
-                vst1q_u8(out_ptr, vld1q_u8(in_ptr));
-            },
-            in, out);
-            break;
-        }
-        case 2:
-        {
-            const size_t out_stride = _output->info()->strides_in_bytes()[1] / sizeof(int16_t);
-            execute_window_loop(window, [&](const Coordinates & id)
+                std::memset(out_ptr + k * element_size, 0, element_size);
+            }
+            else
             {
-                // Output address = base addr + (y * 8) + (x / 8 ) * stride
-                const auto in_ptr  = reinterpret_cast<const uint16_t *>(in.ptr());
-                const auto out_ptr = reinterpret_cast<uint16_t *>(out.ptr()) + (id.y() << 3) + (id.x() >> 3) * out_stride;
-                vst1q_u16(out_ptr, vld1q_u16(in_ptr));
-            },
-            in, out);
-            break;
+                std::memcpy(out_ptr + k * element_size, in_ptr + k * element_size, element_size);
+            }
         }
-        case 4:
-        {
-            const size_t out_stride = _output->info()->strides_in_bytes()[1] / sizeof(float);
-            execute_window_loop(window, [&](const Coordinates & id)
-            {
-                // Output address = base addr + (y * 4) + (x / 4 ) * stride
-                const auto in_ptr  = reinterpret_cast<const uint32_t *>(in.ptr());
-                const auto out_ptr = reinterpret_cast<uint32_t *>(out.ptr()) + (id.y() << 2) + (id.x() >> 2) * out_stride;
-                vst1q_u32(out_ptr, vld1q_u32(in_ptr));
-            },
-            in, out);
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Element size not supported");
-            break;
-        }
-    }
+    },
+    in, out);
 }
 } // namespace arm_compute

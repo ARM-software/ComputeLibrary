@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2019 Arm Limited.
+/// Copyright (c) 2019-2020 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -29,6 +29,11 @@ namespace arm_compute
 @tableofcontents
 
 @section S7_1_errata Errata
+
+- Under certain conditions, the validation test case 'CL/DirectConvolutionLayer/Float/FP32/RunSmall9x9\@InputShape=32x37x3x4:StrideX=1:StrideY=1:PadX=0:PadY=0:KernelSize=9:NumKernels=1:DataType=F32:ActivationInfo=LU_BOUNDED_RELU:DataLayout=NHWC' may fail.
+    - Versions Affected: >= v20.08
+    - Conditions:
+        - The validation suite has to run in nightly mode and execute 40k+ test cases before the test mentioned above
 
 - Under certain conditions, benchmark examples can hang when OpenCL profiling queues are enabled.
     - Versions Affected: >= v19.11

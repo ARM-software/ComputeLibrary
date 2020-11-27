@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,15 +25,16 @@
 #define ARM_COMPUTE_NESELECT_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NESelect */
-class NESelect : public INESimpleFunction
+class NESelect : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs and output.

@@ -28,8 +28,13 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "src/core/NEON/kernels/NEDerivativeKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEHOGDescriptorKernel.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEHOGMultiDetection::~NEHOGMultiDetection() = default;
 
 NEHOGMultiDetection::NEHOGMultiDetection(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
@@ -262,3 +267,4 @@ void NEHOGMultiDetection::run()
         NEScheduler::get().schedule(&_non_maxima_kernel, Window::DimY);
     }
 }
+} // namespace arm_compute

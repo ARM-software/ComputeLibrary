@@ -21,19 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
+#include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
-#include "arm_compute/core/NEON/NEMath.h"
-#include "arm_compute/core/NEON/NESymm.h"
-#include "arm_compute/core/NEON/kernels/detail/NEActivationFunctionDetail.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/NEON/NEFixedPoint.h"
+#include "src/core/NEON/NEMath.h"
+#include "src/core/NEON/NESymm.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+
+#include "src/core/NEON/kernels/detail/NEActivationFunctionDetail.h"
 
 #include <map>
 

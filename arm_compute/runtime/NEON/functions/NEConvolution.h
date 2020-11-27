@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_NECONVOLUTION_H
 #define ARM_COMPUTE_NECONVOLUTION_H
 
-#include "arm_compute/core/NEON/kernels/NEConvolutionKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -39,16 +37,37 @@
 namespace arm_compute
 {
 class ITensor;
+class NEFillBorderKernel;
+template <unsigned int matrix_size>
+class NEConvolutionKernel;
+template <unsigned int matrix_size>
+class NESeparableConvolutionHorKernel;
+template <unsigned int matrix_size>
+class NESeparableConvolutionVertKernel;
 
 /** Basic function to execute convolution of size 3x3. This function calls the following NEON kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NEConvolution3x3Kernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEConvolution3x3 : public INESimpleFunction
 {
 public:
+    /** Constructor */
+    NEConvolution3x3() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolution3x3(const NEConvolution3x3 &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolution3x3 &operator=(const NEConvolution3x3 &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolution3x3(NEConvolution3x3 &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolution3x3 &operator=(NEConvolution3x3 &&) = delete;
+    /** Default destructor */
+    ~NEConvolution3x3();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in,out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -67,6 +86,8 @@ public:
  * -# @ref NEConvolutionKernel or<br/>
  *    @ref NESeparableConvolutionHorKernel and @ref NESeparableConvolutionVertKernel (if convolution matrix is separable)
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 template <unsigned int matrix_size>
 class NEConvolutionSquare : public IFunction
@@ -74,6 +95,16 @@ class NEConvolutionSquare : public IFunction
 public:
     /** Default constructor */
     NEConvolutionSquare(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionSquare(const NEConvolutionSquare &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionSquare &operator=(const NEConvolutionSquare &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionSquare(NEConvolutionSquare &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionSquare &operator=(NEConvolutionSquare &&) = delete;
+    /** Default destructor */
+    ~NEConvolutionSquare();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in,out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -89,13 +120,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                   _memory_group;   /**< Function memory group */
-    Tensor                                        _tmp;            /**< temporary buffer for output of horizontal pass */
-    bool                                          _is_separable;   /**< true if the convolution can be separated */
-    NESeparableConvolutionHorKernel<matrix_size>  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */
-    NESeparableConvolutionVertKernel<matrix_size> _kernel_vert;    /**< kernel for vertical pass of separated convolution */
-    NEConvolutionKernel<matrix_size>              _kernel;         /**< kernel for non-separated convolution **/
-    NEFillBorderKernel                            _border_handler; /**< kernel for border handling */
+    MemoryGroup                                                    _memory_group;   /**< Function memory group */
+    Tensor                                                         _tmp;            /**< temporary buffer for output of horizontal pass */
+    bool                                                           _is_separable;   /**< true if the convolution can be separated */
+    std::unique_ptr<NESeparableConvolutionHorKernel<matrix_size>>  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */
+    std::unique_ptr<NESeparableConvolutionVertKernel<matrix_size>> _kernel_vert;    /**< kernel for vertical pass of separated convolution */
+    std::unique_ptr<NEConvolutionKernel<matrix_size>>              _kernel;         /**< kernel for non-separated convolution **/
+    std::unique_ptr<NEFillBorderKernel>                            _border_handler; /**< kernel for border handling */
 };
 
 /** Basic function to run 5x5 convolution. */
@@ -111,10 +142,25 @@ using NEConvolution9x9 = NEConvolutionSquare<9>;
  * -# @ref NEConvolutionRectangleKernel or<br/>
  *
  * @note Convolution rectangle should have dimensions of 3, 5, 7, 9
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEConvolutionRectangle : public INESimpleFunction
 {
 public:
+    /** Constructor */
+    NEConvolutionRectangle() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionRectangle(const NEConvolutionRectangle &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionRectangle &operator=(const NEConvolutionRectangle &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionRectangle(NEConvolutionRectangle &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionRectangle &operator=(NEConvolutionRectangle &&) = delete;
+    /** Default destructor */
+    ~NEConvolutionRectangle();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in,out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)

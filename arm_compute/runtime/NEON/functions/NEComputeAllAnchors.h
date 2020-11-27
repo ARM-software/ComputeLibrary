@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,19 +24,20 @@
 #ifndef ARM_COMPUTE_NECOMPUTEALLANCHORS_H
 #define ARM_COMPUTE_NECOMPUTEALLANCHORS_H
 
-#include "arm_compute/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref NEComputeAllAnchorsKernel.
  *
  * This function calls the following NEON kernels:
  * -# @ref NEComputeAllAnchorsKernel
  */
-class NEComputeAllAnchors : public INESimpleFunction
+class NEComputeAllAnchors : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and output tensors.

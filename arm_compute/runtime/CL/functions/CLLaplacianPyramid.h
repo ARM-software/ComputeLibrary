@@ -50,6 +50,9 @@ class ICLTensor;
  *  difference between the two tensors is the corresponding level L(i) of the Laplacian pyramid.
  *  L(i) = I(i) - Gaussian5x5(I(i))
  *  Level 0 has always the same first two dimensions as the input tensor.
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
 */
 class CLLaplacianPyramid : public IFunction
 {

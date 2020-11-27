@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/RuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -36,6 +37,8 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ActivationLayerFixture.h"
 
+#include "support/Requires.h"
+
 namespace arm_compute
 {
 namespace test
@@ -44,6 +47,9 @@ namespace validation
 {
 namespace
 {
+RelativeTolerance<float> tolerance_float_sqrt(0.0001f);
+    
+    
 /** Define relative tolerance of the activation layer.
  *
  * @param[in] data_type  The data type used.
@@ -123,52 +129,47 @@ const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions
 
 /** Input data sets. */
 const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+
+template <typename T, REQUIRES_TA(arm_compute::utils::traits::is_floating_point<T>::value)>
+void test_float_sqrt_boundary_value()
+{
+    constexpr auto vector_size = uint32_t{ 16 };
+
+    auto data_type = DataType::F32;
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    data_type = std::is_same<T, half>::value ? DataType::F16 : data_type;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
+    const auto boundary_value_vector = std::vector<T>
+    {
+        std::numeric_limits<T>::min(),
+        T(0),
+        std::numeric_limits<T>::epsilon(),
+        std::numeric_limits<T>::max(),
+    };
+
+    // the following size ensures that the whole logic (vector + left-over) to be tested
+    // using all boundary values iff boundary_value_vecotr.size() is smaller than vector_size.
+    auto shape = TensorShape{ vector_size + boundary_value_vector.size() };
+    auto info  = ActivationLayerInfo{ ActivationLayerInfo::ActivationFunction::SQRT };
+    auto src   = create_tensor<Tensor>(shape, data_type);
+
+    auto act = NEActivationLayer{};
+    act.configure(&src, nullptr, info);
+    src.allocator()->allocate();
+    library->fill_static_values(Accessor(src), boundary_value_vector);
+    act.run();
+
+    auto reference_src = SimpleTensor<T> { shape, data_type };
+    library->fill_static_values(reference_src, boundary_value_vector);
+    auto reference_dst = reference::activation_layer<T>(reference_src, info);
+
+    validate(Accessor(src), reference_dst, tolerance_float_sqrt);
+}
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(ActivationLayer)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
-               shape, data_type, in_place)
-{
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type, 1);
-    Tensor dst = create_tensor<Tensor>(shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create context
-    RuntimeContext ctx;
-
-    // Create and configure function
-    NEActivationLayer act_layer(&ctx);
-
-    if(in_place)
-    {
-        act_layer.configure(&src, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
-    }
-    else
-    {
-        act_layer.configure(&src, &dst, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
-    }
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-
-    if(!in_place)
-    {
-        validate(dst.info()->valid_region(), valid_region);
-    }
-
-    // Validate padding
-    validate(src.info()->padding(), PaddingSize());
-    if(!in_place)
-    {
-        validate(dst.info()->padding(), PaddingSize());
-    }
-}
 
 // *INDENT-OFF*
 // clang-format off
@@ -200,6 +201,10 @@ using NEActivationLayerFixture = ActivationValidationFixture<Tensor, Accessor, N
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
+TEST_CASE(SqrtBoundaryValue, framework::DatasetMode::ALL)
+{
+    test_float_sqrt_boundary_value<half>();
+}
 FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset),
                                                                                                       framework::dataset::make("DataType",
                                                                                                               DataType::F16)))
@@ -207,10 +212,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::Data
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+TEST_SUITE_END() // FP16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
+TEST_CASE(SqrtBoundaryValue, framework::DatasetMode::ALL)
+{
+    test_float_sqrt_boundary_value<float>();
+}
 FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
                                                                                                        DataType::F32)))
 

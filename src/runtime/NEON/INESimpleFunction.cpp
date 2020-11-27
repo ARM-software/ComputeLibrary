@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,14 @@
  */
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
+#include "arm_compute/core/CPP/ICPPKernel.h"
+#include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+INESimpleFunction::~INESimpleFunction() = default;
 
 INESimpleFunction::INESimpleFunction() // NOLINT
     : _kernel(),
@@ -35,6 +40,7 @@ INESimpleFunction::INESimpleFunction() // NOLINT
 
 void INESimpleFunction::run()
 {
-    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+    NEScheduler::get().schedule(_border_handler.get(), Window::DimZ);
     NEScheduler::get().schedule(_kernel.get(), Window::DimY);
 }
+} //namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -67,35 +68,123 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 const auto data_interleave = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12);
 const auto data_transpose  = framework::dataset::make("M", 8, 14) * framework::dataset::make("N", 7, 14);
 
+/** Zero padding test */
+template <typename FunctionType>
+bool validate_zero_padding(unsigned int dim0_value, unsigned int dim1_value)
+{
+    const TensorShape in_shape(dim0_value, dim1_value);
+
+    // Create tensors
+    Tensor in = create_tensor<Tensor>(in_shape, DataType::U32);
+    Tensor dst;
+
+    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Validate zero-padding
+    FunctionType func;
+
+    func.configure(&in, &dst);
+
+    return in.info()->padding().empty();
+}
+
+/* Zero padding test for GEMM kernels */
+bool validate_gemm_zero_padding(const TensorShape shape0, const TensorShape shape1)
+{
+    // Create tensors
+    Tensor in0 = create_tensor<Tensor>(shape0, DataType::F32);
+    Tensor in1 = create_tensor<Tensor>(shape1, DataType::F32);
+    Tensor dst;
+
+    // Validate zero-padding
+    NEGEMMMatrixMultiplyKernel gemm;
+    gemm.configure(&in0, &in1, &dst, 1.0, false);
+
+    return in0.info()->padding().empty() && in1.info()->padding().empty() && dst.info()->padding().empty();
+}
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(GEMM)
 
 TEST_SUITE(TRANSPOSE_1XW)
-using NEGEMMTranspose1xW        = NESynthetizeFunctionWithZeroConstantBorder<NEGEMMTranspose1xWKernel, 4>;
-using NEGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixture<Tensor, Accessor, NEGEMMTranspose1xW, float>;
-TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * framework::dataset::make("DataType", DataType::F32))
+using NEGEMMTranspose1xW = NESynthetizeFunctionWithZeroConstantBorder<NEGEMMTranspose1xWKernel, 4>;
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
+                   framework::dataset::make("N", { 1, 23, 63, 101 }),
+                   framework::dataset::make("K", { 1, 47, 29, 27 })),
+               n_value, k_value)
+{
+    bool status = validate_zero_padding<NEGEMMTranspose1xWKernel>(n_value, k_value);
+    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
+
+TEST_SUITE(U32)
+using NEGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixture<Tensor, Accessor, NEGEMMTranspose1xW, uint32_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END() // FP32
+TEST_SUITE_END() // U32
+
+TEST_SUITE(U16)
+using NEGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixture<Tensor, Accessor, NEGEMMTranspose1xW, uint16_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * framework::dataset::make("DataType", DataType::U16))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // U16
+
+TEST_SUITE(U8)
+using NEGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixture<Tensor, Accessor, NEGEMMTranspose1xW, uint8_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * framework::dataset::make("DataType", DataType::U8))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // U8
 
 TEST_SUITE_END() // TRANSPOSE_1XW
 
 TEST_SUITE(INTERLEAVE_4X4)
 using NEGEMMInterleave4x4 = NESynthetizeFunctionWithZeroConstantBorder<NEGEMMInterleave4x4Kernel, 4>;
 
-TEST_SUITE(FP32)
-using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, float>;
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::F32))
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
+                   framework::dataset::make("M", { 1, 23, 63, 101 }),
+                   framework::dataset::make("K", { 1, 47, 29, 27 })),
+               m_value, k_value)
+{
+    bool status = validate_zero_padding<NEGEMMInterleave4x4Kernel>(m_value, k_value);
+    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
+
+TEST_SUITE(U32)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, uint32_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END() // FP32
+TEST_SUITE_END() // U32
+
+TEST_SUITE(U16)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, uint16_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::U16))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // U16
+
+TEST_SUITE(U8)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, uint8_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::QASYMM8))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // U8
 
 TEST_SUITE_END() // INTERLEAVE_4X4
 
@@ -108,6 +197,26 @@ template <typename T>
 using NEGEMMFixtureDisabledC = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true>;
 
 TEST_SUITE(Float)
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(framework::dataset::make("In0", { TensorShape(21U, 13U),
+                                                                                                       TensorShape(31U, 1U),
+                                                                                                       TensorShape(31U, 1U),
+                                                                                                       TensorShape(8U, 2U),
+                                                                                                       TensorShape(38U, 12U),
+                                                                                                       TensorShape(32U, 1U)
+                                                                                                     }),
+                                                                     framework::dataset::make("In1", { TensorShape(33U, 21U),
+                                                                                                       TensorShape(23U, 31U),
+                                                                                                       TensorShape(23U, 31U),
+                                                                                                       TensorShape(16U, 8U),
+                                                                                                       TensorShape(21U, 38U),
+                                                                                                       TensorShape(17U, 32U)
+                                                                                                     })),
+               shape0, shape1)
+{
+    bool status = validate_gemm_zero_padding(shape0, shape1);
+    ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
+}
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),

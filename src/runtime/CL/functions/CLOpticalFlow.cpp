@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLOpticalFlow.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLLKTrackerKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
@@ -33,6 +32,8 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLScharr3x3.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLLKTrackerKernel.h"
 #include "support/MemorySupport.h"
 
 using namespace arm_compute;
@@ -42,7 +43,7 @@ CLOpticalFlow::CLOpticalFlow(std::shared_ptr<IMemoryManager> memory_manager) // 
       _tracker_init_kernel(),
       _tracker_stage0_kernel(),
       _tracker_stage1_kernel(),
-      _tracker_finalize_kernel(),
+      _tracker_finalize_kernel(support::cpp14::make_unique<CLLKTrackerFinalizeKernel>()),
       _func_scharr(),
       _scharr_gx(),
       _scharr_gy(),
@@ -56,6 +57,8 @@ CLOpticalFlow::CLOpticalFlow(std::shared_ptr<IMemoryManager> memory_manager) // 
       _num_levels(0)
 {
 }
+
+CLOpticalFlow::~CLOpticalFlow() = default;
 
 void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new_pyramid,
                               const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates, ICLKeyPointArray *new_points,
@@ -93,9 +96,9 @@ void CLOpticalFlow::configure(const CLCompileContext &compile_context, const CLP
     const int   old_values_list_length = list_length * window_dimension * window_dimension;
 
     // Create kernels and tensors
-    _tracker_init_kernel.resize(_num_levels);
-    _tracker_stage0_kernel.resize(_num_levels);
-    _tracker_stage1_kernel.resize(_num_levels);
+    _tracker_init_kernel.reserve(_num_levels);
+    _tracker_stage0_kernel.reserve(_num_levels);
+    _tracker_stage1_kernel.reserve(_num_levels);
     _func_scharr.resize(_num_levels);
     _scharr_gx.resize(_num_levels);
     _scharr_gy.resize(_num_levels);
@@ -134,16 +137,19 @@ void CLOpticalFlow::configure(const CLCompileContext &compile_context, const CLP
         _func_scharr[i].configure(compile_context, old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
 
         // Init Lucas-Kanade init kernel
-        _tracker_init_kernel[i].configure(compile_context, old_points, new_points_estimates, _old_points_internal.get(), _new_points_internal.get(), use_initial_estimate, i, _num_levels, pyr_scale);
+        _tracker_init_kernel.emplace_back(support::cpp14::make_unique<CLLKTrackerInitKernel>());
+        _tracker_init_kernel.back()->configure(compile_context, old_points, new_points_estimates, _old_points_internal.get(), _new_points_internal.get(), use_initial_estimate, i, _num_levels, pyr_scale);
 
         // Init Lucas-Kanade stage0 kernel
-        _tracker_stage0_kernel[i].configure(compile_context, old_ith_input, &_scharr_gx[i], &_scharr_gy[i],
-                                            _old_points_internal.get(), _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
-                                            window_dimension, i);
+        _tracker_stage0_kernel.emplace_back(support::cpp14::make_unique<CLLKTrackerStage0Kernel>());
+        _tracker_stage0_kernel.back()->configure(compile_context, old_ith_input, &_scharr_gx[i], &_scharr_gy[i],
+                                                 _old_points_internal.get(), _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
+                                                 window_dimension, i);
 
         // Init Lucas-Kanade stage1 kernel
-        _tracker_stage1_kernel[i].configure(compile_context, new_ith_input, _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
-                                            termination, epsilon, num_iterations, window_dimension, i);
+        _tracker_stage1_kernel.emplace_back(support::cpp14::make_unique<CLLKTrackerStage1Kernel>());
+        _tracker_stage1_kernel.back()->configure(compile_context, new_ith_input, _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
+                                                 termination, epsilon, num_iterations, window_dimension, i);
 
         // Allocate intermediate buffers
         _scharr_gx[i].allocator()->allocate();
@@ -151,7 +157,7 @@ void CLOpticalFlow::configure(const CLCompileContext &compile_context, const CLP
     }
 
     // Finalize Lucas-Kanade
-    _tracker_finalize_kernel.configure(compile_context, _new_points_internal.get(), new_points);
+    _tracker_finalize_kernel->configure(compile_context, _new_points_internal.get(), new_points);
 }
 
 void CLOpticalFlow::run()
@@ -166,14 +172,14 @@ void CLOpticalFlow::run()
         _func_scharr[level - 1].run();
 
         // Run Lucas-Kanade init kernel
-        CLScheduler::get().enqueue(_tracker_init_kernel[level - 1]);
+        CLScheduler::get().enqueue(*_tracker_init_kernel[level - 1]);
 
         // Run Lucas-Kanade stage0 kernel
-        CLScheduler::get().enqueue(_tracker_stage0_kernel[level - 1]);
+        CLScheduler::get().enqueue(*_tracker_stage0_kernel[level - 1]);
 
         // Run Lucas-Kanade stage1 kernel
-        CLScheduler::get().enqueue(_tracker_stage1_kernel[level - 1]);
+        CLScheduler::get().enqueue(*_tracker_stage1_kernel[level - 1]);
     }
 
-    CLScheduler::get().enqueue(_tracker_finalize_kernel, true);
+    CLScheduler::get().enqueue(*_tracker_finalize_kernel, true);
 }

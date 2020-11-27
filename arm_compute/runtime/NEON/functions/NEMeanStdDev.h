@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,15 +24,18 @@
 #ifndef ARM_COMPUTE_NEMEANSTDDEV_H
 #define ARM_COMPUTE_NEMEANSTDDEV_H
 
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEMeanStdDevKernel.h"
+#include "arm_compute/core/IMultiImage.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include <memory>
 
 #include <cstdint>
 
 namespace arm_compute
 {
+class NEMeanStdDevKernel;
+class NEFillBorderKernel;
+
 /** Basic function to execute mean and std deviation. This function calls the following NEON kernels:
  *
  * @ref NEMeanStdDevKernel
@@ -43,6 +46,16 @@ class NEMeanStdDev : public IFunction
 public:
     /** Default Constructor. */
     NEMeanStdDev();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEMeanStdDev(const NEMeanStdDev &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEMeanStdDev &operator=(const NEMeanStdDev &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMeanStdDev(NEMeanStdDev &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMeanStdDev &operator=(NEMeanStdDev &&) = delete;
+    /** Default destructor */
+    ~NEMeanStdDev();
     /** Initialise the kernel's inputs and outputs.
      *
      * @param[in, out] input  Input image. Data types supported: U8. (Written to only for border filling)
@@ -55,10 +68,10 @@ public:
     void run() override;
 
 private:
-    NEMeanStdDevKernel _mean_stddev_kernel; /**< Kernel that standard deviation calculation. */
-    NEFillBorderKernel _fill_border_kernel; /**< Kernel that fills tensor's borders with zeroes. */
-    uint64_t           _global_sum;         /**< Variable that holds the global sum among calls in order to ease reduction */
-    uint64_t           _global_sum_squared; /**< Variable that holds the global sum of squared values among calls in order to ease reduction */
+    std::unique_ptr<NEMeanStdDevKernel> _mean_stddev_kernel; /**< Kernel that standard deviation calculation. */
+    std::unique_ptr<NEFillBorderKernel> _fill_border_kernel; /**< Kernel that fills tensor's borders with zeroes. */
+    uint64_t                            _global_sum;         /**< Variable that holds the global sum among calls in order to ease reduction */
+    uint64_t                            _global_sum_squared; /**< Variable that holds the global sum of squared values among calls in order to ease reduction */
 };
 }
 #endif /*ARM_COMPUTE_NEMEANSTDDEV_H */

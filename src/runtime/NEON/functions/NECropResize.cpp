@@ -24,11 +24,16 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "arm_compute/runtime/NEON/functions/NECropResize.h"
+#include "src/core/NEON/kernels/NECropKernel.h"
+
+#include "support/MemorySupport.h"
 
 #include <cstddef>
 
 namespace arm_compute
 {
+NECropResize::~NECropResize() = default;
+
 NECropResize::NECropResize()
     : _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _crop(), _scale(), _crop_results(), _scaled_results()
 {

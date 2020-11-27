@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_CLCONVOLUTION_H
 #define ARM_COMPUTE_CLCONVOLUTION_H
 
-#include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -38,12 +36,21 @@
 
 namespace arm_compute
 {
+template <unsigned int matrix_size>
+class CLConvolutionKernel;
+template <unsigned int matrix_size>
+class CLSeparableConvolutionHorKernel;
+template <unsigned int matrix_size>
+class CLSeparableConvolutionVertKernel;
+class CLFillBorderKernel;
 class ICLTensor;
 
 /** Basic function to execute convolution of size 3x3. This function calls the following OpenCL kernels:
  *
  * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref CLConvolution3x3Kernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class CLConvolution3x3 : public ICLSimpleFunction
@@ -78,6 +85,8 @@ public:
  * -# @ref CLConvolutionKernel or<br/>
  *    @ref CLSeparableConvolutionHorKernel and @ref CLSeparableConvolutionVertKernel (if convolution matrix is separable)
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 template <unsigned int matrix_size>
 class CLConvolutionSquare : public IFunction
@@ -85,6 +94,16 @@ class CLConvolutionSquare : public IFunction
 public:
     /** Default constructor */
     CLConvolutionSquare(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLConvolutionSquare(const CLConvolutionSquare &) = delete;
+    /** Default move constructor */
+    CLConvolutionSquare(CLConvolutionSquare &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLConvolutionSquare &operator=(const CLConvolutionSquare &) = delete;
+    /** Default move assignment operator */
+    CLConvolutionSquare &operator=(CLConvolutionSquare &&) = default;
+    /** Default destructor */
+    ~CLConvolutionSquare();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -111,13 +130,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                   _memory_group;   /**< Function's memory group */
-    CLTensor                                      _tmp;            /**< temporary buffer for output of horizontal pass */
-    bool                                          _is_separable;   /**< true if the convolution can be separated */
-    CLSeparableConvolutionHorKernel<matrix_size>  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */
-    CLSeparableConvolutionVertKernel<matrix_size> _kernel_vert;    /**< kernel for vertical pass of separated convolution */
-    CLConvolutionKernel<matrix_size>              _kernel;         /**< kernel for non-separated convolution **/
-    CLFillBorderKernel                            _border_handler; /**< kernel for border handling */
+    MemoryGroup                                                    _memory_group;   /**< Function's memory group */
+    CLTensor                                                       _tmp;            /**< temporary buffer for output of horizontal pass */
+    bool                                                           _is_separable;   /**< true if the convolution can be separated */
+    std::unique_ptr<CLSeparableConvolutionHorKernel<matrix_size>>  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */
+    std::unique_ptr<CLSeparableConvolutionVertKernel<matrix_size>> _kernel_vert;    /**< kernel for vertical pass of separated convolution */
+    std::unique_ptr<CLConvolutionKernel<matrix_size>>              _kernel;         /**< kernel for non-separated convolution **/
+    std::unique_ptr<CLFillBorderKernel>                            _border_handler; /**< kernel for border handling */
 };
 
 /** Basic function to run 5x5 convolution. */
@@ -133,6 +152,9 @@ using CLConvolution9x9 = CLConvolutionSquare<9>;
  * -# @ref CLConvolutionRectangleKernel or<br/>
  *
  * @note Convolution rectangle should have dimensions of 3, 5, 7, 9
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLConvolutionRectangle : public ICLSimpleFunction
 {

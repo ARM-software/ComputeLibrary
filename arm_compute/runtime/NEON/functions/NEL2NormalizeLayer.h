@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEL2NORMALIZELAYER_H
 #define ARM_COMPUTE_NEL2NORMALIZELAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -36,6 +35,7 @@
 namespace arm_compute
 {
 class ITensor;
+class NEL2NormalizeLayerKernel;
 
 /** Basic function to perform a L2 normalization on a given axis.
  *
@@ -48,6 +48,16 @@ class NEL2NormalizeLayer : public IFunction
 public:
     /** Constructor */
     NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEL2NormalizeLayer(const NEL2NormalizeLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEL2NormalizeLayer &operator=(const NEL2NormalizeLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEL2NormalizeLayer(NEL2NormalizeLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEL2NormalizeLayer &operator=(NEL2NormalizeLayer &&) = delete;
+    /** Default destructor */
+    ~NEL2NormalizeLayer();
     /** Set the input and output tensors.
      *
      * @param[in, out] input   Source tensor. Data types supported: F16/F32. (Written to only for border_size != 0)
@@ -55,7 +65,7 @@ public:
      * @param[in]      axis    Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in]      epsilon (Optional) Lower bound value for the normalization.
      */
-    void configure(ITensor *input, ITensor *output, int axis, float epsilon = 1e-12f);
+    void configure(ITensor *input, ITensor *output, int axis, float epsilon = 1e-6f);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEL2NormalizeLayer.
      *
@@ -66,16 +76,16 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int axis, float epsilon = 1e-12f);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int axis, float epsilon = 1e-6f);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    MemoryGroup              _memory_group;
-    NEReductionOperation     _reduce_func;
-    NEL2NormalizeLayerKernel _normalize_kernel;
-    Tensor                   _sumsq;
+    MemoryGroup                               _memory_group;
+    NEReductionOperation                      _reduce_func;
+    std::unique_ptr<NEL2NormalizeLayerKernel> _normalize_kernel;
+    Tensor                                    _sumsq;
 };
 }
 #endif /* ARM_COMPUTE_NEL2NORMALIZELAYER_H */

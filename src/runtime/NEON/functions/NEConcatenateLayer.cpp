@@ -23,10 +23,10 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEBatchConcatenateLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
+#include "src/core/NEON/kernels/NEBatchConcatenateLayerKernel.h"
+#include "src/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
+#include "src/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
+#include "src/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
@@ -35,6 +35,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/helpers/AutoConfiguration.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

@@ -24,18 +24,23 @@
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLDirectConvolutionLayer::CLDirectConvolutionLayer()
-    : _direct_conv_kernel(), _input_border_handler(), _activationlayer_function(), _is_activationlayer_enabled(false)
+    : _direct_conv_kernel(support::cpp14::make_unique<CLDirectConvolutionLayerKernel>()), _input_border_handler(support::cpp14::make_unique<CLFillBorderKernel>()), _activationlayer_function(),
+      _is_activationlayer_enabled(false)
 {
 }
+
+CLDirectConvolutionLayer::~CLDirectConvolutionLayer() = default;
 
 void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
@@ -43,14 +48,14 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
 }
 
 void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
-                                         const PadStrideInfo &conv_info,
+                                         const PadStrideInfo       &conv_info,
                                          const ActivationLayerInfo &act_info)
 {
     // Set GPU target
-    _direct_conv_kernel.set_target(CLScheduler::get().target());
+    _direct_conv_kernel->set_target(CLScheduler::get().target());
 
     // Configure direct convolution
-    _direct_conv_kernel.configure(compile_context, input, weights, biases, output, conv_info);
+    _direct_conv_kernel->configure(compile_context, input, weights, biases, output, conv_info);
 
     // Configure border handler
     PixelValue &&zero_value(0.f);
@@ -58,10 +63,10 @@ void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context
     {
         zero_value = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
     }
-    _input_border_handler.configure(compile_context, input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, zero_value);
+    _input_border_handler->configure(compile_context, input, _direct_conv_kernel->border_size(), BorderMode::CONSTANT, zero_value);
 
     // Tune kernels
-    CLScheduler::get().tune_kernel_static(_direct_conv_kernel);
+    CLScheduler::get().tune_kernel_static(*_direct_conv_kernel);
 
     _is_activationlayer_enabled = act_info.enabled();
 
@@ -86,10 +91,10 @@ Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITenso
 void CLDirectConvolutionLayer::run()
 {
     // Run border handler
-    CLScheduler::get().enqueue(_input_border_handler, false);
+    CLScheduler::get().enqueue(*_input_border_handler, false);
 
     // Run direct convolution
-    CLScheduler::get().enqueue(_direct_conv_kernel);
+    CLScheduler::get().enqueue(*_direct_conv_kernel);
 
     //Run Activation Layer
     if(_is_activationlayer_enabled)

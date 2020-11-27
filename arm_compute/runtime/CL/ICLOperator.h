@@ -24,7 +24,8 @@
 #ifndef ARM_COMPUTE_ICLOPERATOR_H
 #define ARM_COMPUTE_ICLOPERATOR_H
 
-#include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/Types.h"
+
 #include "arm_compute/runtime/IOperator.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Types.h"
@@ -33,6 +34,7 @@
 
 namespace arm_compute
 {
+class ICLKernel;
 namespace experimental
 {
 /** Basic interface for functions which have a single async CL kernel */

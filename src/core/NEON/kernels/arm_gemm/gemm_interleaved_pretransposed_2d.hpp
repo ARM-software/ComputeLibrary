@@ -250,7 +250,8 @@ class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
                         first_m,
                         last_m,
                         current.k0(),
-                        current.kmax());
+                        current.kmax(),
+                        0);
                 }
             }
 

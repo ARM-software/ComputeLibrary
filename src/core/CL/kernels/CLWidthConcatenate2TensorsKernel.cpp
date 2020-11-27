@@ -21,18 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
+#include "src/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/helpers/tensor_info.h"
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/core/utils/helpers/tensor_info.h"
+#include "support/Cast.h"
 
 #include "support/StringSupport.h"
 
@@ -40,25 +39,6 @@ namespace arm_compute
 {
 namespace
 {
-constexpr unsigned int num_elems_processed_per_iteration = 8;
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
-{
-    // The window needs to be based on the output
-    Window             win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-    AccessWindowStatic input1_access(input1, 0, 0, ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration), input1->dimension(1));
-    const unsigned int input2_right_padding = ((output->dimension(0) / num_elems_processed_per_iteration) * num_elems_processed_per_iteration - input1->dimension(0) - input2->dimension(
-                                                   0)) % num_elems_processed_per_iteration;
-    AccessWindowStatic input2_access(input2, -(input1->dimension(0) % num_elems_processed_per_iteration),
-                                     0, input2->dimension(0) + input2_right_padding, input2->dimension(1));
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, input1_access, input2_access, output_access);
-
-    Window win_collapsed = win.collapse(win, Window::DimZ);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win_collapsed);
-}
 Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
@@ -81,7 +61,6 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
 Status CLWidthConcatenate2TensorsKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
     return Status{};
 }
 
@@ -90,13 +69,22 @@ void CLWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1, input2, output));
 
+    auto padding_info = get_padding_info({ input1, input2, output });
+
+    const unsigned int min_dimension                     = std::min(input1->dimension(0), input2->dimension(0));
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(8, min_dimension);
+    const unsigned int vec_size_leftover                 = output->dimension(0) % num_elems_processed_per_iteration;
+
     // Add build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input1->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_leftover));
     build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input1->dimension(2)));
     build_opts.add_option("-DINPUT1_WIDTH=" + support::cpp11::to_string(input1->dimension(0)));
+    build_opts.add_option("-DINPUT2_WIDTH=" + support::cpp11::to_string(input2->dimension(0)));
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input1->element_size()));
+    build_opts.add_option("-DINPUT1_ROTATE_N=" + support::cpp11::to_string((input1->dimension(0) - vec_size_leftover) % num_elems_processed_per_iteration));
 
     // If input have different quantization info set quantization parameters needed for the re-quantization process
     const bool have_different_qinfo = helpers::tensor_info::tensors_have_different_quantization_info(output, input1, input2);
@@ -118,21 +106,12 @@ void CLWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile
     _kernel = create_kernel(compile_context, "concatenate_width_x2", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-
-    ICLKernel::configure_internal(std::get<1>(win_config));
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    ICLKernel::configure_internal(win.collapse(win, Window::DimZ));
 
     // Set output valid region
     output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
-
-    // Pass paddings as arguments to the kernel
-    const unsigned int input1_width         = input1->dimension(0);
-    const unsigned int input1_right_padding = ceil_to_multiple(input1_width, num_elems_processed_per_iteration) - input1_width;
-    const unsigned int input2_left_padding  = input1_width % num_elems_processed_per_iteration;
-    unsigned int       idx0                 = 3 * num_arguments_per_4D_tensor();
-    _kernel.setArg<cl_uint>(idx0++, input1_right_padding);
-    _kernel.setArg<cl_uint>(idx0++, input2_left_padding);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 
     // Set config_id for enabling LWS tuning
     _config_id = "concatenate_width_x2_";

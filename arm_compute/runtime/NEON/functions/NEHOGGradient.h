@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEHOGGRADIENT_H
 #define ARM_COMPUTE_NEHOGGRADIENT_H
 
-#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -38,10 +37,14 @@
 namespace arm_compute
 {
 class ITensor;
+class ICPPKernel;
+
 /** Basic function to calculate the gradient for HOG. This function calls the following NEON kernels:
  *
  * -# @ref NEDerivative
  * -# NEMagnitudePhaseKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class NEHOGGradient : public IFunction
@@ -49,6 +52,16 @@ class NEHOGGradient : public IFunction
 public:
     /** Default constructor */
     NEHOGGradient(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEHOGGradient(const NEHOGGradient &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEHOGGradient &operator=(const NEHOGGradient &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHOGGradient(NEHOGGradient &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHOGGradient &operator=(NEHOGGradient &&) = delete;
+    /** Default destructor */
+    ~NEHOGGradient();
     /** Initialise the function's source, destinations, phase type and border mode
      *
      * @param[in, out] input                 Input tensor. Data type supported: U8.
@@ -65,11 +78,11 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                _memory_group;
-    NEDerivative               _derivative;
-    std::unique_ptr<INEKernel> _mag_phase;
-    Tensor                     _gx;
-    Tensor                     _gy;
+    MemoryGroup                 _memory_group;
+    NEDerivative                _derivative;
+    std::unique_ptr<ICPPKernel> _mag_phase;
+    Tensor                      _gx;
+    Tensor                      _gy;
 };
 }
 #endif /*ARM_COMPUTE_NEHOGGRADIENT_H */

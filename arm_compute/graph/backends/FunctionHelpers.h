@@ -37,7 +37,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/core/utils/misc/Cast.h"
+#include "support/Cast.h"
 
 namespace arm_compute
 {
@@ -126,6 +126,43 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
                                << " a: " << act_info.a()
                                << " b: " << act_info.b()
                                << " InPlace : " << is_in_place_operation(input, output)
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
+/** Creates a backend argminmax layer function
+ *
+ * @tparam ArgMinMaxLayerFunction Backend activation function
+ * @tparam TargetInfo             Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend argminmax layer function
+ */
+template <typename ArgMinMaxLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_arg_min_max_layer(ArgMinMaxLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    const ReductionOperation         op     = node.reduction_operation();
+    unsigned int                     axis   = node.axis();
+
+    // Create function
+    auto func = support::cpp14::make_unique<ArgMinMaxLayerFunction>();
+    func->configure(input, axis, output, op);
+
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Shape: " << input->info()->tensor_shape()
+                               << " Reduction Operation: " << op
+                               << " axis: " << axis
                                << std::endl);
 
     return RETURN_UNIQUE_PTR(func);
@@ -614,6 +651,45 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
     return RETURN_UNIQUE_PTR(func);
 }
 
+/** Create a backend depth to space layer function
+ *
+ * @tparam DepthToSpaceLayerNode Function Backend depth to space function
+ * @tparam TargetInfo            Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend depth to space layer function
+ */
+template <typename DepthToSpaceLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_depth_to_space_layer(DepthToSpaceLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<DepthToSpaceLayerFunction>();
+    func->configure(input, output, node.block_shape());
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Block Size: " << node.block_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
 /** Create a backend dequantize layer function
  *
  * @tparam DequantizationLayer Function Backend dequantize function
@@ -797,6 +873,12 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
         std::tie(func, func_name) = create_named_function<typename EltwiseFunctions::Multiplication>(
                                         std::string("PixelWiseMultiplication"),
                                         input1, input2, output, 1.f, convert_policy, node.rounding_policy(), act_info);
+    }
+    else if(eltwise_op == EltwiseOperation::Max)
+    {
+        std::tie(func, func_name) = create_named_function<typename EltwiseFunctions::Maximum>(
+                                        std::string("ElementwiseMaximum"),
+                                        input1, input2, output, act_info);
     }
     else
     {
@@ -1002,6 +1084,50 @@ std::unique_ptr<IFunction> create_generate_proposals_layer(GenerateProposalsLaye
                                << " Proposals shape: " << proposals->info()->tensor_shape()
                                << " Num valid proposals shape: " << num_valid_proposals->info()->tensor_shape()
                                << " Scores Out shape: " << scores_out->info()->tensor_shape()
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
+/** Create a backend l2 normalization layer function
+ *
+ * @tparam NormalizationLayerFunction Backend normalization function
+ * @tparam TargetInfo                 Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
+ *
+ * @return Backend normalization layer function
+ */
+template <typename L2NormalizeLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_l2_normalize_layer(L2NormalizeLayerNode &node, GraphContext &ctx)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
+    int                              axis    = node.axis();
+    float                            epsilon = node.epsilon();
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
+    auto func = support::cpp14::make_unique<L2NormalizeLayerFunction>(mm);
+    func->configure(input, output, axis, epsilon);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Axis: " << axis
+                               << " Epsilon: " << epsilon
                                << std::endl);
 
     return RETURN_UNIQUE_PTR(func);
@@ -1352,6 +1478,50 @@ std::unique_ptr<IFunction> create_quantization_layer(QuantizationLayerNode &node
     return RETURN_UNIQUE_PTR(func);
 }
 
+/** Create a backend reduction operation layer function
+ *
+ * @tparam ReductionOperationFunction Backend reduction operation function
+ * @tparam TargetInfo                 Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
+ *
+ * @return Backend reduction sum layer function
+ */
+template <typename ReductionOperationFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_reduction_operation_layer(ReductionLayerNode &node, GraphContext &ctx)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input     = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output    = get_backing_tensor<TargetInfo>(node.output(0));
+    ReductionOperation               op        = node.op();
+    int                              axis      = node.axis();
+    bool                             keep_dims = node.keep_dims();
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<ReductionOperationFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    func->configure(input, output, axis, op, keep_dims);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Operation: " << op
+                               << " Axis: " << axis
+                               << " Keep dimensions:" << keep_dims
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
 /** Create a backend reorg layer function
  *
  * @tparam ReorgLayerFunction Backend reorg function
@@ -1628,6 +1798,49 @@ std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
 
     return RETURN_UNIQUE_PTR(func);
 }
+
+/** Create a backend slice layer function
+ *
+ * @tparam StridedSliceLayerFunction Backend strided slice function
+ * @tparam TargetInfo                Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend strided slice layer function
+ */
+template <typename StridedSliceLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
+    Coordinates                      starts  = node.starts();
+    Coordinates                      ends    = node.ends();
+    BiStrides                        strides = node.strides();
+    StridedSliceLayerInfo            info    = node.strided_slice_info();
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<StridedSliceLayerFunction>();
+    func->configure(input, output, starts, ends, strides, info.begin_mask(), info.end_mask(), info.shrink_axis_mask());
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << std::endl);
+
+    return RETURN_UNIQUE_PTR(func);
+}
+
 /** Create a backend Upsample layer function
  *
  * @tparam UpsampleLayerFunction Backend Upsample function

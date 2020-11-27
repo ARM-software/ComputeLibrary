@@ -73,6 +73,16 @@ class CLConvolutionLayer : public IFunction
 public:
     /** Default constructor */
     CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Default Destructor */
+    ~CLConvolutionLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLConvolutionLayer(const CLConvolutionLayer &) = delete;
+    /** Default move constructor */
+    CLConvolutionLayer(CLConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLConvolutionLayer &operator=(const CLConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    CLConvolutionLayer &operator=(CLConvolutionLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],

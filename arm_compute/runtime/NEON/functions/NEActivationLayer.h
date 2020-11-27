@@ -46,8 +46,6 @@ public:
      * @param[in] ctx Runtime context to be used by the function
      */
     NEActivationLayer(IRuntimeContext *ctx = nullptr);
-    /** Destructor */
-    ~NEActivationLayer();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEActivationLayer(const NEActivationLayer &) = delete;
     /** Default move constructor */
@@ -56,6 +54,8 @@ public:
     NEActivationLayer &operator=(const NEActivationLayer &) = delete;
     /** Default move assignment operator */
     NEActivationLayer &operator=(NEActivationLayer &&);
+    /** Destructor */
+    ~NEActivationLayer();
     /** [NEActivationLayer snippet] **/
     /** Set the input and output tensor.
      *
@@ -93,6 +93,19 @@ namespace experimental
 class NEActivationLayer : public INEOperator
 {
 public:
+    /** Constructor */
+    NEActivationLayer() = default;
+    /** Prevent instances of this class from being copied */
+    NEActivationLayer(const NEActivationLayer &) = delete;
+    /** Default move constructor */
+    NEActivationLayer(NEActivationLayer &&) = default;
+    /** Prevent instances of this class from being copied */
+    NEActivationLayer &operator=(const NEActivationLayer &) = delete;
+    /** Default move assignment operator */
+    NEActivationLayer &operator=(NEActivationLayer &&) = default;
+    /** Destructor */
+    ~NEActivationLayer();
+
     /** Set the input and output tensor.
      *
      * @param[in]  input           Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.

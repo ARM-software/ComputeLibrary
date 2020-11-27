@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,9 @@ class IGCTensor;
 /** Basic function to execute shift function for tensor. This function applies to fix alignment issue on OpenGL ES:
  *
  * @note This alignment issue is introduced by limits of compute shader which requires 32/64/128bit alignment for data access on OpenGL ES
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class GCTensorShift : public IGCSimpleFunction
 {

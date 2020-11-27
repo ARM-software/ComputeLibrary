@@ -24,9 +24,9 @@
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "arm_compute/runtime/CL/tuners/CLLWSList.h"
 
-#include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/ICLKernel.h"
 #include "support/StringSupport.h"
 
 #include <cerrno>

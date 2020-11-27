@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLReverse.h"
 
-#include "arm_compute/core/CL/kernels/CLReverseKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLReverseKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

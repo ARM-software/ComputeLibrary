@@ -25,27 +25,37 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEConvolutionKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NEConvolutionKernel.h"
+#include "src/core/NEON/kernels/NEConvolutionKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "support/MemorySupport.h"
 
 #include <array>
 #include <utility>
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEConvolution3x3::~NEConvolution3x3() = default;
 
 void NEConvolution3x3::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEConvolution3x3Kernel>();
     k->configure(input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+
+    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    b->configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler = std::move(b);
 }
+
+template <unsigned int matrix_size>
+NEConvolutionSquare<matrix_size>::~NEConvolutionSquare() = default;
 
 template <unsigned int matrix_size>
 NEConvolutionSquare<matrix_size>::NEConvolutionSquare(std::shared_ptr<IMemoryManager> memory_manager)
@@ -66,6 +76,7 @@ void NEConvolutionSquare<matrix_size>::configure(ITensor *input, ITensor *output
 
     _is_separable = separate_matrix(conv, conv_col.data(), conv_row.data(), matrix_size);
 
+    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
     if(_is_separable)
     {
         DataType intermediate_type = DataType::UNKNOWN;
@@ -82,35 +93,40 @@ void NEConvolutionSquare<matrix_size>::configure(ITensor *input, ITensor *output
             scale = calculate_matrix_scale(conv, matrix_size);
         }
 
-        _kernel_hor.configure(input, &_tmp, conv_row.data(), border_mode == BorderMode::UNDEFINED);
-        _kernel_vert.configure(&_tmp, output, conv_col.data(), scale, border_mode == BorderMode::UNDEFINED);
+        _kernel_hor  = arm_compute::support::cpp14::make_unique<NESeparableConvolutionHorKernel<matrix_size>>();
+        _kernel_vert = arm_compute::support::cpp14::make_unique<NESeparableConvolutionVertKernel<matrix_size>>();
+
+        _kernel_hor->configure(input, &_tmp, conv_row.data(), border_mode == BorderMode::UNDEFINED);
+        _kernel_vert->configure(&_tmp, output, conv_col.data(), scale, border_mode == BorderMode::UNDEFINED);
 
         _tmp.allocator()->allocate();
 
-        _border_handler.configure(input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
+        b->configure(input, _kernel_hor->border_size(), border_mode, PixelValue(constant_border_value));
     }
     else
     {
-        _kernel.configure(input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
-        _border_handler.configure(input, _kernel.border_size(), border_mode, PixelValue(constant_border_value));
+        _kernel = arm_compute::support::cpp14::make_unique<NEConvolutionKernel<matrix_size>>();
+        _kernel->configure(input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
+        b->configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
     }
+    _border_handler = std::move(b);
 }
 
 template <unsigned int matrix_size>
 void                   NEConvolutionSquare<matrix_size>::run()
 {
-    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+    NEScheduler::get().schedule(_border_handler.get(), Window::DimZ);
 
     if(_is_separable)
     {
         MemoryGroupResourceScope scope_mg(_memory_group);
 
-        NEScheduler::get().schedule(&_kernel_hor, Window::DimY);
-        NEScheduler::get().schedule(&_kernel_vert, Window::DimY);
+        NEScheduler::get().schedule(_kernel_hor.get(), Window::DimY);
+        NEScheduler::get().schedule(_kernel_vert.get(), Window::DimY);
     }
     else
     {
-        NEScheduler::get().schedule(&_kernel, Window::DimY);
+        NEScheduler::get().schedule(_kernel.get(), Window::DimY);
     }
 }
 
@@ -118,10 +134,16 @@ template class arm_compute::NEConvolutionSquare<5>;
 template class arm_compute::NEConvolutionSquare<7>;
 template class arm_compute::NEConvolutionSquare<9>;
 
+NEConvolutionRectangle::~NEConvolutionRectangle() = default;
+
 void NEConvolutionRectangle::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t rows, uint32_t cols, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEConvolutionRectangleKernel>();
     k->configure(input, output, conv, rows, cols, scale, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+
+    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    b->configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler = std::move(b);
 }
+} // namespace arm_compute

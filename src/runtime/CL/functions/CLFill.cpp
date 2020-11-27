@@ -23,8 +23,10 @@
  */
 #include "arm_compute/runtime/CL/functions/CLFill.h"
 
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLMemsetKernel.h"
+
+#include "support/MemorySupport.h"
 
 #include <utility>
 

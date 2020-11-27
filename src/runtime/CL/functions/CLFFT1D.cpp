@@ -25,15 +25,28 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/utils/helpers/fft.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFFTDigitReverseKernel.h"
+#include "src/core/CL/kernels/CLFFTRadixStageKernel.h"
+#include "src/core/CL/kernels/CLFFTScaleKernel.h"
+#include "src/core/utils/helpers/fft.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLFFT1D::CLFFT1D(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _digit_reverse_kernel(), _fft_kernels(), _scale_kernel(), _digit_reversed_input(), _digit_reverse_indices(), _num_ffts(0), _run_scale(false)
+    : _memory_group(std::move(memory_manager)),
+      _digit_reverse_kernel(support::cpp14::make_unique<CLFFTDigitReverseKernel>()),
+      _fft_kernels(),
+      _scale_kernel(support::cpp14::make_unique<CLFFTScaleKernel>()),
+      _digit_reversed_input(),
+      _digit_reverse_indices(),
+      _num_ffts(0),
+      _run_scale(false)
 {
 }
+
+CLFFT1D::~CLFFT1D() = default;
 
 void CLFFT1D::configure(const ICLTensor *input, ICLTensor *output, const FFT1DInfo &config)
 {
@@ -62,12 +75,12 @@ void CLFFT1D::configure(const CLCompileContext &compile_context, const ICLTensor
     TensorInfo digit_reverse_indices_info(TensorShape(input->info()->tensor_shape()[config.axis]), 1, DataType::U32);
     _digit_reverse_indices.allocator()->init(digit_reverse_indices_info);
     _memory_group.manage(&_digit_reversed_input);
-    _digit_reverse_kernel.configure(compile_context, input, &_digit_reversed_input, &_digit_reverse_indices, digit_reverse_config);
+    _digit_reverse_kernel->configure(compile_context, input, &_digit_reversed_input, &_digit_reverse_indices, digit_reverse_config);
 
     // Create and configure FFT kernels
     unsigned int Nx = 1;
     _num_ffts       = decomposed_vector.size();
-    _fft_kernels.resize(_num_ffts);
+    _fft_kernels.reserve(_num_ffts);
     for(unsigned int i = 0; i < _num_ffts; ++i)
     {
         const unsigned int radix_for_stage = decomposed_vector.at(i);
@@ -77,7 +90,8 @@ void CLFFT1D::configure(const CLCompileContext &compile_context, const ICLTensor
         fft_kernel_info.radix          = radix_for_stage;
         fft_kernel_info.Nx             = Nx;
         fft_kernel_info.is_first_stage = (i == 0);
-        _fft_kernels[i].configure(compile_context, &_digit_reversed_input, ((i == (_num_ffts - 1)) && !is_c2r) ? output : nullptr, fft_kernel_info);
+        _fft_kernels.emplace_back(support::cpp14::make_unique<CLFFTRadixStageKernel>());
+        _fft_kernels.back()->configure(compile_context, &_digit_reversed_input, ((i == (_num_ffts - 1)) && !is_c2r) ? output : nullptr, fft_kernel_info);
 
         Nx *= radix_for_stage;
     }
@@ -88,7 +102,7 @@ void CLFFT1D::configure(const CLCompileContext &compile_context, const ICLTensor
         FFTScaleKernelInfo scale_config;
         scale_config.scale     = static_cast<float>(N);
         scale_config.conjugate = config.direction == FFTDirection::Inverse;
-        is_c2r ? _scale_kernel.configure(compile_context, &_digit_reversed_input, output, scale_config) : _scale_kernel.configure(output, nullptr, scale_config);
+        is_c2r ? _scale_kernel->configure(compile_context, &_digit_reversed_input, output, scale_config) : _scale_kernel->configure(output, nullptr, scale_config);
     }
 
     // Allocate tensors
@@ -132,18 +146,18 @@ void CLFFT1D::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run digit reverse
-    CLScheduler::get().enqueue(_digit_reverse_kernel, false);
+    CLScheduler::get().enqueue(*_digit_reverse_kernel, false);
 
     // Run radix kernels
     for(unsigned int i = 0; i < _num_ffts; ++i)
     {
-        CLScheduler::get().enqueue(_fft_kernels[i], i == (_num_ffts - 1) && !_run_scale);
+        CLScheduler::get().enqueue(*_fft_kernels[i], i == (_num_ffts - 1) && !_run_scale);
     }
 
     // Run output scaling
     if(_run_scale)
     {
-        CLScheduler::get().enqueue(_scale_kernel, true);
+        CLScheduler::get().enqueue(*_scale_kernel, true);
     }
 }
 } // namespace arm_compute

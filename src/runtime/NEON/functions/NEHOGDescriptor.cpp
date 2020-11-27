@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,14 @@
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/NEON/kernels/NEDerivativeKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEHOGDescriptorKernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEHOGDescriptor::~NEHOGDescriptor() = default;
 
 NEHOGDescriptor::NEHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _gradient(), _orient_bin(), _block_norm(), _mag(), _phase(), _hog_space()
@@ -82,10 +88,12 @@ void NEHOGDescriptor::configure(ITensor *input, ITensor *output, const IHOG *hog
     _memory_group.manage(&_hog_space);
 
     // Initialise orientation binning kernel
-    _orient_bin.configure(&_mag, &_phase, &_hog_space, hog->info());
+    _orient_bin = arm_compute::support::cpp14::make_unique<NEHOGOrientationBinningKernel>();
+    _orient_bin->configure(&_mag, &_phase, &_hog_space, hog->info());
 
     // Initialize HOG norm kernel
-    _block_norm.configure(&_hog_space, output, hog->info());
+    _block_norm = arm_compute::support::cpp14::make_unique<NEHOGBlockNormalizationKernel>();
+    _block_norm->configure(&_hog_space, output, hog->info());
 
     // Allocate intermediate tensors
     _mag.allocator()->allocate();
@@ -101,8 +109,9 @@ void NEHOGDescriptor::run()
     _gradient.run();
 
     // Run orientation binning kernel
-    NEScheduler::get().schedule(&_orient_bin, Window::DimY);
+    NEScheduler::get().schedule(_orient_bin.get(), Window::DimY);
 
     // Run block normalization kernel
-    NEScheduler::get().schedule(&_block_norm, Window::DimY);
+    NEScheduler::get().schedule(_block_norm.get(), Window::DimY);
 }
+} // namespace arm_compute

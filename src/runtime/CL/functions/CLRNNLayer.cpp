@@ -28,16 +28,32 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLCopyKernel.h"
+#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
+#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 using namespace arm_compute::misc::shape_calculator;
 
 CLRNNLayer::CLRNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected_kernel(), _copy_kernel(), _fully_connected_out(), _gemm_output(), _add_output(),
-      _is_prepared(false)
+    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected_kernel(), _copy_kernel(support::cpp14::make_unique<CLCopyKernel>()), _fully_connected_out(),
+      _gemm_output(), _add_output(), _is_prepared(false)
 {
 }
+
+CLRNNLayer::~CLRNNLayer() = default;
 
 Status CLRNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *recurrent_weights, const ITensorInfo *bias, const ITensorInfo *hidden_state,
                             const ITensorInfo *output, const ActivationLayerInfo &info)
@@ -107,7 +123,7 @@ void CLRNNLayer::configure(const CLCompileContext &compile_context, const ICLTen
     _activation.configure(compile_context, &_add_output, hidden_state, info);
     _add_output.allocator()->allocate();
 
-    _copy_kernel.configure(compile_context, hidden_state, output);
+    _copy_kernel->configure(compile_context, hidden_state, output);
 }
 
 void CLRNNLayer::run()
@@ -122,7 +138,7 @@ void CLRNNLayer::run()
     _activation.run();
 
     // copy hidden out to output
-    CLScheduler::get().enqueue(_copy_kernel);
+    CLScheduler::get().enqueue(*_copy_kernel);
 }
 
 void CLRNNLayer::prepare()

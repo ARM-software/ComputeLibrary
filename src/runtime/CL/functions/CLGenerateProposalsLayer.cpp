@@ -25,21 +25,29 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLBoundingBoxTransformKernel.h"
+#include "src/core/CL/kernels/CLDequantizationLayerKernel.h"
+#include "src/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
+#include "src/core/CL/kernels/CLPadLayerKernel.h"
+#include "src/core/CL/kernels/CLPermuteKernel.h"
+#include "src/core/CL/kernels/CLQuantizationLayerKernel.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager),
-      _permute_deltas_kernel(),
+      _permute_deltas_kernel(support::cpp14::make_unique<CLPermuteKernel>()),
       _flatten_deltas(),
-      _permute_scores_kernel(),
+      _permute_scores_kernel(support::cpp14::make_unique<CLPermuteKernel>()),
       _flatten_scores(),
-      _compute_anchors_kernel(),
-      _bounding_box_kernel(),
-      _pad_kernel(),
-      _dequantize_anchors(),
-      _dequantize_deltas(),
-      _quantize_all_proposals(),
+      _compute_anchors_kernel(support::cpp14::make_unique<CLComputeAllAnchorsKernel>()),
+      _bounding_box_kernel(support::cpp14::make_unique<CLBoundingBoxTransformKernel>()),
+      _pad_kernel(support::cpp14::make_unique<CLPadLayerKernel>()),
+      _dequantize_anchors(support::cpp14::make_unique<CLDequantizationLayerKernel>()),
+      _dequantize_deltas(support::cpp14::make_unique<CLDequantizationLayerKernel>()),
+      _quantize_all_proposals(support::cpp14::make_unique<CLQuantizationLayerKernel>()),
       _cpp_nms(memory_manager),
       _is_nhwc(false),
       _is_qasymm8(false),
@@ -60,6 +68,8 @@ CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManage
       _scores_out(nullptr)
 {
 }
+
+CLGenerateProposalsLayer::~CLGenerateProposalsLayer() = default;
 
 void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTensor *deltas, const ICLTensor *anchors, ICLTensor *proposals, ICLTensor *scores_out, ICLTensor *num_valid_proposals,
                                          const GenerateProposalsInfo &info)
@@ -91,7 +101,7 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
 
     // Compute all the anchors
     _memory_group.manage(&_all_anchors);
-    _compute_anchors_kernel.configure(compile_context, anchors, &_all_anchors, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale()));
+    _compute_anchors_kernel->configure(compile_context, anchors, &_all_anchors, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale()));
 
     const TensorShape flatten_shape_deltas(values_per_roi, total_num_anchors);
     _deltas_flattened.allocator()->init(TensorInfo(flatten_shape_deltas, 1, scores_data_type, deltas->info()->quantization_info()));
@@ -101,7 +111,7 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
     if(!_is_nhwc)
     {
         _memory_group.manage(&_deltas_permuted);
-        _permute_deltas_kernel.configure(compile_context, deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
+        _permute_deltas_kernel->configure(compile_context, deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
         _flatten_deltas.configure(compile_context, &_deltas_permuted, &_deltas_flattened);
         _deltas_permuted.allocator()->allocate();
     }
@@ -118,7 +128,7 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
     if(!_is_nhwc)
     {
         _memory_group.manage(&_scores_permuted);
-        _permute_scores_kernel.configure(compile_context, scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
+        _permute_scores_kernel->configure(compile_context, scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
         _flatten_scores.configure(compile_context, &_scores_permuted, &_scores_flattened);
         _scores_permuted.allocator()->allocate();
     }
@@ -136,18 +146,18 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
         _memory_group.manage(&_all_anchors_f32);
         _memory_group.manage(&_deltas_flattened_f32);
         // Dequantize anchors to float
-        _dequantize_anchors.configure(compile_context, &_all_anchors, &_all_anchors_f32);
+        _dequantize_anchors->configure(compile_context, &_all_anchors, &_all_anchors_f32);
         _all_anchors.allocator()->allocate();
         anchors_to_use = &_all_anchors_f32;
         // Dequantize deltas to float
-        _dequantize_deltas.configure(compile_context, &_deltas_flattened, &_deltas_flattened_f32);
+        _dequantize_deltas->configure(compile_context, &_deltas_flattened, &_deltas_flattened_f32);
         _deltas_flattened.allocator()->allocate();
         deltas_to_use = &_deltas_flattened_f32;
     }
     // Bounding box transform
     _memory_group.manage(&_all_proposals);
     BoundingBoxTransformInfo bbox_info(info.im_width(), info.im_height(), 1.f);
-    _bounding_box_kernel.configure(compile_context, anchors_to_use, &_all_proposals, deltas_to_use, bbox_info);
+    _bounding_box_kernel->configure(compile_context, anchors_to_use, &_all_proposals, deltas_to_use, bbox_info);
     deltas_to_use->allocator()->allocate();
     anchors_to_use->allocator()->allocate();
 
@@ -157,7 +167,7 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
         _memory_group.manage(&_all_proposals_quantized);
         // Requantize all_proposals to QASYMM16 with 0.125 scale and 0 offset
         _all_proposals_quantized.allocator()->init(TensorInfo(_all_proposals.info()->tensor_shape(), 1, DataType::QASYMM16, QuantizationInfo(0.125f, 0)));
-        _quantize_all_proposals.configure(compile_context, &_all_proposals, &_all_proposals_quantized);
+        _quantize_all_proposals->configure(compile_context, &_all_proposals, &_all_proposals_quantized);
         _all_proposals.allocator()->allocate();
         _all_proposals_to_use = &_all_proposals_quantized;
     }
@@ -192,7 +202,7 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
     _scores_flattened.allocator()->allocate();
 
     // Add the first column that represents the batch id. This will be all zeros, as we don't support multiple images
-    _pad_kernel.configure(compile_context, &_proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } });
+    _pad_kernel->configure(compile_context, &_proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } });
     _proposals_4_roi_values.allocator()->allocate();
 }
 
@@ -342,34 +352,34 @@ void CLGenerateProposalsLayer::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Compute all the anchors
-    CLScheduler::get().enqueue(_compute_anchors_kernel, false);
+    CLScheduler::get().enqueue(*_compute_anchors_kernel, false);
 
     // Transpose and reshape the inputs
     if(!_is_nhwc)
     {
-        CLScheduler::get().enqueue(_permute_deltas_kernel, false);
-        CLScheduler::get().enqueue(_permute_scores_kernel, false);
+        CLScheduler::get().enqueue(*_permute_deltas_kernel, false);
+        CLScheduler::get().enqueue(*_permute_scores_kernel, false);
     }
     _flatten_deltas.run();
     _flatten_scores.run();
 
     if(_is_qasymm8)
     {
-        CLScheduler::get().enqueue(_dequantize_anchors, false);
-        CLScheduler::get().enqueue(_dequantize_deltas, false);
+        CLScheduler::get().enqueue(*_dequantize_anchors, false);
+        CLScheduler::get().enqueue(*_dequantize_deltas, false);
     }
 
     // Build the boxes
-    CLScheduler::get().enqueue(_bounding_box_kernel, false);
+    CLScheduler::get().enqueue(*_bounding_box_kernel, false);
 
     if(_is_qasymm8)
     {
-        CLScheduler::get().enqueue(_quantize_all_proposals, false);
+        CLScheduler::get().enqueue(*_quantize_all_proposals, false);
     }
 
     // Non maxima suppression
     run_cpp_nms_kernel();
     // Add dummy batch indexes
-    CLScheduler::get().enqueue(_pad_kernel, true);
+    CLScheduler::get().enqueue(*_pad_kernel, true);
 }
 } // namespace arm_compute

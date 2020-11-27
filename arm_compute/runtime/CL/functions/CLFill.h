@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Function to run @ref CLMemsetKernel to fill a tensor with a scalar value */

@@ -31,7 +31,9 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 class CLCopy : public ICLSimpleFunction
 {

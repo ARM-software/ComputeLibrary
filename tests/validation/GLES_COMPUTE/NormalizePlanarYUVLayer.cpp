@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,24 +51,6 @@ TEST_SUITE(NormalizePlanarYUVLayer)
 
 template <typename T>
 using GCNormalizePlanarYUVLayerFixture = NormalizePlanarYUVLayerValidationFixture<GCTensor, GCAccessor, GCNormalizePlanarYUVLayer, T>;
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::RandomNormalizePlanarYUVLayerDataset(), framework::dataset::make("DataType", { DataType::F16 })),
-               shape0, shape1, dt)
-{
-    // Create tensors
-    GCTensor src  = create_tensor<GCTensor>(shape0, dt, 1);
-    GCTensor dst  = create_tensor<GCTensor>(shape0, dt, 1);
-    GCTensor mean = create_tensor<GCTensor>(shape1, dt, 1);
-    GCTensor sd   = create_tensor<GCTensor>(shape1, dt, 1);
-
-    // Create and Configure function
-    GCNormalizePlanarYUVLayer norm;
-    norm.configure(&src, &dst, &mean, &sd);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape0);
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 // *INDENT-OFF*
 // clang-format off

@@ -23,12 +23,13 @@
  */
 #include "arm_compute/graph/backends/CL/CLFunctionFactory.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/backends/FunctionHelpers.h"
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
+#include "src/core/CL/CLKernels.h"
+#include "support/Cast.h"
 
 using namespace arm_compute::utils::cast;
 
@@ -64,6 +65,7 @@ struct CLEltwiseFunctions
     using Addition       = CLArithmeticAddition;
     using Subtraction    = CLArithmeticSubtraction;
     using Multiplication = CLPixelWiseMultiplication;
+    using Maximum        = CLElementwiseMax;
 };
 
 /** Collection of CL unary element-wise functions */
@@ -237,6 +239,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
     {
         case NodeType::ActivationLayer:
             return detail::create_activation_layer<CLActivationLayer, CLTargetInfo>(*polymorphic_downcast<ActivationLayerNode *>(node));
+        case NodeType::ArgMinMaxLayer:
+            return detail::create_arg_min_max_layer<CLArgMinMaxLayer, CLTargetInfo>(*polymorphic_downcast<ArgMinMaxLayerNode *>(node));
         case NodeType::BatchNormalizationLayer:
             return detail::create_batch_normalization_layer<CLBatchNormalizationLayer, CLTargetInfo>(*polymorphic_downcast<BatchNormalizationLayerNode *>(node));
         case NodeType::BoundingBoxTransformLayer:
@@ -249,6 +253,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_deconvolution_layer<CLDeconvolutionLayer, CLTargetInfo>(*polymorphic_downcast<DeconvolutionLayerNode *>(node), ctx);
         case NodeType::ConcatenateLayer:
             return detail::create_concatenate_layer<CLConcatenateLayer, CLTargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
+        case NodeType::DepthToSpaceLayer:
+            return detail::create_depth_to_space_layer<CLDepthToSpaceLayer, CLTargetInfo>(*polymorphic_downcast<DepthToSpaceLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::create_depthwise_convolution_layer<CLDepthwiseConvolutionLayer, CLTargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DequantizationLayer:
@@ -271,6 +277,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_fused_depthwise_convolution_batch_normalization_layer<CLFusedLayerTypes, CLTargetInfo>(*polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node), ctx);
         case NodeType::GenerateProposalsLayer:
             return detail::create_generate_proposals_layer<CLGenerateProposalsLayer, CLTargetInfo>(*polymorphic_downcast<GenerateProposalsLayerNode *>(node), ctx);
+        case NodeType::L2NormalizeLayer:
+            return detail::create_l2_normalize_layer<CLL2NormalizeLayer, CLTargetInfo>(*polymorphic_downcast<L2NormalizeLayerNode *>(node), ctx);
         case NodeType::NormalizationLayer:
             return detail::create_normalization_layer<CLNormalizationLayer, CLTargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
         case NodeType::NormalizePlanarYUVLayer:
@@ -289,6 +297,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_priorbox_layer<CLPriorBoxLayer, CLTargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:
             return detail::create_quantization_layer<CLQuantizationLayer, CLTargetInfo>(*polymorphic_downcast<QuantizationLayerNode *>(node));
+        case NodeType::ReductionOperationLayer:
+            return detail::create_reduction_operation_layer<CLReductionOperation, CLTargetInfo>(*polymorphic_downcast<ReductionLayerNode *>(node), ctx);
         case NodeType::ReorgLayer:
             return detail::create_reorg_layer<CLReorgLayer, CLTargetInfo>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:
@@ -303,6 +313,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_softmax_layer<CLSoftmaxLayer, CLTargetInfo>(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
         case NodeType::StackLayer:
             return detail::create_stack_layer<CLStackLayer, CLTargetInfo>(*polymorphic_downcast<StackLayerNode *>(node));
+        case NodeType::StridedSliceLayer:
+            return detail::create_strided_slice_layer<CLStridedSlice, CLTargetInfo>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
         case NodeType::UpsampleLayer:
             return detail::create_upsample_layer<CLUpsampleLayer, CLTargetInfo>(*polymorphic_downcast<UpsampleLayerNode *>(node), ctx);
         case NodeType::YOLOLayer:

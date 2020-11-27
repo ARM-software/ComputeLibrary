@@ -24,13 +24,14 @@
 #ifndef ARM_COMPUTE_CLPRELULAYER_H
 #define ARM_COMPUTE_CLPRELULAYER_H
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 namespace experimental
 {
@@ -65,9 +66,6 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-
-private:
-    CLFillBorderKernel _border_handler;
 };
 } // namespace experimental
 

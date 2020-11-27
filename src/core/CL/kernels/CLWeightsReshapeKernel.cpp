@@ -21,10 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
+#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -86,6 +88,8 @@ void CLWeightsReshapeKernel::configure(const CLCompileContext &compile_context, 
                                                   (biases != nullptr) ? biases->info() : nullptr,
                                                   output->info(), num_groups));
 
+    auto padding_info = get_padding_info({ input, biases, output });
+
     const DataType data_type = input->info()->data_type();
 
     _biases = biases;
@@ -106,6 +110,8 @@ void CLWeightsReshapeKernel::configure(const CLCompileContext &compile_context, 
     // The CLWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
     ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)

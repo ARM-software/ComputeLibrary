@@ -26,10 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
-#include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
-#include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -44,6 +40,9 @@
 namespace arm_compute
 {
 class ITensor;
+class NECol2ImKernel;
+class NEIm2ColKernel;
+class NEWeightsReshapeKernel;
 
 /** Function to reshape the weights. This function calls the following kernel:
  * -# @ref NEWeightsReshapeKernel
@@ -55,12 +54,14 @@ public:
     NEConvolutionLayerReshapeWeights();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayerReshapeWeights(const NEConvolutionLayerReshapeWeights &) = delete;
-    /** Default move constructor */
-    NEConvolutionLayerReshapeWeights(NEConvolutionLayerReshapeWeights &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionLayerReshapeWeights(NEConvolutionLayerReshapeWeights &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayerReshapeWeights &operator=(const NEConvolutionLayerReshapeWeights &) = delete;
-    /** Default move assignment operator */
-    NEConvolutionLayerReshapeWeights &operator=(NEConvolutionLayerReshapeWeights &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionLayerReshapeWeights &operator=(NEConvolutionLayerReshapeWeights &&) = delete;
+    /** Default destructor */
+    ~NEConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
      *
      * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
@@ -88,7 +89,7 @@ public:
     void run() override;
 
 private:
-    NEWeightsReshapeKernel _weights_reshape_kernel;
+    std::unique_ptr<NEWeightsReshapeKernel> _weights_reshape_kernel;
 };
 
 namespace weights_transformations
@@ -97,6 +98,18 @@ namespace weights_transformations
 class NEConvolutionLayerReshapeWeightsTransform : public ITransformWeights
 {
 public:
+    /** Constructor */
+    NEConvolutionLayerReshapeWeightsTransform() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionLayerReshapeWeightsTransform(const NEConvolutionLayerReshapeWeightsTransform &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionLayerReshapeWeightsTransform &operator=(const NEConvolutionLayerReshapeWeightsTransform &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionLayerReshapeWeightsTransform(NEConvolutionLayerReshapeWeightsTransform &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEConvolutionLayerReshapeWeightsTransform &operator=(NEConvolutionLayerReshapeWeightsTransform &&) = delete;
+    /** Default destructor */
+    ~NEConvolutionLayerReshapeWeightsTransform() = default;
     void configure(const ITensor *input, const ITensor *biases)
     {
         _bias_bit = (biases != nullptr) ? 1 : 0;
@@ -154,12 +167,14 @@ public:
     NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConvolutionLayer(const NEGEMMConvolutionLayer &) = delete;
-    /** Default move constructor */
-    NEGEMMConvolutionLayer(NEGEMMConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMConvolutionLayer(NEGEMMConvolutionLayer &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConvolutionLayer &operator=(const NEGEMMConvolutionLayer &) = delete;
-    /** Default move assignment operator */
-    NEGEMMConvolutionLayer &operator=(NEGEMMConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEGEMMConvolutionLayer &operator=(NEGEMMConvolutionLayer &&) = delete;
+    /** Default destructor */
+    ~NEGEMMConvolutionLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -253,10 +268,10 @@ private:
     IWeightsManager                                                   *_weights_manager;
     NEConvolutionLayerReshapeWeights                                   _reshape_weights;
     weights_transformations::NEConvolutionLayerReshapeWeightsTransform _reshape_weights_managed;
-    NEIm2ColKernel                                                     _im2col_kernel;
+    std::unique_ptr<NEIm2ColKernel>                                    _im2col_kernel;
     NEGEMM                                                             _mm_gemm;
     NEGEMMLowpMatrixMultiplyCore                                       _mm_gemmlowp;
-    NECol2ImKernel                                                     _col2im_kernel;
+    std::unique_ptr<NECol2ImKernel>                                    _col2im_kernel;
     NEReshapeLayer                                                     _reshape_layer;
 
     const ITensor *_original_weights;

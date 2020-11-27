@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLElementWiseUnaryLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
+#include "src/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

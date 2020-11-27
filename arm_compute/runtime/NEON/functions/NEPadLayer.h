@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,13 +29,15 @@
 #include "arm_compute/runtime/NEON/functions/NEStridedSlice.h"
 #include "arm_compute/runtime/SubTensor.h"
 
-#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEPadLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+#include <memory>
 
 namespace arm_compute
 {
+class NECopyKernel;
+class NEPadLayerKernel;
+
 /** Basic function to pad a tensor. This function calls the following NEON functions/kernels:
  *
  *  - For padding mode = PaddingMode::CONSTANT:
@@ -49,8 +51,18 @@ namespace arm_compute
 class NEPadLayer : public IFunction
 {
 public:
-    /** Default constructor*/
+    /** Default Constructor */
     NEPadLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEPadLayer(const NEPadLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEPadLayer &operator=(const NEPadLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEPadLayer(NEPadLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEPadLayer &operator=(NEPadLayer &&) = delete;
+    /** Default destructor */
+    ~NEPadLayer();
     /** Initialize the function
      *
      * @param[in]  input          Source tensor. Data types supported: All.
@@ -97,15 +109,15 @@ private:
     void configure_reflect_symmetric_mode(ITensor *input, ITensor *output);
 
 private:
-    NECopyKernel                    _copy_kernel;
-    NEPadLayerKernel                _pad_kernel;
-    PaddingMode                     _mode;
-    PaddingList                     _padding;
-    uint32_t                        _num_dimensions;
-    std::vector<NEStridedSlice>     _slice_functions;
-    std::vector<NEConcatenateLayer> _concat_functions;
-    std::vector<Tensor>             _slice_results;
-    std::vector<Tensor>             _concat_results;
+    std::unique_ptr<NECopyKernel>     _copy_kernel;
+    std::unique_ptr<NEPadLayerKernel> _pad_kernel;
+    PaddingMode                       _mode;
+    PaddingList                       _padding;
+    uint32_t                          _num_dimensions;
+    std::vector<NEStridedSlice>       _slice_functions;
+    std::vector<NEConcatenateLayer>   _concat_functions;
+    std::vector<Tensor>               _slice_results;
+    std::vector<Tensor>               _concat_results;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEPADLAYER_H */

@@ -30,7 +30,9 @@
 namespace arm_compute
 {
 // Forward declarations
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to run @ref CLComparisonKernel */
 class CLComparison : public ICLSimpleFunction

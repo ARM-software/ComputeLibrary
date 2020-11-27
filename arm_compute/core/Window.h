@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,6 +45,8 @@ public:
     static constexpr size_t DimY = 1;
     /** Alias for dimension 2 also known as Z dimension */
     static constexpr size_t DimZ = 2;
+    /** Alias for dimension 3 also known as W dimension */
+    static constexpr size_t DimW = 3;
 
     /** Default constructor: create a window containing a single element. */
     constexpr Window()

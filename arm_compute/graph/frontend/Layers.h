@@ -145,6 +145,48 @@ private:
     const QuantizationInfo _out_quant_info;
 };
 
+/** ArgMinMax Layer */
+class ArgMinMaxLayer final : public ILayer
+{
+public:
+    /** Construct an activation layer.
+     *
+     * @param[in] op             Reduction Operation: min or max
+     * @param[in] axis           Axis to perform reduction along
+     * @param[in] out_data_type  (Optional) Output tensor data type
+     * @param[in] out_quant_info (Optional) Output quantization info
+     */
+    ArgMinMaxLayer(ReductionOperation     op,
+                   unsigned int           axis,
+                   DataType               out_data_type  = DataType::UNKNOWN,
+                   const QuantizationInfo out_quant_info = QuantizationInfo())
+        : _op(op),
+          _axis(axis),
+          _out_data_type(out_data_type),
+          _out_quant_info(std::move(out_quant_info))
+    {
+    }
+
+    /** Create layer and add to the given stream.
+     *
+     * @param[in] s Stream to add layer to.
+     *
+     * @return ID of the created node.
+     */
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_arg_min_max_node(s.graph(), common_params, input, _op, _axis, _out_data_type, std::move(_out_quant_info));
+    }
+
+private:
+    ReductionOperation _op;
+    unsigned int       _axis;
+    DataType           _out_data_type;
+    QuantizationInfo   _out_quant_info;
+};
+
 /** Batchnormalization Layer */
 class BatchNormalizationLayer final : public ILayer
 {
@@ -489,6 +531,31 @@ private:
     const QuantizationInfo _weights_quant_info;
     const QuantizationInfo _out_quant_info;
 };
+
+/** DepthToSpace Layer */
+class DepthToSpaceLayer final : public ILayer
+{
+public:
+    /** Construct an DepthToSpace layer.
+     *
+     * @param[in] block_shape Block size to rearranged
+     */
+    DepthToSpaceLayer(int32_t block_shape)
+        : _block_shape(block_shape)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_depth_to_space_node(s.graph(), common_params, input, _block_shape);
+    }
+
+private:
+    int32_t _block_shape;
+};
+
 /** Dequantization Layer */
 class DequantizationLayer final : public ILayer
 {
@@ -771,6 +838,32 @@ private:
     GenerateProposalsInfo _info;
 };
 
+/** L2 Normalize Layer */
+class L2NormalizeLayer final : public ILayer
+{
+public:
+    /** Construct a L2 Normalize layer.
+     *
+     * @param[in] axis    Axis to perform normalization on
+     * @param[in] epsilon Lower bound value for the normalization
+     */
+    L2NormalizeLayer(int axis, float epsilon)
+        : _axis(axis), _epsilon(epsilon)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_l2_normalize_node(s.graph(), common_params, input, _axis, _epsilon);
+    }
+
+private:
+    int   _axis;
+    float _epsilon;
+};
+
 /** Normalization Layer */
 class NormalizationLayer final : public ILayer
 {
@@ -1040,6 +1133,34 @@ private:
     QuantizationInfo _out_quant_info;
 };
 
+/** Reduction Layer */
+class ReductionLayer final : public ILayer
+{
+public:
+    /** Construct a reduction layer.
+     *
+     * @param[in] op        Reduction operation
+     * @param[in] axis      Reduction axis
+     * @param[in] keep_dims (Optional) Whether to keep the reduced dimension after the operation. Defaults to true.
+     */
+    ReductionLayer(ReductionOperation op, unsigned int axis, bool keep_dims)
+        : _op(op), _axis(axis), _keep_dims(keep_dims)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_reduction_operation_node(s.graph(), common_params, input, _op, _axis, _keep_dims);
+    }
+
+private:
+    ReductionOperation _op;
+    unsigned int       _axis;
+    bool               _keep_dims;
+};
+
 /** Reorg Layer */
 class ReorgLayer final : public ILayer
 {
@@ -1306,6 +1427,36 @@ public:
 private:
     std::vector<std::unique_ptr<SubStream>> _sub_streams;
     int                                     _axis;
+};
+
+/** StridedSlice Layer */
+class StridedSliceLayer final : public ILayer
+{
+public:
+    /** Construct a strided slice layer.
+     *
+     * @param[in] starts             The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] ends               The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] strides            The strides of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] strided_slice_info Contains masks for the starts, ends and strides
+     */
+    StridedSliceLayer(Coordinates &starts, Coordinates &ends, BiStrides &strides, StridedSliceLayerInfo strided_slice_info)
+        : _starts(starts), _ends(ends), _strides(strides), _info(strided_slice_info)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_strided_slice_node(s.graph(), common_params, input, _starts, _ends, _strides, _info);
+    }
+
+private:
+    Coordinates           _starts;
+    Coordinates           _ends;
+    BiStrides             _strides;
+    StridedSliceLayerInfo _info;
 };
 
 /** Upsample Layer */

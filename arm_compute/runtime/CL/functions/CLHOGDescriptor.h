@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_CLHOGDESCRIPTOR_H
 #define ARM_COMPUTE_CLHOGDESCRIPTOR_H
 
-#include "arm_compute/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLHOGGradient.h"
@@ -37,11 +36,15 @@
 namespace arm_compute
 {
 class IHOG;
+class CLHOGOrientationBinningKernel;
+class CLHOGBlockNormalizationKernel;
 /** Basic function to calculate HOG descriptor. This function calls the following OpenCL kernels:
  *
  * -# @ref CLHOGGradient
  * -# @ref CLHOGOrientationBinningKernel
  * -# @ref CLHOGBlockNormalizationKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class CLHOGDescriptor : public IFunction
@@ -49,6 +52,12 @@ class CLHOGDescriptor : public IFunction
 public:
     /** Default constructor */
     CLHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied */
+    CLHOGDescriptor(const CLHOGDescriptor &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLHOGDescriptor &operator=(const CLHOGDescriptor &) = delete;
+    /** Default destructor */
+    ~CLHOGDescriptor();
     /** Initialise the function's source, destination, HOG data-object and border mode
      *
      * @param[in, out] input                 Input tensor. Data type supported: U8
@@ -75,13 +84,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                   _memory_group;
-    CLHOGGradient                 _gradient;
-    CLHOGOrientationBinningKernel _orient_bin;
-    CLHOGBlockNormalizationKernel _block_norm;
-    CLTensor                      _mag;
-    CLTensor                      _phase;
-    CLTensor                      _hog_space;
+    MemoryGroup                                    _memory_group;
+    CLHOGGradient                                  _gradient;
+    std::unique_ptr<CLHOGOrientationBinningKernel> _orient_bin;
+    std::unique_ptr<CLHOGBlockNormalizationKernel> _block_norm;
+    CLTensor                                       _mag;
+    CLTensor                                       _phase;
+    CLTensor                                       _hog_space;
 };
 }
 

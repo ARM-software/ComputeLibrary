@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
 #include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
@@ -31,6 +30,9 @@
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 #include <set>

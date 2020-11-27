@@ -77,51 +77,43 @@ class GemmHybrid : public GemmCommon<To, Tr> {
             return args._cfg->inner_block_size;
         }
 
-        const unsigned int L1_size = args._ci->get_L1_cache_size();
+        // Target block size (512 for FP32, scaling for other types).  Don't block until size reaches 1.5X this.
+        unsigned int target_block_size = 2048 / sizeof(To);
 
-        // k_block: Find out how much of the larger array can be loaded into half the cache.
-        // This should account for associative caches.
-        unsigned int k_block = (L1_size / 2) / (sizeof(Toi) * (std::max(strategy::out_width(), strategy::out_height())));
+        if (args._Ksize >= ((3 * target_block_size) / 2)) {
+            unsigned int target_blocks = iceildiv(args._Ksize, target_block_size);
 
-        // Needs to be (at least a single) multiple of the K unroll level.
-        k_block /= strategy::k_unroll();
-        k_block = std::max(k_block, 1U) * strategy::k_unroll();
+            unsigned int block_size = iceildiv(args._Ksize, target_blocks);
 
-        // Now tune to presented problem size; this is how many blocks we need.
-        unsigned int numk_blocks = iceildiv(args._Ksize, k_block);
+            block_size = roundup(block_size, strategy::k_unroll());
 
-        // So divide the space equally into that many blocks.
-        k_block = iceildiv(args._Ksize, numk_blocks);
+            return block_size;
+        }
 
-        // And round UP to the K unroll level required.
-        k_block = roundup(k_block, strategy::k_unroll());
-
-        return k_block;
+        return args._Ksize;
     }
 
+    // New N blocking strategy: if it's narrow, or much taller than it is wide, do the full width.  Otherwise do a
+    // single block.
     static unsigned int compute_n_block(const GemmArgs &args) {
         if (args._cfg && args._cfg->outer_block_size) {
             return args._cfg->outer_block_size;
         }
 
-        const unsigned int k_block = compute_k_block(args);
-        const unsigned int L2_size = args._ci->get_L2_cache_size();
+        if (args._Nsize <= 64) {
+            return args._Nsize;
+        }
 
-        // n_block: Work out how many rows (of length k_block) will fit in the L2
-        // Don't allocate more than 90% of the L2 to allow for overheads, and subtract off the L1 contents.
-        unsigned int n_block = (((L2_size * 9) / 10) - (k_block * sizeof(Toi) * (strategy::out_width() + strategy::out_height()))) /
-                                 (sizeof(Toi) * k_block);
+        if ((args._Msize / args._Nsize) > 155) {
+            return args._Nsize;
+        }
 
-        // Needs to be (at least a single) multiple of the kernel output width.
-        n_block /= strategy::out_width();
-        n_block = std::max(n_block, 1U) * strategy::out_width();
+        // Go slightly wider if thread count and depth are small.
+        if ((args._Ksize <= 128) && (args._maxthreads <= 16)) {
+            return strategy::out_width() * 3;
+        }
 
-        // And tune to the presented problem size.
-        unsigned int numblocks = iceildiv(args._Nsize, n_block);
-        n_block = iceildiv(args._Nsize, numblocks);
-        n_block = roundup(n_block, strategy::out_width());
-
-        return n_block;
+        return strategy::out_width();
     }
 
 public:

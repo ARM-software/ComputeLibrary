@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLMagnitude.h"
 
-#include "arm_compute/core/CL/kernels/CLMagnitudePhaseKernel.h"
+#include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

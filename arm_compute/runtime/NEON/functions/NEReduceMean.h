@@ -26,9 +26,10 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -41,6 +42,16 @@ class NEReduceMean : public IFunction
 public:
     /** Constructor */
     NEReduceMean(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEReduceMean(const NEReduceMean &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEReduceMean &operator=(const NEReduceMean &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEReduceMean(NEReduceMean &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEReduceMean &operator=(NEReduceMean &&) = delete;
+    /** Default destructor */
+    ~NEReduceMean();
     /** Configure kernel
      *
      * @note Supported tensor rank: up to 4
@@ -71,8 +82,13 @@ private:
     std::vector<NEReductionOperation> _reduction_kernels;
     std::vector<Tensor>               _reduced_outs;
     NEReshapeLayer                    _reshape;
+    NEDequantizationLayer             _dequant;
+    NEQuantizationLayer               _requant;
     int                               _reduction_ops;
     bool                              _keep_dims;
+    bool                              _do_requant;
+    Tensor                            _input_no_quant;
+    Tensor                            _output_no_quant;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEON_REDUCE_MEAN_H */

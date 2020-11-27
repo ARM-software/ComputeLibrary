@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,17 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
+#include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 #include <cmath>
 #include <memory>
@@ -41,6 +52,7 @@ const QuantizationInfo qsymm_3(8.f / 32768.f, 0);  // qsymm16 with 3 integer bit
 const QuantizationInfo qsymm_4(16.f / 32768.f, 0); // qsymm16 with 4 integer bit
 const QuantizationInfo qsymm_0(1.f / 32768.f, 0);  // qsymm16 with 0 integer bit
 } // namespace
+NELSTMLayerQuantized::~NELSTMLayerQuantized() = default;
 
 NELSTMLayerQuantized::NELSTMLayerQuantized(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _gemmlowp(), _output_stage(), _transpose_weights(), _concat_input_weights(), _concat_recurrent_weights(), _concat_weights(), _concat_inputs(),

@@ -24,16 +24,19 @@
 #ifndef ARM_COMPUTE_CLSPACETOBATCHLAYER_H
 #define ARM_COMPUTE_CLSPACETOBATCHLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
-#include "arm_compute/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLMemsetKernel;
+class CLSpaceToBatchLayerKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to spatial divide a tensor. This function calls the following OpenCL kernels/functions:
  *
@@ -54,12 +57,12 @@ public:
     /** Allow instances of this class to be moved */
     CLSpaceToBatchLayer &operator=(CLSpaceToBatchLayer &&) = default;
     /** Default destructor */
-    virtual ~CLSpaceToBatchLayer() = default;
+    ~CLSpaceToBatchLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
-     * @param[in]  block_shape 1-D tensor with shape [M]. Data types supported: S32
-     * @param[in]  paddings    2-D tensor with shape [2, M]. Data types supported: S32
+     * @param[in]  block_shape 1-D tensor with shape [M]. Supported M: 2. Data types supported: S32
+     * @param[in]  paddings    2-D tensor with shape [2, M] (First dimension is the fastest-changing dimension). Supported M: 2. Data types supported: S32
      * @param[out] output      Tensor output. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output);
@@ -67,8 +70,8 @@ public:
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Tensor input. Supported tensor rank: 4. Data types supported: All.
-     * @param[in]  block_shape     1-D tensor with shape [M]. Data types supported: S32
-     * @param[in]  paddings        2-D tensor with shape [2, M]. Data types supported: S32
+     * @param[in]  block_shape     1-D tensor with shape [M]. Supported M: 2. Data types supported: S32
+     * @param[in]  paddings        2-D tensor with shape [2, M] (First dimension is the fastest-changing dimension). Supported M: 2. Data types supported: S32
      * @param[out] output          Tensor output. Data types supported: same as @p input
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output);
@@ -77,8 +80,8 @@ public:
      * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
-     * @param[in]  padding_left  The left padding of the output tensor.
-     * @param[in]  padding_right The right padding of the output tensor.
+     * @param[in]  padding_left  The padding at the beginning of every dimension of the output tensor.
+     * @param[in]  padding_right The padding at the end of every dimension of the output tensor.
      * @param[out] output        Tensor output. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ICLTensor *output);
@@ -88,8 +91,8 @@ public:
      * @param[in]  input           Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x   Block shape x value.
      * @param[in]  block_shape_y   Block shape y value.
-     * @param[in]  padding_left    The left padding of the output tensor.
-     * @param[in]  padding_right   The right padding of the output tensor.
+     * @param[in]  padding_left    The padding at the beginning of every dimension of the output tensor.
+     * @param[in]  padding_right   The padding at the end of every dimension of the output tensor.
      * @param[out] output          Tensor output. Data types supported: same as @p input
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right,
@@ -97,8 +100,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLSpaceToBatchLayer
      *
      * @param[in]  input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
-     * @param[in]  block_shape block shape tensor info with shape [M]. Data types supported: S32
-     * @param[in]  paddings    paddings tensor info with shape [2, M]. Data types supported: S32
+     * @param[in]  block_shape block shape tensor info with shape [M]. Supported M: 2. Data types supported: S32
+     * @param[in]  paddings    paddings tensor info with shape [2, M] (First dimension is the fastest-changing dimension). Supported M: 2. Data types supported: S32
      * @param[out] output      Tensor output info. Data types supported: same as @p input
      *
      * @return a status
@@ -109,8 +112,8 @@ public:
      * @param[in]  input         Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
-     * @param[in]  padding_left  The left padding of the output tensor.
-     * @param[in]  padding_right The right padding of the output tensor.
+     * @param[in]  padding_left  The padding at the beginning of every dimension of the output tensor.
+     * @param[in]  padding_right The padding at the end of every dimension of the output tensor.
      * @param[out] output        Tensor output info. Data types supported: same as @p input
      *
      * @return a status
@@ -121,9 +124,9 @@ public:
     void run() override;
 
 private:
-    CLSpaceToBatchLayerKernel _space_to_batch_kernel; /**< SpaceToBatch kernel to run */
-    CLMemsetKernel            _memset_kernel;         /**< Memset kernel to run */
-    bool                      _has_padding;           /**< Flag to check if the output has padding */
+    std::unique_ptr<CLSpaceToBatchLayerKernel> _space_to_batch_kernel; /**< SpaceToBatch kernel to run */
+    std::unique_ptr<CLMemsetKernel>            _memset_kernel;         /**< Memset kernel to run */
+    bool                                       _has_padding;           /**< Flag to check if the output has padding */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLSPACETOBATCHLAYER_H */

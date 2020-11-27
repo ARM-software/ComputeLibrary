@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,8 +31,15 @@ namespace arm_compute
 namespace graph
 {
 QuantizationLayerNode::QuantizationLayerNode(QuantizationInfo out_quant_info)
-    : _out_quant_info(std::move(out_quant_info))
+    : QuantizationLayerNode(out_quant_info, DataType::QASYMM8)
 {
+}
+
+QuantizationLayerNode::QuantizationLayerNode(QuantizationInfo out_quant_info, DataType out_data_type)
+    : _out_quant_info(std::move(out_quant_info)), _out_data_type(out_data_type)
+{
+    ARM_COMPUTE_ERROR_ON(!is_data_type_quantized(out_data_type));
+
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
@@ -58,7 +65,7 @@ TensorDescriptor QuantizationLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
     TensorDescriptor output_info = src->desc();
-    output_info.data_type        = DataType::QASYMM8;
+    output_info.data_type        = _out_data_type;
     output_info.quant_info       = _out_quant_info;
 
     return output_info;

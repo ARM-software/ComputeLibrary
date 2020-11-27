@@ -21,14 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
+#include "src/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
 
-#include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NESymm.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/NESymm.h"
+#include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {
@@ -65,7 +67,7 @@ void sub_same(const ITensor *in1, const ITensor *in2, ITensor *out, const Window
     constexpr int window_step_x         = 16 / sizeof(T);
     const auto    window_start_x        = static_cast<int>(window.x().start());
     const auto    window_end_x          = static_cast<int>(window.x().end());
-    const bool    is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool    is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
@@ -176,7 +178,7 @@ void sub_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const W
     const int  window_step_x         = 16;
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
@@ -370,7 +372,7 @@ void sub_QSYMM16_QSYMM16_QSYMM16(const ITensor *in1, const ITensor *in2, ITensor
     const int  window_step_x         = 8;
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
@@ -669,9 +671,12 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
 {
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::S32, DataType::F16,
+                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::S32, DataType::F16,
+                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::S32, DataType::F16,
+                                                         DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
@@ -685,15 +690,16 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
         && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16)
         && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8)
         && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::S16)
+        && !(input1.data_type() == DataType::S32 && input2.data_type() == DataType::S32)
         && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32)
         && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16),
         "You called subtract with the wrong image formats");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED && policy == ConvertPolicy::WRAP
-        && input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && policy == ConvertPolicy::WRAP
-        && input1.data_type() == DataType::QSYMM16 && input2.data_type() == DataType::QSYMM16 && policy == ConvertPolicy::WRAP,
-        "Convert policy cannot be WRAP if datatype is QASYMM8 or QASYMM8_SIGNED");
+        (input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED && policy == ConvertPolicy::WRAP)
+        || (input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && policy == ConvertPolicy::WRAP)
+        || (input1.data_type() == DataType::QSYMM16 && input2.data_type() == DataType::QSYMM16 && policy == ConvertPolicy::WRAP),
+        "Convert policy cannot be WRAP if datatype is quantized");
 
     // Validate in case of configured output
     if(output.total_size() > 0)
@@ -707,6 +713,7 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
+            && !(input1.data_type() == DataType::S32 && input2.data_type() == DataType::S32 && output.data_type() == DataType::S32)
             && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32 && output.data_type() == DataType::F32)
             && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16 && output.data_type() == DataType::F16),
             "You called subtract with the wrong image formats");
@@ -775,6 +782,10 @@ void NEArithmeticSubtractionKernel::configure(const ITensorInfo *input1, const I
         case DataType::QSYMM16:
             _func = &sub_QSYMM16_QSYMM16_QSYMM16;
             set_data_type_if_unknown(*output, DataType::QSYMM16);
+            break;
+        case DataType::S32:
+            _func = &sub_same<int32_t>;
+            set_format_if_unknown(*output, Format::S32);
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:

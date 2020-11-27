@@ -25,9 +25,7 @@
 #define ARM_COMPUTE_CL_CROP_RESIZE_H
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLCropKernel.h"
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
+
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 
@@ -37,7 +35,11 @@
 namespace arm_compute
 {
 // Forward Declarations
+class CLCompileContext;
+class CLCopyKernel;
+class CLCropKernel;
 class ITensor;
+class ITensorInfo;
 
 /** Function to perform cropping and resizing */
 class CLCropResize : public IFunction
@@ -54,7 +56,7 @@ public:
     /** Allow instances of this class to be moved */
     CLCropResize &operator=(CLCropResize &&) = default;
     /** Default destructor */
-    virtual ~CLCropResize() = default;
+    ~CLCropResize();
 
     /** Configure kernel
      *

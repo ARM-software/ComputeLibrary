@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_CLSOBEL7X7_H
 #define ARM_COMPUTE_CLSOBEL7X7_H
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLSobel7x7Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -37,6 +35,10 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLFillBorderKernel;
+class CLSobel7x7HorKernel;
+class CLSobel7x7VertKernel;
 class ICLTensor;
 
 /** Basic function to execute sobel 7x7 filter. This function calls the following OpenCL kernels:
@@ -45,6 +47,8 @@ class ICLTensor;
  * -# @ref CLSobel7x7HorKernel
  * -# @ref CLSobel7x7VertKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ * 
  */
 class CLSobel7x7 : public IFunction
 {
@@ -54,6 +58,12 @@ public:
      * @param[in] memory_manager (Optional) Memory manager.
      */
     CLSobel7x7(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied */
+    CLSobel7x7(const CLSobel7x7 &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLSobel7x7 &operator=(const CLSobel7x7 &) = delete;
+    /** Default destructor */
+    ~CLSobel7x7();
     /** Initialise the function's source, destinations and border mode.
      *
      * @note At least one of output_x or output_y must be not NULL.
@@ -82,12 +92,12 @@ public:
     void run() override;
 
 protected:
-    MemoryGroup          _memory_group;   /**< Function's memory group */
-    CLSobel7x7HorKernel  _sobel_hor;      /**< Sobel Horizontal 7x7 kernel */
-    CLSobel7x7VertKernel _sobel_vert;     /**< Sobel Vertical 7x7 kernel */
-    CLFillBorderKernel   _border_handler; /**< Kernel to handle image borders */
-    CLImage              _tmp_x;          /**< Temporary buffer for Sobel X */
-    CLImage              _tmp_y;          /**< Temporary buffer for Sobel Y */
+    MemoryGroup                           _memory_group;   /**< Function's memory group */
+    std::unique_ptr<CLSobel7x7HorKernel>  _sobel_hor;      /**< Sobel Horizontal 7x7 kernel */
+    std::unique_ptr<CLSobel7x7VertKernel> _sobel_vert;     /**< Sobel Vertical 7x7 kernel */
+    std::unique_ptr<CLFillBorderKernel>   _border_handler; /**< Kernel to handle image borders */
+    CLImage                               _tmp_x;          /**< Temporary buffer for Sobel X */
+    CLImage                               _tmp_y;          /**< Temporary buffer for Sobel Y */
 };
 }
 #endif /*ARM_COMPUTE_CLSOBEL7X7_H */

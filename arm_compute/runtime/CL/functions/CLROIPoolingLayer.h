@@ -24,14 +24,14 @@
 #ifndef ARM_COMPUTE_CLROIPOOLINGLAYER_H
 #define ARM_COMPUTE_CLROIPOOLINGLAYER_H
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
-
 #include "arm_compute/core/CL/ICLArray.h"
-#include "arm_compute/core/CL/kernels/CLROIPoolingLayerKernel.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ROIPoolingLayerInfo;
 
 /** Basic function to run @ref CLROIPoolingLayerKernel.
  *

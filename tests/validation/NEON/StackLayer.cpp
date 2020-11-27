@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,35 +77,6 @@ const auto shapes_3d_large = combine(datasets::Medium3DShapes(), framework::data
 
 /** Shapes 4D to test */
 const auto shapes_4d_large = combine(datasets::Medium4DShapes(), framework::dataset::make("Axis", -4, 5));
-
-/** Configuration test */
-void validate_configuration(TensorShape shape_in, int axis, DataType data_type, int num_tensors)
-{
-    // Wrap around negative values
-    const unsigned int axis_u = wrap_around(axis, static_cast<int>(shape_in.num_dimensions() + 1));
-
-    const TensorShape shape_dst = compute_stack_shape(TensorInfo(shape_in, 1, data_type), axis_u, num_tensors);
-
-    std::vector<Tensor>   tensors(num_tensors);
-    std::vector<ITensor*> src(num_tensors);
-
-    // Create vector of input tensors
-    for(int i = 0; i < num_tensors; ++i)
-    {
-        tensors[i] = create_tensor<Tensor>(shape_in, data_type);
-        src[i]     = &(tensors[i]);
-        ARM_COMPUTE_EXPECT(src[i]->info()->is_resizable(), framework::LogLevel::ERRORS);
-    }
-
-    // Create tensors
-    Tensor dst = create_tensor<Tensor>(shape_dst, data_type);
-
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEStackLayer stack;
-    stack.configure(src, axis, &dst);
-}
 } // namespace
 
 /** Fixture to use */
@@ -148,15 +119,6 @@ input_info, output_info, axis, expected)
 }
 
 TEST_SUITE(Shapes1D)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(shapes_1d_small,
-                                                                           data_types),
-                                                                           n_values),
-shape_in, axis, data_type, num_tensors)
-{
-    validate_configuration(shape_in, axis, data_type, num_tensors);
-}
-
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEStackLayerFixture<int>, framework::DatasetMode::ALL,
                                                            combine(combine(shapes_1d_small,
@@ -219,15 +181,6 @@ TEST_SUITE_END() // S8
 TEST_SUITE_END() // Shapes1D
 
 TEST_SUITE(Shapes2D)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(shapes_2d_small,
-                                                                           data_types),
-                                                                           n_values),
-shape_in, axis, data_type, num_tensors)
-{
-    validate_configuration(shape_in, axis, data_type, num_tensors);
-}
-
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEStackLayerFixture<int>, framework::DatasetMode::ALL,
                                                            combine(combine(shapes_2d_small,
@@ -290,14 +243,6 @@ TEST_SUITE_END() // S8
 TEST_SUITE_END() // Shapes2D
 
 TEST_SUITE(Shapes3D)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(shapes_3d_small,
-                                                                           data_types),
-                                                                           n_values),
-shape_in, axis, data_type, num_tensors)
-{
-    validate_configuration(shape_in, axis, data_type, num_tensors);
-}
-
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEStackLayerFixture<int>, framework::DatasetMode::ALL,
                                                            combine(combine(shapes_3d_small,
@@ -360,14 +305,6 @@ TEST_SUITE_END() // S8
 TEST_SUITE_END() // Shapes3D
 
 TEST_SUITE(Shapes4D)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(shapes_4d_small,
-                                                                           data_types),
-                                                                           n_values),
-shape_in, axis, data_type, num_tensors)
-{
-    validate_configuration(shape_in, axis, data_type, num_tensors);
-}
-
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEStackLayerFixture<int>, framework::DatasetMode::ALL,
                                                            combine(combine(shapes_4d_small,

@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYER_H
 
-#include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -34,7 +32,11 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLDirectConvolutionLayerKernel;
+class CLFillBorderKernel;
 class ICLTensor;
+class ITensorInfo;
 
 /** Basic function to execute direct convolution function:
  */
@@ -43,6 +45,12 @@ class CLDirectConvolutionLayer : public IFunction
 public:
     /** Default constructor */
     CLDirectConvolutionLayer();
+    /** Prevent instances of this class from being copied */
+    CLDirectConvolutionLayer(const CLDirectConvolutionLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLDirectConvolutionLayer &operator=(const CLDirectConvolutionLayer &) = delete;
+    /** Default destructor */
+    ~CLDirectConvolutionLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -95,9 +103,9 @@ public:
     void run() override;
 
 private:
-    CLDirectConvolutionLayerKernel _direct_conv_kernel;
-    CLFillBorderKernel             _input_border_handler;
-    CLActivationLayer              _activationlayer_function;
+    std::unique_ptr<CLDirectConvolutionLayerKernel> _direct_conv_kernel;
+    std::unique_ptr<CLFillBorderKernel>             _input_border_handler;
+    CLActivationLayer                               _activationlayer_function;
 
     bool _is_activationlayer_enabled;
 };

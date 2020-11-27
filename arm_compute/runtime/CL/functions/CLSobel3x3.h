@@ -31,6 +31,7 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
 
 /** Basic function to execute sobel 3x3 filter. This function calls the following OpenCL kernels:
@@ -38,10 +39,20 @@ class ICLTensor;
  * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref CLSobel3x3Kernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class CLSobel3x3 : public ICLSimpleFunction
 {
 public:
+    /** Default Constructor */
+    CLSobel3x3() = default;
+    /** Prevent instances of this class from being copied */
+    CLSobel3x3(const CLSobel3x3 &) = delete;
+    /** Prevent instances of this class from being copied */
+    CLSobel3x3 &operator=(const CLSobel3x3 &) = delete;
+    /** Default destructor */
+    ~CLSobel3x3();
     /** Initialise the function's source, destinations and border mode.
      *
      * @note At least one of output_x or output_y must be not NULL.

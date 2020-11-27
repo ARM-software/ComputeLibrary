@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -162,7 +162,7 @@ public:
     SmallDepthwiseConvolutionLayerDataset3x3()
     {
         add_config(TensorShape(3U, 3U, 2U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0));
-        add_config(TensorShape(7U, 7U, 3U, 2U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(7U, 8U, 3U, 2U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(21U, 31U, 9U, 4U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 0));
         // Asymmetric padding
         add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));

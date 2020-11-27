@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,26 +96,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(arm_compute::test::datasets::SmallGatherDataset(), framework::dataset::make("DataType", { DataType::F32 })),
-               input_shape, indices_shape, axis, data_type)
-{
-    const uint32_t actual_axis = wrap_around(axis, static_cast<int>(input_shape.num_dimensions()));
-    Tensor         src         = create_tensor<Tensor>(input_shape, data_type);
-    Tensor         indices     = create_tensor<Tensor>(indices_shape, DataType::U32);
-    TensorShape    dst_shape   = arm_compute::misc::shape_calculator::compute_gather_shape(input_shape, indices_shape, actual_axis);
-    Tensor         dst         = create_tensor<Tensor>(dst_shape, data_type);
-
-    // Create and Configure function
-    NEGather gather;
-    gather.configure(&src, &indices, &dst, axis);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 template <typename T>
 using NEGatherFixture = GatherFixture<Tensor, Accessor, NEGather, T>;

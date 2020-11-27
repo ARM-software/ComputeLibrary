@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,27 +25,42 @@
 #define ARM_COMPUTE_NEMINMAXLOCATION_H
 
 #include "arm_compute/core/IArray.h"
-#include "arm_compute/core/NEON/kernels/NEMinMaxLocationKernel.h"
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
+class NEMinMaxKernel;
+class NEMinMaxLocationKernel;
 using IImage = ITensor;
 
 /** Basic function to execute min and max location. This function calls the following NEON kernels:
  *
  * -# NEMinMaxKernel
  * -# NEMinMaxLocationKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
  */
 class NEMinMaxLocation : public IFunction
 {
 public:
     /** Constructor */
     NEMinMaxLocation();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEMinMaxLocation(const NEMinMaxLocation &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEMinMaxLocation &operator=(const NEMinMaxLocation &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMinMaxLocation(NEMinMaxLocation &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMinMaxLocation &operator=(NEMinMaxLocation &&) = delete;
+    /** Default destructor */
+    ~NEMinMaxLocation();
     /** Initialise the kernel's inputs and outputs.
      *
      * @param[in]  input     Input image. Data types supported: U8/S16/F32.
@@ -64,8 +79,8 @@ public:
     void run() override;
 
 private:
-    NEMinMaxKernel         _min_max;     /**< Kernel that performs min/max */
-    NEMinMaxLocationKernel _min_max_loc; /**< Kernel that extracts min/max locations */
+    std::unique_ptr<NEMinMaxKernel>         _min_max;     /**< Kernel that performs min/max */
+    std::unique_ptr<NEMinMaxLocationKernel> _min_max_loc; /**< Kernel that extracts min/max locations */
 };
 }
 #endif /*ARM_COMPUTE_NEMINMAXLOCATION_H */

@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEBitwiseNot.h"
 
-#include "arm_compute/core/NEON/kernels/NEBitwiseNotKernel.h"
+#include "src/core/NEON/kernels/NEBitwiseNotKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

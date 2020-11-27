@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
@@ -33,8 +32,13 @@
 #include "arm_compute/runtime/Pyramid.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NELKTrackerKernel.h"
+#include "support/MemorySupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NEOpticalFlow::~NEOpticalFlow() = default;
 
 NEOpticalFlow::NEOpticalFlow(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
@@ -110,11 +114,12 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
         _func_scharr[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
 
         // Init Lucas-Kanade kernel
-        _kernel_tracker[i].configure(old_ith_input, new_ith_input, &_scharr_gx[i], &_scharr_gy[i],
-                                     old_points, new_points_estimates, new_points,
-                                     &_old_points_internal, &_new_points_internal,
-                                     termination, use_initial_estimate, epsilon, num_iterations, window_dimension,
-                                     i, _num_levels, pyr_scale);
+        _kernel_tracker[i] = arm_compute::support::cpp14::make_unique<NELKTrackerKernel>();
+        _kernel_tracker[i]->configure(old_ith_input, new_ith_input, &_scharr_gx[i], &_scharr_gy[i],
+                                      old_points, new_points_estimates, new_points,
+                                      &_old_points_internal, &_new_points_internal,
+                                      termination, use_initial_estimate, epsilon, num_iterations, window_dimension,
+                                      i, _num_levels, pyr_scale);
 
         _scharr_gx[i].allocator()->allocate();
         _scharr_gy[i].allocator()->allocate();
@@ -133,6 +138,7 @@ void NEOpticalFlow::run()
         _func_scharr[level - 1].run();
 
         // Run Lucas-Kanade kernel
-        NEScheduler::get().schedule(&_kernel_tracker[level - 1], Window::DimX);
+        NEScheduler::get().schedule(_kernel_tracker[level - 1].get(), Window::DimX);
     }
 }
+} // namespace arm_compute

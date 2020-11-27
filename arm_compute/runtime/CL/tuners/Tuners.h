@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 
 #include "arm_compute/runtime/CL/tuners/BifrostTuner.h"
 #include "arm_compute/runtime/CL/tuners/MidgardTuner.h"
+
+#include "support/MemorySupport.h"
 
 #include <memory>
 

@@ -21,20 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
+#include "src/core/CL/kernels/CLIm2ColKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 #include <cmath>
@@ -317,7 +317,8 @@ void CLIm2ColKernel::configure(const CLCompileContext &compile_context, const IC
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, num_groups));
 
-    _data_layout = input->info()->data_layout();
+    auto padding_info = get_padding_info({ input, output });
+    _data_layout      = input->info()->data_layout();
 
     const unsigned int width_idx    = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
@@ -358,6 +359,8 @@ void CLIm2ColKernel::configure(const CLCompileContext &compile_context, const IC
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
     _config_id += "_";
     _config_id += lower_string(string_from_data_layout(_data_layout));
+
+    ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::NHWC && has_padding_changed(padding_info));
 }
 
 Status CLIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,

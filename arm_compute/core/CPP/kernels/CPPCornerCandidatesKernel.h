@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_CPPCORNERCANDIDATESKERNEL_H
 #define ARM_COMPUTE_CPPCORNERCANDIDATESKERNEL_H
 
+#include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/IArray.h"
-#include "arm_compute/core/NEON/INEKernel.h"
 
 #include "support/Mutex.h"
 
@@ -39,7 +39,7 @@ using IImage = ITensor;
 
 /** CPP kernel to perform corner candidates
  */
-class CPPCornerCandidatesKernel : public INEKernel
+class CPPCornerCandidatesKernel : public ICPPKernel
 {
 public:
     const char *name() const override

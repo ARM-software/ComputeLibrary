@@ -46,8 +46,6 @@
  * @param[in]  block_shape_ptr                           Pointer to the block shape tensor. Supported data types: S32
  * @param[in]  block_shape_stride_x                      Stride of the block shape tensor in X dimension (in bytes)
  * @param[in]  block_shape_step_x                        block_shape_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  block_shape_stride_y                      Stride of the block shape tensor in Y dimension (in bytes)
- * @param[in]  block_shape_step_y                        block_shape_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  block_shape_offset_first_element_in_bytes The offset of the first element in the block shapetensor
  * @param[in]  batch_id                                  The output tensor batch id
  * @param[out] output_ptr                                Pointer to the destination tensor. Supported data types: same as @p input_ptr
@@ -117,8 +115,6 @@ __kernel void space_to_batch_nchw(
  * @param[in]  block_shape_ptr                           Pointer to the block shape tensor. Supported data types: S32
  * @param[in]  block_shape_stride_x                      Stride of the block shape tensor in X dimension (in bytes)
  * @param[in]  block_shape_step_x                        block_shape_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  block_shape_stride_y                      Stride of the block shape tensor in Y dimension (in bytes)
- * @param[in]  block_shape_step_y                        block_shape_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  block_shape_offset_first_element_in_bytes The offset of the first element in the block shapetensor
  * @param[in]  batch_id                                  The output tensor batch id
  * @param[out] output_ptr                                Pointer to the destination tensor. Supported data types: same as @p input_ptr

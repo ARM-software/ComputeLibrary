@@ -30,6 +30,11 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLHOGDescriptorKernel.h"
+#include "src/core/CL/kernels/CLHOGDetectorKernel.h"
+#include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -51,6 +56,8 @@ CLHOGMultiDetection::CLHOGMultiDetection(std::shared_ptr<IMemoryManager> memory_
       _num_hog_detect_kernel(0)
 {
 }
+
+CLHOGMultiDetection::~CLHOGMultiDetection() = default;
 
 void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_hog, ICLDetectionWindowArray *detection_windows, ICLSize2DArray *detection_window_strides, BorderMode border_mode,
                                     uint8_t constant_border_value, float threshold, bool non_maxima_suppression, float min_distance)
@@ -135,8 +142,8 @@ void CLHOGMultiDetection::configure(const CLCompileContext &compile_context, ICL
     _num_block_norm_kernel  = input_block_norm.size(); // Number of CLHOGBlockNormalizationKernel kernels to compute
     _num_hog_detect_kernel  = input_hog_detect.size(); // Number of CLHOGDetector functions to compute
 
-    _orient_bin_kernel.resize(_num_orient_bin_kernel);
-    _block_norm_kernel.resize(_num_block_norm_kernel);
+    _orient_bin_kernel.reserve(_num_orient_bin_kernel);
+    _block_norm_kernel.reserve(_num_block_norm_kernel);
     _hog_detect_kernel.resize(_num_hog_detect_kernel);
     _hog_space.resize(_num_orient_bin_kernel);
     _hog_norm_space.resize(_num_block_norm_kernel);
@@ -181,7 +188,8 @@ void CLHOGMultiDetection::configure(const CLCompileContext &compile_context, ICL
         _memory_group.manage(&_hog_space[i]);
 
         // Initialise orientation binning kernel
-        _orient_bin_kernel[i].configure(compile_context, &_mag, &_phase, &_hog_space[i], multi_hog->model(idx_multi_hog)->info());
+        _orient_bin_kernel.emplace_back(support::cpp14::make_unique<CLHOGOrientationBinningKernel>());
+        _orient_bin_kernel.back()->configure(compile_context, &_mag, &_phase, &_hog_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
     // Allocate intermediate tensors
@@ -202,7 +210,8 @@ void CLHOGMultiDetection::configure(const CLCompileContext &compile_context, ICL
         _memory_group.manage(&_hog_norm_space[i]);
 
         // Initialize block normalization kernel
-        _block_norm_kernel[i].configure(compile_context, &_hog_space[idx_orient_bin], &_hog_norm_space[i], multi_hog->model(idx_multi_hog)->info());
+        _block_norm_kernel.emplace_back(support::cpp14::make_unique<CLHOGBlockNormalizationKernel>());
+        _block_norm_kernel.back()->configure(compile_context, &_hog_space[idx_orient_bin], &_hog_norm_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
     // Allocate intermediate tensors
@@ -248,13 +257,13 @@ void CLHOGMultiDetection::run()
     // Run orientation binning kernel
     for(size_t i = 0; i < _num_orient_bin_kernel; ++i)
     {
-        CLScheduler::get().enqueue(_orient_bin_kernel[i], false);
+        CLScheduler::get().enqueue(*_orient_bin_kernel[i], false);
     }
 
     // Run block normalization kernel
     for(size_t i = 0; i < _num_block_norm_kernel; ++i)
     {
-        CLScheduler::get().enqueue(_block_norm_kernel[i], false);
+        CLScheduler::get().enqueue(*_block_norm_kernel[i], false);
     }
 
     // Run HOG detector kernel

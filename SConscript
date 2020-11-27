@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v20.08"
-LIBRARY_VERSION_MAJOR = 20
+VERSION = "v20.11"
+LIBRARY_VERSION_MAJOR = 21
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -48,20 +48,6 @@ def build_library(name, sources, static=False, libs=[]):
     else:
         if env['set_soname']:
             obj = arm_compute_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
-
-            symlinks = []
-            # Manually delete symlinks or SCons will get confused:
-            directory = os.path.dirname(obj[0].path)
-            library_prefix = obj[0].path[:-(1 + len(SONAME_VERSION))]
-            real_lib = "%s.%s" % (library_prefix, SONAME_VERSION)
-
-            for f in Glob("#%s.*" % library_prefix):
-                if str(f) != real_lib:
-                    symlinks.append("%s/%s" % (directory,str(f)))
-
-            clean = arm_compute_env.Command('clean-%s' % str(obj[0]), [], Delete(symlinks))
-            Default(clean)
-            Depends(obj, clean)
         else:
             obj = arm_compute_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
@@ -178,6 +164,7 @@ arm_compute_env.Append(LIBS = ['dl'])
 core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
 core_files += Glob('src/core/CPP/kernels/*.cpp')
+core_files += Glob('src/core/helpers/*.cpp')
 core_files += Glob('src/core/utils/*.cpp')
 core_files += Glob('src/core/utils/helpers/*.cpp')
 core_files += Glob('src/core/utils/io/*.cpp')
@@ -228,11 +215,10 @@ if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
     core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
-    arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/convolution/common/",
-                                      "arm_compute/core/NEON/kernels/convolution/winograd/",
-                                      "arm_compute/core/NEON/kernels/convolution/depthwise/",
-                                      "src/core/NEON/kernels/assembly/",
+    arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
                                       "src/core/NEON/kernels/convolution/winograd/",
+                                      "src/core/NEON/kernels/convolution/depthwise/",
+                                      "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/"])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
@@ -244,6 +230,17 @@ if env['neon']:
         core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
         if "sve" in env['arch']:
              core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/sve_*/*.cpp')
+
+    if any(i in env['data_type_support'] for i in ['all', 'fp16']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/fp16_*.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'fp32']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/fp32_*.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/qasymm8_neon*.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/qasymm8_signed_*.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/qsymm16_*.cpp')
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')

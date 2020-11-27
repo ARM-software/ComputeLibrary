@@ -21,10 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
+#include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {

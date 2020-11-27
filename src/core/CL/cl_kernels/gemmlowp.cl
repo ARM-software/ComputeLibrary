@@ -290,7 +290,7 @@
         (VECTOR_ACC_TYPE, k0, a, b, c);                          \
     })
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N)
+#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices with QASYMM/QASYMM_SIGNED data type.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
@@ -433,7 +433,7 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // The plane (zout) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zout, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
+    CALCULATE_Z_OFFSET(M0, uint, zout, y * M0, HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -447,7 +447,12 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(REINTERPRET_OUTPUT_AS_3D)
 
     // Convert and store output block
-    CONVERT_STORE_BLOCK(M0, N0, int, c, dst_addr, dst_stride_y, zout);
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
+    // Store output block
+    REPEAT_VAR_INIT_CONVERT_SAT(M0, VEC_DATA_TYPE(int, N0), c, c_lp);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #undef LHS_BLOCK_SIZE
 #undef LHS_OFFSET_X
@@ -456,9 +461,9 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
 }
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(K)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(K)
+#if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix is NOT reshaped
@@ -550,7 +555,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
-    uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
+    uint lhs_offset = lhs_offset_first_element_in_bytes + COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * (uint)lhs_stride_y;
 
     // Compute RHS matrix address
     uint rhs_offset = rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X + (x / (uint)H0) * rhs_stride_y;
@@ -567,7 +572,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 
 #if defined(REINTERPRET_INPUT_AS_3D)
     // The plane (zlhs) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zlhs, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
+    CALCULATE_Z_OFFSET(M0, uint, zlhs, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply lhs_stride_z by DEPTH_GEMM3D
@@ -583,7 +588,8 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
     // Initialize the accumulators
     REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(ACC_DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(ACC_DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(N0-1)=0;
 
-    for(int i = 0; i < K; i += K0)
+    int i = 0;
+    for(; i <= (K - K0); i += K0)
     {
         // Load values from LHS matrix
         LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
@@ -597,14 +603,26 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
         lhs_offset += K0;
         rhs_offset += N0 * RHS_STEP_X * RHS_STEP_LOOP;
     }
+    // Left-over accumulations
+    for(; i < K; ++i)
+    {
+        // Load values from LHS matrix
+        LOAD_BLOCK(M0, 1, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(int) + (y * (uint)M0 * dst_stride_y);
+        // Load values from RHS reshaped matrix
+        LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
+
+        ARM_MM_K0XN0XM0(M0, N0, 1, a, b, c);
+        lhs_offset += 1;
+        rhs_offset += 1;
+    }
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(int)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * dst_stride_y);
 
     REPEAT_VAR_INIT_TO_CONST(8, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // The plane (zout) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zout, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
+    CALCULATE_Z_OFFSET(M0, uint, zout, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -618,7 +636,12 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(REINTERPRET_OUTPUT_AS_3D)
 
     // Convert and store output block
-    CONVERT_STORE_BLOCK(M0, N0, int, c, dst_addr, dst_stride_y, zout);
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
+    // Store output block
+    REPEAT_VAR_INIT_CONVERT_SAT(M0, VEC_DATA_TYPE(int, N0), c, c_lp);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -764,7 +787,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
 #endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
-    uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
+    uint lhs_offset = lhs_offset_first_element_in_bytes + COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * (uint)lhs_stride_y;
 
     // Compute RHS matrix address
     uint rhs_offset = rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X + (x / (uint)H0) * rhs_stride_y;
@@ -781,7 +804,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
 
 #if defined(REINTERPRET_INPUT_AS_3D)
     // The plane (zlhs) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zlhs, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
+    CALCULATE_Z_OFFSET(M0, uint, zlhs, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply lhs_stride_z by DEPTH_GEMM3D
@@ -797,7 +820,8 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
     // Initialize the accumulators
     REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(ACC_DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(ACC_DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(N0-1)=0;
 
-    for(int i = 0; i < K; i += K0)
+    int i = 0;
+    for(; i <= (K - K0); i += K0)
     {
         // Load values from LHS matrix
         LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
@@ -811,15 +835,27 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
         lhs_offset += K0;
         rhs_offset += N0 * RHS_STEP_X * RHS_STEP_LOOP;
     }
+    // Left-over accumulations
+    for(; i < K; ++i)
+    {
+        // Load values from LHS matrix
+        LOAD_BLOCK(M0, 1, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
+        // Load values from RHS reshaped matrix
+        LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
+
+        ARM_MM_K0XN0XM0(M0, N0, 1, a, b, c);
+        lhs_offset += 1;
+        rhs_offset += 1;
+    }
     // Result of MM is of type DATA_TYPE
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(DATA_TYPE) + (y * (uint)M0 * dst_stride_y);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * dst_stride_y);
 
     REPEAT_VAR_INIT_TO_CONST(8, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // The plane (zout) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zout, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
+    CALCULATE_Z_OFFSET(M0, uint, zout, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -857,7 +893,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
     // Note: The sum_row tensor is generated through CLGEMMLowpMatrixAReductionKernel which
     // does not introduce paddings. For this reason is safe to access the tensor in this manner
     // without considering that the coordinate "y" could come from an input 3D tensor
-    __global uchar *sum_row_addr = sum_row_ptr + sum_row_offset_first_element_in_bytes + (y * (uint)M0) * sizeof(int) + z * sum_row_stride_y;
+    __global uchar *sum_row_addr = sum_row_ptr + sum_row_offset_first_element_in_bytes + (COMPUTE_M0_START_ROW(y, (uint)M0, PARTIAL_STORE_M0)) * sizeof(int) + z * sum_row_stride_y;
 
     LOAD_SCALAR_AS_VECTOR(M0, N0, int, b_offset_s32_, sum_row_addr, 0, sum_row_stride_x);
 
@@ -906,17 +942,22 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
     REPEAT_MIN_CONST_VAR(M0, VEC_DATA_TYPE(int, N0), c_int, MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
-    // Convert and store output block (does convert saturate)
-    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c_int, dst_addr, dst_stride_y, zout);
+    // Convert and store output block
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
+    // Store output block
+    REPEAT_VAR_INIT_CONVERT_SAT(M0, VEC_DATA_TYPE(DATA_TYPE, N0), c_int, c_lp);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
 }
 #endif // defined(RESULT_OFFSET) && defined(RESULT_SHIFT) && defined(RESULT_MULTIPLIER)
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(K)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(K)
+#if defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix is NOT reshaped
@@ -992,10 +1033,10 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
 #endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
-    uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
+    uint lhs_offset = lhs_offset_first_element_in_bytes + COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * (uint)lhs_stride_y;
 
     // Compute RHS matrix address
-    uint rhs_offset = rhs_offset_first_element_in_bytes + x * N0;
+    uint rhs_offset = rhs_offset_first_element_in_bytes + x * N0 * sizeof(DATA_TYPE);
 
 #if defined(MATRIX_B_DEPTH)
     // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
@@ -1009,7 +1050,7 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
 
 #if defined(REINTERPRET_INPUT_AS_3D)
     // The plane (zlhs) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zlhs, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
+    CALCULATE_Z_OFFSET(M0, uint, zlhs, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply lhs_stride_z by DEPTH_GEMM3D
@@ -1074,13 +1115,13 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
         rhs_offset += rhs_stride_y;
     }
 
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(int) + (y * (uint)M0 * dst_stride_y);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(int)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * dst_stride_y);
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // The plane (zout) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zout, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
+    CALCULATE_Z_OFFSET(M0, uint, zout, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -1092,11 +1133,14 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
     dst_addr += z * dst_stride_z;
 
 #endif // defined(REINTERPRET_OUTPUT_AS_3D)
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
 
     // Convert and store output block
-    CONVERT_STORE_BLOCK(M0, N0, int, c, dst_addr, dst_stride_y, zout);
+    REPEAT_VAR_INIT_CONVERT(M0, VEC_DATA_TYPE(int, N0), c, res); // resN = CONVERT(cN, VEC_DATA_TYPE(int, N0));
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, res, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(K)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
 #if defined(COLS_A)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
@@ -1236,7 +1280,7 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 #endif // defined(COLS_A)
 
-#if defined(COLS_B) && defined(ROWS_B)
+#if defined(COLS_B) && defined(ROWS_B) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each column of Matrix B.
  * It is also possible to multiply each reduced column by a scalar value, if SCALAR is passed at compile time.
  *
@@ -1247,6 +1291,8 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
  * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
  * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note In case of scaling the scalar value must be passed at compile time using -DSCALAR (i.e. -DSCALAR=3)
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -1267,29 +1313,30 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
                                           IMAGE_DECLARATION(dst))
 {
     // Compute source and destination addresses
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Image    dst = CONVERT_TO_IMAGE_STRUCT(dst);
+    const uint x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    const uint y      = get_global_id(1);
 
-    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
-    sum_col_32 = (VEC_DATA_TYPE(ACC_DATA_TYPE, 16))0;
+    __global const DATA_TYPE *matrix_b = (__global const DATA_TYPE *)(src_ptr + src_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) + y * src_step_y + y * src_stride_z);
+    __global uchar *dst_addr           = dst_ptr + dst_offset_first_element_in_bytes + x_offs * sizeof(int) + y * dst_stride_y;
 
-    __global const DATA_TYPE *matrix_b = (__global const DATA_TYPE *)(src.ptr + get_global_id(1) * src_stride_z);
+    VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
+    sum_col_32 = (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))0;
 
     int i = 0;
     // This for loop performs 4 accumulations
     for(; i <= ((int)ROWS_B - 4); i += 4)
     {
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b0 = vload16(0, matrix_b + 0 * src_stride_y);
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b1 = vload16(0, matrix_b + 1 * src_stride_y);
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b2 = vload16(0, matrix_b + 2 * src_stride_y);
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b3 = vload16(0, matrix_b + 3 * src_stride_y);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b0 = VLOAD(VEC_SIZE)(0, matrix_b + 0 * src_stride_y);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b1 = VLOAD(VEC_SIZE)(0, matrix_b + 1 * src_stride_y);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b2 = VLOAD(VEC_SIZE)(0, matrix_b + 2 * src_stride_y);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b3 = VLOAD(VEC_SIZE)(0, matrix_b + 3 * src_stride_y);
 
-        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b1, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b2, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b3, VEC_DATA_TYPE(ACC_DATA_TYPE,
-                      16));
+        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b1, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b2, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)) + CONVERT(b3,
+                      VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 
         matrix_b += 4 * src_stride_y;
     }
@@ -1297,25 +1344,29 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
     // This for loop perfoms the leftover accumulations
     for(; i < (int)ROWS_B; ++i)
     {
-        const VEC_DATA_TYPE(DATA_TYPE, 16)
-        b0 = vload16(0, matrix_b);
+        const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        b0 = VLOAD(VEC_SIZE)(0, matrix_b);
 
-        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
+        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 
         matrix_b += src_stride_y;
     }
 
 #if defined(SCALAR)
-    sum_col_32 *= (VEC_DATA_TYPE(ACC_DATA_TYPE, 16))SCALAR;
+    sum_col_32 *= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))SCALAR;
 #endif // defined(SCALAR)
-    VSTORE(16)
-    (convert_int16(sum_col_32), 0, (__global int *)dst.ptr);
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    res0 = CONVERT(sum_col_32, VEC_DATA_TYPE(int, VEC_SIZE));
+
+    STORE_VECTOR_SELECT(res, int, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif // defined(COLS_B) && defined(ROWS_B)
+#endif // defined(COLS_B) && defined(ROWS_B) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 
 #endif // defined(DATA_TYPE) && defined(ACC_DATA_TYPE)
 
-#if defined(K_OFFSET)
+#if defined(K_OFFSET) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
+
+#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
 
 /* Helper function used to calculate the offset contribution after matrix multiplication.
  *
@@ -1326,8 +1377,10 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
  * @note In case the offset contribution due to a_offset is required, a_offset needs to be passed at compile time using -DA_OFFSET (i.e. -DA_OFFSET=1)
  * @note In case the offset contribution due to b_offset is required, b_offset needs to be passed at compile time using -DB_OFFSET (i.e. -DB_OFFSET=6)
  * @note In case sum_col has batches, -DSUM_COL_HAS_BATCHES must be passed at compile time. Usually if gemmlowp is used to accelerate convolution layer, sum_col will not have batches
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
- * @param[in] x                                     get_global_id(0) * 4
+ * @param[in] x                                     max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0)
  * @param[in] y                                     get_global_id(1)
  * @param[in] z                                     get_global_id(2)
  * @param[in] sum_col_ptr                           (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
@@ -1347,7 +1400,7 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases tensor
  */
-inline int4 offset_contribution(
+inline VEC_INT offset_contribution(
     int x,
     int y,
     int z
@@ -1365,8 +1418,8 @@ inline int4 offset_contribution(
 #endif // defined(ADD_BIAS)
 )
 {
-    int4 a_offset_s32 = (int4)0;
-    int4 b_offset_s32 = (int4)0;
+    VEC_INT a_offset_s32 = (VEC_INT)0;
+    VEC_INT b_offset_s32 = (VEC_INT)0;
 
     int batch_id = z;
 #if defined(DEPTH_INPUT3D)
@@ -1379,12 +1432,12 @@ inline int4 offset_contribution(
 
     // Compute the offset contribution due to A_OFFSET
 #if defined(SUM_COL_HAS_BATCHES)
-    a_offset_s32 = vload4(0, (__global int *)(sum_col_addr + batch_id * sum_col_stride_y));
+    a_offset_s32 = VLOAD(VEC_SIZE)(0, (__global int *)(sum_col_addr + batch_id * sum_col_stride_y));
 #else  // defined(SUM_COL_HAS_BATCHES)
-    a_offset_s32 = vload4(0, (__global int *)sum_col_addr);
+    a_offset_s32 = VLOAD(VEC_SIZE)(0, (__global int *)sum_col_addr);
 #endif // defined(SUM_COL_HAS_BATCHES)
 
-    a_offset_s32 *= (int4)A_OFFSET;
+    a_offset_s32 *= (VEC_INT)A_OFFSET;
 #endif // defined(A_OFFSET)
 
 #if defined(B_OFFSET)
@@ -1393,22 +1446,22 @@ inline int4 offset_contribution(
 
     // Compute the offset contribution due to B_OFFSET
 #if defined(HEIGHT_INPUT3D) && defined(DEPTH_INPUT3D)
-    b_offset_s32 = (int4) * (((__global int *)(sum_row_addr + batch_id * sum_row_stride_y)) + (z % (int)DEPTH_INPUT3D) * (int)HEIGHT_INPUT3D);
+    b_offset_s32 = (VEC_INT) * (((__global int *)(sum_row_addr + batch_id * sum_row_stride_y)) + (z % (int)DEPTH_INPUT3D) * (int)HEIGHT_INPUT3D);
 #else  // defined(HEIGHT_INPUT3D) && defined(DEPTH_INPUT3D)
-    b_offset_s32 = (int4) * (((__global int *)(sum_row_addr + batch_id * sum_row_stride_y)));
+    b_offset_s32 = (VEC_INT) * (((__global int *)(sum_row_addr + batch_id * sum_row_stride_y)));
 #endif // defined(HEIGHT_INPUT3D) && defined(DEPTH_INPUT3D)
-    b_offset_s32 *= (int4)B_OFFSET;
+    b_offset_s32 *= (VEC_INT)B_OFFSET;
 #endif // defined(B_OFFSET)
 
 #if defined(ADD_BIAS)
     // Add bias
     __global uchar *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
 
-    int4 biases_values = vload4(0, (__global int *)bias_addr);
-    b_offset_s32 += (int4)biases_values;
+    VEC_INT biases_values = VLOAD(VEC_SIZE)(0, (__global int *)bias_addr);
+    b_offset_s32 += (VEC_INT)biases_values;
 #endif // defined(ADD_BIAS)
 
-    return (int4)K_OFFSET + a_offset_s32 + b_offset_s32;
+    return (VEC_INT)K_OFFSET + a_offset_s32 + b_offset_s32;
 }
 
 /* OpenCL kernel used to add the offset contribution after matrix multiplication. The computation is performed in-place
@@ -1420,6 +1473,8 @@ inline int4 offset_contribution(
  * @note In case the offset contribution due to a_offset is required, a_offset needs to be passed at compile time using -DA_OFFSET (i.e. -DA_OFFSET=1)
  * @note In case the offset contribution due to b_offset is required, b_offset needs to be passed at compile time using -DB_OFFSET (i.e. -DB_OFFSET=6)
  * @note In case sum_col has batches, -DSUM_COL_HAS_BATCHES must be passed at compile time. Usually if gemmlowp is used to accelerate convolution layer, sum_col will not have batches
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * The final result is:
  *
@@ -1468,49 +1523,49 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
 #endif // defined(ADD_BIAS))
                                           )
 {
-    const int x = get_global_id(0) * 4;
+    const int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     const int y = get_global_id(1);
     const int z = get_global_id(2);
 
     // Compute offset contribution
-    int4 offset_term_s32 = offset_contribution(
-                               x, y, z
+    VEC_INT offset_term_s32 = offset_contribution(
+                                  x, y, z
 #if defined(A_OFFSET)
-                               ,
-                               sum_col_ptr,
-                               sum_col_stride_x,
-                               sum_col_step_x,
-                               sum_col_stride_y,
-                               sum_col_step_y,
-                               sum_col_offset_first_element_in_bytes
+                                  ,
+                                  sum_col_ptr,
+                                  sum_col_stride_x,
+                                  sum_col_step_x,
+                                  sum_col_stride_y,
+                                  sum_col_step_y,
+                                  sum_col_offset_first_element_in_bytes
 #endif // defined(A_OFFSET)
 #if defined(B_OFFSET)
-                               ,
-                               sum_row_ptr,
-                               sum_row_stride_x,
-                               sum_row_step_x,
-                               sum_row_stride_y,
-                               sum_row_step_y,
-                               sum_row_offset_first_element_in_bytes
+                                  ,
+                                  sum_row_ptr,
+                                  sum_row_stride_x,
+                                  sum_row_step_x,
+                                  sum_row_stride_y,
+                                  sum_row_step_y,
+                                  sum_row_offset_first_element_in_bytes
 #endif // defined(B_OFFSET)
 #if defined(ADD_BIAS)
-                               ,
-                               biases_ptr,
-                               biases_stride_x,
-                               biases_step_x,
-                               biases_offset_first_element_in_bytes
+                                  ,
+                                  biases_ptr,
+                                  biases_stride_x,
+                                  biases_step_x,
+                                  biases_offset_first_element_in_bytes
 #endif // defined(ADD_BIAS)
-                           );
+                              );
 
     __global uchar *mm_result_addr = mm_result_ptr + mm_result_offset_first_element_in_bytes + x * sizeof(int) + y * mm_result_stride_y + z * mm_result_stride_z;
 
-    int4 in_s32 = vload4(0, (__global int *)mm_result_addr);
+    VEC_INT in_s32_0 = VLOAD(VEC_SIZE)(0, (__global int *)mm_result_addr);
 
     // Add the offset terms to GEMM's result
-    in_s32 += offset_term_s32;
+    in_s32_0 += offset_term_s32;
 
     // Store the result with the offset contribution
-    vstore4(in_s32, 0, (__global int *)mm_result_addr);
+    STORE_VECTOR_SELECT(in_s32_, int, mm_result_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 
 #if defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT) && defined(OUTPUT_DATA_TYPE)
@@ -1548,6 +1603,8 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
  * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  mm_result_ptr                                    Pointer to the source tensor. Supported data type: S32
  * @param[in]  mm_result_stride_x                               Stride of the source tensor in X dimension (in bytes)
@@ -1611,45 +1668,45 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
 #endif // defined(PER_CHANNEL_QUANTIZATION)
                                                         )
 {
-    const int x = get_global_id(0) * 4;
+    const int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     const int y = get_global_id(1);
     const int z = get_global_id(2);
 
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x + y * dst_stride_y + z * dst_stride_z;
 
     // Compute offset contribution
-    int4 offset_term_s32 = offset_contribution(
-                               x, y, z
+    VEC_INT offset_term_s32 = offset_contribution(
+                                  x, y, z
 #if defined(A_OFFSET)
-                               ,
-                               sum_col_ptr,
-                               sum_col_stride_x,
-                               sum_col_step_x,
-                               sum_col_stride_y,
-                               sum_col_step_y,
-                               sum_col_offset_first_element_in_bytes
+                                  ,
+                                  sum_col_ptr,
+                                  sum_col_stride_x,
+                                  sum_col_step_x,
+                                  sum_col_stride_y,
+                                  sum_col_step_y,
+                                  sum_col_offset_first_element_in_bytes
 #endif // defined(A_OFFSET)
 #if defined(B_OFFSET)
-                               ,
-                               sum_row_ptr,
-                               sum_row_stride_x,
-                               sum_row_step_x,
-                               sum_row_stride_y,
-                               sum_row_step_y,
-                               sum_row_offset_first_element_in_bytes
+                                  ,
+                                  sum_row_ptr,
+                                  sum_row_stride_x,
+                                  sum_row_step_x,
+                                  sum_row_stride_y,
+                                  sum_row_step_y,
+                                  sum_row_offset_first_element_in_bytes
 #endif // defined(B_OFFSET)
 #if defined(ADD_BIAS)
-                               ,
-                               biases_ptr,
-                               biases_stride_x,
-                               biases_step_x,
-                               biases_offset_first_element_in_bytes
+                                  ,
+                                  biases_ptr,
+                                  biases_stride_x,
+                                  biases_step_x,
+                                  biases_offset_first_element_in_bytes
 #endif // defined(ADD_BIAS)
-                           );
+                              );
 
     __global uchar *mm_result_addr = mm_result_ptr + mm_result_offset_first_element_in_bytes + x * sizeof(int) + y * mm_result_stride_y + z * mm_result_stride_z;
 
-    int4 in_s32 = vload4(0, (__global int *)mm_result_addr);
+    VEC_INT in_s32 = VLOAD(VEC_SIZE)(0, (__global int *)mm_result_addr);
 
     // Add the offset terms to GEMM's result
     in_s32 += offset_term_s32;
@@ -1657,14 +1714,14 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
     // -------------- OUTPUT STAGE
 
     // Add the offset terms to GEMM's result
-    in_s32 += (int4)RESULT_OFFSET;
+    in_s32 += (VEC_INT)RESULT_OFFSET;
 
     // Multiply by result_mult_int and shift
 #if defined(PER_CHANNEL_QUANTIZATION)
     __global uchar *result_multipliers_addr   = result_multipliers_ptr + result_multipliers_offset_first_element_in_bytes + x * sizeof(int);
     __global uchar *result_shifts_addr        = result_shifts_ptr + result_shifts_offset_first_element_in_bytes + x * sizeof(int);
-    int4            result_multipliers_values = vload4(0, (__global int *)result_multipliers_addr);
-    int4            result_shifts_values      = vload4(0, (__global int *)result_shifts_addr);
+    VEC_INT         result_multipliers_values = VLOAD(VEC_SIZE)(0, (__global int *)result_multipliers_addr);
+    VEC_INT         result_shifts_values      = VLOAD(VEC_SIZE)(0, (__global int *)result_shifts_addr);
 
     in_s32 *= result_multipliers_values;
     in_s32 >>= result_shifts_values;
@@ -1674,18 +1731,18 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
     in_s32 >>= RESULT_SHIFT;
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
-    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
-    res = CONVERT_SAT(in_s32, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
+    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE)
+    res0 = CONVERT_SAT(in_s32, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE));
 
 #if defined(MIN_BOUND)
-    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
+    res0 = max(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
+    res0 = min(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
+    STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 
 /* OpenCL kernel used to add the offset contribution after matrix multiplication and it quantizes down to uint8.
@@ -1722,6 +1779,8 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
  * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  mm_result_ptr                                    Pointer to the source tensor. Supported data type: S32
  * @param[in]  mm_result_stride_x                               Stride of the source tensor in X dimension (in bytes)
@@ -1747,7 +1806,7 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
  * @param[in]  biases_stride_x                                  (Optional) Stride of the biases tensor in X dimension (in bytes)
  * @param[in]  biases_step_x                                    (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  biases_offset_first_element_in_bytes             (Optional) The offset of the first element in the biases tensor
- * @param[out] dst_ptr                                          Pointer to the destination tensor Supported data type: QASYMM8
+ * @param[out] dst_ptr                                          Pointer to the destination tensor Supported data type: QASYMM8/QASYMM8_SIGNED
  * @param[in]  dst_stride_x                                     Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                                       dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                                     Stride of the destination tensor in Y dimension (in bytes)
@@ -1785,45 +1844,45 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
 #endif // defined(PER_CHANNEL_QUANTIZATION)
                                                                    )
 {
-    const int x = get_global_id(0) * 4;
+    const int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     const int y = get_global_id(1);
     const int z = get_global_id(2);
 
     // Compute offset contribution
-    int4 offset_term_s32 = offset_contribution(
-                               x, y, z
+    VEC_INT offset_term_s32 = offset_contribution(
+                                  x, y, z
 #if defined(A_OFFSET)
-                               ,
-                               sum_col_ptr,
-                               sum_col_stride_x,
-                               sum_col_step_x,
-                               sum_col_stride_y,
-                               sum_col_step_y,
-                               sum_col_offset_first_element_in_bytes
+                                  ,
+                                  sum_col_ptr,
+                                  sum_col_stride_x,
+                                  sum_col_step_x,
+                                  sum_col_stride_y,
+                                  sum_col_step_y,
+                                  sum_col_offset_first_element_in_bytes
 #endif // defined(A_OFFSET)
 #if defined(B_OFFSET)
-                               ,
-                               sum_row_ptr,
-                               sum_row_stride_x,
-                               sum_row_step_x,
-                               sum_row_stride_y,
-                               sum_row_step_y,
-                               sum_row_offset_first_element_in_bytes
+                                  ,
+                                  sum_row_ptr,
+                                  sum_row_stride_x,
+                                  sum_row_step_x,
+                                  sum_row_stride_y,
+                                  sum_row_step_y,
+                                  sum_row_offset_first_element_in_bytes
 #endif // defined(B_OFFSET)
 #if defined(ADD_BIAS)
-                               ,
-                               biases_ptr,
-                               biases_stride_x,
-                               biases_step_x,
-                               biases_offset_first_element_in_bytes
+                                  ,
+                                  biases_ptr,
+                                  biases_stride_x,
+                                  biases_step_x,
+                                  biases_offset_first_element_in_bytes
 #endif // defined(ADD_BIAS)
-                           );
+                              );
 
     __global uchar *mm_result_addr = mm_result_ptr + mm_result_offset_first_element_in_bytes + x * sizeof(int) + y * mm_result_stride_y + z * mm_result_stride_z;
 
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x + y * dst_stride_y + z * dst_stride_z;
 
-    int4 in_s32 = vload4(0, (__global int *)mm_result_addr);
+    VEC_INT in_s32 = VLOAD(VEC_SIZE)(0, (__global int *)mm_result_addr);
 
     // Add the offset terms to GEMM's result
     in_s32 += offset_term_s32;
@@ -1834,41 +1893,43 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
 #if defined(PER_CHANNEL_QUANTIZATION)
     __global uchar *result_multipliers_addr   = result_multipliers_ptr + result_multipliers_offset_first_element_in_bytes + x * sizeof(int);
     __global uchar *result_shifts_addr        = result_shifts_ptr + result_shifts_offset_first_element_in_bytes + x * sizeof(int);
-    int4            result_multipliers_values = vload4(0, (__global int *)result_multipliers_addr);
-    int4            result_shifts_values      = vload4(0, (__global int *)result_shifts_addr);
+    VEC_INT         result_multipliers_values = VLOAD(VEC_SIZE)(0, (__global int *)result_multipliers_addr);
+    VEC_INT         result_shifts_values      = VLOAD(VEC_SIZE)(0, (__global int *)result_shifts_addr);
 
-    int4 in_s32_shift_lt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(in_s32, result_multipliers_values, result_shifts_values, 4);
-    int4 in_s32_shift_gt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, result_multipliers_values, result_shifts_values, 4);
-    in_s32                = select(in_s32_shift_lt0, in_s32_shift_gt0, result_shifts_values >= 0);
+    VEC_INT in_s32_shift_lt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(in_s32, result_multipliers_values, result_shifts_values, VEC_SIZE);
+    VEC_INT in_s32_shift_gt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, result_multipliers_values, result_shifts_values, VEC_SIZE);
+    in_s32                   = select(in_s32_shift_lt0, in_s32_shift_gt0, result_shifts_values >= 0);
 #else // defined(PER_CHANNEL_QUANTIZATION)
 
 #if RESULT_SHIFT < 0
-    in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, 4);
+    in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
 #else  // RESULT_SHIFT >= 0
-    in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, 4);
+    in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
 #endif // RESULT_SHIFT < 0
 
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
     // Add the offset terms to GEMM's result
-    in_s32 += (int4)RESULT_OFFSET;
+    in_s32 += (VEC_INT)RESULT_OFFSET;
 
-    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
-    res = CONVERT_SAT(in_s32, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
+    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE)
+    res0 = CONVERT_SAT(in_s32, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE));
 
 #if defined(MIN_BOUND)
-    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
+    res0 = max(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
+    res0 = min(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
+    STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT) && defined(OUTPUT_DATA_TYPE)
 
-#endif // defined(K_OFFSET)
+#undef VEC_INT
+
+#endif // defined(K_OFFSET) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 
 #if defined(RESULT_OFFSET) && defined(RESULT_MULT_INT) && defined(RESULT_SHIFT)
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8/QASYMM8_SIGNED
@@ -1891,6 +1952,7 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
  * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                              Pointer to the source tensor. Supported data type: S32
  * @param[in]  src_stride_x                         Stride of the source tensor in X dimension (in bytes)
@@ -1920,7 +1982,7 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
                                                   TENSOR3D_DECLARATION(dst))
 {
     // Compute source and destination addresses
-    int x = get_global_id(0) * 4;
+    int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     int y = get_global_id(1);
     int z = get_global_id(2);
 
@@ -1928,18 +1990,20 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
 
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x + y * dst_stride_y + z * dst_stride_z;
 
-    int4 input_values = vload4(0, (__global int *)src_addr);
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    input_values = VLOAD(VEC_SIZE)(0, (__global int *)src_addr);
 
 #if defined(ADD_BIAS)
     // Add bias
     __global uchar *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
 
-    int4 biases_values = vload4(0, (__global int *)bias_addr);
-    input_values += (int4)biases_values;
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    biases_values = VLOAD(VEC_SIZE)(0, (__global int *)bias_addr);
+    input_values += biases_values;
 #endif // defined(ADD_BIAS)
 
     // Add the offset terms to GEMM's result
-    input_values += (int4)RESULT_OFFSET;
+    input_values += (VEC_DATA_TYPE(int, VEC_SIZE))RESULT_OFFSET;
 
     // Multiply by result_mult_int and shift
     input_values *= RESULT_MULT_INT;
@@ -1950,18 +2014,18 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
     input_values >>= RESULT_SHIFT;
 #endif // RESULT_SHIFT < 0
 
-    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
-    res = CONVERT_SAT(input_values, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
+    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE)
+    res0 = CONVERT_SAT(input_values, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE));
 
 #if defined(MIN_BOUND)
-    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
+    res0 = max(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
+    res0 = min(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
+    STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(RESULT_OFFSET) && defined(RESULT_MULT_INT) && defined(RESULT_SHIFT)
 
@@ -1986,6 +2050,8 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
  * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                              Pointer to the source tensor. Supported data type: S32
  * @param[in]  src_stride_x                         Stride of the source tensor in X dimension (in bytes)
@@ -2015,7 +2081,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
                                                              TENSOR3D_DECLARATION(dst))
 {
     // Compute source and destination addresses
-    int x = get_global_id(0) * 4;
+    int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     int y = get_global_id(1);
     int z = get_global_id(2);
 
@@ -2023,38 +2089,40 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
 
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x + y * dst_stride_y + z * dst_stride_z;
 
-    int4 input_values = vload4(0, (__global int *)src_addr);
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    input_values = VLOAD(VEC_SIZE)(0, (__global int *)src_addr);
 
 #if defined(ADD_BIAS)
     // Add bias
     __global uchar *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
 
-    int4 biases_values = vload4(0, (__global int *)bias_addr);
-    input_values += (int4)biases_values;
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    biases_values = VLOAD(VEC_SIZE)(0, (__global int *)bias_addr);
+    input_values += biases_values;
 #endif // defined(ADD_BIAS)
 
     // Multiply by result_mult_int and shift
 #if RESULT_SHIFT < 0
-    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
 #else  // RESULT_SHIFT >= 0
-    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
 #endif // RESULT_SHIFT < 0
 
     // Add the offset terms to GEMM's result
-    input_values += (int4)RESULT_OFFSET_AFTER_SHIFT;
+    input_values += (VEC_DATA_TYPE(int, VEC_SIZE))RESULT_OFFSET_AFTER_SHIFT;
 
-    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
-    res = CONVERT_SAT(input_values, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
+    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE)
+    res0 = CONVERT_SAT(input_values, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE));
 
 #if defined(MIN_BOUND)
-    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
+    res0 = max(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
+    res0 = min(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
+    STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(RESULT_OFFSET_AFTER_SHIFT) && defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 
@@ -2077,6 +2145,8 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
  * @note In case the addition of int32 biases is required, -DADD_BIAS should be passed at compile time
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                              Pointer to the source tensor. Supported data type: S32
  * @param[in]  src_stride_x                         Stride of the source tensor in X dimension (in bytes)
@@ -2106,42 +2176,45 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
                                                                      TENSOR3D_DECLARATION(dst))
 {
     // Compute source and destination addresses
-    int x = get_global_id(0) * 4;
+    int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     int y = get_global_id(1);
     int z = get_global_id(2);
 
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(int) + y * src_stride_y + z * src_stride_z;
 
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * 2 + y * dst_stride_y + z * dst_stride_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(short) + y * dst_stride_y + z * dst_stride_z;
 
-    int4 input_values = vload4(0, (__global int *)src_addr);
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    input_values = VLOAD(VEC_SIZE)(0, (__global int *)src_addr);
 
 #if defined(ADD_BIAS)
     // Add bias
     __global uchar *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
 
-    int4 biases_values = vload4(0, (__global int *)bias_addr);
-    input_values += (int4)biases_values;
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    biases_values = VLOAD(VEC_SIZE)(0, (__global int *)bias_addr);
+    input_values += biases_values;
 #endif // defined(ADD_BIAS)
 
     // Multiply by result_mult_int and shift
 #if RESULT_SHIFT < 0
-    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
 #else  // RESULT_SHIFT >= 0
-    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
 #endif // RESULT_SHIFT < 0
 
-    short4 res = convert_short4_sat(input_values);
+    VEC_DATA_TYPE(short, VEC_SIZE)
+    res0 = CONVERT_SAT(input_values, VEC_DATA_TYPE(short, VEC_SIZE));
 
 #if defined(MIN_BOUND)
-    res = max(res, (short4)MIN_BOUND);
+    res0 = max(res0, (VEC_DATA_TYPE(short, VEC_SIZE))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (short4)MAX_BOUND);
+    res0 = min(res0, (VEC_DATA_TYPE(short, VEC_SIZE))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, (__global short *)dst_addr);
+    STORE_VECTOR_SELECT(res, short, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 
@@ -2166,6 +2239,8 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
  * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                              Pointer to the source tensor. Supported data type: S32
  * @param[in]  src_stride_x                         Stride of the source tensor in X dimension (in bytes)
@@ -2201,7 +2276,7 @@ __kernel void gemmlowp_output_stage_quantize_down_float(TENSOR3D_DECLARATION(src
 #endif // defined(DST_HEIGHT)
 {
     // Compute source and destination addresses
-    int x = get_global_id(0) * 4;
+    int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     int y = get_global_id(1);
     int z = get_global_id(2);
 
@@ -2209,13 +2284,15 @@ __kernel void gemmlowp_output_stage_quantize_down_float(TENSOR3D_DECLARATION(src
 
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x + y * dst_stride_y + z * dst_stride_z;
 
-    int4 input_values = vload4(0, (__global int *)src_addr);
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    input_values = VLOAD(VEC_SIZE)(0, (__global int *)src_addr);
 
 #if defined(ADD_BIAS)
     // Add bias
     __global uchar *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
 
-    int4 biases_values = vload4(0, (__global int *)bias_addr);
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    biases_values = VLOAD(VEC_SIZE)(0, (__global int *)bias_addr);
     input_values += (int4)biases_values;
 #endif // defined(ADD_BIAS)
 
@@ -2223,17 +2300,17 @@ __kernel void gemmlowp_output_stage_quantize_down_float(TENSOR3D_DECLARATION(src
     float4 input_values_f = convert_float4(input_values);
     input_values_f        = round(input_values_f * (float)REAL_MULTIPLIER + (float)OUTPUT_OFFSET);
 
-    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
-    res = CONVERT_SAT(input_values_f, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
+    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE)
+    res0 = CONVERT_SAT(input_values_f, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE));
 
 #if defined(MIN_BOUND)
-    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
+    res0 = max(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
+    res0 = min(res0, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
+    STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
 #endif // defined(REAL_MULTIPLIER) && defined(OUTPUT_OFFSET)

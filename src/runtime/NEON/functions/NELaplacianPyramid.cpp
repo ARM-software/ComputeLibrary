@@ -29,11 +29,15 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussianPyramid.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEGaussian5x5Kernel.h"
+#include "src/core/NEON/kernels/NEGaussianPyramidKernel.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NELaplacianPyramid::~NELaplacianPyramid() = default;
 
 NELaplacianPyramid::NELaplacianPyramid() // NOLINT
     : _num_levels(0),
@@ -105,3 +109,4 @@ void NELaplacianPyramid::configure(const ITensor *input, IPyramid *pyramid, ITen
     _gauss_pyr.allocate();
     _conv_pyr.allocate();
 }
+} // namespace arm_compute

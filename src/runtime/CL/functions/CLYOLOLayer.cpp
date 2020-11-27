@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLYOLOLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLYOLOLayerKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLYOLOLayerKernel.h"
 #include "support/MemorySupport.h"
 
 using namespace arm_compute;

@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLAbsoluteDifference.h"
 
-#include "arm_compute/core/CL/kernels/CLAbsoluteDifferenceKernel.h"
+#include "src/core/CL/kernels/CLAbsoluteDifferenceKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

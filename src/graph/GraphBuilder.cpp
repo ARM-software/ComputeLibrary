@@ -139,6 +139,12 @@ NodeID GraphBuilder::add_activation_node(Graph &g, NodeParams params, NodeIdxPai
     return create_simple_single_input_output_node<ActivationLayerNode>(g, params, input, act_info, out_quant_info);
 }
 
+NodeID GraphBuilder::add_arg_min_max_node(Graph &g, NodeParams params, NodeIdxPair input, ReductionOperation op, unsigned int axis,
+                                          DataType out_data_type, const QuantizationInfo &out_quant_info)
+{
+    return create_simple_single_input_output_node<ArgMinMaxLayerNode>(g, params, input, op, axis, out_data_type, out_quant_info);
+}
+
 NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, float epsilon,
                                                   ITensorAccessorUPtr mean_accessor, ITensorAccessorUPtr var_accessor,
                                                   ITensorAccessorUPtr beta_accessor, ITensorAccessorUPtr gamma_accessor)
@@ -376,6 +382,12 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
 
     return conv_nid;
 }
+
+NodeID GraphBuilder::add_depth_to_space_node(Graph &g, NodeParams params, NodeIdxPair input, int32_t block_shape)
+{
+    return create_simple_single_input_output_node<DepthToSpaceLayerNode>(g, params, input, block_shape);
+}
+
 NodeID GraphBuilder::add_dequantization_node(Graph &g, NodeParams params, NodeIdxPair input)
 {
     return create_simple_single_input_output_node<DequantizationLayerNode>(g, params, input);
@@ -540,6 +552,11 @@ NodeID GraphBuilder::add_generate_proposals_node(Graph &g, NodeParams params, No
     return nid;
 }
 
+NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
+{
+    return create_simple_single_input_output_node<L2NormalizeLayerNode>(g, params, input, axis, epsilon);
+}
+
 NodeID GraphBuilder::add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info)
 {
     return create_simple_single_input_output_node<NormalizationLayerNode>(g, params, input, norm_info);
@@ -625,6 +642,11 @@ NodeID GraphBuilder::add_quantization_node(Graph &g, NodeParams params, NodeIdxP
     return create_simple_single_input_output_node<QuantizationLayerNode>(g, params, input, out_quant_info);
 }
 
+NodeID GraphBuilder::add_reduction_operation_node(Graph &g, NodeParams params, NodeIdxPair input, ReductionOperation op, int axis, bool keep_dims)
+{
+    return create_simple_single_input_output_node<ReductionLayerNode>(g, params, input, op, axis, keep_dims);
+}
+
 NodeID GraphBuilder::add_reorg_node(Graph &g, NodeParams params, NodeIdxPair input, int stride)
 {
     return create_simple_single_input_output_node<ReorgLayerNode>(g, params, input, stride);
@@ -698,6 +720,11 @@ NodeID GraphBuilder::add_slice_node(Graph &g, NodeParams params, NodeIdxPair inp
 NodeID GraphBuilder::add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis)
 {
     return create_simple_single_input_output_node<SplitLayerNode>(g, params, input, num_splits, axis);
+}
+
+NodeID GraphBuilder::add_strided_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends, BiStrides &strides, StridedSliceLayerInfo info)
+{
+    return create_simple_single_input_output_node<StridedSliceLayerNode>(g, params, input, starts, ends, strides, info);
 }
 
 NodeID GraphBuilder::add_stack_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, int axis)

@@ -24,16 +24,25 @@
 #ifndef ARM_COMPUTE_CLHOGDETECTOR_H
 #define ARM_COMPUTE_CLHOGDETECTOR_H
 
+#include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/CL/kernels/CLHOGDetectorKernel.h"
 #include "arm_compute/core/IHOG.h"
 #include "arm_compute/runtime/IFunction.h"
 
+#include <memory>
+
 namespace arm_compute
 {
+class CLCompileContext;
+class CLHOGDetectorKernel;
+class ICLTensor;
+class ICLHOG;
+
 /** Basic function to execute HOG detector based on linear SVM. This function calls the following OpenCL kernel:
  *
  * -# @ref CLHOGDetectorKernel
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
  *
  */
 class CLHOGDetector : public IFunction
@@ -50,7 +59,7 @@ public:
     /** Allow instances of this class to be moved */
     CLHOGDetector &operator=(CLHOGDetector &&) = default;
     /** Default destructor */
-    ~CLHOGDetector() = default;
+    ~CLHOGDetector();
     /** Initialise the kernel's input, output, HOG data object, detection window stride, threshold and index class
      *
      * @attention The function does not reset the number of values in @ref IDetectionWindowArray so it is caller's responsibility to clear it.
@@ -78,16 +87,16 @@ public:
      * @param[in]  idx_class               (Optional) Index of the class used for evaluating which class the detection window belongs to
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, const Size2D &detection_window_stride,
-                   float threshold = 0.0f,
+                   float  threshold = 0.0f,
                    size_t idx_class = 0);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    CLHOGDetectorKernel      _hog_detector_kernel;
-    ICLDetectionWindowArray *_detection_windows;
-    cl::Buffer               _num_detection_windows;
+    std::unique_ptr<CLHOGDetectorKernel> _hog_detector_kernel;
+    ICLDetectionWindowArray             *_detection_windows;
+    cl::Buffer                           _num_detection_windows;
 };
 }
 

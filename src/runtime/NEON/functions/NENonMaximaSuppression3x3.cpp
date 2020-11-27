@@ -23,25 +23,29 @@
  */
 #include "arm_compute/runtime/NEON/functions/NENonMaximaSuppression3x3.h"
 
-#include "arm_compute/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NENonMaximaSuppression3x3::configure(ITensor *input, ITensor *output, BorderMode border_mode)
 {
     auto k = arm_compute::support::cpp14::make_unique<NENonMaximaSuppression3x3Kernel>();
     k->configure(input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
 
+    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
     if(border_mode != BorderMode::UNDEFINED)
     {
-        _border_handler.configure(input, BorderSize(1), BorderMode::CONSTANT, static_cast<float>(0.f));
+        b->configure(input, BorderSize(1), BorderMode::CONSTANT, static_cast<float>(0.f));
     }
     else
     {
-        _border_handler.configure(input, BorderSize(1), BorderMode::UNDEFINED, static_cast<float>(0.f));
+        b->configure(input, BorderSize(1), BorderMode::UNDEFINED, static_cast<float>(0.f));
     }
+    _border_handler = std::move(b);
 }
+} // namespace arm_compute

@@ -24,12 +24,6 @@
 #ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
 #define ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
 
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
@@ -38,6 +32,11 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class CLFillBorderKernel;
+class CLDepthwiseConvolutionLayerNativeKernel;
+class CLDepthwiseConvolutionLayerReshapeWeightsKernel;
+class ICLDepthwiseConvolutionLayer3x3Kernel;
 class ICLTensor;
 
 /** Function to execute a depthwise convolution
@@ -55,13 +54,15 @@ public:
     CLDepthwiseConvolutionLayer &operator=(const CLDepthwiseConvolutionLayer &) = delete;
     /** Default move assignment operator */
     CLDepthwiseConvolutionLayer &operator=(CLDepthwiseConvolutionLayer &&) = default;
+    /** Default destructor */
+    ~CLDepthwiseConvolutionLayer();
     /** Initialize the function's source, destination, weights and convolution information.
      *
-     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/FP16/FP32. Data layout supported: NHWC, NCHW
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/FP16/FP32. Data layout supported: NHWC, NCHW
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-     *                                  Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                                  Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -73,11 +74,11 @@ public:
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * @param[in]      compile_context  The compile context to be used.
-     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/FP16/FP32. Data layout supported: NHWC, NCHW
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/FP16/FP32. Data layout supported: NHWC, NCHW
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-     *                                  Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                                  Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -89,11 +90,11 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer
      *
-     * @param[in] input            Source tensor info. Data type supported: QASYMM8/FP16/FP32. Data layout supported: NHWC, NCHW
+     * @param[in] input            Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/FP16/FP32. Data layout supported: NHWC, NCHW
      * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                             Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in] biases           Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                             Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -211,25 +212,25 @@ private:
         };
 
     private:
-        MemoryGroup                                            _memory_group;
-        std::unique_ptr<ICLDepthwiseConvolutionLayer3x3Kernel> _kernel;
-        CLFillBorderKernel                                     _border_handler;
-        CLPermute                                              _permute_input_to_nchw;
-        CLPermute                                              _permute_weights_to_nchw;
-        CLPermute                                              _permute_output_to_nhwc;
-        CLDepthwiseConvolutionLayerReshapeWeightsKernel        _reshape_weights;
-        CLTensor                                               _permuted_input;
-        CLTensor                                               _permuted_weights;
-        CLTensor                                               _permuted_output;
-        CLTensor                                               _output_multipliers;
-        CLTensor                                               _output_shifts;
-        const ITensor                                         *_original_weights;
-        const ITensor                                         *_input;
-        const ITensor                                         *_output;
-        bool                                                   _needs_permute;
-        bool                                                   _needs_weights_reshape;
-        bool                                                   _is_prepared;
-        bool                                                   _is_quantized;
+        MemoryGroup                                                      _memory_group;
+        std::unique_ptr<ICLDepthwiseConvolutionLayer3x3Kernel>           _kernel;
+        std::unique_ptr<CLFillBorderKernel>                              _border_handler;
+        CLPermute                                                        _permute_input_to_nchw;
+        CLPermute                                                        _permute_weights_to_nchw;
+        CLPermute                                                        _permute_output_to_nhwc;
+        std::unique_ptr<CLDepthwiseConvolutionLayerReshapeWeightsKernel> _reshape_weights;
+        CLTensor                                                         _permuted_input;
+        CLTensor                                                         _permuted_weights;
+        CLTensor                                                         _permuted_output;
+        CLTensor                                                         _output_multipliers;
+        CLTensor                                                         _output_shifts;
+        const ITensor                                                   *_original_weights;
+        const ITensor                                                   *_input;
+        const ITensor                                                   *_output;
+        bool                                                             _needs_permute;
+        bool                                                             _needs_weights_reshape;
+        bool                                                             _is_prepared;
+        bool                                                             _is_quantized;
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
@@ -313,10 +314,10 @@ private:
     private:
         MemoryGroup _memory_group;
 
-        CLDepthwiseConvolutionLayerNativeKernel _dwc_native_kernel;
-        CLPermute                               _permute_input_to_nhwc;
-        CLPermute                               _permute_weights_to_nhwc;
-        CLPermute                               _permute_output_to_nchw;
+        std::unique_ptr<CLDepthwiseConvolutionLayerNativeKernel> _dwc_native_kernel;
+        CLPermute                                                _permute_input_to_nhwc;
+        CLPermute                                                _permute_weights_to_nhwc;
+        CLPermute                                                _permute_output_to_nchw;
 
         CLTensor       _permuted_input;
         CLTensor       _permuted_weights;

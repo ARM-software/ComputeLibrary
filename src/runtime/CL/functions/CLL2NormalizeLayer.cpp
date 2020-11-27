@@ -24,12 +24,15 @@
 #include "arm_compute/runtime/CL/functions/CLL2NormalizeLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
+#include "src/core/CL/kernels/CLReductionOperationKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -39,9 +42,14 @@ constexpr int max_input_tensor_dim = 3;
 } // namespace
 
 CLL2NormalizeLayer::CLL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _reduce_func(), _normalize_kernel(), _sumsq()
+    : _memory_group(std::move(memory_manager)),
+      _reduce_func(),
+      _normalize_kernel(support::cpp14::make_unique<CLL2NormalizeLayerKernel>()),
+      _sumsq()
 {
 }
+
+CLL2NormalizeLayer::~CLL2NormalizeLayer() = default;
 
 void CLL2NormalizeLayer::configure(ICLTensor *input, ICLTensor *output, int axis, float epsilon)
 {
@@ -59,7 +67,7 @@ void CLL2NormalizeLayer::configure(const CLCompileContext &compile_context, ICLT
     // Configure kernels
     const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
     _reduce_func.configure(compile_context, input, &_sumsq, actual_axis, ReductionOperation::SUM_SQUARE);
-    _normalize_kernel.configure(compile_context, input, &_sumsq, output, axis, epsilon);
+    _normalize_kernel->configure(compile_context, input, &_sumsq, output, axis, epsilon);
 
     // Allocate intermediate tensor
     _sumsq.allocator()->allocate();
@@ -91,6 +99,6 @@ void CLL2NormalizeLayer::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     _reduce_func.run();
-    CLScheduler::get().enqueue(_normalize_kernel, true);
+    CLScheduler::get().enqueue(*_normalize_kernel, true);
 }
 } // namespace arm_compute

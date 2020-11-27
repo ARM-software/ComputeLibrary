@@ -89,61 +89,16 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 
 /** Input data sets. */
 const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), datasets::ActivationFunctions()), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(ActivationLayer)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
-               shape, data_type, in_place)
-{
-    // Create context
-    auto ctx = parameters->get_ctx<CLTensor>();
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, QuantizationInfo(), DataLayout::NCHW, ctx);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, QuantizationInfo(), DataLayout::NCHW, ctx);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLActivationLayer act_layer(ctx);
-
-    if(in_place)
-    {
-        act_layer.configure(&src, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
-    }
-    else
-    {
-        act_layer.configure(&src, &dst, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
-    }
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
-
-    if(!in_place)
-    {
-        validate(dst.info()->valid_region(), valid_region);
-    }
-
-    // Validate padding
-    const int         step    = 16 / arm_compute::data_size_from_type(data_type);
-    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
-    validate(src.info()->padding(), padding);
-
-    if(!in_place)
-    {
-        validate(dst.info()->padding(), padding);
-    }
-}
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Window shrink
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8), // Invalid quantization info
@@ -172,11 +127,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::SQRT),
                                                           })),
-               framework::dataset::make("Expected", { false, false, true, true, false, false, true, true, false })),
+               framework::dataset::make("Expected", { false, true, true, true, false, false, true, true, false })),
                input_info, output_info, act_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLActivationLayer::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), act_info)) == expected, framework::LogLevel::ERRORS);
 }
+
 // clang-format on
 // *INDENT-ON*
 

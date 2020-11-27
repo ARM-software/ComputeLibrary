@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_NEGAUSSIANPYRAMID_H
 
 #include "arm_compute/core/IPyramid.h"
-#include "arm_compute/core/NEON/kernels/NEGaussianPyramidKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
@@ -39,8 +38,15 @@
 namespace arm_compute
 {
 class ITensor;
+class NEGaussianPyramidHorKernel;
+class NEGaussianPyramidVertKernel;
+class NEFillBorderKernel;
 
-/** Common interface for all Gaussian pyramid functions */
+/** Common interface for all Gaussian pyramid functions
+ *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ */
 class NEGaussianPyramid : public IFunction
 {
 public:
@@ -79,22 +85,35 @@ protected:
  * -# @ref NEGaussianPyramidHorKernel
  * -# @ref NEGaussianPyramidVertKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ *
  */
 class NEGaussianPyramidHalf : public NEGaussianPyramid
 {
 public:
     /** Constructor */
     NEGaussianPyramidHalf();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGaussianPyramidHalf(const NEGaussianPyramidHalf &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGaussianPyramidHalf &operator=(const NEGaussianPyramidHalf &) = delete;
+    /** Allow instances of this class to be moved */
+    NEGaussianPyramidHalf(NEGaussianPyramidHalf &&) = default;
+    /** Allow instances of this class to be moved */
+    NEGaussianPyramidHalf &operator=(NEGaussianPyramidHalf &&) = default;
+    /** Default destructor */
+    ~NEGaussianPyramidHalf();
 
     // Inherited methods overridden:
     void configure(const ITensor *input, IPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value) override;
     void run() override;
 
 private:
-    std::vector<NEFillBorderKernel>          _horizontal_border_handler;
-    std::vector<NEFillBorderKernel>          _vertical_border_handler;
-    std::vector<NEGaussianPyramidHorKernel>  _horizontal_reduction;
-    std::vector<NEGaussianPyramidVertKernel> _vertical_reduction;
+    std::vector<std::unique_ptr<NEFillBorderKernel>>          _horizontal_border_handler;
+    std::vector<std::unique_ptr<NEFillBorderKernel>>          _vertical_border_handler;
+    std::vector<std::unique_ptr<NEGaussianPyramidHorKernel>>  _horizontal_reduction;
+    std::vector<std::unique_ptr<NEGaussianPyramidVertKernel>> _vertical_reduction;
 };
 
 /** Basic function to execute gaussian pyramid with ORB scale factor. This function calls the following NEON kernels and functions:
@@ -103,12 +122,25 @@ private:
  * -# @ref NEGaussian5x5
  * -# @ref NEScaleKernel
  *
+ * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+ *
+ *
  */
 class NEGaussianPyramidOrb : public NEGaussianPyramid
 {
 public:
     /** Constructor */
     NEGaussianPyramidOrb();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGaussianPyramidOrb(const NEGaussianPyramidOrb &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGaussianPyramidOrb &operator=(const NEGaussianPyramidOrb &) = delete;
+    /** Allow instances of this class to be moved */
+    NEGaussianPyramidOrb(NEGaussianPyramidOrb &&) = default;
+    /** Allow instances of this class to be moved */
+    NEGaussianPyramidOrb &operator=(NEGaussianPyramidOrb &&) = default;
+    /** Default destructor */
+    ~NEGaussianPyramidOrb();
 
     // Inherited methods overridden:
     void configure(const ITensor *input, IPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value) override;

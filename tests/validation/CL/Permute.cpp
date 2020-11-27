@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -119,29 +119,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32 })),
-               shape, data_type)
-{
-    // Define permutation vector
-    const PermutationVector perm(2U, 0U, 1U);
-
-    // Permute shapes
-    TensorShape output_shape = shape;
-    permute(output_shape, perm);
-
-    // Create tensors
-    CLTensor ref_src = create_tensor<CLTensor>(shape, data_type);
-    CLTensor dst     = create_tensor<CLTensor>(output_shape, data_type);
-
-    // Create and Configure function
-    CLPermute perm_func;
-    perm_func.configure(&ref_src, &dst, perm);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(output_shape);
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 #ifndef DOXYGEN_SKIP_THIS
 

@@ -43,15 +43,6 @@ namespace validation
 {
 namespace
 {
-const auto configure_dataset = combine(datasets::SmallShapes(),
-                                       framework::dataset::make("DataType", { DataType::QASYMM8,
-                                                                              DataType::QASYMM8_SIGNED,
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                                              DataType::F16,
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-                                                                              DataType::F32
-                                                                            }));
-
 const auto run_small_dataset           = combine(datasets::ComparisonOperations(), datasets::SmallShapes());
 const auto run_small_broadcast_dataset = combine(datasets::ComparisonOperations(), datasets::SmallShapesBroadcast());
 const auto run_large_dataset           = combine(datasets::ComparisonOperations(), datasets::LargeShapes());
@@ -93,6 +84,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 template <typename T>
 using NEComparisonFixture = ComparisonValidationFixture<Tensor, Accessor, NEElementwiseComparison, T>;
+
+TEST_SUITE(Bool)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEComparisonFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::U8)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

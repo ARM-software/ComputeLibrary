@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -18,7 +18,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
@@ -41,8 +41,6 @@ namespace validation
 {
 namespace
 {
-auto configuration_dataset = combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
-                                     framework::dataset::make("has_same_rank", { false, true }));
 auto run_small_dataset = combine(datasets::SmallShapes(), framework::dataset::make("has_same_rank", { false, true }));
 auto run_large_dataset = combine(datasets::LargeShapes(), framework::dataset::make("has_same_rank", { false, true }));
 } // namespace
@@ -100,26 +98,6 @@ TEST_SUITE(Float)
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(F16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, configuration_dataset,
-               shape, same_rank)
-{
-    const DataType dt = DataType::F16;
-
-    // Create tensors
-    Tensor ref_c = create_tensor<Tensor>(detail::select_condition_shape(shape, same_rank), DataType::U8);
-    Tensor ref_x = create_tensor<Tensor>(shape, dt);
-    Tensor ref_y = create_tensor<Tensor>(shape, dt);
-    Tensor dst   = create_tensor<Tensor>(shape, dt);
-
-    // Create and Configure function
-    NESelect select;
-    select.configure(&ref_c, &ref_x, &ref_y, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NESelectFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
@@ -141,26 +119,6 @@ TEST_SUITE_END() // F16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, configuration_dataset,
-               shape, same_rank)
-{
-    const DataType dt = DataType::F32;
-
-    // Create tensors
-    Tensor ref_c = create_tensor<Tensor>(detail::select_condition_shape(shape, same_rank), DataType::U8);
-    Tensor ref_x = create_tensor<Tensor>(shape, dt);
-    Tensor ref_y = create_tensor<Tensor>(shape, dt);
-    Tensor dst   = create_tensor<Tensor>(shape, dt);
-
-    // Create and Configure function
-    NESelect select;
-    select.configure(&ref_c, &ref_x, &ref_y, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NESelectFixture<float>,
                        framework::DatasetMode::PRECOMMIT,

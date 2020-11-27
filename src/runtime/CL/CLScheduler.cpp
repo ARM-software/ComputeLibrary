@@ -24,10 +24,10 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "arm_compute/runtime/CL/tuners/Tuners.h"
+#include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {

@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLBitwiseOr.h"
 
-#include "arm_compute/core/CL/kernels/CLBitwiseOrKernel.h"
+#include "src/core/CL/kernels/CLBitwiseOrKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>

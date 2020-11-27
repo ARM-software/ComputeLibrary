@@ -24,19 +24,28 @@
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLSobel7x7Kernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLSobel7x7Kernel.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLSobel7x7::CLSobel7x7(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _sobel_hor(), _sobel_vert(), _border_handler(), _tmp_x(), _tmp_y()
+    : _memory_group(std::move(memory_manager)),
+      _sobel_hor(support::cpp14::make_unique<CLSobel7x7HorKernel>()),
+      _sobel_vert(support::cpp14::make_unique<CLSobel7x7VertKernel>()),
+      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _tmp_x(),
+      _tmp_y()
 {
 }
+
+CLSobel7x7::~CLSobel7x7() = default;
 
 void CLSobel7x7::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, BorderMode border_mode, uint8_t constant_border_value)
 {
@@ -58,8 +67,8 @@ void CLSobel7x7::configure(const CLCompileContext &compile_context, ICLTensor *i
         _tmp_y.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_x);
         _memory_group.manage(&_tmp_y);
-        _sobel_hor.configure(compile_context, input, &_tmp_x, &_tmp_y, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(compile_context, &_tmp_x, &_tmp_y, output_x, output_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor->configure(compile_context, input, &_tmp_x, &_tmp_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert->configure(compile_context, &_tmp_x, &_tmp_y, output_x, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
         _tmp_y.allocator()->allocate();
     }
@@ -67,27 +76,27 @@ void CLSobel7x7::configure(const CLCompileContext &compile_context, ICLTensor *i
     {
         _tmp_x.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_x);
-        _sobel_hor.configure(compile_context, input, &_tmp_x, nullptr, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(compile_context, &_tmp_x, nullptr, output_x, nullptr, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor->configure(compile_context, input, &_tmp_x, nullptr, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert->configure(compile_context, &_tmp_x, nullptr, output_x, nullptr, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
     }
     else if(run_sobel_y)
     {
         _tmp_y.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_y);
-        _sobel_hor.configure(compile_context, input, nullptr, &_tmp_y, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(compile_context, nullptr, &_tmp_y, nullptr, output_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor->configure(compile_context, input, nullptr, &_tmp_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert->configure(compile_context, nullptr, &_tmp_y, nullptr, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_y.allocator()->allocate();
     }
-    _border_handler.configure(compile_context, input, _sobel_hor.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler->configure(compile_context, input, _sobel_hor->border_size(), border_mode, PixelValue(constant_border_value));
 }
 
 void CLSobel7x7::run()
 {
-    CLScheduler::get().enqueue(_border_handler, false);
+    CLScheduler::get().enqueue(*_border_handler, false);
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    CLScheduler::get().enqueue(_sobel_hor, false);
-    CLScheduler::get().enqueue(_sobel_vert);
+    CLScheduler::get().enqueue(*_sobel_hor, false);
+    CLScheduler::get().enqueue(*_sobel_vert);
 }

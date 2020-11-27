@@ -22,13 +22,20 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
+#include "src/core/CL/kernels/CLCopyKernel.h"
+#include "src/core/CL/kernels/CLPadLayerKernel.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLPadLayer::CLPadLayer()
-    : _pad_kernel(), _copy_kernel(), _perform_pad(false)
+    : _pad_kernel(support::cpp14::make_unique<CLPadLayerKernel>()),
+      _copy_kernel(support::cpp14::make_unique<CLCopyKernel>()),
+      _perform_pad(false)
 {
 }
+
+CLPadLayer::~CLPadLayer() = default;
 
 void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
@@ -46,12 +53,12 @@ void CLPadLayer::configure(const CLCompileContext &compile_context, ICLTensor *i
 
     if(_perform_pad)
     {
-        _pad_kernel.configure(compile_context, input, output, padding, constant_value, mode);
+        _pad_kernel->configure(compile_context, input, output, padding, constant_value, mode);
     }
     else
     {
         // Copy the input to the whole output if no padding is applied
-        _copy_kernel.configure(compile_context, input, output);
+        _copy_kernel->configure(compile_context, input, output);
     }
 }
 Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
@@ -67,9 +74,7 @@ Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
     }
     else
     {
-        Window copy_window = Window();
-        copy_window.use_tensor_dimensions(output->tensor_shape());
-        ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(input, output, PaddingList(), &copy_window));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(input, output));
     }
     return Status{};
 }
@@ -77,11 +82,11 @@ void CLPadLayer::run()
 {
     if(_perform_pad)
     {
-        CLScheduler::get().enqueue(_pad_kernel);
+        CLScheduler::get().enqueue(*_pad_kernel);
     }
     else
     {
-        CLScheduler::get().enqueue(_copy_kernel);
+        CLScheduler::get().enqueue(*_copy_kernel);
     }
 }
 } // namespace arm_compute

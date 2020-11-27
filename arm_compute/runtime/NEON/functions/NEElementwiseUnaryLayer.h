@@ -24,11 +24,13 @@
 #ifndef ARM_COMPUTE_NEELEMENTWISEUNARYLAYER_H
 #define ARM_COMPUTE_NEELEMENTWISEUNARYLAYER_H
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to perform inverse square root on an input tensor. */
 class NERsqrtLayer : public INESimpleFunctionNoBorder

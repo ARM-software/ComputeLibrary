@@ -33,9 +33,9 @@
 #include <map>
 #include <string>
 
-using namespace arm_compute;
-
-std::string arm_compute::read_file(const std::string &filename, bool binary)
+namespace arm_compute
+{
+std::string read_file(const std::string &filename, bool binary)
 {
     std::string   out;
     std::ifstream fs;
@@ -73,7 +73,7 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
     return out;
 }
 
-const std::string &arm_compute::string_from_format(Format format)
+const std::string &string_from_format(Format format)
 {
     static std::map<Format, const std::string> formats_map =
     {
@@ -99,7 +99,7 @@ const std::string &arm_compute::string_from_format(Format format)
     return formats_map[format];
 }
 
-const std::string &arm_compute::string_from_channel(Channel channel)
+const std::string &string_from_channel(Channel channel)
 {
     static std::map<Channel, const std::string> channels_map =
     {
@@ -120,7 +120,7 @@ const std::string &arm_compute::string_from_channel(Channel channel)
     return channels_map[channel];
 }
 
-const std::string &arm_compute::string_from_data_layout(DataLayout dl)
+const std::string &string_from_data_layout(DataLayout dl)
 {
     static std::map<DataLayout, const std::string> dl_map =
     {
@@ -132,7 +132,7 @@ const std::string &arm_compute::string_from_data_layout(DataLayout dl)
     return dl_map[dl];
 }
 
-const std::string &arm_compute::string_from_data_type(DataType dt)
+const std::string &string_from_data_type(DataType dt)
 {
     static std::map<DataType, const std::string> dt_map =
     {
@@ -160,7 +160,7 @@ const std::string &arm_compute::string_from_data_type(DataType dt)
     return dt_map[dt];
 }
 
-const std::string &arm_compute::string_from_activation_func(ActivationLayerInfo::ActivationFunction act)
+const std::string &string_from_activation_func(ActivationLayerInfo::ActivationFunction act)
 {
     static std::map<ActivationLayerInfo::ActivationFunction, const std::string> act_map =
     {
@@ -184,7 +184,7 @@ const std::string &arm_compute::string_from_activation_func(ActivationLayerInfo:
     return act_map[act];
 }
 
-const std::string &arm_compute::string_from_matrix_pattern(MatrixPattern pattern)
+const std::string &string_from_matrix_pattern(MatrixPattern pattern)
 {
     static std::map<MatrixPattern, const std::string> pattern_map =
     {
@@ -197,7 +197,7 @@ const std::string &arm_compute::string_from_matrix_pattern(MatrixPattern pattern
     return pattern_map[pattern];
 }
 
-const std::string &arm_compute::string_from_non_linear_filter_function(NonLinearFilterFunction function)
+const std::string &string_from_non_linear_filter_function(NonLinearFilterFunction function)
 {
     static std::map<NonLinearFilterFunction, const std::string> func_map =
     {
@@ -209,7 +209,7 @@ const std::string &arm_compute::string_from_non_linear_filter_function(NonLinear
     return func_map[function];
 }
 
-const std::string &arm_compute::string_from_interpolation_policy(InterpolationPolicy policy)
+const std::string &string_from_interpolation_policy(InterpolationPolicy policy)
 {
     static std::map<InterpolationPolicy, const std::string> interpolation_policy_map =
     {
@@ -221,7 +221,7 @@ const std::string &arm_compute::string_from_interpolation_policy(InterpolationPo
     return interpolation_policy_map[policy];
 }
 
-const std::string &arm_compute::string_from_border_mode(BorderMode border_mode)
+const std::string &string_from_border_mode(BorderMode border_mode)
 {
     static std::map<BorderMode, const std::string> border_mode_map =
     {
@@ -233,7 +233,7 @@ const std::string &arm_compute::string_from_border_mode(BorderMode border_mode)
     return border_mode_map[border_mode];
 }
 
-const std::string &arm_compute::string_from_norm_type(NormType type)
+const std::string &string_from_norm_type(NormType type)
 {
     static std::map<NormType, const std::string> norm_type_map =
     {
@@ -245,7 +245,7 @@ const std::string &arm_compute::string_from_norm_type(NormType type)
     return norm_type_map[type];
 }
 
-const std::string &arm_compute::string_from_pooling_type(PoolingType type)
+const std::string &string_from_pooling_type(PoolingType type)
 {
     static std::map<PoolingType, const std::string> pool_type_map =
     {
@@ -257,7 +257,7 @@ const std::string &arm_compute::string_from_pooling_type(PoolingType type)
     return pool_type_map[type];
 }
 
-const std::string &arm_compute::string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage)
+const std::string &string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage)
 {
     static std::map<GEMMLowpOutputStageType, const std::string> output_stage_map =
     {
@@ -270,7 +270,7 @@ const std::string &arm_compute::string_from_gemmlowp_output_stage(GEMMLowpOutput
     return output_stage_map[output_stage];
 }
 
-std::string arm_compute::string_from_pixel_value(const PixelValue &value, const DataType data_type)
+std::string string_from_pixel_value(const PixelValue &value, const DataType data_type)
 {
     std::stringstream ss;
     std::string       converted_string;
@@ -323,21 +323,45 @@ std::string arm_compute::string_from_pixel_value(const PixelValue &value, const 
     return converted_string;
 }
 
-std::string arm_compute::lower_string(const std::string &val)
+DataType data_type_from_name(const std::string &name)
+{
+    static const std::map<std::string, DataType> data_types =
+    {
+        { "f16", DataType::F16 },
+        { "f32", DataType::F32 },
+        { "qasymm8", DataType::QASYMM8 },
+    };
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+    try
+    {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+        return data_types.at(utility::tolower(name));
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+    }
+    catch(const std::out_of_range &)
+    {
+        ARM_COMPUTE_ERROR_VAR("Invalid data type name: %s", name.c_str());
+    }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+}
+
+std::string lower_string(const std::string &val)
 {
     std::string res = val;
     std::transform(res.begin(), res.end(), res.begin(), ::tolower);
     return res;
 }
 
-PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout, const Size2D &dilation,
-                                              const DimensionRoundingType &rounding_type)
+PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout, const Size2D &dilation,
+                                 const DimensionRoundingType &rounding_type)
 {
     const auto &strides = conv_info.stride();
     ARM_COMPUTE_ERROR_ON_MSG((strides.first < 1 || strides.second < 1), "Stride values should be greater than or equal to 1.");
 
-    const unsigned int width_idx     = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx    = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int width_idx     = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const unsigned int in_width      = input_shape[width_idx];
     const unsigned int in_height     = input_shape[height_idx];
     const unsigned int kernel_width  = weights_shape[width_idx];
@@ -372,9 +396,9 @@ PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorSha
     return same_info;
 }
 
-std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
-                                                                                   unsigned int kernel_width, unsigned int kernel_height,
-                                                                                   const PadStrideInfo &pad_stride_info)
+std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
+                                                                      unsigned int kernel_width, unsigned int kernel_height,
+                                                                      const PadStrideInfo &pad_stride_info)
 {
     const unsigned int pad_left   = pad_stride_info.pad_left();
     const unsigned int pad_top    = pad_stride_info.pad_top();
@@ -392,10 +416,10 @@ std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensio
     return std::make_pair<unsigned int, unsigned int>(w, h);
 }
 
-std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(int width, int height,
-                                                                     int kernel_width, int kernel_height,
-                                                                     const PadStrideInfo &pad_stride_info,
-                                                                     const Size2D        &dilation)
+std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
+                                                        int kernel_width, int kernel_height,
+                                                        const PadStrideInfo &pad_stride_info,
+                                                        const Size2D        &dilation)
 {
     const int dilation_x = dilation.x();
     const int dilation_y = dilation.y();
@@ -426,7 +450,7 @@ std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(int width, 
     return std::make_pair(static_cast<unsigned int>(w), static_cast<unsigned int>(h));
 }
 
-bool arm_compute::needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis)
+bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis)
 {
     const bool is_min_max        = (op == ReductionOperation::MAX || op == ReductionOperation::MIN);
     const bool is_quantized_type = is_data_type_quantized(dt);
@@ -435,7 +459,7 @@ bool arm_compute::needs_serialized_reduction(ReductionOperation op, DataType dt,
     return !is_first_dim || is_min_max || is_quantized_type;
 }
 
-QuantizationInfo arm_compute::get_softmax_output_quantization_info(DataType input_type, bool is_log)
+QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool is_log)
 {
     // Note: Output quantization info for softmax should always have
     // * Softmax with QASYMM8: scale = 1/256, offset = 0
@@ -456,7 +480,7 @@ QuantizationInfo arm_compute::get_softmax_output_quantization_info(DataType inpu
     return QuantizationInfo(1.f / 256, 0);
 }
 
-std::pair<int32_t, int32_t> arm_compute::get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info)
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info)
 {
     const bool is_qasymm8_signed = is_data_type_quantized_asymmetric_signed(data_type);
     const auto a                 = act_info.a();
@@ -471,8 +495,47 @@ std::pair<int32_t, int32_t> arm_compute::get_quantized_activation_min_max(Activa
     return std::make_pair(min_activation, max_activation);
 }
 
+std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initializer_list<const ITensor *> tensors)
+{
+    std::unordered_map<const ITensorInfo *, PaddingSize> res;
+
+    for(const ITensor *tensor : tensors)
+    {
+        if(tensor)
+        {
+            res.insert({ tensor->info(), tensor->info()->padding() });
+        }
+    }
+
+    return res;
+}
+
+std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initializer_list<const ITensorInfo *> infos)
+{
+    std::unordered_map<const ITensorInfo *, PaddingSize> res;
+
+    for(const ITensorInfo *info : infos)
+    {
+        if(info)
+        {
+            res.insert({ info, info->padding() });
+        }
+    }
+
+    return res;
+}
+
+bool has_padding_changed(const std::unordered_map<const ITensorInfo *, PaddingSize> &padding_map)
+{
+    return std::find_if(padding_map.begin(), padding_map.end(), [](const std::pair<const ITensorInfo *, PaddingSize> &padding_info)
+    {
+        return (padding_info.first->padding() != padding_info.second);
+    })
+    != padding_map.end();
+}
+
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
-void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
+void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
 {
     switch(dt)
     {
@@ -514,7 +577,7 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
     }
 }
 
-int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n)
+int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n)
 {
     switch(dt)
     {
@@ -548,3 +611,5 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
     return 0;
 }
 #endif /* ARM_COMPUTE_ASSERTS_ENABLED */
+
+} // namespace arm_compute

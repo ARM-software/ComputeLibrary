@@ -23,17 +23,21 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
-#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+#include "src/core/CPP/Validate.h"
+#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
+#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
+#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 #include "support/MemorySupport.h"
 
-#include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
+#include "src/core/NEON/kernels/convolution/common/utils.hpp"
 #include "src/core/NEON/kernels/convolution/winograd/winograd.hpp"
 
 namespace arm_compute

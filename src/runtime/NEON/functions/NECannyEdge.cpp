@@ -25,8 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NECannyEdgeKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
@@ -34,13 +32,19 @@
 #include "arm_compute/runtime/NEON/functions/NESobel5x5.h"
 #include "arm_compute/runtime/NEON/functions/NESobel7x7.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/NEON/kernels/NECannyEdgeKernel.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NESobel5x5Kernel.h"
+#include "src/core/NEON/kernels/NESobel7x7Kernel.h"
 #include "support/MemorySupport.h"
 
 #include <cstring>
 #include <inttypes.h>
 #include <utility>
 
-using namespace arm_compute;
+namespace arm_compute
+{
+NECannyEdge::~NECannyEdge() = default;
 
 NECannyEdge::NECannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
@@ -139,21 +143,25 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _memory_group.manage(&_nonmax);
 
     // Configure non-maxima suppression
-    _non_max_suppr.configure(&_magnitude, &_phase, &_nonmax, upper_thr, lower_thr, border_mode == BorderMode::UNDEFINED);
+    _non_max_suppr = arm_compute::support::cpp14::make_unique<NEEdgeNonMaxSuppressionKernel>();
+    _non_max_suppr->configure(&_magnitude, &_phase, &_nonmax, upper_thr, lower_thr, border_mode == BorderMode::UNDEFINED);
 
     // Fill border around magnitude image as non-maxima suppression will access
     // it. If border mode is undefined filling the border is a nop.
-    _border_mag_gradient.configure(&_magnitude, _non_max_suppr.border_size(), border_mode, constant_border_value);
+    _border_mag_gradient = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _border_mag_gradient->configure(&_magnitude, _non_max_suppr->border_size(), border_mode, constant_border_value);
 
     // Allocate intermediate tensors
     _phase.allocator()->allocate();
     _magnitude.allocator()->allocate();
 
     // Configure edge tracing
-    _edge_trace.configure(&_nonmax, output);
+    _edge_trace = arm_compute::support::cpp14::make_unique<NEEdgeTraceKernel>();
+    _edge_trace->configure(&_nonmax, output);
 
     // Fill border with "No edge" to stop recursion in edge trace
-    _border_edge_trace.configure(&_nonmax, _edge_trace.border_size(), BorderMode::CONSTANT, static_cast<float>(0.f));
+    _border_edge_trace = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _border_edge_trace->configure(&_nonmax, _edge_trace->border_size(), BorderMode::CONSTANT, static_cast<float>(0.f));
 
     // Allocate intermediate tensors
     _nonmax.allocator()->allocate();
@@ -172,17 +180,18 @@ void NECannyEdge::run()
     NEScheduler::get().schedule(_gradient.get(), Window::DimY);
 
     // Fill border before non-maxima suppression. Nop for border mode undefined.
-    NEScheduler::get().schedule(&_border_mag_gradient, Window::DimZ);
+    NEScheduler::get().schedule(_border_mag_gradient.get(), Window::DimZ);
 
     // Run non-maxima suppression
-    NEScheduler::get().schedule(&_non_max_suppr, Window::DimY);
+    NEScheduler::get().schedule(_non_max_suppr.get(), Window::DimY);
 
     ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
     std::fill_n(_output->buffer(), _output->info()->total_size(), 0);
 
     // Fill border before edge trace
-    NEScheduler::get().schedule(&_border_edge_trace, Window::DimZ);
+    NEScheduler::get().schedule(_border_edge_trace.get(), Window::DimZ);
 
     // Run edge tracing
-    NEScheduler::get().schedule(&_edge_trace, Window::DimY);
+    NEScheduler::get().schedule(_edge_trace.get(), Window::DimY);
 }
+} // namespace arm_compute

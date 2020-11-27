@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,13 +26,11 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
-#include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
-#include "arm_compute/core/NEON/kernels/NELocallyConnectedMatrixMultiplyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NECol2Im.h"
+#include "arm_compute/runtime/NEON/functions/NEIm2Col.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -40,6 +38,8 @@
 namespace arm_compute
 {
 class INETensor;
+class NEWeightsReshapeKernel;
+class NELocallyConnectedMatrixMultiplyKernel;
 
 /** Basic function to compute the locally connected layer. This function calls the following NEON kernels:
  *
@@ -55,12 +55,14 @@ public:
     NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NELocallyConnectedLayer(const NELocallyConnectedLayer &) = delete;
-    /** Default move constructor */
-    NELocallyConnectedLayer(NELocallyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NELocallyConnectedLayer(NELocallyConnectedLayer &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NELocallyConnectedLayer &operator=(const NELocallyConnectedLayer &) = delete;
-    /** Default move assignment operator */
-    NELocallyConnectedLayer &operator=(NELocallyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NELocallyConnectedLayer &operator=(NELocallyConnectedLayer &&) = delete;
+    /** Default destructor */
+    ~NELocallyConnectedLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -72,6 +74,7 @@ public:
      *                       Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.11)
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NELocallyConnectedLayer
      *
@@ -93,16 +96,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                            _memory_group;
-    NEIm2ColKernel                         _input_im2col_kernel;
-    NEWeightsReshapeKernel                 _weights_reshape_kernel;
-    NELocallyConnectedMatrixMultiplyKernel _mm_kernel;
-    NECol2ImKernel                         _output_col2im_kernel;
-    Tensor                                 _input_im2col_reshaped;
-    Tensor                                 _weights_reshaped;
-    Tensor                                 _gemm_output;
-    bool                                   _is_prepared;
-    const ITensor                         *_original_weights;
+    MemoryGroup                                             _memory_group;
+    NEIm2Col                                                _input_im2col;
+    std::unique_ptr<NEWeightsReshapeKernel>                 _weights_reshape_kernel;
+    std::unique_ptr<NELocallyConnectedMatrixMultiplyKernel> _mm_kernel;
+    NECol2Im                                                _output_col2im;
+    Tensor                                                  _input_im2col_reshaped;
+    Tensor                                                  _weights_reshaped;
+    Tensor                                                  _gemm_output;
+    bool                                                    _is_prepared;
+    const ITensor                                          *_original_weights;
 };
 }
 #endif /* ARM_COMPUTE_NELOCALLYCONNECTEDLAYER_H */

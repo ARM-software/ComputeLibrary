@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLConvolution.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -32,6 +31,8 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "src/core/CL/kernels/CLConvolutionKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
@@ -49,14 +50,19 @@ void CLConvolution3x3::configure(const CLCompileContext &compile_context, ICLTen
     auto k = arm_compute::support::cpp14::make_unique<CLConvolution3x3Kernel>();
     k->configure(compile_context, input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
 }
 
 template <unsigned int matrix_size>
 CLConvolutionSquare<matrix_size>::CLConvolutionSquare(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _tmp(), _is_separable(false), _kernel_hor(), _kernel_vert(), _kernel(), _border_handler()
+    : _memory_group(std::move(memory_manager)), _tmp(), _is_separable(false), _kernel_hor(support::cpp14::make_unique<CLSeparableConvolutionHorKernel<matrix_size>>()),
+      _kernel_vert(support::cpp14::make_unique<CLSeparableConvolutionVertKernel<matrix_size>>()), _kernel(support::cpp14::make_unique<CLConvolutionKernel<matrix_size>>()),
+      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>())
 {
 }
+
+template <unsigned int matrix_size>
+CLConvolutionSquare<matrix_size>::~CLConvolutionSquare() = default;
 
 template <unsigned int matrix_size>
 void CLConvolutionSquare<matrix_size>::configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode,
@@ -88,35 +94,35 @@ void CLConvolutionSquare<matrix_size>::configure(const CLCompileContext &compile
             scale = calculate_matrix_scale(conv, matrix_size);
         }
 
-        _kernel_hor.configure(compile_context, input, &_tmp, conv_row.data(), border_mode == BorderMode::UNDEFINED);
-        _kernel_vert.configure(compile_context, &_tmp, output, conv_col.data(), scale, border_mode == BorderMode::UNDEFINED, type_pair.second);
-        _border_handler.configure(compile_context, input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
+        _kernel_hor->configure(compile_context, input, &_tmp, conv_row.data(), border_mode == BorderMode::UNDEFINED);
+        _kernel_vert->configure(compile_context, &_tmp, output, conv_col.data(), scale, border_mode == BorderMode::UNDEFINED, type_pair.second);
+        _border_handler->configure(compile_context, input, _kernel_hor->border_size(), border_mode, PixelValue(constant_border_value));
 
         // Allocate intermediate buffer
         _tmp.allocator()->allocate();
     }
     else
     {
-        _kernel.configure(compile_context, input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
-        _border_handler.configure(compile_context, input, _kernel.border_size(), border_mode, PixelValue(constant_border_value));
+        _kernel->configure(compile_context, input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
+        _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
     }
 }
 
 template <unsigned int matrix_size>
 void                   CLConvolutionSquare<matrix_size>::run()
 {
-    CLScheduler::get().enqueue(_border_handler);
+    CLScheduler::get().enqueue(*_border_handler);
 
     if(_is_separable)
     {
         MemoryGroupResourceScope scope_mg(_memory_group);
 
-        CLScheduler::get().enqueue(_kernel_hor, false);
-        CLScheduler::get().enqueue(_kernel_vert);
+        CLScheduler::get().enqueue(*_kernel_hor, false);
+        CLScheduler::get().enqueue(*_kernel_vert);
     }
     else
     {
-        CLScheduler::get().enqueue(_kernel);
+        CLScheduler::get().enqueue(*_kernel);
     }
 }
 
@@ -135,5 +141,5 @@ void CLConvolutionRectangle::configure(const CLCompileContext &compile_context, 
     auto k = arm_compute::support::cpp14::make_unique<CLConvolutionRectangleKernel>();
     k->configure(compile_context, input, output, conv, rows, cols, scale, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
 }

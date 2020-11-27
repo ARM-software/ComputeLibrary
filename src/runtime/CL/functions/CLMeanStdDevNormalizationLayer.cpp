@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLMeanStdDevNormalizationLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLMeanStdDevNormalizationKernel.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/CL/kernels/CLMeanStdDevNormalizationKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute

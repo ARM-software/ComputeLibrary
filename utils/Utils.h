@@ -24,10 +24,13 @@
 #ifndef __UTILS_UTILS_H__
 #define __UTILS_UTILS_H__
 
+/** @dir .
+ *  brief Boiler plate code used by examples. Various utilities to print types, load / store assets, etc.
+ */
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/Tensor.h"
 #pragma GCC diagnostic push

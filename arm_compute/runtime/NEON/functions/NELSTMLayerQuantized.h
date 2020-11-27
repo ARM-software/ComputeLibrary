@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,12 +67,14 @@ public:
     NELSTMLayerQuantized(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NELSTMLayerQuantized(const NELSTMLayerQuantized &) = delete;
-    /** Default move constructor */
-    NELSTMLayerQuantized(NELSTMLayerQuantized &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NELSTMLayerQuantized(NELSTMLayerQuantized &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NELSTMLayerQuantized &operator=(const NELSTMLayerQuantized &) = delete;
-    /** Default move assignment operator */
-    NELSTMLayerQuantized &operator=(NELSTMLayerQuantized &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains pointers) */
+    NELSTMLayerQuantized &operator=(NELSTMLayerQuantized &&) = delete;
+    /** Default destructor */
+    ~NELSTMLayerQuantized();
     /** Initialize function's tensors.
      *
      * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: QASYMM8.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NECannyEdgeKernel.h"
+#include "src/core/NEON/kernels/NECannyEdgeKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -31,28 +30,25 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "src/core/AccessWindowStatic.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 #include <cstddef>
 #include <cstdint>
 #include <tuple>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 namespace
 {
 constexpr int NO_EDGE = 0;
 constexpr int EDGE    = 255;
 constexpr int MAYBE   = 127;
-} // namespace
 
-namespace
-{
 inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t &gy)
 {
     // Constant use for evaluating score1 and score3
@@ -869,6 +865,8 @@ void edge_trace_U8_U8(uint8_t *__restrict input, uint8_t *__restrict output, con
 }
 } // namespace
 
+NEGradientKernel::~NEGradientKernel() = default;
+
 NEGradientKernel::NEGradientKernel()
     : _func(nullptr), _gx(nullptr), _gy(nullptr), _magnitude(nullptr), _phase(nullptr)
 {
@@ -957,6 +955,7 @@ void NEGradientKernel::run(const Window &window, const ThreadInfo &info)
     gx, gy, magnitude, phase);
 }
 
+NEEdgeNonMaxSuppressionKernel::~NEEdgeNonMaxSuppressionKernel() = default;
 NEEdgeNonMaxSuppressionKernel::NEEdgeNonMaxSuppressionKernel()
     : _func(nullptr), _magnitude(nullptr), _phase(nullptr), _output(nullptr), _lower_thr(0), _upper_thr(0)
 {
@@ -1041,6 +1040,7 @@ void NEEdgeNonMaxSuppressionKernel::run(const Window &window, const ThreadInfo &
     magnitude, phase, output);
 }
 
+NEEdgeTraceKernel::~NEEdgeTraceKernel() = default;
 NEEdgeTraceKernel::NEEdgeTraceKernel()
     : _input(nullptr), _output(nullptr)
 {
@@ -1119,3 +1119,4 @@ void NEEdgeTraceKernel::run(const Window &window, const ThreadInfo &info)
     },
     input, output);
 }
+} // namespace arm_compute
