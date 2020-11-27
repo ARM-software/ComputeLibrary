@@ -1,0 +1,5 @@
+<map id="NEComplexPixelWiseMultiplicationKernel" name="NEComplexPixelWiseMultiplicationKernel">
+<area shape="rect" id="node1" title="Interface for the complex pixelwise multiplication kernel." alt="" coords="5,155,243,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="83,80,165,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="92,5,156,32"/>
+</map>

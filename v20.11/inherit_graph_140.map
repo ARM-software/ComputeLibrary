@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_c_l_g_e_m_m_kernel_configuration.xhtml" title="Basic interface for the GEMM kernel configuration." alt="" coords="5,209,211,235"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_native_kernel_configuration_bifrost.xhtml" title="Bifrost based OpenCL GEMMNative configuration." alt="" coords="269,5,512,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_native_kernel_configuration_midgard.xhtml" title="Midgard based OpenCL GEMMNative configuration." alt="" coords="269,71,512,112"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_native_kernel_configuration_valhall.xhtml" title="Valhall based OpenCL GEMMNative configuration." alt="" coords="269,136,512,177"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_kernel_configuration_bifrost.xhtml" title="Bifrost based OpenCL GEMMReshaped configuration." alt="" coords="259,201,523,243"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_kernel_configuration_valhall.xhtml" title="Valhall based OpenCL GEMMReshaped configuration." alt="" coords="259,267,523,308"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_bifrost.xhtml" title="Bifrost based OpenCL GEMMReshapedOnlyRHS configuration." alt="" coords="273,332,508,373"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_valhall.xhtml" title="Valhall based OpenCL GEMMReshapedOnlyRHS configuration." alt="" coords="273,397,508,439"/>
+</map>

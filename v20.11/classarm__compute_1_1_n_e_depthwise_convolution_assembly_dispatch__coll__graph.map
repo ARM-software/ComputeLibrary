@@ -1,0 +1,4 @@
+<map id="NEDepthwiseConvolutionAssemblyDispatch" name="NEDepthwiseConvolutionAssemblyDispatch">
+<area shape="rect" id="node1" title="Depthwise convolution assembly kernel glue." alt="" coords="5,80,248,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="87,5,166,32"/>
+</map>
