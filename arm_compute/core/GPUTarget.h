@@ -50,7 +50,7 @@ enum class GPUTarget
     G52LIT        = 0x241,
     G76           = 0x250,
     G77           = 0x310,
-    TBOX          = 0x320,
+    G78           = 0x320,
     TODX          = 0x330,
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,9 +35,9 @@ arm_compute::GPUTarget get_valhall_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G77;
     }
-    else if(version.find("TBOX") != std::string::npos)
+    if(version.find("G78") != std::string::npos)
     {
-        return arm_compute::GPUTarget::TBOX;
+        return arm_compute::GPUTarget::G78;
     }
     else if(version.find("TODX") != std::string::npos)
     {
@@ -131,7 +131,7 @@ const std::string &string_from_target(GPUTarget target)
         { GPUTarget::G52LIT, "g52lit" },
         { GPUTarget::G76, "g76" },
         { GPUTarget::G77, "g77" },
-        { GPUTarget::TBOX, "tbox" },
+        { GPUTarget::G78, "g78" },
         { GPUTarget::TODX, "todx" }
     };
 

@@ -2049,8 +2049,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::G77:
             os << "G77";
             break;
-        case GPUTarget::TBOX:
-            os << "TBOX";
+        case GPUTarget::G78:
+            os << "G78";
             break;
         case GPUTarget::TODX:
             os << "TODX";
