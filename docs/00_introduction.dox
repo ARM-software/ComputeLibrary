@@ -88,8 +88,11 @@ If there is more than one release in a month then an extra sequential number is 
 
 v21.02 Public major release
  - Upgraded C++ standard to C++14
- - Removed kernels:
+ - Removed functions:
+   - NELocallyConnectedLayer / CLLocallyConnectedLayer
+ - Remove kernels:
    - NEGEMMMatrixVectorMultiplyKernel
+   - NELocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedMatrixMultiplyKernel
 
 v20.11 Public major release
  - Various bug fixes.
@@ -130,7 +133,7 @@ v20.11 Public major release
    - @ref NEGEMMInterleave4x4Kernel
    - @ref NEDirectConvolutionLayerKernel
    - @ref NEScaleKernel
-   - @ref NELocallyConnectedMatrixMultiplyKernel
+   - NELocallyConnectedMatrixMultiplyKernel
    - @ref NEGEMMLowpOffsetContributionKernel
    - @ref NEGEMMTranspose1xWKernel
    - @ref NEPoolingLayerKernel
@@ -1200,7 +1203,7 @@ v17.06 Public major release
     - @ref CLBatchNormalizationLayerKernel / @ref CLBatchNormalizationLayer
     - @ref CLDepthConcatenateLayerKernel / CLDepthConcatenateLayer
     - @ref CLHOGOrientationBinningKernel @ref CLHOGBlockNormalizationKernel, @ref CLHOGDetectorKernel / @ref CLHOGDescriptor @ref CLHOGDetector @ref CLHOGGradient @ref CLHOGMultiDetection
-    - @ref CLLocallyConnectedMatrixMultiplyKernel / @ref CLLocallyConnectedLayer
+    - CLLocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedLayer
     - @ref CLWeightsReshapeKernel / @ref CLConvolutionLayerReshapeWeights
  - New C++ kernels:
     - @ref CPPDetectionWindowNonMaximaSuppressionKernel
@@ -1208,7 +1211,7 @@ v17.06 Public major release
     - @ref NEBatchNormalizationLayerKernel / @ref NEBatchNormalizationLayer
     - @ref NEDepthConcatenateLayerKernel / NEDepthConcatenateLayer
     - @ref NEDirectConvolutionLayerKernel / @ref NEDirectConvolutionLayer
-    - @ref NELocallyConnectedMatrixMultiplyKernel / @ref NELocallyConnectedLayer
+    - NELocallyConnectedMatrixMultiplyKernel / NELocallyConnectedLayer
     - @ref NEWeightsReshapeKernel / @ref NEConvolutionLayerReshapeWeights
 
 v17.05 Public bug fixes release

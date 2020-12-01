@@ -103,7 +103,6 @@
 #include "src/core/CL/kernels/CLIntegralImageKernel.h"
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "src/core/CL/kernels/CLLKTrackerKernel.h"
-#include "src/core/CL/kernels/CLLocallyConnectedMatrixMultiplyKernel.h"
 #include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
 #include "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
 #include "src/core/CL/kernels/CLMeanStdDevKernel.h"

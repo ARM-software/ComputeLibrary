@@ -98,7 +98,6 @@
 #include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
 #include "arm_compute/runtime/CL/functions/CLLaplacianPyramid.h"
 #include "arm_compute/runtime/CL/functions/CLLaplacianReconstruct.h"
-#include "arm_compute/runtime/CL/functions/CLLocallyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalAnd.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalNot.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
