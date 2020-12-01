@@ -375,7 +375,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         AccessWindowStatic input_access(input, 0, -conv_pad_left,
                                         ceil_to_multiple(input->dimension(0), num_elems_read_per_iteration_x),
                                         ceil_to_multiple(input->dimension(1) + conv_info.pad_right(), num_elems_read_per_iteration_y));
-        AccessWindowStatic    weights_access(weights, 0, 0, weights->dimension(0), weights->dimension(1));
+        AccessWindowStatic    weights_access(weights, 0, 0, ceil_to_multiple(weights->dimension(0), num_elems_read_per_iteration_x), weights->dimension(1));
         AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
         window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
         output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
