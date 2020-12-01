@@ -88,6 +88,8 @@ If there is more than one release in a month then an extra sequential number is 
 
 v21.02 Public major release
  - Upgraded C++ standard to C++14
+ - Removed kernels:
+   - NEGEMMMatrixVectorMultiplyKernel
 
 v20.11 Public major release
  - Various bug fixes.

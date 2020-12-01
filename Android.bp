@@ -139,7 +139,6 @@ cc_library_static {
         "src/core/CL/kernels/CLGEMMMatrixMultiplyNativeKernel.cpp",
         "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.cpp",
         "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.cpp",
-        "src/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.cpp",
         "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.cpp",
         "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.cpp",
         "src/core/CL/kernels/CLGatherKernel.cpp",

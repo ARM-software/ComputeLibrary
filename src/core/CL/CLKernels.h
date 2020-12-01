@@ -86,7 +86,6 @@
 #include "src/core/CL/kernels/CLGEMMMatrixMultiplyNativeKernel.h"
 #include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
 #include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
-#include "src/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLGatherKernel.h"
