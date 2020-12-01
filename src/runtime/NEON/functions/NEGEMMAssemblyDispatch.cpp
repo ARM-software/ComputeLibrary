@@ -62,9 +62,10 @@ Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *d, 
     p.M        = d->info()->tensor_shape().y();
     p.K        = a->info()->tensor_shape().x();
     p.N        = d->info()->tensor_shape().x();
+    p.batches  = 1;
     p.multis   = 1;
-    p.indirect = false;
     p.sections = 1;
+    p.indirect = false;
 
     if(info.method == AsmConvMethod::Conv || info.method == AsmConvMethod::Indirect)
     {
