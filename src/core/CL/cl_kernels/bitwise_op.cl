@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,13 @@
  */
 #include "helpers.h"
 
+#if defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
+
 /** This function computes the bitwise OR of two input images.
+ *
+ * @note The following variables must be passed at compile time:
+ * -# -DVEC_SIZE         : The number of elements processed in X dimension
+ * -# -DVEC_SIZE_LEFTOVER: Leftover size in the X dimension; x_dimension % VEC_SIZE
  *
  * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: U8
  * @param[in]  in1_stride_x                      Stride of the source image in X dimension (in bytes)
@@ -49,17 +55,31 @@ __kernel void bitwise_or(
     IMAGE_DECLARATION(in2),
     IMAGE_DECLARATION(out))
 {
-    Image in1 = CONVERT_TO_IMAGE_STRUCT(in1);
-    Image in2 = CONVERT_TO_IMAGE_STRUCT(in2);
-    Image out = CONVERT_TO_IMAGE_STRUCT(out);
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
-    uchar16 in_a = vload16(0, in1.ptr);
-    uchar16 in_b = vload16(0, in2.ptr);
+    // Get pixels pointer
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x_offs + get_global_id(1) * in1_step_y;
+    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + x_offs + get_global_id(1) * in2_step_y;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x_offs + get_global_id(1) * out_step_y;
 
-    vstore16(in_a | in_b, 0, out.ptr);
+    // Load data
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    in_a = VLOAD(VEC_SIZE)(0, (__global uchar *)in1_addr);
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    in_b = VLOAD(VEC_SIZE)(0, (__global uchar *)in2_addr);
+
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    data0 = in_a | in_b;
+
+    // Boundary-aware store
+    STORE_VECTOR_SELECT(data, uchar, (__global uchar *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 
 /** This function computes the bitwise AND of two input images.
+ *
+ * @note The following variables must be passed at compile time:
+ * -# -DVEC_SIZE         : The number of elements processed in X dimension
+ * -# -DVEC_SIZE_LEFTOVER: Leftover size in the X dimension; x_dimension % VEC_SIZE
  *
  * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: U8
  * @param[in]  in1_stride_x                      Stride of the source image in X dimension (in bytes)
@@ -85,17 +105,31 @@ __kernel void bitwise_and(
     IMAGE_DECLARATION(in2),
     IMAGE_DECLARATION(out))
 {
-    Image in1 = CONVERT_TO_IMAGE_STRUCT(in1);
-    Image in2 = CONVERT_TO_IMAGE_STRUCT(in2);
-    Image out = CONVERT_TO_IMAGE_STRUCT(out);
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
-    uchar16 in_a = vload16(0, in1.ptr);
-    uchar16 in_b = vload16(0, in2.ptr);
+    // Get pixels pointer
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x_offs + get_global_id(1) * in1_step_y;
+    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + x_offs + get_global_id(1) * in2_step_y;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x_offs + get_global_id(1) * out_step_y;
 
-    vstore16(in_a & in_b, 0, out.ptr);
+    // Load data
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    in_a = VLOAD(VEC_SIZE)(0, (__global uchar *)in1_addr);
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    in_b = VLOAD(VEC_SIZE)(0, (__global uchar *)in2_addr);
+
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    data0 = in_a & in_b;
+
+    // Boundary-aware store
+    STORE_VECTOR_SELECT(data, uchar, (__global uchar *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 
 /** This function computes the bitwise XOR of two input images.
+ *
+ * @note The following variables must be passed at compile time:
+ * -# -DVEC_SIZE         : The number of elements processed in X dimension
+ * -# -DVEC_SIZE_LEFTOVER: Leftover size in the X dimension; x_dimension % VEC_SIZE
  *
  * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: U8
  * @param[in]  in1_stride_x                      Stride of the source image in X dimension (in bytes)
@@ -121,17 +155,31 @@ __kernel void bitwise_xor(
     IMAGE_DECLARATION(in2),
     IMAGE_DECLARATION(out))
 {
-    Image in1 = CONVERT_TO_IMAGE_STRUCT(in1);
-    Image in2 = CONVERT_TO_IMAGE_STRUCT(in2);
-    Image out = CONVERT_TO_IMAGE_STRUCT(out);
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
-    uchar16 in_a = vload16(0, in1.ptr);
-    uchar16 in_b = vload16(0, in2.ptr);
+    // Get pixels pointer
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x_offs + get_global_id(1) * in1_step_y;
+    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + x_offs + get_global_id(1) * in2_step_y;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x_offs + get_global_id(1) * out_step_y;
 
-    vstore16(in_a ^ in_b, 0, out.ptr);
+    // Load data
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    in_a = VLOAD(VEC_SIZE)(0, (__global uchar *)in1_addr);
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    in_b = VLOAD(VEC_SIZE)(0, (__global uchar *)in2_addr);
+
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    data0 = in_a ^ in_b;
+
+    // Boundary-aware store
+    STORE_VECTOR_SELECT(data, uchar, (__global uchar *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 
-/** This function computes the bitwise NOT of an image.
+/** This function computes the bitwise NOT of an images.
+ *
+ * @note The following variables must be passed at compile time:
+ * -# -DVEC_SIZE         : The number of elements processed in X dimension
+ * -# -DVEC_SIZE_LEFTOVER: Leftover size in the X dimension; x_dimension % VEC_SIZE
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -147,13 +195,24 @@ __kernel void bitwise_xor(
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
  */
 __kernel void bitwise_not(
-    IMAGE_DECLARATION(in),
+    IMAGE_DECLARATION(in1),
     IMAGE_DECLARATION(out))
 {
-    Image in  = CONVERT_TO_IMAGE_STRUCT(in);
-    Image out = CONVERT_TO_IMAGE_STRUCT(out);
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
-    uchar16 in_data = vload16(0, in.ptr);
+    // Get pixels pointer
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x_offs + get_global_id(1) * in1_step_y;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x_offs + get_global_id(1) * out_step_y;
 
-    vstore16(~in_data, 0, out.ptr);
+    // Load data
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    in_a = VLOAD(VEC_SIZE)(0, (__global uchar *)in1_addr);
+
+    VEC_DATA_TYPE(uchar, VEC_SIZE)
+    data0 = ~in_a;
+
+    // Boundary-aware store
+    STORE_VECTOR_SELECT(data, uchar, (__global uchar *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
+
+#endif // defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)

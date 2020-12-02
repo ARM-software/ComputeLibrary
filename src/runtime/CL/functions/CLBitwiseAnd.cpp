@@ -23,12 +23,12 @@
  */
 #include "arm_compute/runtime/CL/functions/CLBitwiseAnd.h"
 
-#include "src/core/CL/kernels/CLBitwiseAndKernel.h"
+#include "src/core/CL/kernels/CLBitwiseKernel.h"
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void CLBitwiseAnd::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
@@ -36,7 +36,8 @@ void CLBitwiseAnd::configure(const ICLTensor *input1, const ICLTensor *input2, I
 
 void CLBitwiseAnd::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
-    auto k = std::make_unique<CLBitwiseAndKernel>();
-    k->configure(compile_context, input1, input2, output);
+    auto k = std::make_unique<CLBitwiseKernel>();
+    k->configure(compile_context, input1, input2, output, BitwiseOperation::AND);
     _kernel = std::move(k);
 }
+} // namespace arm_compute

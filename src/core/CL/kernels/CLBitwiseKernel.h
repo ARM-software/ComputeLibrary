@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLBITWISEANDKERNEL_H
-#define ARM_COMPUTE_CLBITWISEANDKERNEL_H
+#ifndef ARM_COMPUTE_CLBITWISEKERNEL_H
+#define ARM_COMPUTE_CLBITWISEKERNEL_H
 
 #include "src/core/CL/ICLKernel.h"
 
@@ -30,39 +30,36 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the bitwise AND operation kernel.
+/** Interface for the bitwise operation kernel.
  *
- * Result is computed by:
- * @f[ output(x,y) = input1(x,y) \land input2(x,y) @f]
+ * Result depends on the \ref BitwiseOperation and is computed by:
+ * AND operation: @f[ output(x,y) = input1(x,y) \land input2(x,y) @f]
+ * NOT operation: @f[ output(x,y) = \lnot input1(x,y) @f]
+ * OR operation: @f[ output(x,y) = input1(x,y) \lor input2(x,y) @f]
+ * XOR operation: @f[ output(x,y) = input1(x,y) \oplus input2(x,y) @f]
  */
-class CLBitwiseAndKernel : public ICLKernel
+class CLBitwiseKernel : public ICLKernel
 {
 public:
     /** Default constructor. */
-    CLBitwiseAndKernel();
+    CLBitwiseKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLBitwiseAndKernel(const CLBitwiseAndKernel &) = delete;
+    CLBitwiseKernel(const CLBitwiseKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLBitwiseAndKernel &operator=(const CLBitwiseAndKernel &) = delete;
+    CLBitwiseKernel &operator=(const CLBitwiseKernel &) = delete;
     /** Allow instances of this class to be moved */
-    CLBitwiseAndKernel(CLBitwiseAndKernel &&) = default;
+    CLBitwiseKernel(CLBitwiseKernel &&) = default;
     /** Allow instances of this class to be moved */
-    CLBitwiseAndKernel &operator=(CLBitwiseAndKernel &&) = default;
-    /** Set the inputs and output images
-     *
-     * @param[in]  input1 Source tensor. Data types supported: U8.
-     * @param[in]  input2 Source tensor. Data types supported: U8.
-     * @param[out] output Destination tensor. Data types supported: U8.
-     */
-    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
-    /** Set the inputs and output images
+    CLBitwiseKernel &operator=(CLBitwiseKernel &&) = default;
+    /** Set the inputs and output tensors
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input1          Source tensor. Data types supported: U8.
      * @param[in]  input2          Source tensor. Data types supported: U8.
      * @param[out] output          Destination tensor. Data types supported: U8.
+     * @param[in]  op              Bitwise operation to perform. Supported: AND, OR, NOT, XOR.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, BitwiseOperation op);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -73,4 +70,4 @@ private:
     ICLTensor       *_output; /**< Destination tensor */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLBITWISEANDKERNEL_H */
+#endif /* ARM_COMPUTE_CLBITWISEKERNEL_H */
