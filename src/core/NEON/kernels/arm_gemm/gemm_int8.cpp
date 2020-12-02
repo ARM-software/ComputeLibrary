@@ -105,7 +105,7 @@ static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_s16_8x12",
     nullptr,
-    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53 && args._Ksize>4; },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53 && ((args._Msize > 28) || ((args._Msize % 8) > 4)); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_s16_8x12, int8_t, int32_t>(args); },
 },
 {

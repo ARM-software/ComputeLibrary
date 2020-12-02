@@ -128,7 +128,7 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_s16_8x12",
     nullptr,
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() == CPUModel::A53; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() == CPUModel::A53 && ((args._Msize > 28) || ((args._Msize % 8) > 4)); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_s16_8x12, int8_t, int8_t>(args, qp); }
 },
 {
