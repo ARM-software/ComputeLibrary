@@ -257,14 +257,13 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             _offset_contribution_kernel = std::make_unique<NEGEMMLowpOffsetContributionKernel>();
             _offset_contribution_kernel->configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a_to_use->info()->dimension(0), _a_offset, _b_offset);
         }
-
-        // Configure activation
-        const ActivationLayerInfo &activation = gemm_info.activation_info();
-        _run_activation                       = activation.enabled() && (!_assembly_path || (_assembly_path && !NEGEMMAssemblyDispatch::is_activation_supported(activation)));
-        if(_run_activation)
-        {
-            _activation_func.configure(output, nullptr, activation);
-        }
+    }
+    // Configure activation
+    const ActivationLayerInfo &activation = gemm_info.activation_info();
+    _run_activation                       = activation.enabled() && (!_assembly_path || !NEGEMMAssemblyDispatch::is_activation_supported(activation));
+    if(_run_activation)
+    {
+        _activation_func.configure(output, nullptr, activation);
     }
 
     // Allocate tensors
@@ -564,7 +563,7 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     }
 
     // Run fused activation unless already run in the fused assembly
-    if(_run_activation && !_fused_assembly_path)
+    if(_run_activation)
     {
         _activation_func.run();
     }
