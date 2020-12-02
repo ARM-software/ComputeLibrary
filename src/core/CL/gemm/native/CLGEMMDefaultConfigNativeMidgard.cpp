@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/gemm/native/CLGEMMNativeKernelConfigurationMidgard.h"
+#include "src/core/CL/gemm/native/CLGEMMDefaultConfigNativeMidgard.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -35,23 +35,23 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-CLGEMMNativeKernelConfigurationMidgard::CLGEMMNativeKernelConfigurationMidgard(GPUTarget gpu)
+CLGEMMDefaultConfigNativeMidgard::CLGEMMDefaultConfigNativeMidgard(GPUTarget gpu)
     : ICLGEMMKernelConfiguration(gpu)
 {
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationMidgard::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeMidgard::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMNativeKernelConfigurationMidgard::*)(unsigned int m, unsigned int n, unsigned int k,
+    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMDefaultConfigNativeMidgard::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
     // Configurations for Midgard architectures
     static std::map<DataType, ConfigurationFunctionExecutorPtr> default_configs =
     {
-        { DataType::QASYMM8, &CLGEMMNativeKernelConfigurationMidgard::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMNativeKernelConfigurationMidgard::default_q8 },
-        { DataType::QSYMM8, &CLGEMMNativeKernelConfigurationMidgard::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMNativeKernelConfigurationMidgard::default_q8 }
+        { DataType::QASYMM8, &CLGEMMDefaultConfigNativeMidgard::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigNativeMidgard::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultConfigNativeMidgard::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigNativeMidgard::default_q8 }
     };
 
     if(default_configs.find(data_type) != default_configs.end())
@@ -61,7 +61,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationM
     ARM_COMPUTE_ERROR("Not supported data type");
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);

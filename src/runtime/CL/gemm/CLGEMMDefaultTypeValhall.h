@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CLGEMMKERNELSELECTIONBIFROST_H
-#define SRC_CLGEMMKERNELSELECTIONBIFROST_H
+#ifndef SRC_CLGEMMDEFAULTTYPEVALHALL_H
+#define SRC_CLGEMMDEFAULTTYPEVALHALL_H
 
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
 
@@ -30,29 +30,25 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-/** Bifrost based OpenCL GEMMKernel selection */
-class CLGEMMKernelSelectionBifrost final : public ICLGEMMKernelSelection
+/** Valhall based OpenCL GEMMKernel selection */
+class CLGEMMDefaultTypeValhall final : public ICLGEMMKernelSelection
 {
 public:
     /** Constructor
      *
      * @param[in] gpu GPU target
      */
-    CLGEMMKernelSelectionBifrost(GPUTarget gpu);
+    CLGEMMDefaultTypeValhall(GPUTarget gpu);
 
     // Inherited overridden method
     CLGEMMKernelType select_kernel(const CLGEMMKernelSelectionParams &params) override;
 
 private:
-    CLGEMMKernelType g52_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
-    CLGEMMKernelType g76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
-    CLGEMMKernelType g76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
-    CLGEMMKernelType g52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
-    CLGEMMKernelType g71_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
     CLGEMMKernelType default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
     CLGEMMKernelType default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
     CLGEMMKernelType default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType g77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /* SRC_CLGEMMKERNELSELECTIONBIFROST_H */
+#endif /* SRC_CLGEMMDEFAULTTYPEVALHALL_H */

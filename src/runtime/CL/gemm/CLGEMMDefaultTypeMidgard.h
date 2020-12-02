@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CLGEMMKERNELSELECTIONMIDGARD_H
-#define SRC_CLGEMMKERNELSELECTIONMIDGARD_H
+#ifndef SRC_CLGEMMDefaultTypeMidgard_H
+#define SRC_CLGEMMDefaultTypeMidgard_H
 
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
 
@@ -31,14 +31,14 @@ namespace arm_compute
 namespace cl_gemm
 {
 /** Midgard based OpenCL GEMMKernel selection */
-class CLGEMMKernelSelectionMidgard final : public ICLGEMMKernelSelection
+class CLGEMMDefaultTypeMidgard final : public ICLGEMMKernelSelection
 {
 public:
     /** Constructor
      *
      * @param[in] gpu GPU target
      */
-    CLGEMMKernelSelectionMidgard(GPUTarget gpu);
+    CLGEMMDefaultTypeMidgard(GPUTarget gpu);
 
     // Inherited overridden method
     CLGEMMKernelType select_kernel(const CLGEMMKernelSelectionParams &params) override;
@@ -50,4 +50,4 @@ private:
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /* SRC_CLGEMMKERNELSELECTIONMIDGARD_H */
+#endif /* SRC_CLGEMMDefaultTypeMidgard_H */

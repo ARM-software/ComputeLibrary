@@ -21,31 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONMIDGARD_H
-#define ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONMIDGARD_H
+#ifndef SRC_CLGEMMDEFAULTTYPEBIFROST_H
+#define SRC_CLGEMMDEFAULTTYPEBIFROST_H
 
-#include "src/core/CL/ICLGEMMKernelConfiguration.h"
+#include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
 
 namespace arm_compute
 {
 namespace cl_gemm
 {
-/** Midgard based OpenCL GEMMNative configuration */
-class CLGEMMNativeKernelConfigurationMidgard final : public ICLGEMMKernelConfiguration
+/** Bifrost based OpenCL GEMMKernel selection */
+class CLGEMMDefaultTypeBifrost final : public ICLGEMMKernelSelection
 {
 public:
     /** Constructor
      *
      * @param[in] gpu GPU target
      */
-    CLGEMMNativeKernelConfigurationMidgard(GPUTarget gpu);
+    CLGEMMDefaultTypeBifrost(GPUTarget gpu);
 
     // Inherited overridden method
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
+    CLGEMMKernelType select_kernel(const CLGEMMKernelSelectionParams &params) override;
 
 private:
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    CLGEMMKernelType g52_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType g76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType g76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType g52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType g71_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONMIDGARD_H */
+#endif /* SRC_CLGEMMDEFAULTTYPEBIFROST_H */

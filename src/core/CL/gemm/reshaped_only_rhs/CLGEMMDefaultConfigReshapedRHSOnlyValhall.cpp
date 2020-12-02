@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfigurationValhall.h"
+#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMDefaultConfigReshapedRHSOnlyValhall.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -40,25 +40,25 @@ namespace cl_gemm
 {
 using namespace arm_compute::misc::shape_calculator;
 
-CLGEMMReshapedOnlyRHSKernelConfigurationValhall::CLGEMMReshapedOnlyRHSKernelConfigurationValhall(GPUTarget gpu)
+CLGEMMDefaultConfigReshapedRHSOnlyValhall::CLGEMMDefaultConfigReshapedRHSOnlyValhall(GPUTarget gpu)
     : ICLGEMMKernelConfiguration(gpu)
 {
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMReshapedOnlyRHSKernelConfigurationValhall::*)(unsigned int m, unsigned int n, unsigned int k,
+    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMDefaultConfigReshapedRHSOnlyValhall::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
     // Configurations for Mali-G77
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G77 =
     {
-        { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_f32 },
-        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_f16 },
-        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 },
-        { DataType::QSYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 }
+        { DataType::F32, &CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_f32 },
+        { DataType::F16, &CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_u8 },
+        { DataType::QSYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_u8 }
     };
 
     switch(_target)
@@ -76,7 +76,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     if(m == 1)
     {
@@ -121,7 +121,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     {
         const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
         const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
-        const float r_mk = static_cast<float>(m) / static_cast<float>(k);
+        const float r_mk     = static_cast<float>(m) / static_cast<float>(k);
 
         if(workload <= 1999.2000122070312)
         {
@@ -175,14 +175,14 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
                 std::tie(lhs_info_buf, rhs_info_buf) = configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 16, false, true, false, true, false);
 
                 return select_lhs_rhs_info(std::make_pair(lhs_info_img, rhs_info_img),
-                                            std::make_pair(lhs_info_buf, rhs_info_buf),
-                                            n, k, b, DataType::F32);
+                                           std::make_pair(lhs_info_buf, rhs_info_buf),
+                                           n, k, b, DataType::F32);
             }
         }
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -232,7 +232,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyValhall::configure_G77_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);

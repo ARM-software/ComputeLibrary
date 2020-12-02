@@ -25,8 +25,8 @@
 #define ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATION_H
 
 #include "src/core/CL/ICLGEMMKernelConfiguration.h"
-#include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
-#include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationValhall.h"
+#include "src/core/CL/gemm/reshaped/CLGEMMDefaultConfigReshapedBifrost.h"
+#include "src/core/CL/gemm/reshaped/CLGEMMDefaultConfigReshapedValhall.h"
 
 #include <memory>
 
@@ -50,9 +50,9 @@ public:
         {
             case GPUTarget::MIDGARD:
             case GPUTarget::BIFROST:
-                return std::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(gpu);
+                return std::make_unique<CLGEMMDefaultConfigReshapedBifrost>(gpu);
             case GPUTarget::VALHALL:
-                return std::make_unique<CLGEMMReshapedKernelConfigurationValhall>(gpu);
+                return std::make_unique<CLGEMMDefaultConfigReshapedValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
         }

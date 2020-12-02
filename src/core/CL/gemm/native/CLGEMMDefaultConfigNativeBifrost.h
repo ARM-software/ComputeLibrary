@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLGEMMRESHAPEDONLYRHSKERNELCONFIGURATIONBIFROST_H
-#define ARM_COMPUTE_CLGEMMRESHAPEDONLYRHSKERNELCONFIGURATIONBIFROST_H
+#ifndef ARM_COMPUTE_CLGEMMDEFAULTCONFIGNATIVEBIFROST_H
+#define ARM_COMPUTE_CLGEMMDEFAULTCONFIGNATIVEBIFROST_H
 
 #include "src/core/CL/ICLGEMMKernelConfiguration.h"
 
@@ -30,32 +30,27 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-/** Bifrost based OpenCL GEMMReshapedOnlyRHS configuration */
-class CLGEMMReshapedOnlyRHSKernelConfigurationBifrost final : public ICLGEMMKernelConfiguration
+/** Bifrost based OpenCL GEMMNative configuration */
+class CLGEMMDefaultConfigNativeBifrost final : public ICLGEMMKernelConfiguration
 {
 public:
     /** Constructor
      *
      * @param[in] gpu GPU target
      */
-    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget gpu);
+    CLGEMMDefaultConfigNativeBifrost(GPUTarget gpu);
 
     // Inherited overridden method
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
 
 private:
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G7x_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G71_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G71_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G52_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G51_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G7x_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G51_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G7x_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G76_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G51_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_default_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLGEMMRESHAPEDONLYRHSKERNELCONFIGURATIONBIFROST_H */
+#endif /*ARM_COMPUTE_CLGEMMDEFAULTCONFIGNATIVEBIFROST_H */

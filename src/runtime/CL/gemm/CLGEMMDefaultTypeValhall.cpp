@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/CL/gemm/CLGEMMKernelSelectionValhall.h"
+#include "src/runtime/CL/gemm/CLGEMMDefaultTypeValhall.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -34,38 +34,38 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-CLGEMMKernelSelectionValhall::CLGEMMKernelSelectionValhall(GPUTarget gpu)
+CLGEMMDefaultTypeValhall::CLGEMMDefaultTypeValhall(GPUTarget gpu)
     : ICLGEMMKernelSelection(gpu)
 {
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionValhall::select_kernel(const CLGEMMKernelSelectionParams &params)
+CLGEMMKernelType CLGEMMDefaultTypeValhall::select_kernel(const CLGEMMKernelSelectionParams &params)
 {
     // _target could be used in the future to have a dedicated heuristic for each GPU IP
     ARM_COMPUTE_UNUSED(_target);
 
-    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMKernelSelectionValhall::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMDefaultTypeValhall::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 
     // Default configurations for Valhall architectures
     static std::map<DataType, FunctionExecutorPtr> gemm_default_configs =
     {
-        { DataType::F32, &CLGEMMKernelSelectionValhall::default_f32 },
-        { DataType::F16, &CLGEMMKernelSelectionValhall::default_f16 },
-        { DataType::QASYMM8, &CLGEMMKernelSelectionValhall::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMKernelSelectionValhall::default_q8 },
-        { DataType::QSYMM8, &CLGEMMKernelSelectionValhall::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMKernelSelectionValhall::default_q8 }
+        { DataType::F32, &CLGEMMDefaultTypeValhall::default_f32 },
+        { DataType::F16, &CLGEMMDefaultTypeValhall::default_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
     };
 
     // Mali-G77 configurations
     static std::map<DataType, FunctionExecutorPtr> gemm_g77_configs =
     {
-        { DataType::F32, &CLGEMMKernelSelectionValhall::default_f32 },
-        { DataType::F16, &CLGEMMKernelSelectionValhall::g77_f16 },
-        { DataType::QASYMM8, &CLGEMMKernelSelectionValhall::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMKernelSelectionValhall::default_q8 },
-        { DataType::QSYMM8, &CLGEMMKernelSelectionValhall::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMKernelSelectionValhall::default_q8 }
+        { DataType::F32, &CLGEMMDefaultTypeValhall::default_f32 },
+        { DataType::F16, &CLGEMMDefaultTypeValhall::g77_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
     };
 
     const DataType data_type = params.data_type;
@@ -87,35 +87,35 @@ CLGEMMKernelType CLGEMMKernelSelectionValhall::select_kernel(const CLGEMMKernelS
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionValhall::default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeValhall::default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
     return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE_V1;
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionValhall::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeValhall::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
     return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE_V1;
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionValhall::g77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeValhall::g77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
-    if (!is_rhs_constant)
+    if(!is_rhs_constant)
     {
         return CLGEMMKernelType::NATIVE_V1;
     }
 
-    if (m == 1)
+    if(m == 1)
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
 
-    const float r_mn = static_cast<float>(m) / static_cast<float>(n);
-    const float r_mk = static_cast<float>(m) / static_cast<float>(k);
-    const float r_nk = static_cast<float>(n) / static_cast<float>(k);
+    const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
+    const float r_mk     = static_cast<float>(m) / static_cast<float>(k);
+    const float r_nk     = static_cast<float>(n) / static_cast<float>(k);
     const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
 
     if(r_mk <= 0.6817956566810608)
@@ -205,7 +205,7 @@ CLGEMMKernelType CLGEMMKernelSelectionValhall::g77_f16(unsigned int m, unsigned 
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionValhall::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeValhall::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 

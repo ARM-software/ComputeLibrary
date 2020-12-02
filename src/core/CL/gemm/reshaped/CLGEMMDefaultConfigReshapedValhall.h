@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATIONVALHALL_H
-#define ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATIONVALHALL_H
+#ifndef ARM_COMPUTE_CLGEMMDEFAULTCONFIGRESHAPEDVALHALL_H
+#define ARM_COMPUTE_CLGEMMDEFAULTCONFIGRESHAPEDVALHALL_H
 
 #include "src/core/CL/ICLGEMMKernelConfiguration.h"
 
@@ -31,14 +31,14 @@ namespace arm_compute
 namespace cl_gemm
 {
 /** Valhall based OpenCL GEMMReshaped configuration */
-class CLGEMMReshapedKernelConfigurationValhall final : public ICLGEMMKernelConfiguration
+class CLGEMMDefaultConfigReshapedValhall final : public ICLGEMMKernelConfiguration
 {
 public:
     /** Constructor
      *
      * @param[in] gpu GPU target
      */
-    CLGEMMReshapedKernelConfigurationValhall(GPUTarget gpu);
+    CLGEMMDefaultConfigReshapedValhall(GPUTarget gpu);
 
     // Inherited overridden method
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
@@ -50,4 +50,4 @@ private:
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATIONVALHALL_H */
+#endif /*ARM_COMPUTE_CLGEMMDEFAULTCONFIGRESHAPEDVALHALL_H */

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfigurationBifrost.h"
+#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMDefaultConfigReshapedRHSOnlyBifrost.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -40,58 +40,58 @@ namespace cl_gemm
 {
 using namespace arm_compute::misc::shape_calculator;
 
-CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget gpu)
+CLGEMMDefaultConfigReshapedRHSOnlyBifrost::CLGEMMDefaultConfigReshapedRHSOnlyBifrost(GPUTarget gpu)
     : ICLGEMMKernelConfiguration(gpu)
 {
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::*)(unsigned int m, unsigned int n, unsigned int k,
+    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMDefaultConfigReshapedRHSOnlyBifrost::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
     // Configurations for Mali-G51
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G51 =
     {
-        { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f32 },
-        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f16 },
-        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8 },
-        { DataType::QSYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8 }
+        { DataType::F32, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_f32 },
+        { DataType::F16, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_u8 },
+        { DataType::QSYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_u8 }
     };
 
     // Configurations for Mali-G52
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G52 =
     {
-        { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G52_f32 },
-        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G52_f16 },
-        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
-        { DataType::QSYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 }
+        { DataType::F32, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G52_f32 },
+        { DataType::F16, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G52_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8 },
+        { DataType::QSYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8 }
     };
 
     // Configurations for Mali-G76
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G76 =
     {
-        { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_f32 },
-        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_f16 },
-        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_u8 },
-        { DataType::QSYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_u8 }
+        { DataType::F32, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_f32 },
+        { DataType::F16, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_u8 },
+        { DataType::QSYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_u8 }
     };
 
     // Configurations for Mali-G7x
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G7x =
     {
-        { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_f32 },
-        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_f16 },
-        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
-        { DataType::QSYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 }
+        { DataType::F32, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_f32 },
+        { DataType::F16, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8 },
+        { DataType::QSYMM8, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8 }
     };
 
     switch(_target)
@@ -135,7 +135,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -157,7 +157,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -230,7 +230,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G52_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G52_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
     const float r_nk     = static_cast<float>(n) / static_cast<float>(k);
@@ -274,7 +274,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -291,7 +291,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -315,12 +315,12 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
     const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
-    const float r_mk = static_cast<float>(m) / static_cast<float>(k);
-    const float r_nk = static_cast<float>(n) / static_cast<float>(k);
+    const float r_mk     = static_cast<float>(m) / static_cast<float>(k);
+    const float r_nk     = static_cast<float>(n) / static_cast<float>(k);
 
     GEMMLHSMatrixInfo lhs_info_buf;
     GEMMRHSMatrixInfo rhs_info_buf;
@@ -402,7 +402,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
 
@@ -474,7 +474,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -491,7 +491,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G7x_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -523,7 +523,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G76_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -539,7 +539,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOnlyBifrost::configure_G51_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);

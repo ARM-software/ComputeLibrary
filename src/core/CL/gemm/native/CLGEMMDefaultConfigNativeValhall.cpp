@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/gemm/native/CLGEMMNativeKernelConfigurationValhall.h"
+#include "src/core/CL/gemm/native/CLGEMMDefaultConfigNativeValhall.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -35,25 +35,25 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-CLGEMMNativeKernelConfigurationValhall::CLGEMMNativeKernelConfigurationValhall(GPUTarget gpu)
+CLGEMMDefaultConfigNativeValhall::CLGEMMDefaultConfigNativeValhall(GPUTarget gpu)
     : ICLGEMMKernelConfiguration(gpu)
 {
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationValhall::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeValhall::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMNativeKernelConfigurationValhall::*)(unsigned int m, unsigned int n, unsigned int k,
+    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMDefaultConfigNativeValhall::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
     // Configurations for Mali-G77
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G77 =
     {
-        { DataType::F32, &CLGEMMNativeKernelConfigurationValhall::configure_G77_f32 },
-        { DataType::F16, &CLGEMMNativeKernelConfigurationValhall::configure_G77_f16 },
-        { DataType::QASYMM8, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 },
-        { DataType::QSYMM8, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 }
+        { DataType::F32, &CLGEMMDefaultConfigNativeValhall::configure_G77_f32 },
+        { DataType::F16, &CLGEMMDefaultConfigNativeValhall::configure_G77_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultConfigNativeValhall::configure_G77_u8 },
+        { DataType::QSYMM8, &CLGEMMDefaultConfigNativeValhall::configure_G77_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigNativeValhall::configure_G77_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigNativeValhall::configure_G77_u8 }
     };
 
     switch(_target)
@@ -71,7 +71,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationV
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationValhall::configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeValhall::configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -97,7 +97,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationV
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationValhall::configure_G77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeValhall::configure_G77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -123,7 +123,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationV
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationValhall::configure_G77_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeValhall::configure_G77_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/CL/gemm/CLGEMMKernelSelectionBifrost.h"
+#include "src/runtime/CL/gemm/CLGEMMDefaultTypeBifrost.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -34,60 +34,60 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-CLGEMMKernelSelectionBifrost::CLGEMMKernelSelectionBifrost(GPUTarget gpu)
+CLGEMMDefaultTypeBifrost::CLGEMMDefaultTypeBifrost(GPUTarget gpu)
     : ICLGEMMKernelSelection(gpu)
 {
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::select_kernel(const CLGEMMKernelSelectionParams &params)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::select_kernel(const CLGEMMKernelSelectionParams &params)
 {
     // _target could be used in the future to have a dedicated heuristic for each GPU IP
     ARM_COMPUTE_UNUSED(_target);
 
-    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMKernelSelectionBifrost::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMDefaultTypeBifrost::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 
     // Default configurations for Bifrost architectures
     static std::map<DataType, FunctionExecutorPtr> gemm_default_configs =
     {
-        { DataType::F32, &CLGEMMKernelSelectionBifrost::default_f32 },
-        { DataType::F16, &CLGEMMKernelSelectionBifrost::default_f16 },
-        { DataType::QASYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QSYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMKernelSelectionBifrost::default_q8 }
+        { DataType::F32, &CLGEMMDefaultTypeBifrost::default_f32 },
+        { DataType::F16, &CLGEMMDefaultTypeBifrost::default_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeBifrost::default_q8 }
     };
 
     // Mali-G71 configurations
     static std::map<DataType, FunctionExecutorPtr> gemm_g71_configs =
     {
-        { DataType::F32, &CLGEMMKernelSelectionBifrost::default_f32 },
-        { DataType::F16, &CLGEMMKernelSelectionBifrost::g71_f16 },
-        { DataType::QASYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QSYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMKernelSelectionBifrost::default_q8 }
+        { DataType::F32, &CLGEMMDefaultTypeBifrost::default_f32 },
+        { DataType::F16, &CLGEMMDefaultTypeBifrost::g71_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeBifrost::default_q8 }
     };
 
     // Mali-G52 configurations
     static std::map<DataType, FunctionExecutorPtr> gemm_g52_configs =
     {
-        { DataType::F32, &CLGEMMKernelSelectionBifrost::g52_f32 },
-        { DataType::F16, &CLGEMMKernelSelectionBifrost::g52_f16 },
-        { DataType::QASYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QSYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMKernelSelectionBifrost::default_q8 }
+        { DataType::F32, &CLGEMMDefaultTypeBifrost::g52_f32 },
+        { DataType::F16, &CLGEMMDefaultTypeBifrost::g52_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeBifrost::default_q8 }
     };
 
     // Mali-G76 configurations
     static std::map<DataType, FunctionExecutorPtr> gemm_g76_configs =
     {
-        { DataType::F32, &CLGEMMKernelSelectionBifrost::g76_f32 },
-        { DataType::F16, &CLGEMMKernelSelectionBifrost::g76_f16 },
-        { DataType::QASYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QSYMM8, &CLGEMMKernelSelectionBifrost::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMKernelSelectionBifrost::default_q8 }
+        { DataType::F32, &CLGEMMDefaultTypeBifrost::g76_f32 },
+        { DataType::F16, &CLGEMMDefaultTypeBifrost::g76_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultTypeBifrost::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeBifrost::default_q8 }
     };
 
     const DataType data_type = params.data_type;
@@ -121,7 +121,7 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::select_kernel(const CLGEMMKernelS
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(b);
 
@@ -162,7 +162,7 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::default_f32(unsigned int m, unsig
     return gemm_type;
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(n, k, b);
 
@@ -183,7 +183,7 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::default_f16(unsigned int m, unsig
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
@@ -197,7 +197,7 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::default_q8(unsigned int m, unsign
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::g76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(b);
 
@@ -254,16 +254,16 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f32(unsigned int m, unsigned 
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::g52_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::g52_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(b);
 
-    if (!is_rhs_constant)
+    if(!is_rhs_constant)
     {
         return CLGEMMKernelType::NATIVE_V1;
     }
 
-    if (m == 1)
+    if(m == 1)
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
@@ -381,16 +381,16 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g52_f32(unsigned int m, unsigned 
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::g76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(b);
 
-    if (!is_rhs_constant)
+    if(!is_rhs_constant)
     {
         return CLGEMMKernelType::NATIVE_V1;
     }
 
-    if (m == 1)
+    if(m == 1)
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
@@ -443,14 +443,14 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g76_f16(unsigned int m, unsigned 
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::g52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::g52_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
-    if (!is_rhs_constant)
+    if(!is_rhs_constant)
     {
         return CLGEMMKernelType::NATIVE_V1;
     }
 
-    if (m == 1)
+    if(m == 1)
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
@@ -556,7 +556,7 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::g52_f16(unsigned int m, unsigned 
     }
 }
 
-CLGEMMKernelType CLGEMMKernelSelectionBifrost::g71_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeBifrost::g71_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(b);
 

@@ -21,34 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CLGEMMKERNELSELECTIONVALHALL_H
-#define SRC_CLGEMMKERNELSELECTIONVALHALL_H
+#ifndef ARM_COMPUTE_CLGEMMDEFAULTCONFIGRESHAPEDRHSONLYVALHALL_H
+#define ARM_COMPUTE_CLGEMMDEFAULTCONFIGRESHAPEDRHSONLYVALHALL_H
 
-#include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
+#include "src/core/CL/ICLGEMMKernelConfiguration.h"
 
 namespace arm_compute
 {
 namespace cl_gemm
 {
-/** Valhall based OpenCL GEMMKernel selection */
-class CLGEMMKernelSelectionValhall final : public ICLGEMMKernelSelection
+/** Valhall based OpenCL GEMMReshapedOnlyRHS configuration */
+class CLGEMMDefaultConfigReshapedRHSOnlyValhall final : public ICLGEMMKernelConfiguration
 {
 public:
     /** Constructor
      *
      * @param[in] gpu GPU target
      */
-    CLGEMMKernelSelectionValhall(GPUTarget gpu);
+    CLGEMMDefaultConfigReshapedRHSOnlyValhall(GPUTarget gpu);
 
     // Inherited overridden method
-    CLGEMMKernelType select_kernel(const CLGEMMKernelSelectionParams &params) override;
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
 
 private:
-    CLGEMMKernelType default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
-    CLGEMMKernelType default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
-    CLGEMMKernelType default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
-    CLGEMMKernelType g77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /* SRC_CLGEMMKERNELSELECTIONVALHALL_H */
+#endif /*ARM_COMPUTE_CLGEMMDEFAULTCONFIGRESHAPEDRHSONLYVALHALL_H */
