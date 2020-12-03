@@ -46,11 +46,6 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
-const auto data_matrix_multiply = framework::dataset::make("M", 12, 20) * framework::dataset::make("N", 12, 20) * framework::dataset::make("K", 16);
-} // namespace
-
 TEST_SUITE(NEON)
 TEST_SUITE(GEMMLowp)
 TEST_SUITE(MatrixMultiplyCore)
