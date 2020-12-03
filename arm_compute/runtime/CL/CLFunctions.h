@@ -44,7 +44,6 @@
 #include "arm_compute/runtime/CL/functions/CLChannelShuffleLayer.h"
 #include "arm_compute/runtime/CL/functions/CLColorConvert.h"
 #include "arm_compute/runtime/CL/functions/CLComparison.h"
-#include "arm_compute/runtime/CL/functions/CLComputeAllAnchors.h"
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/CL/functions/CLConvolution.h"

@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "arm_compute/runtime/NEON/functions/NEComputeAllAnchors.h"
 #include "arm_compute/runtime/NEON/functions/NEGenerateProposalsLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/NEON/functions/NESlice.h"
+#include "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/ArrayAccessor.h"
+#include "tests/NEON/Helper.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
@@ -43,6 +44,8 @@ namespace validation
 {
 namespace
 {
+using NEComputeAllAnchors = NESynthetizeFunction<NEComputeAllAnchorsKernel>;
+
 template <typename U, typename T>
 inline void fill_tensor(U &&tensor, const std::vector<T> &v)
 {

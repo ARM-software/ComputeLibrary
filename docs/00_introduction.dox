@@ -94,7 +94,8 @@ v21.02 Public major release
    - NECol2Im
    - NEGEMMInterleave4x4
    - NEGEMMTranspose1xW
- - Remove kernels:
+   - NEComputeAllAnchors / CLComputeAllAnchors
+ - Removed kernels:
    - NEGEMMMatrixVectorMultiplyKernel
    - NELocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedMatrixMultiplyKernel
 
@@ -621,7 +622,7 @@ v19.11 Public major release
     - @ref CLLogSoftmaxLayer
  - New NEON kernels / functions:
     - @ref NEBoundingBoxTransformKernel / @ref NEBoundingBoxTransform
-    - @ref NEComputeAllAnchorsKernel / @ref NEComputeAllAnchors
+    - @ref NEComputeAllAnchorsKernel / NEComputeAllAnchors
     - @ref NEDetectionPostProcessLayer
     - @ref NEGenerateProposalsLayer
     - @ref NEInstanceNormalizationLayerKernel / @ref NEInstanceNormalizationLayer

@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/functions/CLComputeAllAnchors.h"
 #include "arm_compute/runtime/CL/functions/CLGenerateProposalsLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
+#include "src/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/CLArrayAccessor.h"
+#include "tests/CL/Helper.h"
 #include "tests/Globals.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -43,6 +44,8 @@ namespace validation
 {
 namespace
 {
+using CLComputeAllAnchors = CLSynthetizeFunction<CLComputeAllAnchorsKernel>;
+
 template <typename U, typename T>
 inline void fill_tensor(U &&tensor, const std::vector<T> &v)
 {

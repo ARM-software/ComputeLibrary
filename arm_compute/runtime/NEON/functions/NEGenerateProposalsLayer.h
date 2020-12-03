@@ -30,7 +30,6 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
-#include "arm_compute/runtime/NEON/functions/NEComputeAllAnchors.h"
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPadLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
@@ -41,6 +40,7 @@
 namespace arm_compute
 {
 class ITensor;
+class NEComputeAllAnchorsKernel;
 
 /** Basic function to generate proposals for a RPN (Region Proposal Network)
  *
@@ -114,16 +114,16 @@ private:
     MemoryGroup _memory_group;
 
     // Neon kernels
-    NEPermute              _permute_deltas;
-    NEReshapeLayer         _flatten_deltas;
-    NEPermute              _permute_scores;
-    NEReshapeLayer         _flatten_scores;
-    NEComputeAllAnchors    _compute_anchors;
-    NEBoundingBoxTransform _bounding_box;
-    NEPadLayer             _pad;
-    NEDequantizationLayer  _dequantize_anchors;
-    NEDequantizationLayer  _dequantize_deltas;
-    NEQuantizationLayer    _quantize_all_proposals;
+    NEPermute                                  _permute_deltas;
+    NEReshapeLayer                             _flatten_deltas;
+    NEPermute                                  _permute_scores;
+    NEReshapeLayer                             _flatten_scores;
+    std::unique_ptr<NEComputeAllAnchorsKernel> _compute_anchors;
+    NEBoundingBoxTransform                     _bounding_box;
+    NEPadLayer                                 _pad;
+    NEDequantizationLayer                      _dequantize_anchors;
+    NEDequantizationLayer                      _dequantize_deltas;
+    NEQuantizationLayer                        _quantize_all_proposals;
 
     // CPP functions
     CPPBoxWithNonMaximaSuppressionLimit _cpp_nms;
