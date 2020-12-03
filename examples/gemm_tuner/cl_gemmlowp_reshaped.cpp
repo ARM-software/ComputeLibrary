@@ -181,7 +181,7 @@ public:
 
         // Parse command line options
         CommandLineParser        parser;
-        CommonGemmExampleOptions param_options(parser);
+        CommonGemmExampleOptions param_options(parser, DataType::QASYMM8);
         GemmConfigOptions        config_options(parser);
 
         parser.parse(argc, argv);
@@ -214,9 +214,13 @@ public:
         rhs.allocator()->init(TensorInfo(TensorShape(params.N, params.K, params.B), 1, params.data_type));
 
         // Set arbitrary quantization information
-        lhs.info()->set_quantization_info({ 0.012, 3 });
-        rhs.info()->set_quantization_info({ 0.012, 3 });
-        dst.info()->set_quantization_info({ 0.012, 3 });
+        const QuantizationInfo q_info
+        {
+            0.012, 3
+        };
+        lhs.info()->set_quantization_info(q_info);
+        rhs.info()->set_quantization_info(q_info);
+        dst.info()->set_quantization_info(q_info);
 
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = configs.m0;
@@ -234,8 +238,9 @@ public:
         rhs_info.export_to_cl_image = false; // CL image not supported for quantized cases yet
 
         lhs_reshaped.allocator()->init(TensorInfo(compute_lhs_reshaped_shape(*lhs.info(), lhs_info), 1, params.data_type));
-
         rhs_reshaped.allocator()->init(TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));
+        lhs_reshaped.info()->set_quantization_info(q_info);
+        rhs_reshaped.info()->set_quantization_info(q_info);
 
         if(rhs_info.export_to_cl_image)
         {

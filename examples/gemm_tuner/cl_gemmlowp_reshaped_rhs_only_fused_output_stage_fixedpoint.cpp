@@ -160,7 +160,7 @@ public:
 
         // Parse command line options
         CommandLineParser        parser;
-        CommonGemmExampleOptions param_options(parser);
+        CommonGemmExampleOptions param_options(parser, DataType::QASYMM8);
         GemmConfigOptions        config_options(parser);
 
         parser.parse(argc, argv);
@@ -196,10 +196,14 @@ public:
 
         // Set arbitrary quantization information (non-zero offset to ensure offset contribution stage is included)
         // Could be extended in the future to include a user-controlled option for offset == 0
-        lhs.info()->set_quantization_info({ 0.012, 3 });
-        rhs.info()->set_quantization_info({ 0.012, 3 });
-        bias.info()->set_quantization_info({ 0.012, 3 });
-        dst.info()->set_quantization_info({ 0.012, 3 });
+        const QuantizationInfo q_info
+        {
+            0.012, 3
+        };
+        lhs.info()->set_quantization_info(q_info);
+        rhs.info()->set_quantization_info(q_info);
+        bias.info()->set_quantization_info(q_info);
+        dst.info()->set_quantization_info(q_info);
 
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = configs.m0;
@@ -214,6 +218,7 @@ public:
         rhs_info.export_to_cl_image = false; // CL image not supported for quantized cases yet
 
         rhs_reshaped.allocator()->init(TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));
+        rhs_reshaped.info()->set_quantization_info(q_info);
         if(rhs_info.export_to_cl_image)
         {
             examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info());
