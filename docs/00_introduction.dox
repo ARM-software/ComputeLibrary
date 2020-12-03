@@ -90,6 +90,10 @@ v21.02 Public major release
  - Upgraded C++ standard to C++14
  - Removed functions:
    - NELocallyConnectedLayer / CLLocallyConnectedLayer
+   - NEIm2Col
+   - NECol2Im
+   - NEGEMMInterleave4x4
+   - NEGEMMTranspose1xW
  - Remove kernels:
    - NEGEMMMatrixVectorMultiplyKernel
    - NELocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedMatrixMultiplyKernel
@@ -477,7 +481,7 @@ v20.05 Public major release
      - @ref NEWeightsReshapeKernel
      - @ref NEConvolutionLayerReshapeWeights
      - @ref NEIm2ColKernel
-     - @ref NEIm2Col
+     - NEIm2Col
      - @ref NEDepthConvertLayerKernel
      - @ref NEDepthConvertLayer
      - @ref NEGEMMConvolutionLayer
@@ -984,7 +988,7 @@ v18.05 Public major release
     - @ref NEBatchNormalizationLayer / @ref CLBatchNormalizationLayer
     - @ref NEDepthwiseConvolutionLayer
     - @ref NEScale
-    - @ref NEIm2Col
+    - NEIm2Col
  - Added support for dilated convolutions in @ref NEConvolutionLayer and @ref CLConvolutionLayer.
  - New OpenCL kernels / functions:
     - @ref CLChannelShuffleLayer / @ref CLChannelShuffleLayerKernel

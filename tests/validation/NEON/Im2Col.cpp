@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEIm2Col.h"
+#include "src/core/NEON/kernels/NEIm2ColKernel.h"
 #include "tests/NEON/Accessor.h"
+#include "tests/NEON/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -53,6 +54,8 @@ const auto conv_args_small         = combine(combine(combine(combine(conv_filter
 } // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(Im2Col)
+
+using NEIm2Col = NESynthetizeFunction<NEIm2ColKernel>;
 
 // *INDENT-OFF*
 // clang-format off
