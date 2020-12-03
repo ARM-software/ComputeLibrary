@@ -198,7 +198,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "fill_image_borders_constant", "fill_border.cl" },
     { "fill_image_borders_replicate", "fill_border.cl" },
     { "finalize", "optical_flow_pyramid_lk.cl" },
-    { "flatten", "flatten.cl" },
     { "floor_layer", "floor.cl" },
     { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
     { "gather", "gather.cl" },
@@ -670,10 +669,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "fill_border.cl",
 #include "./cl_kernels/fill_border.clembed"
-    },
-    {
-        "flatten.cl",
-#include "./cl_kernels/flatten.clembed"
     },
     {
         "floor.cl",

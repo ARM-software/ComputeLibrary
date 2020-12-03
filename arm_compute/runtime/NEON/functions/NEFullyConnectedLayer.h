@@ -35,8 +35,6 @@
 
 namespace arm_compute
 {
-class NEFlattenLayerKernel;
-
 /** Basic function to reshape the weights of Fully Connected layer with NEON. This function calls the following kernels:
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
@@ -181,7 +179,7 @@ private:
 
     MemoryGroup                                                         _memory_group;
     IWeightsManager                                                    *_weights_manager;
-    std::unique_ptr<NEFlattenLayerKernel>                               _flatten_kernel;
+    NEFlattenLayer                                                      _flatten;
     NEConvertFullyConnectedWeights                                      _convert_weights;
     weights_transformations::NEConvertFullyConnectedWeightsManaged      _convert_weights_managed;
     NEFullyConnectedLayerReshapeWeights                                 _reshape_weights_function;

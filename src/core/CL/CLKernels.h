@@ -70,7 +70,6 @@
 #include "src/core/CL/kernels/CLFFTScaleKernel.h"
 #include "src/core/CL/kernels/CLFastCornersKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLFlattenLayerKernel.h"
 #include "src/core/CL/kernels/CLFloorKernel.h"
 #include "src/core/CL/kernels/CLFuseBatchNormalizationKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"

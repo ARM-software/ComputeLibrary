@@ -33,7 +33,6 @@
 #include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "src/core/NEON/kernels/NECopyKernel.h"
-#include "src/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"

@@ -69,7 +69,6 @@
 #include "src/core/NEON/kernels/NEFastCornersKernel.h"
 #include "src/core/NEON/kernels/NEFillArrayKernel.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "src/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "src/core/NEON/kernels/NEFloorKernel.h"
 #include "src/core/NEON/kernels/NEFuseBatchNormalizationKernel.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
