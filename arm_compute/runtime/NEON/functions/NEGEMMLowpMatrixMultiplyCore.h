@@ -27,8 +27,8 @@
 #include "NEActivationLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -45,6 +45,7 @@ class NEGEMMLowpOffsetContributionOutputStageKernel;
 class NEGEMMLowpMatrixAReductionKernel;
 class NEGEMMLowpMatrixBReductionKernel;
 class NEGEMMTranspose1xWKernel;
+class NEGEMMAssemblyDispatch;
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on NEON. This function calls the following NEON kernels if the DOT product instruction is not available:
  *
@@ -115,7 +116,7 @@ public:
 private:
     MemoryGroup                                                    _memory_group;
     IWeightsManager                                               *_weights_manager;
-    NEGEMMAssemblyDispatch                                         _asm_glue;
+    std::unique_ptr<NEGEMMAssemblyDispatch>                        _asm_glue;
     std::unique_ptr<NEGEMMLowpMatrixMultiplyKernel>                _mm_kernel;
     std::unique_ptr<NEGEMMInterleave4x4Kernel>                     _mtx_a_reshape_kernel;
     std::unique_ptr<NEGEMMTranspose1xWKernel>                      _mtx_b_reshape_kernel;

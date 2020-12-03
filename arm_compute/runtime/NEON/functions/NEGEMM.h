@@ -30,17 +30,19 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
 
 namespace arm_compute
 {
+// Forward declarations
 class NEGEMMInterleave4x4Kernel;
 class NEGEMMMatrixAdditionKernel;
 class NEGEMMMatrixMultiplyKernel;
 class NEGEMMTranspose1xWKernel;
+class NEGEMMAssemblyDispatch;
+
 /** Basic function to execute GEMM on NEON. This function calls the following NEON kernels:
  *
  * If optimized assembly is available:
@@ -112,7 +114,7 @@ private:
     std::unique_ptr<NEGEMMInterleave4x4Kernel>  _interleave_kernel;
     std::unique_ptr<NEGEMMTranspose1xWKernel>   _transpose_kernel;
     std::unique_ptr<NEGEMMMatrixMultiplyKernel> _mm_kernel;
-    NEGEMMAssemblyDispatch                      _asm_glue;
+    std::unique_ptr<NEGEMMAssemblyDispatch>     _asm_glue;
     std::unique_ptr<NEGEMMMatrixAdditionKernel> _ma_kernel;
     NEActivationLayer                           _alpha_scale_func;
     NEArithmeticAddition                        _add_bias;

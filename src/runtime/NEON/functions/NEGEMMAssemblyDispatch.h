@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEGEMMASSEMBLYDISPATCH_H
-#define ARM_COMPUTE_NEGEMMASSEMBLYDISPATCH_H
+#ifndef SRC_NEGEMMASSEMBLYDISPATCH_H
+#define SRC_NEGEMMASSEMBLYDISPATCH_H
 
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -122,4 +122,4 @@ private:
     IWeightsManager           *_weights_manager; /**< Pointer to the weights manager */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEGEMMASSEMBLYDISPATCH_H */
+#endif /* SRC_NEGEMMASSEMBLYDISPATCH_H */

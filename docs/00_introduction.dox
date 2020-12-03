@@ -95,6 +95,7 @@ v21.02 Public major release
    - NEGEMMInterleave4x4
    - NEGEMMTranspose1xW
    - NEComputeAllAnchors / CLComputeAllAnchors
+   - NEGEMMAssemblyDispatch
  - Removed kernels:
    - NEGEMMMatrixVectorMultiplyKernel
    - NELocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedMatrixMultiplyKernel
@@ -486,7 +487,7 @@ v20.05 Public major release
      - @ref NEDepthConvertLayerKernel
      - @ref NEDepthConvertLayer
      - @ref NEGEMMConvolutionLayer
-     - @ref NEGEMMAssemblyDispatch
+     - NEGEMMAssemblyDispatch
  - Added new data type QASYMM8_SIGNED support for:
      - @ref CLDirectConvolutionLayer
      - @ref CLDeconvolutionLayer

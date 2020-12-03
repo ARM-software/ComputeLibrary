@@ -31,7 +31,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
@@ -39,6 +38,7 @@
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
+#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 
 #include <cmath>
 
@@ -61,7 +61,7 @@ AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
 } // namespace
 
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager), _weights_manager(weights_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(memory_manager, weights_manager), _ma_kernel(),
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(std::make_unique<NEGEMMAssemblyDispatch>()), _ma_kernel(),
       _alpha_scale_func(nullptr), _add_bias(), _activation_func(), _tmp_a(), _tmp_b(), _tmp_d(), _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_alpha_scale(false),
       _run_addition(false), _run_bias_addition(false), _run_activation(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
@@ -90,8 +90,8 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     if(run_optimised)
     {
         const ITensor *c_to_use = is_c_bias ? c : nullptr;
-        _asm_glue.configure(a, b, c_to_use, d, asm_info);
-        ARM_COMPUTE_ERROR_ON(!_asm_glue.is_configured());
+        _asm_glue->configure(a, b, c_to_use, d, asm_info);
+        ARM_COMPUTE_ERROR_ON(!_asm_glue->is_configured());
 
         // Scale product by alpha
         if(_run_alpha_scale)
@@ -312,9 +312,9 @@ void NEGEMM::run()
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    if(_asm_glue.is_configured())
+    if(_asm_glue->is_configured())
     {
-        _asm_glue.run();
+        _asm_glue->run();
         if(_run_alpha_scale)
         {
             _alpha_scale_func.run();
@@ -361,20 +361,20 @@ void NEGEMM::prepare()
     if(!_is_prepared)
     {
         const bool original_b_managed_by_weights_manager = _weights_manager && _weights_manager->are_weights_managed(_original_b);
-        if(_asm_glue.is_configured())
+        if(_asm_glue->is_configured())
         {
             if(!original_b_managed_by_weights_manager)
             {
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
-            _asm_glue.prepare();
+            _asm_glue->prepare();
             if(!original_b_managed_by_weights_manager)
             {
                 _original_b->mark_as_unused();
             }
         }
-        else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue.is_configured())
+        else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue->is_configured())
         {
             if(!original_b_managed_by_weights_manager)
             {
