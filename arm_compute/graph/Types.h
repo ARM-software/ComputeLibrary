@@ -181,7 +181,6 @@ enum class NodeType
     StridedSliceLayer,
     UpsampleLayer,
     UnaryEltwiseLayer,
-    YOLOLayer,
 
     Input,
     Output,

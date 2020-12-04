@@ -438,7 +438,7 @@ v20.08 Public major release
    - @ref NELogits1DSoftmaxKernel
    - @ref NEROIPoolingLayerKernel
    - @ref NEROIAlignLayerKernel
-   - @ref NEYOLOLayerKernel
+   - NEYOLOLayerKernel
    - @ref NEUpsampleLayerKernel
    - @ref NEFloorKernel
    - @ref NEWidthConcatenateLayerKernel
@@ -894,7 +894,7 @@ v18.11 Public major release
     - @ref NEReorgLayer / @ref NEReorgLayerKernel
     - @ref NEPriorBoxLayer / @ref NEPriorBoxLayerKernel
     - @ref NEUpsampleLayer / @ref NEUpsampleLayerKernel
-    - @ref NEYOLOLayer / @ref NEYOLOLayerKernel
+    - NEYOLOLayer / NEYOLOLayerKernel
  - New OpenCL kernels / functions:
     - @ref CLBatchToSpaceLayer / @ref CLBatchToSpaceLayerKernel
     - @ref CLBoundingBoxTransform / @ref CLBoundingBoxTransformKernel
@@ -911,7 +911,7 @@ v18.11 Public major release
     - @ref CLSplit
     - @ref CLStridedSlice / @ref CLStridedSliceKernel
     - @ref CLUpsampleLayer / @ref CLUpsampleLayerKernel
-    - @ref CLYOLOLayer / @ref CLYOLOLayerKernel
+    - CLYOLOLayer / CLYOLOLayerKernel
  - New CPP kernels / functions:
     - @ref CPPBoxWithNonMaximaSuppressionLimit / @ref CPPBoxWithNonMaximaSuppressionLimitKernel
  - Added the validate method in:

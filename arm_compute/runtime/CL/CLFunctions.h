@@ -153,6 +153,5 @@
 #include "arm_compute/runtime/CL/functions/CLWarpPerspective.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
-#include "arm_compute/runtime/CL/functions/CLYOLOLayer.h"
 
 #endif /* ARM_COMPUTE_CLFUNCTIONS_H */

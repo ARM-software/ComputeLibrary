@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 namespace graph
 {
-SliceLayerNode::SliceLayerNode(Coordinates &starts, Coordinates &ends)
+SliceLayerNode::SliceLayerNode(const Coordinates &starts, const Coordinates &ends)
     : _starts(starts), _ends(ends)
 {
     _input_edges.resize(1, EmptyEdgeID);

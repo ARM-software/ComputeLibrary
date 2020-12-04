@@ -1494,8 +1494,8 @@ public:
      * @param[in] act_info    Activation info
      * @param[in] num_classes Number of classes to activate
      */
-    YOLOLayer(ActivationLayerInfo act_info, int32_t num_classes)
-        : _act_info(act_info), _num_classes(num_classes)
+    YOLOLayer(ActivationLayerInfo act_info)
+        : _act_info(act_info)
     {
     }
 
@@ -1503,12 +1503,11 @@ public:
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
-        return GraphBuilder::add_yolo_node(s.graph(), common_params, input, _act_info, _num_classes);
+        return GraphBuilder::add_yolo_node(s.graph(), common_params, input, _act_info);
     }
 
 private:
     ActivationLayerInfo _act_info;
-    int32_t             _num_classes;
 };
 } // namespace frontend
 } // namespace graph

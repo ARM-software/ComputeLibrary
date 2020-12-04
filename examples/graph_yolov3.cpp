@@ -171,7 +171,7 @@ public:
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("conv2d_59")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_59/Linear")
-              << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo1")
+              << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f)).set_name("Yolo1")
               << OutputLayer(get_output_accessor(common_params, 5));
         route_1 << ConvolutionLayer(
                     1U, 1U, 256U,
@@ -282,7 +282,7 @@ public:
                      PadStrideInfo(1, 1, 0, 0))
                  .set_name("conv2d_67")
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_67/Linear")
-                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo2")
+                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f)).set_name("Yolo2")
                  << OutputLayer(get_output_accessor(common_params, 5));
         route_2 << ConvolutionLayer(
                     1U, 1U, 128U,
@@ -392,7 +392,7 @@ public:
                      PadStrideInfo(1, 1, 0, 0))
                  .set_name("conv2d_75")
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_75/Linear")
-                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo3")
+                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f)).set_name("Yolo3")
                  << OutputLayer(get_output_accessor(common_params, 5));
 
         // Finalize graph

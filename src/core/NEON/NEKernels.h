@@ -145,6 +145,5 @@
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "src/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
 #include "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
-#include "src/core/NEON/kernels/NEYOLOLayerKernel.h"
 
 #endif /* ARM_COMPUTE_NEKERNELS_H */

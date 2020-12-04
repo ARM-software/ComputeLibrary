@@ -154,7 +154,6 @@
 #include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "src/core/CL/kernels/CLWinogradInputTransformKernel.h"
 #include "src/core/CL/kernels/CLWinogradOutputTransformKernel.h"
-#include "src/core/CL/kernels/CLYOLOLayerKernel.h"
 #include "src/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 
 #endif /* ARM_COMPUTE_CLKERNELS_H */

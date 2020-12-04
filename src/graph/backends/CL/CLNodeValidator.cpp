@@ -125,8 +125,6 @@ Status CLNodeValidator::validate(INode *node)
             return detail::validate_strided_slice_layer<CLStridedSlice>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
         case NodeType::UpsampleLayer:
             return detail::validate_upsample_layer<CLUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
-        case NodeType::YOLOLayer:
-            return detail::validate_yolo_layer<CLYOLOLayer>(*polymorphic_downcast<YOLOLayerNode *>(node));
         case NodeType::EltwiseLayer:
             return detail::validate_eltwise_Layer<CLEltwiseLayerFunctions>(*polymorphic_downcast<EltwiseLayerNode *>(node));
         case NodeType::UnaryEltwiseLayer:
