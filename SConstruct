@@ -205,6 +205,7 @@ if 'v7a' in env['arch']:
 elif 'v8' in env['arch']:
     if 'sve2' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
+        env.Append(CPPDEFINES = ['SVE2'])
     elif 'sve' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
     elif 'v8.' in env['arch']:
