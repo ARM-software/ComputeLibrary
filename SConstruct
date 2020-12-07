@@ -207,7 +207,7 @@ elif 'v8' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
     elif 'sve' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
-    elif 'v8.2-a' in env['arch']:
+    elif 'v8.' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
     else:
         env.Append(CXXFLAGS = ['-march=armv8-a'])
