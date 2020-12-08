@@ -41,7 +41,7 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(c, x, y);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(c, x, y, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(x);
     ARM_COMPUTE_RETURN_ERROR_ON(x->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(x, y);
@@ -52,7 +52,7 @@ Status validate_arguments(const ITensorInfo *c, const ITensorInfo *x, const ITen
     ARM_COMPUTE_RETURN_ERROR_ON(is_same_rank && (x->tensor_shape() != c->tensor_shape()));
     ARM_COMPUTE_RETURN_ERROR_ON(!is_same_rank && ((c->tensor_shape().num_dimensions() > 1) || (c->tensor_shape().x() != x->tensor_shape()[x->tensor_shape().num_dimensions() - 1])));
 
-    if(output != nullptr && output->total_size() != 0)
+    if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(x, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(x, output);
@@ -60,52 +60,11 @@ Status validate_arguments(const ITensorInfo *c, const ITensorInfo *x, const ITen
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *c, ITensorInfo *x, ITensorInfo *y, ITensorInfo *output)
-{
-    if(output != nullptr)
-    {
-        // Output tensor auto initialization if not yet initialized
-        auto_init_if_empty(*output, *x->clone());
-    }
-
-    const bool is_same_rank = (c->tensor_shape().num_dimensions() == x->tensor_shape().num_dimensions());
-
-    const unsigned int num_elems_processed_per_iteration = 16 / x->element_size();
-
-    // Configure kernel window
-    Window                 win = calculate_max_window(*x, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal x_access(x, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal y_access(y, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, x_access, y_access);
-
-    // Update window for condition
-    if(is_same_rank)
-    {
-        AccessWindowHorizontal c_access(c, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, c_access);
-    }
-
-    // Update window for output
-    if(output != nullptr)
-    {
-        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, output_access);
-        output_access.set_valid_region(win, x->valid_region());
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 CLSelectKernel::CLSelectKernel()
     : _c(nullptr), _x(nullptr), _y(nullptr), _output(nullptr), _has_same_rank(false)
 {
-}
-void CLSelectKernel::configure(const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), c, x, y, output);
 }
 
 void CLSelectKernel::configure(const CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
@@ -119,12 +78,15 @@ void CLSelectKernel::configure(const CLCompileContext &compile_context, const IC
     _output        = output;
     _has_same_rank = (c->info()->tensor_shape().num_dimensions() == x->info()->tensor_shape().num_dimensions());
 
-    const unsigned int num_elems_processed_per_iteration = 16 / x->info()->element_size();
+    auto               padding_info         = get_padding_info({ c, x, y, output });
+    const unsigned int vec_size_x           = adjust_vec_size(16 / x->info()->element_size(), x->info()->dimension(0));
+    const int          vec_size_x_leftovers = output->info()->dimension(0) % vec_size_x;
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(x->info()->data_type()));
-    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(x->info()->element_size()));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_x_leftovers));
 
     // Create kernel
     std::string kernel_name = "select";
@@ -149,9 +111,9 @@ void CLSelectKernel::configure(const CLCompileContext &compile_context, const IC
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(c->info(), x->info(), y->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    auto_init_if_empty(*output->info(), *x->info()->clone());
+    Window win = calculate_max_window(*x->info(), Steps(vec_size_x));
+    ICLKernel::configure_internal(win);
 
     _config_id = "select_";
     _config_id += string_from_data_type(x->info()->data_type());
@@ -161,12 +123,12 @@ void CLSelectKernel::configure(const CLCompileContext &compile_context, const IC
     _config_id += support::cpp11::to_string(x->info()->dimension(1));
     _config_id += "_";
     _config_id += support::cpp11::to_string(x->info()->dimension(2));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLSelectKernel::validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(c, x, y, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(c->clone().get(), x->clone().get(), y->clone().get(), output->clone().get()).first);
     return Status{};
 }
 
