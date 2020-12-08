@@ -73,4 +73,15 @@
 #include "src/core/NEON/wrapper/intrinsics/tanh.h"
 #include "src/core/NEON/wrapper/intrinsics/tbl.h"
 
+#if defined(__ARM_FEATURE_SVE)
+#include "src/core/NEON/wrapper/intrinsics/svcnt.h"
+#include "src/core/NEON/wrapper/intrinsics/svcvt.h"
+#include "src/core/NEON/wrapper/intrinsics/svdup_n.h"
+#include "src/core/NEON/wrapper/intrinsics/svexp.h"
+#include "src/core/NEON/wrapper/intrinsics/svlog.h"
+#include "src/core/NEON/wrapper/intrinsics/svptrue.h"
+#include "src/core/NEON/wrapper/intrinsics/svsin.h"
+#include "src/core/NEON/wrapper/intrinsics/svwhilelt.h"
+#endif /* defined(__ARM_FEATURE_SVE) */
+
 #endif /* ARM_COMPUTE_WRAPPER_INTRINSICS_H */

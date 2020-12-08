@@ -25,6 +25,10 @@
 #define ARM_COMPUTE_SVEMATH_H
 
 #if defined(__ARM_FEATURE_SVE)
+#include "src/core/NEON/wrapper/intrinsics/svcvt.h"
+#include "src/core/NEON/wrapper/intrinsics/svdup_n.h"
+#include "src/core/NEON/wrapper/intrinsics/svreinterpret.h"
+#include "src/core/common/StdTypes.h"
 #include <arm_sve.h>
 #include <array>
 
@@ -109,6 +113,64 @@ svfloat16_t svinv_f16_z(svbool_t pg, svfloat16_t x);
  * @return The calculated logarithm.
  */
 svfloat16_t svlog_f16_z(svbool_t pg, svfloat16_t x);
+
+/** Calculate inverse square root.
+ *
+ * @param[in] pg  Input reciprocal.
+ * @param[in] val Input value.
+ *
+ * @return The calculated inverse square root.
+ */
+template <typename VectorType>
+inline VectorType svinvsqrt(svbool_t pg, VectorType val)
+{
+    auto sqrt_reciprocal = svrsqrte(val);
+    sqrt_reciprocal      = svmul_z(pg, svrsqrts(svmul_z(pg, val, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
+    sqrt_reciprocal      = svmul_z(pg, svrsqrts(svmul_z(pg, val, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
+    return sqrt_reciprocal;
+}
+
+/** Calculate sine.
+ *
+ * @param[in] pg  Input reciprocal.
+ * @param[in] val Input vector value in radians, F32 format.
+ *
+ * @return The calculated sine.
+ */
+svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val);
+
+/** Calculate sine.
+ *
+ * @param[in] pg  Input reciprocal.
+ * @param[in] val Input vector value in radians, F16 format.
+ *
+ * @return The calculated sine.
+ */
+svfloat16_t svsin_f16_z(svbool_t pg, svfloat16_t val);
+
+/** Calculate n power of a number.
+ *
+ * pow(x,n) = e^(n*log(x))
+ *
+ * @param[in] pg Input reciprocal.
+ * @param[in] a  Input vector value in F32 format.
+ * @param[in] b  Powers to raise the input to.
+ *
+ * @return The calculated power.
+ */
+svfloat32_t svpow_f32_z(svbool_t pg, svfloat32_t a, svfloat32_t b);
+
+/** Calculate n power of a number.
+ *
+ * pow(x,n) = e^(n*log(x))
+ *
+ * @param[in] pg Input reciprocal.
+ * @param[in] a  Input vector value in F16 format.
+ * @param[in] b  Powers to raise the input to.
+ *
+ * @return The calculated power.
+ */
+svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b);
 
 } // namespace arm_compute
 #include "src/core/NEON/SVEMath.inl"
