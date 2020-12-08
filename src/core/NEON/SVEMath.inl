@@ -308,15 +308,15 @@ inline svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b)
 #if defined(__ARM_FEATURE_SVE2)
     auto pg_top = pg;
     auto a_top  = svcvtlt_f32_x(pg, a);
-    auto b_top  = svcvtlt_f32_x(pg, b)
+    auto b_top  = svcvtlt_f32_x(pg, b);
 #else  /* defined(__ARM_FEATURE_SVE2) */
     auto pg_top = svptrue_b16();
     auto a_top  = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(a))));
     auto b_top  = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(b))));
 #endif /* defined(__ARM_FEATURE_SVE2) */
 
-                  auto res_bottom = svpow_f32_z(pg, a_bottom, b_bottom);
-    auto     res_top    = svpow_f32_z(pg_top, a_top, b_top);
+    auto res_bottom = svpow_f32_z(pg, a_bottom, b_bottom);
+    auto res_top    = svpow_f32_z(pg_top, a_top, b_top);
 
 #if defined(__ARM_FEATURE_SVE2)
     return svcvtnt_f16_m(svcvt_f16_z(pg, res_bottom), pg_top, res_top);

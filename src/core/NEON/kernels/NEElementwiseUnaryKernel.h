@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,26 +78,17 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
-private:
-    /** Common signature for all the specialised arithmetic functions
+    /** Common signature for all the specialised elementwise unary micro-kernels
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using ElementwiseUnaryPtr = void (NEElementwiseUnaryKernel::*)(const Window &window);
+    using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary)>::type;
 
-    /** Template function to run elementwise unary operation
-     *
-     * @tparam ScalarType Scalar datatype
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename ScalarType>
-    void elementwise_op(const Window &window);
-
-    ElementwiseUnaryPtr _func;
-    const ITensor      *_input;
-    ITensor            *_output;
-    ElementWiseUnary    _op;
+private:
+    ElementwiseUnaryUkernelPtr _func;
+    const ITensor             *_input;
+    ITensor                   *_output;
+    ElementWiseUnary           _op;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEELEMENTWISEUNARYKERNEL_H */
