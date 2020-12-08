@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,6 +80,7 @@
 #include "src/core/NEON/wrapper/intrinsics/svexp.h"
 #include "src/core/NEON/wrapper/intrinsics/svlog.h"
 #include "src/core/NEON/wrapper/intrinsics/svptrue.h"
+#include "src/core/NEON/wrapper/intrinsics/svqadd.h"
 #include "src/core/NEON/wrapper/intrinsics/svsin.h"
 #include "src/core/NEON/wrapper/intrinsics/svwhilelt.h"
 #endif /* defined(__ARM_FEATURE_SVE) */

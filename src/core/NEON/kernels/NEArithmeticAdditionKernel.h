@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,7 +88,6 @@ public:
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
-private:
     /** Common signature for all the specialised add functions
      *
      * @param[in]  input1 First input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32
@@ -97,10 +96,12 @@ private:
      * @param[in]  policy Overflow policy.
      * @param[in]  window Region on which to execute the kernel.
      */
-    using AddFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const Window &window);
+    using ArithmeticAdditionKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+
+private:
     /** Add function to use for the particular tensor types passed to configure() */
-    AddFunction *_func;
-    ConvertPolicy _policy;
+    ArithmeticAdditionKernelPtr _func;
+    ConvertPolicy               _policy;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEARITHMETICADDITIONKERNEL_H */

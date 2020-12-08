@@ -66,7 +66,7 @@ vars.AddVariables(
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
     PathVariable("external_tests_dir", "Add examples, benchmarks and tests to the tests suite", "", PathVariable.PathAccept),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
-    ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32"]),
+    ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]),
     ("toolchain_prefix", "Override the toolchain prefix", ""),
     ("compiler_prefix", "Override the compiler prefix", ""),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
@@ -306,6 +306,8 @@ if env['data_type_support']:
         env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_SIGNED_KERNELS'])
     if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
         env.Append(CXXFLAGS = ['-DENABLE_QSYMM16_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'integer']):
+        env.Append(CXXFLAGS = ['-DENABLE_INTEGER_KERNELS'])
 
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])

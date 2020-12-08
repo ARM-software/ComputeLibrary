@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ namespace arm_compute
 {
 /** Calculate exponent.
  *
- * @param[in] pg  Input reciprocal.
+ * @param[in] pg  Input predicate.
  * @param[in] val Input vector value in F32 format.
  *
  * @return The calculated exponent.
@@ -45,7 +45,7 @@ svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t val);
 
 /** Calculate reciprocal.
  *
- * @param[in] pg Input reciprocal.
+ * @param[in] pg Input predicate.
  * @param[in] x  Input value.
  *
  * @return The calculated reciprocal.
@@ -54,7 +54,7 @@ svfloat32_t svinv_f32_z(svbool_t pg, svfloat32_t x);
 
 /** Calculate logarithm
  *
- * @param[in] pg Input reciprocal.
+ * @param[in] pg Input predicate.
  * @param[in] x  Input vector value in F32 format.
  *
  * @return The calculated logarithm.
@@ -67,7 +67,7 @@ svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x);
  *
  * @note We clamp x to [-5,5] to avoid overflowing issues.
  *
- * @param[in] pg  Input reciprocal.
+ * @param[in] pg  Input predicate.
  * @param[in] val Input vector value in F32 format.
  *
  * @return The calculated Hyperbolic Tangent.
@@ -80,7 +80,7 @@ svfloat32_t svtanh_f32_z(svbool_t pg, svfloat32_t val);
  *
  * @note We clamp x to [-5,5] to avoid overflowing issues.
  *
- * @param[in] pg  Input reciprocal.
+ * @param[in] pg  Input predicate.
  * @param[in] val Input vector value in F16 format.
  *
  * @return The calculated Hyperbolic Tangent.
@@ -89,7 +89,7 @@ svfloat16_t svtanh_f16_z(svbool_t pg, svfloat16_t val);
 
 /** Calculate exponential
  *
- * @param[in] pg Input reciprocal.
+ * @param[in] pg Input predicate.
  * @param[in] x  Input vector value in F16 format.
  *
  * @return The calculated exponent.
@@ -98,7 +98,7 @@ svfloat16_t svexp_f16_z(svbool_t pg, svfloat16_t x);
 
 /** Calculate reciprocal.
  *
- * @param[in] pg Input reciprocal.
+ * @param[in] pg Input predicate.
  * @param[in] x  Input value.
  *
  * @return The calculated reciprocal.
@@ -107,7 +107,7 @@ svfloat16_t svinv_f16_z(svbool_t pg, svfloat16_t x);
 
 /** Calculate logarithm
  *
- * @param[in] pg Input reciprocal.
+ * @param[in] pg Input predicate.
  * @param[in] x  Input vector value in F32 format.
  *
  * @return The calculated logarithm.
@@ -116,7 +116,7 @@ svfloat16_t svlog_f16_z(svbool_t pg, svfloat16_t x);
 
 /** Calculate inverse square root.
  *
- * @param[in] pg  Input reciprocal.
+ * @param[in] pg  Input predicate.
  * @param[in] val Input value.
  *
  * @return The calculated inverse square root.
@@ -132,7 +132,7 @@ inline VectorType svinvsqrt(svbool_t pg, VectorType val)
 
 /** Calculate sine.
  *
- * @param[in] pg  Input reciprocal.
+ * @param[in] pg  Input predicate.
  * @param[in] val Input vector value in radians, F32 format.
  *
  * @return The calculated sine.
@@ -141,7 +141,7 @@ svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val);
 
 /** Calculate sine.
  *
- * @param[in] pg  Input reciprocal.
+ * @param[in] pg  Input predicate.
  * @param[in] val Input vector value in radians, F16 format.
  *
  * @return The calculated sine.
@@ -152,7 +152,7 @@ svfloat16_t svsin_f16_z(svbool_t pg, svfloat16_t val);
  *
  * pow(x,n) = e^(n*log(x))
  *
- * @param[in] pg Input reciprocal.
+ * @param[in] pg Input predicate.
  * @param[in] a  Input vector value in F32 format.
  * @param[in] b  Powers to raise the input to.
  *
@@ -164,7 +164,7 @@ svfloat32_t svpow_f32_z(svbool_t pg, svfloat32_t a, svfloat32_t b);
  *
  * pow(x,n) = e^(n*log(x))
  *
- * @param[in] pg Input reciprocal.
+ * @param[in] pg Input predicate.
  * @param[in] a  Input vector value in F16 format.
  * @param[in] b  Powers to raise the input to.
  *

@@ -256,6 +256,8 @@ if env['neon']:
         core_files += Glob('src/core/NEON/kernels/*/impl/*/qasymm8_signed.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
         core_files += Glob('src/core/NEON/kernels/*/impl/*/qsymm16.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'integer']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/*/integer.cpp')
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')

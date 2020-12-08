@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,5 +82,15 @@
 #define REGISTER_QSYMM16_NEON(func_name) nullptr
 #define REGISTER_QSYMM16_SVE(func_name) nullptr
 #endif /* defined(ENABLE_QSYMM16_KERNELS) */
+
+#if defined(ENABLE_INTEGER_KERNELS)
+#if defined(__ARM_FEATURE_SVE)
+#define REGISTER_INTEGER_SVE(func_name) &(func_name)
+#endif /* defined(__ARM_FEATURE_SVE) */
+#define REGISTER_INTEGER_NEON(func_name) &(func_name)
+#else /* defined(ENABLE_INTEGER_KERNELS) */
+#define REGISTER_INTEGER_NEON(func_name) nullptr
+#define REGISTER_INTEGER_SVE(func_name) nullptr
+#endif /* defined(ENABLE_INTEGER_KERNELS) */
 
 #endif /* SRC_CORE_COMMON_REGISTRARS_H */
