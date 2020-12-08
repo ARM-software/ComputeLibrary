@@ -90,7 +90,7 @@ public:
 
             // Set the specified dimension and increase the number of dimensions if
             // necessary
-            Dimensions::set(dimension, value);
+            Dimensions::set(dimension, value, false);
 
             // Correct number dimensions to ignore trailing dimensions of size 1
             if(apply_dim_correction)

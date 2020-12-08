@@ -338,7 +338,6 @@ __kernel void depthwise_convolution_3x3(
 #endif //defined(HAS_BIAS)
 )
 {
-    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 
@@ -351,7 +350,8 @@ __kernel void depthwise_convolution_3x3(
 
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
 
-    __global uchar *src_addr = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    __global uchar *src_addr = src_ptr + get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + get_global_id(2) * src_step_z - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) *
+                               (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
     // Load the weights
     float3 weights_values0 = vload3(0, (__global float *)(weights_addr + 0 * weights_stride_y));
@@ -501,7 +501,6 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
 #endif //defined(HAS_BIAS)
 )
 {
-    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 
@@ -515,7 +514,8 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
     const int batch   = get_global_id(2) / DST_CHANNELS;
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
-    __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    __global uchar *src_addr     = src_ptr + get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + get_global_id(2) * src_step_z - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) *
+                                   (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
 #if(DILATION_X == 1 && DILATION_Y == 1)
     // Load the weights
@@ -547,13 +547,13 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
 #else /* DILATION_X==1 && DILATION_Y==1 */
 
     //3x3 Convolution of elements starting in 0th row
-    pixels0 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src.stride_x, src.stride_y, 0, weights_addr, weights_stride_y);
+    pixels0 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 1st row
-    pixels1 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src.stride_x, src.stride_y, 1, weights_addr, weights_stride_y);
+    pixels1 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src_stride_x, src_stride_y, 1, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels2 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src.stride_x, src.stride_y, 2, weights_addr, weights_stride_y);
+    pixels2 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 3rd row
-    pixels3 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src.stride_x, src.stride_y, 3, weights_addr, weights_stride_y);
+    pixels3 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src_stride_x, src_stride_y, 3, weights_addr, weights_stride_y);
 
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
@@ -621,7 +621,6 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
 #endif //defined(HAS_BIAS)
 )
 {
-    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 
@@ -633,7 +632,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     const int batch   = get_global_id(2) / DST_CHANNELS;
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
-    __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    __global uchar *src_addr     = src_ptr + get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + get_global_id(2) * src_step_z - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) *
+                                   (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
 #if(DILATION_X == 1 && DILATION_Y == 1)
 
@@ -664,9 +664,9 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
 #else  /* DILATION_X==1 && DILATION_Y==1 */
 
     //3x3 Convolution of elements starting in 0th row
-    pixels0 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(src_addr, src.stride_x, src.stride_y, 0, weights_addr, weights_stride_y);
+    pixels0 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels1 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(src_addr, src.stride_x, src.stride_y, 2, weights_addr, weights_stride_y);
+    pixels1 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
 #ifdef HAS_BIAS
@@ -997,16 +997,16 @@ inline half4 convolution1x3_stride_3_f16(__global const uchar *left_pixel,
  * @return a half4 containing 4 convoluted values.
  */
 inline half4 convolution3x3_f16(
-    Image     *src,
+    __global uchar *src, uint src_stride_y,
     const half mat0, const half mat1, const half mat2,
     const half mat3, const half mat4, const half mat5,
     const half mat6, const half mat7, const half mat8)
 {
     half4 pixels;
 
-    pixels = convolution1x3_f16(offset(src, 0, 0), mat0, mat1, mat2);
-    pixels += convolution1x3_f16(offset(src, 0, DILATION_Y), mat3, mat4, mat5);
-    pixels += convolution1x3_f16(offset(src, 0, DILATION_Y * 2), mat6, mat7, mat8);
+    pixels = convolution1x3_f16(src, mat0, mat1, mat2);
+    pixels += convolution1x3_f16(src + DILATION_Y * src_stride_y, mat3, mat4, mat5);
+    pixels += convolution1x3_f16(src + DILATION_Y * 2 * src_stride_y, mat6, mat7, mat8);
 
     return pixels;
 }
@@ -1059,7 +1059,6 @@ __kernel void depthwise_convolution_3x3_f16(
 #endif //defined(HAS_BIAS)
 )
 {
-    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 #if defined(HAS_BIAS)
@@ -1070,7 +1069,8 @@ __kernel void depthwise_convolution_3x3_f16(
     const int channel = get_global_id(2) % DST_CHANNELS;
     const int batch   = get_global_id(2) / DST_CHANNELS;
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
-    src.ptr -= batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z + (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    __global uchar *src_addr     = src_ptr + get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + get_global_id(2) * src_step_z - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) *
+                                   (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
 
     uchar3 offset         = (uchar3)(0, 1, 2) * (uchar3)weights_stride_y;
@@ -1078,7 +1078,7 @@ __kernel void depthwise_convolution_3x3_f16(
     half3 weights_values1 = vload3(0, (__global half *)(weights_addr + offset.s1));
     half3 weights_values2 = vload3(0, (__global half *)(weights_addr + offset.s2));
 
-    half4 pixels = convolution3x3_f16(&src, weights_values0.s0, weights_values0.s1, weights_values0.s2,
+    half4 pixels = convolution3x3_f16(src_addr, src_stride_y, weights_values0.s0, weights_values0.s1, weights_values0.s2,
                                       weights_values1.s0, weights_values1.s1, weights_values1.s2,
                                       weights_values2.s0, weights_values2.s1, weights_values2.s2);
 #if defined(HAS_BIAS)
@@ -1137,7 +1137,6 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
 #endif //defined(HAS_BIAS)
 )
 {
-    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 
@@ -1158,7 +1157,8 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
 
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
-    __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    __global uchar *src_addr     = src_ptr + get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + get_global_id(2) * src_step_z - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) *
+                                   (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
 #if(DILATION_X == 1 && DILATION_Y == 1)
     // Load the weights
@@ -1190,13 +1190,13 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
 #else /* DILATION_X==1 && DILATION_Y==1 */
 
     //3x3 Convolution of elements starting in 0th row
-    pixels0 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src.stride_x, src.stride_y, 0, weights_addr, weights_stride_y);
+    pixels0 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 1st row
-    pixels1 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src.stride_x, src.stride_y, 1, weights_addr, weights_stride_y);
+    pixels1 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src_stride_x, src_stride_y, 1, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels2 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src.stride_x, src.stride_y, 2, weights_addr, weights_stride_y);
+    pixels2 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 3rd row
-    pixels3 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src.stride_x, src.stride_y, 3, weights_addr, weights_stride_y);
+    pixels3 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src_stride_x, src_stride_y, 3, weights_addr, weights_stride_y);
 
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
@@ -1260,7 +1260,6 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
 #endif //defined(HAS_BIAS)
 )
 {
-    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 
@@ -1279,7 +1278,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
 
     // Load relevant input and weights data ( Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
-    __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    __global uchar *src_addr     = src_ptr + get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + get_global_id(2) * src_step_z - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) *
+                                   (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
 #if(DILATION_X == 1 && DILATION_Y == 1)
 
@@ -1309,9 +1309,9 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
 
 #else  /* DILATION_X==1 && DILATION_Y==1 */
     //3x3 Convolution of elements starting in 0th row
-    pixels0 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src.stride_x, src.stride_y, 0, weights_addr, weights_stride_y);
+    pixels0 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels1                  = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src.stride_x, src.stride_y, 2, weights_addr, weights_stride_y);
+    pixels1                  = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
 #ifdef HAS_BIAS

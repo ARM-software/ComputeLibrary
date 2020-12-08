@@ -63,7 +63,7 @@ RelativeTolerance<half_float::half>  rel_tolerance_f16(half_float::half(0.01f));
 constexpr float                      abs_tolerance_f16(0.03f);
 
 /** Width values to test - Precommit */
-const auto width_values_precommit = framework::dataset::make("width", { 37U } );
+const auto width_values_precommit = framework::dataset::make("width", { 1U, 17U, 32U } );
 
 /** Width values to test - Nightly */
 const auto width_values_nightly = framework::dataset::make("width", { 53U, 47U } );

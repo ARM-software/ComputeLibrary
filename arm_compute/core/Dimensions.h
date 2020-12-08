@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,14 +68,19 @@ public:
 
     /** Accessor to set the value of one of the dimensions.
      *
-     * @param[in] dimension Dimension for which the value is set.
-     * @param[in] value     Value to be set for the dimension.
+     * @param[in] dimension         Dimension for which the value is set.
+     * @param[in] value             Value to be set for the dimension.
+     * @param[in] increase_dim_unit (Optional) Set to true if unit dimension increase the number of dimensions (e.g. for Coordinates), false otherwise (e.g. for TensorShapes)
      */
-    void set(size_t dimension, T value)
+    void set(size_t dimension, T value, bool increase_dim_unit = true)
     {
         ARM_COMPUTE_ERROR_ON(dimension >= num_max_dimensions);
-        _id[dimension]  = value;
-        _num_dimensions = std::max(_num_dimensions, dimension + 1);
+        _id[dimension] = value;
+        // Don't increase the number of dimensions if the new dimension is 1
+        if(increase_dim_unit || value != 1)
+        {
+            _num_dimensions = std::max(_num_dimensions, dimension + 1);
+        }
     }
     /** Alias to access the size of the first dimension */
     T x() const
