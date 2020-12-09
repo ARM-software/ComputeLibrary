@@ -141,7 +141,6 @@
 #include "src/core/CL/kernels/CLThresholdKernel.h"
 #include "src/core/CL/kernels/CLTileKernel.h"
 #include "src/core/CL/kernels/CLTransposeKernel.h"
-#include "src/core/CL/kernels/CLUpsampleLayerKernel.h"
 #include "src/core/CL/kernels/CLWarpAffineKernel.h"
 #include "src/core/CL/kernels/CLWarpPerspectiveKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"

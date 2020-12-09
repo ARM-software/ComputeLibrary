@@ -1459,32 +1459,6 @@ private:
     StridedSliceLayerInfo _info;
 };
 
-/** Upsample Layer */
-class UpsampleLayer final : public ILayer
-{
-public:
-    /** Construct a Upsample layer.
-     *
-     * @param[in] info              Stride info
-     * @param[in] upsampling_policy Upsampling policy
-     */
-    UpsampleLayer(Size2D info, InterpolationPolicy upsampling_policy)
-        : _info(info), _upsampling_policy(upsampling_policy)
-    {
-    }
-
-    NodeID create_layer(IStream &s) override
-    {
-        NodeParams  common_params = { name(), s.hints().target_hint };
-        NodeIdxPair input         = { s.tail_node(), 0 };
-        return GraphBuilder::add_upsample_node(s.graph(), common_params, input, _info, _upsampling_policy);
-    }
-
-private:
-    Size2D              _info;
-    InterpolationPolicy _upsampling_policy;
-};
-
 /** YOLO Layer */
 class YOLOLayer final : public ILayer
 {

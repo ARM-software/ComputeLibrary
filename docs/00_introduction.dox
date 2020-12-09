@@ -96,9 +96,11 @@ v21.02 Public major release
    - NEGEMMTranspose1xW
    - NEComputeAllAnchors / CLComputeAllAnchors
    - NEGEMMAssemblyDispatch
+   - NEUpsampleLayer / CLUpsampleLayer
  - Removed kernels:
    - NEGEMMMatrixVectorMultiplyKernel
    - NELocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedMatrixMultiplyKernel
+   - NEUpsampleLayerKernel / CLUpsampleLayerKernel
 
 v20.11 Public major release
  - Various bug fixes.
@@ -439,7 +441,7 @@ v20.08 Public major release
    - @ref NEROIPoolingLayerKernel
    - @ref NEROIAlignLayerKernel
    - NEYOLOLayerKernel
-   - @ref NEUpsampleLayerKernel
+   - NEUpsampleLayerKernel
    - @ref NEFloorKernel
    - @ref NEWidthConcatenateLayerKernel
    - @ref NEDepthConcatenateLayerKernel
@@ -500,7 +502,7 @@ v20.05 Public major release
      - @ref CLReduceMean
      - @ref NEScale
      - @ref NEScaleKernel
-     - @ref NEUpsampleLayer
+     - NEUpsampleLayer
      - @ref NECast
      - @ref NEReductionOperation
      - @ref NEReduceMean
@@ -893,7 +895,7 @@ v18.11 Public major release
     - @ref NEReduceMean
     - @ref NEReorgLayer / @ref NEReorgLayerKernel
     - @ref NEPriorBoxLayer / @ref NEPriorBoxLayerKernel
-    - @ref NEUpsampleLayer / @ref NEUpsampleLayerKernel
+    - NEUpsampleLayer / NEUpsampleLayerKernel
     - NEYOLOLayer / NEYOLOLayerKernel
  - New OpenCL kernels / functions:
     - @ref CLBatchToSpaceLayer / @ref CLBatchToSpaceLayerKernel
@@ -910,7 +912,7 @@ v18.11 Public major release
     - @ref CLSlice
     - @ref CLSplit
     - @ref CLStridedSlice / @ref CLStridedSliceKernel
-    - @ref CLUpsampleLayer / @ref CLUpsampleLayerKernel
+    - CLUpsampleLayer / CLUpsampleLayerKernel
     - CLYOLOLayer / CLYOLOLayerKernel
  - New CPP kernels / functions:
     - @ref CPPBoxWithNonMaximaSuppressionLimit / @ref CPPBoxWithNonMaximaSuppressionLimitKernel

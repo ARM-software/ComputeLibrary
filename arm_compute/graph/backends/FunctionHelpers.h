@@ -1619,7 +1619,7 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
 
     // Create and configure function
     auto func = std::make_unique<ResizeLayerFunction>();
-    func->configure(input, output, ScaleKernelInfo{ policy, BorderMode::CONSTANT });
+    func->configure(input, output, ScaleKernelInfo{ policy, BorderMode::CONSTANT, PixelValue(), SamplingPolicy::CENTER, false, false });
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -1836,51 +1836,6 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
                                << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
-                               << std::endl);
-
-    return RETURN_UNIQUE_PTR(func);
-}
-
-/** Create a backend Upsample layer function
- *
- * @tparam UpsampleLayerFunction Backend Upsample function
- * @tparam TargetInfo            Target-specific information
- *
- * @param[in] node Node to create the backend function for
- * @param[in] ctx  Graph context
- *
- * @return Backend Upsample layer function
- */
-template <typename UpsampleLayerFunction, typename TargetInfo>
-std::unique_ptr<IFunction> create_upsample_layer(UpsampleLayerNode &node, GraphContext &ctx)
-{
-    ARM_COMPUTE_UNUSED(ctx);
-    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
-
-    // Extract IO and info
-    typename TargetInfo::TensorType *input             = get_backing_tensor<TargetInfo>(node.input(0));
-    typename TargetInfo::TensorType *output            = get_backing_tensor<TargetInfo>(node.output(0));
-    const Size2D                     info              = node.info();
-    const InterpolationPolicy        upsampling_policy = node.upsampling_policy();
-    ARM_COMPUTE_ERROR_ON(upsampling_policy != InterpolationPolicy::NEAREST_NEIGHBOR);
-    ARM_COMPUTE_ERROR_ON(info.x() != 2 || info.y() != 2);
-    ARM_COMPUTE_ERROR_ON(input == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
-
-    // Create and configure function
-    auto func = std::make_unique<UpsampleLayerFunction>();
-    func->configure(input, output, info, upsampling_policy);
-
-    // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Type: " << node.type()
-                               << " Target: " << TargetInfo::TargetType
-                               << " Data Type: " << input->info()->data_type()
-                               << " Input shape: " << input->info()->tensor_shape()
-                               << " Output shape: " << output->info()->tensor_shape()
-                               << " Strides: " << info
-                               << " Upsampling policy: " << upsampling_policy
                                << std::endl);
 
     return RETURN_UNIQUE_PTR(func);

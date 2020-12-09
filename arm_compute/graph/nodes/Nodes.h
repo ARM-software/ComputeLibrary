@@ -67,6 +67,5 @@
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
 #include "arm_compute/graph/nodes/StackLayerNode.h"
 #include "arm_compute/graph/nodes/StridedSliceLayerNode.h"
-#include "arm_compute/graph/nodes/UpsampleLayerNode.h"
 
 #endif /* ARM_COMPUTE_GRAPH_NODES_H */

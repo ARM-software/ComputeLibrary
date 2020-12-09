@@ -73,7 +73,6 @@ class SliceLayerNode;
 class SplitLayerNode;
 class StackLayerNode;
 class StridedSliceLayerNode;
-class UpsampleLayerNode;
 } // namespace graph
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_GRAPH_NODES_FWD_H */

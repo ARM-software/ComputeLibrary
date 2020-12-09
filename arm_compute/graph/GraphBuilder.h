@@ -571,17 +571,6 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_strided_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends, BiStrides &strides, StridedSliceLayerInfo info);
-    /** Adds an upsample layer to the graph
-     *
-     * @param[in] g                 Graph to add the node to
-     * @param[in] params            Common node parameters
-     * @param[in] input             Input to the yolo layer node as a NodeID-Index pair
-     * @param[in] info              Upsample layer stride info
-     * @param[in] upsampling_policy Upsampling policy used
-     *
-     * @return Node ID of the created node, EmptyNodeID in case of error
-     */
-    static NodeID add_upsample_node(Graph &g, NodeParams params, NodeIdxPair input, Size2D info, InterpolationPolicy upsampling_policy);
     /** Adds a yolo layer to the graph
      *
      * @param[in] g        Graph to add the node to

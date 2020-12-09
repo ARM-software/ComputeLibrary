@@ -145,7 +145,6 @@
 #include "arm_compute/runtime/NEON/functions/NETile.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/NEON/functions/NEUnstack.h"
-#include "arm_compute/runtime/NEON/functions/NEUpsampleLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpAffine.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"

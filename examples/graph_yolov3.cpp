@@ -187,7 +187,7 @@ public:
                     0.000001f)
                 .set_name("conv2d_59/BatchNorm")
                 << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d_60/LeakyRelu")
-                << UpsampleLayer(Size2D(2, 2), InterpolationPolicy::NEAREST_NEIGHBOR).set_name("Upsample_60");
+                << ResizeLayer(InterpolationPolicy::NEAREST_NEIGHBOR, 2, 2).set_name("Upsample_60");
         SubStream concat_1(route_1);
         concat_1 << ConcatLayer(std::move(route_1), std::move(intermediate_layers.second)).set_name("Route1")
                  << ConvolutionLayer(
@@ -298,7 +298,7 @@ public:
                     0.000001f)
                 .set_name("conv2d_66/BatchNorm")
                 << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d_68/LeakyRelu")
-                << UpsampleLayer(Size2D(2, 2), InterpolationPolicy::NEAREST_NEIGHBOR).set_name("Upsample_68");
+                << ResizeLayer(InterpolationPolicy::NEAREST_NEIGHBOR, 2, 2).set_name("Upsample_68");
         SubStream concat_2(route_2);
         concat_2 << ConcatLayer(std::move(route_2), std::move(intermediate_layers.first)).set_name("Route2")
                  << ConvolutionLayer(

@@ -140,7 +140,6 @@
 #include "src/core/NEON/kernels/NEThresholdKernel.h"
 #include "src/core/NEON/kernels/NETileKernel.h"
 #include "src/core/NEON/kernels/NETransposeKernel.h"
-#include "src/core/NEON/kernels/NEUpsampleLayerKernel.h"
 #include "src/core/NEON/kernels/NEWarpKernel.h"
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "src/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"

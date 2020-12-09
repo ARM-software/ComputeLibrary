@@ -125,8 +125,6 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_slice_layer<NESlice>(*polymorphic_downcast<SliceLayerNode *>(node));
         case NodeType::StridedSliceLayer:
             return detail::validate_strided_slice_layer<NEStridedSlice>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
-        case NodeType::UpsampleLayer:
-            return detail::validate_upsample_layer<NEUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
         case NodeType::EltwiseLayer:
             return detail::validate_eltwise_Layer<NEEltwiseLayerFunctions>(*polymorphic_downcast<EltwiseLayerNode *>(node));
         case NodeType::UnaryEltwiseLayer:

@@ -200,8 +200,6 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_stack_layer<NEStackLayer, NETargetInfo>(*polymorphic_downcast<StackLayerNode *>(node));
         case NodeType::StridedSliceLayer:
             return detail::create_strided_slice_layer<NEStridedSlice, NETargetInfo>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
-        case NodeType::UpsampleLayer:
-            return detail::create_upsample_layer<NEUpsampleLayer, NETargetInfo>(*polymorphic_downcast<UpsampleLayerNode *>(node), ctx);
         default:
             return nullptr;
     }
