@@ -118,7 +118,7 @@ void CLFFT1D::configure(const CLCompileContext &compile_context, const ICLTensor
 Status CLFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, const FFT1DInfo &config)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() != 1 && input->num_channels() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(std::set<unsigned int>({ 0, 1 }).count(config.axis) == 0);
 

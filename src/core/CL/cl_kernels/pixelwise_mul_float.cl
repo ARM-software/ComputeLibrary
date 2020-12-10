@@ -105,9 +105,11 @@ __kernel void pixelwise_mul_float(
 }
 #endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(ACC_DATA_TYPE) && defined(DATA_TYPE_OUT) */
 
+#if defined(DATA_TYPE)
+
 /** Performs a pixelwise multiplication of complex float values
  *
- * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: F16/F32
  * @param[in]  in1_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -143,16 +145,21 @@ __kernel void pixelwise_mul_complex(
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load data
-    float2 vin1 = vload2(0, (__global float *)in1.ptr);
-    float2 vin2 = vload2(0, (__global float *)in2.ptr);
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    vin1 = vload2(0, (__global DATA_TYPE *)in1.ptr);
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    vin2 = vload2(0, (__global DATA_TYPE *)in2.ptr);
 
     // Perform complex multiplication
-    float2 res = { vin1.x *vin2.x - vin1.y * vin2.y, vin1.x *vin2.y + vin2.x * vin1.y };
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    res = { vin1.x *vin2.x - vin1.y * vin2.y, vin1.x *vin2.y + vin2.x * vin1.y };
 
 #if defined(ACTIVATION_TYPE)
-    vstore2(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, res, A_VAL, B_VAL), 0, (__global float *)out.ptr);
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, res, A_VAL, B_VAL), 0, (__global DATA_TYPE *)out.ptr);
 #else  // defined(ACTIVATION_TYPE)
     // Store result
-    vstore2(res, 0, (__global float *)out.ptr);
+    vstore2(res, 0, (__global DATA_TYPE *)out.ptr);
 #endif // defined(ACTIVATION_TYPE)
 }
+
+#endif // defined(DATA_TYPE)

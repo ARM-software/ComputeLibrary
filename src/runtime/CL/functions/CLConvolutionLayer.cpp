@@ -88,7 +88,7 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
         case ConvolutionMethod::FFT:
         {
             auto f = std::make_unique<CLFFTConvolutionLayer>(_memory_manager);
-            f->configure(compile_context, input, weights, biases, output, conv_info, act_info);
+            f->configure(compile_context, input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _function = std::move(f);
             break;
         }
@@ -131,7 +131,7 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         case ConvolutionMethod::FFT:
         {
             // Validate FFT-based convolution layer
-            ARM_COMPUTE_RETURN_ON_ERROR(CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math));
             break;
         }
         default:
@@ -204,7 +204,7 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
         {
             return ConvolutionMethod::DIRECT;
         }
-        if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && (CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+        if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && (CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)))
         {
             return ConvolutionMethod::FFT;
         }

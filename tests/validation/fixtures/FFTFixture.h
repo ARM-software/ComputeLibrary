@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,8 @@
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/DFT.h"
 
+#include "utils/Utils.h"
+
 #include <random>
 
 namespace arm_compute
@@ -59,8 +61,23 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        std::uniform_real_distribution<float> distribution(-5.f, 5.f);
-        library->fill(tensor, distribution, 0);
+        switch(tensor.data_type())
+        {
+            case DataType::F16:
+            {
+                arm_compute::utils::uniform_real_distribution_fp16 distribution(half(-5.0f), half(5.0f));
+                library->fill(tensor, distribution, 0);
+                break;
+            }
+            case DataType::F32:
+            {
+                std::uniform_real_distribution<float> distribution(-5.0f, 5.0f);
+                library->fill(tensor, distribution, 0);
+                break;
+            }
+            default:
+                library->fill_tensor_uniform(tensor, 0);
+        }
     }
 
     TensorType compute_target(const TensorShape &shape, DataType data_type)
@@ -134,9 +151,15 @@ protected:
     {
         switch(tensor.data_type())
         {
+            case DataType::F16:
+            {
+                arm_compute::utils::uniform_real_distribution_fp16 distribution(half(-1.0f), half(1.0f));
+                library->fill(tensor, distribution, i);
+                break;
+            }
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -166,7 +189,7 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        conv.configure(&src, &weights, &bias, &dst, info, act_info);
+        conv.configure(&src, &weights, &bias, &dst, info, act_info, _data_type == DataType::F16);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);

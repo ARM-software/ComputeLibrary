@@ -104,14 +104,17 @@ CLFFTConvolutionLayer::CLFFTConvolutionLayer(std::shared_ptr<IMemoryManager> mem
 }
 
 void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                      const ActivationLayerInfo &act_info)
+                                      const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info);
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info, enable_fast_math);
 }
 
 void CLFFTConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                      const ActivationLayerInfo &act_info)
+                                      const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
+    ARM_COMPUTE_UNUSED(enable_fast_math);
+    ARM_COMPUTE_ERROR_THROW_ON(CLFFTConvolutionLayer::validate(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info, act_info, enable_fast_math));
+
     _original_weights = weights;
     _original_bias    = biases;
 
@@ -265,9 +268,10 @@ void CLFFTConvolutionLayer::configure(const CLCompileContext &compile_context, I
 }
 
 Status CLFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                       const ActivationLayerInfo &act_info)
+                                       const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON((input->data_type() == DataType::F16) && !enable_fast_math);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
     // Get indices for the width and height
@@ -287,9 +291,8 @@ Status CLFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorIn
     // Validate biases
     if(biases != nullptr)
     {
-        const size_t idx_channels = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channels] != biases->tensor_shape().x());
+        ARM_COMPUTE_RETURN_ERROR_ON(weights->tensor_shape()[3] != biases->tensor_shape().x());
     }
 
     // Checks performed when output is configured

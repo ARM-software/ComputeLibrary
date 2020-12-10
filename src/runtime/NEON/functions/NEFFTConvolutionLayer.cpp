@@ -103,8 +103,10 @@ NEFFTConvolutionLayer::NEFFTConvolutionLayer(std::shared_ptr<IMemoryManager> mem
 NEFFTConvolutionLayer::~NEFFTConvolutionLayer() = default;
 
 void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                      const ActivationLayerInfo &act_info)
+                                      const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
+    ARM_COMPUTE_UNUSED(enable_fast_math);
+
     _original_weights = weights;
     _original_bias    = biases;
 
@@ -258,8 +260,10 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
 }
 
 Status NEFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                       const ActivationLayerInfo &act_info)
+                                       const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
+    ARM_COMPUTE_UNUSED(enable_fast_math);
+
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 

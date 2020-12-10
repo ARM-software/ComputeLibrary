@@ -64,8 +64,10 @@ const auto ActivationFunctionsSmallDataset = framework::dataset::make("Activatio
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
 });
 
-RelativeTolerance<float> tolerance_f32(0.1f);   /**< Relative tolerance value for FP32 */
-constexpr float          tolerance_num = 0.07f; /**< Tolerance number */
+RelativeTolerance<float> tolerance_f32(0.1f);       /**< Relative tolerance value for FP32 */
+RelativeTolerance<half>  tolerance_f16(half(0.1f)); /**< Relative tolerance value for FP16 */
+constexpr float          tolerance_num_f32 = 0.07f; /**< Tolerance number for FP32*/
+constexpr float          tolerance_num_f16 = 0.15f; /**< Tolerance number for FP32*/
 
 } // namespace
 TEST_SUITE(CL)
@@ -108,9 +110,16 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFFT1DFixture<float>, framework::DatasetMode::ALL, combine(shapes_1d, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
 }
 TEST_SUITE_END() // FP32
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFFT1DFixture<half>, framework::DatasetMode::ALL, combine(shapes_1d, framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
+}
+TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
 TEST_SUITE_END() // FFT1D
@@ -149,9 +158,16 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFFT2DFixture<float>, framework::DatasetMode::ALL, combine(shapes_2d, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
 }
 TEST_SUITE_END() // FP32
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFFT2DFixture<half>, framework::DatasetMode::ALL, combine(shapes_2d, framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
+}
+TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // FFT2D
 
@@ -168,9 +184,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<float>, framework:
                                                                                                                  ActivationFunctionsSmallDataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
 }
 TEST_SUITE_END() // FP32
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFFTConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                ActivationFunctionsSmallDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
+}
+TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // FFTConvolutionLayer
 
