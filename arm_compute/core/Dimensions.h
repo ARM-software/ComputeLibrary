@@ -70,7 +70,7 @@ public:
      *
      * @param[in] dimension         Dimension for which the value is set.
      * @param[in] value             Value to be set for the dimension.
-     * @param[in] increase_dim_unit (Optional) Set to true if unit dimension increase the number of dimensions (e.g. for Coordinates), false otherwise (e.g. for TensorShapes)
+     * @param[in] increase_dim_unit (Optional) Set to true if new unit dimensions increase the number of dimensions (e.g. for Coordinates), false otherwise (e.g. for TensorShapes)
      */
     void set(size_t dimension, T value, bool increase_dim_unit = true)
     {

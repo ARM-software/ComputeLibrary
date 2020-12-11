@@ -145,7 +145,7 @@ inline void permute(TensorShape &shape, const PermutationVector &perm)
     for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
     {
         size_t dimension_val = (perm[i] < shape.num_dimensions()) ? shape_copy[perm[i]] : 1;
-        shape.set(i, dimension_val, false); // Avoid changes in _num_dimension
+        shape.set(i, dimension_val, false, false); // Avoid changes in _num_dimension
     }
 }
 
