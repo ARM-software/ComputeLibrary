@@ -32,6 +32,7 @@
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <arm_neon.h>
 #include <cmath>

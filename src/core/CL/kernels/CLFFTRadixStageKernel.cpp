@@ -32,6 +32,7 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 

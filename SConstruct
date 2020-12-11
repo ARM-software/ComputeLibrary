@@ -166,6 +166,10 @@ elif 'armclang' in cpp_compiler:
 else:
     env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
 
+if cpp_compiler == 'g++':
+    # Don't strip comments that could include markers
+    env.Append(CXXFLAGS = ['-C'])
+
 if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])
 

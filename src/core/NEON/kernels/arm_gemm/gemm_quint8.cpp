@@ -69,15 +69,15 @@ static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_meth
 },
 #ifdef SVE2 // Requantizing kernels include some SVE2 only instructions (SQRDMULH, SRSHL)
 {
-    GemmMethod::GEMM_HYBRID, 
+    GemmMethod::GEMM_HYBRID,
     "sve_hybrid_u8qa_dot_4x4VL",
-    [](const GemmArgs &args, const Requantize32 &qp) { return quant_hybrid_asymmetric(qp); },
+    [](const GemmArgs &, const Requantize32 &qp) { return quant_hybrid_asymmetric(qp); },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_u8qa_dot_4x4VL, uint8_t, uint8_t, Requantize32>(args, qp); }
 },
 #endif
 {
-    GemmMethod::GEMM_HYBRID, 
+    GemmMethod::GEMM_HYBRID,
     "sve_hybrid_u8u32_dot_6x4VL",
     nullptr,
     nullptr,

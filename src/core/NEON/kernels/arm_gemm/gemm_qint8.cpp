@@ -74,14 +74,14 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qs_dot_6x4VL",
-    [](const GemmArgs &args, const Requantize32 &qp) { return quant_hybrid_symmetric(qp); },
+    [](const GemmArgs &, const Requantize32 &qp) { return quant_hybrid_symmetric(qp); },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qs_dot_6x4VL, int8_t, int8_t, Requantize32>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qa_dot_4x4VL",
-    [](const GemmArgs &args, const Requantize32 &qp) { return quant_hybrid_asymmetric(qp); },
+    [](const GemmArgs &, const Requantize32 &qp) { return quant_hybrid_asymmetric(qp); },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qa_dot_4x4VL, int8_t, int8_t, Requantize32>(args, qp); }
 },

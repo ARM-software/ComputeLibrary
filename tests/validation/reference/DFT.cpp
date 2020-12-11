@@ -27,6 +27,7 @@
 #include "Permute.h"
 #include "Reverse.h"
 #include "SliceOperations.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 
