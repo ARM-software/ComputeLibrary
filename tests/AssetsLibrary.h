@@ -36,6 +36,7 @@
 #include "tests/TensorCache.h"
 #include "tests/Utils.h"
 #include "tests/framework/Exceptions.h"
+#include "utils/Utils.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -782,7 +783,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::F16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
-            std::uniform_real_distribution<float> distribution_f16(-100.f, 100.f);
+            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16{ half(-100.f), half(100.f) };
             fill(tensor, distribution_f16, seed_offset);
             break;
         }
@@ -888,8 +889,8 @@ void AssetsLibrary::fill_tensor_uniform_ranged(T                                
         case DataType::F16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
-            const auto                       converted_pairs = detail::convert_range_pair<float>(excluded_range_pairs);
-            RangedUniformDistribution<float> distribution_f16(-100.f, 100.f, converted_pairs);
+            const auto                      converted_pairs = detail::convert_range_pair<half>(excluded_range_pairs);
+            RangedUniformDistribution<half> distribution_f16(half(-100.f), half(100.f), converted_pairs);
             fill(tensor, distribution_f16, seed_offset);
             break;
         }
@@ -979,7 +980,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         }
         case DataType::F16:
         {
-            std::uniform_real_distribution<float> distribution_f16(low, high);
+            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16{ half(low), half(high) };
             fill(tensor, distribution_f16, seed_offset);
             break;
         }

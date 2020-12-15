@@ -35,8 +35,6 @@
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/DFT.h"
 
-#include "utils/Utils.h"
-
 #include <random>
 
 namespace arm_compute
@@ -65,7 +63,7 @@ protected:
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_fp16 distribution(half(-5.0f), half(5.0f));
+                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-5.0f), half(5.0f) };
                 library->fill(tensor, distribution, 0);
                 break;
             }
@@ -153,7 +151,7 @@ protected:
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_fp16 distribution(half(-1.0f), half(1.0f));
+                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-1.0f), half(1.0f) };
                 library->fill(tensor, distribution, i);
                 break;
             }

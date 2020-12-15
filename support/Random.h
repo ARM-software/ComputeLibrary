@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_MISC_RANDOM_H
 
 #include "arm_compute/core/Error.h"
+#include "utils/Utils.h"
 
 #include <random>
 #include <type_traits>
@@ -43,13 +44,14 @@ template <typename T>
 class RangedUniformDistribution
 {
 public:
-    using DT = typename std::conditional<std::is_integral<T>::value,
-          std::uniform_int_distribution<T>,
-          std::uniform_real_distribution<float>>::type;
+    static constexpr bool is_half     = std::is_same<T, half>::value;
+    static constexpr bool is_integral = std::is_integral<T>::value && !is_half;
+
+    using fp_dist     = typename std::conditional<is_half, arm_compute::utils::uniform_real_distribution_fp16, std::uniform_real_distribution<T>>::type;
+    using DT          = typename std::conditional<is_integral, std::uniform_int_distribution<T>, fp_dist>::type;
     using result_type = T;
     using range_pair  = std::pair<result_type, result_type>;
 
-public:
     /** Constructor
      *
      * @param[in] low            lowest value in the range (inclusive)
@@ -62,7 +64,7 @@ public:
         result_type clow = low;
         for(const auto &erange : exclude_ranges)
         {
-            result_type epsilon = std::is_integral<result_type>::value ? 1 : static_cast<result_type>(std::numeric_limits<float>::epsilon());
+            result_type epsilon = is_integral ? result_type(1) : result_type(std::numeric_limits<T>::epsilon());
 
             ARM_COMPUTE_ERROR_ON(clow > erange.first || clow >= erange.second);
 

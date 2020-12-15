@@ -63,9 +63,14 @@ protected:
         switch(tensor.data_type())
         {
             case DataType::F16:
+            {
+                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(lo), half(hi) };
+                library->fill(tensor, distribution, i);
+                break;
+            }
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(lo, hi);
+                std::uniform_real_distribution<float> distribution(lo, hi);
                 library->fill(tensor, distribution, i);
                 break;
             }

@@ -74,10 +74,15 @@ protected:
             {
                 switch(data_type)
                 {
-                    case DataType::F32:
                     case DataType::F16:
                     {
-                        std::uniform_real_distribution<> distribution(-2.0f, 2.0f);
+                        arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-2.0f), half(2.0f) };
+                        library->fill(tensor, distribution, i);
+                        break;
+                    }
+                    case DataType::F32:
+                    {
+                        std::uniform_real_distribution<float> distribution(-2.0f, 2.0f);
                         library->fill(tensor, distribution, i);
                         break;
                     }
