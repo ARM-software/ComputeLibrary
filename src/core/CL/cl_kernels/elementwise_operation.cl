@@ -42,8 +42,8 @@
 #define POWER(x, y) pow(x, y)
 #define PRELU(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE_OUT)0), SELECT_VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))))
 
-#define AND(x, y) (CONVERT((x && y), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)) & 1)
-#define OR(x, y) (CONVERT((x || y), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)) & 1)
+#define AND(x, y) (CONVERT((x && y), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)) & ((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))1))
+#define OR(x, y) (CONVERT((x || y), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)) & ((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))1))
 
 #define OP_FUN_NAME_STR(op) elementwise_operation_##op
 #define OP_FUN_NAME(op) OP_FUN_NAME_STR(op)
