@@ -79,6 +79,7 @@ void CLReorgLayerKernel::configure(const CLCompileContext &compile_context, cons
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), stride));
+    auto padding_info = get_padding_info({ input, output });
 
     _input  = input;
     _output = output;
@@ -114,6 +115,7 @@ void CLReorgLayerKernel::configure(const CLCompileContext &compile_context, cons
     _config_id += support::cpp11::to_string(input->info()->dimension(2));
     _config_id += "_";
     _config_id += support::cpp11::to_string(stride);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLReorgLayerKernel::validate(const arm_compute::ITensorInfo *input, const arm_compute::ITensorInfo *output, int32_t stride)

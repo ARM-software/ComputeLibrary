@@ -80,6 +80,7 @@ void CLComputeAllAnchorsKernel::configure(const ICLTensor *anchors, ICLTensor *a
 void CLComputeAllAnchorsKernel::configure(const CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(anchors, all_anchors);
+    auto padding_info = get_padding_info({ anchors, all_anchors });
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(anchors->info(), all_anchors->info(), info));
 
     // Metadata
@@ -123,6 +124,7 @@ void CLComputeAllAnchorsKernel::configure(const CLCompileContext &compile_contex
     // compose the struct.
     Window win = calculate_max_window(*all_anchors->info(), Steps(info.values_per_roi()));
     ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLComputeAllAnchorsKernel::validate(const ITensorInfo *anchors, const ITensorInfo *all_anchors, const ComputeAnchorsInfo &info)

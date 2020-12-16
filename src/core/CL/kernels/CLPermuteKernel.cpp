@@ -28,8 +28,8 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLPermuteKernel::CLPermuteKernel()
     : _input(nullptr), _output(nullptr), _perm()
 {
@@ -76,6 +76,7 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
 void CLPermuteKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    auto              padding_info = get_padding_info({ input, output });
     const TensorShape output_shape = get_output_shape(input->info(), perm);
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
@@ -107,6 +108,7 @@ void CLPermuteKernel::configure(const CLCompileContext &compile_context, const I
     output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLPermuteKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
@@ -140,3 +142,4 @@ void CLPermuteKernel::run(const Window &window, cl::CommandQueue &queue)
     }
     while(window.slide_window_slice_4D(slice_in) && window.slide_window_slice_4D(slice_out));
 }
+} // namespace arm_compute

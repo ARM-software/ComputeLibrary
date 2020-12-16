@@ -86,6 +86,7 @@ void CLGatherKernel::configure(const ICLTensor *input, const ICLTensor *indices,
 void CLGatherKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, indices);
+    auto padding_info = get_padding_info({ input, output, indices });
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), indices->info(), output->info(), axis));
 
     // Configure kernel window
@@ -107,6 +108,7 @@ void CLGatherKernel::configure(const CLCompileContext &compile_context, const IC
     // Create kernel
     _kernel = create_kernel(compile_context, "gather", build_opts.options());
     ICLKernel::configure_internal(win_config.second);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLGatherKernel::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)

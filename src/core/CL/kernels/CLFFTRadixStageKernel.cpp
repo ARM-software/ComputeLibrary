@@ -92,6 +92,7 @@ void CLFFTRadixStageKernel::configure(const CLCompileContext &compile_context, I
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, config));
+    auto padding_info = get_padding_info({ input, output });
 
     _input        = input;
     _output       = output;
@@ -133,6 +134,7 @@ void CLFFTRadixStageKernel::configure(const CLCompileContext &compile_context, I
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLFFTRadixStageKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const FFTRadixStageKernelInfo &config)

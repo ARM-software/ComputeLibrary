@@ -79,6 +79,7 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const CLCompileContext &compi
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayerUpsampleKernel::validate(input->info(), output->info(), info));
+    auto padding_info = get_padding_info({ input, output });
 
     _input       = input;
     _output      = output;
@@ -98,6 +99,7 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const CLCompileContext &compi
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQueue &queue)
