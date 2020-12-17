@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,9 +59,9 @@ public:
 
 protected:
     template <typename U>
-    void fill(U &&tensor, int i, int lo, int hi)
+    void fill(U &&tensor, int i, float lo, float hi)
     {
-        std::uniform_real_distribution<> distribution(lo, hi);
+        std::uniform_real_distribution<float> distribution(lo, hi);
         library->fill_boxes(tensor, distribution, i);
     }
 

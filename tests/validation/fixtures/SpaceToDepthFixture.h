@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,10 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_fp16, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
     }
     TensorType compute_target(TensorShape input_shape, TensorShape output_shape, const int block_shape,

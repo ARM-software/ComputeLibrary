@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,12 +56,14 @@ protected:
     template <typename U>
     void fill(U &&src_tensor, U &&mean_tensor, U &&std_tensor)
     {
+        using FloatDistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_fp16, std::uniform_real_distribution<float>>::type;
+
         if(is_data_type_float(_data_type))
         {
-            const float                      min_bound = -1.f;
-            const float                      max_bound = 1.f;
-            std::uniform_real_distribution<> distribution(min_bound, max_bound);
-            std::uniform_real_distribution<> distribution_std(0.1, max_bound);
+            const T               min_bound = T(-1.f);
+            const T               max_bound = T(1.f);
+            FloatDistributionType distribution(min_bound, max_bound);
+            FloatDistributionType distribution_std(T(0.1f), max_bound);
             library->fill(src_tensor, distribution, 0);
             library->fill(mean_tensor, distribution, 1);
             library->fill(std_tensor, distribution_std, 2);

@@ -218,10 +218,10 @@ public:
 
         if(data_type_b == DataType::QSYMM8_PER_CHANNEL)
         {
-            output_stage.is_quantized_per_channel         = true;
-            const size_t                     num_channels = shape_b[0];
-            std::vector<float>               scales(num_channels);
-            std::uniform_real_distribution<> distribution(0, 1);
+            output_stage.is_quantized_per_channel              = true;
+            const size_t                          num_channels = shape_b[0];
+            std::vector<float>                    scales(num_channels);
+            std::uniform_real_distribution<float> distribution(0.f, 1.f);
             library->fill(scales, distribution, 0);
             output_stage.gemmlowp_multipliers.resize(num_channels);
             output_stage.gemmlowp_shifts.resize(num_channels);

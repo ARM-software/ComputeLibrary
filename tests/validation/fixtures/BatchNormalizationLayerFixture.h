@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,10 +59,14 @@ protected:
     template <typename U>
     void fill(U &&src_tensor, U &&mean_tensor, U &&var_tensor, U &&beta_tensor, U &&gamma_tensor)
     {
-        const float                      min_bound = -1.f;
-        const float                      max_bound = 1.f;
-        std::uniform_real_distribution<> distribution(min_bound, max_bound);
-        std::uniform_real_distribution<> distribution_var(0, max_bound);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_fp16, std::uniform_real_distribution<T>>::type;
+
+        const T          min_bound = T(-1.f);
+        const T          max_bound = T(1.f);
+        DistributionType distribution{ min_bound, max_bound };
+        DistributionType distribution_var{ T(0.f), max_bound };
+
         library->fill(src_tensor, distribution, 0);
         library->fill(mean_tensor, distribution, 1);
         library->fill(var_tensor, distribution_var, 0);
@@ -73,7 +77,7 @@ protected:
         else
         {
             // Fill with default value 0.f
-            library->fill_tensor_value(beta_tensor, 0.f);
+            library->fill_tensor_value(beta_tensor, T(0.f));
         }
         if(_use_gamma)
         {
@@ -82,7 +86,7 @@ protected:
         else
         {
             // Fill with default value 1.f
-            library->fill_tensor_value(gamma_tensor, 1.f);
+            library->fill_tensor_value(gamma_tensor, T(1.f));
         }
     }
 

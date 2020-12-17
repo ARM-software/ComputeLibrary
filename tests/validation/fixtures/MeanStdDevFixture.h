@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,9 +50,14 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(is_data_type_float(tensor.data_type()))
+        if(tensor.data_type() == DataType::F32)
         {
-            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+            std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+            library->fill(tensor, distribution, 0);
+        }
+        else if(tensor.data_type() == DataType::F16)
+        {
+            arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-1.0f), half(1.0f) };
             library->fill(tensor, distribution, 0);
         }
         else

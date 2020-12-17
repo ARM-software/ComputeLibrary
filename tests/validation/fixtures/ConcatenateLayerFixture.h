@@ -70,8 +70,8 @@ public:
         {
             qi = QuantizationInfo(1.f / 255.f, offset_dis(gen));
         }
-        std::bernoulli_distribution      mutate_dis(0.5f);
-        std::uniform_real_distribution<> change_dis(-0.25f, 0.f);
+        std::bernoulli_distribution           mutate_dis(0.5f);
+        std::uniform_real_distribution<float> change_dis(-0.25f, 0.f);
 
         // Generate more shapes based on the input
         for(auto &s : shapes)

@@ -408,7 +408,7 @@ protected:
         {
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
                 library->fill(tensor, distribution, i);
                 break;
             }

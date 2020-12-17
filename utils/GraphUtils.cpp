@@ -743,7 +743,7 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
         }
         case DataType::F16:
         {
-            std::uniform_real_distribution<float> distribution_f16(_lower.get<half>(), _upper.get<half>());
+            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16(_lower.get<half>(), _upper.get<half>());
             fill<half>(tensor, distribution_f16);
             break;
         }

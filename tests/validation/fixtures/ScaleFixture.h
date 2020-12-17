@@ -98,9 +98,15 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(is_data_type_float(_data_type))
+        if(tensor.data_type() == DataType::F32)
         {
-            library->fill_tensor_uniform(tensor, 0);
+            std::uniform_real_distribution<float> distribution(-5.0f, 5.0f);
+            library->fill(tensor, distribution, 0);
+        }
+        else if(tensor.data_type() == DataType::F16)
+        {
+            arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-5.0f), half(5.0f) };
+            library->fill(tensor, distribution, 0);
         }
         else if(is_data_type_quantized(tensor.data_type()))
         {
@@ -109,9 +115,7 @@ protected:
         }
         else
         {
-            // Restrict range for float to avoid any floating point issues
-            std::uniform_real_distribution<> distribution(-5.0f, 5.0f);
-            library->fill(tensor, distribution, 0);
+            library->fill_tensor_uniform(tensor, 0);
         }
     }
 

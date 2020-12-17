@@ -534,12 +534,14 @@ void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std:
 template <typename T, typename D>
 void AssetsLibrary::fill_boxes(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
 {
-    using ResultType = typename std::remove_reference<D>::type::result_type;
+    using DistributionType = typename std::remove_reference<D>::type;
+    using ResultType       = typename DistributionType::result_type;
+
     std::mt19937   gen(_seed + seed_offset);
     TensorShape    shape(tensor.shape());
     const uint32_t num_boxes = tensor.num_elements() / 4;
     // Iterate over all elements
-    std::uniform_real_distribution<> size_dist(0.f, 1.f);
+    DistributionType size_dist{ ResultType(0.f), ResultType(1.f) };
     for(uint32_t element_idx = 0; element_idx < num_boxes * 4; element_idx += 4)
     {
         const ResultType delta   = size_dist(gen);

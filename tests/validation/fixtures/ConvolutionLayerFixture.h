@@ -301,9 +301,9 @@ public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataType weights_data_type)
     {
-        std::vector<float>               weights_scales{};
-        std::mt19937                     gen(library->seed());
-        std::uniform_real_distribution<> dis(0.01f, 1);
+        std::vector<float>                    weights_scales{};
+        std::mt19937                          gen(library->seed());
+        std::uniform_real_distribution<float> dis(0.01f, 1.f);
         for(size_t i = 0; i < output_shape[2]; ++i)
         {
             weights_scales.push_back(dis(gen));

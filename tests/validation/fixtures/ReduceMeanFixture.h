@@ -58,17 +58,26 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(!is_data_type_quantized(tensor.data_type()))
+        if(tensor.data_type() == DataType::F32)
         {
-            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+            std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
             library->fill(tensor, distribution, 0);
         }
-        else
+        else if(tensor.data_type() == DataType::F16)
+        {
+            arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-1.0f), half(1.0f) };
+            library->fill(tensor, distribution, 0);
+        }
+        else if(is_data_type_quantized(tensor.data_type()))
         {
             std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
             std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
 
             library->fill(tensor, distribution, 0);
+        }
+        else
+        {
+            library->fill_tensor_uniform(tensor, 0);
         }
     }
 

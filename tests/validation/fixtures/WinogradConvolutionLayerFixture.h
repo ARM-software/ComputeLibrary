@@ -72,9 +72,14 @@ protected:
         switch(tensor.data_type())
         {
             case DataType::F16:
+            {
+                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(min), half(max) };
+                library->fill(tensor, distribution, i);
+                break;
+            }
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(min, max);
+                std::uniform_real_distribution<float> distribution(min, max);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -183,7 +188,7 @@ protected:
             }
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(min, max);
+                std::uniform_real_distribution<float> distribution(min, max);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -338,9 +343,14 @@ protected:
         switch(tensor.data_type())
         {
             case DataType::F16:
+            {
+                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(min), half(max) };
+                library->fill(tensor, distribution, i);
+                break;
+            }
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(min, max);
+                std::uniform_real_distribution<float> distribution(min, max);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -420,9 +430,14 @@ protected:
         switch(tensor.data_type())
         {
             case DataType::F16:
+            {
+                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(min), half(max) };
+                library->fill(tensor, distribution, i);
+                break;
+            }
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(min, max);
+                std::uniform_real_distribution<float> distribution(min, max);
                 library->fill(tensor, distribution, i);
                 break;
             }

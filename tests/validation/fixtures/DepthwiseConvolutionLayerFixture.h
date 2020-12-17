@@ -239,7 +239,7 @@ protected:
         {
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -460,9 +460,9 @@ public:
         const float out_scale = output_quantization_info.uniform().scale;
         const float in_scale  = input_quantization_info.uniform().scale;
 
-        std::vector<float>               weights_scales{};
-        std::mt19937                     gen(library->seed());
-        std::uniform_real_distribution<> dis(0.01f, out_scale / in_scale);
+        std::vector<float>                    weights_scales{};
+        std::mt19937                          gen(library->seed());
+        std::uniform_real_distribution<float> dis(0.01f, out_scale / in_scale);
         for(size_t i = 0; i < in_shape.z() * depth_multiplier; ++i)
         {
             weights_scales.push_back(dis(gen));

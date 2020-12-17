@@ -59,15 +59,24 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(!is_data_type_quantized(tensor.data_type()))
+        if(tensor.data_type() == DataType::F32)
         {
-            std::uniform_real_distribution<> distribution(-10.f, 10.f);
+            std::uniform_real_distribution<float> distribution(-10.0f, 10.0f);
             library->fill(tensor, distribution, 0);
         }
-        else // data type is quantized_asymmetric (signed or unsigned)
+        else if(tensor.data_type() == DataType::F16)
+        {
+            arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-10.0f), half(10.0f) };
+            library->fill(tensor, distribution, 0);
+        }
+        else if(!is_data_type_quantized(tensor.data_type()))
         {
             std::uniform_int_distribution<> distribution(0, 100);
             library->fill(tensor, distribution, 0);
+        }
+        else
+        {
+            library->fill_tensor_uniform(tensor, 0);
         }
     }
 
