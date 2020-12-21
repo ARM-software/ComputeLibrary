@@ -33,8 +33,8 @@
     {                                              \
         VEC_DATA_TYPE(DATA_TYPE, 2)                \
         w, tmp;                                    \
-        w.x   = native_cos(phi);                   \
-        w.y   = native_sin(phi);                   \
+        w.x   = cos(phi);                          \
+        w.y   = sin(phi);                          \
         tmp.x = (w.x * input.x) - (w.y * input.y); \
         tmp.y = (w.x * input.y) + (w.y * input.x); \
         input = tmp;                               \
