@@ -70,11 +70,11 @@ __kernel void select_same_rank(
     TENSOR3D_DECLARATION(out))
 {
     // Get pointers
-    uint     offset              = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
-    __global uchar *c_addr       = c_ptr + c_offset_first_element_in_bytes + offset + get_global_id(1) * c_step_y + get_global_id(2) * c_step_z;
-    __global DATA_TYPE *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
-    __global DATA_TYPE *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
-    __global DATA_TYPE *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
+    uint     offset          = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    __global uchar *c_addr   = c_ptr + c_offset_first_element_in_bytes + offset + get_global_id(1) * c_step_y + get_global_id(2) * c_step_z;
+    __global uchar *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
+    __global uchar *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
     // Load values
     SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
@@ -136,11 +136,11 @@ __kernel void select_different_rank_2(
     const int c_idx = get_global_id(1);
 
     // Get pointers
-    uint     offset              = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
-    __global uchar *c_addr       = c_ptr + c_offset_first_element_in_bytes;
-    __global DATA_TYPE *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
-    __global DATA_TYPE *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
-    __global DATA_TYPE *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
+    uint     offset          = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    __global uchar *c_addr   = c_ptr + c_offset_first_element_in_bytes;
+    __global uchar *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
+    __global uchar *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
     // Load values
     SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
@@ -204,11 +204,11 @@ __kernel void select_different_rank_n(
     const int c_idx = get_global_id(2) / DEPTH_SIZE;
 
     // Get pointers
-    uint     offset              = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
-    __global uchar *c_addr       = c_ptr + c_offset_first_element_in_bytes;
-    __global DATA_TYPE *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
-    __global DATA_TYPE *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
-    __global DATA_TYPE *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
+    uint     offset          = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    __global uchar *c_addr   = c_ptr + c_offset_first_element_in_bytes;
+    __global uchar *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
+    __global uchar *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
     // Load values
     SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
