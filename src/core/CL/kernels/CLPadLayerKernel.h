@@ -88,8 +88,6 @@ public:
 private:
     const ICLTensor *_input;
     ICLTensor       *_output;
-    int              _input_start_x;
-    int              _input_start_y;
     bool             _4d_enabled;
 };
 } // namespace arm_compute

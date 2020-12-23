@@ -23,14 +23,15 @@
  */
 #include "helpers.h"
 
-#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(PAD_X_BEFORE) && defined(SRC_WIDTH)
+#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(PAD_X_BEFORE) && defined(SRC_WIDTH) && defined(PAD_X_BEFORE_REMAINDER) && defined(VEC_SIZE_LEFTOVER_WRITE)
 
 #define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
 #define VEC_SELECT SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define OFFSETS VEC_OFFS(SELECT_DATA_TYPE(DATA_TYPE), VEC_SIZE)
+#define SCALAR_COND(x) CONVERT((VEC_SELECT)x == (VEC_SELECT)1, VEC_SELECT)
 
-#if defined(CONST_VAL)
+#if defined(CONST_VAL) && defined(VEC_SIZE_LEFTOVER_READ)
 /** Perform a pad operation when PaddingMode is CONSTANT
  *
  * @note Data type can be passed using the -DDATA_TYPE compile flag, e.g. -DDATA_TYPE=float
@@ -39,7 +40,9 @@
  * @note Pad to add to the left must be passed using the -DPAD_X_BEFORE compile flag, e.g. -DPAD_X_BEFORE=5
  * @note Input tensor's width must be passed using the -DSRC_WIDTH compile flag, e.g. -DSRC_WIDTH=224
  * @note In case pad left is more than the vector size, the number of threads to skip along the X axis must be passed using the
- *       -DNUM_THREADS_TO_SKIP_X compile flag, e.g. -DNUM_THREADS_TO_SKIP_X=1. This is defined as (PAD_X_BEFORE / VEC_SIZE)
+ *       -DTHREADS_TO_SKIP_BEFORE compile flag, e.g. -DTHREADS_TO_SKIP_BEFORE=1. This is defined as (PAD_X_BEFORE / VEC_SIZE)
+ * @note In case pad left is more than the vector size, the thread from which to skip along the X axis for pad right must be passed using the
+ *       -DTHREADS_TO_SKIP_AFTER compile flag, e.g. -THREADS_TO_SKIP_AFTER=1. This is defined as ((SRC_WIDTH + PAD_X_BEFORE) / VEC_SIZE)
  * @note If pad also needs to be added to the top of the tensor, the following compile flags must be passed at compile time:
  *       -# -DPAD_Y_BEFORE: Pad to add to the top of the input tensor (e.g. -DPAD_Y_BEFORE=3)
  *       -# -DSRC_HEIGHT: Input tensor's height (e.g. -DSRC_HEIGHT=127)
@@ -76,67 +79,77 @@ __kernel void pad_layer_constant(TENSOR3D_DECLARATION(src),
 #endif // defined(PAD_W_BEFORE)
                                 )
 {
-    const int x = get_global_id(0);
-    const int y = get_global_id(1);
-    const int z = get_global_id(2);
+    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
 
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+    int z = get_global_id(2);
+
+    // If true, write only padding values; no reads performed
     uint cond = 0;
-
-#if defined(PAD_W_BEFORE)
-    cond |= batch < PAD_W_BEFORE || batch >= (SRC_BATCH + PAD_W_BEFORE);
-#endif // defined(PAD_W_BEFORE)
+#if defined(THREADS_TO_SKIP_BEFORE)
+    cond |= x < THREADS_TO_SKIP_BEFORE || x > THREADS_TO_SKIP_AFTER;
+#endif // defined(THREADS_TO_SKIP_BEFORE)
+#if defined(PAD_Y_BEFORE)
+    cond |= y < PAD_Y_BEFORE || y >= (SRC_HEIGHT + PAD_Y_BEFORE);
+#endif // defined(PAD_Y_BEFORE)
 #if defined(PAD_Z_BEFORE)
     cond |= z < PAD_Z_BEFORE || z >= (SRC_DEPTH + PAD_Z_BEFORE);
 #endif // defined(PAD_Z_BEFORE)
+#if defined(PAD_W_BEFORE)
+    cond |= batch < PAD_W_BEFORE || batch >= (SRC_BATCH + PAD_W_BEFORE);
+#endif // defined(PAD_W_BEFORE)
 
     if(cond)
     {
-        Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
-        VSTORE(VEC_SIZE)
-        ((VEC_TYPE)CONST_VAL, 0, (__global DATA_TYPE *)dst.ptr);
+        VEC_TYPE const_vals0 = (VEC_TYPE)CONST_VAL;
+        STORE_VECTOR_SELECT(const_vals, DATA_TYPE, dst.ptr, VEC_SIZE, VEC_SIZE_LEFTOVER_WRITE, get_global_id(0) == (get_global_size(0) - 1));
     }
     else
     {
-        Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-        Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
-
-#if defined(NUM_THREADS_TO_SKIP_X)
-        /* In case the pad left is greater than the vector size, and we are past the threads operating solely on pad values,
-         * the input pointer must be brought back along the X axis to start from the first non-pad values.
-         *
-         * E.g. with VEC_SIZE=2, PAD_X_BEFORE=5, CONST_VAL=0 and 1D input |1 2 3 4 5 6|:
-         *  -# The first thread will compute the output values |0 0| since it detects (x_outs == (0, 1)) < PAD_X_BEFORE
-         *  -# The second thread will compute the output values |0 0| since it detects (x_outs == (2, 3)) < PAD_X_BEFORE
-         *  -# The third thread should compute |0 1|, however the input pointer is now ahead of ((x * VEC_SIZE) == 4) values, reading |4 5|
-         *  -# To detect this, we use ((PAD_X_BEFORE / VEC_SIZE) == NUM_THREADS_TO_SKIP_X == 2) and check that it is >= to the current x
-         *  -# So, we bring the pointer back of NUM_THREADS_TO_SKIP_X threads, which means multiplying this constant by the input's step along the X axis
-         *  -# Now that the pointer is back of ((NUM_THREADS_TO_SKIP_X * src_step_x) == 4) values, it will read the desired values |0 1|
-         */
-        src.ptr -= select(0u, NUM_THREADS_TO_SKIP_X * src_step_x, x >= NUM_THREADS_TO_SKIP_X);
-#endif // defined(NUM_THREADS_TO_SKIP_X)
+        // Calculate input's coordinates based on output's
+        int w = 0;
+#if defined(THREADS_TO_SKIP_BEFORE)
+        x -= THREADS_TO_SKIP_BEFORE;
+#endif // defined(THREADS_TO_SKIP_BEFORE)
+#if defined(PAD_Y_BEFORE)
+        y -= PAD_Y_BEFORE;
+#endif // defined(PAD_Y_BEFORE)
 #if defined(PAD_Z_BEFORE)
-        src.ptr -= PAD_Z_BEFORE * src_step_z;
+        z -= PAD_Z_BEFORE;
 #endif // defined(PAD_Z_BEFORE)
 #if defined(PAD_W_BEFORE)
-        src.ptr -= PAD_W_BEFORE * SRC_DEPTH * src_step_z;
+        w -= PAD_W_BEFORE * SRC_DEPTH;
 #endif // defined(PAD_W_BEFORE)
+        x *= VEC_SIZE;
+        x -= PAD_X_BEFORE_REMAINDER;
 
-        VEC_TYPE src_vals = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
+        // Check for out of bound reads and clamp X coordinate
+        uint cond_left  = x < 0;
+        uint cond_right = (x + VEC_SIZE) > SRC_WIDTH;
+        x               = clamp(x, 0, (SRC_WIDTH - VEC_SIZE));
 
-        VEC_INT xs_out = (VEC_INT)(x * VEC_SIZE) + CONVERT(OFFSETS, VEC_INT);
-        VEC_INT cond   = xs_out < (VEC_INT)PAD_X_BEFORE || xs_out >= (VEC_INT)(SRC_WIDTH + PAD_X_BEFORE);
-#if defined(PAD_Y_BEFORE)
-        cond |= (VEC_INT)y < (VEC_INT)PAD_Y_BEFORE || (VEC_INT)y >= (VEC_INT)(SRC_HEIGHT + PAD_Y_BEFORE);
-#endif // defined(PAD_Y_BEFORE)
-        VSTORE(VEC_SIZE)
-        (select(src_vals, (VEC_TYPE)CONST_VAL, CONVERT(cond, VEC_SELECT)), 0, (__global DATA_TYPE *)dst.ptr);
+        // Calculate input's address
+        __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * src_stride_x + y * src_stride_y + z * src_stride_z + w * (int)src_stride_z;
+
+        // Read values and rotate them properly if they would have been across paddings
+        VEC_TYPE src_vals0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
+        src_vals0          = select(src_vals0, ROTATE(src_vals0, VEC_SIZE, PAD_X_BEFORE_REMAINDER), SCALAR_COND(cond_left));
+        src_vals0          = select(src_vals0, ROTATE(src_vals0, VEC_SIZE, VEC_SIZE_LEFTOVER_READ), SCALAR_COND(cond_right));
+
+        // Check what values would be padding and replace them with the constant value
+        VEC_INT xs_out = (VEC_INT)(get_global_id(0) * VEC_SIZE) + VEC_OFFS(int, VEC_SIZE);
+        VEC_INT conds  = xs_out < (VEC_INT)PAD_X_BEFORE || xs_out >= (VEC_INT)(SRC_WIDTH + PAD_X_BEFORE);
+        src_vals0      = select(src_vals0, (VEC_TYPE)CONST_VAL, CONVERT(conds, VEC_SELECT));
+
+        // Store values in bounds
+        STORE_VECTOR_SELECT(src_vals, DATA_TYPE, dst.ptr, VEC_SIZE, VEC_SIZE_LEFTOVER_WRITE, get_global_id(0) == (get_global_size(0) - 1));
     }
 }
-#endif // defined(CONST_VAL)
+#endif // defined(CONST_VAL) && defined(VEC_SIZE_LEFTOVER_READ)
 
-#if defined(PAD_X_BEFORE_REMAINDER) && defined(PAD_X_AFTER_REMAINDER) && defined(PAD_X_BEFORE_REMAINDER_REFL) && defined(PAD_X_AFTER_REMAINDER_REFL) && defined(AFTER_PAD_FACT_X)
+#if defined(IS_REFLECT) && defined(PAD_X_AFTER_REMAINDER) && defined(PAD_X_BEFORE_REMAINDER_REFL) && defined(PAD_X_AFTER_REMAINDER_REFL) && defined(AFTER_PAD_FACT_X)
 
-#define SCALAR_COND(x) (VEC_SELECT) x == (VEC_SELECT)1
 #define ROTATE_REVERSE(x, n) ROTATE(REVERSE(x, VEC_SIZE), VEC_SIZE, n)
 #define SYMM_REFL_LEFT(x, n0, n1) select(ROTATE_REVERSE(x, n1), ROTATE(x, VEC_SIZE, n0), OFFSETS >= (VEC_SELECT)n0)
 #define SYMM_REFL_RIGHT(x, n0, n1) select(ROTATE(x, VEC_SIZE, n0), ROTATE_REVERSE(x, n1), OFFSETS >= (VEC_SELECT)n0)
@@ -232,20 +245,19 @@ __kernel void pad_layer_symmetric_reflect(TENSOR3D_DECLARATION(src),
     ((VEC_TYPE)(*(__global DATA_TYPE *)src_addr), 0, (__global DATA_TYPE *)dst.ptr);
 #else // SRC_WIDTH == 1
 
-    VEC_TYPE src_vals = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
+    VEC_TYPE src_vals0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
 
     // Choose rearrangement policy based on the defined conditions
-    src_vals = select(src_vals, SYMM_REFL_LEFT(src_vals, PAD_X_BEFORE_REMAINDER, PAD_X_BEFORE_REMAINDER_REFL), SCALAR_COND(is_across_pad_left));
-    src_vals = select(src_vals, SYMM_REFL_RIGHT(src_vals, PAD_X_AFTER_REMAINDER, PAD_X_AFTER_REMAINDER_REFL), SCALAR_COND(is_across_pad_right));
-    src_vals = select(src_vals, REVERSE(src_vals, VEC_SIZE), SCALAR_COND((is_before_pad_left || is_after_pad_right)));
+    src_vals0 = select(src_vals0, SYMM_REFL_LEFT(src_vals0, PAD_X_BEFORE_REMAINDER, PAD_X_BEFORE_REMAINDER_REFL), SCALAR_COND(is_across_pad_left));
+    src_vals0 = select(src_vals0, SYMM_REFL_RIGHT(src_vals0, PAD_X_AFTER_REMAINDER, PAD_X_AFTER_REMAINDER_REFL), SCALAR_COND(is_across_pad_right));
+    src_vals0 = select(src_vals0, REVERSE(src_vals0, VEC_SIZE), SCALAR_COND((is_before_pad_left || is_after_pad_right)));
 #if defined(AFTER_PAD_REM)
-    src_vals = select(src_vals, ROTATE(src_vals, VEC_SIZE, AFTER_PAD_REM), SCALAR_COND(neg_offs));
+    src_vals0 = select(src_vals0, ROTATE(src_vals0, VEC_SIZE, AFTER_PAD_REM), SCALAR_COND(neg_offs));
 #endif // defined(AFTER_PAD_REM)
 
-    // Store
-    VSTORE(VEC_SIZE)
-    (src_vals, 0, (__global DATA_TYPE *)dst.ptr);
+    // Store values in bounds
+    STORE_VECTOR_SELECT(src_vals, DATA_TYPE, dst.ptr, VEC_SIZE, VEC_SIZE_LEFTOVER_WRITE, get_global_id(0) == (get_global_size(0) - 1));
 #endif // SRC_WIDTH == 1
 }
-#endif // defined(PAD_X_BEFORE_REMAINDER) && defined(PAD_X_AFTER_REMAINDER) && defined(PAD_X_BEFORE_REMAINDER_REFL) && defined(PAD_X_AFTER_REMAINDER_REFL) && defined(AFTER_PAD_FACT_X)
-#endif // defined(DATA_TYPE) && defined(VEC_SIZE) && defined(PAD_X_BEFORE) && defined(SRC_WIDTH)
+#endif // defined(IS_REFLECT) && defined(PAD_X_AFTER_REMAINDER) && defined(PAD_X_BEFORE_REMAINDER_REFL) && defined(PAD_X_AFTER_REMAINDER_REFL) && defined(AFTER_PAD_FACT_X)
+#endif // defined(DATA_TYPE) && defined(VEC_SIZE) && defined(PAD_X_BEFORE) && defined(SRC_WIDTH) && defined(PAD_X_BEFORE_REMAINDER) && defined(VEC_SIZE_LEFTOVER_WRITE)

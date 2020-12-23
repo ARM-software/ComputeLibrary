@@ -110,18 +110,22 @@
  * @{
  */
 #define ROT1_0(x) ((x))
+#define ROT1_1(x) ((x))
 
 #define ROT2_0(x) ((x))
 #define ROT2_1(x) ((x).s10)
+#define ROT2_2(x) ((x))
 
 #define ROT3_0(x) ((x))
 #define ROT3_1(x) ((x).s201)
 #define ROT3_2(x) ((x).s120)
+#define ROT3_3(x) ((x))
 
 #define ROT4_0(x) ((x))
 #define ROT4_1(x) ((x).s3012)
 #define ROT4_2(x) ((x).s2301)
 #define ROT4_3(x) ((x).s1230)
+#define ROT4_4(x) ((x))
 
 #define ROT8_0(x) ((x))
 #define ROT8_1(x) ((x).s70123456)
@@ -131,6 +135,7 @@
 #define ROT8_5(x) ((x).s34567012)
 #define ROT8_6(x) ((x).s23456701)
 #define ROT8_7(x) ((x).s12345670)
+#define ROT8_8(x) ((x))
 
 #define ROT16_0(x) ((x))
 #define ROT16_1(x) ((x).sF0123456789ABCDE)
@@ -148,6 +153,7 @@
 #define ROT16_13(x) ((x).s3456789ABCDEF012)
 #define ROT16_14(x) ((x).s23456789ABCDEF01)
 #define ROT16_15(x) ((x).s123456789ABCDEF0)
+#define ROT16_16(x) ((x))
 /** @} */ // end of group ROTs_n
 
 /** Circular-right-shift (rotate-right) the given vector by the given amount.
