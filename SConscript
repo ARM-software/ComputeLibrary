@@ -137,7 +137,7 @@ arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
 arm_compute_env.AlwaysBuild(version_file)
 
-default_cpp_compiler = 'g++' if env['os'] != 'android' else 'clang++'
+default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos'] else 'clang++'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 
 # Generate embed files
@@ -171,7 +171,8 @@ arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSI
 
 
 # Don't allow undefined references in the libraries:
-arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined'])
+undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else '-Wl,--no-undefined'
+arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 arm_compute_env.Append(LIBS = ['dl'])

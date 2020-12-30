@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,11 +98,12 @@ void set_thread_affinity(int core_id)
         return;
     }
 
+#if !defined(__APPLE__)
     cpu_set_t set;
     CPU_ZERO(&set);
     CPU_SET(core_id, &set);
-    ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set),
-                            "Error setting thread affinity");
+    ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
+#endif /* !defined(__APPLE__) */
 }
 
 class Thread final

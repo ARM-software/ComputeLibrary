@@ -30,7 +30,7 @@ namespace arm_compute
 The Computer Vision and Machine Learning library is a set of functions optimised for both ARM CPUs and GPUs using SIMD technologies.
 
 Several builds of the library are available using various configurations:
- - OS: Linux, Android or bare metal.
+ - OS: Linux, Android, macOS or bare metal.
  - Architecture: armv7a (32bit) or arm64-v8a (64bit)
  - Technology: NEON / OpenCL / GLES_COMPUTE / NEON and OpenCL and GLES_COMPUTE
  - Debug / Asserts / Release: Use a build with asserts enabled to debug your application and enable extra validation. Once you are sure your application works as expected you can switch to a release build of the library for maximum performance.
@@ -87,7 +87,8 @@ If there is more than one release in a month then an extra sequential number is 
 @subsection S2_2_changelog Changelog
 
 v21.02 Public major release
- - Upgraded C++ standard to C++14
+ - Upgrade C++ standard to C++14
+ - Add macOS support
  - Removed functions:
    - NELocallyConnectedLayer / CLLocallyConnectedLayer
    - NEIm2Col
@@ -1337,7 +1338,7 @@ To see the build options available simply run ```scons -h```:
             default: auto
             actual: auto
 
-        os: Target OS (linux|android|tizen|bare_metal)
+        os: Target OS (linux|android|macos|tizen|bare_metal)
             default: linux
             actual: linux
 
@@ -1815,7 +1816,17 @@ For example:
 
 In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the CLTuner), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.
 
-@subsection S3_4_bare_metal Building for bare metal
+@subsection S3_4_macos Building for macOS
+
+The library was successfully natively built for Apple Silicon under macOS 11.1 using clang v12.0.0.
+
+To natively compile the library with accelerated CPU support:
+
+	scons Werror=1 -j8 neon=1 opencl=0 os=macos arch=arm64-v8a build=native
+
+@note Initial support disables feature discovery through HWCAPS and thread scheduling affinity controls
+
+@subsection S3_5_bare_metal Building for bare metal
 
 For bare metal, the library was successfully built using linaro's latest (gcc-linaro-6.3.1-2017.05) bare metal toolchains:
  - arm-eabi for armv7a
@@ -1825,24 +1836,24 @@ Download linaro for <a href="https://releases.linaro.org/components/toolchain/bi
 
 @note Make sure to add the toolchains to your PATH: export PATH=$PATH:$MY_TOOLCHAINS/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-elf/bin:$MY_TOOLCHAINS/gcc-linaro-6.3.1-2017.05-x86_64_arm-eabi/bin
 
-@subsubsection S3_4_1_library How to build the library ?
+@subsubsection S3_5_1_library How to build the library ?
 
 To cross-compile the library with NEON support for baremetal arm64-v8a:
 
 	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=bare_metal arch=arm64-v8a build=cross_compile cppthreads=0 openmp=0 standalone=1
 
-@subsubsection S3_4_2_examples How to manually build the examples ?
+@subsubsection S3_5_2_examples How to manually build the examples ?
 
 Examples are disabled when building for bare metal. If you want to build the examples you need to provide a custom bootcode depending on the target architecture and link against the compute library. More information about bare metal bootcode can be found <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0527a/index.html">here</a>.
 
-@subsection S3_5_windows_host Building on a Windows host system
+@subsection S3_6_windows_host Building on a Windows host system
 
 Using `scons` directly from the Windows command line is known to cause
 problems. The reason seems to be that if `scons` is setup for cross-compilation
 it gets confused about Windows style paths (using backslashes). Thus it is
 recommended to follow one of the options outlined below.
 
-@subsubsection S3_5_1_ubuntu_on_windows Bash on Ubuntu on Windows
+@subsubsection S3_6_1_ubuntu_on_windows Bash on Ubuntu on Windows
 
 The best and easiest option is to use
 <a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows</a>.
@@ -1850,7 +1861,7 @@ This feature is still marked as *beta* and thus might not be available.
 However, if it is building the library is as simple as opening a *Bash on
 Ubuntu on Windows* shell and following the general guidelines given above.
 
-@subsubsection S3_5_2_cygwin Cygwin
+@subsubsection S3_6_2_cygwin Cygwin
 
 If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a>
 can be used to install and run `scons`, the minimum Cygwin version must be 3.0.7 or later. In addition
@@ -1863,9 +1874,9 @@ compiler is included in the Android standalone toolchain. After everything has
 been set up in the Cygwin terminal the general guide on building the library
 can be followed.
 
-@subsection S3_6_cl_requirements OpenCL DDK Requirements
+@subsection S3_7_cl_requirements OpenCL DDK Requirements
 
-@subsubsection S3_6_1_cl_hard_requirements Hard Requirements
+@subsubsection S3_7_1_cl_hard_requirements Hard Requirements
 
 Compute Library requires OpenCL 1.1 and above with support of non uniform workgroup sizes, which is officially supported in the Mali OpenCL DDK r8p0 and above as an extension (respective extension flag is \a -cl-arm-non-uniform-work-group-size).
 
@@ -1873,7 +1884,7 @@ Enabling 16-bit floating point calculations require \a cl_khr_fp16 extension to 
 
 Use of @ref CLMeanStdDev function requires 64-bit atomics support, thus \a cl_khr_int64_base_atomics should be supported in order to use.
 
-@subsubsection S3_6_2_cl_performance_requirements Performance improvements
+@subsubsection S3_7_2_cl_performance_requirements Performance improvements
 
 Integer dot product built-in function extensions (and therefore optimized kernels) are available with Mali OpenCL DDK r22p0 and above for the following GPUs : G71, G76. The relevant extensions are \a cl_arm_integer_dot_product_int8, \a cl_arm_integer_dot_product_accumulate_int8 and \a cl_arm_integer_dot_product_accumulate_int16.
 
@@ -1881,7 +1892,7 @@ OpenCL kernel level debugging can be simplified with the use of printf, this req
 
 SVM allocations are supported for all the underlying allocations in Compute Library. To enable this OpenCL 2.0 and above is a requirement.
 
-@subsection S3_7_cl_tuner OpenCL Tuner
+@subsection S3_8_cl_tuner OpenCL Tuner
 
 The OpenCL tuner, a.k.a. CLTuner, is a module of Arm Compute Library that can improve the performance of the OpenCL kernels tuning the Local-Workgroup-Size (LWS).
 The optimal LWS for each unique OpenCL kernel configuration is stored in a table. This table can be either imported or exported from/to a file.
@@ -1929,7 +1940,7 @@ CLTuner looks for the optimal LWS for each unique OpenCL kernel configuration. S
     gemm1.configure(&a1, &b1, nullptr, &c1, 1.0f, 0.0f);
 @endcode
 
-@subsubsection S3_7_1_cl_tuner_how_to How to use it
+@subsubsection S3_8_1_cl_tuner_how_to How to use it
 
 All the graph examples in the Compute Library's folder "examples" and the arm_compute_benchmark accept an argument to enable the OpenCL tuner and an argument to export/import the LWS values to/from a file
 

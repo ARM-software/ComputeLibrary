@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 
-#ifndef BARE_METAL
+#if !defined(BARE_METAL)
 #include <sched.h>
 #endif /* defined(BARE_METAL) */
 
@@ -110,9 +110,9 @@ CPUInfo::CPUInfo()
 
 CPUModel CPUInfo::get_cpu_model() const
 {
-#if defined(BARE_METAL) || (!defined(__arm__) && !defined(__aarch64__))
+#if defined(BARE_METAL) || defined(__APPLE__) || (!defined(__arm__) && !defined(__aarch64__))
     return get_cpu_model(0);
-#else  /* defined(BARE_METAL) || (!defined(__arm__) && !defined(__aarch64__)) */
+#else  /* defined(BARE_METAL) || defined(__APPLE__) || (!defined(__arm__) && !defined(__aarch64__)) */
     return get_cpu_model(sched_getcpu());
-#endif /* defined(BARE_METAL) || (!defined(__arm__) && !defined(__aarch64__)) */
+#endif /* defined(BARE_METAL) || defined(__APPLE__) || (!defined(__arm__) && !defined(__aarch64__)) */
 }

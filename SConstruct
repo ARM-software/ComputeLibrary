@@ -46,7 +46,7 @@ vars.AddVariables(
                   allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "bare_metal")),
+    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
@@ -151,8 +151,8 @@ env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
-default_cpp_compiler = 'g++' if env['os'] != 'android' else 'clang++'
-default_c_compiler = 'gcc' if env['os'] != 'android' else 'clang'
+default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos'] else 'clang++'
+default_c_compiler = 'gcc' if env['os'] not in ['android', 'macos'] else 'clang'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 c_compiler = os.environ.get('CC', default_c_compiler)
 
@@ -220,7 +220,6 @@ elif 'v8' in env['arch']:
         env.Append(CPPDEFINES = ['MMLA_INT8', 'V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
         if "disable_mmla_fp" not in env['custom_options']:
             env.Append(CPPDEFINES = ['MMLA_FP32'])
-
 elif 'x86' in env['arch']:
     if env['estate'] == '32':
         env.Append(CCFLAGS = ['-m32'])
