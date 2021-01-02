@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -198,21 +198,42 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
     }
     else
     {
-        // SRGAN
-        if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9) && (conv_info.pad_top() < 3)
-           && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+        if(input->data_layout() == DataLayout::NCHW)
         {
-            return ConvolutionMethod::DIRECT;
+            // SRGAN
+            if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9) && (conv_info.pad_top() < 3)
+               && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+            {
+                return ConvolutionMethod::DIRECT;
+            }
+            if((weights->dimension(idx_h) > 5) && (input->dimension(idx_c) > output->dimension(idx_c)) && (CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)))
+            {
+                return ConvolutionMethod::FFT;
+            }
+            if(input->dimension(idx_c) < 16)
+            {
+                return ConvolutionMethod::GEMM;
+            }
+            return bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
         }
-        if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && (CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)))
+        else
         {
-            return ConvolutionMethod::FFT;
+            // SRGAN
+            if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9) && (conv_info.pad_top() < 3)
+               && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+            {
+                return ConvolutionMethod::DIRECT;
+            }
+            if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+            {
+                return ConvolutionMethod::DIRECT;
+            }
+            if(input->dimension(idx_c) < 16)
+            {
+                return ConvolutionMethod::GEMM;
+            }
+            return bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
         }
-        if(input->dimension(idx_c) < 16)
-        {
-            return ConvolutionMethod::GEMM;
-        }
-        return bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
     }
 }
 

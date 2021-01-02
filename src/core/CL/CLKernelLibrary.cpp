@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -137,17 +137,14 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "dequantization_layer_per_channel_nchw", "dequantization_layer.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
+    { "direct_convolution_nhwc", "direct_convolution.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
-    { "direct_convolution1x1_nhwc", "direct_convolution1x1.cl" },
     { "direct_convolution1x1_f32_bifrost", "direct_convolution1x1.cl" },
     { "direct_convolution3x3", "direct_convolution3x3.cl" },
-    { "direct_convolution3x3_nhwc", "direct_convolution3x3.cl" },
     { "direct_convolution3x3_f32_bifrost", "direct_convolution3x3.cl" },
     { "direct_convolution5x5", "direct_convolution5x5.cl" },
-    { "direct_convolution5x5_nhwc", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
     { "direct_convolution_quantized", "direct_convolution_quantized.cl" },
-    { "direct_convolution9x9_nhwc", "direct_convolution9x9.cl" },
     { "elementwise_operation_ADD", "elementwise_operation.cl" },
     { "elementwise_operation_SUB", "elementwise_operation.cl" },
     { "elementwise_operation_MAX", "elementwise_operation.cl" },
@@ -631,8 +628,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/direct_convolution_quantized.clembed"
     },
     {
-        "direct_convolution9x9.cl",
-#include "./cl_kernels/direct_convolution9x9.clembed"
+        "direct_convolution.cl",
+#include "./cl_kernels/direct_convolution.clembed"
     },
     {
         "elementwise_operation.cl",
