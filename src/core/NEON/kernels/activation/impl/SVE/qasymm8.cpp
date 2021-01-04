@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,20 @@ void qasymm8_sve_activation(const ITensor *src, ITensor *dst, const ActivationLa
     float o  = -qi_in.offset * s + qi_out.offset;
     auto  vs = svdup_n_f32(s);
     auto  vo = svdup_n_f32(o);
+
+    // Initialise scale/offset for re-quantization with int32_t
+    const auto  voffset_in      = svdup_n_s32(qi_in.offset);
+    int32_t     s_s32           = round(s * (1 << 8), arm_compute::RoundingPolicy::TO_NEAREST_EVEN);
+    int32_t     o_s32           = round(o * (1 << 8), arm_compute::RoundingPolicy::TO_NEAREST_EVEN);
+    const auto  vs_s32          = svdup_n_s32(s_s32);
+    const auto  vo_s32          = svdup_n_s32(o_s32);
+
+    // Initialise scale/offset for re-quantization for leaky relu
+    int32_t     s_leaky_s32     = round(s * act_info.a() * (1 << 8), arm_compute::RoundingPolicy::TO_NEAREST_EVEN);
+    int32_t     o_leaky_s32     = round((-qi_in.offset * s * act_info.a() + qi_out.offset) * (1 << 8),
+                                             arm_compute::RoundingPolicy::TO_NEAREST_EVEN);
+    const auto  vs_leaky_s32    = svdup_n_s32(s_leaky_s32);
+    const auto  vo_leaky_s32    = svdup_n_s32(o_leaky_s32);
 
     execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
@@ -163,6 +177,65 @@ void qasymm8_sve_activation(const ITensor *src, ITensor *dst, const ActivationLa
                 };
                 // Re-quantize to new output space
                 tmp = svquantize_z(pg, tmp_dep, qi_out);
+            }
+            else if(act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
+            {
+                svbool_t p0, p1, p2, p3;
+                svint32x4_t tmp_dep;
+
+                // Expand to int32
+                const svint32x4_t vin_s32 =
+                {
+                    { {
+                            svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(vin))),
+                            svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(vin))),
+                            svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(vin))),
+                            svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(vin))),
+                    } }
+                };
+
+                // Compare elements to input offset
+                if (qi_in.scale >= 0)
+                {
+                    p0 = svcmplt_s32(pg, svget4_s32(vin_s32, 0), voffset_in);
+                    p1 = svcmplt_s32(pg, svget4_s32(vin_s32, 1), voffset_in);
+                    p2 = svcmplt_s32(pg, svget4_s32(vin_s32, 2), voffset_in);
+                    p3 = svcmplt_s32(pg, svget4_s32(vin_s32, 3), voffset_in);
+                }
+                else
+                {
+                    p0 = svcmpgt_s32(pg, svget4_s32(vin_s32, 0), voffset_in);
+                    p1 = svcmpgt_s32(pg, svget4_s32(vin_s32, 1), voffset_in);
+                    p2 = svcmpgt_s32(pg, svget4_s32(vin_s32, 2), voffset_in);
+                    p3 = svcmpgt_s32(pg, svget4_s32(vin_s32, 3), voffset_in);
+                }
+
+                // Multiply negative elements and requantize if necessary
+                if (requant)
+                {
+                    tmp_dep = svcreate4_s32(
+                        svasr_n_s32_m(pg, svmla_s32_m(pg, svsel(p0, vo_leaky_s32, vo_s32), svget4_s32(vin_s32, 0), svsel(p0, vs_leaky_s32, vs_s32)), 8),
+                        svasr_n_s32_m(pg, svmla_s32_m(pg, svsel(p1, vo_leaky_s32, vo_s32), svget4_s32(vin_s32, 1), svsel(p1, vs_leaky_s32, vs_s32)), 8),
+                        svasr_n_s32_m(pg, svmla_s32_m(pg, svsel(p2, vo_leaky_s32, vo_s32), svget4_s32(vin_s32, 2), svsel(p2, vs_leaky_s32, vs_s32)), 8),
+                        svasr_n_s32_m(pg, svmla_s32_m(pg, svsel(p3, vo_leaky_s32, vo_s32), svget4_s32(vin_s32, 3), svsel(p3, vs_leaky_s32, vs_s32)), 8)
+                    );
+                }
+                else
+                {
+                    tmp_dep = svcreate4_s32(
+                        svasr_n_s32_m(p0, svmad_s32_m(p0, svget4_s32(vin_s32, 0), vs_leaky_s32, vo_leaky_s32), 8),
+                        svasr_n_s32_m(p1, svmad_s32_m(p1, svget4_s32(vin_s32, 1), vs_leaky_s32, vo_leaky_s32), 8),
+                        svasr_n_s32_m(p2, svmad_s32_m(p2, svget4_s32(vin_s32, 2), vs_leaky_s32, vo_leaky_s32), 8),
+                        svasr_n_s32_m(p3, svmad_s32_m(p3, svget4_s32(vin_s32, 3), vs_leaky_s32, vo_leaky_s32), 8)
+                    );
+                }
+
+                // Convert uint32 vectors to uint16 vectors (with saturation)
+                const auto v_low_u16 = svqxtunt_s32(svqxtunb_s32(svget4_s32(tmp_dep, 0)), svget4_s32(tmp_dep, 1));
+                const auto v_high_u16 = svqxtunt_s32(svqxtunb_s32(svget4_s32(tmp_dep, 2)), svget4_s32(tmp_dep, 3));
+
+                // convert uint16 vectors to uint8 vectors (with saturation)
+                tmp = svqxtnt_u16(svqxtnb_u16(v_low_u16), v_high_u16);
             }
             else
             {
