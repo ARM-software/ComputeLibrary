@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -137,7 +137,14 @@ namespace cpu
 void fp32_neon_batch_normalization(ITensor *src, ITensor *dst, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma,
                                    float epsilon, ActivationLayerInfo &act_info, const Window &window)
 {
-    fused_map[act_info.activation()](src, dst, mean, var, beta, gamma, epsilon, act_info, window);
+    if(act_info.enabled())
+    {
+        fused_map[act_info.activation()](src, dst, mean, var, beta, gamma, epsilon, act_info, window);
+    }
+    else
+    {
+        batch_normalization<detail::dummy<float, 4>>(src, dst, mean, var, beta, gamma, epsilon, act_info, window);
+    }
 }
 } // namespace cpu
 } // namespace arm_compute
