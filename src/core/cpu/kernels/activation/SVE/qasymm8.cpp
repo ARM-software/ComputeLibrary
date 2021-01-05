@@ -26,7 +26,6 @@
 #include "arm_compute/core/Window.h"
 #include "src/core/common/Validate.h"
 
-#include <arm_neon.h>
 #include <cmath>
 #include <cstddef>
 

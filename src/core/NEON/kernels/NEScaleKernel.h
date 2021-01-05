@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,17 +96,11 @@ private:
     void scale_bilinear_nchw(const Window &window);
     /** function to perform scale using bilinear interpolation on the given window */
     template <typename T>
-    void scale_bilinear_nhwc(const Window &window);
-    /** function to perform scale using bilinear interpolation on the given window */
-    template <typename T>
     void scale_bilinear_qasymm(const Window &window);
 
     /** function to perform scale using nearest neighbour on the given window */
     template <typename T>
     void scale_nearest_nchw(const Window &window);
-    /** function to perform scale using nearest neighbour on the given window */
-    template <typename T>
-    void scale_nearest_nhwc(const Window &window);
 
     /** Scale function to use for the particular function to use */
     using ScaleFunctionPtr = void (NEScaleKernel::*)(const Window &window);

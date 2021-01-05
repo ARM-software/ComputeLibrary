@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,13 +28,14 @@
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/NEON/kernels/scale/impl/list.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
-
 #include <arm_neon.h>
 #include <map>
 
@@ -42,23 +43,113 @@ namespace arm_compute
 {
 namespace
 {
-inline float compute_bilinear(float a00, float a01, float a10, float a11, float dx_val, float dy_val)
+struct ScaleSelectorData
 {
-    const float dx1_val = 1.0f - dx_val;
-    const float dy1_val = 1.0f - dy_val;
+    DataType dt;
+};
+using ScaleSelectorPtr = std::add_pointer<bool(const ScaleSelectorData &data)>::type;
+using ScaleKernelPtr   = std::add_pointer<void(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *,
+                                               InterpolationPolicy, BorderMode, PixelValue, float, bool, const Window &)>::type;
+struct ScaleKernel
+{
+    const char            *name;
+    const ScaleSelectorPtr is_selected;
+    ScaleKernelPtr         ukernel;
+};
 
-    const float w1 = dx1_val * dy1_val;
-    const float w2 = dx_val * dy1_val;
-    const float w3 = dx1_val * dy_val;
-    const float w4 = dx_val * dy_val;
-    return a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4;
+static const ScaleKernel available_kernels[] =
+{
+#if defined(__ARM_FEATURE_SVE)
+    {
+        "fp16_sve_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::fp16_sve_scale)
+    },
+    {
+        "f32_sve_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::fp32_sve_scale)
+    },
+    {
+        "qasymm8_sve_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::qasymm8_sve_scale)
+    },
+    {
+        "qasymm8_signed_sve_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::qasymm8_signed_sve_scale)
+    },
+    {
+        "u8_sve_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::U8; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u8_sve_scale)
+    },
+    {
+        "s16_sve_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::S16; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s16_sve_scale)
+    },
+#else /* !defined(__ARM_FEATURE_SVE) */
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+    {
+        "fp16_neon_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_scale)
+    },
+#endif /* !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
+    {
+        "f32_neon_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_scale)
+    },
+    {
+        "qasymm8_neon_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::qasymm8_neon_scale)
+    },
+    {
+        "qasymm8_signed_neon_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::qasymm8_signed_neon_scale)
+    },
+    {
+        "u8_neon_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::U8; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u8_neon_scale)
+    },
+    {
+        "s16_neon_scale",
+        [](const ScaleSelectorData & data) { return data.dt == DataType::S16; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s16_neon_scale)
+    },
+#endif /* !defined(__ARM_FEATURE_SVE) */
+};
+
+/** Micro-kernel selector
+ *
+ * @param[in] data Selection data passed to help pick the appropriate micro-kernel
+ *
+ * @return A matching micro-kernel else nullptr
+ */
+const ScaleKernel *get_implementation(const ScaleSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
+        {
+            return &uk;
+        }
+    }
+    return nullptr;
 }
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy,
                           const ITensorInfo *offsets, ITensorInfo *output, const ScaleKernelInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    const auto *uk = get_implementation(ScaleSelectorData{ input->data_type() });
+    ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
+
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
@@ -141,64 +232,51 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     const auto hr = scale_utils::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), _align_corners);
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
-    const auto policy_to_use = (info.interpolation_policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f) ? InterpolationPolicy::NEAREST_NEIGHBOR : _policy;
+    _policy = (_policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f) ? InterpolationPolicy::NEAREST_NEIGHBOR : _policy;
 
     if(_border_mode == BorderMode::UNDEFINED)
     {
         _border_mode           = BorderMode::CONSTANT;
         _constant_border_value = PixelValue();
     }
-    std::string function_to_call("scale_");
-    function_to_call += string_from_data_type(_input->info()->data_type()) + "_";
-    function_to_call += string_from_data_layout(_input->info()->data_layout()) + "_";
-    function_to_call += string_from_interpolation_policy(policy_to_use);
 
-    static std::map<std::string, ScaleFunctionPtr> map_function =
+    // Configure scale function to run
+    if(_input->info()->data_layout() == DataLayout::NCHW)
     {
-        { "scale_U8_NCHW_AREA_CONSTANT", &NEScaleKernel::scale_area_nchw_u8 },
+        std::string function_to_call("scale_");
+        function_to_call += string_from_data_type(_input->info()->data_type()) + "_";
+        function_to_call += string_from_data_layout(_input->info()->data_layout()) + "_";
+        function_to_call += string_from_interpolation_policy(_policy);
 
-        { "scale_U8_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_nchw<uint8_t> },
-        { "scale_U8_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<uint8_t> },
+        static std::map<std::string, ScaleFunctionPtr> map_function =
+        {
+            { "scale_U8_NCHW_AREA_CONSTANT", &NEScaleKernel::scale_area_nchw_u8 },
 
-        { "scale_U8_NHWC_BILINEAR", &NEScaleKernel::scale_bilinear_nhwc<uint8_t> },
-        { "scale_U8_NHWC_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nhwc<uint8_t> },
+            { "scale_U8_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_nchw<uint8_t> },
+            { "scale_U8_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<uint8_t> },
 
-        { "scale_QASYMM8_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_qasymm<uint8_t> },
-        { "scale_QASYMM8_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<uint8_t> },
+            { "scale_QASYMM8_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_qasymm<uint8_t> },
+            { "scale_QASYMM8_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<uint8_t> },
 
-        { "scale_QASYMM8_NHWC_BILINEAR", &NEScaleKernel::scale_bilinear_qasymm<uint8_t> },
-        { "scale_QASYMM8_NHWC_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nhwc<uint8_t> },
+            { "scale_QASYMM8_SIGNED_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_qasymm<int8_t> },
+            { "scale_QASYMM8_SIGNED_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<int8_t> },
 
-        { "scale_QASYMM8_SIGNED_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_qasymm<int8_t> },
-        { "scale_QASYMM8_SIGNED_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<uint8_t> },
-
-        { "scale_QASYMM8_SIGNED_NHWC_BILINEAR", &NEScaleKernel::scale_bilinear_qasymm<int8_t> },
-        { "scale_QASYMM8_SIGNED_NHWC_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nhwc<uint8_t> },
-
-        { "scale_S16_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_nchw<int16_t> },
-        { "scale_S16_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<uint16_t> },
-
-        { "scale_S16_NHWC_BILINEAR", &NEScaleKernel::scale_bilinear_nhwc<int16_t> },
-        { "scale_S16_NHWC_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nhwc<uint16_t> },
+            { "scale_S16_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_nchw<int16_t> },
+            { "scale_S16_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<int16_t> },
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        { "scale_F16_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_nchw<float16_t> },
-        { "scale_F16_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<uint16_t> },
-
-        { "scale_F16_NHWC_BILINEAR", &NEScaleKernel::scale_bilinear_nhwc<float16_t> },
-        { "scale_F16_NHWC_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nhwc<uint16_t> },
+            { "scale_F16_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_nchw<float16_t> },
+            { "scale_F16_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<float16_t> },
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
-        { "scale_F32_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_nchw<float> },
-        { "scale_F32_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<float> },
-
-        { "scale_F32_NHWC_BILINEAR", &NEScaleKernel::scale_bilinear_nhwc<float> },
-        { "scale_F32_NHWC_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nhwc<float> },
-    };
-    auto it = map_function.find(function_to_call);
-    if(it != map_function.end())
-    {
-        _func = it->second;
+            { "scale_F32_NCHW_BILINEAR", &NEScaleKernel::scale_bilinear_nchw<float> },
+            { "scale_F32_NCHW_NEAREST_NEIGHBOUR", &NEScaleKernel::scale_nearest_nchw<float> },
+        };
+        auto it = map_function.find(function_to_call);
+        if(it != map_function.end())
+        {
+            _func = it->second;
+        }
     }
 
     // Configure window
@@ -303,7 +381,7 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
                              (*(pixel_row_ptr + index_w + 1 + index_h * in_stride_w + in_stride_w)) :
                              const_border_value;
 
-            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(compute_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
         },
         in, offsets, dx, dy, out);
     }
@@ -327,7 +405,7 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
             const auto a10 = *(pixel_row_ptr + clamped_x + clamped_y1 * in_stride_w);
             const auto a11 = *(pixel_row_ptr + clamped_x1 + clamped_y1 * in_stride_w);
 
-            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(compute_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
         },
         in, offsets, dx, dy, out);
     }
@@ -386,121 +464,6 @@ void NEScaleKernel::scale_area_nchw_u8(const Window &window)
         vst1q_u8(out.ptr(), vcombine_u8(tmp0, tmp1));
     },
     in, out);
-}
-
-template <typename T>
-void NEScaleKernel::scale_nearest_nhwc(const Window &window)
-{
-    const size_t in_stride_c  = _input->info()->dimension(0) + _input->info()->padding().left + _input->info()->padding().right;
-    const size_t in_stride_w  = _input->info()->dimension(1) + _input->info()->padding().top + _input->info()->padding().bottom;
-    const size_t in_stride_wc = in_stride_w * in_stride_c;
-    const size_t in_dim_h     = _input->info()->dimension(2);
-
-    // Compute the ratio between source height and destination height
-    const auto hr             = scale_utils::calculate_resize_ratio(in_dim_h, _output->info()->dimension(2), _align_corners);
-    const auto window_start_x = static_cast<int32_t>(window.x().start());
-    const auto window_end_x   = static_cast<int32_t>(window.x().end());
-    const int  window_step_x  = 16 / sizeof(T);
-
-    Window win(window);
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    Iterator out(_output, win);
-
-    const uint8_t     *in_ptr_start        = _input->buffer() + _input->info()->offset_first_element_in_bytes();
-    const unsigned int in_stride_bytes_hwc = _input->info()->strides_in_bytes()[3];
-
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        const int32_t offset     = *reinterpret_cast<const int32_t *>(_offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
-        const auto    in_hi      = static_cast<int>(_align_corners ? utils::rounding::round_half_away_from_zero((id.z() + _sampling_offset) * hr) : std::floor((id.z() + _sampling_offset) * hr));
-        const int     offset_row = in_hi * in_stride_wc;
-        int32_t       x          = window_start_x;
-        const T      *in_ptr     = reinterpret_cast<const T *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
-
-        for(; x <= window_end_x - window_step_x; x += window_step_x)
-        {
-            wrapper::vstore(reinterpret_cast<T *>(out.ptr()) + x,
-                            wrapper::vloadq(in_ptr + offset + offset_row + x));
-        }
-        for(; x < window_end_x; ++x)
-        {
-            *(reinterpret_cast<T *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
-        }
-    },
-    out);
-}
-
-template <typename T>
-void NEScaleKernel::scale_bilinear_nhwc(const Window &window)
-{
-    // Compute the ratio between source height and destination height
-    const auto hr = scale_utils::calculate_resize_ratio(_input->info()->dimension(2), _output->info()->dimension(2), _align_corners);
-
-    Iterator  out(_output, window);
-    const int in_stride_c  = _input->info()->dimension(0) + _input->info()->padding().left + _input->info()->padding().right;
-    const int in_dim_w     = _input->info()->dimension(1);
-    const int in_dim_h     = _input->info()->dimension(2);
-    const int in_stride_wc = in_stride_c * (in_dim_w + _input->info()->padding().top + _input->info()->padding().bottom);
-
-    // Don't increment in Y and Z direction for the input tensor
-    // A pointer to the start of this plane is needed as base for the precomputed offsets
-    Window win_in(window);
-    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    Iterator in(_input, win_in);
-
-    if(_border_mode == BorderMode::CONSTANT)
-    {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        using ConstType = typename std::conditional<std::is_same<T, float16_t>::value, half, T>::type;
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        using ConstType = T;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        const T const_border_value = static_cast<T>(_constant_border_value.get<ConstType>());
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            const auto    offset = *reinterpret_cast<const int32_t *>(_offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto    dx_val = *reinterpret_cast<const float *>(_dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto    dy_val = *reinterpret_cast<const float *>(_dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int32_t in_hi  = std::floor((id.z() + _sampling_offset) * hr - _sampling_offset);
-            const T      *in_ptr = reinterpret_cast<const T *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
-
-            const auto a00 = (0 <= offset && offset < in_dim_w && 0 <= in_hi && in_hi < in_dim_h) ? *in_ptr : const_border_value;
-            const auto a01 = (-1 <= offset && offset < in_dim_w - 1 && 0 <= in_hi && in_hi < in_dim_h) ? *(in_ptr + in_stride_c) : const_border_value;
-            const auto a10 = (0 <= offset && offset < in_dim_w && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_wc) : const_border_value;
-            const auto a11 = (-1 <= offset && offset < in_dim_w - 1 && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_c + in_stride_wc) : const_border_value;
-
-            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(compute_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
-    }
-    else if(_border_mode == BorderMode::REPLICATE)
-    {
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            const auto offset = *reinterpret_cast<const int32_t *>(_offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto dx_val = *reinterpret_cast<const float *>(_dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto dy_val = *reinterpret_cast<const float *>(_dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int  in_hi  = std::floor((id.z() + _sampling_offset) * hr - _sampling_offset);
-
-            auto clamped_w  = utility::clamp<int>(offset, 0, in_dim_w - 1);
-            auto clamped_w1 = utility::clamp<int>(offset + 1, 0, in_dim_w - 1);
-            auto clamped_h  = utility::clamp<int>(in_hi, 0, in_dim_h - 1);
-            auto clamped_h1 = utility::clamp<int>(in_hi + 1, 0, in_dim_h - 1);
-
-            const auto a00 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_stride_c + clamped_h * in_stride_wc);
-            const auto a01 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h * in_stride_wc);
-            const auto a10 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_stride_c + clamped_h1 * in_stride_wc);
-            const auto a11 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h1 * in_stride_wc);
-
-            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(compute_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Not implemented");
-    }
 }
 
 template <typename T>
@@ -572,7 +535,7 @@ void NEScaleKernel::scale_bilinear_qasymm(const Window &window)
             const float inp01                 = Qasymm8QuantizationHelper<T>::dequantize(a01, iq_info);
             const float inp10                 = Qasymm8QuantizationHelper<T>::dequantize(a10, iq_info);
             const float inp11                 = Qasymm8QuantizationHelper<T>::dequantize(a11, iq_info);
-            *reinterpret_cast<T *>(out.ptr()) = Qasymm8QuantizationHelper<T>::quantize(compute_bilinear(inp00, inp01, inp10, inp11, dx_val, dy_val), oq_info);
+            *reinterpret_cast<T *>(out.ptr()) = Qasymm8QuantizationHelper<T>::quantize(scale_helpers::delta_bilinear(inp00, inp01, inp10, inp11, dx_val, dy_val), oq_info);
         },
         in, out);
     }
@@ -600,7 +563,7 @@ void NEScaleKernel::scale_bilinear_qasymm(const Window &window)
             const float inp01                 = Qasymm8QuantizationHelper<T>::dequantize(a01, iq_info);
             const float inp10                 = Qasymm8QuantizationHelper<T>::dequantize(a10, iq_info);
             const float inp11                 = Qasymm8QuantizationHelper<T>::dequantize(a11, iq_info);
-            *reinterpret_cast<T *>(out.ptr()) = Qasymm8QuantizationHelper<T>::quantize(compute_bilinear(inp00, inp01, inp10, inp11, dx_val, dy_val), oq_info);
+            *reinterpret_cast<T *>(out.ptr()) = Qasymm8QuantizationHelper<T>::quantize(scale_helpers::delta_bilinear(inp00, inp01, inp10, inp11, dx_val, dy_val), oq_info);
         },
         in, out);
     }
@@ -622,8 +585,16 @@ void NEScaleKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr);
+    ARM_COMPUTE_ERROR_ON(_func == nullptr && _input->info()->data_layout() == DataLayout::NCHW);
 
-    (this->*_func)(window);
+    if(_input->info()->data_layout() == DataLayout::NCHW)
+    {
+        (this->*_func)(window);
+    }
+    else
+    {
+        const auto *uk = get_implementation(ScaleSelectorData{ _input->info()->data_type() });
+        uk->ukernel(_input, _output, _offsets, _dx, _dy, _policy, _border_mode, _constant_border_value, _sampling_offset, _align_corners, window);
+    }
 }
 } // namespace arm_compute

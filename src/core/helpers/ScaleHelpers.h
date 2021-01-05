@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 Arm Limited.
+* Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -324,6 +324,32 @@ pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t widt
 
     // Return average
     return sum / (x_elements * y_elements);
+}
+
+/** Computes bilinear interpolation using the top-left, top-right, bottom-left, bottom-right pixels and the pixel's distance between
+ * the real coordinates and the smallest following integer coordinates.
+ *
+ * @param[in] a00 The top-left pixel value.
+ * @param[in] a01 The top-right pixel value.
+ * @param[in] a10 The bottom-left pixel value.
+ * @param[in] a11 The bottom-right pixel value.
+ * @param[in] dx  Pixel's distance between the X real coordinate and the smallest X following integer
+ * @param[in] dy  Pixel's distance between the Y real coordinate and the smallest Y following integer
+ *
+ * @note dx and dy must be in the range [0, 1.0]
+ *
+ * @return The bilinear interpolated pixel value
+ */
+inline float delta_bilinear(float a00, float a01, float a10, float a11, float dx_val, float dy_val)
+{
+    const float dx1_val = 1.0f - dx_val;
+    const float dy1_val = 1.0f - dy_val;
+
+    const float w1 = dx1_val * dy1_val;
+    const float w2 = dx_val * dy1_val;
+    const float w3 = dx1_val * dy_val;
+    const float w4 = dx_val * dy_val;
+    return a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4;
 }
 } // namespace scale_helpers
 } // namespace arm_compute
