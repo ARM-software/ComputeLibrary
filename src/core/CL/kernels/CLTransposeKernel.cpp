@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,15 +30,10 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "src/core/AccessWindowStatic.h"
-#include "src/core/AccessWindowTranspose.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
-#include <set>
-#include <sstream>
-#include <string>
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -72,37 +67,12 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / input->element_size();
-
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
-
-    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win, input_access);
-
-    if(output->total_size() != 0)
-    {
-        AccessWindowTranspose output_access(output, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-
-        window_changed = window_changed || update_window_and_padding(win, output_access);
-
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 Status CLTransposeKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
     return Status{};
 }
 
@@ -119,20 +89,28 @@ void CLTransposeKernel::configure(const CLCompileContext &compile_context, const
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(transposed_tensor_shape(input->info()->tensor_shape())));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
+    auto padding_info = get_padding_info({ input, output });
 
     _input  = input;
     _output = output;
 
-    std::set<std::string> build_opts;
-    std::ostringstream    data_type_in_bytes;
-    data_type_in_bytes << input->info()->element_size();
-    build_opts.emplace("-DDATA_TYPE_IN_BYTES=" + data_type_in_bytes.str());
+    const unsigned int vec_size_x           = adjust_vec_size(max_cl_vector_width / input->info()->element_size(), input->info()->dimension(0));
+    const int          vec_size_x_leftovers = input->info()->dimension(0) % vec_size_x;
+    const unsigned int vec_size_y           = adjust_vec_size(max_cl_vector_width / input->info()->element_size(), input->info()->dimension(1));
+    const int          vec_size_y_leftovers = input->info()->dimension(1) % vec_size_y;
 
-    _kernel = create_kernel(compile_context, "transpose", build_opts);
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE_IN_BYTES=" + support::cpp11::to_string(input->info()->element_size()));
+    build_opts.add_option("-DVEC_SIZE_X=" + support::cpp11::to_string(vec_size_x));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER_X=" + support::cpp11::to_string(vec_size_x_leftovers));
+    build_opts.add_option("-DVEC_SIZE_Y=" + support::cpp11::to_string(vec_size_y));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER_Y=" + support::cpp11::to_string(vec_size_y_leftovers));
+
+    _kernel = create_kernel(compile_context, "transpose", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second, cl::NDRange(2, 8));
+    Window win = calculate_max_window(*input->info(), Steps(vec_size_x, vec_size_y));
+    ICLKernel::configure_internal(win, cl::NDRange(2, 8));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 } // namespace arm_compute

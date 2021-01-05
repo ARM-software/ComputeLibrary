@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,8 +27,8 @@
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void CLTranspose::configure(const ICLTensor *input, ICLTensor *output)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
@@ -45,3 +45,4 @@ Status CLTranspose::validate(const ITensorInfo *input, const ITensorInfo *output
 {
     return CLTransposeKernel::validate(input, output);
 }
+} // namespace arm_compute

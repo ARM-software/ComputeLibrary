@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,116 +21,93 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#define PARTIAL_STORE_M0 VEC_SIZE_LEFTOVER_X
+#define PARTIAL_STORE_N0 VEC_SIZE_LEFTOVER_Y
+
 #include "helpers.h"
+#include "repeat.h"
 
-#define SWAP_ROW(u0, l0)     \
-    ({                       \
-        tmp_swap = u0;       \
-        u0       = l0;       \
-        l0       = tmp_swap; \
-    })
+#if defined(DATA_TYPE_IN_BYTES) && defined(VEC_SIZE_X) && defined(VEC_SIZE_LEFTOVER_X) && defined(VEC_SIZE_Y) && defined(VEC_SIZE_LEFTOVER_Y)
 
-#define SWAP_4x4(u0, u1, u2, u3, l0, l1, l2, l3) \
-    ({                                           \
-        VEC_DATA_TYPE(DATA_TYPE, 4)              \
-        tmp_swap;                                \
-        SWAP_ROW(u0, l0);                        \
-        SWAP_ROW(u1, l1);                        \
-        SWAP_ROW(u2, l2);                        \
-        SWAP_ROW(u3, l3);                        \
-    })
-
-#define SWAP_8x8(u0, u1, u2, u3, u4, u5, u6, u7, l0, l1, l2, l3, l4, l5, l6, l7) \
-    ({                                                                           \
-        VEC_DATA_TYPE(DATA_TYPE, 8)                                              \
-        tmp_swap;                                                                \
-        SWAP_ROW(u0, l0);                                                        \
-        SWAP_ROW(u1, l1);                                                        \
-        SWAP_ROW(u2, l2);                                                        \
-        SWAP_ROW(u3, l3);                                                        \
-        SWAP_ROW(u4, l4);                                                        \
-        SWAP_ROW(u5, l5);                                                        \
-        SWAP_ROW(u6, l6);                                                        \
-        SWAP_ROW(u7, l7);                                                        \
-    })
-
-#define TRANSPOSE_4x4(u0, u1, u2, u3) \
-    ({                                \
-        VEC_DATA_TYPE(DATA_TYPE, 4)   \
-        tmp;                          \
-        tmp.s012 = u0.s123;           \
-        u0.s1    = u1.s0;             \
-        u0.s2    = u2.s0;             \
-        u0.s3    = u3.s0;             \
-        u1.s0    = tmp.s0;            \
-        u2.s0    = tmp.s1;            \
-        u3.s0    = tmp.s2;            \
-        \
-        tmp.s01 = u1.s23;             \
-        u1.s2   = u2.s1;              \
-        u1.s3   = u3.s1;              \
-        u2.s1   = tmp.s0;             \
-        u3.s1   = tmp.s1;             \
-        \
-        tmp.s0 = u2.s3;               \
-        u2.s3  = u3.s2;               \
-        u3.s2  = tmp.s0;              \
-    })
-
-#define TRANSPOSE_8x8(u0, u1, u2, u3, u4, u5, u6, u7)                                             \
-    ({                                                                                            \
-        TRANSPOSE_4x4(u0.s0123, u1.s0123, u2.s0123, u3.s0123);                                    \
-        TRANSPOSE_4x4(u0.s4567, u1.s4567, u2.s4567, u3.s4567);                                    \
-        TRANSPOSE_4x4(u4.s0123, u5.s0123, u6.s0123, u7.s0123);                                    \
-        TRANSPOSE_4x4(u4.s4567, u5.s4567, u6.s4567, u7.s4567);                                    \
-        SWAP_4x4(u0.s4567, u1.s4567, u2.s4567, u3.s4567, u4.s0123, u5.s0123, u6.s0123, u7.s0123); \
-    })
-
-#define TRANSPOSE_16x16(u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15)                                                \
-    ({                                                                                                                                       \
-        TRANSPOSE_8x8(u0.s01234567, u1.s01234567, u2.s01234567, u3.s01234567, u4.s01234567, u5.s01234567, u6.s01234567, u7.s01234567);       \
-        TRANSPOSE_8x8(u0.s89ABCDEF, u1.s89ABCDEF, u2.s89ABCDEF, u3.s89ABCDEF, u4.s89ABCDEF, u5.s89ABCDEF, u6.s89ABCDEF, u7.s89ABCDEF);       \
-        TRANSPOSE_8x8(u8.s01234567, u9.s01234567, u10.s01234567, u11.s01234567, u12.s01234567, u13.s01234567, u14.s01234567, u15.s01234567); \
-        TRANSPOSE_8x8(u8.s89ABCDEF, u9.s89ABCDEF, u10.s89ABCDEF, u11.s89ABCDEF, u12.s89ABCDEF, u13.s89ABCDEF, u14.s89ABCDEF, u15.s89ABCDEF); \
-        SWAP_8x8(u0.s89ABCDEF, u1.s89ABCDEF, u2.s89ABCDEF, u3.s89ABCDEF, u4.s89ABCDEF, u5.s89ABCDEF, u6.s89ABCDEF, u7.s89ABCDEF,             \
-                 u8.s01234567, u9.s01234567, u10.s01234567, u11.s01234567, u12.s01234567, u13.s01234567, u14.s01234567, u15.s01234567);      \
-    })
-
-#ifndef DATA_TYPE_IN_BYTES
-#error DATA_TYPE_IN_BYTES not set for the transpose OpenCL kernel
-#endif /* not DATA_TYPE_IN_BYTES */
-
-#undef VLOAD
-#undef VSTORE
+#if VEC_SIZE_X == 1
+#if VEC_SIZE_Y == 1
+#define TRANSPOSED_U(val) \
+    {                     \
+        u0                \
+    }
+#elif VEC_SIZE_Y == 2
+#define TRANSPOSED_U(val) \
+    {                     \
+        u0, u1            \
+    }
+#elif VEC_SIZE_Y == 4
+#define TRANSPOSED_U(val) \
+    {                     \
+        u0, u1, u2, u3    \
+    }
+#elif VEC_SIZE_Y == 8
+#define TRANSPOSED_U(val)              \
+    {                                  \
+        u0, u1, u2, u3, u4, u5, u6, u7 \
+    }
+#elif VEC_SIZE_Y == 16
+#define TRANSPOSED_U(val)                        \
+    {                                            \
+        u0, u1, u2, u3, u4, u5, u6, u7,          \
+        u8, u9, u10, u11, u12, u13, u14, u15 \
+    }
+#endif /* switch VEC_SIZE_Y */
+#else  // VEC_SIZE_X == 1
+#if VEC_SIZE_Y == 1
+#define TRANSPOSED_U(val) \
+    {                     \
+        u0.val            \
+    }
+#elif VEC_SIZE_Y == 2
+#define TRANSPOSED_U(val) \
+    {                     \
+        u0.val, u1.val    \
+    }
+#elif VEC_SIZE_Y == 4
+#define TRANSPOSED_U(val)              \
+    {                                  \
+        u0.val, u1.val, u2.val, u3.val \
+    }
+#elif VEC_SIZE_Y == 8
+#define TRANSPOSED_U(val)                                              \
+    {                                                                  \
+        u0.val, u1.val, u2.val, u3.val, u4.val, u5.val, u6.val, u7.val \
+    }
+#elif VEC_SIZE_Y == 16
+#define TRANSPOSED_U(val)                                                        \
+    {                                                                            \
+        u0.val, u1.val, u2.val, u3.val, u4.val, u5.val, u6.val, u7.val,          \
+        u8.val, u9.val, u10.val, u11.val, u12.val, u13.val, u14.val, u15.val \
+    }
+#endif /* switch VEC_SIZE_Y */
+#endif // VEC_SIZE_X == 1
 
 #if DATA_TYPE_IN_BYTES == 4
 #define DATA_TYPE uint
-#define TRANSPOSE() TRANSPOSE_4x4(u0, u1, u2, u3)
-#define VLOAD(x, y) vload4(x, y)
-#define VSTORE(x, y, z) vstore4(x, y, z)
-#define BLOCK_SIZE 4
 #elif DATA_TYPE_IN_BYTES == 2
 #define DATA_TYPE ushort
-#define TRANSPOSE() TRANSPOSE_8x8(u0, u1, u2, u3, u4, u5, u6, u7)
-#define VLOAD(x, y) vload8(x, y)
-#define VSTORE(x, y, z) vstore8(x, y, z)
-#define BLOCK_SIZE 8
 #elif DATA_TYPE_IN_BYTES == 1
 #define DATA_TYPE uchar
-#define TRANSPOSE() TRANSPOSE_16x16(u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15)
-#define VLOAD(x, y) vload16(x, y)
-#define VSTORE(x, y, z) vstore16(x, y, z)
-#define BLOCK_SIZE 16
 #else /* switch DATA_TYPE_IN_BYTES */
 #error DATA_TYPE_IN_BYTES not supported for transpose
 #endif /* switch DATA_TYPE_IN_BYTES */
 
 /** This OpenCL kernel computes the matrix transposition of input matrix
  *
- * @attention The number of bytes of the data type need to be passed at compile time using -DDATA_TYPE_IN_BYTES. DATA_TYPE_IN_BYTES can be:
+ * @note The number of bytes of the data type need to be passed at compile time using -DDATA_TYPE_IN_BYTES. DATA_TYPE_IN_BYTES can be:
  *  -# -DDATA_TYPE_IN_BYTES=1 for transposing U8 or S8 matrices
  *  -# -DDATA_TYPE_IN_BYTES=2 for transposing U16, S16 or FP16 matrices
  *  -# -DDATA_TYPE_IN_BYTES=4 for transposing U32, S32 or FP32 matrices
+ *  -# -DVEC_SIZE_X is the number of elements processed in X dimension
+ *  -# -DVEC_SIZE_LEFTOVER_X is the leftover size in the X dimension; x_dimension % VEC_SIZE_X
+ *  -# -DVEC_SIZE_Y is the number of elements processed in Y dimension
+ *  -# -DVEC_SIZE_LEFTOVER_Y is the leftover size in the Y dimension; y_dimension % VEC_SIZE_Y
+ *
  *
  * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -148,73 +125,104 @@
 __kernel void transpose(IMAGE_DECLARATION(src),
                         IMAGE_DECLARATION(dst))
 {
-    uint x = get_global_id(0) * BLOCK_SIZE;
-    uint y = get_global_id(1) * BLOCK_SIZE;
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE_X - (VEC_SIZE_X - VEC_SIZE_LEFTOVER_X) % VEC_SIZE_X), 0);
+    uint y_offs = max((int)(get_global_id(1) * VEC_SIZE_Y - (VEC_SIZE_Y - VEC_SIZE_LEFTOVER_Y) % VEC_SIZE_Y), 0);
 
-    // Compute source address
-    Image src = CONVERT_TO_IMAGE_STRUCT(src);
+    // Compute addresses
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offs * DATA_TYPE_IN_BYTES + y_offs * src_stride_y;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + y_offs * DATA_TYPE_IN_BYTES + x_offs * dst_stride_y;
 
-    // Load the NxN block at (x, y)
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u0 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 0)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u1 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 1)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u2 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 2)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u3 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 3)));
-#if BLOCK_SIZE > 4
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u4 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 4)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u5 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 5)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u6 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 6)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u7 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 7)));
-#if BLOCK_SIZE == 16
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u8 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 8)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u9 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 9)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u10 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 10)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u11 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 11)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u12 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 12)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u13 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 13)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u14 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 14)));
-    VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
-    u15 = VLOAD(0, (__global DATA_TYPE *)(offset(&src, 0, 15)));
-#endif /* BLOCK_SIZE == 16 */
-#endif /* BLOCK_SIZE > 4 */
+    // Load the NxM block at (x, y)
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u0 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)src_addr);
+#if VEC_SIZE_Y > 1
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u1 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + src_stride_y));
+#endif /* VEC_SIZE_Y > 1 */
+#if VEC_SIZE_Y > 2
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u2 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u3 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 3 * src_stride_y));
+#endif /* VEC_SIZE_Y > 2 */
+#if VEC_SIZE_Y > 4
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u4 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 4 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u5 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 5 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u6 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 6 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u7 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 7 * src_stride_y));
+#endif /* VEC_SIZE_Y > 4 */
+#if VEC_SIZE_Y > 8
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u8 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 8 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u9 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 9 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u10 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 10 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u11 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 11 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u12 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 12 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u13 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 13 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u14 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 14 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
+    u15 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 15 * src_stride_y));
+#endif /* VEC_SIZE_Y > 8 */
 
-    // Transpose the block
-    TRANSPOSE();
+    //Create transposed vectors
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t0 = TRANSPOSED_U(s0);
+#if VEC_SIZE_X > 1
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t1 = TRANSPOSED_U(s1);
+#endif /* VEC_SIZE_X > 1 */
+#if VEC_SIZE_X > 2
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t2 = TRANSPOSED_U(s2);
+#endif /* VEC_SIZE_X > 2 */
+#if VEC_SIZE_X > 3
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t3 = TRANSPOSED_U(s3);
+#endif /* VEC_SIZE_X > 3 */
+#if VEC_SIZE_X > 4
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t4 = TRANSPOSED_U(s4);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t5 = TRANSPOSED_U(s5);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t6 = TRANSPOSED_U(s6);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t7 = TRANSPOSED_U(s7);
+#endif /* VEC_SIZE_X > 4 */
+#if VEC_SIZE_X > 8
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t8 = TRANSPOSED_U(s8);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    t9 = TRANSPOSED_U(s9);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    tA = TRANSPOSED_U(sA);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    tB = TRANSPOSED_U(sB);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    tC = TRANSPOSED_U(sC);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    tD = TRANSPOSED_U(sD);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    tE = TRANSPOSED_U(sE);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_Y)
+    tF = TRANSPOSED_U(sF);
+#endif /* VEC_SIZE_X > 8 */
 
     // Store the block at (y, x)
-    uint dst_offset_in_bytes = y * DATA_TYPE_IN_BYTES + x * dst_stride_y + dst_offset_first_element_in_bytes;
-    VSTORE(u0, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 0 * dst_stride_y));
-    VSTORE(u1, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 1 * dst_stride_y));
-    VSTORE(u2, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 2 * dst_stride_y));
-    VSTORE(u3, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 3 * dst_stride_y));
-#if BLOCK_SIZE > 4
-    VSTORE(u4, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 4 * dst_stride_y));
-    VSTORE(u5, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 5 * dst_stride_y));
-    VSTORE(u6, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 6 * dst_stride_y));
-    VSTORE(u7, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 7 * dst_stride_y));
-#if BLOCK_SIZE == 16
-    VSTORE(u8, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 8 * dst_stride_y));
-    VSTORE(u9, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 9 * dst_stride_y));
-    VSTORE(u10, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 10 * dst_stride_y));
-    VSTORE(u11, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 11 * dst_stride_y));
-    VSTORE(u12, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 12 * dst_stride_y));
-    VSTORE(u13, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 13 * dst_stride_y));
-    VSTORE(u14, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 14 * dst_stride_y));
-    VSTORE(u15, 0, (__global DATA_TYPE *)(dst_ptr + dst_offset_in_bytes + 15 * dst_stride_y));
-#endif /* BLOCK_SIZE == 16 */
-#endif /* BLOCK_SIZE > 4 */
+    REPEAT_VAR_INIT_TO_CONST(VEC_SIZE_X, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
+    STORE_BLOCK_BOUNDARY_AWARE(VEC_SIZE_X, VEC_SIZE_Y, DATA_TYPE, t, (__global uchar *)dst_addr, dst_stride_y, zout, VEC_SIZE_LEFTOVER_X, VEC_SIZE_LEFTOVER_Y, VEC_SIZE_LEFTOVER_X != 0
+                               && get_global_id(0) == 0,
+                               VEC_SIZE_LEFTOVER_Y != 0 && get_global_id(1) == 0);
 }
+
+#endif // defined(DATA_TYPE_IN_BYTES) && defined(VEC_SIZE_X) && defined(VEC_SIZE_LEFTOVER_X) && defined(VEC_SIZE_Y) && defined(VEC_SIZE_LEFTOVER_Y)
