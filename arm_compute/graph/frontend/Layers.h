@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1465,8 +1465,7 @@ class YOLOLayer final : public ILayer
 public:
     /** Construct a YOLO layer.
      *
-     * @param[in] act_info    Activation info
-     * @param[in] num_classes Number of classes to activate
+     * @param[in] act_info Activation info
      */
     YOLOLayer(ActivationLayerInfo act_info)
         : _act_info(act_info)

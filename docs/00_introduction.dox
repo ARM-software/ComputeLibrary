@@ -1191,7 +1191,7 @@ v17.09 Public major release
     - CLFlattenLayer
     - @ref CLFloorKernel / @ref CLFloor
     - CLGEMMTranspose1xW
-    - @ref CLGEMMMatrixVectorMultiplyKernel
+    - CLGEMMMatrixVectorMultiplyKernel
     - @ref CLL2NormalizeLayerKernel / @ref CLL2NormalizeLayer
     - @ref CLQuantizationLayerKernel @ref CLMinMaxLayerKernel / @ref CLQuantizationLayer
     - @ref CLROIPoolingLayerKernel / @ref CLROIPoolingLayer

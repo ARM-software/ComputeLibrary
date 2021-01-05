@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ class NEComputeAllAnchorsKernel;
 /** Basic function to generate proposals for a RPN (Region Proposal Network)
  *
  * This function calls the following Neon kernels:
- * -# @ref NEComputeAllAnchors
+ * -# @ref NEComputeAllAnchorsKernel
  * -# @ref NEPermute x 2
  * -# @ref NEReshapeLayer x 2
  * -# @ref NEBoundingBoxTransform

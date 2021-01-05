@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ class ITensorInfo;
 /** Basic function to generate proposals for a RPN (Region Proposal Network)
  *
  * This function calls the following OpenCL kernels:
- * -# @ref CLComputeAllAnchors
+ * -# @ref CLComputeAllAnchorsKernel
  * -# @ref CLPermute x 2
  * -# @ref CLReshapeLayer x 2
  * -# @ref CLBoundingBoxTransform

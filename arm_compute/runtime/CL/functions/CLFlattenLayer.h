@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ class ITensorInfo;
 
 /** Basic function to execute flatten. This function calls the following OpenCL kernel:
 *
-* -# @ref CLFlattenLayerKernel
+* -# @ref CLReshapeLayer
 *
 */
 class CLFlattenLayer : public IFunction
