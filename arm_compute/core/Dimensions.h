@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,6 +96,21 @@ public:
     T z() const
     {
         return _id[2];
+    }
+    /** Increments the given dimension by a step size, avoiding overflows
+     *
+     * @note Precondition: dim < _num_dimensions
+     *
+     * @param[in] dim  Dimension to increment.
+     * @param[in] step Step to increment @p dim by.
+     */
+    void increment(size_t dim, T step = 1)
+    {
+        ARM_COMPUTE_ERROR_ON(dim < _num_dimensions);
+        if((std::numeric_limits<T>::max() - _id[dim]) <= step)
+        {
+            _id[dim] += step;
+        }
     }
     /** Generic accessor to get the size of any dimension
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -303,7 +303,7 @@ public:
      * @param[in] min Minimum value of the distribution
      * @param[in] max Maximum value of the distribution
      */
-    explicit uniform_real_distribution_fp16(half min = half(0.0), half max = half(1.0))
+    explicit uniform_real_distribution_fp16(float min = 0.f, float max = 1.0)
         : dist(min, max)
     {
     }

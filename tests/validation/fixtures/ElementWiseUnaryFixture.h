@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,7 @@ protected:
                 {
                     case DataType::F16:
                     {
-                        arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-2.0f), half(2.0f) };
+                        arm_compute::utils::uniform_real_distribution_fp16 distribution{ -2.0f, 2.0f };
                         library->fill(tensor, distribution, i);
                         break;
                     }

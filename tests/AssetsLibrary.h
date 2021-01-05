@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -783,7 +783,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::F16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
-            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16{ half(-100.f), half(100.f) };
+            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16{ -100.f, 100.f };
             fill(tensor, distribution_f16, seed_offset);
             break;
         }
@@ -980,7 +980,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         }
         case DataType::F16:
         {
-            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16{ half(low), half(high) };
+            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16{ float(low), float(high) };
             fill(tensor, distribution_f16, seed_offset);
             break;
         }

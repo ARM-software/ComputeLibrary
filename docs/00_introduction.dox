@@ -1409,10 +1409,6 @@ To see the build options available simply run ```scons -h```:
             default:
             actual:
 
-        internal_only: Enable ARM internal only tests (yes|no)
-            default: False
-            actual: False
-
         custom_options: Custom options that can be used to turn on/off features
             (all|none|comma-separated list of names)
             allowed names: disable_mmla_fp
