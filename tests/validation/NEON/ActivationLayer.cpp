@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -159,7 +159,7 @@ const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions
 /** Input data sets. */
 const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
-template <typename T, REQUIRES_TA(arm_compute::utils::traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(arm_compute::utils::traits::is_floating_point<T>::value)>
 void test_float_sqrt_boundary_value()
 {
     constexpr auto vector_size = uint32_t{ 16 };

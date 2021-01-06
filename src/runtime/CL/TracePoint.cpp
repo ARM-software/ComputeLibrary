@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,10 +32,10 @@
 
 namespace arm_compute
 {
-TRACE_TO_STRING(CLPyramid)
-TRACE_TO_STRING(LSTMParams<ICLTensor>)
-TRACE_TO_STRING(CLCoordinates2DArray)
-CONST_PTR_CLASS(CLPyramid)
-CONST_PTR_CLASS(LSTMParams<ICLTensor>)
-CONST_PTR_CLASS(CLCoordinates2DArray)
+ARM_COMPUTE_TRACE_TO_STRING(CLPyramid)
+ARM_COMPUTE_TRACE_TO_STRING(LSTMParams<ICLTensor>)
+ARM_COMPUTE_TRACE_TO_STRING(CLCoordinates2DArray)
+ARM_COMPUTE_CONST_PTR_CLASS(CLPyramid)
+ARM_COMPUTE_CONST_PTR_CLASS(LSTMParams<ICLTensor>)
+ARM_COMPUTE_CONST_PTR_CLASS(CLCoordinates2DArray)
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,7 @@ enum class RoundingMode
  *
  * @return Floating-point value of rounded @p value.
  */
-template <typename T, REQUIRES_TA(traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round_to_zero(T value)
 {
     T res = std::floor(std::fabs(value));
@@ -72,7 +72,7 @@ inline T round_to_zero(T value)
  *
  * @return Floating-point value of rounded @p value.
  */
-template <typename T, REQUIRES_TA(traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round_away_from_zero(T value)
 {
     T res = std::ceil(std::fabs(value));
@@ -87,7 +87,7 @@ inline T round_away_from_zero(T value)
  *
  * @return Floating-point value of rounded @p value.
  */
-template <typename T, REQUIRES_TA(traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round_half_to_zero(T value)
 {
     T res = T(std::ceil(std::fabs(value) - 0.5f));
@@ -102,7 +102,7 @@ inline T round_half_to_zero(T value)
  *
  * @return Floating-point value of rounded @p value.
  */
-template <typename T, REQUIRES_TA(traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round_half_away_from_zero(T value)
 {
     T res = T(std::floor(std::fabs(value) + 0.5f));
@@ -117,7 +117,7 @@ inline T round_half_away_from_zero(T value)
  *
  * @return Floating-point value of rounded @p value.
  */
-template <typename T, REQUIRES_TA(traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round_half_up(T value)
 {
     return std::floor(value + 0.5f);
@@ -131,7 +131,7 @@ inline T round_half_up(T value)
  *
  * @return Floating-point value of rounded @p value.
  */
-template <typename T, REQUIRES_TA(traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round_half_down(T value)
 {
     return std::ceil(value - 0.5f);
@@ -146,7 +146,7 @@ inline T round_half_down(T value)
  *
  * @return Floating-point value of rounded @p value.
  */
-template <typename T, REQUIRES_TA(traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round_half_even(T value, T epsilon = std::numeric_limits<T>::epsilon())
 {
     T positive_value = std::abs(value);
@@ -176,7 +176,7 @@ inline T round_half_even(T value, T epsilon = std::numeric_limits<T>::epsilon())
  *
  * @return Floating-point value of rounded @p value.
  */
-template <typename T, REQUIRES_TA(traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round(T value, RoundingMode rounding_mode)
 {
     switch(rounding_mode)

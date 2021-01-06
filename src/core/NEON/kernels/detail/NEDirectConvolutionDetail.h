@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@ inline float32x4x3_t load_matrix_row(const float *ptr, int weights_offset = 0)
  *
  * @return The loaded matrix.
  */
-template < typename T, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
+template < typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
 inline int32x4x3_t load_matrix_row(const T *ptr, int weights_offset = 0)
 {
     const int32x4_t v_weights_offset = vdupq_n_s32(weights_offset);
@@ -463,7 +463,7 @@ inline void convolve_3x3(const float *in_top, const float *in_mid, const float *
  * @param[in] input_offset Input quantization offset.
  *
  */
-template < typename T, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
+template < typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
 inline int32x4_t single_convolve_3x3_dilation(const T *in_top, const T *in_mid, const T *in_low,
                                               const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
                                               size_t dilation_x, int32_t input_offset)
@@ -551,7 +551,7 @@ inline int32x4_t single_convolve_3x3_dilation(const T *in_top, const T *in_mid, 
  * @param[in] input_offset Input quantization offset.
  *
  */
-template < typename T, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
+template < typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
 inline int32x4x2_t convolve_3x3_dilation(const T *in_top, const T *in_mid, const T *in_low, const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
                                          const size_t dilation_x, unsigned int stridex, int input_offset)
 {
@@ -590,7 +590,7 @@ inline int32x4x2_t convolve_3x3_dilation(const T *in_top, const T *in_mid, const
  * @param[in]  input_offset Input quantization offset.
  *
  */
-template < bool accumulate, typename T1, typename T2, REQUIRES_TA(std::is_same<T1, uint8_t>::value || std::is_same<T1, int8_t>::value) >
+template < bool accumulate, typename T1, typename T2, ARM_COMPUTE_REQUIRES_TA(std::is_same<T1, uint8_t>::value || std::is_same<T1, int8_t>::value) >
 void convolve_3x3(const T1 *in_top, const T1 *in_mid, const T1 *in_low, T2 *out_ptr,
                   const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
                   unsigned int stridex, int32_t input_offset)
