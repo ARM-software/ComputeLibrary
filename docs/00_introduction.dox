@@ -87,9 +87,19 @@ If there is more than one release in a month then an extra sequential number is 
 @subsection S2_2_changelog Changelog
 
 v21.02 Public major release
+ - Various bug fixes.
+ - Various optimisations.
  - Upgrade C++ standard to C++14
  - Add macOS support
- - Removed functions:
+ - Add SVE/SVE2 support for:
+   - @ref NEScaleKernel
+   - @ref NEActivationLayer
+   - @ref NEArithmeticAddition
+   - @ref NEBatchNormalizationLayerKernel
+   - @ref NELogits1DSoftmaxKernel
+   - @ref NELogits1DMaxKernel
+   - @ref NEElementwiseUnaryKernel
+ - Remove functions:
    - NELocallyConnectedLayer / CLLocallyConnectedLayer
    - NEIm2Col
    - NECol2Im
@@ -98,7 +108,7 @@ v21.02 Public major release
    - NEComputeAllAnchors / CLComputeAllAnchors
    - NEGEMMAssemblyDispatch
    - NEUpsampleLayer / CLUpsampleLayer
- - Removed kernels:
+ - Remove kernels:
    - NEGEMMMatrixVectorMultiplyKernel
    - NELocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedMatrixMultiplyKernel
    - NEUpsampleLayerKernel / CLUpsampleLayerKernel
