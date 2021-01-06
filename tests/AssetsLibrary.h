@@ -776,14 +776,14 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::BFLOAT16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
-            std::uniform_real_distribution<float> distribution_bf16(-1000.f, 1000.f);
+            arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution_bf16(-1000.f, 1000.f);
             fill(tensor, distribution_bf16, seed_offset);
             break;
         }
         case DataType::F16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
-            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16{ -100.f, 100.f };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution_f16{ -100.f, 100.f };
             fill(tensor, distribution_f16, seed_offset);
             break;
         }
@@ -881,8 +881,8 @@ void AssetsLibrary::fill_tensor_uniform_ranged(T                                
         case DataType::BFLOAT16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
-            const auto                       converted_pairs = detail::convert_range_pair<float>(excluded_range_pairs);
-            RangedUniformDistribution<float> distribution_bf16(-1000.f, 1000.f, converted_pairs);
+            const auto                          converted_pairs = detail::convert_range_pair<bfloat16>(excluded_range_pairs);
+            RangedUniformDistribution<bfloat16> distribution_bf16(bfloat16(-1000.f), bfloat16(1000.f), converted_pairs);
             fill(tensor, distribution_bf16, seed_offset);
             break;
         }
@@ -974,13 +974,13 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         }
         case DataType::BFLOAT16:
         {
-            std::uniform_real_distribution<float> distribution_bf16(low, high);
+            arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution_bf16(low, high);
             fill(tensor, distribution_bf16, seed_offset);
             break;
         }
         case DataType::F16:
         {
-            arm_compute::utils::uniform_real_distribution_fp16 distribution_f16{ float(low), float(high) };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution_f16{ float(low), float(high) };
             fill(tensor, distribution_f16, seed_offset);
             break;
         }

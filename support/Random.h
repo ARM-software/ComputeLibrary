@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,10 +44,10 @@ template <typename T>
 class RangedUniformDistribution
 {
 public:
-    static constexpr bool is_half     = std::is_same<T, half>::value;
-    static constexpr bool is_integral = std::is_integral<T>::value && !is_half;
+    static constexpr bool is_fp_16bit = std::is_same<T, half>::value || std::is_same<T, bfloat16>::value;
+    static constexpr bool is_integral = std::is_integral<T>::value && !is_fp_16bit;
 
-    using fp_dist     = typename std::conditional<is_half, arm_compute::utils::uniform_real_distribution_fp16, std::uniform_real_distribution<T>>::type;
+    using fp_dist     = typename std::conditional<is_fp_16bit, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
     using DT          = typename std::conditional<is_integral, std::uniform_int_distribution<T>, fp_dist>::type;
     using result_type = T;
     using range_pair  = std::pair<result_type, result_type>;

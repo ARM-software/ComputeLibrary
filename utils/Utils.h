@@ -294,16 +294,19 @@ inline void unmap(GCTensor &tensor)
  *  uniform_real_distribution<half> generates values that get rounded off to zero, causing
  *  differences between ACL and reference implementation
 */
-class uniform_real_distribution_fp16
+template <typename T>
+class uniform_real_distribution_16bit
 {
+    static_assert(std::is_same<T, half>::value || std::is_same<T, bfloat16>::value, "Only half and bfloat16 data types supported");
+
 public:
-    using result_type = half;
+    using result_type = T;
     /** Constructor
      *
      * @param[in] min Minimum value of the distribution
      * @param[in] max Maximum value of the distribution
      */
-    explicit uniform_real_distribution_fp16(float min = 0.f, float max = 1.0)
+    explicit uniform_real_distribution_16bit(float min = 0.f, float max = 1.0)
         : dist(min, max)
     {
     }
@@ -312,9 +315,9 @@ public:
      *
      * @param[in] gen an uniform random bit generator object
      */
-    half operator()(std::mt19937 &gen)
+    T operator()(std::mt19937 &gen)
     {
-        return half(dist(gen));
+        return T(dist(gen));
     }
 
 private:
@@ -770,10 +773,10 @@ void fill_tensor_vector(TensorType &tensor, std::vector<T> vec)
 template <typename T, typename TensorType>
 void fill_random_tensor(TensorType &tensor, std::random_device::result_type seed, T lower_bound = std::numeric_limits<T>::lowest(), T upper_bound = std::numeric_limits<T>::max())
 {
-    constexpr bool is_half     = std::is_same<T, half>::value;
-    constexpr bool is_integral = std::is_integral<T>::value && !is_half;
+    constexpr bool is_fp_16bit = std::is_same<T, half>::value || std::is_same<T, bfloat16>::value;
+    constexpr bool is_integral = std::is_integral<T>::value && !is_fp_16bit;
 
-    using fp_dist_type = typename std::conditional<is_half, arm_compute::utils::uniform_real_distribution_fp16, std::uniform_real_distribution<T>>::type;
+    using fp_dist_type = typename std::conditional<is_fp_16bit, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
     using dist_type    = typename std::conditional<is_integral, std::uniform_int_distribution<T>, fp_dist_type>::type;
 
     std::mt19937 gen(seed);

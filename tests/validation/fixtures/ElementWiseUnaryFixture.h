@@ -76,7 +76,7 @@ protected:
                 {
                     case DataType::F16:
                     {
-                        arm_compute::utils::uniform_real_distribution_fp16 distribution{ -2.0f, 2.0f };
+                        arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -2.0f, 2.0f };
                         library->fill(tensor, distribution, i);
                         break;
                     }
