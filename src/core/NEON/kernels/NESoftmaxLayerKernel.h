@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,11 +71,7 @@ public:
     BorderSize border_size() const override;
 
 private:
-    using Logits1DMaxFunction = void(const ITensor &in, ITensor &out, const Window &window);
-
-private:
-    Logits1DMaxFunction *_func;
-    BorderSize           _border_size;
+    BorderSize _border_size;
 };
 
 /** Interface for softmax computation for QASYMM8 with pre-computed max. */
@@ -135,15 +131,11 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    using LogitsSoftmaxFunction = void(const ITensor &in, const ITensor &max, void *const tmp, ITensor &out, const float beta,
-                                       const Window &window);
-
-    LogitsSoftmaxFunction *_func;
-    const ITensor         *_input;
-    const ITensor         *_max;
-    ITensor               *_output;
-    float                  _beta;
-    ITensor               *_tmp; //Temporary. Used internally
+    const ITensor *_input;
+    const ITensor *_max;
+    ITensor       *_output;
+    float          _beta;
+    ITensor       *_tmp; //Temporary. Used internally
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H */
