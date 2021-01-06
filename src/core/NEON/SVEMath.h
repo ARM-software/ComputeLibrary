@@ -28,7 +28,6 @@
 #include "src/core/NEON/wrapper/intrinsics/svcvt.h"
 #include "src/core/NEON/wrapper/intrinsics/svdup_n.h"
 #include "src/core/NEON/wrapper/intrinsics/svreinterpret.h"
-#include "src/core/common/StdTypes.h"
 #include <arm_sve.h>
 #include <array>
 

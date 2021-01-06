@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,21 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_FLOOR_LIST_H
-#define SRC_CORE_NEON_KERNELS_FLOOR_LIST_H
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+
+#include "src/core/NEON/NEMath.h"
+#include "src/core/common/Validate.h"
+
+#include <arm_neon.h>
+#include <cmath>
+#include <cstddef>
 
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_FLOOR_KERNEL(func_name) \
-    void func_name(const void *src, void *dst, int len)
+constexpr int step = 8;
 
-DECLARE_FLOOR_KERNEL(fp16_neon_floor);
-DECLARE_FLOOR_KERNEL(fp32_neon_floor);
+void fp16_neon_floor(const void *src, void *dst, int len)
+{
+    ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
+    ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
+    ARM_COMPUTE_ASSERT(len >= 0);
 
-#undef DECLARE_FLOOR_KERNEL
+    auto psrc = static_cast<const __fp16 *>(src);
+    auto pdst = static_cast<__fp16 *>(dst);
+
+    for(; len >= step; len -= step)
+    {
+        vst1q_f16(pdst, vfloorq_f16(vld1q_f16(psrc)));
+        psrc += step;
+        pdst += step;
+    }
+
+    for(; len > 0; --len)
+    {
+        *pdst = std::floor(*psrc);
+        ++psrc;
+        ++pdst;
+    }
+}
 } // namespace cpu
 } // namespace arm_compute
-
-#endif /* SRC_CORE_NEON_KERNELS_FLOOR_LIST_H */
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

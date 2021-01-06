@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,42 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/NEMath.h"
-#include "src/core/common/StdTypes.h"
-#include "src/core/common/Validate.h"
+#ifndef ARM_COMPUTE_CPU_FLOOR_H
+#define ARM_COMPUTE_CPU_FLOOR_H
 
-#include <arm_neon.h>
-#include <cmath>
-#include <cstddef>
+#include "src/runtime/cpu/ICpuOperator.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-constexpr int step = 4;
-
-void fp32_neon_floor(const void *src, void *dst, int len)
+/** Basic function to run @ref CpuFloorKernel */
+class CpuFloor : public ICpuOperator
 {
-    ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
-    ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
-    ARM_COMPUTE_ASSERT(len >= 0);
-
-    auto psrc = static_cast<const f32 *>(src);
-    auto pdst = static_cast<f32 *>(dst);
-
-    for(; len >= step; len -= step)
-    {
-        vst1q_f32(pdst, vfloorq_f32(vld1q_f32(psrc)));
-        psrc += step;
-        pdst += step;
-    }
-
-    for(; len > 0; --len)
-    {
-        *pdst = std::floor(*psrc);
-        ++pdst;
-        ++psrc;
-    }
-}
+public:
+    /** Constructor */
+    CpuFloor() = default;
+    /** Set the input and output tensor.
+     *
+     * @param[in] src Source tensor info. Data types supported: F16/F32.
+     * @param[in] dst Destination tensor info. Data type supported: same as @p src
+     */
+    void configure(const ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuFloor
+     *
+     * @param[in] src Source tensor info. Data types supported: F16/F32.
+     * @param[in] dst Destination tensor info. Data type supported: same as @p src
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
 } // namespace cpu
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_CPU_FLOOR_H */

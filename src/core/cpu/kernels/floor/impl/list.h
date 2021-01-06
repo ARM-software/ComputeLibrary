@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,23 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_COMMON_STDTYPES_H
-#define SRC_CORE_COMMON_STDTYPES_H
-
-#include <cstdint>
+#ifndef SRC_CORE_NEON_KERNELS_FLOOR_LIST_H
+#define SRC_CORE_NEON_KERNELS_FLOOR_LIST_H
 
 namespace arm_compute
 {
-using u8  = uint8_t;
-using s8  = int8_t;
-using u16 = uint16_t;
-using s16 = int16_t;
-using u32 = uint32_t;
-using s32 = int32_t;
-using f32 = float;
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
-using f16 = __fp16;
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
+namespace cpu
+{
+#define DECLARE_FLOOR_KERNEL(func_name) \
+    void func_name(const void *src, void *dst, int len)
+
+DECLARE_FLOOR_KERNEL(fp16_neon_floor);
+DECLARE_FLOOR_KERNEL(fp32_neon_floor);
+
+#undef DECLARE_FLOOR_KERNEL
+} // namespace cpu
 } // namespace arm_compute
 
-#endif /* SRC_CORE_COMMON_STDTYPES_H */
+#endif /* SRC_CORE_NEON_KERNELS_FLOOR_LIST_H */

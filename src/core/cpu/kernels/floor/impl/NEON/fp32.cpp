@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,46 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NEFloor.h"
+#include "src/core/NEON/NEMath.h"
+#include "src/core/common/Validate.h"
 
-#include "src/runtime/cpu/operators/CpuFloor.h"
+#include <arm_neon.h>
+#include <cmath>
+#include <cstddef>
 
 namespace arm_compute
 {
-NEFloor::NEFloor()
-    : _impl(std::make_unique<Impl>())
+namespace cpu
 {
+constexpr int step = 4;
+
+void fp32_neon_floor(const void *src, void *dst, int len)
+{
+    ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
+    ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
+    ARM_COMPUTE_ASSERT(len >= 0);
+
+    auto psrc = static_cast<const float *>(src);
+    auto pdst = static_cast<float *>(dst);
+
+    for(; len >= step; len -= step)
+    {
+        vst1q_f32(pdst, vfloorq_f32(vld1q_f32(psrc)));
+        psrc += step;
+        pdst += step;
+    }
+
+    for(; len > 0; --len)
+    {
+        *pdst = std::floor(*psrc);
+        ++pdst;
+        ++psrc;
+    }
 }
-NEFloor::NEFloor(NEFloor &&) = default;
-NEFloor &NEFloor::operator=(NEFloor &&) = default;
-NEFloor::~NEFloor()                     = default;
-
-struct NEFloor::Impl
-{
-    const ITensor                 *src{ nullptr };
-    ITensor                       *dst{ nullptr };
-    std::unique_ptr<cpu::CpuFloor> op{ nullptr };
-};
-
-void NEFloor::configure(const ITensor *input, ITensor *output)
-{
-    _impl->src = input;
-    _impl->dst = output;
-
-    _impl->op = std::make_unique<cpu::CpuFloor>();
-    _impl->op->configure(_impl->src->info(), _impl->dst->info());
-}
-
-Status NEFloor::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return cpu::CpuFloor::validate(input, output);
-}
-
-void NEFloor::run()
-{
-    ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-    _impl->op->run(pack);
-}
+} // namespace cpu
 } // namespace arm_compute

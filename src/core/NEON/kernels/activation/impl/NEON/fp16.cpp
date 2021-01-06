@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/common/StdTypes.h"
 #include "src/core/common/Validate.h"
 
 #include <arm_neon.h>

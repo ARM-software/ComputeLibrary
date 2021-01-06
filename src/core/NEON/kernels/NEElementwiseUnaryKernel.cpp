@@ -31,7 +31,6 @@
 #include "src/core/NEON/kernels/elementwise/impl/elementwise_unary_list.h"
 #include "src/core/SVE/kernels/elementwise/impl/elementwise_unary_list.h"
 #include "src/core/common/Registrars.h"
-#include "src/core/common/StdTypes.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/ToolchainSupport.h"
@@ -55,35 +54,35 @@ static const ElementwiseUnaryKernel available_kernels[] =
     {
         "fp32_sve_elementwise_unary",
         [](DataType dt) { return dt == DataType::F32; },
-        REGISTER_FP32_SVE(arm_compute::cpu::elementwise_sve_op<f32>),
+        REGISTER_FP32_SVE(arm_compute::cpu::elementwise_sve_op<float>),
     },
     {
         "fp16_sve_elementwise_unary",
         [](DataType dt) { return dt == DataType::F16; },
-        REGISTER_FP16_SVE(arm_compute::cpu::elementwise_sve_op<f16>),
+        REGISTER_FP16_SVE(arm_compute::cpu::elementwise_sve_op<__fp16>),
     },
     {
         "s32_sve_elementwise_unary",
         [](DataType dt) { return dt == DataType::S32; },
-        REGISTER_INTEGER_SVE(arm_compute::cpu::elementwise_sve_op<s32>),
+        REGISTER_INTEGER_SVE(arm_compute::cpu::elementwise_sve_op<int32_t>),
     },
 #endif // defined(__ARM_FEATURE_SVE)
     {
         "fp32_neon_elementwise_unary",
         [](DataType dt) { return dt == DataType::F32; },
-        REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<f32>),
+        REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<float>),
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "fp16_neon_elementwise_unary",
         [](DataType dt) { return dt == DataType::F16; },
-        REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<f16>),
+        REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<__fp16>),
     },
 #endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "s32_neon_elementwise_unary",
         [](DataType dt) { return dt == DataType::S32; },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::elementwise_op<s32>),
+        REGISTER_INTEGER_NEON(arm_compute::cpu::elementwise_op<int32_t>),
     },
 };
 

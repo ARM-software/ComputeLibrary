@@ -32,7 +32,6 @@
 #include "src/core/NEON/kernels/arithmetic_addition/impl/SVE/list.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/common/Registrars.h"
-#include "src/core/common/StdTypes.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 

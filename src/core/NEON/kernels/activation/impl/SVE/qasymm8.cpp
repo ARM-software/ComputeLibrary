@@ -24,7 +24,6 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/common/StdTypes.h"
 #include "src/core/common/Validate.h"
 
 #include <arm_neon.h>

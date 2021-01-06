@@ -442,7 +442,7 @@ v20.08 Public major release
    - @ref NEROIAlignLayerKernel
    - NEYOLOLayerKernel
    - NEUpsampleLayerKernel
-   - @ref NEFloorKernel
+   - NEFloorKernel
    - @ref NEWidthConcatenateLayerKernel
    - @ref NEDepthConcatenateLayerKernel
    - @ref NENormalizationLayerKernel
@@ -1177,7 +1177,7 @@ v17.09 Public major release
  - New NEON kernels / functions:
     - arm_compute::NEGEMMAssemblyBaseKernel arm_compute::NEGEMMAArch64Kernel
     - @ref NEDequantizationLayerKernel / @ref NEDequantizationLayer
-    - @ref NEFloorKernel / @ref NEFloor
+    - NEFloorKernel / @ref NEFloor
     - @ref NEL2NormalizeLayerKernel / @ref NEL2NormalizeLayer
     - @ref NEQuantizationLayerKernel @ref NEMinMaxLayerKernel / @ref NEQuantizationLayer
     - @ref NEROIPoolingLayerKernel / @ref NEROIPoolingLayer

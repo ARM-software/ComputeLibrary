@@ -26,7 +26,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
-#include "src/core/common/StdTypes.h"
 #include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute

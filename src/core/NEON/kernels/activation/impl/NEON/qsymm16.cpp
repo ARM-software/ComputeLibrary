@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/NESymm.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/common/StdTypes.h"
 #include "src/core/common/Validate.h"
 
 #include <arm_neon.h>
