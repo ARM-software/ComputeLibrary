@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,8 +55,8 @@
 __kernel void range(
     VECTOR_DECLARATION(out))
 {
-    uint     id                 = max((int)(get_global_id(0) * VECTOR_SIZE - (VECTOR_SIZE - VEC_SIZE_LEFTOVER) % VECTOR_SIZE), 0);
-    __global DATA_TYPE *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
+    uint     id             = max((int)(get_global_id(0) * VECTOR_SIZE - (VECTOR_SIZE - VEC_SIZE_LEFTOVER) % VECTOR_SIZE), 0);
+    __global uchar *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
 #if VECTOR_SIZE == 1
     DATA_TYPE seq;
     seq = (DATA_TYPE)START + (DATA_TYPE)id * (DATA_TYPE)STEP;
@@ -104,10 +104,10 @@ __kernel void range(
 __kernel void range_quantized(
     VECTOR_DECLARATION(out))
 {
-    uint     id                 = max((int)(get_global_id(0) * VECTOR_SIZE - (VECTOR_SIZE - VEC_SIZE_LEFTOVER) % VECTOR_SIZE), 0);
-    __global DATA_TYPE *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
+    uint     id             = max((int)(get_global_id(0) * VECTOR_SIZE - (VECTOR_SIZE - VEC_SIZE_LEFTOVER) % VECTOR_SIZE), 0);
+    __global uchar *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
 #if VECTOR_SIZE == 1
-    float               seq;
+    float           seq;
     seq      = (float)START + (float)id * (float)STEP;
     seq      = (DATA_TYPE)(int)(seq / ((float)SCALE_OUT) + (float)OFFSET_OUT);
     seq      = max(0.0f, min(seq, 255.0f));
