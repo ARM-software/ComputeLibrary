@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,11 @@ public:
         _data_layout = data_layout;
         _has_bias    = data_type != DataType::QASYMM8;
         _num_groups  = num_groups;
+
+        if(_data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+        }
 
         TensorInfo input_info(input_shape, 1, data_type);
         input_info.set_data_layout(_data_layout);

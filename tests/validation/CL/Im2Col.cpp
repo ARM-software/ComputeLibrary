@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -155,7 +155,7 @@ FIXTURE_DATA_TEST_CASE(W3x3,
                        combine(combine(combine(combine(combine(combine(
                                                                    framework::dataset::make("InputShape",
 {
-    TensorShape(2U, 5U, 7U, 2U), TensorShape(3U, 4U, 6U, 2U), TensorShape(1U, 5U, 3U, 2U),
+    TensorShape(5U, 7U, 2U, 2U), TensorShape(4U, 6U, 3U, 2U), TensorShape(5U, 3U, 1U, 2U),
 }),
 framework::dataset::make("DataType", DataType::F32)),
 framework::dataset::make("Kernel", Size2D(3, 3))),
@@ -185,7 +185,7 @@ FIXTURE_DATA_TEST_CASE(W9x9,
                        combine(combine(combine(combine(combine(combine(
                                                                    framework::dataset::make("InputShape",
 {
-    TensorShape(2U, 13U, 15U, 2U), TensorShape(3U, 15U, 12U, 2U), TensorShape(1U, 13U, 22U, 2U),
+    TensorShape(13U, 15U, 2U, 2U), TensorShape(15U, 12U, 3U, 2U), TensorShape(13U, 22U, 1U, 2U),
 }),
 framework::dataset::make("DataType", DataType::F32)),
 framework::dataset::make("Kernel", Size2D(9, 9))),
@@ -215,7 +215,7 @@ FIXTURE_DATA_TEST_CASE(Generic,
                        combine(combine(combine(combine(combine(combine(
                                                                    framework::dataset::make("InputShape",
 {
-    TensorShape(4U, 13U, 15U, 2U), TensorShape(7U, 15U, 12U, 1U), TensorShape(1U, 5U, 3U, 1U),
+    TensorShape(13U, 15U, 4U, 2U), TensorShape(15U, 12U, 7U, 1U), TensorShape(5U, 3U, 1U, 1U),
 }),
 framework::dataset::make("DataType", DataType::F32)),
 framework::dataset::make("Kernel", Size2D(5, 3))),
