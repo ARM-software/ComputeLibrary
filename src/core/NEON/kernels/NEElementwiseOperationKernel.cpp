@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/SVE/kernels/elementwise/impl/elementwise_list.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -1135,14 +1136,23 @@ configure_arithm_func(const ITensorInfo *input1, const ITensorInfo *input2, ITen
 {
     static std::map<std::string, NEElementwiseOperationKernel::ElementwiseFunction *> map_function =
     {
+#if defined(__ARM_FEATURE_SVE)
+        { "op_F32_F32_F32", &arm_compute::cpu::sve::elementwise_arithmetic_op<op, float32_t> },
+        { "op_S32_S32_S32", &arm_compute::cpu::sve::elementwise_arithmetic_op<op, int32_t> },
+#else  /* defined(__ARM_FEATURE_SVE) */
         { "op_F32_F32_F32", &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float, 4>> },
-        { "op_S16_S16_S16", &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>> },
         { "op_S32_S32_S32", &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int32_t, 4>> },
+#endif /* defined(__ARM_FEATURE_SVE) */
+        { "op_S16_S16_S16", &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>> },
         { "op_QASYMM8_QASYMM8_QASYMM8", &elementwise_arithm_op_quantized<op> },
         { "op_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &elementwise_arithm_op_quantized_signed<op> }
     };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#if defined(__ARM_FEATURE_SVE)
+    map_function["op_F16_F16_F16"] = &arm_compute::cpu::sve::elementwise_arithmetic_op<op, float16_t>;
+#else  /* defined(__ARM_FEATURE_SVE) */
     map_function["op_F16_F16_F16"] = &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float16_t, 8>>;
+#endif /* defined(__ARM_FEATURE_SVE) */
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
     return configure_func(input1, input2, output, map_function);
@@ -1154,15 +1164,26 @@ configure_comp_func(const ITensorInfo *input1, const ITensorInfo *input2, ITenso
 {
     static std::map<std::string, NEElementwiseOperationKernel::ElementwiseFunction *> map_function =
     {
+#if defined(__ARM_FEATURE_SVE)
+        { "op_U8_U8_U8", &arm_compute::cpu::sve::elementwise_comparison_op<op, uint8_t> },
+        { "op_F32_F32_U8", &arm_compute::cpu::sve::elementwise_comparison_op<op, float> },
+        { "op_S16_S16_U8", &arm_compute::cpu::sve::elementwise_comparison_op<op, int16_t> },
+        { "op_S32_S32_U8", &arm_compute::cpu::sve::elementwise_comparison_op<op, int32_t> },
+#else  /* defined(__ARM_FEATURE_SVE) */
         { "op_U8_U8_U8", &elementwise_comp_op_8<op, uint8_t, uint8x16_t> },
         { "op_F32_F32_U8", &elementwise_comp_op_32<op, float, float32x4_t> },
         { "op_S16_S16_U8", &elementwise_comp_op_16<op, int16_t, int16x8_t> },
         { "op_S32_S32_U8", &elementwise_comp_op_32<op, int32_t, int32x4_t> },
+#endif /* defined(__ARM_FEATURE_SVE) */
         { "op_QASYMM8_SIGNED_QASYMM8_SIGNED_U8", &elementwise_comp_op_quantized_signed<op> },
         { "op_QASYMM8_QASYMM8_U8", &elementwise_comp_op_quantized<op> }
     };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    map_function["op_F16_F16_U8"] = &elementwise_comp_op_16<op, float16_t, float16x8_t>;
+#if defined(__ARM_FEATURE_SVE)
+    map_function["op_F16_F16_U8"] = &arm_compute::cpu::sve::elementwise_comparison_op<op, float16_t>;
+#else  /* defined(__ARM_FEATURE_SVE) */
+    map_function["op_F16_F16_U8"]  = &elementwise_comp_op_16<op, float16_t, float16x8_t>;
+#endif /* defined(__ARM_FEATURE_SVE) */
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
     return configure_func(input1, input2, output, map_function);

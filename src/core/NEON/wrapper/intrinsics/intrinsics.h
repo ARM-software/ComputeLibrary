@@ -79,6 +79,7 @@
 #include "src/core/NEON/wrapper/intrinsics/svdup_n.h"
 #include "src/core/NEON/wrapper/intrinsics/svexp.h"
 #include "src/core/NEON/wrapper/intrinsics/svlog.h"
+#include "src/core/NEON/wrapper/intrinsics/svpow.h"
 #include "src/core/NEON/wrapper/intrinsics/svptrue.h"
 #include "src/core/NEON/wrapper/intrinsics/svqadd.h"
 #include "src/core/NEON/wrapper/intrinsics/svsin.h"
