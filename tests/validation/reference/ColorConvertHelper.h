@@ -614,7 +614,7 @@ inline void colorconvert_rgb_to_yuv4(const SimpleTensor<T> src, std::vector<Simp
 
     rgb_to_yuv_calculation(rvec, gvec, bvec, dst[0], uvec_top, uvec_bottom, vvec_top, vvec_bottom);
 
-    Coordinates uvec_coord{};
+    Coordinates uvec_coord{ 0, 0 };
     for(int y = 0; y < height; y++)
     {
         for(int x = 0; x < width; x += 2)

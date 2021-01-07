@@ -106,8 +106,8 @@ public:
      */
     void increment(size_t dim, T step = 1)
     {
-        ARM_COMPUTE_ERROR_ON(dim < _num_dimensions);
-        if((std::numeric_limits<T>::max() - _id[dim]) <= step)
+        ARM_COMPUTE_ERROR_ON(dim >= _num_dimensions);
+        if((std::numeric_limits<T>::max() - _id[dim]) >= step)
         {
             _id[dim] += step;
         }
