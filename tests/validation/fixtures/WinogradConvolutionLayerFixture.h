@@ -73,7 +73,7 @@ protected:
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(min), half(max) };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ float(min), float(max) };
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -344,7 +344,7 @@ protected:
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(min), half(max) };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ float(min), float(max) };
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -431,7 +431,7 @@ protected:
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(min), half(max) };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ float(min), float(max) };
                 library->fill(tensor, distribution, i);
                 break;
             }

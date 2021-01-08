@@ -778,7 +778,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::BFLOAT16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
-            arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution_bf16(-1000.f, 1000.f);
+            arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution_bf16{ -1000.f, 1000.f };
             fill(tensor, distribution_bf16, seed_offset);
             break;
         }
@@ -976,7 +976,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         }
         case DataType::BFLOAT16:
         {
-            arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution_bf16(low, high);
+            arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution_bf16{ float(low), float(high) };
             fill(tensor, distribution_bf16, seed_offset);
             break;
         }

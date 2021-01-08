@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,7 +105,7 @@ protected:
         }
         else if(tensor.data_type() == DataType::F16)
         {
-            arm_compute::utils::uniform_real_distribution_fp16 distribution{ half(-5.0f), half(5.0f) };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -5.0f, 5.0f };
             library->fill(tensor, distribution, 0);
         }
         else if(is_data_type_quantized(tensor.data_type()))
