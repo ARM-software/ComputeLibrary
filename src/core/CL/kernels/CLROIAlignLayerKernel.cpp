@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,27 +76,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, ITe
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = compute_roi_align_shape(*input, *rois, pool_info);
-    auto_init_if_empty((*output), output_shape, 1, input->data_type());
-    output->set_data_layout(input->data_layout());
-
-    // Configure kernel window
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
-    Window                 win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal input_access(input, input->valid_region().start(0), num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 CLROIAlignLayerKernel::CLROIAlignLayerKernel()
@@ -114,9 +93,12 @@ void CLROIAlignLayerKernel::configure(const CLCompileContext &compile_context, c
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, rois);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->info(), output->info(), pool_info));
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), rois->info(), output->info(), pool_info);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    // Output auto inizialitation if not yet initialized
+    const TensorShape output_shape = compute_roi_align_shape(*input->info(), *rois->info(), pool_info);
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+    output->info()->set_data_layout(input->info()->data_layout());
+
+    auto padding_info = get_padding_info({ input, rois, output });
 
     _input     = input;
     _output    = output;
@@ -157,7 +139,10 @@ void CLROIAlignLayerKernel::configure(const CLCompileContext &compile_context, c
     const std::string kernel_name = (is_qasymm) ? "roi_align_layer_quantized" : "roi_align_layer";
     _kernel                       = create_kernel(compile_context, kernel_name, build_opts.options());
 
-    ICLKernel::configure_internal(win_config.second);
+    // Configure kernel window
+    Window win = calculate_max_window(*output->info(), Steps());
+    ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLROIAlignLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
