@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,22 +54,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    auto_init_if_empty(*output, *input);
-
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-
-    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, input->valid_region());
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 CLFloorKernel::CLFloorKernel()
@@ -86,22 +70,25 @@ void CLFloorKernel::configure(const CLCompileContext &compile_context, const ICL
 
     // Validate
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
+    auto padding_info = get_padding_info({ input, output });
 
     _input  = input;
     _output = output;
 
-    const unsigned int    num_elems_processed_per_iteration = 16 / input->info()->element_size();
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
+    const unsigned int vec_size_x           = adjust_vec_size(max_cl_vector_width / input->info()->element_size(), input->info()->dimension(0));
+    const int          vec_size_x_leftovers = input->info()->dimension(0) % vec_size_x;
+    CLBuildOptions     build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_x_leftovers));
 
     // Create kernel
-    _kernel = create_kernel(compile_context, "floor_layer", build_opts);
+    _kernel = create_kernel(compile_context, "floor_layer", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*input->info(), Steps(vec_size_x));
+    ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
@@ -112,8 +99,6 @@ void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
 Status CLFloorKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
-
     return Status{};
 }
 
