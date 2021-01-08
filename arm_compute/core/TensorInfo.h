@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -224,6 +224,7 @@ public:
     ITensorInfo &set_num_channels(int num_channels) override;
     ITensorInfo &set_format(Format format) override;
     ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
+    ITensorInfo &set_tensor_dims_state(const TensorDimsState &state) override;
     ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override;
     ITensorInfo &set_data_layout(const DataLayout &data_layout) override;
     ITensorInfo &reset_padding() override;
@@ -262,6 +263,10 @@ public:
     {
         return _tensor_shape;
     }
+    const TensorDimsState &tensor_dims_state() const override
+    {
+        return _dims_state;
+    }
     DataType data_type() const override
     {
         return _data_type;
@@ -288,16 +293,11 @@ public:
     }
     bool is_dynamic() const override
     {
-        return _is_dynamic;
+        return std::find(std::cbegin(_dims_state), std::cend(_dims_state), -1) != std::cend(_dims_state);
     }
     ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         _is_resizable = is_resizable;
-        return *this;
-    }
-    ITensorInfo &set_is_dynamic(bool is_dynamic) override
-    {
-        _is_dynamic = is_dynamic;
         return *this;
     }
     ValidRegion valid_region() const override
@@ -329,10 +329,10 @@ private:
     Strides          _strides_in_bytes;
     size_t           _num_channels;
     TensorShape      _tensor_shape;
+    TensorDimsState  _dims_state;
     DataType         _data_type;
     Format           _format;
     bool             _is_resizable;
-    bool             _is_dynamic;
     ValidRegion      _valid_region;
     PaddingSize      _padding;
     QuantizationInfo _quantization_info;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,6 +98,7 @@ public:
         return *this;
     };
     ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
+    ITensorInfo &set_tensor_dims_state(const TensorDimsState &state) override;
     ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
@@ -155,6 +156,11 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _tensor_shape;
     }
+    const TensorDimsState &tensor_dims_state() const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return _dims_state;
+    }
     DataType data_type() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
@@ -196,12 +202,6 @@ public:
         _parent->set_is_resizable(is_resizable);
         return *this;
     }
-    ITensorInfo &set_is_dynamic(bool is_dynamic) override
-    {
-        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-        _parent->set_is_dynamic(is_dynamic);
-        return *this;
-    }
     ValidRegion valid_region() const override
     {
         return _valid_region;
@@ -228,11 +228,12 @@ public:
     }
 
 private:
-    ITensorInfo *_parent;
-    TensorShape  _tensor_shape;
-    Coordinates  _coords;
-    ValidRegion  _valid_region;
-    bool         _extend_parent;
+    ITensorInfo    *_parent;
+    TensorShape     _tensor_shape;
+    TensorDimsState _dims_state;
+    Coordinates     _coords;
+    ValidRegion     _valid_region;
+    bool            _extend_parent;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_SUBTENSORINFO_H */
