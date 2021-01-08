@@ -23,10 +23,18 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
 
+#include "arm_compute/core/Validate.h"
 #include "src/runtime/cpu/operators/CpuFloor.h"
 
 namespace arm_compute
 {
+struct NEFloor::Impl
+{
+    const ITensor                 *src{ nullptr };
+    ITensor                       *dst{ nullptr };
+    std::unique_ptr<cpu::CpuFloor> op{ nullptr };
+};
+
 NEFloor::NEFloor()
     : _impl(std::make_unique<Impl>())
 {
@@ -35,15 +43,10 @@ NEFloor::NEFloor(NEFloor &&) = default;
 NEFloor &NEFloor::operator=(NEFloor &&) = default;
 NEFloor::~NEFloor()                     = default;
 
-struct NEFloor::Impl
-{
-    const ITensor                 *src{ nullptr };
-    ITensor                       *dst{ nullptr };
-    std::unique_ptr<cpu::CpuFloor> op{ nullptr };
-};
-
 void NEFloor::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
     _impl->src = input;
     _impl->dst = output;
 

@@ -267,15 +267,15 @@ if env['neon']:
     core_files += Glob('src/core/cpu/kernels/*.cpp')
     core_files += Glob('src/core/cpu/kernels/*/*.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):
-        core_files += Glob('src/core/cpu/kernels/*/impl/*/fp16.cpp')
+        core_files += Glob('src/core/cpu/kernels/*/*/fp16.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'fp32']):
-        core_files += Glob('src/core/cpu/kernels/*/impl/*/fp32.cpp')
+        core_files += Glob('src/core/cpu/kernels/*/*/fp32.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
-        core_files += Glob('src/core/cpu/kernels/*/impl/*/qasymm8.cpp')
+        core_files += Glob('src/core/cpu/kernels/*/*/qasymm8.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
-        core_files += Glob('src/core/cpu/kernels/*/impl/*/qasymm8_signed.cpp')
+        core_files += Glob('src/core/cpu/kernels/*/*/qasymm8_signed.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
-        core_files += Glob('src/core/cpu/kernels/*/impl/*/qsymm16.cpp')
+        core_files += Glob('src/core/cpu/kernels/*/*/qsymm16.cpp')
 
     runtime_files += Glob('src/runtime/cpu/*.cpp')
     runtime_files += Glob('src/runtime/cpu/operators/*.cpp')

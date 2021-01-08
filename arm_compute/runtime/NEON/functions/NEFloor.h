@@ -32,6 +32,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 class ITensorInfo;
 

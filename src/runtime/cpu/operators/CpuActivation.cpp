@@ -21,16 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ICPUOPERATOR_H
-#define ARM_COMPUTE_ICPUOPERATOR_H
+#include "src/runtime/cpu/operators/CpuActivation.h"
 
-#include "arm_compute/runtime/NEON/INEOperator.h"
+#include "src/core/cpu/kernels/CpuActivationKernel.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-using ICpuOperator = experimental::INEOperator;
+void CpuActivation::configure(const ITensorInfo *input, ITensorInfo *output, const ActivationLayerInfo &activation_info)
+{
+    auto k = std::make_unique<kernels::CpuActivationKernel>();
+    k->configure(input, output, activation_info);
+    _kernel = std::move(k);
+}
+
+Status CpuActivation::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &activation_info)
+{
+    return kernels::CpuActivationKernel::validate(input, output, activation_info);
+}
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_ICPUOPERATOR_H */

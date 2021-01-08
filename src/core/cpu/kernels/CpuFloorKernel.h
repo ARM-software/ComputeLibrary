@@ -63,8 +63,8 @@ public:
     Window infer_window(const ITensorInfo *src, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) final;
-    const char *name() const final;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    const char *name() const override;
 };
 } // namespace kernels
 } // namespace cpu

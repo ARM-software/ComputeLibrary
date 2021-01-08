@@ -32,7 +32,7 @@
 #include "src/core/helpers/WindowHelpers.h"
 
 #include "src/core/common/Registrars.h"
-#include "src/core/cpu/kernels/floor/impl/list.h"
+#include "src/core/cpu/kernels/floor/list.h"
 
 namespace arm_compute
 {

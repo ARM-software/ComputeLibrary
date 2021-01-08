@@ -225,7 +225,7 @@ inline svfloat16_t svlog_f16_z(svbool_t pg, svfloat16_t x)
 inline svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val)
 {
     using ScalarType = float;
-    using IntType    = u32;
+    using IntType    = uint32_t;
 
     constexpr float te_sin_coeff2 = 0.166666666666f; // 1/(2*3)
     constexpr float te_sin_coeff3 = 0.05f;           // 1/(4*5)

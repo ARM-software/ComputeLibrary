@@ -27,7 +27,6 @@
 /* Header regrouping all the NEON kernels */
 #include "src/core/NEON/kernels/NEAbsoluteDifferenceKernel.h"
 #include "src/core/NEON/kernels/NEAccumulateKernel.h"
-#include "src/core/NEON/kernels/NEActivationLayerKernel.h"
 #include "src/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "src/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
 #include "src/core/NEON/kernels/NEBatchConcatenateLayerKernel.h"
