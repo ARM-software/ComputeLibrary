@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEMemsetKernel.h"
+#include "src/core/cpu/kernels/CpuFillKernel.h"
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -34,41 +34,41 @@
 
 namespace arm_compute
 {
-NEMemsetKernel::NEMemsetKernel()
-    : _tensor(nullptr), _constant_value()
+namespace cpu
 {
-}
-
-void NEMemsetKernel::configure(ITensor *tensor, const PixelValue &constant_value)
+namespace kernels
+{
+void CpuFillKernel::configure(const ITensorInfo *tensor, const PixelValue &constant_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-    _tensor         = tensor;
     _constant_value = constant_value;
 
     // Configure kernel window
-    Window win = calculate_max_window(*tensor->info(), Steps());
-    INEKernel::configure(win);
+    Window win = calculate_max_window(*tensor, Steps());
+    ICpuKernel::configure(win);
 }
 
-void NEMemsetKernel::run(const Window &window, const ThreadInfo &info)
+void CpuFillKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+
+    auto inout = tensors.get_tensor(TensorType::ACL_SRC_DST);
 
     // Collapse all the batches on the third dimension
     bool   has_collapsed = true;
     Window collapsed     = window.collapse_if_possible(window, Window::DimZ, &has_collapsed);
     ARM_COMPUTE_ERROR_ON(!has_collapsed);
 
-    uint8_t *const start_valid_region = _tensor->ptr_to_element(_tensor->info()->valid_region().anchor);
+    uint8_t *const start_valid_region = inout->ptr_to_element(inout->info()->valid_region().anchor);
     const auto     window_width       = static_cast<int>(collapsed.x().end()) - static_cast<int>(collapsed.x().start());
-    const size_t   element_size       = _tensor->info()->element_size();
+    const size_t   element_size       = inout->info()->element_size();
 
     // Unroll X dimension
     collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator tensor_it(_tensor, collapsed);
+    Iterator tensor_it(inout, collapsed);
     execute_window_loop(collapsed, [&](const Coordinates &)
     {
         uint8_t *base_addr = start_valid_region + tensor_it.offset();
@@ -81,4 +81,11 @@ void NEMemsetKernel::run(const Window &window, const ThreadInfo &info)
     },
     tensor_it);
 }
+
+const char *CpuFillKernel::name() const
+{
+    return "CpuFillKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,52 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_FLOOR_KERNEL_H
-#define ARM_COMPUTE_CPU_FLOOR_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_RESHAPE_H
+#define ARM_COMPUTE_CPU_RESHAPE_H
 
-#include "src/core/common/Macros.h"
-#include "src/core/cpu/ICpuKernel.h"
+#include "src/runtime/cpu/ICpuOperator.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-namespace kernels
-{
-/** Cpu accelarated kernel to perform a floor operation */
-class CpuFloorKernel : public ICpuKernel
+/** Basic function to run @ref CpuReshapeKernel */
+class CpuReshape : public ICpuOperator
 {
 public:
-    CpuFloorKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuFloorKernel);
-    /** Configure kernel for a given list of arguments
+    /** Constructor */
+    CpuReshape() = default;
+    /** Configure operator for a given list of arguments
      *
-     * @param[in]  src Source tensor. Data type supported: F16/F32.
-     * @param[out] dst Destination tensor. Same as @p src
+     * @param[in]  src Source tensor info. Data type supported: All
+     * @param[out] dst Destination info. Data type supported: Same as @p src
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuFloorKernel
+
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuReshape
      *
-     * @param[in] src Source tensor info. Data type supported: F16/F32.
-     * @param[in] dst Destination tensor info. Same as @p src
+     * @param[in] src Source tensor info. Data type supported: All
+     * @param[in] dst Destination tensor info. Data type supported: Same as @p src
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
-    /** Infer execution window
-     *
-     * @param[in] src Source tensor info. Data type supported: F16/F32.
-     * @param[in] dst Destination tensor info. Same as @p src
-     *
-     * @return an execution Window
-     */
-    Window infer_window(const ITensorInfo *src, const ITensorInfo *dst);
-
-    // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
-    const char *name() const override;
 };
-} // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_FLOOR_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_RESHAPE_H */

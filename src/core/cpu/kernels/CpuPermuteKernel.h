@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_FLOOR_KERNEL_H
-#define ARM_COMPUTE_CPU_FLOOR_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_PERMUTE_KERNEL_H
+#define ARM_COMPUTE_CPU_PERMUTE_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -33,40 +33,41 @@ namespace cpu
 {
 namespace kernels
 {
-/** Cpu accelarated kernel to perform a floor operation */
-class CpuFloorKernel : public ICpuKernel
+/** Kernel to perform tensor permutation given a permutation vector */
+class CpuPermuteKernel : public ICpuKernel
 {
 public:
-    CpuFloorKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuFloorKernel);
+    CpuPermuteKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPermuteKernel);
     /** Configure kernel for a given list of arguments
      *
-     * @param[in]  src Source tensor. Data type supported: F16/F32.
-     * @param[out] dst Destination tensor. Same as @p src
-     */
-    void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuFloorKernel
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
      *
-     * @param[in] src Source tensor info. Data type supported: F16/F32.
-     * @param[in] dst Destination tensor info. Same as @p src
+     * @param[in]  src  Srouce tensor to permute. Data types supported: All
+     * @param[out] dst  Destination tensor. Data types supported: Same as @p src
+     * @param[in]  perm Permutation vector
+     */
+    void configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuPermuteKernel
+     *
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
+     *
+     * @param[in] src  Source tensor to permute. Data types supported: All
+     * @param[in] dst  Destination tensor. Data types supported: Same as @p src
+     * @param[in] perm Permutation vector
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
-    /** Infer execution window
-     *
-     * @param[in] src Source tensor info. Data type supported: F16/F32.
-     * @param[in] dst Destination tensor info. Same as @p src
-     *
-     * @return an execution Window
-     */
-    Window infer_window(const ITensorInfo *src, const ITensorInfo *dst);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+
+private:
+    PermutationVector _perm{};
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_FLOOR_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_PERMUTE_KERNEL_H */

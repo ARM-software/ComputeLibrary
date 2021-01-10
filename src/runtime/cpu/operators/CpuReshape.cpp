@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,52 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_EXPERIMENTAL_TYPES_H
-#define ARM_COMPUTE_EXPERIMENTAL_TYPES_H
+#include "src/runtime/cpu/operators/CpuReshape.h"
 
-#include "arm_compute/core/ITensorPack.h"
-#include "arm_compute/core/TensorShape.h"
-
-#include <vector>
+#include "src/core/cpu/kernels/CpuReshapeKernel.h"
 
 namespace arm_compute
 {
-// Forward declaration
-class ITensor;
-
-/** Memory type */
-enum TensorType : int32_t
+namespace cpu
 {
-    ACL_UNKNOWN = -1,
-    ACL_SRC_DST = 0,
-    ACL_SRC     = 0,
-    ACL_SRC_0   = 0,
-    ACL_SRC_1   = 1,
-    ACL_SRC_2   = 2,
-    ACL_DST     = 30,
-    ACL_DST_0   = 30,
-    ACL_DST_1   = 31,
-    ACL_INT     = 50,
-    ACL_INT_0   = 50,
-    ACL_INT_1   = 51,
-    ACL_INT_2   = 52,
-    ACL_SRC_VEC = 256,
-};
-
-namespace experimental
+void CpuReshape::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
-struct MemoryInfo
-{
-    MemoryInfo(TensorType type, size_t size, size_t alignment)
-        : type(type), size(size), alignment(alignment)
-    {
-    }
-    TensorType type;
-    size_t     size;
-    size_t     alignment;
-};
+    auto k = std::make_unique<kernels::CpuReshapeKernel>();
+    k->configure(src, dst);
+    _kernel = std::move(k);
+}
 
-using MemoryRequirements = std::vector<MemoryInfo>;
-} // namespace experimental
+Status CpuReshape::validate(const ITensorInfo *src, const ITensorInfo *dst)
+{
+    return kernels::CpuReshapeKernel::validate(src, dst);
+}
+} // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_EXPERIMENTAL_TYPES_H */

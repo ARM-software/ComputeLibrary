@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,30 +24,33 @@
 #ifndef ARM_COMPUTE_NECOPY_H
 #define ARM_COMPUTE_NECOPY_H
 
+#include "arm_compute/runtime/IFunction.h"
+
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NECopyKernel */
-class NECopy : public INESimpleFunctionNoBorder
+/** Basic function to run @ref CpuCopyKernel */
+class NECopy : public IFunction
 {
 public:
-    /** Constructor */
-    NECopy() = default;
+    /** Default Constructor */
+    NECopy();
+    /** Default Destructor */
+    ~NECopy();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NECopy(const NECopy &) = delete;
+    /** Default move constructor */
+    NECopy(NECopy &&);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NECopy &operator=(const NECopy &) = delete;
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    NECopy(NECopy &&) = delete;
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    NECopy &operator=(NECopy &&) = delete;
-    /** Default destructor */
-    ~NECopy();
+    /** Default move assignment operator */
+    NECopy &operator=(NECopy &&);
     /** Initialise the function's source and destination.
      *
      * @param[in]  input  Source tensor. Data types supported: All
@@ -63,6 +66,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NECOPY_H */

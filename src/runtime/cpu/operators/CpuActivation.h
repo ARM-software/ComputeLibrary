@@ -36,7 +36,7 @@ class CpuActivation : public ICpuOperator
 public:
     /** Constructor */
     CpuActivation() = default;
-    /** Set the input and output tensor.
+    /** Configure operator for a given list of arguments
      *
      * @param[in]  input           Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
      * @param[out] output          Destination tensor info. Data type supported: same as @p src

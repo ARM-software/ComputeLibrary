@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_FLOOR_H
-#define ARM_COMPUTE_CPU_FLOOR_H
+#ifndef ARM_COMPUTE_CPU_PERMUTE_H
+#define ARM_COMPUTE_CPU_PERMUTE_H
 
 #include "src/runtime/cpu/ICpuOperator.h"
 
@@ -30,27 +30,33 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref CpuFloorKernel */
-class CpuFloor : public ICpuOperator
+/** Basic function to run @ref CpuPermuteKernel */
+class CpuPermute : public ICpuOperator
 {
 public:
     /** Constructor */
-    CpuFloor() = default;
+    CpuPermute() = default;
     /** Configure operator for a given list of arguments
      *
-     * @param[in] src Source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data type supported: same as @p src
-     */
-    void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuFloor
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
      *
-     * @param[in] src Source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data type supported: same as @p src
+     * @param[in]  src  Source tensor to permute. Data types supported: All
+     * @param[out] dst  Destintation tensor. Data types supported: Same as @p src
+     * @param[in]  perm Permutation vector
+     */
+    void configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuPermute
+     *
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
+     *
+     * @param[in] src  Source tensor to permute. Data types supported: All
+     * @param[in] dst  Destination tensor. Data types supported: Same as @p dst
+     * @param[in] perm Permutation vector
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm);
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_FLOOR_H */
+#endif /* ARM_COMPUTE_CPU_RESHAPE_H */

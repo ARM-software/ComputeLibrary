@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_FLOOR_KERNEL_H
-#define ARM_COMPUTE_CPU_FLOOR_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_COPY_KERNEL_H
+#define ARM_COMPUTE_CPU_COPY_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -33,40 +33,37 @@ namespace cpu
 {
 namespace kernels
 {
-/** Cpu accelarated kernel to perform a floor operation */
-class CpuFloorKernel : public ICpuKernel
+/** Kernel to perform a copy between two tensors */
+class CpuCopyKernel : public ICpuKernel
 {
 public:
-    CpuFloorKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuFloorKernel);
+    CpuCopyKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuCopyKernel);
     /** Configure kernel for a given list of arguments
      *
-     * @param[in]  src Source tensor. Data type supported: F16/F32.
-     * @param[out] dst Destination tensor. Same as @p src
+     * @param[in]  src     Source tensor. Data types supported: All
+     * @param[out] dst     Destination tensor. Data types supported: same as @p src.
+     * @param[in]  padding (Optional) Padding to be applied to the input tensor
      */
-    void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuFloorKernel
+    void configure(const ITensorInfo *src, ITensorInfo *dst, const PaddingList &padding = PaddingList());
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuCopyKernel
      *
-     * @param[in] src Source tensor info. Data type supported: F16/F32.
-     * @param[in] dst Destination tensor info. Same as @p src
+     * @param[in] srd     Source tensor. Data types supported: All
+     * @param[in] dst     Destination tensor. Data types supported: same as @p src.
+     * @param[in] padding (Optional) Padding to be applied to the input tensor
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
-    /** Infer execution window
-     *
-     * @param[in] src Source tensor info. Data type supported: F16/F32.
-     * @param[in] dst Destination tensor info. Same as @p src
-     *
-     * @return an execution Window
-     */
-    Window infer_window(const ITensorInfo *src, const ITensorInfo *dst);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PaddingList &padding = PaddingList());
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+
+private:
+    PaddingList _padding{};
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_FLOOR_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_COPY_KERNEL_H */

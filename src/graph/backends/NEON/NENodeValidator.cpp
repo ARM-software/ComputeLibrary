@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,6 @@
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
-#include "src/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "support/Cast.h"
 

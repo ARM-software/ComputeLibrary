@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,53 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NECopy.h"
-
-#include "arm_compute/core/Validate.h"
 #include "src/runtime/cpu/operators/CpuCopy.h"
 
-#include <utility>
+#include "src/core/cpu/kernels/CpuCopyKernel.h"
 
 namespace arm_compute
 {
-struct NECopy::Impl
+namespace cpu
 {
-    const ITensor                *src{ nullptr };
-    ITensor                      *dst{ nullptr };
-    std::unique_ptr<cpu::CpuCopy> op{ nullptr };
-};
-
-NECopy::NECopy()
-    : _impl(std::make_unique<Impl>())
+void CpuCopy::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
-}
-NECopy::NECopy(NECopy &&) = default;
-NECopy &NECopy::operator=(NECopy &&) = default;
-NECopy::~NECopy()                    = default;
-
-void NECopy::configure(ITensor *input, ITensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    _impl->src = input;
-    _impl->dst = output;
-    _impl->op  = std::make_unique<cpu::CpuCopy>();
-    _impl->op->configure(input->info(), output->info());
+    auto k = std::make_unique<kernels::CpuCopyKernel>();
+    k->configure(src, dst);
+    _kernel = std::move(k);
 }
 
-Status NECopy::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status CpuCopy::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuCopy::validate(input, output));
-
-    return Status{};
+    return kernels::CpuCopyKernel::validate(src, dst);
 }
-
-void NECopy::run()
-{
-    ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-    _impl->op->run(pack);
-}
+} // namespace cpu
 } // namespace arm_compute

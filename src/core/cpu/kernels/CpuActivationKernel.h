@@ -39,7 +39,7 @@ class CpuActivationKernel : public ICpuKernel
 public:
     CpuActivationKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuActivationKernel);
-    /** Set the input and output tensor.
+    /** Configure kernel for a given list of arguments
      *
      * @note If the output tensor is a nullptr, the activation function will be performed in-place
      *

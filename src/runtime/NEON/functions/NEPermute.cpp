@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,19 +23,52 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 
-#include "src/core/NEON/kernels/NEPermuteKernel.h"
+#include "arm_compute/core/Validate.h"
+#include "src/runtime/cpu/operators/CpuPermute.h"
 
 namespace arm_compute
 {
+struct NEPermute::Impl
+{
+    const ITensor                   *src{ nullptr };
+    ITensor                         *dst{ nullptr };
+    std::unique_ptr<cpu::CpuPermute> op{ nullptr };
+};
+
+NEPermute::NEPermute()
+    : _impl(std::make_unique<Impl>())
+{
+}
+
+NEPermute::NEPermute(NEPermute &&) = default;
+
+NEPermute &NEPermute::operator=(NEPermute &&) = default;
+
+NEPermute::~NEPermute() = default;
+
 void NEPermute::configure(const ITensor *input, ITensor *output, const PermutationVector &perm)
 {
-    auto k = std::make_unique<NEPermuteKernel>();
-    k->configure(input, output, perm);
-    _kernel = std::move(k);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = std::make_unique<cpu::CpuPermute>();
+    _impl->op->configure(input->info(), output->info(), perm);
 }
 
 Status NEPermute::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
-    return NEPermuteKernel::validate(input, output, perm);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuPermute::validate(input, output, perm));
+
+    return Status{};
+}
+
+void NEPermute::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

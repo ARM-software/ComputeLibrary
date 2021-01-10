@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,61 +24,41 @@
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "arm_compute/runtime/Types.h"
-#include "src/core/NEON/kernels/NEReshapeLayerKernel.h"
+#include "src/runtime/cpu/operators/CpuReshape.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-namespace experimental
-{
-NEReshape::~NEReshape() = default;
-
-void NEReshape::configure(const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = std::make_unique<NEReshapeLayerKernel>();
-    k->configure(input, output);
-    _kernel = std::move(k);
-}
-
-Status NEReshape::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return arm_compute::NEReshapeLayerKernel::validate(input, output);
-}
-} // namespace experimental
-
 struct NEReshapeLayer::Impl
 {
-    const ITensor                           *src{ nullptr };
-    ITensor                                 *dst{ nullptr };
-    std::unique_ptr<experimental::NEReshape> op{ nullptr };
+    const ITensor                   *src{ nullptr };
+    ITensor                         *dst{ nullptr };
+    std::unique_ptr<cpu::CpuReshape> op{ nullptr };
 };
 
 NEReshapeLayer::NEReshapeLayer()
     : _impl(std::make_unique<Impl>())
 {
 }
-
 NEReshapeLayer::NEReshapeLayer(NEReshapeLayer &&) = default;
-
 NEReshapeLayer &NEReshapeLayer::operator=(NEReshapeLayer &&) = default;
-
-NEReshapeLayer::~NEReshapeLayer() = default;
+NEReshapeLayer::~NEReshapeLayer()                            = default;
 
 void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = std::make_unique<experimental::NEReshape>();
+    _impl->op  = std::make_unique<cpu::CpuReshape>();
     _impl->op->configure(input->info(), output->info());
 }
 
 Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(experimental::NEReshape::validate(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuReshape::validate(input, output));
 
     return Status{};
 }
