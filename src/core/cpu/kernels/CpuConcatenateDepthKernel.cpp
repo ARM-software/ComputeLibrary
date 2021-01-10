@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
+#include "src/core/cpu/kernels/CpuConcatenateDepthKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -41,77 +41,81 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
 template <typename T>
-void depth_concat(const ITensor *in, ITensor *out, unsigned int depth_offset, const Window &window)
+void depth_concat(const ITensor *src, ITensor *dst, unsigned int depth_offset, const Window &window)
 {
-    // Offset input
-    uint8_t *input_ptr = in->buffer() + in->info()->offset_first_element_in_bytes();
+    // Offset source
+    uint8_t *src_ptr = src->buffer() + src->info()->offset_first_element_in_bytes();
 
-    // Offset output
-    uint8_t *output_ptr = out->buffer() + out->info()->offset_first_element_in_bytes() + depth_offset * out->info()->strides_in_bytes()[2];
+    // Offset destination
+    uint8_t *dst_ptr = dst->buffer() + dst->info()->offset_first_element_in_bytes() + depth_offset * dst->info()->strides_in_bytes()[2];
 
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
-    const int  window_step_x  = 16 / out->info()->element_size();
+    const int  window_step_x  = 16 / dst->info()->element_size();
 
     Window win{ window };
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    win.set(Window::DimZ, Window::Dimension(0, in->info()->tensor_shape().z(), 1));
+    win.set(Window::DimZ, Window::Dimension(0, src->info()->tensor_shape().z(), 1));
 
-    Iterator input(in, win);
-    Iterator output(out, win);
+    Iterator src_it(src, win);
+    Iterator dst_it(dst, win);
 
-    const DataType                dt           = in->info()->data_type();
-    const UniformQuantizationInfo input_qinfo  = in->info()->quantization_info().uniform();
-    const UniformQuantizationInfo output_qinfo = out->info()->quantization_info().uniform();
-    if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
+    const DataType                dt        = src->info()->data_type();
+    const UniformQuantizationInfo src_qinfo = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo dst_qinfo = dst->info()->quantization_info().uniform();
+    if(dt == DataType::QASYMM8 && src_qinfo != dst_qinfo)
     {
         execute_window_loop(win, [&](const Coordinates &)
         {
-            const auto in_ptr  = reinterpret_cast<const uint8_t *>(input_ptr + input.offset());
-            const auto out_ptr = reinterpret_cast<uint8_t *>(output_ptr + output.offset());
+            const auto in_ptr  = reinterpret_cast<const uint8_t *>(src_ptr + src_it.offset());
+            const auto out_ptr = reinterpret_cast<uint8_t *>(dst_ptr + dst_it.offset());
             int        x       = window_start_x;
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                wrapper::vstore(out_ptr + x, vquantize(vdequantize(wrapper::vloadq(in_ptr + x), input_qinfo), output_qinfo));
+                wrapper::vstore(out_ptr + x, vquantize(vdequantize(wrapper::vloadq(in_ptr + x), src_qinfo), dst_qinfo));
             }
 
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                *(out_ptr + x) = quantize_qasymm8(dequantize_qasymm8(*(in_ptr + x), input_qinfo), output_qinfo);
+                *(out_ptr + x) = quantize_qasymm8(dequantize_qasymm8(*(in_ptr + x), src_qinfo), dst_qinfo);
             }
         },
-        input, output);
+        src_it, dst_it);
     }
-    else if(dt == DataType::QASYMM8_SIGNED && input_qinfo != output_qinfo)
+    else if(dt == DataType::QASYMM8_SIGNED && src_qinfo != dst_qinfo)
     {
         execute_window_loop(win, [&](const Coordinates &)
         {
-            const auto in_ptr  = reinterpret_cast<const int8_t *>(input_ptr + input.offset());
-            const auto out_ptr = reinterpret_cast<int8_t *>(output_ptr + output.offset());
+            const auto in_ptr  = reinterpret_cast<const int8_t *>(src_ptr + src_it.offset());
+            const auto out_ptr = reinterpret_cast<int8_t *>(dst_ptr + dst_it.offset());
             int        x       = window_start_x;
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                wrapper::vstore(out_ptr + x, vquantize_signed(vdequantize(wrapper::vloadq(in_ptr + x), input_qinfo), output_qinfo));
+                wrapper::vstore(out_ptr + x, vquantize_signed(vdequantize(wrapper::vloadq(in_ptr + x), src_qinfo), dst_qinfo));
             }
 
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                *(out_ptr + x) = quantize_qasymm8_signed(dequantize_qasymm8_signed(*(in_ptr + x), input_qinfo), output_qinfo);
+                *(out_ptr + x) = quantize_qasymm8_signed(dequantize_qasymm8_signed(*(in_ptr + x), src_qinfo), dst_qinfo);
             }
         },
-        input, output);
+        src_it, dst_it);
     }
     else
     {
         execute_window_loop(win, [&](const Coordinates &)
         {
-            const auto in_ptr  = reinterpret_cast<const T *>(input_ptr + input.offset());
-            const auto out_ptr = reinterpret_cast<T *>(output_ptr + output.offset());
+            const auto in_ptr  = reinterpret_cast<const T *>(src_ptr + src_it.offset());
+            const auto out_ptr = reinterpret_cast<T *>(dst_ptr + dst_it.offset());
             int        x       = window_start_x;
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
@@ -123,7 +127,7 @@ void depth_concat(const ITensor *in, ITensor *out, unsigned int depth_offset, co
                 *(out_ptr + x) = *(in_ptr + x);
             }
         },
-        input, output);
+        src_it, dst_it);
     }
 }
 
@@ -143,20 +147,20 @@ Status validate_arguments(const ITensorInfo *input, unsigned int depth_offset, c
 }
 } // namespace
 
-NEDepthConcatenateLayerKernel::NEDepthConcatenateLayerKernel()
+CpuConcatenateDepthKernel::CpuConcatenateDepthKernel()
     : _func(nullptr), _depth_offset(0)
 {
 }
 
-void NEDepthConcatenateLayerKernel::configure(const ITensorInfo *input, unsigned int depth_offset, ITensorInfo *output)
+void CpuConcatenateDepthKernel::configure(const ITensorInfo *src, unsigned int depth_offset, ITensorInfo *dst)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, depth_offset, output));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, depth_offset, dst));
 
     _func         = nullptr;
     _depth_offset = depth_offset;
 
-    switch(input->data_type())
+    switch(src->data_type())
     {
         case DataType::QASYMM8:
             _func = &depth_concat<uint8_t>;
@@ -175,27 +179,27 @@ void NEDepthConcatenateLayerKernel::configure(const ITensorInfo *input, unsigned
     }
 
     // Configure kernel window
-    Window      win = calculate_max_window(*output, Steps());
+    Window      win = calculate_max_window(*dst, Steps());
     Coordinates coord;
-    coord.set_num_dimensions(output->num_dimensions());
+    coord.set_num_dimensions(dst->num_dimensions());
 
-    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
-    INEKernel::configure(win);
+    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
+    ICpuKernel::configure(win);
 }
 
-Status NEDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,
-                                               unsigned int                    depth_offset,
-                                               const arm_compute::ITensorInfo *output)
+Status CpuConcatenateDepthKernel::validate(const arm_compute::ITensorInfo *src,
+                                           unsigned int                    depth_offset,
+                                           const arm_compute::ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, depth_offset, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, depth_offset, dst));
     return Status{};
 }
 
-void NEDepthConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuConcatenateDepthKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
     (*_func)(tensors.get_const_tensor(TensorType::ACL_SRC),
@@ -203,4 +207,11 @@ void NEDepthConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &w
              _depth_offset,
              window);
 }
+
+const char *CpuConcatenateDepthKernel::name() const
+{
+    return "CpuConcatenateDepthKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

@@ -29,7 +29,6 @@
 #include "src/core/NEON/kernels/NEAccumulateKernel.h"
 #include "src/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "src/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
-#include "src/core/NEON/kernels/NEBatchConcatenateLayerKernel.h"
 #include "src/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEBatchToSpaceLayerKernel.h"
 #include "src/core/NEON/kernels/NEBitwiseAndKernel.h"
@@ -50,7 +49,6 @@
 #include "src/core/NEON/kernels/NECopyKernel.h"
 #include "src/core/NEON/kernels/NECropKernel.h"
 #include "src/core/NEON/kernels/NECumulativeDistributionKernel.h"
-#include "src/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
 #include "src/core/NEON/kernels/NEDepthConvertLayerKernel.h"
 #include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 #include "src/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
@@ -89,7 +87,6 @@
 #include "src/core/NEON/kernels/NEHOGDescriptorKernel.h"
 #include "src/core/NEON/kernels/NEHOGDetectorKernel.h"
 #include "src/core/NEON/kernels/NEHarrisCornersKernel.h"
-#include "src/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
 #include "src/core/NEON/kernels/NEHistogramKernel.h"
 #include "src/core/NEON/kernels/NEIm2ColKernel.h"
 #include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
@@ -140,7 +137,6 @@
 #include "src/core/NEON/kernels/NETransposeKernel.h"
 #include "src/core/NEON/kernels/NEWarpKernel.h"
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
-#include "src/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
 #include "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 
 #endif /* ARM_COMPUTE_NEKERNELS_H */
