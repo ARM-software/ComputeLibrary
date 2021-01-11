@@ -30,6 +30,7 @@
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/SVE/kernels/elementwise/impl/elementwise_list.h"
+#include "src/core/SVE/kernels/elementwise/impl/elementwise_quantized_list.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -717,6 +718,7 @@ void elementwise_op(const ITensor *in1, const ITensor *in2, ITensor *out, const 
     }
 }
 
+#if !defined(__ARM_FEATURE_SVE2)
 void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window,
                               uint8_t (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
                               int (*broadcast_func)(int, int, int, const uint8_t *, float32x4x4_t, uint8_t *, int32x4_t, float32x4_t,
@@ -1038,6 +1040,7 @@ void elementwise_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITe
         input1, input2, output);
     }
 }
+#endif /* !defined(__ARM_FEATURE_SVE2) */
 
 template <ComparisonOperation op, typename InputScalarType, typename InputVectorType>
 void elementwise_comp_op_8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
@@ -1143,9 +1146,14 @@ configure_arithm_func(const ITensorInfo *input1, const ITensorInfo *input2, ITen
         { "op_F32_F32_F32", &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float, 4>> },
         { "op_S32_S32_S32", &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int32_t, 4>> },
 #endif /* defined(__ARM_FEATURE_SVE) */
-        { "op_S16_S16_S16", &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>> },
+#if defined(__ARM_FEATURE_SVE2)
+        { "op_QASYMM8_QASYMM8_QASYMM8", &arm_compute::cpu::sve::elementwise_arithmetic_quantized_op<op, uint8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &arm_compute::cpu::sve::elementwise_arithmetic_quantized_op<op, int8_t> },
+#else  /* defined(__ARM_FEATURE_SVE2) */
         { "op_QASYMM8_QASYMM8_QASYMM8", &elementwise_arithm_op_quantized<op> },
-        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &elementwise_arithm_op_quantized_signed<op> }
+        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &elementwise_arithm_op_quantized_signed<op> },
+#endif /* defined(__ARM_FEATURE_SVE2) */
+        { "op_S16_S16_S16", &elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>> },
     };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #if defined(__ARM_FEATURE_SVE)
@@ -1175,8 +1183,13 @@ configure_comp_func(const ITensorInfo *input1, const ITensorInfo *input2, ITenso
         { "op_S16_S16_U8", &elementwise_comp_op_16<op, int16_t, int16x8_t> },
         { "op_S32_S32_U8", &elementwise_comp_op_32<op, int32_t, int32x4_t> },
 #endif /* defined(__ARM_FEATURE_SVE) */
+#if defined(__ARM_FEATURE_SVE2)
+        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED_U8", &arm_compute::cpu::sve::elementwise_comparison_quantized_op<op, int8_t> },
+        { "op_QASYMM8_QASYMM8_U8", &arm_compute::cpu::sve::elementwise_comparison_quantized_op<op, uint8_t> }
+#else  /* defined(__ARM_FEATURE_SVE2) */
         { "op_QASYMM8_SIGNED_QASYMM8_SIGNED_U8", &elementwise_comp_op_quantized_signed<op> },
         { "op_QASYMM8_QASYMM8_U8", &elementwise_comp_op_quantized<op> }
+#endif /* defined(__ARM_FEATURE_SVE2) */
     };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #if defined(__ARM_FEATURE_SVE)
