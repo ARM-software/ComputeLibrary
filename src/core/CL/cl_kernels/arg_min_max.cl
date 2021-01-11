@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,11 @@
  */
 #include "helpers.h"
 
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE_OUTPUT) && defined(DATA_TYPE_SELECT)
+
+#define VEC_TYPE_IN VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#define VEC_TYPE_OUT VEC_DATA_TYPE(DATA_TYPE_OUTPUT, VEC_SIZE)
+
 #if defined(FLOAT_DATA_TYPE)
 #define ISGREATER(x, y) isgreater(x, y)
 #define ISLESS(x, y) isless(x, y)
@@ -31,8 +36,8 @@
 #define ISGREATER(x, y) (x > y) ? 1 : 0
 #define ISLESS(x, y) (x < y) ? 1 : 0
 #else // !defined(WIDTH)
-#define ISGREATER(x, y) select((VEC_DATA_TYPE(DATA_TYPE_SELECT, 16))0, (VEC_DATA_TYPE(DATA_TYPE_SELECT, 16)) - 1, x > y)
-#define ISLESS(x, y) select((VEC_DATA_TYPE(DATA_TYPE_SELECT, 16))0, (VEC_DATA_TYPE(DATA_TYPE_SELECT, 16)) - 1, x < y)
+#define ISGREATER(x, y) select((VEC_DATA_TYPE(DATA_TYPE_SELECT, VEC_SIZE))0, (VEC_DATA_TYPE(DATA_TYPE_SELECT, VEC_SIZE)) - 1, x > y)
+#define ISLESS(x, y) select((VEC_DATA_TYPE(DATA_TYPE_SELECT, VEC_SIZE))0, (VEC_DATA_TYPE(DATA_TYPE_SELECT, VEC_SIZE)) - 1, x < y)
 #endif // defined(WIDTH)
 #endif // defined(FLOAT_DATA_TYPE)
 
@@ -44,7 +49,6 @@
 #error "Unsupported reduction operation!"
 #endif // defined(ARG_MAX)
 
-#if defined(DATA_TYPE_OUTPUT) && defined(DATA_TYPE_SELECT)
 #if defined(WIDTH)
 #if defined(ARG_MIN)
 #if defined(PREV_OUTPUT)
@@ -293,16 +297,17 @@ __kernel void arg_min_max_x(
 /** This kernel performs reduction on y-axis.
  *
  * @note The input data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note The data type of the output must be passed at compile time using -DDATA_TYPE_OUTPUT: e.g. -DDATA_TYPE_OUTPUT=uint
  * @note The data type of the select results must be passed at compile time using -DDATA_TYPE_SELECT: e.g. -DDATA_TYPE_SELECT=int
  * @note The height size must be passed at compile time using -DHEIGHT e.g. -DHEIGHT=128
  *
- * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
- * @param[in] src_stride_x                         Stride of the source tensor in X dimension (in bytes)
- * @param[in] src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                         Stride of the source tensor in Y dimension (in bytes)
- * @param[in] src_step_y                           src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes    The offset of the first element in the source tensor
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
+ * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
  * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: U32/S32
  * @param[in] output_stride_x                      Stride of the output tensor in X dimension (in bytes)
  * @param[in] output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
@@ -311,30 +316,28 @@ __kernel void arg_min_max_x(
  * @param[in] output_offset_first_element_in_bytes The offset of the first element in the source tensor
  */
 __kernel void arg_min_max_y(
-    IMAGE_DECLARATION(src),
+    IMAGE_DECLARATION(input),
     IMAGE_DECLARATION(output))
 {
-    Image src    = CONVERT_TO_IMAGE_STRUCT(src);
-    Image output = CONVERT_TO_IMAGE_STRUCT(output);
+    const int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    res = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, 0)), VEC_DATA_TYPE(DATA_TYPE, 16));
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) + get_global_id(1) * input_stride_y;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE_OUTPUT) + get_global_id(1) * output_stride_y;
 
-    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
-    indx = 0;
+    VEC_TYPE_IN res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_TYPE_IN);
+
+    VEC_TYPE_OUT indx0 = 0;
     for(unsigned int y = 1; y < HEIGHT; ++y)
     {
-        VEC_DATA_TYPE(DATA_TYPE, 16)
-        in = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, y)), VEC_DATA_TYPE(DATA_TYPE, 16));
+        VEC_TYPE_IN in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + y * input_stride_y)), VEC_TYPE_IN);
 
-        VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
-        cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16));
-        indx      = select(indx, y, cond_conv);
-        res       = select(res, in, CONDITION_TO_USE(in, res));
+        VEC_TYPE_OUT cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_TYPE_OUT);
+        indx0                  = select(indx0, y, cond_conv);
+        res                    = select(res, in, CONDITION_TO_USE(in, res));
     }
 
     // Store result
-    vstore16(indx, 0, (__global DATA_TYPE_OUTPUT *)output.ptr);
+    STORE_VECTOR_SELECT(indx, DATA_TYPE_OUTPUT, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif // defined(HEIGHT)
 
@@ -342,6 +345,7 @@ __kernel void arg_min_max_y(
 /** This kernel performs reduction on z-axis.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note The data type of the select results must be passed at compile time using -DDATA_TYPE_SELECT: e.g. -DDATA_TYPE_SELECT=int
  * @note The depth size must be passed at compile time using -DDEPTH e.g. -DDEPTH=128
  *
@@ -366,27 +370,25 @@ __kernel void arg_min_max_z(
     TENSOR3D_DECLARATION(input),
     TENSOR3D_DECLARATION(output))
 {
-    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+    const int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    res = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, 0)), VEC_DATA_TYPE(DATA_TYPE, 16));
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) + get_global_id(1) * input_stride_y + get_global_id(2) * input_stride_z;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE_OUTPUT) + get_global_id(1) * output_stride_y + get_global_id(2) * output_stride_z;
 
-    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
-    indx = 0;
+    VEC_TYPE_IN res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_TYPE_IN);
+
+    VEC_TYPE_OUT indx0 = 0;
     for(DATA_TYPE_OUTPUT z = 1; z < DEPTH; ++z)
     {
-        VEC_DATA_TYPE(DATA_TYPE, 16)
-        in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, z)), VEC_DATA_TYPE(DATA_TYPE, 16));
+        VEC_TYPE_IN in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + z * input_stride_z)), VEC_TYPE_IN);
 
-        VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
-        cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16));
-        indx      = select(indx, z, cond_conv);
-        res       = select(res, in, CONDITION_TO_USE(in, res));
+        VEC_TYPE_OUT cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_TYPE_OUT);
+        indx0                  = select(indx0, z, cond_conv);
+        res                    = select(res, in, CONDITION_TO_USE(in, res));
     }
 
     // Store result
-    vstore16(indx, 0, (__global DATA_TYPE_OUTPUT *)output.ptr);
+    STORE_VECTOR_SELECT(indx, DATA_TYPE_OUTPUT, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif /* defined(DEPTH) */
 
@@ -394,6 +396,7 @@ __kernel void arg_min_max_z(
 /** This kernel performs reduction on w-axis.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note The data type of the select results must be passed at compile time using -DDATA_TYPE_SELECT: e.g. -DDATA_TYPE_SELECT=int
  * @note The batch size must be passed at compile time using -DBATCH e.g. -DBATCH=128
  * @note The depth size must be passed at compile time using -DBATCH e.g. -DDEPTH=128
@@ -423,27 +426,27 @@ __kernel void arg_min_max_w(
     TENSOR4D_DECLARATION(input),
     TENSOR4D_DECLARATION(output))
 {
-    Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT(input, DEPTH);
-    Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT(output, DEPTH);
+    const int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    res = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, 0)), VEC_DATA_TYPE(DATA_TYPE, 16));
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) + get_global_id(1) * input_stride_y + (get_global_id(2) % DEPTH) * input_stride_z +
+                                  (get_global_id(2) / DEPTH) * input_stride_w;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE_OUTPUT) + get_global_id(1) * output_stride_y + (get_global_id(
+                                      2) % DEPTH) * output_stride_z + (get_global_id(2) / DEPTH) * output_stride_w;
 
-    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
-    indx = 0;
+    VEC_TYPE_IN res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_TYPE_IN);
+
+    VEC_TYPE_OUT indx0 = 0;
     for(DATA_TYPE_OUTPUT w = 1; w < BATCH; ++w)
     {
-        VEC_DATA_TYPE(DATA_TYPE, 16)
-        in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, w)), VEC_DATA_TYPE(DATA_TYPE, 16));
+        VEC_TYPE_IN in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + w * input_stride_w)), VEC_TYPE_IN);
 
-        VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
-        cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16));
-        indx      = select(indx, w, cond_conv);
-        res       = select(res, in, CONDITION_TO_USE(in, res));
+        VEC_TYPE_OUT cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_TYPE_OUT);
+        indx0                  = select(indx0, w, cond_conv);
+        res                    = select(res, in, CONDITION_TO_USE(in, res));
     }
 
     // Store result
-    vstore16(indx, 0, (__global DATA_TYPE_OUTPUT *)output.ptr);
+    STORE_VECTOR_SELECT(indx, DATA_TYPE_OUTPUT, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif /* defined(BATCH) && defined(DEPTH) */
-#endif /* defined(DATA_TYPE_OUTPUT) && defined(DATA_TYPE_SELECT) */
+#endif // defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE_OUTPUT) && defined(DATA_TYPE_SELECT)

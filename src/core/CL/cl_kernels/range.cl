@@ -61,7 +61,7 @@ __kernel void range(
     DATA_TYPE seq;
     seq = (DATA_TYPE)START + (DATA_TYPE)id * (DATA_TYPE)STEP;
 
-    *dst_ptr = seq;
+    *(__global DATA_TYPE *)dst_ptr = seq;
 #else  // VECTOR_SIZE == 1
     VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
     seq0 = ((DATA_TYPE)START + (DATA_TYPE)id * (DATA_TYPE)STEP);
@@ -108,18 +108,18 @@ __kernel void range_quantized(
     __global uchar *dst_ptr = out_ptr + out_offset_first_element_in_bytes + id * sizeof(DATA_TYPE);
 #if VECTOR_SIZE == 1
     float           seq;
-    seq      = (float)START + (float)id * (float)STEP;
-    seq      = (DATA_TYPE)(int)(seq / ((float)SCALE_OUT) + (float)OFFSET_OUT);
-    seq      = max(0.0f, min(seq, 255.0f));
-    *dst_ptr = CONVERT_SAT(CONVERT_DOWN(seq, int), uchar);
+    seq                            = (float)START + (float)id * (float)STEP;
+    seq                            = (DATA_TYPE)(int)(seq / ((float)SCALE_OUT) + (float)OFFSET_OUT);
+    seq                            = max(0.0f, min(seq, 255.0f));
+    *(__global DATA_TYPE *)dst_ptr = CONVERT_SAT(CONVERT_DOWN(seq, int), DATA_TYPE);
 #else  // VECTOR_SIZE == 1
     VEC_DATA_TYPE(float, VECTOR_SIZE)
     seq = (float)START + id * (float)STEP;
     seq = seq + STEP_VEC;
     seq = seq / ((VEC_DATA_TYPE(float, VECTOR_SIZE))((float)SCALE_OUT)) + ((VEC_DATA_TYPE(float, VECTOR_SIZE))((float)OFFSET_OUT));
     seq = max((VEC_DATA_TYPE(float, VECTOR_SIZE))(0.0f), min(seq, (VEC_DATA_TYPE(float, VECTOR_SIZE))(255.0f)));
-    VEC_DATA_TYPE(uchar, VECTOR_SIZE)
-    res0 = CONVERT_SAT(CONVERT_DOWN(seq, VEC_DATA_TYPE(int, VECTOR_SIZE)), VEC_DATA_TYPE(uchar, VECTOR_SIZE));
+    VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
+    res0 = CONVERT_SAT(CONVERT_DOWN(seq, VEC_DATA_TYPE(int, VECTOR_SIZE)), VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE));
     STORE_VECTOR_SELECT(res, DATA_TYPE, dst_ptr, VECTOR_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif // VECTOR_SIZE == 1
 }
