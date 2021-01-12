@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,21 +21,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/gpu/cl/ClContext.h"
 
-#ifndef SRC_CORE_COMMON_VALIDATE_H
-#define SRC_CORE_COMMON_VALIDATE_H
+namespace arm_compute
+{
+namespace gpu
+{
+namespace opencl
+{
+namespace
+{
+mlgo::MLGOHeuristics populate_mlgo(const char *filename)
+{
+    mlgo::MLGOHeuristics heuristics;
+    bool                 status = heuristics.reload_from_file(filename);
+    return status ? std::move(heuristics) : mlgo::MLGOHeuristics();
+}
+} // namespace
 
-#if defined(ARM_COMPUTE_ASSERTS_ENABLED)
+ClContext::ClContext(const AclContextOptions *options)
+    : IContext(Target::GpuOcl),
+      _mlgo_heuristics(),
+      _cl_context()
+{
+    if(options != nullptr)
+    {
+        _mlgo_heuristics = populate_mlgo(options->kernel_config_file);
+    }
+}
 
-#include <cassert>
+const mlgo::MLGOHeuristics &ClContext::mlgo() const
+{
+    return _mlgo_heuristics;
+}
 
-#define ARM_COMPUTE_ASSERT(cond) assert(cond)
-#define ARM_COMPUTE_ASSERT_NOT_NULLPTR(ptr) assert((ptr) != nullptr)
+::cl::Context ClContext::cl_ctx()
+{
+    return _cl_context;
+}
 
-#else /* defined(ARM_COMPUTE_ASSERTS_ENABLED) */
-
-#define ARM_COMPUTE_ASSERT(cond)
-#define ARM_COMPUTE_ASSERT_NOT_NULLPTR(ptr)
-
-#endif /* defined(ARM_COMPUTE_ASSERTS_ENABLED) */
-#endif /* SRC_CORE_COMMON_VALIDATE_H */
+bool ClContext::set_cl_ctx(::cl::Context ctx)
+{
+    if(this->refcount() == 0)
+    {
+        _cl_context = ctx;
+        return true;
+    }
+    return false;
+}
+} // namespace opencl
+} // namespace gpu
+} // namespace arm_compute

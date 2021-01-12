@@ -25,7 +25,6 @@
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/experimental/Types.h"
-#include "src/core/common/Validate.h"
 
 #include <cmath>
 #include <cstddef>

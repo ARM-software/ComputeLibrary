@@ -165,7 +165,6 @@ arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSI
                                      ('ARM_COMPUTE_VERSION_MINOR', LIBRARY_VERSION_MINOR),
                                      ('ARM_COMPUTE_VERSION_PATCH', LIBRARY_VERSION_PATCH)])
 
-
 # Don't allow undefined references in the libraries:
 undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else '-Wl,--no-undefined'
 arm_compute_env.Append(LINKFLAGS=[undefined_flag])
@@ -188,6 +187,10 @@ if env["logging"]:
 runtime_files = Glob('src/runtime/*.cpp')
 runtime_files += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
 runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
+
+runtime_files += Glob('src/c/*.cpp')
+runtime_files += Glob('src/common/*.cpp')
+runtime_files += Glob('src/cpu/*.cpp')
 
 # CLHarrisCorners uses the Scheduler to run CPP kernels
 runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
@@ -219,6 +222,9 @@ if env['opencl']:
     runtime_files += Glob('src/runtime/gpu/cl/operators/*.cpp')
     runtime_files += Glob('src/runtime/CL/mlgo/*.cpp')
     runtime_files += Glob('src/runtime/CL/gemm_auto_heuristics/*.cpp')
+
+    runtime_files += Glob('src/gpu/cl/*.cpp')
+    runtime_files += Glob('src/c/cl/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 

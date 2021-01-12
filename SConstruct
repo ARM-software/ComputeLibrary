@@ -340,7 +340,11 @@ if env['os'] == 'linux' and env['arch'] == 'armv7a':
 if env['specs_file'] != "":
     env.Append(LINKFLAGS = ['-specs='+env['specs_file']])
 
+if env['neon']:
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_CPU_ENABLED'])
+
 if env['opencl']:
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_OPENCL_ENABLED'])
     if env['os'] in ['bare_metal'] or env['standalone']:
         print("Cannot link OpenCL statically, which is required for bare metal / standalone builds")
         Exit(1)

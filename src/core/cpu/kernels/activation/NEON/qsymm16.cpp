@@ -28,7 +28,6 @@
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/NESymm.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/common/Validate.h"
 
 #include <arm_neon.h>
 #include <cmath>

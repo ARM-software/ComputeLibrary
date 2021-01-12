@@ -25,8 +25,8 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "src/common/utils/Validate.h"
 #include "src/core/CL/CLValidate.h"
-#include "src/core/common/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"

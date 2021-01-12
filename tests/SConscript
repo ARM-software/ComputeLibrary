@@ -127,6 +127,7 @@ if env['opencl']:
     files_validation += Glob('validation/CL/' + filter_pattern)
     if env['external_tests_dir']:
         files_validation += Glob(env['external_tests_dir'] + '/tests/validation/CL/' + filter_pattern)
+    files_validation += Glob('validation/gpu/unit/*.cpp')
 
 if env['neon']:
     filter_pattern = test_env['test_filter']
@@ -144,6 +145,7 @@ if env['neon']:
         files_validation += Glob('validation/NEON/*/' + filter_pattern)
     if env['external_tests_dir']:
         files_validation += Glob(env['external_tests_dir'] + '/tests/validation/NEON/' + filter_pattern)
+    files_validation += Glob('validation/cpu/unit/*.cpp')
 
 extra_link_flags = []
 if env['os'] == 'android':

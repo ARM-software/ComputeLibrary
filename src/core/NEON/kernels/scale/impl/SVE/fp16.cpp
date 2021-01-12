@@ -26,7 +26,6 @@
 #include "arm_compute/core/Window.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/common/Validate.h"
 #include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"

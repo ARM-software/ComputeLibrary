@@ -57,6 +57,9 @@ func globalFlags(ctx android.BaseContext) []string {
         }
     }
 
+    cppflags = append(cppflags, "-ARM_COMPUTE_CPU_ENABLED")
+    cppflags = append(cppflags, "-ARM_COMPUTE_OPENCL_ENABLED")
+
     return cppflags
 }
 
