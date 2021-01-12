@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_SVE_KERNELS_ARITHMETIC_ADDITION_LIST_H
-#define SRC_CORE_SVE_KERNELS_ARITHMETIC_ADDITION_LIST_H
+#ifndef SRC_CORE_SVE_KERNELS_ADD_LIST_H
+#define SRC_CORE_SVE_KERNELS_ADD_LIST_H
 
 #if defined(__ARM_FEATURE_SVE)
 #include "arm_compute/core/Types.h"
@@ -35,25 +35,25 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_ARITHMETIC_ADDITION_KERNEL(func_name) \
-    void func_name(const ITensor *in1, const ITensor *in2, ITensor *out, const ConvertPolicy &policy, const Window &window)
+#define DECLARE_ADD_KERNEL(func_name) \
+    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 
-DECLARE_ARITHMETIC_ADDITION_KERNEL(arithmetic_addition_qasymm8_sve);
-DECLARE_ARITHMETIC_ADDITION_KERNEL(arithmetic_addition_qasymm8_signed_sve);
-DECLARE_ARITHMETIC_ADDITION_KERNEL(arithmetic_addition_qsymm16_sve);
-DECLARE_ARITHMETIC_ADDITION_KERNEL(arithmetic_addition_S16_U8_S16_sve);
-DECLARE_ARITHMETIC_ADDITION_KERNEL(arithmetic_addition_U8_S16_S16_sve);
-DECLARE_ARITHMETIC_ADDITION_KERNEL(arithmetic_addition_U8_U8_S16_sve);
+DECLARE_ADD_KERNEL(add_qasymm8_sve);
+DECLARE_ADD_KERNEL(add_qasymm8_signed_sve);
+DECLARE_ADD_KERNEL(add_qsymm16_sve);
+DECLARE_ADD_KERNEL(add_s16_u8_s16_sve);
+DECLARE_ADD_KERNEL(add_u8_s16_s16_sve);
+DECLARE_ADD_KERNEL(add_u8_u8_s16_sve);
 
-#undef DECLARE_ARITHMETIC_ADDITION_KERNEL
+#undef DECLARE_ADD_KERNEL
 
 template <typename ScalarType>
-void arithmetic_addition_same_sve(const ITensor *in1, const ITensor *in2, ITensor *out, const ConvertPolicy &policy, const Window &window)
+void add_same_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     const auto all_true_pg           = wrapper::svptrue<ScalarType>();
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
+    const bool is_broadcast_across_x = src0->info()->tensor_shape().x() != src1->info()->tensor_shape().x();
     const bool is_sat                = (policy == ConvertPolicy::SATURATE);
 
     // Clear X Dimension on execution window as we handle manually
@@ -61,27 +61,27 @@ void arithmetic_addition_same_sve(const ITensor *in1, const ITensor *in2, ITenso
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     // Create input windows
-    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
-    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+    Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
-    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
-    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
-    Iterator output(out, window);
+    Iterator input1(src0, window.broadcast_if_dimension_le_one(src0->info()->tensor_shape()));
+    Iterator input2(src1, window.broadcast_if_dimension_le_one(src1->info()->tensor_shape()));
+    Iterator output(dst, window);
 
     if(is_broadcast_across_x)
     {
         const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
         Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
         Window         non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
-        const ITensor *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
-        const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
+        const ITensor *broadcast_tensor     = is_broadcast_input_2 ? src1 : src0;
+        const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? src1 : src0;
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
         Iterator broadcast_input(broadcast_tensor, broadcast_win);
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
-        Iterator output(out, win);
+        Iterator output(dst, win);
 
         execute_window_loop(win, [&](const Coordinates &)
         {
@@ -112,9 +112,9 @@ void arithmetic_addition_same_sve(const ITensor *in1, const ITensor *in2, ITenso
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-        Iterator input1(in1, input1_win);
-        Iterator input2(in2, input2_win);
-        Iterator output(out, win);
+        Iterator input1(src0, input1_win);
+        Iterator input2(src1, input2_win);
+        Iterator output(dst, win);
 
         execute_window_loop(win, [&](const Coordinates &)
         {
@@ -142,4 +142,4 @@ void arithmetic_addition_same_sve(const ITensor *in1, const ITensor *in2, ITenso
 } // namespace cpu
 } // namespace arm_compute
 #endif // defined(__ARM_FEATURE_SVE)
-#endif // SRC_CORE_SVE_KERNELS_ARITHMETIC_ADDITION_LIST_H
+#endif // SRC_CORE_SVE_KERNELS_ADD_LIST_H

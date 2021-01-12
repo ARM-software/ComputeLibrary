@@ -32,21 +32,21 @@ namespace arm_compute
 {
 namespace cpu
 {
-void arithmetic_addition_U8_U8_S16_neon(const ITensor *in1, const ITensor *in2, ITensor *out, const ConvertPolicy &policy, const Window &window)
+void add_u8_u8_s16_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     // Create input windows
     Window win        = window;
-    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
-    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+    Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
     // Clear X Dimension on execution window as we handle manually
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
     input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input1(in1, input1_win);
-    Iterator input2(in2, input2_win);
-    Iterator output(out, win);
+    Iterator input1(src0, input1_win);
+    Iterator input2(src1, input2_win);
+    Iterator output(dst, win);
 
     const int  window_step_x  = 8;
     const auto window_start_x = static_cast<int>(window.x().start());
@@ -97,21 +97,21 @@ void arithmetic_addition_U8_U8_S16_neon(const ITensor *in1, const ITensor *in2, 
     input1, input2, output);
 }
 
-void arithmetic_addition_S16_U8_S16_neon(const ITensor *in1, const ITensor *in2, ITensor *out, const ConvertPolicy &policy, const Window &window)
+void add_s16_u8_s16_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     // Create input windows
     Window win        = window;
-    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
-    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+    Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
     // Clear X Dimension on execution window as we handle manually
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
     input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input1(in1, input1_win);
-    Iterator input2(in2, input2_win);
-    Iterator output(out, win);
+    Iterator input1(src0, input1_win);
+    Iterator input2(src1, input2_win);
+    Iterator output(dst, win);
 
     const int  window_step_x  = 8;
     const auto window_start_x = static_cast<int>(window.x().start());
@@ -161,10 +161,10 @@ void arithmetic_addition_S16_U8_S16_neon(const ITensor *in1, const ITensor *in2,
     input1, input2, output);
 }
 
-void arithmetic_addition_U8_S16_S16_neon(const ITensor *input1, const ITensor *input2, ITensor *output, const ConvertPolicy &policy, const Window &window)
+void add_u8_s16_s16_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     // Simply swap the two input buffers:
-    arithmetic_addition_S16_U8_S16_neon(input2, input1, output, policy, window);
+    add_s16_u8_s16_neon(src1, src0, dst, policy, window);
 }
 } // namespace cpu
 } // namespace arm_compute

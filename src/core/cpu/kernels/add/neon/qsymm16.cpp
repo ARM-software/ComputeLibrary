@@ -32,13 +32,13 @@ namespace arm_compute
 {
 namespace cpu
 {
-void arithmetic_addition_qsymm16_neon(const ITensor *in1, const ITensor *in2, ITensor *out, const ConvertPolicy &policy, const Window &window)
+void add_qsymm16_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     ARM_COMPUTE_UNUSED(policy);
 
     // Create input windows
-    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
-    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+    Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
@@ -47,11 +47,11 @@ void arithmetic_addition_qsymm16_neon(const ITensor *in1, const ITensor *in2, IT
     const int  window_step_x         = 8;
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
+    const bool is_broadcast_across_x = src0->info()->tensor_shape().x() != src1->info()->tensor_shape().x();
 
-    const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
-    const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
-    const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq1_info = src0->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq2_info = src1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info  = dst->info()->quantization_info().uniform();
 
     const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
     const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
@@ -62,8 +62,8 @@ void arithmetic_addition_qsymm16_neon(const ITensor *in1, const ITensor *in2, IT
         const bool                    is_broadcast_input_2 = input2_win.x().step() == 0;
         Window                        broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
         Window                        non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
-        const ITensor                *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
-        const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
+        const ITensor                *broadcast_tensor     = is_broadcast_input_2 ? src1 : src0;
+        const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? src1 : src0;
         const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
         const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
 
@@ -72,7 +72,7 @@ void arithmetic_addition_qsymm16_neon(const ITensor *in1, const ITensor *in2, IT
 
         Iterator broadcast_input(broadcast_tensor, broadcast_win);
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
-        Iterator output(out, win);
+        Iterator output(dst, win);
 
         execute_window_loop(win, [&](const Coordinates &)
         {
@@ -123,9 +123,9 @@ void arithmetic_addition_qsymm16_neon(const ITensor *in1, const ITensor *in2, IT
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-        Iterator input1(in1, input1_win);
-        Iterator input2(in2, input2_win);
-        Iterator output(out, win);
+        Iterator input1(src0, input1_win);
+        Iterator input2(src1, input2_win);
+        Iterator output(dst, win);
 
         execute_window_loop(win, [&](const Coordinates &)
         {
@@ -164,7 +164,7 @@ void arithmetic_addition_qsymm16_neon(const ITensor *in1, const ITensor *in2, IT
             {
                 const float afs   = static_cast<int32_t>((*(input1_ptr + x))) * iq1_info.scale;
                 const float bfs   = static_cast<int32_t>((*(input2_ptr + x))) * iq2_info.scale;
-                *(output_ptr + x) = quantize_qsymm16((afs + bfs), out->info()->quantization_info());
+                *(output_ptr + x) = quantize_qsymm16((afs + bfs), dst->info()->quantization_info());
             }
         },
         input1, input2, output);
