@@ -136,12 +136,27 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
     }
 }
 
-/** Tolerance for quantized asymmetric operations */
-#if(!defined(__aarch64__) || defined(__ARM_FEATURE_SVE2))
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
-#else  // !(!defined(__aarch64__) || defined(__ARM_FEATURE_SVE2))
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
-#endif // defined(__aarch64__)
+/** Define absolute tolerance of the activation layer for qasymm8.
+ *
+ * @param[in] activation The activation function used.
+ *
+ * @return Absolute tolerance depending on the activation function.
+ */
+AbsoluteTolerance<uint8_t> tolerance_qasymm8(ActivationLayerInfo::ActivationFunction activation)
+{
+    switch(activation)
+    {
+        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
+        case ActivationLayerInfo::ActivationFunction::SQRT:
+        case ActivationLayerInfo::ActivationFunction::TANH:
+        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
+        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+        case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
+            return AbsoluteTolerance<uint8_t>(1);
+        default:
+            return AbsoluteTolerance<uint8_t>(0);
+    }
+}
 
 constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1);
 
@@ -285,7 +300,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, fra
                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qasymm8(_function));
 }
 TEST_SUITE_END() // QASYMM8
 
@@ -296,7 +311,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, fram
                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qasymm8(_function));
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 
