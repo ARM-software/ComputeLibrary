@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1165,10 +1165,10 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s3));
 
     // z == 1
-    // z_coord can be only negative for z = 0 so we do not need to clamp it
-    // Moreover z_coord cannot be out-of-bound for z = 1 so we do not need to clamp the offset
     z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 1;
+    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
     offset  = y_offset + (int4)(z_coord * src_stride_z);
+    offset  = min(offset, (int4)max_offset);
     VEC_TYPE(VEC_SIZE)
     values4 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -1179,10 +1179,10 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     values7 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s3));
 
     // z == 2
-    // After z = 1 we can simply add src_stride_z to offset without updating z_coord
-    // However offset can be out-of-bound so we need to check if it is greater than max_offset
-    offset += (int4)src_stride_z;
-    offset = min(offset, (int4)max_offset);
+    z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 2;
+    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
+    offset  = y_offset + (int4)(z_coord * src_stride_z);
+    offset  = min(offset, (int4)max_offset);
     VEC_TYPE(VEC_SIZE)
     values8 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -1193,10 +1193,10 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     values11 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s3));
 
     // z == 3
-    // After z = 1 we can simply add src_stride_z to offset without updating z_coord
-    // However offset can be out-of-bound so we need to check if it is greater than max_offset
-    offset += (int4)(src_stride_z);
-    offset = min(offset, (int4)max_offset);
+    z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 3;
+    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
+    offset  = y_offset + (int4)(z_coord * src_stride_z);
+    offset  = min(offset, (int4)max_offset);
     VEC_TYPE(VEC_SIZE)
     values12 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
