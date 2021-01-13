@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,7 +97,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8Signed, NEQuantizationLayerQASYMM8SignedFi
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_u8);
+    validate(Accessor(_target), _reference, tolerance_s8);
 }
 FIXTURE_DATA_TEST_CASE(RunSmallQASYMM16, NEQuantizationLayerQASYMM16Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
                        framework::dataset::make("DataType", DataType::F32)),
@@ -140,7 +140,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8Signed, NEQuantizationLayerQASYMM8SignedFi
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_u8);
+    validate(Accessor(_target), _reference, tolerance_s8);
 }
 FIXTURE_DATA_TEST_CASE(RunSmallQASYMM16, NEQuantizationLayerQASYMM16Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
                        framework::dataset::make("DataType", DataType::F16)),
