@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
 #include "MeanStdDevNormalizationLayer.h"
 #include "PixelWiseMultiplication.h"
 #include "arm_compute/core/utils/misc/Utility.h"
-#include "src/core/utils/quantization/AsymmHelpers.cpp"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 namespace arm_compute
 {
