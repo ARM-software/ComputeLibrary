@@ -51,7 +51,7 @@ class NEGEMMLowpMatrixAReductionKernel;
  *
  * -# @ref NEActivationLayer                                     Activation functions (tanh and logistic)
  * -# @ref NEArithmeticAddition                                  Elementwise addition
- * -# @ref NEArithmeticSubtractionKernel                         Elementwise subtraction
+ * -# @ref NEArithmeticSubtraction                               Elementwise subtraction
  * -# @ref NECopy                                                Copy kernel for copying output_state_out to output
  * -# @ref NEGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16

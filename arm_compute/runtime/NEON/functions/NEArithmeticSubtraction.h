@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,75 +32,13 @@ namespace arm_compute
 {
 class ITensor;
 
-namespace experimental
-{
-/** Basic function to run @ref NEArithmeticSubtractionKernel
+/** Basic function to run @ref cpu::kernels::CpuSubKernel
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/S16/S32/F16/F32.
  * @note The function performs an arithmetic subtraction between two tensors.
  *
  *  This function calls the following kernels:
- * -# @ref NEArithmeticSubtractionKernel
- */
-class NEArithmeticSubtraction : public INEOperator
-{
-public:
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * Valid configurations (Input1,Input2) -> Output :
-     *
-     *   - (U8,U8)                          -> U8
-     *   - (U8,U8)                          -> S16
-     *   - (QASYMM8, QASYMM8)               -> QASYMM8
-     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (S16,U8)                         -> S16
-     *   - (U8,S16)                         -> S16
-     *   - (S16,S16)                        -> S16
-     *   - (S32,S32)                        -> S32
-     *   - (F16,F16)                        -> F16
-     *   - (F32,F32)                        -> F32
-     *
-     * @param[in]  input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
-     * @param[in]  input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
-     * @param[out] output   Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
-     * @param[in]  policy   Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
-     * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
-     */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticSubtraction
-     *
-     * Valid configurations (Input1,Input2) -> Output :
-     *
-     *   - (U8,U8)                          -> U8
-     *   - (U8,U8)                          -> S16
-     *   - (QASYMM8, QASYMM8)               -> QASYMM8
-     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (S16,U8)                         -> S16
-     *   - (U8,S16)                         -> S16
-     *   - (S16,S16)                        -> S16
-     *   - (S32,S32)                        -> S32
-     *   - (F16,F16)                        -> F16
-     *   - (F32,F32)                        -> F32
-     *
-     * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
-     * @param[in] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
-     * @param[in] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
-     * @param[in] policy   Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-};
-} // namespace experimental
-
-/** Basic function to run @ref NEArithmeticSubtractionKernel
- *
- * @note The tensor data type for the inputs must be U8/QASYMM8/S16/S32/F16/F32.
- * @note The function performs an arithmetic subtraction between two tensors.
- *
- *  This function calls the following kernels:
- * -# @ref NEArithmeticSubtractionKernel
+ * -# @ref cpu::kernels::CpuSubKernel
  */
 class NEArithmeticSubtraction : public IFunction
 {
