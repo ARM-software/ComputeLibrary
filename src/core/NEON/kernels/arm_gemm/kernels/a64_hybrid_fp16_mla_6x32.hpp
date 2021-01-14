@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,15 @@
 #if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
 #include "../std_transforms_fixed.hpp"
+#include "../performance_parameters.hpp"
 
 #define ARGLIST  \
-   unsigned int, const unsigned int *, \
-   IndirectInputArg<__fp16>, \
-   size_t, size_t, \
-   const __fp16 *, \
-   IndirectOutputArg<__fp16>, \
-   const __fp16 *, Activation, bool
+    unsigned int, const unsigned int *, \
+    IndirectInputArg<__fp16>, \
+    size_t, size_t, \
+    const __fp16 *, \
+    IndirectOutputArg<__fp16>, \
+    const __fp16 *, Activation, bool
 
 namespace arm_gemm
 {
@@ -71,12 +72,10 @@ public:
 
     StdTransformsFixed<operand_type, result_type, 6, 32, 1> transforms = {};
 
-    static PerformanceParameters get_performance_parameters(const CPUInfo *ci)
-    {
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
         switch (ci->get_cpu_model()) {
             case CPUModel::A55r1:
                 return { 5.22 };
-
             default:
                 return { 14.53 };
         }

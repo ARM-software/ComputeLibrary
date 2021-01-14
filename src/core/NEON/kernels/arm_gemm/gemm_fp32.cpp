@@ -27,7 +27,6 @@
 #include "gemm_hybrid_indirect.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
-#include "gemm_interleaved_pretransposed_2d.hpp"
 #include "gemv_batched.hpp"
 #include "gemv_pretransposed.hpp"
 

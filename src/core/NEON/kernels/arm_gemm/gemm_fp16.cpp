@@ -32,7 +32,6 @@
 #include "gemm_hybrid_indirect.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
-#include "gemm_interleaved_pretransposed_2d.hpp"
 
 #include "kernels/a32_sgemm_8x6.hpp"
 #include "kernels/a64_hgemm_8x24.hpp"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,12 +27,12 @@
 #include "../std_transforms_sve.hpp"
 
 #define ARGLIST  \
-   unsigned int, const unsigned int *, \
-   IndirectInputArg<int8_t>, \
-   size_t, size_t, \
-   const int8_t *, \
-   IndirectOutputArg<int8_t>, \
-   const Requantize32 *, const int32_t *, unsigned int
+    unsigned int, const unsigned int *, \
+    IndirectInputArg<int8_t>, \
+    size_t, size_t, \
+    const int8_t *, \
+    IndirectOutputArg<int8_t>, \
+    const Requantize32 *, const int32_t *, unsigned int
 
 namespace arm_gemm
 {
