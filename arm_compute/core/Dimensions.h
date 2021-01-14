@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <limits>
 #include <numeric>
 
 namespace arm_compute

@@ -24,6 +24,7 @@
 #ifdef __aarch64__
 
 #include <algorithm>
+#include <limits>
 
 #include "arm_gemm.hpp"
 

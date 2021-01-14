@@ -27,6 +27,7 @@
 #include "../../utils.hpp"
 
 #include <cassert>
+#include <limits>
 
 namespace arm_gemm {
 

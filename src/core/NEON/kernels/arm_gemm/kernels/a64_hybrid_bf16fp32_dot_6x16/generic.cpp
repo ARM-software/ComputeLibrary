@@ -28,6 +28,7 @@
 #include "../../bfloat.hpp"
 
 #include <cassert>
+#include <limits>
 
 namespace arm_gemm {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_ITENSORPACK_H
 #define ARM_COMPUTE_ITENSORPACK_H
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
 
