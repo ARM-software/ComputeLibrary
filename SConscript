@@ -320,9 +320,10 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
 
-arm_compute_graph_env = arm_compute_env.Clone();
-if 'clang++' in cpp_compiler:
-    arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-pessimizing-move'])
+arm_compute_graph_env = arm_compute_env.Clone()
+
+arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-redundant-move', '-Wno-pessimizing-move'])
+
 arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a])
 Export('arm_compute_graph_a')
 

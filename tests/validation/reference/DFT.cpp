@@ -268,8 +268,9 @@ SimpleTensor<T> complex_mul_and_reduce(const SimpleTensor<T> &input, const Simpl
     output_shape.set(2, Co);
     SimpleTensor<T> dst(output_shape, input.data_type(), input.num_channels());
 
-    // MemSet dst memory to zero
-    std::memset(dst.data(), 0, dst.size());
+    // dst memory to zero
+    const auto total_element_count = dst.num_channels() * dst.num_elements();
+    std::fill_n(dst.data(), total_element_count, 0);
 
     for(uint32_t b = 0; b < N; ++b)
     {
