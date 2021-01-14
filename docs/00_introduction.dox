@@ -1330,7 +1330,7 @@ To see the build options available simply run ```scons -h```:
             default: False
             actual: False
 
-        arch: Target Architecture (armv7a|arm64-v8a|arm64-v8.2-a|arm64-v8.2-a-sve|arm64-v8.2-a-sve2|x86_32|x86_64|armv8a|armv8.2-a|armv8.2-a-sve|armv8.6-a|armv8.6-a-sve|armv8.6-a-sve2|x86)
+        arch: Target Architecture (armv7a|arm64-v8a|arm64-v8.2-a|arm64-v8.2-a-sve|arm64-v8.2-a-sve2|x86_32|x86_64|armv8a|armv8.2-a|armv8.2-a-sve|armv8.6-a|armv8.6-a-sve|armv8.6-a-sve2|armv8r64|x86)
             default: armv7a
             actual: armv7a
 
