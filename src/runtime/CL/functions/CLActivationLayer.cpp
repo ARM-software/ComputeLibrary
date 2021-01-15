@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,32 +25,19 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
-#include "src/core/CL/kernels/CLActivationLayerKernel.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClActivation.h"
 
 namespace arm_compute
 {
-namespace experimental
-{
-void CLActivation::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info)
-{
-    auto k = std::make_unique<CLActivationLayerKernel>();
-    k->configure(compile_context, input, output, act_info);
-    _kernel = std::move(k);
-}
-
-Status CLActivation::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
-{
-    return CLActivationLayerKernel::validate(input, output, act_info);
-}
-} // namespace experimental
-
 struct CLActivationLayer::Impl
 {
-    const ICLTensor                            *src{ nullptr };
-    ICLTensor                                  *dst{ nullptr };
-    CLRuntimeContext                           *ctx{ nullptr };
-    std::unique_ptr<experimental::CLActivation> op{ nullptr };
+    const ICLTensor                      *src{ nullptr };
+    ICLTensor                            *dst{ nullptr };
+    CLRuntimeContext                     *ctx{ nullptr };
+    std::unique_ptr<opencl::ClActivation> op{ nullptr };
 };
 
 CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
@@ -58,12 +45,9 @@ CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
 {
     _impl->ctx = ctx;
 }
-
 CLActivationLayer::CLActivationLayer(CLActivationLayer &&) = default;
-
 CLActivationLayer &CLActivationLayer::operator=(CLActivationLayer &&) = default;
-
-CLActivationLayer::~CLActivationLayer() = default;
+CLActivationLayer::~CLActivationLayer()                               = default;
 
 void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
@@ -77,13 +61,13 @@ void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTe
     _impl->src = input;
     _impl->dst = output == nullptr ? input : output;
 
-    _impl->op = std::make_unique<experimental::CLActivation>();
+    _impl->op = std::make_unique<opencl::ClActivation>();
     _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), act_info);
 }
 
 Status CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    return experimental::CLActivation::validate(input, output, act_info);
+    return opencl::ClActivation::validate(input, output, act_info);
 }
 
 void CLActivationLayer::run()

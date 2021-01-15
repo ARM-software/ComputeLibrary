@@ -182,7 +182,7 @@ v20.11 Public major release
    - @ref CLDepthConvertLayerKernel
    - @ref CLCopyKernel
    - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
-   - @ref CLActivationLayerKernel
+   - CLActivationLayerKernel
    - @ref CLWinogradFilterTransformKernel
    - CLWidthConcatenateLayerKernel
    - CLWidthConcatenate4TensorsKernel
@@ -535,7 +535,7 @@ v20.05 Public major release
      - @ref NEQLSTMLayer
      - @ref NEQLSTMLayerNormalizationKernel
  - Added HARD_SWISH support in:
-     - @ref CLActivationLayerKernel
+     - CLActivationLayerKernel
      - NEActivationLayerKernel
  - Deprecated OpenCL kernels / functions:
      - CLGEMMLowpQuantizeDownInt32ToUint8Scale
@@ -1200,7 +1200,7 @@ v17.09 Public major release
     - @ref CLDequantizationLayerKernel / @ref CLDequantizationLayer
     - @ref CLDirectConvolutionLayerKernel / @ref CLDirectConvolutionLayer
     - CLFlattenLayer
-    - @ref CLFloorKernel / @ref CLFloor
+    - CLFloorKernel / @ref CLFloor
     - CLGEMMTranspose1xW
     - CLGEMMMatrixVectorMultiplyKernel
     - @ref CLL2NormalizeLayerKernel / @ref CLL2NormalizeLayer
@@ -1306,7 +1306,7 @@ v17.02.1 Sources preview
 
 v17.02 Sources preview
  - New OpenCL kernels / functions:
-   - @ref CLActivationLayerKernel / @ref CLActivationLayer
+   - CLActivationLayerKernel / @ref CLActivationLayer
    - @ref CLChannelCombineKernel / @ref CLChannelCombine
    - @ref CLDerivativeKernel / @ref CLChannelExtract
    - @ref CLFastCornersKernel / @ref CLFastCorners

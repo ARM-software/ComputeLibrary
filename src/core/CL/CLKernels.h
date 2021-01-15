@@ -27,7 +27,6 @@
 /* Header regrouping all the CL kernels */
 #include "src/core/CL/kernels/CLAbsoluteDifferenceKernel.h"
 #include "src/core/CL/kernels/CLAccumulateKernel.h"
-#include "src/core/CL/kernels/CLActivationLayerKernel.h"
 #include "src/core/CL/kernels/CLArgMinMaxLayerKernel.h"
 #include "src/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 #include "src/core/CL/kernels/CLBatchToSpaceLayerKernel.h"
@@ -65,7 +64,6 @@
 #include "src/core/CL/kernels/CLFFTScaleKernel.h"
 #include "src/core/CL/kernels/CLFastCornersKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLFloorKernel.h"
 #include "src/core/CL/kernels/CLFuseBatchNormalizationKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLActivationLayerKernel.h"
+#include "src/core/gpu/cl/kernels/ClActivationKernel.h"
 
 #include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/CL/CLHelpers.h"
@@ -39,12 +39,16 @@
 
 namespace arm_compute
 {
+namespace opencl
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::F16, DataType::F32);
 
     static std::set<ActivationLayerInfo::ActivationFunction> quantized_supported_activations =
     {
@@ -56,8 +60,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
         ActivationLayerInfo::ActivationFunction::HARD_SWISH,
         ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
     };
-    const DataType                                data_type = input->data_type();
-    const QuantizationInfo                       &oq_info   = (output != nullptr) ? output->quantization_info() : input->quantization_info();
+    const DataType                                data_type = src->data_type();
+    const QuantizationInfo                       &oq_info   = (dst != nullptr) ? dst->quantization_info() : src->quantization_info();
     const ActivationLayerInfo::ActivationFunction f_act     = act_info.activation();
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(data_type) && (quantized_supported_activations.count(f_act) == 0),
@@ -72,41 +76,41 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8_SIGNED && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 128.f, 0)));
     ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8_SIGNED && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 256.f, -128)));
 
-    // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    // Checks performed when destination is configured
+    if((dst != nullptr) && (dst->total_size() != 0))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
 
     return Status{};
 }
 } // namespace
 
-CLActivationLayerKernel::CLActivationLayerKernel()
+ClActivationKernel::ClActivationKernel()
     : _run_in_place(false)
 {
 }
 
-void CLActivationLayerKernel::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info)
+void ClActivationKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src);
 
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({ src, dst });
 
-    _run_in_place = (output == nullptr) || (output == input);
+    _run_in_place = (dst == nullptr) || (dst == src);
 
-    if(output != nullptr)
+    if(dst != nullptr)
     {
-        // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output, *input->clone());
+        // Destination auto inizialitation if not yet initialized
+        auto_init_if_empty(*dst, *src->clone());
     }
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, (output != nullptr) ? output : nullptr, act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, (dst != nullptr) ? dst : nullptr, act_info));
 
-    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->element_size(), input->dimension(0));
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / src->element_size(), src->dimension(0));
 
-    const DataType dt      = input->data_type();
+    const DataType dt      = src->data_type();
     float          a_const = act_info.a();
     float          b_const = act_info.b();
 
@@ -125,14 +129,14 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     build_opts.add_option("-DACT=" + lower_string(string_from_activation_func(f_act)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
 
     std::string kernel_name = std::string("activation_layer");
 
     // Set quantization info build options
     if(is_quantized)
     {
-        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo iq_info = src->quantization_info().uniform();
 
         if(!perform_activation_in_float)
         {
@@ -180,10 +184,10 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
         // Set correct kernel name
         kernel_name += perform_activation_in_float ? std::string("_quant_f32") : std::string("_quant");
 
-        // Set scale and offset of the input and output if they have different quantization info
-        if(output != nullptr)
+        // Set scale and offset of the source and destination if they have different quantization info
+        if(dst != nullptr)
         {
-            const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+            const UniformQuantizationInfo oq_info = dst->quantization_info().uniform();
 
             if(iq_info != oq_info)
             {
@@ -203,27 +207,27 @@ void CLActivationLayerKernel::configure(const CLCompileContext &compile_context,
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*src, Steps(num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win);
 
     // Set config_id for enabling LWS tuning
     _config_id = "activation_layer_";
     _config_id += lower_string(string_from_data_type(dt));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->dimension(0));
+    _config_id += support::cpp11::to_string(src->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->dimension(1));
+    _config_id += support::cpp11::to_string(src->dimension(1));
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status ClActivationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, act_info));
     return Status{};
 }
 
-void CLActivationLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClActivationKernel::run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
@@ -247,4 +251,6 @@ void CLActivationLayerKernel::run_op(ITensorPack &tensors, const Window &window,
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

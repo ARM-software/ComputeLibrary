@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_CLACTIVATIONLAYER_H
 #define ARM_COMPUTE_CLACTIVATIONLAYER_H
 
-#include "arm_compute/runtime/CL/ICLOperator.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLRuntimeContext.h"
 
 namespace arm_compute
 {
@@ -35,7 +35,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLActivationLayerKernel
+/** Basic function to run @ref opencl::kernels::ClActivationKernel
  *
  * @note The function simulates an activation layer with the specified activation function.
  */
@@ -96,33 +96,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
-namespace experimental
-{
-/** Basic function to run @ref CLActivationLayerKernel */
-class CLActivation : public ICLOperator
-{
-public:
-    /** Set the input and output tensor.
-     *
-     * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input           Source tensor info. In case of @p output tensor = nullptr, this tensor will store the result
-     *                                 of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
-     * @param[out]     output          Destination tensor info. Data type supported: same as @p input
-     * @param[in]      act_info        Activation layer parameters.
-     */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo act_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLActivationLayer
-     *
-     * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result
-     *                     of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
-     * @param[in] output   Destination tensor info. Data type supported: same as @p input
-     * @param[in] act_info Activation layer information.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
-};
-} // namespace experimental
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLACTIVATIONLAYER_H */
