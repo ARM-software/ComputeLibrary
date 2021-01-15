@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -766,8 +766,14 @@ void NEWinogradConvolutionLayer::prepare()
         // Transform weights
         _kernel_storage.allocator()->allocate();
         NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
-
         _weights_hwio.allocator()->free();
+
+        _gemm_function.prepare();
+        if(!_kernel_storage.is_used())
+        {
+            _kernel_storage.allocator()->free();
+        }
+
         _is_prepared = true;
     }
 }
