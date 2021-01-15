@@ -40,6 +40,11 @@
     {                     \
         u0, u1            \
     }
+#elif VEC_SIZE_Y == 3
+#define TRANSPOSED_U(val) \
+    {                     \
+        u0, u1, u2        \
+    }
 #elif VEC_SIZE_Y == 4
 #define TRANSPOSED_U(val) \
     {                     \
@@ -67,6 +72,11 @@
 #define TRANSPOSED_U(val) \
     {                     \
         u0.val, u1.val    \
+    }
+#elif VEC_SIZE_Y == 3
+#define TRANSPOSED_U(val)      \
+    {                          \
+        u0.val, u1.val, u2.val \
     }
 #elif VEC_SIZE_Y == 4
 #define TRANSPOSED_U(val)              \
@@ -142,9 +152,11 @@ __kernel void transpose(IMAGE_DECLARATION(src),
 #if VEC_SIZE_Y > 2
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
     u2 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_y));
+#endif /* VEC_SIZE_Y > 2 */
+#if VEC_SIZE_Y > 3
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
     u3 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 3 * src_stride_y));
-#endif /* VEC_SIZE_Y > 2 */
+#endif /* VEC_SIZE_Y > 3 */
 #if VEC_SIZE_Y > 4
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)
     u4 = VLOAD(VEC_SIZE_X)(0, (__global DATA_TYPE *)(src_addr + 4 * src_stride_y));
