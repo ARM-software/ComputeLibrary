@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -444,7 +444,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure_indirect(const ITen
 
         _indirect_buf = std::unique_ptr<const TypeInput *, free_delete>(reinterpret_cast<const TypeInput **>(malloc(multi_size * multis)));
         _indirect_arg = std::unique_ptr<const TypeInput *const *, free_delete>(reinterpret_cast<const TypeInput *const **>(malloc(sizeof(TypeInput **) * kernel_hw * multis * batches)));
-        _indirect_pad = std::vector<TypeInput>(_cp.input_channels, zeropad);
+        _indirect_pad = std::vector<TypeInput>(_cp.input_channels, TypeInput(zeropad));
 
         // Set indirect argument
         int64_t pos = 0;
