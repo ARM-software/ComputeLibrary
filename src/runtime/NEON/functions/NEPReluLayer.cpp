@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "src/core/NEON/kernels/NEElementwiseOperationKernel.h"
+#include "src/core/cpu/kernels/CpuElementwiseKernel.h"
 
 namespace arm_compute
 {
@@ -32,14 +32,14 @@ namespace experimental
 {
 void NEPRelu::configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output)
 {
-    auto k = std::make_unique<NEArithmeticOperationKernel>();
+    auto k = std::make_unique<cpu::kernels::CpuArithmeticKernel>();
     k->configure(ArithmeticOperation::PRELU, input, alpha, output);
     _kernel = std::move(k);
 }
 
 Status NEPRelu::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
 {
-    return NEArithmeticOperationKernel::validate(ArithmeticOperation::PRELU, input, alpha, output);
+    return cpu::kernels::CpuArithmeticKernel::validate(ArithmeticOperation::PRELU, input, alpha, output);
 }
 } // nsamespace experimental
 

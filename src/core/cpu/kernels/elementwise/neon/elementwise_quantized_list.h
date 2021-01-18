@@ -24,7 +24,7 @@
 #ifndef SRC_CORE_NEON_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 #define SRC_CORE_NEON_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 
-#include "src/core/NEON/kernels/elementwise/impl/elementwise_list.h"
+#include "src/core/cpu/kernels/elementwise/neon/elementwise_list.h"
 
 namespace arm_compute
 {

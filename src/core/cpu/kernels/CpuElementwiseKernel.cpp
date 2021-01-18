@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEElementwiseOperationKernel.h"
+#include "src/core/cpu/kernels/CpuElementwiseKernel.h"
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/kernels/elementwise/impl/elementwise_list.h"
-#include "src/core/NEON/kernels/elementwise/impl/elementwise_quantized_list.h"
-#include "src/core/SVE/kernels/elementwise/impl/elementwise_list.h"
-#include "src/core/SVE/kernels/elementwise/impl/elementwise_quantized_list.h"
 #include "src/core/common/Registrars.h"
+#include "src/core/cpu/kernels/elementwise/neon/elementwise_list.h"
+#include "src/core/cpu/kernels/elementwise/neon/elementwise_quantized_list.h"
+#include "src/core/cpu/kernels/elementwise/sve/elementwise_list.h"
+#include "src/core/cpu/kernels/elementwise/sve/elementwise_quantized_list.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -38,10 +38,14 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
 using ElementwiseSelector = std::add_pointer<bool(DataType)>::type;
-using UKernelType         = NEElementwiseOperationKernel::ElementwiseFunction;
+using UKernelType         = CpuElementwiseKernel::ElementwiseFunction;
 struct ElementwiseKernel
 {
     const char               *name;
@@ -154,12 +158,7 @@ configure_comp_func(const ITensorInfo *input1, const ITensorInfo *input2, ITenso
 }
 } // namespace
 
-NEElementwiseOperationKernel::NEElementwiseOperationKernel()
-    : _function(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr)
-{
-}
-
-Status NEElementwiseOperationKernel::validate_arguments_common(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
+Status CpuElementwiseKernel::validate_arguments_common(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &input2);
@@ -178,7 +177,7 @@ Status NEElementwiseOperationKernel::validate_arguments_common(const ITensorInfo
     return Status{};
 }
 
-void NEElementwiseOperationKernel::configure_common(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuElementwiseKernel::configure_common(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
 
@@ -192,45 +191,33 @@ void NEElementwiseOperationKernel::configure_common(const ITensorInfo *input1, c
 
     Window win = calculate_max_window(valid_region);
 
-    INEKernel::configure(win);
+    ICpuKernel::configure(win);
 }
 
-void NEElementwiseOperationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuElementwiseKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info, window);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_function == nullptr);
-    _function(tensors.get_const_tensor(TensorType::ACL_SRC_0),
-              tensors.get_const_tensor(TensorType::ACL_SRC_1),
-              tensors.get_tensor(TensorType::ACL_DST), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+
+    auto src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    auto src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    auto dst  = tensors.get_tensor(TensorType::ACL_DST);
+
+    auto function = get_implementation(src0->info(), src1->info(), dst->info());
+    ARM_COMPUTE_ERROR_ON(function == nullptr);
+    function(src0, src1, dst, window);
 }
 
 /** Arithmetic operators (min, max, squared_diff) */
-void NEArithmeticOperationKernel::configure(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuArithmeticKernel::configure(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output));
     configure_common(input1, input2, output);
-    switch(op)
-    {
-        case ArithmeticOperation::MAX:
-            _function = configure_arithm_func<ArithmeticOperation::MAX>(input1, input2, output);
-            break;
-        case ArithmeticOperation::MIN:
-            _function = configure_arithm_func<ArithmeticOperation::MIN>(input1, input2, output);
-            break;
-        case ArithmeticOperation::SQUARED_DIFF:
-            _function = configure_arithm_func<ArithmeticOperation::SQUARED_DIFF>(input1, input2, output);
-            break;
-        case ArithmeticOperation::PRELU:
-            _function = configure_arithm_func<ArithmeticOperation::PRELU>(input1, input2, output);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
+    _op = op;
 }
 
-Status NEArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
+Status CpuArithmeticKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::S32, DataType::F32);
     // Validate in case of configured output
@@ -241,7 +228,7 @@ Status NEArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1
     return validate_arguments_common(input1, input2, output);
 }
 
-Status NEArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CpuArithmeticKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_UNUSED(op);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
@@ -249,22 +236,45 @@ Status NEArithmeticOperationKernel::validate(ArithmeticOperation op, const ITens
     return Status{};
 }
 
+std::function<CpuElementwiseKernel::ElementwiseFunction>
+CpuArithmeticKernel::get_implementation(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+{
+    switch(_op)
+    {
+        case ArithmeticOperation::MAX:
+            return configure_arithm_func<ArithmeticOperation::MAX>(input1, input2, output);
+        case ArithmeticOperation::MIN:
+            return configure_arithm_func<ArithmeticOperation::MIN>(input1, input2, output);
+        case ArithmeticOperation::SQUARED_DIFF:
+            return configure_arithm_func<ArithmeticOperation::SQUARED_DIFF>(input1, input2, output);
+        case ArithmeticOperation::PRELU:
+            return configure_arithm_func<ArithmeticOperation::PRELU>(input1, input2, output);
+        case ArithmeticOperation::DIV:
+            return configure_arithm_func<ArithmeticOperation::DIV>(input1, input2, output);
+        case ArithmeticOperation::POWER:
+            return configure_arithm_func<ArithmeticOperation::POWER>(input1, input2, output);
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return nullptr;
+}
+
 /** The division operator */
 
-void NEDivisionOperationKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuDivisionKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output));
     configure_common(input1, input2, output);
-    _function = configure_arithm_func<ArithmeticOperation::DIV>(input1, input2, output);
+    _op = ArithmeticOperation::DIV;
 }
 
-Status NEDivisionOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
+Status CpuDivisionKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::S32, DataType::F16, DataType::F32);
-    return NEArithmeticOperationKernel::validate_arguments(input1, input2, output);
+    return CpuArithmeticKernel::validate_arguments(input1, input2, output);
 }
 
-Status NEDivisionOperationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CpuDivisionKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input1, *input2, *output));
@@ -272,20 +282,20 @@ Status NEDivisionOperationKernel::validate(const ITensorInfo *input1, const ITen
 }
 
 /** The power operator */
-void NEPowerOperationKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuPowerKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output));
     configure_common(input1, input2, output);
-    _function = configure_arithm_func<ArithmeticOperation::POWER>(input1, input2, output);
+    _op = ArithmeticOperation::POWER;
 }
 
-Status NEPowerOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
+Status CpuPowerKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::F16, DataType::F32);
-    return NEArithmeticOperationKernel::validate_arguments(input1, input2, output);
+    return CpuArithmeticKernel::validate_arguments(input1, input2, output);
 }
 
-Status NEPowerOperationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CpuPowerKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input1, *input2, *output));
@@ -293,36 +303,14 @@ Status NEPowerOperationKernel::validate(const ITensorInfo *input1, const ITensor
 }
 
 /** Comparison operators (equal, not equal, less than, greater than, less than or equal, greater than or equal) */
-void NEComparisonOperationKernel::configure(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuComparisonKernel::configure(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output));
     configure_common(input1, input2, output);
-    switch(op)
-    {
-        case ComparisonOperation::Equal:
-            _function = configure_comp_func<ComparisonOperation::Equal>(input1, input2, output);
-            break;
-        case ComparisonOperation::NotEqual:
-            _function = configure_comp_func<ComparisonOperation::NotEqual>(input1, input2, output);
-            break;
-        case ComparisonOperation::Greater:
-            _function = configure_comp_func<ComparisonOperation::Greater>(input1, input2, output);
-            break;
-        case ComparisonOperation::GreaterEqual:
-            _function = configure_comp_func<ComparisonOperation::GreaterEqual>(input1, input2, output);
-            break;
-        case ComparisonOperation::Less:
-            _function = configure_comp_func<ComparisonOperation::Less>(input1, input2, output);
-            break;
-        case ComparisonOperation::LessEqual:
-            _function = configure_comp_func<ComparisonOperation::LessEqual>(input1, input2, output);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
+    _op = op;
 }
 
-Status NEComparisonOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
+Status CpuComparisonKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::S32, DataType::F32);
     // Validate in case of configured output
@@ -333,11 +321,36 @@ Status NEComparisonOperationKernel::validate_arguments(const ITensorInfo &input1
     return validate_arguments_common(input1, input2, output);
 }
 
-Status NEComparisonOperationKernel::validate(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CpuComparisonKernel::validate(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_UNUSED(op);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input1, *input2, *output));
     return Status{};
 }
+
+std::function<CpuElementwiseKernel::ElementwiseFunction>
+CpuComparisonKernel::get_implementation(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+{
+    switch(_op)
+    {
+        case ComparisonOperation::Equal:
+            return configure_comp_func<ComparisonOperation::Equal>(input1, input2, output);
+        case ComparisonOperation::NotEqual:
+            return configure_comp_func<ComparisonOperation::NotEqual>(input1, input2, output);
+        case ComparisonOperation::Greater:
+            return configure_comp_func<ComparisonOperation::Greater>(input1, input2, output);
+        case ComparisonOperation::GreaterEqual:
+            return configure_comp_func<ComparisonOperation::GreaterEqual>(input1, input2, output);
+        case ComparisonOperation::Less:
+            return configure_comp_func<ComparisonOperation::Less>(input1, input2, output);
+        case ComparisonOperation::LessEqual:
+            return configure_comp_func<ComparisonOperation::LessEqual>(input1, input2, output);
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return nullptr;
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

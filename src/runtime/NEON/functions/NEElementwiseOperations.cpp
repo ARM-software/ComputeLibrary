@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
-#include <src/core/NEON/kernels/NEElementwiseOperationKernel.h>
+#include "arm_compute/core/Validate.h"
+#include "src/runtime/cpu/operators/CpuElementwise.h"
 
 #include "arm_compute/core/ITensor.h"
 
@@ -31,109 +31,12 @@
 
 namespace arm_compute
 {
-namespace experimental
-{
-void NEElementwiseMax::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
-{
-    auto k = std::make_unique<NEArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::MAX, input1, input2, output);
-    _kernel = std::move(k);
-}
-
-Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
-{
-    return NEArithmeticOperationKernel::validate(ArithmeticOperation::MAX, input1, input2, output);
-}
-
-void NEElementwiseMin::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
-{
-    auto k = std::make_unique<NEArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::MIN, input1, input2, output);
-    _kernel = std::move(k);
-}
-
-Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
-{
-    return NEArithmeticOperationKernel::validate(ArithmeticOperation::MIN, input1, input2, output);
-}
-
-void NEElementwiseSquaredDiff::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
-{
-    auto k = std::make_unique<NEArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
-    _kernel = std::move(k);
-}
-
-Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
-{
-    return NEArithmeticOperationKernel::validate(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
-}
-
-void NEElementwiseDivision::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
-{
-    auto k = std::make_unique<NEDivisionOperationKernel>();
-    k->configure(input1, input2, output);
-    _kernel = std::move(k);
-}
-
-Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
-{
-    return NEDivisionOperationKernel::validate(input1, input2, output);
-}
-
-void NEElementwisePower::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
-{
-    auto k = std::make_unique<NEPowerOperationKernel>();
-    k->configure(input1, input2, output);
-    _kernel = std::move(k);
-}
-
-Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
-{
-    return NEPowerOperationKernel::validate(input1, input2, output);
-}
-
-template <ComparisonOperation COP>
-void NEElementwiseComparisonStatic<COP>::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
-{
-    auto k = std::make_unique<NEComparisonOperationKernel>();
-    k->configure(COP, input1, input2, output);
-    _kernel = std::move(k);
-}
-
-template <ComparisonOperation COP>
-Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
-{
-    return NEComparisonOperationKernel::validate(COP, input1, input2, output);
-}
-
-void NEElementwiseComparison::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ComparisonOperation op)
-{
-    auto k = std::make_unique<NEComparisonOperationKernel>();
-    k->configure(op, input1, input2, output);
-    _kernel = std::move(k);
-}
-
-Status NEElementwiseComparison::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op)
-{
-    return NEComparisonOperationKernel::validate(op, input1, input2, output);
-}
-
-// Supported Specializations
-template class NEElementwiseComparisonStatic<ComparisonOperation::Equal>;
-template class NEElementwiseComparisonStatic<ComparisonOperation::NotEqual>;
-template class NEElementwiseComparisonStatic<ComparisonOperation::Greater>;
-template class NEElementwiseComparisonStatic<ComparisonOperation::GreaterEqual>;
-template class NEElementwiseComparisonStatic<ComparisonOperation::Less>;
-template class NEElementwiseComparisonStatic<ComparisonOperation::LessEqual>;
-} // namespace experimental
-
 struct NEElementwiseMax::Impl
 {
-    const ITensor                                  *src_0{ nullptr };
-    const ITensor                                  *src_1{ nullptr };
-    ITensor                                        *dst{ nullptr };
-    std::unique_ptr<experimental::NEElementwiseMax> op{ nullptr };
+    const ITensor                          *src_0{ nullptr };
+    const ITensor                          *src_1{ nullptr };
+    ITensor                                *dst{ nullptr };
+    std::unique_ptr<cpu::CpuElementwiseMax> op{ nullptr };
 };
 
 NEElementwiseMax::NEElementwiseMax()
@@ -150,14 +53,14 @@ void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *outp
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEElementwiseMax>();
+    _impl->op    = std::make_unique<cpu::CpuElementwiseMax>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwiseMax::validate(input1, input2, output);
+    return cpu::CpuElementwiseMax::validate(input1, input2, output);
 }
 
 void NEElementwiseMax::run()
@@ -171,10 +74,10 @@ void NEElementwiseMax::run()
 
 struct NEElementwiseMin::Impl
 {
-    const ITensor                                  *src_0{ nullptr };
-    const ITensor                                  *src_1{ nullptr };
-    ITensor                                        *dst{ nullptr };
-    std::unique_ptr<experimental::NEElementwiseMin> op{ nullptr };
+    const ITensor                          *src_0{ nullptr };
+    const ITensor                          *src_1{ nullptr };
+    ITensor                                *dst{ nullptr };
+    std::unique_ptr<cpu::CpuElementwiseMin> op{ nullptr };
 };
 
 NEElementwiseMin::NEElementwiseMin()
@@ -191,14 +94,14 @@ void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *outp
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEElementwiseMin>();
+    _impl->op    = std::make_unique<cpu::CpuElementwiseMin>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwiseMin::validate(input1, input2, output);
+    return cpu::CpuElementwiseMin::validate(input1, input2, output);
 }
 
 void NEElementwiseMin::run()
@@ -212,10 +115,10 @@ void NEElementwiseMin::run()
 
 struct NEElementwiseSquaredDiff::Impl
 {
-    const ITensor                                          *src_0{ nullptr };
-    const ITensor                                          *src_1{ nullptr };
-    ITensor                                                *dst{ nullptr };
-    std::unique_ptr<experimental::NEElementwiseSquaredDiff> op{ nullptr };
+    const ITensor                                  *src_0{ nullptr };
+    const ITensor                                  *src_1{ nullptr };
+    ITensor                                        *dst{ nullptr };
+    std::unique_ptr<cpu::CpuElementwiseSquaredDiff> op{ nullptr };
 };
 
 NEElementwiseSquaredDiff::NEElementwiseSquaredDiff()
@@ -232,14 +135,14 @@ void NEElementwiseSquaredDiff::configure(ITensor *input1, ITensor *input2, ITens
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEElementwiseSquaredDiff>();
+    _impl->op    = std::make_unique<cpu::CpuElementwiseSquaredDiff>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwiseSquaredDiff::validate(input1, input2, output);
+    return cpu::CpuElementwiseSquaredDiff::validate(input1, input2, output);
 }
 
 void NEElementwiseSquaredDiff::run()
@@ -253,10 +156,10 @@ void NEElementwiseSquaredDiff::run()
 
 struct NEElementwiseDivision::Impl
 {
-    const ITensor                                       *src_0{ nullptr };
-    const ITensor                                       *src_1{ nullptr };
-    ITensor                                             *dst{ nullptr };
-    std::unique_ptr<experimental::NEElementwiseDivision> op{ nullptr };
+    const ITensor                               *src_0{ nullptr };
+    const ITensor                               *src_1{ nullptr };
+    ITensor                                     *dst{ nullptr };
+    std::unique_ptr<cpu::CpuElementwiseDivision> op{ nullptr };
 };
 
 NEElementwiseDivision::NEElementwiseDivision()
@@ -273,14 +176,14 @@ void NEElementwiseDivision::configure(ITensor *input1, ITensor *input2, ITensor 
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEElementwiseDivision>();
+    _impl->op    = std::make_unique<cpu::CpuElementwiseDivision>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwiseDivision::validate(input1, input2, output);
+    return cpu::CpuElementwiseDivision::validate(input1, input2, output);
 }
 
 void NEElementwiseDivision::run()
@@ -294,10 +197,10 @@ void NEElementwiseDivision::run()
 
 struct NEElementwisePower::Impl
 {
-    const ITensor                                    *src_0{ nullptr };
-    const ITensor                                    *src_1{ nullptr };
-    ITensor                                          *dst{ nullptr };
-    std::unique_ptr<experimental::NEElementwisePower> op{ nullptr };
+    const ITensor                            *src_0{ nullptr };
+    const ITensor                            *src_1{ nullptr };
+    ITensor                                  *dst{ nullptr };
+    std::unique_ptr<cpu::CpuElementwisePower> op{ nullptr };
 };
 
 NEElementwisePower::NEElementwisePower()
@@ -314,14 +217,14 @@ void NEElementwisePower::configure(ITensor *input1, ITensor *input2, ITensor *ou
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEElementwisePower>();
+    _impl->op    = std::make_unique<cpu::CpuElementwisePower>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return experimental::NEElementwisePower::validate(input1, input2, output);
+    return cpu::CpuElementwisePower::validate(input1, input2, output);
 }
 
 void NEElementwisePower::run()
@@ -336,10 +239,10 @@ void NEElementwisePower::run()
 template <ComparisonOperation COP>
 struct NEElementwiseComparisonStatic<COP>::Impl
 {
-    const ITensor                                                    *src_0{ nullptr };
-    const ITensor                                                    *src_1{ nullptr };
-    ITensor                                                          *dst{ nullptr };
-    std::unique_ptr<experimental::NEElementwiseComparisonStatic<COP>> op{ nullptr };
+    const ITensor                                            *src_0{ nullptr };
+    const ITensor                                            *src_1{ nullptr };
+    ITensor                                                  *dst{ nullptr };
+    std::unique_ptr<cpu::CpuElementwiseComparisonStatic<COP>> op{ nullptr };
 };
 
 template <ComparisonOperation COP>
@@ -360,14 +263,14 @@ void NEElementwiseComparisonStatic<COP>::configure(ITensor *input1, ITensor *inp
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEElementwiseComparisonStatic<COP>>();
+    _impl->op    = std::make_unique<cpu::CpuElementwiseComparisonStatic<COP>>();
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
 template <ComparisonOperation COP>
 Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    return experimental::NEElementwiseComparisonStatic<COP>::validate(input1, input2, output);
+    return cpu::CpuElementwiseComparisonStatic<COP>::validate(input1, input2, output);
 }
 
 template <ComparisonOperation COP>
@@ -382,10 +285,10 @@ void                          NEElementwiseComparisonStatic<COP>::run()
 
 struct NEElementwiseComparison::Impl
 {
-    const ITensor                                         *src_0{ nullptr };
-    const ITensor                                         *src_1{ nullptr };
-    ITensor                                               *dst{ nullptr };
-    std::unique_ptr<experimental::NEElementwiseComparison> op{ nullptr };
+    const ITensor                                 *src_0{ nullptr };
+    const ITensor                                 *src_1{ nullptr };
+    ITensor                                       *dst{ nullptr };
+    std::unique_ptr<cpu::CpuElementwiseComparison> op{ nullptr };
 };
 
 NEElementwiseComparison::NEElementwiseComparison()
@@ -401,13 +304,13 @@ void NEElementwiseComparison::configure(ITensor *input1, ITensor *input2, ITenso
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEElementwiseComparison>();
+    _impl->op    = std::make_unique<cpu::CpuElementwiseComparison>();
     _impl->op->configure(input1->info(), input2->info(), output->info(), op);
 }
 
 Status NEElementwiseComparison::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op)
 {
-    return experimental::NEElementwiseComparison::validate(input1, input2, output, op);
+    return cpu::CpuElementwiseComparison::validate(input1, input2, output, op);
 }
 
 void NEElementwiseComparison::run()

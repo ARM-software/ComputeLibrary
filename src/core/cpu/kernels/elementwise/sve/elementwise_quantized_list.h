@@ -26,7 +26,7 @@
 
 #if defined(__ARM_FEATURE_SVE2)
 
-#include "src/core/SVE/kernels/elementwise/impl/elementwise_list.h"
+#include "src/core/cpu/kernels/elementwise/sve/elementwise_list.h"
 
 namespace arm_compute
 {

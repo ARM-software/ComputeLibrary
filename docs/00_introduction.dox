@@ -124,8 +124,8 @@ v20.11 Public major release
    - NEArithmeticSubtractionKernel
    - @ref NEPixelWiseMultiplication
    - @ref NEPixelWiseMultiplicationKernel
-   - @ref NEElementwiseDivision
-   - @ref NEDivisionOperationKernel
+   - NEElementwiseDivision
+   - NEDivisionOperationKernel
  - Interface change
    - Properly support softmax axis to have the same meaning as other major frameworks. That is, axis now defines the dimension
      on which Softmax/Logsoftmax is performed. E.g. for input of shape 4x5x6 and axis=1, softmax will be applied to 4x6=24 vectors of size 5.
@@ -569,7 +569,7 @@ v20.02 Public major release
      - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
      - @ref CLGEMMLowpMatrixMultiplyNativeKernel
      - @ref NEActivationLayer
-     - @ref NEComparisonOperationKernel
+     - NEComparisonOperationKernel
      - @ref NEConvolutionLayer
      - @ref NEDepthwiseConvolutionLayer
      - NEDepthwiseConvolutionLayer3x3Kernel
@@ -821,7 +821,7 @@ v19.02 Public major release
  - New Neon kernels / functions:
     - @ref NETileKernel / @ref NETile
     - @ref NEFuseBatchNormalizationKernel / @ref NEFuseBatchNormalization
-    - @ref NEElementwiseOperationKernel
+    - NEElementwiseOperationKernel
     - @ref NEElementwiseMax
     - @ref NEElementwiseMin
     - @ref NEElementwiseSquaredDiff
@@ -842,7 +842,7 @@ v19.02 Public major release
     - @ref NEGatherKernel / @ref NEGather
     - @ref NEElementwiseComparison
     - @ref NEElementwiseComparisonStatic
-    - @ref NEComparisonOperationKernel
+    - NEComparisonOperationKernel
     - @ref NEElementwiseDivision
  - New OpenCL kernels / functions:
     - @ref CLSelectKernel / @ref CLSelect

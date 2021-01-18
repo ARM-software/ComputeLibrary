@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,41 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H
-#define ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H
+#ifndef ARM_COMPUTE_CPU_ELEMENTWISE_KERNEL_H
+#define ARM_COMPUTE_CPU_ELEMENTWISE_KERNEL_H
 
-#include "arm_compute/core/Types.h"
-#include "src/core/NEON/INEKernel.h"
+#include "src/core/common/Macros.h"
+#include "src/core/cpu/ICpuKernel.h"
 
 namespace arm_compute
 {
 class ITensor;
-
+namespace cpu
+{
+namespace kernels
+{
 /** Interface for an element-wise operation kernel
  *
  * Element-wise operation is computed by:
  * @f[ output(x,y) = OP(input1(x,y), input2(x,y))@f]
  *
  */
-class NEElementwiseOperationKernel : public INEKernel
+class CpuElementwiseKernel : public ICpuKernel
 {
 public:
     const char *name() const override
     {
-        return "NEElementwiseOperationKernel";
+        return "CpuElementwiseKernel";
     }
-    /** Default constructor */
-    NEElementwiseOperationKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEElementwiseOperationKernel(const NEElementwiseOperationKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEElementwiseOperationKernel &operator=(const NEElementwiseOperationKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEElementwiseOperationKernel(NEElementwiseOperationKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEElementwiseOperationKernel &operator=(NEElementwiseOperationKernel &&) = default;
-    /** Default destructor */
-    ~NEElementwiseOperationKernel() = default;
+
+    CpuElementwiseKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuElementwiseKernel);
 
     /** Common signature for all the specialised arithmetic functions
      *
@@ -64,7 +58,7 @@ public:
      * @param[out] output Output tensor info. Data types supported: Dependent on subclass.
      * @param[in]  window Region on which to execute the kernel.
      */
-    using ElementwiseFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
+    using ElementwiseFunction = void(const ITensor *, const ITensor *, ITensor *, const Window &);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -83,19 +77,22 @@ protected:
      */
     void configure_common(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
-    /** Function to use for the particular tensor types passed to configure() */
-    std::function<void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window)> _function;
-
-    const ITensor *_input1;
-    const ITensor *_input2;
-    ITensor       *_output;
+    /** Function to get the micro kernel implementation
+     *
+     * @param[in] input1 First input tensor information
+     * @param[in] input2 Second input tensor information
+     * @param[in] output Output tensor information
+     *
+     * @return the function instance for the micro kernel
+     */
+    virtual std::function<ElementwiseFunction> get_implementation(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output) = 0;
 };
 
-class NEArithmeticOperationKernel : public NEElementwiseOperationKernel
+class CpuArithmeticKernel : public CpuElementwiseKernel
 {
 public:
     /** Default constructor */
-    NEArithmeticOperationKernel() = default;
+    CpuArithmeticKernel() = default;
 
     /** Configure kernel
      *
@@ -106,7 +103,7 @@ public:
      */
     void configure(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
      * @param[in] input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
@@ -120,13 +117,26 @@ public:
 protected:
     // Inherited methods overridden:
     static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
+
+    ArithmeticOperation _op{};
+
+private:
+    /** Function to get the micro kernel implementation
+     *
+     * @param[in] input1 First input tensor information
+     * @param[in] input2 Second input tensor information
+     * @param[in] output Output tensor information
+     *
+     * @return the function instance for the micro kernel
+     */
+    std::function<ElementwiseFunction> get_implementation(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output) override;
 };
 
-class NEDivisionOperationKernel : public NEArithmeticOperationKernel
+class CpuDivisionKernel : public CpuArithmeticKernel
 {
 public:
     /** Default constructor */
-    NEDivisionOperationKernel() = default;
+    CpuDivisionKernel() = default;
 
     /** Configure kernel
      *
@@ -136,7 +146,7 @@ public:
      */
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEDivisionOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuDivisionKernel
      *
      * @param[in] input1 First tensor input info. Data types supported: S32/F16/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
@@ -151,11 +161,11 @@ protected:
     static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
 };
 
-class NEPowerOperationKernel : public NEArithmeticOperationKernel
+class CpuPowerKernel : public CpuArithmeticKernel
 {
 public:
     /** Default constructor */
-    NEPowerOperationKernel() = default;
+    CpuPowerKernel() = default;
 
     /** Configure kernel
      *
@@ -165,7 +175,7 @@ public:
      */
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEPowerOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuPowerKernel
      *
      * @param[in] input1 First tensor input info. Data types supported: F16/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
@@ -180,11 +190,11 @@ protected:
     static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
 };
 
-class NEComparisonOperationKernel : public NEElementwiseOperationKernel
+class CpuComparisonKernel : public CpuElementwiseKernel
 {
 public:
     /** Default constructor */
-    NEComparisonOperationKernel() = default;
+    CpuComparisonKernel() = default;
 
     /** Configure kernel
      *
@@ -195,7 +205,7 @@ public:
      */
     void configure(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
      *
      * @param[in] op     Comparison operation to be executed.
      * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
@@ -209,6 +219,21 @@ public:
 protected:
     // Inherited methods overridden:
     static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
+
+private:
+    /** Function to get the micro kernel implementation
+     *
+     * @param[in] input1 First input tensor information
+     * @param[in] input2 Second input tensor information
+     * @param[in] output Output tensor information
+     *
+     * @return the function instance for the micro kernel
+     */
+    std::function<ElementwiseFunction> get_implementation(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output) override;
+
+    ComparisonOperation _op{};
 };
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_ELEMENTWISE_KERNEL_H */
