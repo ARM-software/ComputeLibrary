@@ -165,7 +165,7 @@ v20.11 Public major release
    - @ref NEGEMMLowpMatrixAReductionKernel
    - @ref NEGEMMLowpMatrixBReductionKernel
  - Removed padding from OpenCL kernels:
-   - @ref CLBatchConcatenateLayerKernel
+   - CLBatchConcatenateLayerKernel
    - @ref CLElementwiseOperationKernel
    - @ref CLBatchNormalizationLayerKernel
    - @ref CLPoolingLayerKernel
@@ -184,17 +184,17 @@ v20.11 Public major release
    - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
    - @ref CLActivationLayerKernel
    - @ref CLWinogradFilterTransformKernel
-   - @ref CLWidthConcatenateLayerKernel
-   - @ref CLWidthConcatenate4TensorsKernel
-   - @ref CLWidthConcatenate2TensorsKernel
+   - CLWidthConcatenateLayerKernel
+   - CLWidthConcatenate4TensorsKernel
+   - CLWidthConcatenate2TensorsKernel
    - @ref CLLogits1DMaxShiftExpSumKernel
    - @ref CLLogits1DNormKernel
-   - @ref CLHeightConcatenateLayerKernel
+   - CLHeightConcatenateLayerKernel
    - @ref CLGEMMMatrixMultiplyKernel
    - @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
    - @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
    - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
-   - @ref CLDepthConcatenateLayerKernel
+   - CLDepthConcatenateLayerKernel
    - @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
  - Removed OpenCL kernels / functions:
    - CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
@@ -721,7 +721,7 @@ v19.08 Public major release
     - @ref CLNegLayer
     - @ref CLPReluLayer
     - @ref CLSinLayer
-    - @ref CLBatchConcatenateLayerKernel
+    - CLBatchConcatenateLayerKernel
     - @ref CLDepthToSpaceLayerKernel / @ref CLDepthToSpaceLayer
     - @ref CLGEMMLowpMatrixMultiplyNativeKernel
     - CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
@@ -773,7 +773,7 @@ v19.05 Public major release
     - @ref CLFFTScaleKernel
     - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
     - @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
-    - @ref CLHeightConcatenateLayerKernel
+    - CLHeightConcatenateLayerKernel
     - @ref CLDirectDeconvolutionLayer
     - @ref CLFFT1D
     - @ref CLFFT2D
@@ -1011,7 +1011,7 @@ v18.05 Public major release
     - @ref CLCopy / @ref CLCopyKernel
     - @ref CLLSTMLayer
     - @ref CLRNNLayer
-    - CLWidthConcatenateLayer / @ref CLWidthConcatenateLayerKernel
+    - CLWidthConcatenateLayer / CLWidthConcatenateLayerKernel
     - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
     - @ref CLWinogradInputTransformKernel / @ref CLWinogradInputTransform
  - New Neon kernels / functions:
@@ -1220,7 +1220,7 @@ v17.06 Public major release
  - User can specify his own scheduler by implementing the @ref IScheduler interface.
  - New OpenCL kernels / functions:
     - @ref CLBatchNormalizationLayerKernel / @ref CLBatchNormalizationLayer
-    - @ref CLDepthConcatenateLayerKernel / CLDepthConcatenateLayer
+    - CLDepthConcatenateLayerKernel / CLDepthConcatenateLayer
     - @ref CLHOGOrientationBinningKernel @ref CLHOGBlockNormalizationKernel, @ref CLHOGDetectorKernel / @ref CLHOGDescriptor @ref CLHOGDetector @ref CLHOGGradient @ref CLHOGMultiDetection
     - CLLocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedLayer
     - @ref CLWeightsReshapeKernel / @ref CLConvolutionLayerReshapeWeights

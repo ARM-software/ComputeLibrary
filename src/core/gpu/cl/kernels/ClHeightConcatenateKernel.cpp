@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
+#include "src/core/gpu/cl/kernels/ClHeightConcatenateKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -37,60 +37,64 @@
 
 namespace arm_compute
 {
+namespace opencl
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, unsigned int height_offset, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *src, unsigned int height_offset, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(Window::DimY) + height_offset > output->dimension(Window::DimY));
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(Window::DimY) + height_offset > dst->dimension(Window::DimY));
 
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != output->dimension(0));
+    ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) != dst->dimension(0));
     for(size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(i) != output->dimension(i));
+        ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(i) != dst->dimension(i));
     }
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->num_dimensions() > 4);
 
     return Status{};
 }
 } // namespace
 
-CLHeightConcatenateLayerKernel::CLHeightConcatenateLayerKernel()
+ClHeightConcatenateKernel::ClHeightConcatenateKernel()
     : _height_offset(0)
 {
 }
 
-Status CLHeightConcatenateLayerKernel::validate(const ITensorInfo *input, unsigned int height_offset, const ITensorInfo *output)
+Status ClHeightConcatenateKernel::validate(const ITensorInfo *src, unsigned int height_offset, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, height_offset, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, height_offset, dst));
     return Status{};
 }
 
-void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_context, ITensorInfo *input, unsigned int height_offset, ITensorInfo *output)
+void ClHeightConcatenateKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int height_offset, ITensorInfo *dst)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, height_offset, output));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, height_offset, dst));
 
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({ src, dst });
 
     _height_offset = height_offset;
 
     // Add build options
-    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(4, input->dimension(0));
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(4, src->dimension(0));
 
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->element_size()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(src->element_size()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DHEIGHT_OFFSET=" + support::cpp11::to_string(_height_offset));
-    build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input->dimension(2)));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(src->dimension(2)));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
 
-    if(is_data_type_quantized_asymmetric(input->data_type()) && input->quantization_info() != output->quantization_info())
+    if(is_data_type_quantized_asymmetric(src->data_type()) && src->quantization_info() != dst->quantization_info())
     {
-        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+        const UniformQuantizationInfo iq_info = src->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = dst->quantization_info().uniform();
 
         build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iq_info.offset));
         build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oq_info.offset));
@@ -102,17 +106,17 @@ void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_c
     _kernel = create_kernel(compile_context, "concatenate_height", build_opts.options());
     // Configure kernel window
 
-    // The window needs to be based on input as we copy all the heights of input
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    // The window needs to be based on src as we copy all the heights of src
+    Window win = calculate_max_window(*src, Steps(num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win.collapse(win, Window::DimZ));
 
-    // Set output valid region
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+    // Set dst valid region
+    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-void CLHeightConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClHeightConcatenateKernel::run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
@@ -125,4 +129,6 @@ void CLHeightConcatenateLayerKernel::run_op(ITensorPack &tensors, const Window &
     add_4D_tensor_argument(idx, dst, window);
     enqueue(queue, *this, window, lws_hint());
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

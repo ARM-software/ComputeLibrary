@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 #include "src/core/CL/kernels/CLAccumulateKernel.h"
 #include "src/core/CL/kernels/CLActivationLayerKernel.h"
 #include "src/core/CL/kernels/CLArgMinMaxLayerKernel.h"
-#include "src/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
 #include "src/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 #include "src/core/CL/kernels/CLBatchToSpaceLayerKernel.h"
 #include "src/core/CL/kernels/CLBitwiseKernel.h"
@@ -48,7 +47,6 @@
 #include "src/core/CL/kernels/CLCropKernel.h"
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
-#include "src/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
 #include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "src/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
@@ -92,7 +90,6 @@
 #include "src/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "src/core/CL/kernels/CLHOGDetectorKernel.h"
 #include "src/core/CL/kernels/CLHarrisCornersKernel.h"
-#include "src/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
 #include "src/core/CL/kernels/CLHistogramKernel.h"
 #include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "src/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
@@ -144,9 +141,6 @@
 #include "src/core/CL/kernels/CLWarpAffineKernel.h"
 #include "src/core/CL/kernels/CLWarpPerspectiveKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
-#include "src/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
-#include "src/core/CL/kernels/CLWidthConcatenate4TensorsKernel.h"
-#include "src/core/CL/kernels/CLWidthConcatenateLayerKernel.h"
 #include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "src/core/CL/kernels/CLWinogradInputTransformKernel.h"
 #include "src/core/CL/kernels/CLWinogradOutputTransformKernel.h"

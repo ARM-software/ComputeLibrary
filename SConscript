@@ -212,11 +212,15 @@ if env['opencl']:
     core_files += Glob('src/core/CL/gemm/native/*.cpp')
     core_files += Glob('src/core/CL/gemm/reshaped/*.cpp')
     core_files += Glob('src/core/CL/gemm/reshaped_only_rhs/*.cpp')
+    core_files += Glob('src/core/gpu/cl/*.cpp')
+    core_files += Glob('src/core/gpu/cl/kernels/*.cpp')
 
     runtime_files += Glob('src/runtime/CL/*.cpp')
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
     runtime_files += Glob('src/runtime/CL/gemm/*.cpp')
     runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
+    runtime_files += Glob('src/runtime/gpu/cl/*.cpp')
+    runtime_files += Glob('src/runtime/gpu/cl/operators/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
