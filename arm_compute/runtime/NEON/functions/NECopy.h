@@ -35,7 +35,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CpuCopyKernel */
+/** Basic function to run @ref cpu::kernels::CpuCopyKernel */
 class NECopy : public IFunction
 {
 public:

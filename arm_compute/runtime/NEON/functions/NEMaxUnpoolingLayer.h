@@ -37,7 +37,7 @@ class NEMaxUnpoolingLayerKernel;
 
 /** Function to perform MaxUnpooling. This function calls the following NEON kernels:
  *
- * -# @ref NEFillKernel
+ * -# @ref NEFill
  * -# @ref NEMaxUnpoolingLayerKernel
  */
 class NEMaxUnpoolingLayer : public IFunction

@@ -30,7 +30,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref CpuFillKernel */
+/** Basic function to run @ref kernels::CpuFillKernel */
 class CpuFill : public ICpuOperator
 {
 public:

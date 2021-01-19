@@ -30,7 +30,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref CpuAddKernel */
+/** Basic function to run @ref kernels::CpuAddKernel */
 class CpuAdd : public ICpuOperator
 {
 public:
@@ -60,7 +60,7 @@ public:
      *
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuAddKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuAdd
      *
      * @param[in] src0     First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
      * @param[in] src1     Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32

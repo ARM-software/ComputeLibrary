@@ -36,7 +36,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CpuPermuteKernel */
+/** Basic function to run @ref cpu::kernels::CpuPermuteKernel */
 class NEPermute : public IFunction
 {
 public:

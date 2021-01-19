@@ -30,7 +30,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref CpuActivationKernel */
+/** Basic function to run @ref kernels::CpuActivationKernel */
 class CpuActivation : public ICpuOperator
 {
 public:
@@ -43,7 +43,7 @@ public:
      * @param[in]  activation_info Activation layer parameters.
      */
     void configure(const ITensorInfo *input, ITensorInfo *output, const ActivationLayerInfo &activation_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEActivationLayer
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuActivation
      *
      * @param[in] input    Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
      * @param[in] output   Destination tensor info. Data type supported: same as @p src

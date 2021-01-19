@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,13 +50,13 @@ class NEGEMMLowpMatrixAReductionKernel;
  * This function calls the following NEON functions/kernels:
  *
  * -# @ref NEActivationLayer                                     Activation functions (tanh and logistic)
- * -# @ref NEArithmeticAddition                            Elementwise addition
+ * -# @ref NEArithmeticAddition                                  Elementwise addition
  * -# @ref NEArithmeticSubtractionKernel                         Elementwise subtraction
- * -# @ref NECopyKernel                                          Copy kernel for copying output_state_out to output
+ * -# @ref NECopy                                                Copy kernel for copying output_state_out to output
  * -# @ref NEGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16
  * -# @ref NEGEMMLowpMatrixAReductionKernel                      For precomputing effective biases to use
- * -# @ref NEPixelWiseMultiplication                       Elementwise multiplication
+ * -# @ref NEPixelWiseMultiplication                             Elementwise multiplication
  * -# @ref NETranspose                                           Transpose function for reshaping the weights
  * */
 class NEQLSTMLayer : public IFunction

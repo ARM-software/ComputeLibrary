@@ -329,12 +329,12 @@ pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t widt
 /** Computes bilinear interpolation using the top-left, top-right, bottom-left, bottom-right pixels and the pixel's distance between
  * the real coordinates and the smallest following integer coordinates.
  *
- * @param[in] a00 The top-left pixel value.
- * @param[in] a01 The top-right pixel value.
- * @param[in] a10 The bottom-left pixel value.
- * @param[in] a11 The bottom-right pixel value.
- * @param[in] dx  Pixel's distance between the X real coordinate and the smallest X following integer
- * @param[in] dy  Pixel's distance between the Y real coordinate and the smallest Y following integer
+ * @param[in] a00    The top-left pixel value.
+ * @param[in] a01    The top-right pixel value.
+ * @param[in] a10    The bottom-left pixel value.
+ * @param[in] a11    The bottom-right pixel value.
+ * @param[in] dx_val Pixel's distance between the X real coordinate and the smallest X following integer
+ * @param[in] dy_val Pixel's distance between the Y real coordinate and the smallest Y following integer
  *
  * @note dx and dy must be in the range [0, 1.0]
  *

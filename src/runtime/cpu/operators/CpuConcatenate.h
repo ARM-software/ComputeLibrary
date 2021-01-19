@@ -35,10 +35,10 @@ namespace cpu
 {
 /** Basic function to execute concatenate tensors along a given axis. This function calls the following kernels:
  *
- * -# @ref CpuConcatenateWidthKernel (if underlying concatenation axis is 0).
- * -# @ref CpuConcatenateHeightKernel (if underlying concatenation axis is 1).
- * -# @ref CpuConcatenateDepthKernel (if underlying concatenation axis is 2).
- * -# @ref CpuConcatenateBatchKernel (if underlying concatenation axis is 3).
+ * -# @ref kernels::CpuConcatenateWidthKernel (if underlying concatenation axis is 0).
+ * -# @ref kernels::CpuConcatenateHeightKernel (if underlying concatenation axis is 1).
+ * -# @ref kernels::CpuConcatenateDepthKernel (if underlying concatenation axis is 2).
+ * -# @ref kernels::CpuConcatenateBatchKernel (if underlying concatenation axis is 3).
  */
 class CpuConcatenate : public ICpuOperator
 {
@@ -48,7 +48,8 @@ public:
     /** Configure operator for a given list of arguments
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref CpuConcatenateWidthKernel, @ref CpuConcatenateHeightKernel, @ref CpuConcatenateDepthKernel and @ref CpuConcatenateBatchKernel.
+     * @note Preconditions can be found respectively at @ref kernels::CpuConcatenateWidthKernel, @ref kernels::CpuConcatenateHeightKernel,
+     *       @ref kernels::CpuConcatenateDepthKernel and @ref kernels::CpuConcatenateBatchKernel.
      *
      * @param[in,out] srcs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    dst         Output tensor. Data types supported: Same as @p srcs_vector.
@@ -58,7 +59,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref CpuConcatenateWidthKernel, @ref CpuConcatenateHeightKernel, @ref CpuConcatenateDepthKernel and @ref CpuConcatenateBatchKernel.
+     * @note Preconditions can be found respectively at @ref kernels::CpuConcatenateWidthKernel, @ref kernels::CpuConcatenateHeightKernel,
+     *       @ref kernels::CpuConcatenateDepthKernel and @ref kernels::CpuConcatenateBatchKernel.
      *
      * @param[in] srcs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] dst         Output tensor info. Data types supported: Same as @p srcs_vector.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -156,7 +156,7 @@ private:
  * -# @ref NEGEMM (if the data type is BFLOAT16/FP16/FP32)
  * -# @ref NEGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8/QASYMM8_SIGNED)
- * -# @ref NEArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
+ * -# @ref NEArithmeticAddition (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
  * -# @ref NECol2ImKernel (if NCHW data layout)
  *
  */

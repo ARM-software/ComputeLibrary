@@ -49,7 +49,7 @@ public:
      * @param[in]      activation_info Activation layer information.
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEActivationLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuActivationKernel
      *
      * @param[in] src      Source tensor info. In case of @p dst tensor info = nullptr, this tensor will store the result
      *                     of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
@@ -58,7 +58,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;

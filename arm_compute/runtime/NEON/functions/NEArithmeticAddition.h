@@ -33,7 +33,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CpuAddKernel */
+/** Basic function to run @ref cpu::kernels::CpuAddKernel */
 class NEArithmeticAddition : public IFunction
 {
 public:

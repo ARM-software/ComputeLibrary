@@ -110,8 +110,8 @@ v20.11 Public major release
    This is planned to be resolved in 21.02 release.
  - Added new data type QASYMM8_SIGNED support for @ref NEROIAlignLayer.
  - Added new data type S32 support for:
-   - @ref NEArithmeticSubtraction
-   - @ref NEArithmeticSubtractionKernel
+   - NEArithmeticSubtraction
+   - NEArithmeticSubtractionKernel
    - @ref NEPixelWiseMultiplication
    - @ref NEPixelWiseMultiplicationKernel
    - @ref NEElementwiseDivision
@@ -430,12 +430,12 @@ v20.08 Public major release
    - More robust script for running benchmarks
  - Removed padding from:
    - @ref NEPixelWiseMultiplicationKernel
-   - @ref NEHeightConcatenateLayerKernel
+   - NEHeightConcatenateLayerKernel
    - @ref NEThresholdKernel
-   - @ref NEBatchConcatenateLayerKernel
+   - NEBatchConcatenateLayerKernel
    - @ref NETransposeKernel
    - @ref NEBatchNormalizationLayerKernel
-   - @ref NEArithmeticSubtractionKernel
+   - NEArithmeticSubtractionKernel
    - @ref NEBoundingBoxTransformKernel
    - @ref NELogits1DMaxKernel
    - @ref NELogits1DSoftmaxKernel
@@ -444,8 +444,8 @@ v20.08 Public major release
    - NEYOLOLayerKernel
    - NEUpsampleLayerKernel
    - NEFloorKernel
-   - @ref NEWidthConcatenateLayerKernel
-   - @ref NEDepthConcatenateLayerKernel
+   - NEWidthConcatenateLayerKernel
+   - NEDepthConcatenateLayerKernel
    - @ref NENormalizationLayerKernel
    - @ref NEL2NormalizeLayerKernel
    - @ref NEFillArrayKernel
@@ -526,7 +526,7 @@ v20.05 Public major release
      - @ref NEQLSTMLayerNormalizationKernel
  - Added HARD_SWISH support in:
      - @ref CLActivationLayerKernel
-     - @ref NEActivationLayerKernel
+     - NEActivationLayerKernel
  - Deprecated OpenCL kernels / functions:
      - CLGEMMLowpQuantizeDownInt32ToUint8Scale
      - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
@@ -697,7 +697,7 @@ v19.08 Public major release
     - @ref NENegLayer
     - @ref NEPReluLayer
     - @ref NESinLayer
-    - @ref NEBatchConcatenateLayerKernel
+    - NEBatchConcatenateLayerKernel
     - @ref NEDepthToSpaceLayerKernel / @ref NEDepthToSpaceLayer
     - @ref NEDepthwiseConvolutionLayerNativeKernel
     - @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
@@ -749,7 +749,7 @@ v19.05 Public major release
     - @ref NEFFTRadixStageKernel
     - @ref NEFFTScaleKernel
     - @ref NEGEMMLowpOffsetContributionOutputStageKernel
-    - @ref NEHeightConcatenateLayerKernel
+    - NEHeightConcatenateLayerKernel
     - @ref NESpaceToBatchLayerKernel / @ref NESpaceToBatchLayer
     - @ref NEFFT1D
     - @ref NEFFT2D
@@ -882,7 +882,7 @@ v19.02 Public major release
     - @ref CLROIAlignLayer
     - @ref CLGenerateProposalsLayer
  - Added QASYMM8 support to the following kernels:
-    - @ref NEArithmeticAdditionKernel
+    - NEArithmeticAdditionKernel
     - @ref NEScale
  - Added new tests and improved validation and benchmarking suites.
  - Deprecated functions/interfaces
@@ -1062,7 +1062,7 @@ v18.02 Public major release
  - Added FP16 support to:
     - CLDepthwiseConvolutionLayer3x3
     - @ref CLDepthwiseConvolutionLayer
- - Added broadcasting support to @ref NEArithmeticAddition / @ref CLArithmeticAddition / @ref CLPixelWiseMultiplication
+ - Added broadcasting support to NEArithmeticAddition / @ref CLArithmeticAddition / @ref CLPixelWiseMultiplication
  - Added fused batched normalization and activation to @ref CLBatchNormalizationLayer and @ref NEBatchNormalizationLayer
  - Added support for non-square pooling to @ref NEPoolingLayer and @ref CLPoolingLayer
  - New OpenCL kernels / functions:
@@ -1218,7 +1218,7 @@ v17.06 Public major release
     - @ref CPPDetectionWindowNonMaximaSuppressionKernel
  - New NEON kernels / functions:
     - @ref NEBatchNormalizationLayerKernel / @ref NEBatchNormalizationLayer
-    - @ref NEDepthConcatenateLayerKernel / NEDepthConcatenateLayer
+    - NEDepthConcatenateLayerKernel / NEDepthConcatenateLayer
     - @ref NEDirectConvolutionLayerKernel / @ref NEDirectConvolutionLayer
     - NELocallyConnectedMatrixMultiplyKernel / NELocallyConnectedLayer
     - @ref NEWeightsReshapeKernel / @ref NEConvolutionLayerReshapeWeights
@@ -1276,7 +1276,7 @@ v17.03 Sources preview
    - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
    - @ref CLLaplacianPyramid, @ref CLLaplacianReconstruct
  - New NEON kernels / functions:
-   - @ref NEActivationLayerKernel / @ref NEActivationLayer
+   - NEActivationLayerKernel / @ref NEActivationLayer
    - GEMM refactoring + FP16 support (Requires armv8.2 CPU): @ref NEGEMMInterleave4x4Kernel, @ref NEGEMMTranspose1xWKernel, @ref NEGEMMMatrixMultiplyKernel, @ref NEGEMMMatrixAdditionKernel / @ref NEGEMM
    - @ref NEPoolingLayerKernel / @ref NEPoolingLayer
 

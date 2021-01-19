@@ -48,7 +48,7 @@ public:
     void configure(const ITensorInfo *src, ITensorInfo *dst, const PaddingList &padding = PaddingList());
     /** Static function to check if given info will lead to a valid configuration of @ref CpuCopyKernel
      *
-     * @param[in] srd     Source tensor. Data types supported: All
+     * @param[in] src     Source tensor. Data types supported: All
      * @param[in] dst     Destination tensor. Data types supported: same as @p src.
      * @param[in] padding (Optional) Padding to be applied to the input tensor
      *

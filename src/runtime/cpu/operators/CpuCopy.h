@@ -30,7 +30,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref CpuCopyKernel */
+/** Basic function to run @ref kernels::CpuCopyKernel */
 class CpuCopy : public ICpuOperator
 {
 public:

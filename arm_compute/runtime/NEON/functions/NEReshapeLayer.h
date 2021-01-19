@@ -34,7 +34,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Basic function to run @ref NEReshapeLayerKernel */
+/** Basic function to run @ref cpu::kernels::CpuReshapeKernel */
 class NEReshapeLayer : public IFunction
 {
 public:

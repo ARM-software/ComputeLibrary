@@ -35,7 +35,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref CpuFillKernel */
+/** Basic function to run @ref cpu::kernels::CpuFillKernel */
 class NEFill : public IFunction
 {
 public:

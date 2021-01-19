@@ -30,7 +30,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref CpuReshapeKernel */
+/** Basic function to run @ref kernels::CpuReshapeKernel */
 class CpuReshape : public ICpuOperator
 {
 public:

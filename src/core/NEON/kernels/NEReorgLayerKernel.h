@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ public:
      */
     void configure(const ITensor *input, ITensor *output, int32_t stride);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEReshapeLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuReshapeKernel
      *
      * @param[in] input  Source tensor info. Data type supported: All
      * @param[in] output Destination tensor info. Data type supported: Same as @p input

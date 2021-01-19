@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ class NEGEMMAssemblyDispatch;
  * In both cases:
  *  -# @ref NEGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0 and is not reshaped once)
  * Else:
- *  -# @ref NEArithmeticAdditionKernel (if c != nullptr and is reshaped once and not optimized assembly in place)
+ *  -# @ref NEArithmeticAddition (if c != nullptr and is reshaped once and not optimized assembly in place)
  *
  *  -# @ref NEActivationLayer (if activation is specified in GEMMInfo)
  */

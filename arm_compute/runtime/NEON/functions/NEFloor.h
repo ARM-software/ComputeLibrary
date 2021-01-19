@@ -36,7 +36,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEFloorKernel */
+/** Basic function to run @ref cpu::kernels::CpuFloorKernel */
 class NEFloor : public IFunction
 {
 public:

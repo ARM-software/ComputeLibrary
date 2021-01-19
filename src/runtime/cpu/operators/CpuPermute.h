@@ -30,7 +30,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref CpuPermuteKernel */
+/** Basic function to run @ref kernels::CpuPermuteKernel */
 class CpuPermute : public ICpuOperator
 {
 public:

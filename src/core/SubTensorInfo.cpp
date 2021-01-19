@@ -27,8 +27,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 /** Extends parent shape depending on subtensor's coordinates and shape
@@ -149,3 +149,4 @@ int32_t SubTensorInfo::offset_element_in_bytes(const Coordinates &pos) const
 
     return offset;
 }
+} // namespace arm_compute

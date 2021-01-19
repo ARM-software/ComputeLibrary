@@ -56,7 +56,8 @@ public:
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayerKernel, @ref NEHeightConcatenateLayerKernel and @ref NEDepthConcatenateLayerKernel.
+     * @note Preconditions can be found respectively at @ref cpu::kernels::CpuConcatenateWidthKernel, @ref cpu::kernels::CpuConcatenateHeightKernel,
+     *       @ref cpu::kernels::CpuConcatenateDepthKernel and @ref cpu::kernels::CpuConcatenateBatchKernel.
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
@@ -66,7 +67,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayerKernel, @ref NEHeightConcatenateLayerKernel and @ref NEDepthConcatenateLayerKernel.
+     * @note Preconditions can be found respectively at @ref cpu::kernels::CpuConcatenateWidthKernel, @ref cpu::kernels::CpuConcatenateHeightKernel,
+     *       @ref cpu::kernels::CpuConcatenateDepthKernel and @ref cpu::kernels::CpuConcatenateBatchKernel.
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.

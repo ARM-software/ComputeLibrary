@@ -150,16 +150,16 @@ static const std::array<ActivationLayerInfo::ActivationFunction, 3> qsymm16_acti
     ActivationLayerInfo::ActivationFunction::HARD_SWISH
 };
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &activation_info)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &activation_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    const auto *uk = get_implementation(ActivationSelectorData{ input->data_type() });
+    const auto *uk = get_implementation(ActivationSelectorData{ src->data_type() });
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
-    const DataType                                data_type = input->data_type();
-    const QuantizationInfo                       &oq_info   = (output != nullptr) ? output->quantization_info() : input->quantization_info();
+    const DataType                                data_type = src->data_type();
+    const QuantizationInfo                       &oq_info   = (dst != nullptr) ? dst->quantization_info() : src->quantization_info();
     const ActivationLayerInfo::ActivationFunction f_act     = activation_info.activation();
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized_asymmetric(data_type) && (std::find(std::begin(qasymm8_activations), std::end(qasymm8_activations), f_act) == std::end(qasymm8_activations)),
@@ -178,54 +178,54 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
 
-    // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    // Checks performed when dst is configured
+    if((dst != nullptr) && (dst->total_size() != 0))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, ITensorInfo *dst)
 {
     // Configure kernel window
-    Window win = calculate_max_window(*input, Steps());
+    Window win = calculate_max_window(*src, Steps());
 
-    if(output != nullptr)
+    if(dst != nullptr)
     {
-        // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output, *input->clone());
+        // dst auto inizialitation if not yet initialized
+        auto_init_if_empty(*dst, *src->clone());
 
         Coordinates coord;
-        coord.set_num_dimensions(output->num_dimensions());
-        output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
+        coord.set_num_dimensions(dst->num_dimensions());
+        dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
     }
 
     return std::make_pair(Status{}, win);
 }
 } // namespace
 
-void CpuActivationKernel::configure(const ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo activation_info)
+void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     _act_info = activation_info;
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output, activation_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, activation_info));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input, output);
+    auto win_config = validate_and_configure_window(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICPPKernel::configure(win_config.second);
 }
 
-Status CpuActivationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status CpuActivationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (output != nullptr) ? output->clone().get() : nullptr).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), (dst != nullptr) ? dst->clone().get() : nullptr).first);
 
     return Status{};
 }

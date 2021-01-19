@@ -37,7 +37,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEActivationLayerKernel
+/** Basic function to run @ref cpu::kernels::CpuActivationKernel
  *
  * @note The function simulates an activation layer with the specified activation function.
  */

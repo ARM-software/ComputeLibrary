@@ -30,7 +30,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref CpuFloorKernel */
+/** Basic function to run @ref kernels::CpuFloorKernel */
 class CpuFloor : public ICpuOperator
 {
 public:
@@ -49,7 +49,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 };
 } // namespace cpu
 } // namespace arm_compute
