@@ -28,6 +28,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
@@ -66,7 +67,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         if(is_data_type_quantized(input->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 1 && weights->dimension(width_idx) != 3 && weights->dimension(width_idx) != 5 && weights->dimension(width_idx) != 9,
-                                            "Kernel sizes other than 1x1, 3x3, 5x5 or 9x9 are not supported with quantised data types");
+                                            "Kernel sizes other than 1x1, 3x3, 5x5 or 9x9 are not supported with quantized data types");
         }
         else
         {
@@ -376,7 +377,7 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
         const unsigned int m0               = win_config.second.y().step();
         const unsigned int k0               = std::min(static_cast<unsigned int>(_input->info()->dimension(channel_idx)), 16u);
         const unsigned int partial_store_n0 = _output->info()->dimension(channel_idx) % n0;
-        const unsigned int partial_store_m0 = _output->info()->dimension(channel_idx) % m0;
+        const unsigned int partial_store_m0 = (_output->info()->dimension(width_idx) * _output->info()->dimension(height_idx)) % m0;
         const unsigned int pad_left         = conv_info.pad_left();
         const unsigned int pad_top          = conv_info.pad_top();
 
@@ -409,16 +410,21 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
             const UniformQuantizationInfo wqinfo = _weights->info()->quantization_info().uniform();
             const UniformQuantizationInfo oqinfo = _output->info()->quantization_info().uniform();
 
+            PixelValue zero_value = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
+            int        zero_value_s32;
+            zero_value.get(zero_value_s32);
+
             float multiplier        = iqinfo.scale * wqinfo.scale / oqinfo.scale;
             int   output_multiplier = 0;
             int   output_shift      = 0;
             quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
-            build_options.add_option("-DIS_QUANTISED");
+            build_options.add_option("-DIS_QUANTIZED");
             build_options.add_option("-DDST_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
             build_options.add_option("-DDST_SHIFT=" + support::cpp11::to_string(output_shift));
             build_options.add_option("-DSRC_OFFSET=" + support::cpp11::to_string(-iqinfo.offset));
             build_options.add_option("-DWEI_OFFSET=" + support::cpp11::to_string(-wqinfo.offset));
             build_options.add_option("-DDST_OFFSET=" + support::cpp11::to_string(oqinfo.offset));
+            build_options.add_option("-DZERO_VALUE=" + support::cpp11::to_string(zero_value_s32));
             build_options.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(DataType::S32));
         }
         else
@@ -427,7 +433,6 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
             build_options.add_option("-DSRC_OFFSET=" + support::cpp11::to_string(0));
             build_options.add_option("-DWEI_OFFSET=" + support::cpp11::to_string(0));
             build_options.add_option("-DDST_OFFSET=" + support::cpp11::to_string(0));
-            build_options.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(data_type));
         }
     }
     else

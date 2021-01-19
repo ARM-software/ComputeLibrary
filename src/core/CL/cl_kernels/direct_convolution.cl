@@ -22,13 +22,51 @@
  * SOFTWARE.
  */
 #include "gemm_helpers.h"
-#include "helpers.h"
 #include "helpers_asymm.h"
 #include "repeat.h"
 
-#define CONCAT(a, b) a##b
+#if defined(IS_QUANTIZED)
 
-#if defined(IS_QUANTISED)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
+#define ARM_DOT(x, y, val) val = arm_dot_acc((x), (y), (val));
+#elif defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8) // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
+#define ARM_DOT(x, y, val) val += arm_dot((x), (y));
+#else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
+#define ARM_DOT(x, y, val)                                \
+    ({                                                    \
+        val += (ACC_DATA_TYPE)a.s0 * (ACC_DATA_TYPE)b.s0; \
+        val += (ACC_DATA_TYPE)a.s1 * (ACC_DATA_TYPE)b.s1; \
+        val += (ACC_DATA_TYPE)a.s2 * (ACC_DATA_TYPE)b.s2; \
+        val += (ACC_DATA_TYPE)a.s3 * (ACC_DATA_TYPE)b.s3; \
+    })
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
+
+#define ARM_DOT1(a, b, c)                                                                                                                                               \
+    ({                                                                                                                                                                  \
+        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (VEC_DATA_TYPE(SRC_DATA_TYPE, 3))0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (VEC_DATA_TYPE(WEI_DATA_TYPE, 3))0), c); \
+    })
+#define ARM_DOT2(a, b, c)                                                                                                                                               \
+    ({                                                                                                                                                                  \
+        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (VEC_DATA_TYPE(SRC_DATA_TYPE, 2))0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (VEC_DATA_TYPE(WEI_DATA_TYPE, 2))0), c); \
+    })
+#define ARM_DOT3(a, b, c)                                                                                                           \
+    ({                                                                                                                              \
+        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (SRC_DATA_TYPE)0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (WEI_DATA_TYPE)0), c); \
+    })
+#define ARM_DOT4(a, b, c) \
+    ({                    \
+        ARM_DOT(a, b, c); \
+    })
+#define ARM_DOT8(a, b, c)            \
+    ({                               \
+        ARM_DOT4((a.lo), (b.lo), c); \
+        ARM_DOT4((a.hi), (b.hi), c); \
+    })
+#define ARM_DOT16(a, b, c)           \
+    ({                               \
+        ARM_DOT8((a.lo), (b.lo), c); \
+        ARM_DOT8((a.hi), (b.hi), c); \
+    })
 
 #define ARM_OFFSET1(a, b, c)                      \
     ({                                            \
@@ -223,46 +261,7 @@
 #else // N0 not supported
 #error "N0 value not supported"
 #endif // N0 conditions
-#else  // defined(IS_QUANTISED)
-#define ARM_OFFSET_K0XN0(k0, a, b, a_offset, b_offset, c) \
-    ({})
-#endif // defined(IS_QUANTISED)
-
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8) && defined(IS_QUANTISED)
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
-#define ARM_DOT(x, y, val) val = arm_dot_acc((x), (y), (val));
-#else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
-#define ARM_DOT(x, y, val) val += arm_dot((x), (y));
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
-
-#define ARM_DOT1(a, b, c)                                                                                                                                               \
-    ({                                                                                                                                                                  \
-        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (VEC_DATA_TYPE(SRC_DATA_TYPE, 3))0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (VEC_DATA_TYPE(WEI_DATA_TYPE, 3))0), c); \
-    })
-#define ARM_DOT2(a, b, c)                                                                                                                                               \
-    ({                                                                                                                                                                  \
-        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (VEC_DATA_TYPE(SRC_DATA_TYPE, 2))0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (VEC_DATA_TYPE(WEI_DATA_TYPE, 2))0), c); \
-    })
-#define ARM_DOT3(a, b, c)                                                                                                           \
-    ({                                                                                                                              \
-        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (SRC_DATA_TYPE)0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (WEI_DATA_TYPE)0), c); \
-    })
-#define ARM_DOT4(a, b, c) \
-    ({                    \
-        ARM_DOT(a, b, c); \
-    })
-#define ARM_DOT8(a, b, c)            \
-    ({                               \
-        ARM_DOT4((a.lo), (b.lo), c); \
-        ARM_DOT4((a.hi), (b.hi), c); \
-    })
-#define ARM_DOT16(a, b, c)           \
-    ({                               \
-        ARM_DOT8((a.lo), (b.lo), c); \
-        ARM_DOT8((a.hi), (b.hi), c); \
-    })
-
-#else // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8) && defined(IS_QUANTISED)
+#else  // defined(IS_QUANTIZED)
 
 #define ARM_DOT1(a, b, c)                         \
     ({                                            \
@@ -293,7 +292,7 @@
         ARM_DOT8((a.lo), (b.lo), c); \
         ARM_DOT8((a.hi), (b.hi), c); \
     })
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
+#endif // defined(IS_QUANTIZED)
 
 #if N0 == 1
 #define ARM_DOT_K0XN0(k0, a, b, c) \
@@ -394,7 +393,7 @@
 /** OpenCL kernel to compute the direct convolution.
  *
  * @note Data layout supported: NHWC
- * @note Data type supported: F32/F16/QASYMM8
+ * @note Data type supported: F32/F16/QASYMM8/QASYMM8_SIGNED
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
  * @note The accumulation data type must be passed at compile time using -DACC_DATA_TYPE (e.g. -DDATA_TYPE_PROMOTED=half)
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
@@ -418,13 +417,14 @@
  *  - N0 = 2, 3, 4, 8, 16
  *  - K0 = 2, 3, 4, 8, 16
  *
- *@note In case of QASYMM8, the following extra information must be passed at compile time:
- * - -DIS_QUANTISED
+ *@note In case of QASYMM8/QASYMM8_SIGNED, the following extra information must be passed at compile time:
+ * - -DIS_QUANTIZED
  * - The destination quantization multiplier e.g. -DDST_MULTIPLIER=1234
  * - The destination quantization shift e.g. -DDST_SHIFT=4
  * - The destination offset e.g. -DDST_OFFSET=4
  * - The source offset e.g. -DSRC_OFFSET=4
  * - The weights offset e.g. -DWEI_OFFSET=4
+ * - The quantized zero value e.g. -DZERO_VALUE=4
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -450,7 +450,7 @@
  * @param[in]  wei_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
  * @param[in]  wei_step_z                        wei_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  wei_offset_first_element_in_bytes The offset of the first element in the bias matrix
- * @param[in]  bia_ptr                           (Optional) Pointer to the bias tensor Supported data type: same as @p src_ptr (if F32/F16) or S32 (if QASYMM8)
+ * @param[in]  bia_ptr                           (Optional) Pointer to the bias tensor Supported data type: same as @p src_ptr (if F32/F16) or S32 (if QASYMM8/QASYMM8_SIGNED)
  * @param[in]  bia_stride_x                      (Optional) Stride of the bias tensor in X dimension (in bytes)
  * @param[in]  bia_step_x                        (Optional) bia_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  bia_offset_first_element_in_bytes (Optional) The offset of the first element in the bias matrix
@@ -496,21 +496,16 @@ __kernel void direct_convolution_nhwc(
 
     for(int i = 0; i < (WEI_WIDTH * WEI_HEIGHT); ++i)
     {
-        int tmp = 0;
-        int xk  = i % WEI_WIDTH;
-        int yk  = i / WEI_WIDTH;
+        int xk = i % WEI_WIDTH;
+        int yk = i / WEI_WIDTH;
 
         REPEAT_VAR_INIT_TO_CONST(M0, int, mi_valid_row, 0);
-        REPEAT_VAR_INIT_TO_CONST(M0, int, mi_mask, 1);
+        REPEAT_VAR_INIT_TO_CONST(M0, int, mi_mask, 0);
 
         // Calculate the input row to read from source tensor
 #define MI_INIT(i)                                                                                                  \
-    tmp             = xi##i + xk + (yi##i + yk) * SRC_WIDTH;                                                        \
     mi_valid_row##i = max(min(xi##i + xk, SRC_WIDTH - 1), 0) + max(min(yi##i + yk, SRC_HEIGHT - 1), 0) * SRC_WIDTH; \
-    if(tmp == mi_valid_row##i)                                                                                      \
-        mi_mask##i = 1;                                                                                             \
-    else                                                                                                            \
-        mi_mask##i = 0;
+    mi_mask##i      = (xi##i + xk) >= 0 && (xi##i + xk) < SRC_WIDTH && (yi##i + yk) >= 0 && (yi##i + yk) < SRC_HEIGHT;
 
         MI_INIT(0);
 
@@ -525,11 +520,24 @@ __kernel void direct_convolution_nhwc(
             // Load values from weights tensor
             LOAD_BLOCK(N0, K0, WEI_DATA_TYPE, b, wei_ptr, wei_offset, wei_stride_w, zero);
 
-#define TENSOR_DOT(i)                 \
-    ARM_DOT_K0XN0(K0, a##i, b, c##i); \
-    ARM_OFFSET_K0XN0(K0, a##i, b, SRC_OFFSET, WEI_OFFSET, c##i);
+#if defined(IS_QUANTIZED)
+#define TENSOR_DOT(K0, i)                                                                                      \
+    if(mi_mask##i != 0)                                                                                        \
+    {                                                                                                          \
+        ARM_DOT_K0XN0(K0, a##i, b, c##i);                                                                      \
+        ARM_OFFSET_K0XN0(K0, a##i, b, SRC_OFFSET, WEI_OFFSET, c##i);                                           \
+    }                                                                                                          \
+    else                                                                                                       \
+    {                                                                                                          \
+        ARM_DOT_K0XN0(K0, ((VEC_DATA_TYPE(SRC_DATA_TYPE, K0))ZERO_VALUE), b, c##i);                            \
+        ARM_OFFSET_K0XN0(K0, ((VEC_DATA_TYPE(SRC_DATA_TYPE, K0))ZERO_VALUE), b, SRC_OFFSET, WEI_OFFSET, c##i); \
+    }
+#else // defined(IS_QUANTIZED)
+#define TENSOR_DOT(K0, i) \
+    ARM_DOT_K0XN0(K0, a##i, b, c##i);
+#endif // defined(IS_QUANTIZED)
 
-            TENSOR_DOT(0);
+            TENSOR_DOT(K0, 0);
 
 #undef TENSOR_DOT
 
@@ -541,7 +549,7 @@ __kernel void direct_convolution_nhwc(
         for(; i < SRC_CHANNELS; ++i)
         {
             // Load values from src tensor
-            LOAD_BLOCK_INDIRECT(M0, 1, SRC_DATA_TYPE, a, src_ptr, src_offset_first_element_in_bytes + k * sizeof(SRC_DATA_TYPE), src_stride_y, mi_valid_row, mi_mask);
+            LOAD_BLOCK_INDIRECT(M0, 1, SRC_DATA_TYPE, a, src_ptr, src_offset + k * sizeof(SRC_DATA_TYPE), src_stride_y, mi_valid_row, mi_mask);
 
             // Load values from weights tensor
             LOAD_BLOCK(N0, 1, WEI_DATA_TYPE, b, wei_ptr, wei_offset, wei_stride_w, zero);
@@ -550,7 +558,7 @@ __kernel void direct_convolution_nhwc(
     ARM_DOT_K0XN0(1, a##i, b, c##i); \
     ARM_OFFSET_K0XN0(1, a##i, b, SRC_OFFSET, WEI_OFFSET, c##i);
 
-            TENSOR_DOT(0);
+            TENSOR_DOT(1, 0);
 
 #undef TENSOR_DOT
 
@@ -575,28 +583,28 @@ __kernel void direct_convolution_nhwc(
     ADD_BLOCK_BROADCAST(M0, c, bias0);
 #endif // HAS_BIAS
 
-#if defined(IS_QUANTISED)
+#if defined(IS_QUANTIZED)
 
     REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DST_DATA_TYPE, N0), cq, 0);
 
 #if DST_SHIFT < 0
-#define QUANTISE(i)                                                                               \
+#define QUANTIZE(i)                                                                               \
     c##i  = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(c##i, DST_MULTIPLIER, DST_SHIFT, N0); \
     c##i  = c##i + DST_OFFSET;                                                                    \
     cq##i = CONVERT_SAT(c##i, VEC_DATA_TYPE(DST_DATA_TYPE, N0));
 #else // OUTPUT_SHIFT < 0
-#define QUANTISE(i)                                                                            \
+#define QUANTIZE(i)                                                                            \
     c##i  = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(c##i, DST_MULTIPLIER, DST_SHIFT, N0); \
     c##i  = c##i + DST_OFFSET;                                                                 \
     cq##i = CONVERT_SAT(c##i, VEC_DATA_TYPE(DST_DATA_TYPE, N0));
 #endif // OUTPUT_SHIFT < 0
 
-    QUANTISE(0);
+    QUANTIZE(0);
 
-#undef QUANTISE
+#undef QUANTIZE
 
     STORE_VECTOR_SELECT(cq, DST_DATA_TYPE, dst_addr, N0, PARTIAL_STORE_N0, PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0);
-#else  // defined(IS_QUANTISED)
+#else  // defined(IS_QUANTIZED)
     STORE_VECTOR_SELECT(c, DST_DATA_TYPE, dst_addr, N0, PARTIAL_STORE_N0, PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0);
-#endif // defined(IS_QUANTISED)
+#endif // defined(IS_QUANTIZED)
 }
