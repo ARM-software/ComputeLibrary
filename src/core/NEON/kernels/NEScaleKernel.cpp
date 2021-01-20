@@ -28,7 +28,8 @@
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/kernels/scale/impl/list.h"
+#include "src/core/NEON/kernels/scale/impl/NEON/list.h"
+#include "src/core/NEON/kernels/scale/impl/SVE/list.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -93,15 +94,15 @@ static const ScaleKernel available_kernels[] =
 #else /* !defined(__ARM_FEATURE_SVE) */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "fp16_neon_scale",
+        "common_neon_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::F16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_scale)
+        REGISTER_FP16_NEON(arm_compute::cpu::common_neon_scale<float16_t>)
     },
 #endif /* !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
-        "f32_neon_scale",
+        "common_neon_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::F32; },
-        REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_scale)
+        REGISTER_FP32_NEON(arm_compute::cpu::common_neon_scale<float>)
     },
     {
         "qasymm8_neon_scale",
@@ -114,14 +115,14 @@ static const ScaleKernel available_kernels[] =
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::qasymm8_signed_neon_scale)
     },
     {
-        "u8_neon_scale",
+        "common_neon_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::U8; },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::u8_neon_scale)
+        REGISTER_INTEGER_NEON(arm_compute::cpu::common_neon_scale<uint8_t>)
     },
     {
-        "s16_neon_scale",
+        "common_neon_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::S16; },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::s16_neon_scale)
+        REGISTER_INTEGER_NEON(arm_compute::cpu::common_neon_scale<int16_t>)
     },
 #endif /* !defined(__ARM_FEATURE_SVE) */
 };

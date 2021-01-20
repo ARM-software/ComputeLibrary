@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_SCALE_LIST_H
-#define SRC_CORE_NEON_KERNELS_SCALE_LIST_H
+#ifndef SRC_CORE_SVE_KERNELS_SCALE_LIST_H
+#define SRC_CORE_SVE_KERNELS_SCALE_LIST_H
 
 namespace arm_compute
 {
@@ -33,21 +33,15 @@ namespace cpu
                    InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset, \
                    bool align_corners, const Window &window)
 
-DECLARE_SCALE_KERNEL(fp16_neon_scale);
 DECLARE_SCALE_KERNEL(fp16_sve_scale);
-DECLARE_SCALE_KERNEL(fp32_neon_scale);
 DECLARE_SCALE_KERNEL(fp32_sve_scale);
-DECLARE_SCALE_KERNEL(s16_neon_scale);
 DECLARE_SCALE_KERNEL(s16_sve_scale);
-DECLARE_SCALE_KERNEL(u8_neon_scale);
 DECLARE_SCALE_KERNEL(u8_sve_scale);
-DECLARE_SCALE_KERNEL(qasymm8_neon_scale);
 DECLARE_SCALE_KERNEL(qasymm8_sve_scale);
-DECLARE_SCALE_KERNEL(qasymm8_signed_neon_scale);
 DECLARE_SCALE_KERNEL(qasymm8_signed_sve_scale);
 
-#undef DECLARE_ACTIVATION_KERNEL
+#undef DECLARE_SCALE_KERNEL
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* SRC_CORE_NEON_KERNELS_SCALE_LIST_H */
+#endif /* SRC_CORE_SVE_KERNELS_SCALE_LIST_H */

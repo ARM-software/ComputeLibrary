@@ -21,6 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef SRC_CORE_NEON_KERNELS_SCALE_LIST_H
+#define SRC_CORE_NEON_KERNELS_SCALE_LIST_H
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
@@ -31,16 +34,23 @@
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
 
-#include <arm_neon.h>
-#include <cmath>
-#include <cstddef>
-
 namespace arm_compute
 {
-namespace
+namespace cpu
 {
-void fp32_neon_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offsets,
-                             float sampling_offset, bool align_corners, const Window &window)
+#define DECLARE_SCALE_KERNEL(func_name)                                                                                         \
+    void func_name(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,              \
+                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset, \
+                   bool align_corners, const Window &window)
+
+DECLARE_SCALE_KERNEL(qasymm8_neon_scale);
+DECLARE_SCALE_KERNEL(qasymm8_signed_neon_scale);
+
+#undef DECLARE_SCALE_KERNEL
+
+template <typename T>
+void nearest_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, float sampling_offset,
+                        bool align_corners, const Window &window)
 {
     const size_t in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
     const size_t in_stride_w  = src->info()->dimension(1) + src->info()->padding().top + src->info()->padding().bottom;
@@ -51,7 +61,7 @@ void fp32_neon_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *of
     const auto hr             = scale_utils::calculate_resize_ratio(in_dim_h, dst->info()->dimension(2), align_corners);
     const auto window_start_x = static_cast<int32_t>(window.x().start());
     const auto window_end_x   = static_cast<int32_t>(window.x().end());
-    const int  window_step_x  = 4;
+    const int  window_step_x  = 16 / sizeof(T);
 
     Window win(window);
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -66,24 +76,25 @@ void fp32_neon_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *of
         const auto    in_hi      = static_cast<int>(align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr) : std::floor((id.z() + sampling_offset) * hr));
         const int     offset_row = in_hi * in_stride_wc;
         int32_t       x          = window_start_x;
-        const float *in_ptr     = reinterpret_cast<const float *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
+        const T      *in_ptr     = reinterpret_cast<const T *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
 
         for(; x <= window_end_x - window_step_x; x += window_step_x)
         {
-            wrapper::vstore(reinterpret_cast<float *>(out.ptr()) + x,
+            wrapper::vstore(reinterpret_cast<T *>(out.ptr()) + x,
                             wrapper::vloadq(in_ptr + offset + offset_row + x));
         }
         for(; x < window_end_x; ++x)
         {
-            *(reinterpret_cast<float *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
+            *(reinterpret_cast<T *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
         }
     },
     out);
 }
 
-void fp32_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                              BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                              bool align_corners, const Window &window)
+template <typename T>
+void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
+                         BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
+                         bool align_corners, const Window &window)
 {
     // Compute the ratio between source height and destination height
     const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
@@ -103,21 +114,26 @@ void fp32_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *o
 
     if(border_mode == BorderMode::CONSTANT)
     {
-        const float const_border_value = static_cast<float>(constant_border_value.get<float>());
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        using ConstType = typename std::conditional<std::is_same<T, float16_t>::value, half, T>::type;
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        using ConstType = T;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        const T const_border_value = static_cast<T>(constant_border_value.get<ConstType>());
         execute_window_loop(window, [&](const Coordinates & id)
         {
             const auto    offset = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
             const auto    dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
             const auto    dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
             const int32_t in_hi  = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
-            const float *in_ptr = reinterpret_cast<const float *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
+            const T      *in_ptr = reinterpret_cast<const T *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
 
             const auto a00 = (0 <= offset && offset < in_dim_w && 0 <= in_hi && in_hi < in_dim_h) ? *in_ptr : const_border_value;
             const auto a01 = (-1 <= offset && offset < in_dim_w - 1 && 0 <= in_hi && in_hi < in_dim_h) ? *(in_ptr + in_stride_c) : const_border_value;
             const auto a10 = (0 <= offset && offset < in_dim_w && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_wc) : const_border_value;
             const auto a11 = (-1 <= offset && offset < in_dim_w - 1 && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_c + in_stride_wc) : const_border_value;
 
-            *reinterpret_cast<float *>(out.ptr()) = static_cast<float>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
         },
         in, out);
     }
@@ -135,12 +151,12 @@ void fp32_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *o
             auto clamped_h  = utility::clamp<int>(in_hi, 0, in_dim_h - 1);
             auto clamped_h1 = utility::clamp<int>(in_hi + 1, 0, in_dim_h - 1);
 
-            const auto a00 = *(reinterpret_cast<const float *>(in.ptr()) + clamped_w * in_stride_c + clamped_h * in_stride_wc);
-            const auto a01 = *(reinterpret_cast<const float *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h * in_stride_wc);
-            const auto a10 = *(reinterpret_cast<const float *>(in.ptr()) + clamped_w * in_stride_c + clamped_h1 * in_stride_wc);
-            const auto a11 = *(reinterpret_cast<const float *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h1 * in_stride_wc);
+            const auto a00 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_stride_c + clamped_h * in_stride_wc);
+            const auto a01 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h * in_stride_wc);
+            const auto a10 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_stride_c + clamped_h1 * in_stride_wc);
+            const auto a11 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h1 * in_stride_wc);
 
-            *reinterpret_cast<float *>(out.ptr()) = static_cast<float>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
         },
         in, out);
     }
@@ -149,21 +165,22 @@ void fp32_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *o
         ARM_COMPUTE_ERROR("Not implemented");
     }
 }
-}
-namespace cpu
-{
-void fp32_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                     InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                     bool align_corners, const Window &window)
+
+template <typename T>
+void common_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
+                       InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
+                       bool align_corners, const Window &window)
 {
     if(policy == InterpolationPolicy::BILINEAR)
     {
-        fp32_neon_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset, align_corners, window);
+        bilinear_neon_scale<T>(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset, align_corners, window);
     }
     else if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
-        fp32_neon_scale_nearest(src, dst, offsets, sampling_offset, align_corners, window);
+        nearest_neon_scale<T>(src, dst, offsets, sampling_offset, align_corners, window);
     }
 }
 } // namespace cpu
 } // namespace arm_compute
+
+#endif /* SRC_CORE_NEON_KERNELS_SCALE_LIST_H */

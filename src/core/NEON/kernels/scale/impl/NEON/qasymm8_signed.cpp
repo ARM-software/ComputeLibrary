@@ -21,66 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensorPack.h"
-#include "arm_compute/core/Window.h"
-#include "src/core/NEON/NEMath.h"
-#include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/common/Validate.h"
-#include "src/core/helpers/ScaleHelpers.h"
-#include "src/core/utils/ScaleUtils.h"
-#include "support/Rounding.h"
 
-#include <arm_neon.h>
-#include <cmath>
-#include <cstddef>
+#include "src/core/NEON/kernels/scale/impl/NEON/list.h"
 
 namespace arm_compute
 {
 namespace
 {
-void qasymm8_signed_neon_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offsets,
-                                       float sampling_offset, bool align_corners, const Window &window)
-{
-    const size_t in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
-    const size_t in_stride_w  = src->info()->dimension(1) + src->info()->padding().top + src->info()->padding().bottom;
-    const size_t in_stride_wc = in_stride_w * in_stride_c;
-    const size_t in_dim_h     = src->info()->dimension(2);
-
-    // Compute the ratio between source height and destination height
-    const auto hr             = scale_utils::calculate_resize_ratio(in_dim_h, dst->info()->dimension(2), align_corners);
-    const auto window_start_x = static_cast<int32_t>(window.x().start());
-    const auto window_end_x   = static_cast<int32_t>(window.x().end());
-    const int  window_step_x  = 16;
-
-    Window win(window);
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    Iterator out(dst, win);
-
-    const uint8_t     *in_ptr_start        = src->buffer() + src->info()->offset_first_element_in_bytes();
-    const unsigned int in_stride_bytes_hwc = src->info()->strides_in_bytes()[3];
-
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        const int32_t offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
-        const auto    in_hi      = static_cast<int>(align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr) : std::floor((id.z() + sampling_offset) * hr));
-        const int     offset_row = in_hi * in_stride_wc;
-        int32_t       x          = window_start_x;
-        const int8_t *in_ptr     = reinterpret_cast<const int8_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
-
-        for(; x <= window_end_x - window_step_x; x += window_step_x)
-        {
-            wrapper::vstore(reinterpret_cast<int8_t *>(out.ptr()) + x,
-                            wrapper::vloadq(in_ptr + offset + offset_row + x));
-        }
-        for(; x < window_end_x; ++x)
-        {
-            *(reinterpret_cast<int8_t *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
-        }
-    },
-    out);
-}
-
 void qasymm8_signed_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
                                         BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
                                         bool align_corners, const Window &window)
@@ -196,7 +143,7 @@ void qasymm8_signed_neon_scale(const ITensor *src, ITensor *dst, const ITensor *
     }
     else if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
-        qasymm8_signed_neon_scale_nearest(src, dst, offsets, sampling_offset, align_corners, window);
+        nearest_neon_scale<int8_t>(src, dst, offsets, sampling_offset, align_corners, window);
     }
 }
 } // namespace cpu
