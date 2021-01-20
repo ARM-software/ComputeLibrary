@@ -78,11 +78,11 @@ void NEPoolingAssemblyDispatch::run(ITensorPack &tensors)
 
     if(_is_global_pooling_layer)
     {
-        NEScheduler::get().schedule_op(_kernel.get(), Window::DimX, tensors);
+        NEScheduler::get().schedule_op(_kernel.get(), Window::DimX, _kernel->window(), tensors);
     }
     else
     {
-        NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, tensors);
+        NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
     }
 }
 } // namespace experimental

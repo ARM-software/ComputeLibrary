@@ -165,7 +165,7 @@ void CpuConcatenate::run(ITensorPack &tensors)
         ITensorPack pack;
         pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(ACL_SRC_VEC + i));
         pack.add_tensor(TensorType::ACL_DST, tensors.get_tensor(ACL_DST));
-        NEScheduler::get().schedule_op(k.get(), Window::DimY, pack);
+        NEScheduler::get().schedule_op(k.get(), Window::DimY, k->window(), pack);
         ++i;
     }
 }

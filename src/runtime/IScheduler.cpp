@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,14 +55,11 @@ unsigned int IScheduler::num_threads_hint() const
     return _num_threads_hint;
 }
 
-void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
+void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
-    ARM_COMPUTE_UNUSED(kernel);
-    ARM_COMPUTE_UNUSED(hints);
-    ARM_COMPUTE_UNUSED(tensors);
 #ifndef BARE_METAL
-    const Window &max_window = kernel->window();
+    const Window &max_window = window;
     if(hints.split_dimension() == IScheduler::split_dimensions_all)
     {
         /*
@@ -165,6 +162,8 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, ITensor
             run_workloads(workloads);
         }
     }
+#else  /* !BARE_METAL */
+    ARM_COMPUTE_UNUSED(kernel, hints, window, tensors);
 #endif /* !BARE_METAL */
 }
 

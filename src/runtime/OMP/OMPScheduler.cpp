@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,16 +51,16 @@ void OMPScheduler::set_num_threads(unsigned int num_threads)
 void OMPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
     ITensorPack tensors;
-    schedule_common(kernel, hints, tensors);
+    schedule_common(kernel, hints, kernel->window(), tensors);
 }
 
-void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
+void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
     ARM_COMPUTE_ERROR_ON_MSG(hints.strategy() == StrategyHint::DYNAMIC,
                              "Dynamic scheduling is not supported in OMPScheduler");
 
-    const Window      &max_window     = kernel->window();
+    const Window      &max_window     = window;
     const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
     const unsigned int num_threads    = std::min(num_iterations, _num_threads);
 

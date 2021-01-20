@@ -352,14 +352,14 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 }
 #endif /* DOXYGEN_SKIP_THIS */
 
-void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
+void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors)
 {
-    schedule_common(kernel, hints, tensors);
+    schedule_common(kernel, hints, window, tensors);
 }
 
 void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
     ITensorPack tensors;
-    schedule_common(kernel, hints, tensors);
+    schedule_common(kernel, hints, kernel->window(), tensors);
 }
 } // namespace arm_compute

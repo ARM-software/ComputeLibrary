@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ Status NELogicalAnd::validate(const ITensorInfo *input1, const ITensorInfo *inpu
 
 void NELogicalAnd::run()
 {
-    NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->pack);
+    NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->kernel->window(), _impl->pack);
 }
 
 struct NELogicalOr::Impl : public LogicalArgs
@@ -98,7 +98,7 @@ Status NELogicalOr::validate(const ITensorInfo *input1, const ITensorInfo *input
 
 void NELogicalOr::run()
 {
-    NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->pack);
+    NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->kernel->window(), _impl->pack);
 }
 
 struct NELogicalNot::Impl : public LogicalArgs
@@ -130,6 +130,6 @@ Status NELogicalNot::validate(const ITensorInfo *input, const ITensorInfo *outpu
 
 void NELogicalNot::run()
 {
-    NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->pack);
+    NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->kernel->window(), _impl->pack);
 }
 } // namespace arm_compute
