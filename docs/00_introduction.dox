@@ -96,8 +96,8 @@ v21.02 Public major release
    - @ref NEActivationLayer
    - @ref NEArithmeticAddition
    - @ref NEBatchNormalizationLayerKernel
-   - @ref NELogits1DSoftmaxKernel
-   - @ref NELogits1DMaxKernel
+   - NELogits1DSoftmaxKernel
+   - NELogits1DMaxKernel
    - NEElementwiseUnaryKernel
  - Remove padding from OpenCL kernels:
    - @ref CLDirectConvolutionLayerKernel
@@ -460,8 +460,8 @@ v20.08 Public major release
    - @ref NEBatchNormalizationLayerKernel
    - NEArithmeticSubtractionKernel
    - @ref NEBoundingBoxTransformKernel
-   - @ref NELogits1DMaxKernel
-   - @ref NELogits1DSoftmaxKernel
+   - NELogits1DMaxKernel
+   - NELogits1DSoftmaxKernel
    - @ref NEROIPoolingLayerKernel
    - @ref NEROIAlignLayerKernel
    - NEYOLOLayerKernel
@@ -1269,7 +1269,7 @@ v17.04 Public bug fixes release
  -  NEHarrisScoreFP16Kernel
  -  @ref NEHarrisScoreKernel
  -  @ref NEHOGDetectorKernel
- -  @ref NELogits1DMaxKernel
+ -  NELogits1DMaxKernel
  -  NELogits1DShiftExpSumKernel
  -  NELogits1DNormKernel
  -  @ref NENonMaximaSuppression3x3FP16Kernel
@@ -1284,7 +1284,7 @@ v17.03.1 First Major public release of the sources
  - New NEON kernels / functions:
    - @ref NENormalizationLayerKernel / @ref NENormalizationLayer
    - @ref NETransposeKernel / @ref NETranspose
-   - @ref NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
+   - NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
    - @ref NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
    - NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
    - @ref NEGEMMLowpMatrixMultiplyKernel / NEGEMMLowp

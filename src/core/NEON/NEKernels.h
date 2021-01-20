@@ -117,7 +117,6 @@
 #include "src/core/NEON/kernels/NESobel3x3Kernel.h"
 #include "src/core/NEON/kernels/NESobel5x5Kernel.h"
 #include "src/core/NEON/kernels/NESobel7x7Kernel.h"
-#include "src/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "src/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
 #include "src/core/NEON/kernels/NESpaceToDepthLayerKernel.h"
 #include "src/core/NEON/kernels/NEStackLayerKernel.h"

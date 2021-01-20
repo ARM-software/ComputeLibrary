@@ -24,10 +24,10 @@
 #ifndef SRC_CORE_NEON_KERNELS_SOFTMAX_LIST_H
 #define SRC_CORE_NEON_KERNELS_SOFTMAX_LIST_H
 
-#include "src/core/NEON/wrapper/wrapper.h"
-#include "support/SaturateCast.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/NEMath.h"
+#include "src/core/NEON/wrapper/wrapper.h"
+#include "support/SaturateCast.h"
 
 namespace arm_compute
 {

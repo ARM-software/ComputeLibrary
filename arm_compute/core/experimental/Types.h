@@ -46,10 +46,12 @@ enum TensorType : int32_t
     ACL_DST     = 30,
     ACL_DST_0   = 30,
     ACL_DST_1   = 31,
+    ACL_DST_2   = 32,
     ACL_INT     = 50,
     ACL_INT_0   = 50,
     ACL_INT_1   = 51,
     ACL_INT_2   = 52,
+    ACL_INT_3   = 53,
     ACL_SRC_VEC = 256,
 };
 

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NESoftmaxLayerKernel.h"
+#include "src/core/cpu/kernels/CpuSoftmaxKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -33,11 +33,15 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
-#include "src/core/NEON/kernels/softmax/impl/NEON/list.h"
-#include "src/core/NEON/kernels/softmax/impl/SVE/list.h"
 #include "src/core/common/Registrars.h"
+#include "src/core/cpu/kernels/softmax/impl/NEON/list.h"
+#include "src/core/cpu/kernels/softmax/impl/SVE/list.h"
 
 namespace arm_compute
+{
+namespace cpu
+{
+namespace kernels
 {
 namespace
 {
@@ -208,98 +212,90 @@ Status validate_arguments_logits_1d_max(const ITensorInfo &input, const ITensorI
 
 } // namespace
 
-NELogits1DMaxKernel::NELogits1DMaxKernel()
-    : _border_size()
+CpuLogits1DMaxKernel::CpuLogits1DMaxKernel()
 {
 }
 
-BorderSize NELogits1DMaxKernel::border_size() const
+void CpuLogits1DMaxKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
-    return _border_size;
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
-void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), output->info());
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_1d_max(*input->info(), *output->info()));
-    // Configure kernel window
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_1d_max(*src, *dst));
 
     // Softmax across the x dimension
-    const TensorShape output_shape = TensorShape(input->info()->tensor_shape()).set(0, 1);
+    const TensorShape output_shape = TensorShape(src->tensor_shape()).set(0, 1);
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
+    auto_init_if_empty(*dst, output_shape, 1, src->data_type(), src->quantization_info());
 
-    Window      win = calculate_max_window(*input->info(), Steps());
+    Window      win = calculate_max_window(*src, Steps());
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    coord.set_num_dimensions(dst->num_dimensions());
+    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
 
-    _input  = input;
-    _output = output;
-
-    const int input_width                       = input->info()->valid_region().shape.x();
-    const int num_elems_processed_per_iteration = 16U / data_size_from_type(input->info()->data_type());
-    const int num_elems_read_per_iteration      = ceil_to_multiple(input_width, num_elems_processed_per_iteration);
-
-    _border_size = BorderSize(0, num_elems_read_per_iteration - input_width, 0, 0);
-
-    INEKernel::configure(win);
+    ICpuKernel::configure(win);
 }
 
-Status NELogits1DMaxKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status CpuLogits1DMaxKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_1d_max(*input, *output));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_1d_max(*src, *dst));
 
     return Status{};
 }
 
-void NELogits1DMaxKernel::run(const Window &window, const ThreadInfo &info)
+void CpuLogits1DMaxKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    const auto *uk = get_implementation_logits_max(SoftmaxSelectorData{ _input->info()->data_type() });
-    uk->ukernel(_input, _output, window);
+    const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto       dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    const auto *uk = get_implementation_logits_max(SoftmaxSelectorData{ src->info()->data_type() });
+    uk->ukernel(src, dst, window);
+}
+
+const char *CpuLogits1DMaxKernel::name() const
+{
+    return "CpuLogits1DMaxKernel";
 }
 
 namespace
 {
-Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensorInfo &max,
-                                         const ITensorInfo &output, const float beta, const ITensorInfo &tmp, bool is_log)
+Status validate_arguments_logits_softmax(const ITensorInfo &src, const ITensorInfo &max,
+                                         const ITensorInfo &dst, const float beta, const ITensorInfo &tmp, bool is_log)
 {
     ARM_COMPUTE_UNUSED(beta);
     // Check input
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
 
-    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input.data_type());
+    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(src.data_type());
 
     // Check max
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &max);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(TensorShape(input.tensor_shape()).set(0, 1), max.tensor_shape());
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&input, &max);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &max);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(TensorShape(src.tensor_shape()).set(0, 1), max.tensor_shape());
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&src, &max);
 
     // Check output if configured
-    if(output.total_size() != 0)
+    if(dst.total_size() != 0)
     {
-        const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(input.data_type(), is_log) : output.quantization_info();
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &output);
-        ARM_COMPUTE_RETURN_ERROR_ON(output.quantization_info() != output_quantization);
+        const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(src.data_type(), is_log) : dst.quantization_info();
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &dst);
+        ARM_COMPUTE_RETURN_ERROR_ON(dst.quantization_info() != output_quantization);
     }
 
     // Check tmp if configured
     if(tmp.total_size() != 0)
     {
-        const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : input.data_type();
+        const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : src.data_type();
         ARM_COMPUTE_RETURN_ERROR_ON(tmp.data_type() != tmp_data_type);
         // We could potentially reduce tmp memory if we could predict or make an assumption
         // on the maximum number of threads that will run in parallel.
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &tmp);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &tmp);
     }
 
     return Status{};
@@ -307,74 +303,90 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
 } // namespace
 
 template <bool IS_LOG>
-NELogits1DSoftmaxKernel<IS_LOG>::NELogits1DSoftmaxKernel()
-    : _input(nullptr), _max(nullptr), _output(nullptr), _beta(1.0f), _tmp(nullptr)
+CpuLogits1DSoftmaxKernel<IS_LOG>::CpuLogits1DSoftmaxKernel()
+    : _beta(1.0f)
 {
 }
 
 template <bool IS_LOG>
-void NELogits1DSoftmaxKernel<IS_LOG>::configure(const ITensor *input, const ITensor *max, ITensor *output, const float beta, ITensor *tmp)
+void CpuLogits1DSoftmaxKernel<IS_LOG>::configure(const ITensorInfo *src, const ITensorInfo *max, ITensorInfo *dst, const float beta, ITensorInfo *tmp)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, output, tmp);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), max->info(), output->info(), tmp->info());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, max, dst, tmp);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, max, dst, tmp);
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_softmax(*input->info(), *max->info(), *output->info(), beta, *tmp->info(), IS_LOG));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_softmax(*src, *max, *dst, beta, *tmp, IS_LOG));
+
+    _beta = beta;
 
     // Configure kernel window
-    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input->info()->data_type());
+    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(src->data_type());
 
     // Output auto initialization if not yet initialized
-    const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(input->info()->data_type(), IS_LOG) : output->info()->quantization_info();
-    auto_init_if_empty(*output->info(), TensorInfo(*input->info()).set_quantization_info(output_quantization).reset_padding());
+    const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(src->data_type(), IS_LOG) : dst->quantization_info();
+    auto_init_if_empty(*dst, TensorInfo(*src).set_quantization_info(output_quantization).reset_padding());
 
     // Tmp auto initialization if not yet initialized
-    const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : input->info()->data_type();
-    auto_init_if_empty(*tmp->info(), TensorInfo(*input->info()).set_data_type(tmp_data_type).reset_padding());
+    const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : src->data_type();
+    auto_init_if_empty(*tmp, TensorInfo(*src).set_data_type(tmp_data_type).reset_padding());
 
     // Configure kernel window
-    Window      win = calculate_max_window(*max->info(), Steps());
+    Window      win = calculate_max_window(*max, Steps());
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    coord.set_num_dimensions(dst->num_dimensions());
+    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
 
-    _input  = input;
-    _max    = max;
-    _output = output;
-    _beta   = beta;
-    _tmp    = tmp;
-
-    INEKernel::configure(win);
+    ICpuKernel::configure(win);
 }
 
 template <bool IS_LOG>
-Status NELogits1DSoftmaxKernel<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *max,
-                                                 const ITensorInfo *output, const float beta, const ITensorInfo *tmp)
+Status CpuLogits1DSoftmaxKernel<IS_LOG>::validate(const ITensorInfo *src, const ITensorInfo *max,
+                                                  const ITensorInfo *dst, const float beta, const ITensorInfo *tmp)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, output, tmp);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_softmax(*input, *max, *output, beta, *tmp, IS_LOG));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, max, dst, tmp);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_softmax(*src, *max, *dst, beta, *tmp, IS_LOG));
 
     return Status{};
 }
 
 template <bool IS_LOG>
-void NELogits1DSoftmaxKernel<IS_LOG>::run(const Window &window, const ThreadInfo &info)
+void CpuLogits1DSoftmaxKernel<IS_LOG>::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    const unsigned int num_elems_processed_per_iteration = _input->info()->valid_region().shape.x();
-    const unsigned int tmp_size_for_thread               = _tmp->info()->element_size() * num_elems_processed_per_iteration;
+    const auto src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    auto       max = tensors.get_tensor(TensorType::ACL_SRC_1);
+    auto       dst = tensors.get_tensor(TensorType::ACL_DST_0);
+    auto       tmp = tensors.get_tensor(TensorType::ACL_DST_1);
 
-    ARM_COMPUTE_ERROR_ON(_tmp->info()->total_size() < (info.num_threads * tmp_size_for_thread));
+    const unsigned int num_elems_processed_per_iteration = src->info()->valid_region().shape.x();
+    const unsigned int tmp_size_for_thread               = tmp->info()->element_size() * num_elems_processed_per_iteration;
 
-    void *tmp_for_thread = _tmp->buffer() + (info.thread_id * tmp_size_for_thread);
+    ARM_COMPUTE_ERROR_ON(tmp->info()->total_size() < (info.num_threads * tmp_size_for_thread));
 
-    const auto *uk = get_implementation_logits(SoftmaxSelectorData{ _input->info()->data_type() });
-    uk->ukernel(_input, _max, tmp_for_thread, _output, _beta, IS_LOG, window);
+    void *tmp_for_thread = tmp->buffer() + (info.thread_id * tmp_size_for_thread);
+
+    const auto *uk = get_implementation_logits(SoftmaxSelectorData{ src->info()->data_type() });
+    uk->ukernel(src, max, tmp_for_thread, dst, _beta, IS_LOG, window);
 }
 
-template class NELogits1DSoftmaxKernel<true>;
-template class NELogits1DSoftmaxKernel<false>;
+template <bool IS_LOG>
+const char    *CpuLogits1DSoftmaxKernel<IS_LOG>::name() const
+{
+    if(IS_LOG)
+    {
+        return "CpuLogits1DSoftmaxKernel";
+    }
+    else
+    {
+        return "CpuLogits1DLogSoftmaxKernel";
+    }
+}
 
+template class CpuLogits1DSoftmaxKernel<true>;
+template class CpuLogits1DSoftmaxKernel<false>;
+
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

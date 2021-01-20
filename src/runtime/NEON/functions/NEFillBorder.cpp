@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,11 @@
 
 namespace arm_compute
 {
+NEFillBorder::NEFillBorder()
+    : _border_handler(nullptr)
+{
+}
+
 void NEFillBorder::configure(ITensor *input, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value)
 {
     _border_handler = std::make_unique<NEFillBorderKernel>();
