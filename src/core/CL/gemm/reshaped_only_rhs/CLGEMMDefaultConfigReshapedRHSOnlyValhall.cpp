@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -216,7 +216,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigReshapedRHSOn
         const int h0 = std::max(std::min(static_cast<int>(n / 4), static_cast<int>(256)), static_cast<int>(1));
         if(n >= 64)
         {
-            return configure_lhs_rhs_info(m, n, 4, 4, 4, 1, h0, false, true, false, false);
+            return configure_lhs_rhs_info(m, n, 4, 8, 4, 1, h0, false, true, false, false);
         }
         else
         {
