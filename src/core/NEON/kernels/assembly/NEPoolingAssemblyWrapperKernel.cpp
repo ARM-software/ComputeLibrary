@@ -26,6 +26,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -86,6 +87,7 @@ Status NEPoolingAssemblyWrapperKernel::validate(const ITensorInfo *input, const 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_layout() != DataLayout::NHWC) || (info.data_layout != DataLayout::NHWC), "Only NHWC is supported by assembly kernels");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((info.pool_type != PoolingType::AVG) && (info.pool_type != PoolingType::MAX),
