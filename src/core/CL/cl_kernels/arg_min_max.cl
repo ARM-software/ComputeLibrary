@@ -23,21 +23,23 @@
  */
 #include "helpers.h"
 
-#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE_OUTPUT) && defined(DATA_TYPE_SELECT)
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE_OUTPUT)
 
 #define VEC_TYPE_IN VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define VEC_TYPE_OUT VEC_DATA_TYPE(DATA_TYPE_OUTPUT, VEC_SIZE)
+#define VEC_SELECT_IN SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#define VEC_SIGNED_INT_IN SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
 #if defined(FLOAT_DATA_TYPE)
-#define ISGREATER(x, y) isgreater(x, y)
-#define ISLESS(x, y) isless(x, y)
+#define ISGREATER(x, y) (VEC_SELECT_IN) isgreater(x, y)
+#define ISLESS(x, y) (VEC_SELECT_IN) isless(x, y)
 #else // !FLOAT_DATA_TYPE
 #if defined(WIDTH)
 #define ISGREATER(x, y) (x > y) ? 1 : 0
 #define ISLESS(x, y) (x < y) ? 1 : 0
 #else // !defined(WIDTH)
-#define ISGREATER(x, y) select((VEC_DATA_TYPE(DATA_TYPE_SELECT, VEC_SIZE))0, (VEC_DATA_TYPE(DATA_TYPE_SELECT, VEC_SIZE)) - 1, x > y)
-#define ISLESS(x, y) select((VEC_DATA_TYPE(DATA_TYPE_SELECT, VEC_SIZE))0, (VEC_DATA_TYPE(DATA_TYPE_SELECT, VEC_SIZE)) - 1, x < y)
+#define ISGREATER(x, y) select((VEC_SIGNED_INT_IN)0, (VEC_SIGNED_INT_IN)-1, x > y)
+#define ISLESS(x, y) select((VEC_SIGNED_INT_IN)0, (VEC_SIGNED_INT_IN)-1, x < y)
 #endif // defined(WIDTH)
 #endif // defined(FLOAT_DATA_TYPE)
 
@@ -98,20 +100,20 @@ inline DATA_TYPE_OUTPUT arg_idx_min(__global const DATA_TYPE *input, const int x
     VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
     res = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
-    VEC_DATA_TYPE(DATA_TYPE_SELECT, 8)
+    SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 8)
     idx_sel       = (in.s01234567 <= in.s89abcdef);
     in.s01234567  = select(in.s89abcdef, in.s01234567, idx_sel);
     res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel, int8));
 
-    idx_sel.s0123 = (in.s0123 < in.s4567) || (in.s0123 == in.s4567 && CONVERT((res.s0123 < res.s4567), VEC_DATA_TYPE(DATA_TYPE_SELECT, 4)));
+    idx_sel.s0123 = (in.s0123 < in.s4567) || (in.s0123 == in.s4567 && CONVERT((res.s0123 < res.s4567), SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 4)));
     in.s0123      = select(in.s4567, in.s0123, idx_sel.s0123);
     res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123, int4));
 
-    idx_sel.s01 = (in.s01 < in.s23) || (in.s01 == in.s23 && CONVERT((res.s01 < res.s23), VEC_DATA_TYPE(DATA_TYPE_SELECT, 2)));
+    idx_sel.s01 = (in.s01 < in.s23) || (in.s01 == in.s23 && CONVERT((res.s01 < res.s23), SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 2)));
     in.s01      = select(in.s23, in.s01, idx_sel.s01);
     res.s01     = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
 
-    idx_sel.s0 = (in.s0 < in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), DATA_TYPE_SELECT));
+    idx_sel.s0 = (in.s0 < in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), SIGNED_INT_DATA_TYPE(DATA_TYPE)));
     res.s0     = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
 
     return res.s0 + x_elem;
@@ -167,20 +169,20 @@ inline DATA_TYPE_OUTPUT arg_idx_max(__global const DATA_TYPE *input, const int x
     VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
     res = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
-    VEC_DATA_TYPE(DATA_TYPE_SELECT, 8)
+    SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 8)
     idx_sel       = (in.s01234567 >= in.s89abcdef);
     in.s01234567  = select(in.s89abcdef, in.s01234567, idx_sel);
     res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel, int8));
 
-    idx_sel.s0123 = (in.s0123 > in.s4567) || (in.s0123 == in.s4567 && CONVERT((res.s0123 < res.s4567), VEC_DATA_TYPE(DATA_TYPE_SELECT, 4)));
+    idx_sel.s0123 = (in.s0123 > in.s4567) || (in.s0123 == in.s4567 && CONVERT((res.s0123 < res.s4567), SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 4)));
     in.s0123      = select(in.s4567, in.s0123, idx_sel.s0123);
     res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123, int4));
 
-    idx_sel.s01 = (in.s01 > in.s23) || (in.s01 == in.s23 && CONVERT((res.s01 < res.s23), VEC_DATA_TYPE(DATA_TYPE_SELECT, 2)));
+    idx_sel.s01 = (in.s01 > in.s23) || (in.s01 == in.s23 && CONVERT((res.s01 < res.s23), SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 2)));
     in.s01      = select(in.s23, in.s01, idx_sel.s01);
     res.s01     = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
 
-    idx_sel.s0 = (in.s0 > in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), DATA_TYPE_SELECT));
+    idx_sel.s0 = (in.s0 > in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), SIGNED_INT_DATA_TYPE(DATA_TYPE)));
     res.s0     = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
 
     return res.s0 + x_elem;
@@ -299,7 +301,6 @@ __kernel void arg_min_max_x(
  * @note The input data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note The data type of the output must be passed at compile time using -DDATA_TYPE_OUTPUT: e.g. -DDATA_TYPE_OUTPUT=uint
- * @note The data type of the select results must be passed at compile time using -DDATA_TYPE_SELECT: e.g. -DDATA_TYPE_SELECT=int
  * @note The height size must be passed at compile time using -DHEIGHT e.g. -DHEIGHT=128
  *
  * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
@@ -327,12 +328,12 @@ __kernel void arg_min_max_y(
     VEC_TYPE_IN res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_TYPE_IN);
 
     VEC_TYPE_OUT indx0 = 0;
-    for(unsigned int y = 1; y < HEIGHT; ++y)
+    for(DATA_TYPE_OUTPUT y = 1; y < HEIGHT; ++y)
     {
         VEC_TYPE_IN in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + y * input_stride_y)), VEC_TYPE_IN);
 
         VEC_TYPE_OUT cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_TYPE_OUT);
-        indx0                  = select(indx0, y, cond_conv);
+        indx0                  = select(indx0, (VEC_TYPE_OUT)y, cond_conv);
         res                    = select(res, in, CONDITION_TO_USE(in, res));
     }
 
@@ -346,7 +347,6 @@ __kernel void arg_min_max_y(
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
- * @note The data type of the select results must be passed at compile time using -DDATA_TYPE_SELECT: e.g. -DDATA_TYPE_SELECT=int
  * @note The depth size must be passed at compile time using -DDEPTH e.g. -DDEPTH=128
  *
  * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
@@ -383,7 +383,7 @@ __kernel void arg_min_max_z(
         VEC_TYPE_IN in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + z * input_stride_z)), VEC_TYPE_IN);
 
         VEC_TYPE_OUT cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_TYPE_OUT);
-        indx0                  = select(indx0, z, cond_conv);
+        indx0                  = select(indx0, (VEC_TYPE_OUT)z, cond_conv);
         res                    = select(res, in, CONDITION_TO_USE(in, res));
     }
 
@@ -397,7 +397,6 @@ __kernel void arg_min_max_z(
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
- * @note The data type of the select results must be passed at compile time using -DDATA_TYPE_SELECT: e.g. -DDATA_TYPE_SELECT=int
  * @note The batch size must be passed at compile time using -DBATCH e.g. -DBATCH=128
  * @note The depth size must be passed at compile time using -DBATCH e.g. -DDEPTH=128
  *
@@ -441,7 +440,7 @@ __kernel void arg_min_max_w(
         VEC_TYPE_IN in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + w * input_stride_w)), VEC_TYPE_IN);
 
         VEC_TYPE_OUT cond_conv = CONVERT(CONDITION_TO_USE(in, res), VEC_TYPE_OUT);
-        indx0                  = select(indx0, w, cond_conv);
+        indx0                  = select(indx0, (VEC_TYPE_OUT)w, cond_conv);
         res                    = select(res, in, CONDITION_TO_USE(in, res));
     }
 
@@ -449,4 +448,4 @@ __kernel void arg_min_max_w(
     STORE_VECTOR_SELECT(indx, DATA_TYPE_OUTPUT, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif /* defined(BATCH) && defined(DEPTH) */
-#endif // defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE_OUTPUT) && defined(DATA_TYPE_SELECT)
+#endif // defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE_OUTPUT)

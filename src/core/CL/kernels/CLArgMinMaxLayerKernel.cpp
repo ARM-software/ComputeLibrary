@@ -105,7 +105,6 @@ void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, 
     build_opts.add_option_if(is_data_type_float(input->info()->data_type()), "-DFLOAT_DATA_TYPE");
     build_opts.add_option_if_else(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX", "-DARG_MIN");
     build_opts.add_option("-DDATA_TYPE_OUTPUT=" + get_cl_type_from_data_type(output->info()->data_type()));
-    build_opts.add_option("-DDATA_TYPE_SELECT=" + get_cl_signed_type_from_element_size(input->info()->element_size()));
 
     // Create kernel
     cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange();
