@@ -37,6 +37,7 @@ namespace cpu
 {
 namespace
 {
+#if defined(__ARM_FEATURE_SVE2)
 template <typename int_vec_type>
 int_vec_type convert_float_to_int(const svfloat32_t &in_0, const svfloat32_t &in_1, const svfloat32_t &in_2, const svfloat32_t &in_3);
 
@@ -107,6 +108,7 @@ svint8_t convert_float_to_int<svint8_t>(const svfloat32_t &in_0, const svfloat32
 
     return out;
 }
+#endif /* defined(__ARM_FEATURE_SVE2) */
 } // namespace
 
 template <typename ScalarType>
