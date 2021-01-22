@@ -166,7 +166,7 @@ v20.11 Public major release
    - @ref NEGEMMLowpMatrixBReductionKernel
  - Removed padding from OpenCL kernels:
    - CLBatchConcatenateLayerKernel
-   - @ref CLElementwiseOperationKernel
+   - CLElementwiseOperationKernel
    - @ref CLBatchNormalizationLayerKernel
    - @ref CLPoolingLayerKernel
    - @ref CLWinogradInputTransformKernel

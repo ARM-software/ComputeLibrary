@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@ public:
      * @param[out]     output          Output tensor. Data types supported: same as @p input1.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLLogicalBinaryKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref arm_compute::opencl::kernels::ClLogicalBinaryKernel
      *
      * @param[in] input1 First tensor input info. Data types supported: U8.
      * @param[in] input2 Second tensor input info. Data types supported: same as @p input1.
@@ -65,7 +65,7 @@ public:
 };
 } // namespace experimental
 
-/** Basic function to run @ref CLLogicalBinaryKernel.
+/** Basic function to run @ref arm_compute::opencl::kernels::ClLogicalBinaryKernel.
  *
  * @note The tensor data type for the inputs must be U8.
  * @note The function performs a logical OR operation using the two input tensors.

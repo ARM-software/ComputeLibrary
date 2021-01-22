@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,18 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_KERNEL_TYPES_H
-#define ARM_COMPUTE_KERNEL_TYPES_H
+#include "src/runtime/gpu/cl/operators/ClAdd.h"
+
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/core/gpu/cl/kernels/ClElementwiseKernel.h"
 
 namespace arm_compute
 {
-/** List of supported logical operations */
-enum class LogicalOperation
+namespace opencl
 {
-    Unknown, /**< Unknown */
-    And,     /**< Logical And && */
-    Or,      /**< Logical Or || */
-    Not,     /**< Logical Not ! */
-};
+void ClAdd::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst,
+                      ConvertPolicy policy, const ActivationLayerInfo &act_info)
+{
+    auto k = std::make_unique<kernels::ClSaturatedArithmeticKernel>();
+    k->configure(compile_context, ArithmeticOperation::ADD, src1, src2, dst, policy, act_info);
+    _kernel = std::move(k);
+}
+
+Status ClAdd::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst,
+                       ConvertPolicy policy, const ActivationLayerInfo &act_info)
+{
+    return kernels::ClSaturatedArithmeticKernel::validate(ArithmeticOperation::ADD, src1, src2, dst, policy, act_info);
+}
+} // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_KERNEL_TYPES_H */

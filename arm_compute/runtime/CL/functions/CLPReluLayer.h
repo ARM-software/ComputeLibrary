@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ class ITensorInfo;
 
 namespace experimental
 {
-/** Basic function to run @ref CLArithmeticOperationKernel for PRELU
+/** Basic function to run @ref arm_compute::opencl::kernels::ClArithmeticKernel for PRELU
  *
  * @note The function implements an activation layer with the PRELU activation function.
  */
@@ -69,7 +69,7 @@ public:
 };
 } // namespace experimental
 
-/** Basic function to run @ref CLArithmeticOperationKernel for PRELU
+/** Basic function to run @ref opencl::kernels::ClArithmeticKernel for PRELU
  *
  * @note The function implements an activation layer with the PRELU activation function.
  */

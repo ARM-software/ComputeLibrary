@@ -50,7 +50,7 @@ void NELogicalAnd::configure(const ITensor *input1, const ITensor *input2, ITens
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
 
     _impl->kernel = std::make_unique<kernels::NELogicalKernel>();
-    _impl->kernel->configure(input1->info(), input2->info(), output->info(), kernels::LogicalOperation::And);
+    _impl->kernel->configure(input1->info(), input2->info(), output->info(), LogicalOperation::And);
 
     _impl->pack = ITensorPack();
     _impl->pack.add_tensor(TensorType::ACL_SRC_0, input1);
@@ -60,7 +60,7 @@ void NELogicalAnd::configure(const ITensor *input1, const ITensor *input2, ITens
 
 Status NELogicalAnd::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    return kernels::NELogicalKernel::validate(input1, input2, output, kernels::LogicalOperation::And);
+    return kernels::NELogicalKernel::validate(input1, input2, output, LogicalOperation::And);
 }
 
 void NELogicalAnd::run()
@@ -83,7 +83,7 @@ void NELogicalOr::configure(const ITensor *input1, const ITensor *input2, ITenso
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
 
     _impl->kernel = std::make_unique<kernels::NELogicalKernel>();
-    _impl->kernel->configure(input1->info(), input2->info(), output->info(), kernels::LogicalOperation::Or);
+    _impl->kernel->configure(input1->info(), input2->info(), output->info(), LogicalOperation::Or);
 
     _impl->pack = ITensorPack();
     _impl->pack.add_tensor(TensorType::ACL_SRC_0, input1);
@@ -93,7 +93,7 @@ void NELogicalOr::configure(const ITensor *input1, const ITensor *input2, ITenso
 
 Status NELogicalOr::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    return kernels::NELogicalKernel::validate(input1, input2, output, kernels::LogicalOperation::Or);
+    return kernels::NELogicalKernel::validate(input1, input2, output, LogicalOperation::Or);
 }
 
 void NELogicalOr::run()
@@ -116,7 +116,7 @@ void NELogicalNot::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _impl->kernel = std::make_unique<kernels::NELogicalKernel>();
-    _impl->kernel->configure(input->info(), nullptr, output->info(), kernels::LogicalOperation::Not);
+    _impl->kernel->configure(input->info(), nullptr, output->info(), LogicalOperation::Not);
 
     _impl->pack = ITensorPack();
     _impl->pack.add_tensor(TensorType::ACL_SRC_0, input);
@@ -125,7 +125,7 @@ void NELogicalNot::configure(const ITensor *input, ITensor *output)
 
 Status NELogicalNot::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return kernels::NELogicalKernel::validate(input, nullptr, output, kernels::LogicalOperation::Not);
+    return kernels::NELogicalKernel::validate(input, nullptr, output, LogicalOperation::Not);
 }
 
 void NELogicalNot::run()

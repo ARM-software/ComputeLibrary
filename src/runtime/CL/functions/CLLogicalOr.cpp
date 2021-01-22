@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/core/CL/kernels/CLElementwiseOperationKernel.h"
+#include "src/core/gpu/cl/kernels/ClElementwiseKernel.h"
 
 #include <utility>
 
@@ -33,14 +33,14 @@ namespace experimental
 {
 void CLLogicalOr::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = std::make_unique<CLLogicalBinaryKernel>();
-    k->configure(compile_context, kernels::LogicalOperation::Or, input1, input2, output);
+    auto k = std::make_unique<arm_compute::opencl::kernels::ClLogicalBinaryKernel>();
+    k->configure(compile_context, LogicalOperation::Or, input1, input2, output);
     _kernel = std::move(k);
 }
 
 Status CLLogicalOr::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    return CLLogicalBinaryKernel::validate(kernels::LogicalOperation::Or, input1, input2, output);
+    return arm_compute::opencl::kernels::ClLogicalBinaryKernel::validate(LogicalOperation::Or, input1, input2, output);
 }
 
 void CLLogicalOr::run(ITensorPack &tensors)
