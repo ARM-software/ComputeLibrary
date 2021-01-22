@@ -27,6 +27,7 @@
 #include "src/core/CPP/Validate.h"
 #include "src/core/cpu/kernels/assembly/CpuGemmAssemblyWrapperKernel.h"
 #include "src/core/cpu/kernels/assembly/arm_gemm.hpp"
+#include "src/core/utils/AssemblyUtils.h"
 
 #include <arm_neon.h>
 #include <cstdlib>
@@ -87,38 +88,6 @@ Params extract_parameters(const ITensorInfo *a, const ITensorInfo *b, const ITen
     }
 
     return p;
-}
-
-arm_gemm::Activation map_to_arm_gemm_activation(const ActivationLayerInfo &act)
-{
-    arm_gemm::Activation gemm_act;
-
-    // Early exit in case lower bound is other than 0, as it's not yet supported
-    if(act.b() != 0.f)
-    {
-        return gemm_act;
-    }
-
-    switch(act.activation())
-    {
-        case ActivationLayerInfo::ActivationFunction::RELU:
-            gemm_act.type = arm_gemm::Activation::Type::ReLU;
-            break;
-        case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-            gemm_act.type   = arm_gemm::Activation::Type::BoundedReLU;
-            gemm_act.param1 = act.a();
-            gemm_act.param2 = 0.f;
-            break;
-        case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-            gemm_act.type   = arm_gemm::Activation::Type::BoundedReLU;
-            gemm_act.param1 = act.a();
-            gemm_act.param2 = act.b();
-            break;
-        default:
-            gemm_act.type = arm_gemm::Activation::Type::None;
-    }
-
-    return gemm_act;
 }
 
 IScheduler::Hints scheduling_hint_heuristic(arm_gemm::GemmMethod method, DataType data_type)
@@ -788,14 +757,14 @@ Status CpuGemmAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo
 
 bool CpuGemmAssemblyDispatch::is_activation_supported(const ActivationLayerInfo &activation)
 {
-    arm_gemm::Activation act = map_to_arm_gemm_activation(activation);
+    arm_gemm::Activation act = assembly_utils::map_to_arm_gemm_activation(activation);
     return act.type != arm_gemm::Activation::Type::None;
 }
 
 void CpuGemmAssemblyDispatch::configure(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, ITensorInfo *d, const AsmGemmInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
-    arm_gemm::Activation act = map_to_arm_gemm_activation(info.activation_info);
+    arm_gemm::Activation act = assembly_utils::map_to_arm_gemm_activation(info.activation_info);
 
     //If we don't support a combination of data types, silently return: it is the caller's responsibility to check if configure() was successful via is_configured()
     if(!CpuGemmAssemblyDispatch::validate(a, b, c, d, info))

@@ -92,9 +92,8 @@ private:
     *
     * -# @ref NEFillBorderKernel (if pad_x or pad_y > 0) and no assembly kernel implementation is present
     * -# @ref CpuDepthwiseConv2d3x3Kernel if 3x3 and no assembly kernel implementation is present
-    * -# @ref NEDepthwiseConvolutionAssemblyDispatch if assembly kernel implementation is present
-    * -# @ref NEDirectConvolutionLayerOutputStageKernel if re-quantization of dst is required
-    * -# @ref NEActivationLayer if fused activation is required
+    * -# @ref CpuDepthwiseConv2dAssemblyDispatch if assembly kernel implementation is present
+    * -# @ref CpuActivation if fused activation is required
     *
     */
     class CpuDepthwiseConv2dOptimizedInternal : public ICpuOperator

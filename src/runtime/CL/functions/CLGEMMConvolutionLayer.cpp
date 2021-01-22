@@ -352,7 +352,6 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
         quantization::compute_quantized_multipliers_and_shifts(input->info(),
                                                                weights->info(),
                                                                output->info(),
-                                                               idx_kernels,
                                                                gemmlowp_output_stage.gemmlowp_multipliers.data(),
                                                                gemmlowp_output_stage.gemmlowp_shifts.data());
         gemmlowp_output_stage.gemmlowp_multiplier = gemmlowp_output_stage.gemmlowp_multipliers[0];
@@ -562,7 +561,6 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         quantization::compute_quantized_multipliers_and_shifts(input,
                                                                weights,
                                                                output,
-                                                               idx_kernels,
                                                                gemmlowp_output_stage.gemmlowp_multipliers.data(),
                                                                gemmlowp_output_stage.gemmlowp_shifts.data());
         gemmlowp_output_stage.gemmlowp_multiplier = gemmlowp_output_stage.gemmlowp_multipliers[0];

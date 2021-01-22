@@ -175,6 +175,18 @@ inline unsigned long get_vector_length() {
 #endif
 }
 
+template <typename T>
+inline unsigned long get_vector_length(VLType vl_type) {
+  switch (vl_type) {
+#ifdef __ARM_FEATURE_SVE
+    case VLType::SVE:
+      return get_vector_length_sz<sizeof(T)>();
+#endif
+    default:
+      return 16 / sizeof(T);
+  }
+}
+
 } // utils namespace
 } // arm_gemm namespace
 

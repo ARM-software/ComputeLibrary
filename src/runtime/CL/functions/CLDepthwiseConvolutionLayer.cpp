@@ -307,11 +307,9 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
         {
             _output_multipliers.map();
             _output_shifts.map();
-            const unsigned int idx_ofms = _needs_permute ? 2 : 0;
             quantization::compute_quantized_multipliers_and_shifts(_input->info(),
                                                                    _original_weights->info(),
                                                                    _output->info(),
-                                                                   idx_ofms,
                                                                    reinterpret_cast<int32_t *>(_output_multipliers.ptr_to_element(Coordinates(0))),
                                                                    reinterpret_cast<int32_t *>(_output_shifts.ptr_to_element(Coordinates(0))));
             _output_multipliers.unmap();
@@ -513,11 +511,9 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::prepar
         {
             _output_multipliers.map();
             _output_shifts.map();
-            const unsigned int idx_ofms = _is_nhwc ? 0 : 2;
             quantization::compute_quantized_multipliers_and_shifts(_input->info(),
                                                                    _original_weights->info(),
                                                                    _output->info(),
-                                                                   idx_ofms,
                                                                    reinterpret_cast<int32_t *>(_output_multipliers.ptr_to_element(Coordinates(0))),
                                                                    reinterpret_cast<int32_t *>(_output_shifts.ptr_to_element(Coordinates(0))));
             _output_multipliers.unmap();

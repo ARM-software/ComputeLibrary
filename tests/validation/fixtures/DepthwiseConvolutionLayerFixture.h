@@ -117,8 +117,7 @@ public:
 
     void allocate_and_run_target()
     {
-        // TODO: uncomment after COMPMID-4361
-        // add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
+        add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
 
         // Allocate tensors
         _src.allocator()->allocate();

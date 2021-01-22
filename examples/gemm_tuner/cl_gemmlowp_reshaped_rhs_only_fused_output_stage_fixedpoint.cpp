@@ -236,7 +236,6 @@ public:
         gemmlowp_output_stage.output_data_type = dst.info()->data_type();
         gemmlowp_output_stage.gemmlowp_offset  = 0;
         {
-            const int idx_kernels                          = get_data_layout_dimension_index(lhs.info()->data_layout(), DataLayoutDimension::BATCHES);
             gemmlowp_output_stage.is_quantized_per_channel = false;
             // Num_filters is 1 unless quantized type is of per_channel type. Could be extended in the future to support per-channel quantization.
             const unsigned int num_filters = 1;
@@ -249,7 +248,6 @@ public:
             quantization::compute_quantized_multipliers_and_shifts(lhs.info(),
                                                                    rhs.info(),
                                                                    dst.info(),
-                                                                   idx_kernels,
                                                                    gemmlowp_output_stage.gemmlowp_multipliers.data(),
                                                                    gemmlowp_output_stage.gemmlowp_shifts.data());
             gemmlowp_output_stage.gemmlowp_multiplier = gemmlowp_output_stage.gemmlowp_multipliers[0];

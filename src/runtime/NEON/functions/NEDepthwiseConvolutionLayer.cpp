@@ -137,9 +137,10 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
 
     // Allocate memory based on the internal memory requirements
     experimental::MemoryRequirements mem_req = dwc_optimized_func->workspace();
-    _impl->workspace.allocator()->init(TensorInfo(TensorShape{ mem_req[0].size }, 1, DataType::S8), mem_req[0].alignment);
-    _impl->packed_weights.allocator()->init(TensorInfo(TensorShape{ mem_req[1].size }, 1, DataType::S8), mem_req[1].alignment);
-
+    _impl->workspace.allocator()->init(TensorInfo(TensorShape{ mem_req[0].size + mem_req[0].alignment }, 1, DataType::S8), mem_req[0].alignment);
+    _impl->packed_weights.allocator()->init(TensorInfo(TensorShape{ mem_req[1].size + mem_req[1].alignment }, 1, DataType::S8), mem_req[1].alignment);
+    _memory_group.manage(&_impl->workspace);
+    _memory_group.manage(&_impl->packed_weights);
     _impl->workspace.allocator()->allocate();
     _impl->packed_weights.allocator()->allocate();
 }

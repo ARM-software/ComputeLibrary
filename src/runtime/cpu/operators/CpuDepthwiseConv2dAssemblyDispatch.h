@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DEPTHWISECONV2DASSEMBLYDISPATCH_H
-#define ARM_COMPUTE_CPU_DEPTHWISECONV2DASSEMBLYDISPATCH_H
+#ifndef ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_ASSEMBLY_DISPATCH_H
+#define ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_ASSEMBLY_DISPATCH_H
 
 #include "src/core/common/Macros.h"
 #include "src/runtime/cpu/ICpuOperator.h"
@@ -40,15 +40,15 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDepthwiseConv2dAssemblyDispatch);
     /** Default destructor */
     ~CpuDepthwiseConv2dAssemblyDispatch();
-
     /** Initialize the function's source, destination, kernels and border_size.
      *
      * @note Supports only NHWC format
      *
-     * @param[in]  src     Source tensor info. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
-     * @param[in]  weights Weights tensor info. These are 3D tensors with shape [W, H, IFM]. Data type supported: Same as @p src.
+     * @param[in]  src     Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  weights Weights tensor info. These are 3D tensors with shape [W, H, IFM].
+     *                     Data type supported: same as @p src or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p src is QASYMM8/QASYMM8_SIGNED.
      * @param[in]  bias    (Optional) Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                     Data type supported: Same as @p src.
+     *                     Data type supported: same as @p src or S32 if @p src is quantized.
      * @param[out] dst     Destination tensor info. Data type supported: same as @p src.
      * @param[in]  info    Depthwise convolution meta-data.
      */
@@ -60,18 +60,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const ConvolutionInfo &info);
-    /** Check if the optimized kernel can be used for the given kernel sizes and strides
+    /** Checks if activation is supported by the assembly kernels
      *
-     * @warning Even if this return true the inputs and outputs might need to get permuted as the only layout supported is NHWC
+     * @param[in] activation Activation to check
      *
-     * @param[in] src     Input tensor info.
-     * @param[in] weights Weights tensor info.
-     * @param[in] info    Depthwise convolution meta-data.
-     *
-     * @return True if the assembly kernel could be used else false. Note that transformations of input/output could be needed.
+     * @return True if activation is supported else false
      */
-    static bool is_optimized_supported(const ITensorInfo *src, const ITensorInfo *weights, const ConvolutionInfo &info);
-
+    static bool is_activation_supported(const ActivationLayerInfo &activation);
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
     void prepare(ITensorPack &tensors) override;
@@ -83,4 +78,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_DEPTHWISECONV2DASSEMBLYDISPATCH_H */
+#endif /* ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_ASSEMBLY_DISPATCH_H */

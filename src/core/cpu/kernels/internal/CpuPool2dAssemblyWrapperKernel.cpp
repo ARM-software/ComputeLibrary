@@ -43,11 +43,13 @@ using namespace arm_compute::misc::shape_calculator;
 
 void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
 {
+    ARM_COMPUTE_UNUSED(cpu_info);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // dst initialization if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_pool_shape(*src, info)));
 
+#if defined(__aarch64__)
     const bool requantize = src->quantization_info() != dst->quantization_info();
 
     switch(src->data_type())
@@ -83,6 +85,7 @@ void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorIn
         default:
             break;
     }
+#endif // defined(__aarch64__)
 
     Window win = calculate_max_window(*dst, Steps());
     INEKernel::configure(win);
@@ -192,7 +195,7 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src, 
     arm_conv::pooling::PoolingStride stride{};
     std::tie(stride.cols, stride.rows) = info.pad_stride_info.stride();
 
-    const arm_conv::pooling::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
+    const arm_conv::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
 
     constexpr unsigned int idx_width    = 1;
     constexpr unsigned int idx_height   = 2;
@@ -231,7 +234,7 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
     arm_conv::pooling::PoolingStride stride{};
     std::tie(stride.cols, stride.rows) = info.pad_stride_info.stride();
 
-    const arm_conv::pooling::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
+    const arm_conv::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
 
     constexpr unsigned int idx_width    = 1;
     constexpr unsigned int idx_height   = 2;

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, 2017 Arm Limited.
+# Copyright (c) 2016-2021 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -252,12 +252,8 @@ core_files_sve = []
 if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/assembly/*.cpp')
 
     core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/arm_conv/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_*/*.cpp')
 
     # build winograd/depthwise sources for either v7a / v8a
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
@@ -275,11 +271,22 @@ if env['neon']:
         core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a32_*/*.cpp')
 
     if env['estate'] == '64':
+        core_files += Glob('src/core/NEON/kernels/assembly/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/depthwise/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/depthwise/kernels/cpp_*/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/depthwise/interleaves/8b_mla.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_*/*.cpp')
+
         core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/depthwise/interleaves/a64_*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_*/*.cpp')
         core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/a64_*/*.cpp')
         if "sve" in env['arch'] or env['fat_binary']:
             core_files_sve += filelist['cpu']['core']['sve']['all']
             core_files_sve += Glob('src/core/NEON/kernels/arm_gemm/kernels/sve_*/*.cpp')
+            core_files += Glob('src/core/NEON/kernels/arm_conv/depthwise/interleaves/sve_*.cpp')
+            core_files += Glob('src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_*/*.cpp')
             core_files_sve += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/sve_*/*.cpp')
 
     if any(i in env['data_layout_support'] for i in ['all', 'nchw']):

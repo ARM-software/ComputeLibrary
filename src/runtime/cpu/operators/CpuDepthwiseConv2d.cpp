@@ -62,8 +62,8 @@ Status validate_arguments_optimized(const ITensorInfo *src, const ITensorInfo *w
 
     ARM_COMPUTE_RETURN_ON_ERROR(CpuDepthwiseConv2dAssemblyDispatch::validate(src, weights, biases, dst, info));
 
-    //Validate Activation Layer
-    if(info.act_info.enabled())
+    // Validate Activation Layer
+    if(info.act_info.enabled() && !CpuDepthwiseConv2dAssemblyDispatch::is_activation_supported(info.act_info))
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CpuActivation::validate(dst, nullptr, info.act_info));
     }
@@ -95,15 +95,7 @@ void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::configure(ITensorI
     _is_prepared  = false;
 
     // Configure pipeline
-    ActivationLayerInfo act_info_to_use = ActivationLayerInfo();
-    const bool          is_relu         = arm_compute::utils::info_helpers::is_relu(info.act_info);
-    const bool          is_relu6        = arm_compute::utils::info_helpers::is_relu6(info.act_info);
-    _is_activationlayer_enabled         = info.act_info.enabled() && !(is_relu || is_relu6);
-
-    if(!_is_activationlayer_enabled)
-    {
-        act_info_to_use = info.act_info;
-    }
+    _is_activationlayer_enabled = info.act_info.enabled() && !CpuDepthwiseConv2dAssemblyDispatch::is_activation_supported(info.act_info);
 
     _dwc_optimized_func = std::make_unique<CpuDepthwiseConv2dAssemblyDispatch>();
     if(_is_nchw)
@@ -359,7 +351,7 @@ Status CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::validate(const ITensorInfo
     }
 
     // Validate Activation Layer
-    if(info.act_info.enabled())
+    if(info.act_info.enabled() && !CpuDepthwiseConv2dAssemblyDispatch::is_activation_supported(info.act_info))
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CpuActivation::validate(dst, nullptr, info.act_info));
     }

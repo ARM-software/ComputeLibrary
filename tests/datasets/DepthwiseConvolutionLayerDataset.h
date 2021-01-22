@@ -220,8 +220,6 @@ public:
         add_config(TensorShape(9U, 9U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
         add_config(TensorShape(9U, 9U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), Size2D(2U, 2U));
         add_config(TensorShape(9U, 9U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 1, 1, DimensionRoundingType::CEIL));
-        // TODO(COMPMID-2464): Enable once dilated conv with stride 2 is supported
-        // add_config(TensorShape(9U, 9U, 1U), Size2D(3U, 3U), PadStrideInfo(2, 2, 2, 2, DimensionRoundingType::CEIL), Size2D(2U, 2U));
     }
 };
 /** Dataset containing optimized, 3x3 depthwise convolution shapes. */
@@ -259,11 +257,9 @@ public:
         add_config(TensorShape(7U, 7U, 16U), Size2D(5U, 5U), PadStrideInfo(1, 1, 4, 4, DimensionRoundingType::CEIL), Size2D(2U, 2U));
         // Stride 2
         add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
-        // TODO(COMPMID-2464): Enable once dilated conv with stride 2 is supported
-        // add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), Size2D(2U, 2U));
+        add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), Size2D(2U, 2U));
         add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 2, 2, 2, 2, DimensionRoundingType::CEIL));
-        // TODO(COMPMID-2464): Enable once dilated conv with stride 2 is supported
-        // add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 4, 4, 4, 4, DimensionRoundingType::CEIL), Size2D(2U, 2U));
+        add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 4, 4, 4, 4, DimensionRoundingType::CEIL), Size2D(2U, 2U));
     }
 };
 } // namespace datasets

@@ -28,7 +28,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/kernels/convolution/depthwise/impl_qa8_qa8.hpp"
 #include "src/core/NEON/wrapper/traits.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -97,6 +96,38 @@ struct DepthwiseConvolutionRunInfo
     {
     }
 };
+
+inline int32x4_t saturating_doubling_high_mul(const int32x4_t &a, const int32_t &b)
+{
+    return vqrdmulhq_n_s32(a, b);
+}
+
+inline int32_t saturating_doubling_high_mul(const int32_t &a, const int32_t &b)
+{
+    return vget_lane_s32(vqrdmulh_n_s32(vdup_n_s32(a), b), 0);
+}
+
+inline int32x4_t rounding_divide_by_exp2(const int32x4_t &x, const int exponent)
+{
+    const int32x4_t shift = vdupq_n_s32(-exponent);
+    const int32x4_t fixup = vshrq_n_s32(vandq_s32(x, shift), 31);
+    const int32x4_t fixed = vqaddq_s32(x, fixup);
+    return vrshlq_s32(fixed, shift);
+}
+
+inline int32x2_t rounding_divide_by_exp2(const int32x2_t &x, const int exponent)
+{
+    const int32x2_t shift = vdup_n_s32(-exponent);
+    const int32x2_t fixup = vshr_n_s32(vand_s32(x, shift), 31);
+    const int32x2_t fixed = vqadd_s32(x, fixup);
+    return vrshl_s32(fixed, shift);
+}
+
+inline int32_t rounding_divide_by_exp2(const int32_t &x, const int exponent)
+{
+    const int32x2_t xs = vdup_n_s32(x);
+    return vget_lane_s32(rounding_divide_by_exp2(xs, exponent), 0);
+}
 
 inline bool is_valid_input_region(int32_t base_w, uint32_t base_h, uint32_t w, uint32_t h, const DepthwiseConvolutionRunInfo &run_info, const Size2D &dilation)
 {
