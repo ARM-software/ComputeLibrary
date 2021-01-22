@@ -56,6 +56,7 @@ vars.AddVariables(
     BoolVariable("neon", "Enable Neon support", False),
     BoolVariable("gles_compute", "Enable OpenGL ES Compute Shader support", False),
     BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", True),
+    BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled", False),
     BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
     BoolVariable("tracing", "Enable runtime tracing", False),
     BoolVariable("openmp", "Enable OpenMP backend", False),
@@ -134,6 +135,10 @@ if env['os'] == 'bare_metal':
     if env['cppthreads'] or env['openmp']:
          print("ERROR: OpenMP and C++11 threads not supported in bare_metal. Use cppthreads=0 openmp=0")
          Exit(1)
+
+if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['os'] not in ['android']:
+    print("Compressed kernels are supported only for android builds")
+    Exit(1)
 
 if not env['exceptions']:
     if env['opencl'] or env['gles_compute']:
@@ -349,6 +354,9 @@ if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthre
 if env['opencl'] or env['gles_compute']:
     if env['embed_kernels']:
         env.Append(CPPDEFINES = ['EMBEDDED_KERNELS'])
+    if env['compress_kernels']:
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_COMPRESSED_KERNELS'])
+        env.Append(LIBS = ['z'])
 
 if env['debug']:
     env['asserts'] = True

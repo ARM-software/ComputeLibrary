@@ -23,6 +23,9 @@ import collections
 import os.path
 import re
 import subprocess
+import zlib
+import base64
+import string
 
 VERSION = "v0.0-unreleased"
 LIBRARY_VERSION_MAJOR = 21
@@ -112,15 +115,17 @@ def resolve_includes(target, source, env):
             tmp_file = updated_file
 
         # Append and prepend string literal identifiers and add expanded file to final list
-        tmp_file.insert(0, "R\"(\n")
-        tmp_file.append("\n)\"")
         entry = FileEntry(target_name=file[1].target_name, file_contents=tmp_file)
         final_files.append((file[0], entry))
 
     # Write output files
     for file in final_files:
         with open(file[1].target_name.get_path(), 'w+') as out_file:
-            out_file.write( "\n".join( file[1].file_contents ))
+            file_to_write = "\n".join( file[1].file_contents )
+            if env['compress_kernels']:
+                file_to_write = zlib.compress(file_to_write, 9).encode("base64").replace("\n", "")
+            file_to_write = "R\"(" + file_to_write + ")\""
+            out_file.write(file_to_write)
 
 def create_version_file(target, source, env):
 # Generate string with build options library version to embed in the library:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -164,10 +164,11 @@ public:
     CLCompileContext &get_compile_context();
 
 private:
-    CLCompileContext _compile_context;                                   /**< Compile Context. */
-    std::string      _kernel_path;                                       /**< Path to the kernels folder. */
-    static const std::map<std::string, std::string> _kernel_program_map; /**< Map that associates kernel names with programs. */
-    static const std::map<std::string, std::string> _program_source_map; /**< Contains sources for all programs.
+    CLCompileContext _compile_context;                                        /**< Compile Context. */
+    std::string      _kernel_path;                                            /**< Path to the kernels folder. */
+    mutable std::map<std::string, std::string>      _decompressed_source_map; /**< Map holding the decompressed files when compression is used */
+    static const std::map<std::string, std::string> _kernel_program_map;      /**< Map that associates kernel names with programs. */
+    static const std::map<std::string, std::string> _program_source_map;      /**< Contains sources for all programs.
                                                                             Used for compile-time kernel inclusion. >*/
 };
 } // namespace arm_compute

@@ -1388,6 +1388,10 @@ To see the build options available simply run ```scons -h```:
             default: True
             actual: True
 
+        compress_kernels: Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled as well (yes|no)
+            default: False
+            actual: False
+
         set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
             default: False
             actual: False
@@ -1507,6 +1511,8 @@ To see the build options available simply run ```scons -h```:
 @note If you want to natively compile for 32bit on a 64bit ARM device running a 64bit OS then you will have to use cross-compile too.
 
 There is also an 'embed_only' option which will generate all the .embed files for the OpenCL kernels and / or OpenGLES compute shaders. This might be useful if using a different build system to compile the library.
+
+In addittion the option 'compress_kernels' will compress the embedded OpenCL kernel files using zlib and inject them in the library. This is useful for reducing the binary size. Note, this option is only available for Android when 'embed_kernels' is enabled.
 
 @b Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue either on Github or by an email to developer@arm.com so that the issue can be addressed).
 
