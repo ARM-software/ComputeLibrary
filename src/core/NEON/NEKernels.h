@@ -54,7 +54,6 @@
 #include "src/core/NEON/kernels/NEDilateKernel.h"
 #include "src/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
 #include "src/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
-#include "src/core/NEON/kernels/NEElementwiseUnaryKernel.h"
 #include "src/core/NEON/kernels/NEErodeKernel.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"

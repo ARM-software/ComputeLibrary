@@ -98,7 +98,7 @@ v21.02 Public major release
    - @ref NEBatchNormalizationLayerKernel
    - @ref NELogits1DSoftmaxKernel
    - @ref NELogits1DMaxKernel
-   - @ref NEElementwiseUnaryKernel
+   - NEElementwiseUnaryKernel
  - Remove functions:
    - NELocallyConnectedLayer / CLLocallyConnectedLayer
    - NEIm2Col
@@ -830,7 +830,7 @@ v19.02 Public major release
     - @ref NESlice
     - @ref NEUnstack
     - @ref NEStridedSliceKernel / @ref NEStridedSlice
-    - @ref NEElementwiseUnaryKernel
+    - NEElementwiseUnaryKernel
     - @ref NERsqrtLayer
     - @ref NEExpLayer
     - @ref NEReverseKernel / @ref NEReverse
