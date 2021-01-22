@@ -87,6 +87,9 @@ Status NEPoolingAssemblyWrapperKernel::validate(const ITensorInfo *input, const 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
+#ifndef __aarch64__
+    ARM_COMPUTE_RETURN_ERROR_MSG("32-bit is not supported by assembly kernels");
+#endif /* __aarch64__ */
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_layout() != DataLayout::NHWC) || (info.data_layout != DataLayout::NHWC), "Only NHWC is supported by assembly kernels");
