@@ -1206,6 +1206,11 @@ bool CLKernelLibrary::int64_base_atomics_supported() const
     return _compile_context.int64_base_atomics_supported();
 }
 
+bool CLKernelLibrary::is_wbsm_supported()
+{
+    return _compile_context.is_wbsm_supported();
+}
+
 std::pair<std::string, bool> CLKernelLibrary::get_program(const std::string &program_name) const
 {
 #ifdef EMBEDDED_KERNELS

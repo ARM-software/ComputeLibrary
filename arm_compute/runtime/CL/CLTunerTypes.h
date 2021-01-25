@@ -42,7 +42,10 @@ enum class CLTunerMode
 /**< OpenCL tuner tuning information */
 struct CLTuningInfo
 {
-    bool tune_lws = true;
+    CLTunerMode tuner_mode = CLTunerMode::NORMAL; /**< Parameter to select the level (granularity) of the tuning */
+    bool        tune_wbsm  = false;               /**< Flag to tune the batches of work groups distributed to compute units.
+                                                       Internally, the library will check if this feature is available on
+                                                       the target platform */
 };
 
 /** Converts a string to a strong types enumeration @ref CLTunerMode

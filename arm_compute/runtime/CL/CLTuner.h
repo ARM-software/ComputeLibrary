@@ -182,7 +182,6 @@ private:
     cl::Event    _kernel_event;
     bool         _tune_new_kernels;
     CLTuningInfo _tuning_info;
-    CLTunerMode  _tuner_mode;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLTUNER_H */

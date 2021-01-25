@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -135,6 +135,7 @@ public:
     DECLARE_FUNCTION_PTR(clEnqueueMarker);
     DECLARE_FUNCTION_PTR(clWaitForEvents);
     DECLARE_FUNCTION_PTR(clCreateImage);
+    DECLARE_FUNCTION_PTR(clSetKernelExecInfo);
 
     // Third-party extensions
     DECLARE_FUNCTION_PTR(clImportMemoryARM);

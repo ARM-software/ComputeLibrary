@@ -77,9 +77,12 @@ public:
 
 /** Construct an ICLTuningParametersList object for the given tuner mode and gws configuration.
  *
+ * @param[in] tuning_info Tuning info containng which parameters to tune and the tuner mode
+ * @param[in] gws         Global worksize values
+ *
  * @return unique_ptr to the requested ICLTuningParametersList implementation.
  */
-std::unique_ptr<ICLTuningParametersList> get_tuning_parameters_list(CLTunerMode mode, const cl::NDRange &gws);
+std::unique_ptr<ICLTuningParametersList> get_tuning_parameters_list(CLTuningInfo tuning_info, const cl::NDRange &gws);
 
 } // namespace cl_tuner
 } // namespace arm_compute

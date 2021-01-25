@@ -35,8 +35,14 @@ constexpr unsigned int max_lws_supported_z{ 32u };
 class CLTuningParametersList : public ICLTuningParametersList
 {
 protected:
-    /* Shape of 3-D search space */
-    TensorShape search_space_shape{ 0, 0, 0 };
+    /* Shape of 4-D search space */
+    TensorShape               search_space_shape{ 0, 0, 0, 0 };
+    std::vector<unsigned int> _lws_x{ 0 };
+    std::vector<unsigned int> _lws_y{ 0 };
+    std::vector<unsigned int> _lws_z{ 0 };
+    std::vector<int>          _wbsm{ 0 }; /* Modify the batches size of workgroups distributed to compute units.
+                                             The value is in the range [-31,+31].
+                                             When 0, the runtime-selected wbs used is unmodified. */
 
     /** Constructor */
     CLTuningParametersList() = default;
@@ -62,7 +68,7 @@ public:
     /** Prevent default constructor calls */
     CLTuningParametersListExhaustive() = delete;
     /** Constructor */
-    CLTuningParametersListExhaustive(const cl::NDRange &gws);
+    CLTuningParametersListExhaustive(const cl::NDRange &gws, CLTuningInfo tuning_info);
     /** Copy Constructor */
     CLTuningParametersListExhaustive(const CLTuningParametersListExhaustive &) = default;
     /** Move Constructor */
@@ -83,7 +89,7 @@ class CLTuningParametersListNormal : public CLTuningParametersList
 {
 public:
     /** Constructor */
-    CLTuningParametersListNormal(const cl::NDRange &gws);
+    CLTuningParametersListNormal(const cl::NDRange &gws, CLTuningInfo tuning_info);
     /** Copy Constructor */
     CLTuningParametersListNormal(const CLTuningParametersListNormal &) = default;
     /** Move Constructor */
@@ -97,11 +103,6 @@ public:
 
     // Inherited methods overridden:
     CLTuningParams operator[](size_t) override;
-
-protected:
-    std::vector<unsigned int> _lws_x{};
-    std::vector<unsigned int> _lws_y{};
-    std::vector<unsigned int> _lws_z{};
 
     /** Prevent default constructor calls */
     CLTuningParametersListNormal() = default;
@@ -125,7 +126,7 @@ public:
     /** Prevent default constructor calls */
     CLTuningParametersListRapid() = delete;
     /** Constructor */
-    CLTuningParametersListRapid(const cl::NDRange &gws);
+    CLTuningParametersListRapid(const cl::NDRange &gws, CLTuningInfo tuning_info);
     /** Copy Constructor */
     CLTuningParametersListRapid(const CLTuningParametersListRapid &) = default;
     /** Move Constructor */
@@ -156,36 +157,53 @@ CLTuningParams CLTuningParametersListExhaustive::operator[](size_t index)
 {
     ARM_COMPUTE_ERROR_ON(index >= size());
     auto coords = index2coords(search_space_shape, index);
-    return CLTuningParams(coords[0] + 1U, coords[1] + 1U, coords[2] + 1U);
+    return CLTuningParams(coords[0] + 1U, coords[1] + 1U, coords[2] + 1U, static_cast<int>(coords[3]));
 }
 
-CLTuningParametersListExhaustive::CLTuningParametersListExhaustive(const cl::NDRange &gws)
+CLTuningParametersListExhaustive::CLTuningParametersListExhaustive(const cl::NDRange &gws, CLTuningInfo tuning_info)
 {
     ARM_COMPUTE_UNUSED(gws);
-    search_space_shape = TensorShape(max_lws_supported_x,
-                                     max_lws_supported_y,
-                                     max_lws_supported_z);
+    search_space_shape[0] = max_lws_supported_x;
+    search_space_shape[1] = max_lws_supported_y;
+    search_space_shape[2] = max_lws_supported_z;
+    search_space_shape[3] = 1;
+    if(tuning_info.tune_wbsm)
+    {
+        _wbsm                 = { -3, -2, -1, 0, 1, 2, 3 };
+        search_space_shape[3] = _wbsm.size();
+    }
 }
 
 CLTuningParams CLTuningParametersListNormal::operator[](size_t index)
 {
     ARM_COMPUTE_ERROR_ON(index >= size());
     auto coords = index2coords(search_space_shape, index);
-    return CLTuningParams(_lws_x[coords[0]], _lws_y[coords[1]], _lws_z[coords[2]]);
+    return CLTuningParams(_lws_x[coords[0]], _lws_y[coords[1]], _lws_z[coords[2]], _wbsm[coords[3]]);
 }
 
-CLTuningParametersListNormal::CLTuningParametersListNormal(const cl::NDRange &gws)
+CLTuningParametersListNormal::CLTuningParametersListNormal(const cl::NDRange &gws, CLTuningInfo tuning_info)
 {
     auto lws_x_max = std::min(static_cast<unsigned int>(gws[0]), max_lws_supported_x);
     auto lws_y_max = std::min(static_cast<unsigned int>(gws[1]), max_lws_supported_y);
     auto lws_z_max = std::min(static_cast<unsigned int>(gws[2]), max_lws_supported_z);
 
-    // Initialize the LWS values to test
+    // Initialize the tuning parameters values to test
+    _lws_x = {};
+    _lws_y = {};
+    _lws_z = {};
     initialize_lws_values(_lws_x, gws[0], lws_x_max, gws[2] > 16); // Explore lws that are not factors of gws only when gws[2] > 16
     initialize_lws_values(_lws_y, gws[1], lws_y_max, gws[2] > 16); // Explore lws that are not factors of gws only when gws[2] > 16
     initialize_lws_values(_lws_z, gws[2], lws_z_max, false);
 
-    search_space_shape = TensorShape(_lws_x.size(), _lws_y.size(), _lws_z.size());
+    search_space_shape[0] = _lws_x.size();
+    search_space_shape[1] = _lws_y.size();
+    search_space_shape[2] = _lws_z.size();
+    search_space_shape[3] = 1;
+    if(tuning_info.tune_wbsm)
+    {
+        _wbsm                 = { -2, -1, 0, 1, 2 };
+        search_space_shape[3] = _wbsm.size();
+    }
 }
 
 void CLTuningParametersListNormal::initialize_lws_values(std::vector<unsigned int> &lws, unsigned int gws, unsigned int lws_max, bool mod_let_one)
@@ -207,18 +225,29 @@ void CLTuningParametersListNormal::initialize_lws_values(std::vector<unsigned in
     }
 }
 
-CLTuningParametersListRapid::CLTuningParametersListRapid(const cl::NDRange &gws)
+CLTuningParametersListRapid::CLTuningParametersListRapid(const cl::NDRange &gws, CLTuningInfo tuning_info)
 {
     auto lws_x_max = std::min(static_cast<unsigned int>(gws[0]), 8u); // Limit exploration to 1 - 8
     auto lws_y_max = std::min(static_cast<unsigned int>(gws[1]), 4u); // Limit exploration to 1 - 4
     auto lws_z_max = std::min(static_cast<unsigned int>(gws[2]), 4u); // Limit exploration to 1 - 4
 
     // Initialize the LWS values to test
+    _lws_x = {};
+    _lws_y = {};
+    _lws_z = {};
     initialize_lws_values(_lws_x, lws_x_max);
     initialize_lws_values(_lws_y, lws_y_max);
     initialize_lws_values(_lws_z, lws_z_max);
 
-    search_space_shape = TensorShape(_lws_x.size(), _lws_y.size(), _lws_z.size());
+    search_space_shape[0] = _lws_x.size();
+    search_space_shape[1] = _lws_y.size();
+    search_space_shape[2] = _lws_z.size();
+    search_space_shape[3] = 1;
+    if(tuning_info.tune_wbsm)
+    {
+        _wbsm                 = { -1, 0, 1 };
+        search_space_shape[3] = _wbsm.size();
+    }
 }
 
 void CLTuningParametersListRapid::initialize_lws_values(std::vector<unsigned int> &lws, unsigned int lws_max)
@@ -231,16 +260,16 @@ void CLTuningParametersListRapid::initialize_lws_values(std::vector<unsigned int
     }
 }
 
-std::unique_ptr<ICLTuningParametersList> get_tuning_parameters_list(CLTunerMode mode, const cl::NDRange &gws)
+std::unique_ptr<ICLTuningParametersList> get_tuning_parameters_list(CLTuningInfo tuning_info, const cl::NDRange &gws)
 {
-    switch(mode)
+    switch(tuning_info.tuner_mode)
     {
         case CLTunerMode::EXHAUSTIVE:
-            return std::make_unique<CLTuningParametersListExhaustive>(gws);
+            return std::make_unique<CLTuningParametersListExhaustive>(gws, tuning_info);
         case CLTunerMode::NORMAL:
-            return std::make_unique<CLTuningParametersListNormal>(gws);
+            return std::make_unique<CLTuningParametersListNormal>(gws, tuning_info);
         case CLTunerMode::RAPID:
-            return std::make_unique<CLTuningParametersListRapid>(gws);
+            return std::make_unique<CLTuningParametersListRapid>(gws, tuning_info);
         default:
             return nullptr;
     }

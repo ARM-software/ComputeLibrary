@@ -148,6 +148,12 @@ public:
      */
     std::string get_program_name(const std::string &kernel_name) const;
 
+    /* Returns true if the workgroup batch size modifier parameter is supported on the cl device
+    *
+    * @return true if the workgroup batch size modifier parameter is supported, false otherwise
+    */
+    bool is_wbsm_supported();
+
     /** Sets the CL context used to create programs.
      *
      * @note Setting the context also resets the device to the

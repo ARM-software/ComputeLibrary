@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,11 @@
 
 #include <set>
 #include <string>
+
+/* CL Device capabilities */
+#define ARM_COMPUTE_LIBRARY_OPENCL_DEVICE_CAPABILITIES_ARM 0x41E4
+/* Workgroup Batch Size Modifier */
+#define ARM_COMPUTE_LIBRARY_OPENCL_EXEC_WBSM_ARM 0x41E6
 
 namespace arm_compute
 {
@@ -225,6 +230,21 @@ cl::Kernel create_kernel(const CLCompileContext &ctx, const std::string &kernel_
  * @return An LWS hint object
  */
 cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size);
+
+/* Helper function to check if the workgroup batch size modifier parameter is supported on the cl device
+ *
+ * @param[in] device cl device to check for support
+ *
+ * @return true if the workgroup batch size modifier parameter is supported, false otherwise
+ */
+bool get_wbsm_support_info(const cl::Device &device);
+
+/* Helper function to set the workgroup batch size modifier parameter in the kernel
+ *
+ * @param[in] kernel    cl kernel to set the workgroup batch size modifier parameter
+ * @param[in] wbsm_hint workgroup batch size modifier to use
+ */
+void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint);
 
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHELPERS_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,6 @@
 #include "src/core/helpers/Utils.h"
 
 #include <cstddef>
-
-using namespace arm_compute;
 
 void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint, bool use_dummy_work_items)
 {
@@ -77,9 +75,15 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
         lws = valid_lws;
     }
 
+    if(CLKernelLibrary::get().is_wbsm_supported())
+    {
+        set_wbsm(kernel.kernel(), kernel.wbsm_hint());
+    }
     queue.enqueueNDRangeKernel(kernel.kernel(), cl::NullRange, gws, lws);
 }
 
+namespace arm_compute
+{
 template <unsigned int dimension_size>
 void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, const Window &window)
 {
@@ -146,3 +150,4 @@ cl::NDRange ICLKernel::gws_from_window(const Window &window)
 
     return gws;
 }
+} // namespace arm_compute
