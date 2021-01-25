@@ -46,9 +46,9 @@ public:
     /** Initialise the kernel's source and destination
      *
      * @param[in]     compile_context The compile context to be used.
-     * @param[in]     src             Source tensor. Data types supported: All.
+     * @param[in]     src             Source tensor info. Data types supported: All.
      * @param[in]     width_offset    The offset on the X axis.
-     * @param[in,out] dst             Destination tensor. Data types supported: same as @p src.
+     * @param[in,out] dst             Destination tensor info. Data types supported: same as @p src.
      *
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int width_offset, ITensorInfo *dst);

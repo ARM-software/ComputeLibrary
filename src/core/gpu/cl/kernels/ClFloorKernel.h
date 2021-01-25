@@ -43,8 +43,8 @@ public:
     /** Configure kernel for a given list of arguments
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src             Source tensor. Data type supported: F16/F32.
-     * @param[out] dst             Destination tensor. Same as @p src
+     * @param[in]  src             Source tensor info. Data type supported: F16/F32.
+     * @param[out] dst             Destination tensor info. Same as @p src
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
 

@@ -45,9 +45,9 @@ public:
      * @note If the output tensor is a nullptr, the activation function will be performed in-place
      *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] src             Source tensor. In case of @p dst tensor = nullptr, this tensor will store the result
+     * @param[in, out] src             Source tensor info. In case of @p dst tensor = nullptr, this tensor will store the result
      *                                 of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
-     * @param[out]     dst             Destination tensor. Data type supported: same as @p src
+     * @param[out]     dst             Destination tensor info. Data type supported: same as @p src
      * @param[in]      act_info        Activation layer information.
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo act_info);

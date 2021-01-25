@@ -28,6 +28,7 @@
 #include "src/core/gpu/cl/kernels/ClElementwiseKernel.h"
 
 #include "src/runtime/gpu/cl/operators/ClAdd.h"
+#include "src/runtime/gpu/cl/operators/ClSub.h"
 
 #include <utility>
 
@@ -35,28 +36,6 @@ namespace arm_compute
 {
 namespace experimental
 {
-CLArithmeticSubtraction::CLArithmeticSubtraction()
-{
-}
-void CLArithmeticSubtraction::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy,
-                                        const ActivationLayerInfo &act_info)
-{
-    auto k = std::make_unique<arm_compute::opencl::kernels::ClSaturatedArithmeticKernel>();
-    k->configure(compile_context, ArithmeticOperation::SUB, input1, input2, output, policy, act_info);
-    _kernel = std::move(k);
-}
-
-Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(policy);
-    return arm_compute::opencl::kernels::ClSaturatedArithmeticKernel::validate(ArithmeticOperation::SUB, input1, input2, output, policy, act_info);
-}
-
-void CLArithmeticSubtraction::run(ITensorPack &tensors)
-{
-    ICLOperator::run(tensors);
-}
-
 CLArithmeticDivision::CLArithmeticDivision()
 {
 }
@@ -210,10 +189,10 @@ void CLArithmeticAddition::run()
 
 struct CLArithmeticSubtraction::Impl
 {
-    const ICLTensor                                       *src_0{ nullptr };
-    const ICLTensor                                       *src_1{ nullptr };
-    ICLTensor                                             *dst{ nullptr };
-    std::unique_ptr<experimental::CLArithmeticSubtraction> op{ nullptr };
+    const ICLTensor               *src_0{ nullptr };
+    const ICLTensor               *src_1{ nullptr };
+    ICLTensor                     *dst{ nullptr };
+    std::unique_ptr<opencl::ClSub> op{ nullptr };
 };
 
 CLArithmeticSubtraction::CLArithmeticSubtraction()
@@ -235,13 +214,13 @@ void CLArithmeticSubtraction::configure(const CLCompileContext &compile_context,
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::CLArithmeticSubtraction>();
+    _impl->op    = std::make_unique<opencl::ClSub>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), policy, act_info);
 }
 
 Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
-    return experimental::CLArithmeticSubtraction::validate(input1, input2, output, policy, act_info);
+    return opencl::ClSub::validate(input1, input2, output, policy, act_info);
 }
 
 void CLArithmeticSubtraction::run()

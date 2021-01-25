@@ -46,9 +46,9 @@ public:
     /** Initialise the kernel's source and destination
      *
      * @param[in]     compile_context The compile context to be used.
-     * @param[in]     src             Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]     src             Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]     depth_offset    The offset on the Z axis.
-     * @param[in,out] dst             Destination tensor. Data types supported: Same as @p src.
+     * @param[in,out] dst             Destination tensor info. Data types supported: Same as @p src.
      *
      * @note: The dst tensor's low two dimensions can't be smaller than the src one's.
      * @note: The gaps between the two lowest dimensions of src and dst need to be divisible by 2.

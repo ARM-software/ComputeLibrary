@@ -54,8 +54,8 @@ public:
      *
      *
      * @param[in]     compile_context The compile context to be used.
-     * @param[in,out] src_vector      The vectors containing all the tensors to concatenate. Data types supported: All
-     * @param[out]    dst             Destination tensor. Data types supported: same as @p src_vector.
+     * @param[in,out] src_vector      The vectors containing all the tensors info to concatenate. Data types supported: All
+     * @param[out]    dst             Destination tensor info. Data types supported: same as @p src_vector.
      * @param[in]     axis            Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
     void configure(const ClCompileContext &compile_context, const std::vector<ITensorInfo *> &src_vector, ITensorInfo *dst, size_t axis);

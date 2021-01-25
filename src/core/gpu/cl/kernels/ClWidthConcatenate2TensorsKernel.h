@@ -46,9 +46,9 @@ public:
     /** Initialise the kernel's sources and destination
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src1            First source tensor. Data types supported: All.
-     * @param[in]  src2            Second source tensor. Data types supported: same as @p src1
-     * @param[out] dst             Destination tensor. Data types supported: Same as @p src1.
+     * @param[in]  src1            First source tensor info. Data types supported: All.
+     * @param[in]  src2            Second source tensor info. Data types supported: same as @p src1
+     * @param[out] dst             Destination tensor info. Data types supported: Same as @p src1.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
     /**  Static function to check if given info will lead to a valid configuration of @ref ClWidthConcatenate2TensorsKernel

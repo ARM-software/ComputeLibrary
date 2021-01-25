@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_ADD_H
-#define ARM_COMPUTE_CL_ADD_H
+#ifndef ARM_COMPUTE_CL_SUB_H
+#define ARM_COMPUTE_CL_SUB_H
 
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/runtime/gpu/cl/IClOperator.h"
@@ -31,16 +31,16 @@ namespace arm_compute
 {
 namespace opencl
 {
-/** Basic function to run arithmetic addition
+/** Basic function to run arithmetic subtraction
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
- * @note The function performs an arithmetic addition between two tensors.
+ * @note The function performs an arithmetic subtraction between two tensors.
  */
-class ClAdd : public IClOperator
+class ClSub : public IClOperator
 {
 public:
     /** Default Constructor */
-    ClAdd() = default;
+    ClSub() = default;
     /** Configure function for a given list of arguments.
      *
      * Valid configurations (src1,src2) -> dst :
@@ -68,7 +68,7 @@ public:
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, ConvertPolicy policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref ClAdd
+    /** Static function to check if given info will lead to a valid configuration of @ref ClSub
      *
      * Valid configurations (src1,src2) -> dst :
      *
@@ -97,4 +97,4 @@ public:
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_ADD_H */
+#endif /* ARM_COMPUTE_CL_SUB_H */
