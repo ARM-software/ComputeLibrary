@@ -39,7 +39,7 @@ void CpuAdd::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensor
 
 Status CpuAdd::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuAddKernel::validate(src0, src1, dst, policy);
 }
 } // namespace cpu
