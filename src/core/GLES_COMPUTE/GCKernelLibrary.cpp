@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <regex>
 #include <utility>
 #include <vector>
