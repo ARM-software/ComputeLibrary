@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -136,8 +136,9 @@ void CLConvolutionRectangle::configure(ICLTensor *input, ICLTensor *output, cons
 void CLConvolutionRectangle::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t rows, uint32_t cols, uint32_t scale,
                                        BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = std::make_unique<CLConvolutionRectangleKernel>();
-    k->configure(compile_context, input, output, conv, rows, cols, scale, border_mode == BorderMode::UNDEFINED);
+    border_mode = (border_mode == BorderMode::UNDEFINED) ? BorderMode::CONSTANT : border_mode;
+    auto k      = std::make_unique<CLConvolutionRectangleKernel>();
+    k->configure(compile_context, input, output, conv, rows, cols, scale, false);
     _kernel = std::move(k);
     _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
 }
