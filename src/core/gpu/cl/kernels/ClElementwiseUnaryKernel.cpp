@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
+#include "src/core/gpu/cl/kernels/ClElementwiseUnaryKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -32,55 +32,54 @@
 
 namespace arm_compute
 {
+namespace opencl
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo &input, const ITensorInfo &output, const ElementWiseUnary op)
+Status validate_arguments(const ITensorInfo &src, const ITensorInfo &dst, const ElementWiseUnary op)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src);
     if(op == ElementWiseUnary::LOGICAL_NOT)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::U8);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::U8);
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32);
     }
 
-    // Validate in case of configured output
-    if(output.total_size() > 0)
+    // Validate in case of configured dst
+    if(dst.total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &output);
+        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &dst);
     }
 
     return Status{};
 }
 } // namespace
 
-void CLElementWiseUnaryLayerKernel::configure(const ITensorInfo *input, ITensorInfo *output, const ElementWiseUnary &op)
+void ClElementWiseUnaryKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const ElementWiseUnary &op)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, op);
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
-void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const ElementWiseUnary &op)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    auto padding_info = get_padding_info({ src, dst });
 
-    auto padding_info = get_padding_info({ input, output });
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input, *output, op));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src, *dst, op));
 
     const std::string kernel_name    = "elementwise_unary";
-    const int         vec_size_x     = 16 / output->element_size();
-    const int         output_width_x = output->tensor_shape().x();
-    const bool        multi_access_x = (output_width_x / vec_size_x > 0);
+    const int         vec_size_x     = 16 / dst->element_size();
+    const int         dst_width_x    = dst->tensor_shape().x();
+    const bool        multi_access_x = (dst_width_x / vec_size_x > 0);
 
     // Set kernel build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option_if(multi_access_x, "-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
-    build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(output_width_x - vec_size_x, 0)));
+    build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(dst_width_x - vec_size_x, 0)));
     switch(op)
     {
         case ElementWiseUnary::RSQRT:
@@ -115,7 +114,7 @@ void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_co
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
-    Window win = calculate_max_window(*output);
+    Window win = calculate_max_window(*dst);
     if(multi_access_x)
     {
         win.set(Window::DimX,
@@ -126,16 +125,16 @@ void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_co
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLElementWiseUnaryLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ElementWiseUnary &op)
+Status ClElementWiseUnaryKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const ElementWiseUnary &op)
 {
     ARM_COMPUTE_UNUSED(op);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input, *output, op));
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*src, *dst, op));
 
     return Status{};
 }
 
-void CLElementWiseUnaryLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClElementWiseUnaryKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
@@ -155,4 +154,6 @@ void CLElementWiseUnaryLayerKernel::run_op(ITensorPack &tensors, const Window &w
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

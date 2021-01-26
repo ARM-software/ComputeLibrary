@@ -56,7 +56,6 @@
 #include "src/core/CL/kernels/CLDerivativeKernel.h"
 #include "src/core/CL/kernels/CLDilateKernel.h"
 #include "src/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
-#include "src/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
 #include "src/core/CL/kernels/CLErodeKernel.h"
 #include "src/core/CL/kernels/CLFFTDigitReverseKernel.h"
 #include "src/core/CL/kernels/CLFFTRadixStageKernel.h"

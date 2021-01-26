@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,38 +22,19 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLLogicalNot.h"
-#include "arm_compute/core/CL/ICLTensor.h"
-#include "src/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
 
-#include <utility>
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClLogicalNot.h"
 
 namespace arm_compute
 {
-namespace experimental
-{
-void CLLogicalNot::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = std::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(compile_context, input, output, ElementWiseUnary::LOGICAL_NOT);
-    _kernel = std::move(k);
-}
-
-Status CLLogicalNot::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::LOGICAL_NOT);
-}
-
-void CLLogicalNot::run(ITensorPack &tensors)
-{
-    ICLOperator::run(tensors);
-}
-} // namespace experimental
-
 struct CLLogicalNot::Impl
 {
-    const ICLTensor                            *src{ nullptr };
-    ICLTensor                                  *dst{ nullptr };
-    std::unique_ptr<experimental::CLLogicalNot> op{ nullptr };
+    const ICLTensor                      *src{ nullptr };
+    ICLTensor                            *dst{ nullptr };
+    std::unique_ptr<opencl::ClLogicalNot> op{ nullptr };
 };
 
 CLLogicalNot::CLLogicalNot()
@@ -73,13 +54,13 @@ void CLLogicalNot::configure(const CLCompileContext &compile_context, const ICLT
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = std::make_unique<experimental::CLLogicalNot>();
+    _impl->op  = std::make_unique<opencl::ClLogicalNot>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 
 Status CLLogicalNot::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return experimental::CLLogicalNot::validate(input, output);
+    return opencl::ClLogicalNot::validate(input, output);
 }
 
 void CLLogicalNot::run()

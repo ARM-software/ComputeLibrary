@@ -856,7 +856,7 @@ v19.02 Public major release
     - @ref CLReverse / @ref CLReverseKernel
     - @ref CLRsqrtLayer
     - @ref CLExpLayer
-    - @ref CLElementWiseUnaryLayerKernel
+    - CLElementWiseUnaryLayerKernel
     - @ref CLGEMMReshapeLHSMatrixKernel
     - @ref CLGEMMReshapeRHSMatrixKernel
     - @ref CLGEMMMatrixMultiplyReshapedKernel
