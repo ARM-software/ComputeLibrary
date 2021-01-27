@@ -160,6 +160,12 @@ class PoolingDepthfirstGenericQuantized : public PoolingCommon<typename strategy
       end_out_height = output_height;
     }
 
+    if(start_channel >= end_channel)
+    {
+        // Early exit in case of multiple threads parallelising on channels
+        return;
+    }
+
     // Cast input and output pointers into the right types
     const TInput *const inptr = static_cast<const TInput *>(_input) + start_channel;
     TOutput *const outptr = static_cast<TOutput *>(_output) + start_channel;
