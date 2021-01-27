@@ -41,6 +41,7 @@ namespace kernels
 class ClPermuteKernel : public ICLKernel
 {
 public:
+    /** Default constructor */
     ClPermuteKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClPermuteKernel);
     /** Set the src and dst of the kernel.

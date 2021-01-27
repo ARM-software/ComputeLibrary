@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLSoftmaxLayerKernel.h"
-
+#include "src/core/gpu/cl/kernels/ClSoftmaxKernel.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
+{
+namespace opencl
+{
+namespace kernels
 {
 namespace
 {
@@ -71,53 +78,50 @@ CLBuildOptions prepare_quantized_softmax_build_options(float input_scale, float 
     return build_opts;
 }
 
-Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo &src, const ITensorInfo &max, const ITensorInfo &dst, const ITensorInfo &sum)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(max, sum, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &max);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, max);
-
-    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input->data_type());
+    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(src.data_type());
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if(dst.total_size() != 0)
     {
         if(is_quantized_asymmetric)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, 1, DataType::S32);
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &dst);
     }
 
     // Checks performed when sum is configured
-    if(sum->total_size() != 0)
+    if(sum.total_size() != 0)
     {
         if(is_quantized_asymmetric)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(sum, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&sum, 1, DataType::S32);
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(max, sum);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&max, &sum);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(max, sum);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&max, &sum);
     }
 
     return Status{};
 }
 
-Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, const SoftmaxKernelInfo &info)
+Status validate_arguments_1DNorm(const ITensorInfo &src, const ITensorInfo &sum, const ITensorInfo &dst, const SoftmaxKernelInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(sum, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &sum);
     ARM_COMPUTE_RETURN_ERROR_ON(info.is_log && !is_data_type_float(info.input_data_type));
 
     // Note: output should always have a scale of 1/256 and offset 0
@@ -125,17 +129,17 @@ Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *su
     const bool             is_quantized_asymmetric   = is_data_type_quantized_asymmetric(info.input_data_type);
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if(dst.total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &dst);
         if(!is_quantized_asymmetric)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
-            ARM_COMPUTE_RETURN_ERROR_ON(output->quantization_info() != allowed_quantization_info);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+            ARM_COMPUTE_RETURN_ERROR_ON(dst.quantization_info() != allowed_quantization_info);
         }
     }
 
@@ -144,43 +148,26 @@ Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *su
 } // namespace
 
 /**< Grid size (obtained through auto-tuning) */
-const unsigned int CLLogits1DMaxShiftExpSumKernel::_grid_size = 64;
+const unsigned int ClLogits1DMaxShiftExpSumKernel::_grid_size = 64;
 /**< Vector size in the serial case (obtained through auto-tuning) */
-const unsigned int CLLogits1DMaxShiftExpSumKernel::_serial_vector_size = 8;
+const unsigned int ClLogits1DMaxShiftExpSumKernel::_serial_vector_size = 8;
 /**< Vector size in the parallel case (obtained through auto-tuning, enables the best memory access pattern for Bifrost) .*/
-const unsigned int CLLogits1DMaxShiftExpSumKernel::_parallel_vector_size = 4;
+const unsigned int ClLogits1DMaxShiftExpSumKernel::_parallel_vector_size = 4;
 
-CLLogits1DMaxShiftExpSumKernel::CLLogits1DMaxShiftExpSumKernel()
-    : _input(nullptr), _max(nullptr), _output(nullptr), _sum(nullptr)
+void ClLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &max, ITensorInfo &dst, ITensorInfo &sum, const SoftmaxKernelInfo &info)
 {
-}
-
-void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, max, output, sum, info);
-}
-
-void CLLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
-
-    auto padding_info = get_padding_info({ input, max, output, sum });
+    auto padding_info = get_padding_info({ &src, &max, &dst, &sum });
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*sum->info(), input->info()->clone()->set_tensor_shape(max->info()->tensor_shape()));
-    auto_init_if_empty(*output->info(), *input->info()->clone());
+    auto_init_if_empty(sum, src.clone()->set_tensor_shape(max.tensor_shape()));
+    auto_init_if_empty(dst, *src.clone());
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DMaxShiftExpSum(input->info(), max->info(), output->info(), sum->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DMaxShiftExpSum(src, max, dst, sum));
 
-    _input  = input;
-    _max    = max;
-    _output = output;
-    _sum    = sum;
-
-    const DataType                dt                 = input->info()->data_type();
-    const UniformQuantizationInfo qinfo              = input->info()->quantization_info().uniform();
-    const size_t                  reduction_dim_size = input->info()->dimension(0);
+    const DataType                dt                 = src.data_type();
+    const UniformQuantizationInfo qinfo              = src.quantization_info().uniform();
+    const size_t                  reduction_dim_size = src.dimension(0);
     const float                   beta               = info.beta;
     const auto                    is_signed_qasymm8  = is_data_type_quantized_asymmetric_signed(info.input_data_type);
     const int                     min_value          = is_signed_qasymm8 ? CL_SCHAR_MIN : 0;
@@ -216,7 +203,7 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
         // Handle boundary conditions.
         const unsigned int multiple_grid_size = (reduction_dim_size / vector_size) % _grid_size;
         build_opts.add_option_if((multiple_grid_size != 0) || ((reduction_dim_size % vector_size) != 0), "-DNON_MULTIPLE_OF_GRID_SIZE");
-        // Setting _lws_hint in this way can also communicate grid_size to CLLogits1DMaxShiftExpSumKernel::run().
+        // Setting _lws_hint in this way can also communicate grid_size to ClLogits1DMaxShiftExpSumKernel::run().
         // A single workgroup performs reduction in dimension 0 in the parallel case, hence lws[0]==gws[0].
         lws_hint = cl::NDRange(_grid_size);
     }
@@ -229,35 +216,42 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure window
-    Window win = calculate_max_window(*(input->info()), Steps(reduction_dim_size));
-    ICLKernel::configure_internal(win, lws_hint);
+    Window win = calculate_max_window(src, Steps(reduction_dim_size));
+    IClKernel::configure_internal(win, lws_hint);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLLogits1DMaxShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+Status ClLogits1DMaxShiftExpSumKernel::validate(const ITensorInfo &src, const ITensorInfo &max, const ITensorInfo &dst, const ITensorInfo &sum)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DMaxShiftExpSum(input, max, output, sum));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DMaxShiftExpSum(src, max, dst, sum));
     return Status{};
 }
 
-CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(size_t size)
+ClLogits1DMaxShiftExpSumKernel::ParallelReductionInfo ClLogits1DMaxShiftExpSumKernel::is_parallel_reduction(size_t size)
 {
     bool         is_parallel_reduction = (size >= (_grid_size * _serial_vector_size)) && (_grid_size > 1);
     unsigned int vector_size           = is_parallel_reduction ? _parallel_vector_size : _serial_vector_size;
     return std::make_tuple(is_parallel_reduction, vector_size);
 }
 
-void CLLogits1DMaxShiftExpSumKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClLogits1DMaxShiftExpSumKernel::run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
+    auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    auto max = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_INT_0));
+    auto sum = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_INT_1));
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst, max, sum);
+
     // Collapse window in Z dimension
-    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window window_collapsed = window.collapse_if_possible(IClKernel::window(), Window::DimZ);
 
     // Reconfigure window in case of parallel reduction
-    ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(_input->info()->dimension(0));
+    ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(src->info()->dimension(0));
     if(std::get<0>(parallel_reduction_info))
     {
         // Launch grid_size parallel work items
@@ -270,58 +264,41 @@ void CLLogits1DMaxShiftExpSumKernel::run(const Window &window, cl::CommandQueue 
     {
         unsigned int idx = 0;
         // Set inputs
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _max, slice);
-        add_3D_tensor_argument(idx, _output, slice);
-        add_3D_tensor_argument(idx, _sum, slice);
+        add_3D_tensor_argument(idx, src, slice);
+        add_3D_tensor_argument(idx, max, slice);
+        add_3D_tensor_argument(idx, dst, slice);
+        add_3D_tensor_argument(idx, sum, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
     while(window_collapsed.slide_window_slice_3D(slice));
 }
 
-CLLogits1DNormKernel::CLLogits1DNormKernel()
-    : _input(nullptr), _sum(nullptr), _output(nullptr)
+void ClLogits1DNormKernel::configure(const CLCompileContext &compile_context, const ITensorInfo &src, const ITensorInfo &sum, ITensorInfo &dst, const SoftmaxKernelInfo &info)
 {
-}
-
-void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, sum, output, info);
-}
-
-void CLLogits1DNormKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
-
-    auto padding_info = get_padding_info({ input, output, sum });
+    auto padding_info = get_padding_info({ &src, &dst, &sum });
 
     // Note: output should always have a scale of 1/256 and offset 0
     const bool                    is_quantized_asymmetric   = is_data_type_quantized_asymmetric(info.input_data_type);
     const DataType                output_data_type          = info.input_data_type;
     const QuantizationInfo        allowed_quantization_info = get_softmax_output_quantization_info(info.input_data_type, info.is_log);
-    const UniformQuantizationInfo qinfo                     = input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qinfo                     = src.quantization_info().uniform();
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(),
-                       input->info()->clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
+    auto_init_if_empty(dst, src.clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DNorm(input->info(), sum->info(), output->info(), info));
-
-    _input  = input;
-    _sum    = sum;
-    _output = output;
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DNorm(src, sum, dst, info));
 
     const auto         is_signed_qasymm8 = is_data_type_quantized_asymmetric_signed(info.input_data_type);
     const int          min_value         = is_signed_qasymm8 ? CL_SCHAR_MIN : 0;
-    const unsigned int vector_size       = adjust_vec_size(16, input->info()->dimension(0));
+    const unsigned int vector_size       = adjust_vec_size(16, src.dimension(0));
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(info.input_data_type));
     build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(min_value));
     build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
-    build_opts.add_option("-DVECTOR_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % vector_size));
+    build_opts.add_option("-DVECTOR_SIZE_LEFTOVER=" + support::cpp11::to_string(src.dimension(0) % vector_size));
     build_opts.add_option_if(is_data_type_quantized_asymmetric_signed(info.input_data_type), "-DQASYMM8_SIGNED");
     build_opts.add_options_if(is_quantized_asymmetric,
                               prepare_quantized_softmax_build_options(qinfo.scale, info.beta).options());
@@ -332,23 +309,29 @@ void CLLogits1DNormKernel::configure(const CLCompileContext &compile_context, co
     _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure window
-    auto win = calculate_max_window(*(input->info()), Steps(vector_size));
+    auto win = calculate_max_window(src, Steps(vector_size));
     ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLLogits1DNormKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, const SoftmaxKernelInfo &info)
+Status ClLogits1DNormKernel::validate(const ITensorInfo &src, const ITensorInfo &sum, const ITensorInfo &dst, const SoftmaxKernelInfo &info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DNorm(input, sum, output, info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DNorm(src, sum, dst, info));
 
     return Status{};
 }
 
-void CLLogits1DNormKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClLogits1DNormKernel::run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
+
+    auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    auto sum = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_INT_0));
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst, sum);
 
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice            = window_collapsed.first_slice_window_3D();
@@ -360,11 +343,13 @@ void CLLogits1DNormKernel::run(const Window &window, cl::CommandQueue &queue)
 
         unsigned int idx = 0;
         // Set inputs
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _sum, sum_slice);
-        add_3D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, src, slice);
+        add_3D_tensor_argument(idx, sum, sum_slice);
+        add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
     while(window_collapsed.slide_window_slice_3D(slice));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

@@ -295,8 +295,8 @@ v20.11 Public major release
    - CLWidthConcatenateLayerKernel
    - CLWidthConcatenate4TensorsKernel
    - CLWidthConcatenate2TensorsKernel
-   - @ref CLLogits1DMaxShiftExpSumKernel
-   - @ref CLLogits1DNormKernel
+   - CLLogits1DMaxShiftExpSumKernel
+   - CLLogits1DNormKernel
    - CLHeightConcatenateLayerKernel
    - @ref CLGEMMMatrixMultiplyKernel
    - @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
@@ -1400,7 +1400,7 @@ v17.03 Sources preview
 
 v17.02.1 Sources preview
  - New OpenCL kernels / functions:
-   - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
+   - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, CLLogits1DNormKernel / @ref CLSoftmaxLayer
    - CLPoolingLayerKernel / @ref CLPoolingLayer
    - @ref CLIm2ColKernel, @ref CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / CLConvolutionLayer
    - @ref CLRemapKernel / @ref CLRemap

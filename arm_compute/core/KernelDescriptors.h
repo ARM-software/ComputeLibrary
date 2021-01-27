@@ -114,6 +114,7 @@ struct SoftmaxKernelInfo
     float    beta{ 1.f };                          /**< A scaling factor for the exponent with default value 1.0 */
     bool     is_log{ false };                      /**< Flag used to perform Log Softmax operation */
     DataType input_data_type{ DataType::UNKNOWN }; /**< Input tensor data type */
+    int32_t  axis{ 0 };                            /**< The dimension in which to apply softmax. */
 };
 
 /** Descriptor used by the direct convolution layer output stage kernels */

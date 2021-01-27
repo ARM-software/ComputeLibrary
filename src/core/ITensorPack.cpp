@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,11 @@ void ITensorPack::add_tensor(int id, ITensor *tensor)
 void ITensorPack::add_tensor(int id, const ITensor *tensor)
 {
     _pack[id] = PackElement(tensor);
+}
+
+void ITensorPack::add_const_tensor(int id, const ITensor *tensor)
+{
+    add_tensor(id, tensor);
 }
 
 const ITensor *ITensorPack::get_const_tensor(int id) const

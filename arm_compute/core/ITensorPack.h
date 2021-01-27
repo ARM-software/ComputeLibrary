@@ -69,6 +69,13 @@ public:
      * @param[in] tensor Tensor to add
      */
     void add_tensor(int id, const ITensor *tensor);
+
+    /** Add const tensor to the pack
+     *
+     * @param[in] id     ID/type of the tensor to add
+     * @param[in] tensor Tensor to add
+     */
+    void add_const_tensor(int id, const ITensor *tensor);
     /** Get tensor of a given id from the pac
      *
      * @param[in] id ID of tensor to extract
