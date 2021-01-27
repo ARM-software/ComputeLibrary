@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,13 +48,44 @@ std::string    WallClock<output_timestamps>::id() const
 template <bool output_timestamps>
 void           WallClock<output_timestamps>::start()
 {
+#if defined(BARE_METAL)
+    uint64_t tmp;
+    uint64_t retval;
+
+    __asm __volatile(
+        "mrs    %[tmp], pmcr_el0\n"
+        "orr    %[tmp], %[tmp], #1\n"
+        "msr    pmcr_el0, %[tmp]\n"
+        "mrs    %[tmp], pmcntenset_el0\n"
+        "orr    %[tmp], %[tmp], #1<<31\n"
+        "msr    pmcntenset_el0, %[tmp]\n"
+        "mrs    %[retval], pmccntr_el0\n"
+        : [tmp] "=r"(tmp), [retval] "=r"(retval));
+
+    _start = retval;
+#else  // !defined(BARE_METAL)
     _start = std::chrono::system_clock::now();
+#endif // defined(BARE_METAL)
 }
 
 template <bool output_timestamps>
 void           WallClock<output_timestamps>::stop()
 {
+#if defined(BARE_METAL)
+    uint64_t tmp;
+    uint64_t retval;
+
+    __asm __volatile(
+        "mrs    %[retval], pmccntr_el0\n"
+        "mov   %[tmp], #0x3f\n"
+        "orr   %[tmp], %[tmp], #1<<31\n"
+        "msr    pmcntenclr_el0, %[tmp]\n"
+        : [tmp] "=r"(tmp), [retval] "=r"(retval));
+
+    _stop = retval;
+#else  // !defined(BARE_METAL)
     _stop = std::chrono::system_clock::now();
+#endif // defined(BARE_METAL)
 }
 
 template <bool              output_timestamps>
@@ -63,14 +94,23 @@ Instrument::MeasurementsMap WallClock<output_timestamps>::measurements() const
     MeasurementsMap measurements;
     if(output_timestamps)
     {
-        // _start / _stop are in ns, so divide by an extra 1000:
+#if defined(BARE_METAL)
+        measurements.emplace("[start]Wall clock time", Measurement(_start / static_cast<uint64_t>(_scale_factor), _unit));
+        measurements.emplace("[end]Wall clock time", Measurement(_stop / static_cast<uint64_t>(_scale_factor), _unit));
+#else  // !defined(BARE_METAL)
         measurements.emplace("[start]Wall clock time", Measurement(_start.time_since_epoch().count() / static_cast<uint64_t>(1000 * _scale_factor), _unit));
         measurements.emplace("[end]Wall clock time", Measurement(_stop.time_since_epoch().count() / static_cast<uint64_t>(1000 * _scale_factor), _unit));
+#endif // defined(BARE_METAL)
     }
     else
     {
+#if defined(BARE_METAL)
+        const double delta = _stop - _start;
+        measurements.emplace("Wall clock time", Measurement(delta / static_cast<double>(1000 * _scale_factor), _unit));
+#else  // !defined(BARE_METAL)
         const auto delta = std::chrono::duration_cast<std::chrono::microseconds>(_stop - _start);
         measurements.emplace("Wall clock time", Measurement(delta.count() / _scale_factor, _unit));
+#endif // defined(BARE_METAL)
     }
     return measurements;
 }
