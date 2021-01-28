@@ -116,6 +116,7 @@ private:
     PixelValue          _constant_border_value;
     float               _sampling_offset;
     bool                _align_corners;
+    DataLayout          _data_layout;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NESCALEKERNEL_H */

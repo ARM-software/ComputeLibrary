@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,8 @@ void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *inpu
     // Tune kernels
     CLScheduler::get().tune_kernel_static(*_kernel);
 
-    if(input->info()->data_layout() == DataLayout::NCHW && !_kernel->border_size().empty())
+    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : info.data_layout;
+    if(data_layout == DataLayout::NCHW && !_kernel->border_size().empty())
     {
         _border_handler->configure(compile_context, input, _kernel->border_size(), info.border_mode, info.constant_border_value);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,7 +109,7 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     const bool is_align_corners_used = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy);
 
     // Get data layout and width/height indices
-    const DataLayout data_layout = input->info()->data_layout();
+    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : info.data_layout;
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
@@ -182,7 +182,7 @@ Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, co
     ITensorInfo *dy      = nullptr;
 
     // Get data layout and width/height indices
-    const DataLayout data_layout = input->data_layout();
+    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : info.data_layout;
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
