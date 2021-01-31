@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,24 +84,24 @@ void interleave_block<4, 16, VLType::None, true>(
       "mov x22, #0x0\n"
       "4:"  // no_accumulate_16
       "ldr q19, [x23], #0x10\n"
-      "prfm pldl1keep, [x23, #0x70]\n"
-      "ldr q18, [x21], #0x10\n"
-      "ldr q17, [x20], #0x10\n"
-      "prfm pldl1keep, [x21, #0x70]\n"
-      "ldr q16, [x19], #0x10\n"
-      "prfm pldl1keep, [x20, #0x70]\n"
-      "str q19, [%x[out_ptr], #0x0]\n"
-      "uadalp v28.8h, v19.16b\n"
-      "prfm pldl1keep, [x19, #0x70]\n"
-      "str q18, [%x[out_ptr], #0x10]\n"
-      "uadalp v27.8h, v18.16b\n"
-      "str q17, [%x[out_ptr], #0x20]\n"
-      "uadalp v26.8h, v17.16b\n"
-      "str q16, [%x[out_ptr], #0x30]\n"
-      "uadalp v25.8h, v16.16b\n"
       "add x22, x22, #0x1\n"
+      "ldr q18, [x21], #0x10\n"
       "subs %x[width], %x[width], #0x10\n"
+      "ldr q17, [x20], #0x10\n"
       "cmp %x[width], #0x10\n"
+      "ldr q16, [x19], #0x10\n"
+      "uadalp v28.8h, v19.16b\n"
+      "prfm pldl1keep, [x23, #0x70]\n"
+      "prfm pldl1keep, [x21, #0x70]\n"
+      "uadalp v27.8h, v18.16b\n"
+      "prfm pldl1keep, [x20, #0x70]\n"
+      "uadalp v26.8h, v17.16b\n"
+      "prfm pldl1keep, [x19, #0x70]\n"
+      "uadalp v25.8h, v16.16b\n"
+      "str q19, [%x[out_ptr], #0x0]\n"
+      "str q18, [%x[out_ptr], #0x10]\n"
+      "str q17, [%x[out_ptr], #0x20]\n"
+      "str q16, [%x[out_ptr], #0x30]\n"
       "add %x[out_ptr], %x[out_ptr], #0x40\n"
       "bge 3b\n"
       "5:"  // Main loop skip
@@ -215,7 +215,7 @@ void interleave_block<4, 16, VLType::None, true>(
       "add v24.4s, v24.4s, v20.4s\n"
       "str q24, [%x[out_ptr], #0x0]\n"
       "add %x[out_ptr], %x[out_ptr], #0x10\n"
-      : [out_ptr] "+r" (out_ptr), [width] "+r" (width)
+      : [out_ptr] "+&r" (out_ptr), [width] "+&r" (width)
       : [first] "r" (first), [height] "r" (height), [in] "r" (in), [row_offset] "r" (row_offset)
       : "cc", "memory", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "x19", "x20", "x21", "x22", "x23"
     );

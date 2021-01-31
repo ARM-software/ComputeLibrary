@@ -36,9 +36,9 @@
 
 namespace arm_gemm
 {
-
 // Actual kernel implementations
 void a64_hybrid_fp32_mla_8x4( ARGLIST );
+void a64_hybrid_fp32_mla_8x4_a55( ARGLIST );
 
 class cls_a64_hybrid_fp32_mla_8x4
 {
@@ -73,9 +73,16 @@ public:
 
     // Default to the generic kernel
     kern_type kernel=a64_hybrid_fp32_mla_8x4;
-
-    cls_a64_hybrid_fp32_mla_8x4(const CPUInfo *)
+    cls_a64_hybrid_fp32_mla_8x4(const CPUInfo *ci)
     {
+        switch(ci->get_cpu_model()) {
+            default:
+                break;
+            case CPUModel::A55r1:
+            case CPUModel::A53:
+                kernel=a64_hybrid_fp32_mla_8x4_a55;
+                break;
+        }
     }
 };
 

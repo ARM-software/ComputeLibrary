@@ -37,7 +37,6 @@
 
 namespace arm_gemm
 {
-
 // Actual kernel implementations
 void sve_hybrid_bf16fp32_dot_6x4VL( ARGLIST );
 
@@ -74,7 +73,6 @@ public:
 
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_bf16fp32_dot_6x4VL;
-
     cls_sve_hybrid_bf16fp32_dot_6x4VL(const CPUInfo *)
     {
     }

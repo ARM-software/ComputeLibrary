@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,19 +58,19 @@ void interleave_block<4, 16, VLType::None, false>(
       "blt 3f\n"
       "2:"  // Main loop head
       "ldr q19, [x22], #0x10\n"
-      "prfm pldl1keep, [x22, #0x70]\n"
+      "subs %x[width], %x[width], #0x10\n"
       "ldr q18, [x21], #0x10\n"
+      "cmp %x[width], #0x10\n"
       "ldr q17, [x20], #0x10\n"
-      "prfm pldl1keep, [x21, #0x70]\n"
       "ldr q16, [x19], #0x10\n"
+      "prfm pldl1keep, [x22, #0x70]\n"
+      "prfm pldl1keep, [x21, #0x70]\n"
       "prfm pldl1keep, [x20, #0x70]\n"
+      "prfm pldl1keep, [x19, #0x70]\n"
       "str q19, [%x[out_ptr], #0x0]\n"
       "str q18, [%x[out_ptr], #0x10]\n"
-      "prfm pldl1keep, [x19, #0x70]\n"
       "str q17, [%x[out_ptr], #0x20]\n"
       "str q16, [%x[out_ptr], #0x30]\n"
-      "subs %x[width], %x[width], #0x10\n"
-      "cmp %x[width], #0x10\n"
       "add %x[out_ptr], %x[out_ptr], #0x40\n"
       "bge 2b\n"
       "3:"  // Main loop skip
@@ -171,7 +171,7 @@ void interleave_block<4, 16, VLType::None, false>(
       "add %x[out_ptr], %x[out_ptr], #0x40\n"
       "12:"  // Odds skip
 
-      : [out_ptr] "+r" (out_ptr), [width] "+r" (width)
+      : [out_ptr] "+&r" (out_ptr), [width] "+&r" (width)
       : [height] "r" (height), [in] "r" (in), [row_offset] "r" (row_offset)
       : "cc", "memory", "v16", "v17", "v18", "v19", "x19", "x20", "x21", "x22"
     );

@@ -62,14 +62,13 @@ public:
     // Use the standard fixed size transforms.
     StdTransformsFixed<operand_type, result_type, 8, 24> transforms = {};
 
-    static PerformanceParameters get_performance_parameters(const CPUInfo *ci)
-    {
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
         switch (ci->get_cpu_model()) {
             case CPUModel::A55r1:
-                return { 7.16, 1.14, 0.67 };
+                return {  7.16, 1.14, 0.67  };
 
             default:
-                return { 12.67, 3.98, 1.16 };
+                return { 12.67, 3.98, 1.16  };
         }
     }
 

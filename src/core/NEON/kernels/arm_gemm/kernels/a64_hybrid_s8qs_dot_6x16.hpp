@@ -37,9 +37,9 @@
 
 namespace arm_gemm
 {
-
 // Actual kernel implementations
 void a64_hybrid_s8qs_dot_6x16( ARGLIST );
+void a64_hybrid_s8qs_dot_6x16_a55( ARGLIST );
 
 class cls_a64_hybrid_s8qs_dot_6x16
 {
@@ -72,10 +72,11 @@ public:
 
     StdTransformsFixed<operand_type, result_type, 6, 16, 4> transforms = {};
 
-    static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    {
         switch (ci->get_cpu_model()) {
             case CPUModel::A55r1:
-                return { 7.5301 };
+                return { 8.28 };
             default:
                 return { 27.5482 };
         }
@@ -83,9 +84,15 @@ public:
 
     // Default to the generic kernel
     kern_type kernel=a64_hybrid_s8qs_dot_6x16;
-
-    cls_a64_hybrid_s8qs_dot_6x16(const CPUInfo *)
+    cls_a64_hybrid_s8qs_dot_6x16(const CPUInfo *ci)
     {
+        switch(ci->get_cpu_model()) {
+            default:
+                break;
+            case CPUModel::A55r1:
+                kernel=a64_hybrid_s8qs_dot_6x16_a55;
+                break;
+        }
     }
 };
 
