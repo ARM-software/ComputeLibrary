@@ -99,6 +99,17 @@ v21.02 Public major release
    - @ref NELogits1DSoftmaxKernel
    - @ref NELogits1DMaxKernel
    - NEElementwiseUnaryKernel
+ - Remove padding from OpenCL kernels:
+   - @ref CLDirectConvolutionLayerKernel
+   - @ref CLArgMinMaxLayerKernel
+   - @ref CLPadLayerKernel
+   - @ref CLROIAlignLayerKernel
+   - @ref CLRangeKernel
+   - @ref CLScaleKernel
+   - @ref CLSelectKernel
+   - @ref CLBitwiseKernel
+   - ClFloorKernel
+   - @ref CLTransposeKernel
  - Remove functions:
    - NELocallyConnectedLayer / CLLocallyConnectedLayer
    - NEIm2Col
