@@ -1074,6 +1074,47 @@ inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &poli
     return os;
 }
 
+/** Formatted output of the ITensorInfo type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Tensor information.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
+{
+    const DataType    data_type   = info->data_type();
+    const DataLayout  data_layout = info->data_layout();
+
+    os << "Shape=" << info->tensor_shape() << ","
+       << "DataLayout=" << string_from_data_layout(data_layout) << ","
+       << "DataType=" << string_from_data_type(data_type) << ",";
+
+    if(is_data_type_quantized(data_type))
+    {
+        const QuantizationInfo qinfo = info->quantization_info();
+        os << "QuantizationInfo=";
+        if(is_data_type_quantized_per_channel(data_type))
+        {
+            os << "[";
+            const auto scales  = qinfo.scale();
+            const auto offsets = qinfo.offset();
+            os << "(" << scales[0] << ", " << offsets[0] << ")";
+            for(size_t i = 1; i < scales.size(); ++i)
+            {
+                os << ",(" << scales[i] << ", " << offsets[i] << ")";
+            }
+            os << "]";
+        }
+        else
+        {
+            os << "(" << qinfo.uniform().scale << ", "
+              << qinfo.uniform().offset << ")";
+        }
+    }
+    return os;
+}
+
 /** Formatted output of the TensorInfo type.
  *
  * @param[out] os   Output stream.
@@ -1083,11 +1124,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &poli
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const TensorInfo &info)
 {
-    os << "{Shape=" << info.tensor_shape() << ","
-       << "Type=" << info.data_type() << ","
-       << "Channels=" << info.num_channels() << "}";
-    return os;
+    os << &info;
+	return os;
 }
+
 /** Formatted output of the TensorInfo type.
  *
  * @param[in] info Type to output.
@@ -1097,7 +1137,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const TensorInfo &info)
 inline std::string to_string(const TensorInfo &info)
 {
     std::stringstream str;
-    str << info;
+    str << &info;
     return str.str();
 }
 
