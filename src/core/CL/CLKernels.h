@@ -107,7 +107,6 @@
 #include "src/core/CL/kernels/CLPadLayerKernel.h"
 #include "src/core/CL/kernels/CLPermuteKernel.h"
 #include "src/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
-#include "src/core/CL/kernels/CLPoolingLayerKernel.h"
 #include "src/core/CL/kernels/CLPriorBoxLayerKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "src/core/CL/kernels/CLQuantizationLayerKernel.h"

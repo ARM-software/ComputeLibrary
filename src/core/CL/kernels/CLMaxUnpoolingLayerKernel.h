@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@ public:
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  indices         Tensor containing the offset to store the input elements in the output tensor.
-     *                             @ref CLPoolingLayerKernel with indices should precede this function in order to
+     *                             @ref opencl::ClPooling with indices should precede this function in order to
      *                             properly reconstruct the output tensor.
      *                             The tensor shape of this tensor has to be equal to the input tensor shape. Data type supported: U32.
      * @param[out] output          Destination tensor. Data types supported: Same as @p input.
@@ -65,7 +65,7 @@ public:
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] indices   TensorInfo associated to the tensor containing the offset to store the input elements in the output tensor.
-     *                      @ref CLPoolingLayerKernel with indices should precede this function in order to
+     *                      @ref opencl::ClPooling with indices should precede this function in order to
      *                      properly reconstruct the output tensor.
      *                      The tensor shape of this tensor has to be equal to the input tensor shape. Data type supported: U32.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.

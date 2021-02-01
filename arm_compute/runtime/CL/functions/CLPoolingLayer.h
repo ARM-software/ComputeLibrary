@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,11 @@
 #ifndef ARM_COMPUTE_CLPOOLINGLAYER_H
 #define ARM_COMPUTE_CLPOOLINGLAYER_H
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -35,14 +36,22 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following OpenCL kernels:
- *
- * -# @ref CLFillBorderKernel (executed if padding size is different from zero)
- * -# @ref CLPoolingLayerKernel
- */
-class CLPoolingLayer : public ICLSimpleFunction
+/** Basic function to run  @ref opencl::ClPooling */
+class CLPoolingLayer : public IFunction
 {
 public:
+    /** Default Constructor */
+    CLPoolingLayer();
+    /** Default Destructor */
+    ~CLPoolingLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLPoolingLayer(const CLPoolingLayer &) = delete;
+    /** Default move constructor */
+    CLPoolingLayer(CLPoolingLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLPoolingLayer &operator=(const CLPoolingLayer &) = delete;
+    /** Default move assignment operator */
+    CLPoolingLayer &operator=(CLPoolingLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -70,6 +79,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLPOOLINGLAYER_H */

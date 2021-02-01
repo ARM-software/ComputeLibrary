@@ -168,7 +168,7 @@ v20.11 Public major release
    - CLBatchConcatenateLayerKernel
    - CLElementwiseOperationKernel
    - @ref CLBatchNormalizationLayerKernel
-   - @ref CLPoolingLayerKernel
+   - CLPoolingLayerKernel
    - @ref CLWinogradInputTransformKernel
    - @ref CLGEMMLowpMatrixMultiplyNativeKernel
    - @ref CLGEMMLowpMatrixAReductionKernel
@@ -660,7 +660,7 @@ v19.11 Public major release
     - @ref NEDepthwiseConvolutionLayer
  - Added FP16 mixed-precision support for:
     - @ref CLGEMMMatrixMultiplyReshapedKernel
-    - @ref CLPoolingLayerKernel
+    - CLPoolingLayerKernel
  - Added FP32 and FP16 ELU activation for:
     - @ref CLActivationLayer
     - @ref NEActivationLayer
@@ -1293,7 +1293,7 @@ v17.03 Sources preview
 v17.02.1 Sources preview
  - New OpenCL kernels / functions:
    - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
-   - @ref CLPoolingLayerKernel / @ref CLPoolingLayer
+   - CLPoolingLayerKernel / @ref CLPoolingLayer
    - @ref CLIm2ColKernel, @ref CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / @ref CLConvolutionLayer
    - @ref CLRemapKernel / @ref CLRemap
    - @ref CLGaussianPyramidHorKernel, @ref CLGaussianPyramidVertKernel / @ref CLGaussianPyramid, @ref CLGaussianPyramidHalf, @ref CLGaussianPyramidOrb

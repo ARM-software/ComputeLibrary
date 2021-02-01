@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "src/core/CL/CLKernels.h"
 #include "support/Cast.h"
+
+#include "src/core/gpu/cl/kernels/ClPoolingKernel.h"
 
 namespace arm_compute
 {
@@ -208,7 +210,7 @@ void tune_gemm_kernel(CLGEMMMatrixMultiplyKernel &k)
     k.set_lws_hint(lws_hint);
 }
 
-void tune_pooling_kernel(CLPoolingLayerKernel &k)
+void tune_pooling_kernel(opencl::kernels::ClPoolingKernel &k)
 {
     cl::NDRange     lws_hint   = k.lws_hint();
     const GPUTarget gpu_target = k.get_target();
@@ -217,7 +219,7 @@ void tune_pooling_kernel(CLPoolingLayerKernel &k)
     // On Bifrost, this works for up to 35x35xC filters, for which the pooling_layer_3_optimized
     // kernel is launched with gws=(9, 33, C). In any case, the hint will be ignored if it is
     // invalid (e.g. exceeds the maximum workgroup size that the kernel can be launched with).
-    if(k._input->info()->data_layout() == DataLayout::NCHW)
+    if(k._pool_info.data_layout == DataLayout::NCHW)
     {
         if(gpu_target_is_in(gpu_target,
                             GPUTarget::G71, GPUTarget::G72, GPUTarget::G76,
@@ -279,9 +281,9 @@ void BifrostTuner::tune_kernel_static(ICLKernel &kernel)
     {
         tune_gemm_kernel(*utils::cast::polymorphic_downcast<CLGEMMMatrixMultiplyKernel *>(&kernel));
     }
-    else if(dynamic_cast<CLPoolingLayerKernel *>(&kernel) != nullptr)
+    else if(dynamic_cast<opencl::kernels::ClPoolingKernel *>(&kernel) != nullptr)
     {
-        tune_pooling_kernel(*utils::cast::polymorphic_downcast<CLPoolingLayerKernel *>(&kernel));
+        tune_pooling_kernel(*utils::cast::polymorphic_downcast<opencl::kernels::ClPoolingKernel *>(&kernel));
     }
     else if(dynamic_cast<CLScaleKernel *>(&kernel) != nullptr)
     {
