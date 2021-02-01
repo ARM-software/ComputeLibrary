@@ -375,7 +375,7 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
 
         const unsigned int n0               = win_config.second.x().step();
         const unsigned int m0               = win_config.second.y().step();
-        const unsigned int k0               = std::min(static_cast<unsigned int>(_input->info()->dimension(channel_idx)), 16u);
+        const unsigned int k0               = adjust_vec_size(16u, _input->info()->dimension(channel_idx));
         const unsigned int partial_store_n0 = _output->info()->dimension(channel_idx) % n0;
         const unsigned int partial_store_m0 = (_output->info()->dimension(width_idx) * _output->info()->dimension(height_idx)) % m0;
         const unsigned int pad_left         = conv_info.pad_left();

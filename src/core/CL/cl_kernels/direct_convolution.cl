@@ -34,24 +34,24 @@
 #else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 #define ARM_DOT(x, y, val)                                \
     ({                                                    \
-        val += (ACC_DATA_TYPE)a.s0 * (ACC_DATA_TYPE)b.s0; \
-        val += (ACC_DATA_TYPE)a.s1 * (ACC_DATA_TYPE)b.s1; \
-        val += (ACC_DATA_TYPE)a.s2 * (ACC_DATA_TYPE)b.s2; \
-        val += (ACC_DATA_TYPE)a.s3 * (ACC_DATA_TYPE)b.s3; \
+        val += (ACC_DATA_TYPE)x.s0 * (ACC_DATA_TYPE)y.s0; \
+        val += (ACC_DATA_TYPE)x.s1 * (ACC_DATA_TYPE)y.s1; \
+        val += (ACC_DATA_TYPE)x.s2 * (ACC_DATA_TYPE)y.s2; \
+        val += (ACC_DATA_TYPE)x.s3 * (ACC_DATA_TYPE)y.s3; \
     })
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 
-#define ARM_DOT1(a, b, c)                                                                                                                                               \
-    ({                                                                                                                                                                  \
-        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (VEC_DATA_TYPE(SRC_DATA_TYPE, 3))0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (VEC_DATA_TYPE(WEI_DATA_TYPE, 3))0), c); \
+#define ARM_DOT1(a, b, c)                                                                                                                                                   \
+    ({                                                                                                                                                                      \
+        ARM_DOT(((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (VEC_DATA_TYPE(SRC_DATA_TYPE, 3))0)), ((VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (VEC_DATA_TYPE(WEI_DATA_TYPE, 3))0)), c); \
     })
-#define ARM_DOT2(a, b, c)                                                                                                                                               \
-    ({                                                                                                                                                                  \
-        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (VEC_DATA_TYPE(SRC_DATA_TYPE, 2))0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (VEC_DATA_TYPE(WEI_DATA_TYPE, 2))0), c); \
+#define ARM_DOT2(a, b, c)                                                                                                                                                   \
+    ({                                                                                                                                                                      \
+        ARM_DOT(((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (VEC_DATA_TYPE(SRC_DATA_TYPE, 2))0)), ((VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (VEC_DATA_TYPE(WEI_DATA_TYPE, 2))0)), c); \
     })
-#define ARM_DOT3(a, b, c)                                                                                                           \
-    ({                                                                                                                              \
-        ARM_DOT((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (SRC_DATA_TYPE)0), (VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (WEI_DATA_TYPE)0), c); \
+#define ARM_DOT3(a, b, c)                                                                                                               \
+    ({                                                                                                                                  \
+        ARM_DOT(((VEC_DATA_TYPE(SRC_DATA_TYPE, 4))(a, (SRC_DATA_TYPE)0)), ((VEC_DATA_TYPE(WEI_DATA_TYPE, 4))(b, (WEI_DATA_TYPE)0)), c); \
     })
 #define ARM_DOT4(a, b, c) \
     ({                    \
@@ -539,24 +539,18 @@ __kernel void direct_convolution_nhwc(
 
             TENSOR_DOT(K0, 0);
 
-#undef TENSOR_DOT
-
             wei_offset += K0 * sizeof(WEI_DATA_TYPE);
         }
 
 #if(SRC_CHANNELS % K0) != 0
         // Left-over accumulations
-        for(; i < SRC_CHANNELS; ++i)
+        for(; k < SRC_CHANNELS; ++k)
         {
             // Load values from src tensor
             LOAD_BLOCK_INDIRECT(M0, 1, SRC_DATA_TYPE, a, src_ptr, src_offset + k * sizeof(SRC_DATA_TYPE), src_stride_y, mi_valid_row, mi_mask);
 
             // Load values from weights tensor
             LOAD_BLOCK(N0, 1, WEI_DATA_TYPE, b, wei_ptr, wei_offset, wei_stride_w, zero);
-
-#define TENSOR_DOT(i)                \
-    ARM_DOT_K0XN0(1, a##i, b, c##i); \
-    ARM_OFFSET_K0XN0(1, a##i, b, SRC_OFFSET, WEI_OFFSET, c##i);
 
             TENSOR_DOT(1, 0);
 

@@ -683,7 +683,7 @@ public:
         // Batch size 1
         TensorShape{ 32U, 37U, 3U },
                      // Batch size 4
-                     TensorShape{ 32U, 37U, 3U, 4U },
+                     TensorShape{ 6U, 9U, 5U, 4U },
     })
     {
     }
