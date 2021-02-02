@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,50 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLMEMSETKERNEL_H
-#define ARM_COMPUTE_CLMEMSETKERNEL_H
+#ifndef ARM_COMPUTE_CL_FILL_KERNEL_H
+#define ARM_COMPUTE_CL_FILL_KERNEL_H
 
-#include "arm_compute/core/PixelValue.h"
-#include "arm_compute/core/Types.h"
-#include "src/core/CL/ICLKernel.h"
+#include "src/core/common/Macros.h"
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/core/gpu/cl/IClKernel.h"
 
 namespace arm_compute
 {
-class ICLTensor;
-
+namespace opencl
+{
+namespace kernels
+{
 /** Interface for filling the planes of a tensor */
-class CLMemsetKernel : public ICLKernel
+class ClFillKernel : public ICLKernel
 {
 public:
-    /** Default constructor */
-    CLMemsetKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLMemsetKernel(const CLMemsetKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLMemsetKernel &operator=(const CLMemsetKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    CLMemsetKernel(CLMemsetKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    CLMemsetKernel &operator=(CLMemsetKernel &&) = default;
-    /** Default destructor */
-    ~CLMemsetKernel() = default;
-
+    ClFillKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClFillKernel);
     /** Initialise the kernel's tensor and filling value
      *
-     * @param[in,out] tensor         Input tensor to fill. Supported data types: All.
+     * @param[in,out] tensor         Input tensor info. Supported data types: All.
      * @param[in]     constant_value The value used to fill the planes of the tensor
      * @param[in]     window         Window to be used in case setting only part of a tensor. Default is nullptr.
      */
-    void configure(ICLTensor *tensor, const PixelValue &constant_value, Window *window = nullptr);
+    void configure(ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
     /** Initialise the kernel's tensor and filling value
      *
      * @param[in]     compile_context The compile context to be used.
-     * @param[in,out] tensor          Input tensor to fill. Supported data types: All.
+     * @param[in,out] tensor          Input tensor info. Supported data types: All.
      * @param[in]     constant_value  The value used to fill the planes of the tensor
      * @param[in]     window          Window to be used in case setting only part of a tensor. Default is nullptr.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *tensor, const PixelValue &constant_value, Window *window = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLMemsetKernel
+    void configure(const CLCompileContext &compile_context, ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
+    /** Static function to check if given info will lead to a valid configuration of @ref ClFillKernel
      *
      * @param[in] tensor         Source tensor info. Data types supported: All.
      * @param[in] constant_value The value used to fill the planes of the tensor
@@ -75,11 +66,12 @@ public:
     static Status validate(const ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    ICLTensor *_tensor;
-    Window     _full_window;
+    Window _full_window{};
 };
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLMEMSETRKERNEL_H */

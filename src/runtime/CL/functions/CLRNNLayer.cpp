@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLCopyKernel.h"
 #include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
@@ -47,8 +46,8 @@ namespace arm_compute
 using namespace arm_compute::misc::shape_calculator;
 
 CLRNNLayer::CLRNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected_kernel(), _copy_kernel(std::make_unique<CLCopyKernel>()), _fully_connected_out(),
-      _gemm_output(), _add_output(), _is_prepared(false)
+    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected_kernel(), _copy(), _fully_connected_out(), _gemm_output(), _add_output(),
+      _is_prepared(false)
 {
 }
 
@@ -122,7 +121,7 @@ void CLRNNLayer::configure(const CLCompileContext &compile_context, const ICLTen
     _activation.configure(compile_context, &_add_output, hidden_state, info);
     _add_output.allocator()->allocate();
 
-    _copy_kernel->configure(compile_context, hidden_state, output);
+    _copy.configure(compile_context, hidden_state, output);
 }
 
 void CLRNNLayer::run()
@@ -137,7 +136,7 @@ void CLRNNLayer::run()
     _activation.run();
 
     // copy hidden out to output
-    CLScheduler::get().enqueue(*_copy_kernel);
+    _copy.run();
 }
 
 void CLRNNLayer::prepare()

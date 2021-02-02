@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,14 +29,13 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLMemsetKernel.h"
 #include "src/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
 
 namespace arm_compute
 {
 CLSpaceToBatchLayer::CLSpaceToBatchLayer()
     : _space_to_batch_kernel(std::make_unique<CLSpaceToBatchLayerKernel>()),
-      _memset_kernel(std::make_unique<CLMemsetKernel>()),
+      _fill(),
       _has_padding(false)
 {
 }
@@ -55,7 +54,7 @@ void CLSpaceToBatchLayer::configure(const CLCompileContext &compile_context, con
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
-        _memset_kernel->configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
+        _fill.configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
     _space_to_batch_kernel->configure(compile_context, input, block_shape, paddings, output);
 }
@@ -73,14 +72,14 @@ void CLSpaceToBatchLayer::configure(const CLCompileContext &compile_context, con
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
-        _memset_kernel->configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
+        _fill.configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
     _space_to_batch_kernel->configure(compile_context, input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 }
 
 Status CLSpaceToBatchLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(output, PixelValue(0, input->data_type(), input->quantization_info())));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLFill::validate(output, PixelValue(0, input->data_type(), input->quantization_info())));
     ARM_COMPUTE_RETURN_ON_ERROR(CLSpaceToBatchLayerKernel::validate(input, block_shape, paddings, output));
 
     return Status{};
@@ -89,7 +88,7 @@ Status CLSpaceToBatchLayer::validate(const ITensorInfo *input, const ITensorInfo
 Status CLSpaceToBatchLayer::validate(const ITensorInfo *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right,
                                      const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(output, PixelValue(0, input->data_type(), input->quantization_info())));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLFill::validate(output, PixelValue(0, input->data_type(), input->quantization_info())));
     ARM_COMPUTE_RETURN_ON_ERROR(CLSpaceToBatchLayerKernel::validate(input, block_shape_x, block_shape_y, padding_left, padding_right, output));
 
     return Status{};
@@ -100,7 +99,8 @@ void CLSpaceToBatchLayer::run()
     // Zero out output only if we have paddings
     if(_has_padding)
     {
-        CLScheduler::get().enqueue(*_memset_kernel, true);
+        //CLScheduler::get().enqueue(*_fill, true);
+        _fill.run();
     }
     CLScheduler::get().enqueue(*_space_to_batch_kernel, true);
 }

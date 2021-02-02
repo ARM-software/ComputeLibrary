@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCROPKERNEL_H
-#define ARM_COMPUTE_CLCROPKERNEL_H
+#ifndef ARM_COMPUTE_CL_CROP_H
+#define ARM_COMPUTE_CL_CROP_H
 
 #include "arm_compute/core/Types.h"
-#include "src/core/CL/ICLKernel.h"
+#include "arm_compute/core/Window.h"
+#include "arm_compute/runtime/IFunction.h"
+#include <memory>
 
 namespace arm_compute
 {
+class CLCompileContext;
 class ICLTensor;
+class ITensorInfo;
 
-/** OpenCL kernel to perform a copy between two tensors */
-class CLCropKernel : public ICLKernel
+/** Basic function to run @ref opencl::kernels::ClCropKernel */
+class CLCrop : public IFunction
 {
 public:
-    /** Default constructor */
-    CLCropKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
-    CLCropKernel(const CLCropKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
-    CLCropKernel &operator=(const CLCropKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    CLCropKernel(CLCropKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    CLCropKernel &operator=(CLCropKernel &&) = default;
-    /** Configure kernel
+    /** Constructor */
+    CLCrop();
+    /** Destructor */
+    ~CLCrop();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLCrop(const CLCrop &) = delete;
+    /** Default move constructor */
+    CLCrop(CLCrop &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLCrop &operator=(const CLCrop &) = delete;
+    /** Default move assignment operator */
+    CLCrop &operator=(CLCrop &&);
+    /** Configure function
      *
      * @note Supported tensor rank: up to 4
      *
@@ -58,7 +64,7 @@ public:
      * @param[in]  output_window       Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
      */
     void configure(const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0, Window *output_window = nullptr);
-    /** Configure kernel
+    /** Configure function
      *
      * @note Supported tensor rank: up to 4
      *
@@ -90,14 +96,11 @@ public:
                            Window *output_window = nullptr);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
+    void run() override;
 
 private:
-    const ICLTensor *_input;
-    ICLTensor       *_output;
-    Coordinates2D    _start;
-    uint32_t         _batch_index;
-    float            _extrapolation_value;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLCROPKERNEL_H */
+#endif /*ARM_COMPUTE_CL_CROP_H */

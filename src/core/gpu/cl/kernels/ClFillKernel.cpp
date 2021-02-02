@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,40 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLMemsetKernel.h"
+#include "src/core/gpu/cl/kernels/ClFillKernel.h"
+
+#include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Validate.h"
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
-CLMemsetKernel::CLMemsetKernel()
-    : ICLKernel(), _tensor(nullptr), _full_window()
+namespace opencl
 {
-}
-
-void CLMemsetKernel::configure(ICLTensor        *tensor,
-                               const PixelValue &constant_value,
-                               Window           *window)
+namespace kernels
+{
+void ClFillKernel::configure(ITensorInfo      *tensor,
+                             const PixelValue &constant_value,
+                             Window           *window)
 {
     configure(CLKernelLibrary::get().get_compile_context(), tensor, constant_value, window);
 }
 
-void CLMemsetKernel::configure(const CLCompileContext &compile_context, ICLTensor *tensor,
-                               const PixelValue &constant_value,
-                               Window           *window)
+void ClFillKernel::configure(const CLCompileContext &compile_context, ITensorInfo *tensor,
+                             const PixelValue &constant_value,
+                             Window           *window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-    ARM_COMPUTE_ERROR_THROW_ON(validate(tensor->info(), constant_value, window));
+    ARM_COMPUTE_ERROR_THROW_ON(validate(tensor, constant_value, window));
 
-    _tensor = tensor;
-
-    const DataType data_type  = tensor->info()->data_type();
-    const int      vec_size_x = 16 / tensor->info()->element_size();
+    const DataType data_type  = tensor->data_type();
+    const int      vec_size_x = 16 / tensor->element_size();
 
     // Create and update the window (if needed)
-    _full_window = calculate_max_window(*tensor->info());
+    _full_window = calculate_max_window(*tensor);
     Window win   = _full_window;
     if(window != nullptr)
     {
@@ -81,7 +87,7 @@ void CLMemsetKernel::configure(const CLCompileContext &compile_context, ICLTenso
     _kernel = create_kernel(compile_context, "memset", build_opts.options());
 }
 
-Status CLMemsetKernel::validate(const ITensorInfo *tensor, const PixelValue &constant_value, Window *window)
+Status ClFillKernel::validate(const ITensorInfo *tensor, const PixelValue &constant_value, Window *window)
 {
     ARM_COMPUTE_UNUSED(tensor);
     ARM_COMPUTE_UNUSED(constant_value);
@@ -92,10 +98,12 @@ Status CLMemsetKernel::validate(const ITensorInfo *tensor, const PixelValue &con
     return Status{};
 }
 
-void CLMemsetKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClFillKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    const auto tensor = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
 
     // Collapse all the batches on the third
     Window collapsed = window.collapse_if_possible(_full_window, Window::DimZ);
@@ -104,9 +112,11 @@ void CLMemsetKernel::run(const Window &window, cl::CommandQueue &queue)
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _tensor, slice);
+        add_3D_tensor_argument(idx, tensor, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

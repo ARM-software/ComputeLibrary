@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLReshapeLayerKernel.h"
+#include "src/core/gpu/cl/kernels/ClReshapeKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -38,73 +38,77 @@
 
 #include <string>
 
-/** [CLReshapeLayerKernel Kernel] **/
+/** [ClReshapeKernel Kernel] **/
 namespace arm_compute
+{
+namespace opencl
+{
+namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape().total_size() != output->tensor_shape().total_size());
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().total_size() != dst->tensor_shape().total_size());
 
     return Status{};
 }
 } // namespace
 
-void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
+void ClReshapeKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({ src, dst });
 
     // Create kernel
-    std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->element_size()) };
+    std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(src->element_size()) };
     _kernel                          = create_kernel(compile_context, "reshape_layer", build_opts);
 
     // Add static arguments
-    const cl_int2 input_shape =
+    const cl_int2 src_shape =
     {
         {
-            static_cast<cl_int>(input->tensor_shape()[0]),
-            static_cast<cl_int>(input->tensor_shape()[1])
+            static_cast<cl_int>(src->tensor_shape()[0]),
+            static_cast<cl_int>(src->tensor_shape()[1])
         }
     };
-    const cl_int2 output_shape =
+    const cl_int2 dst_shape =
     {
         {
-            static_cast<cl_int>(output->tensor_shape()[0]),
-            static_cast<cl_int>(output->tensor_shape()[1])
+            static_cast<cl_int>(dst->tensor_shape()[0]),
+            static_cast<cl_int>(dst->tensor_shape()[1])
         }
     };
-    unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
-    _kernel.setArg<cl_int2>(idx++, input_shape);
-    _kernel.setArg<cl_int2>(idx++, output_shape);
+    unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the src and dst parameters
+    _kernel.setArg<cl_int2>(idx++, src_shape);
+    _kernel.setArg<cl_int2>(idx++, dst_shape);
 
     // Configure kernel window
-    Window win = calculate_max_window(*input);
+    Window win = calculate_max_window(*src);
 
-    // Set the output valid region
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+    // Set the dst valid region
+    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
     ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLReshapeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status ClReshapeKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
 
     return Status{};
 }
 
-void CLReshapeLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClReshapeKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
@@ -115,11 +119,13 @@ void CLReshapeLayerKernel::run_op(ITensorPack &tensors, const Window &window, cl
     const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
     auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
-    // Set inputs
+    // Set srcs
     unsigned int idx = 0;
     add_3D_tensor_argument(idx, src, window_collapsed);
     add_3D_tensor_argument(idx, dst, window_collapsed);
     enqueue(queue, *this, slice, lws_hint());
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute
-/** [CLReshapeLayerKernel Kernel] **/
+/** [ClReshapeKernel Kernel] **/

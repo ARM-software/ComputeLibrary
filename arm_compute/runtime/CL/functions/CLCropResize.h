@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,9 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLCopy.h"
+#include "arm_compute/runtime/CL/functions/CLCrop.h"
+#include "arm_compute/runtime/CL/functions/CLFill.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 
 #include <cstdint>
@@ -36,8 +39,6 @@ namespace arm_compute
 {
 // Forward Declarations
 class CLCompileContext;
-class CLCopyKernel;
-class CLCropKernel;
 class ITensor;
 class ITensorInfo;
 
@@ -125,12 +126,12 @@ public:
     InterpolationPolicy _method;
     float               _extrapolation_value;
 
-    std::vector<std::unique_ptr<CLScale>>      _scale;
-    std::vector<std::unique_ptr<CLCopyKernel>> _copy;
-    std::vector<std::unique_ptr<CLTensor>>     _crop_results;
-    std::vector<std::unique_ptr<CLTensor>>     _scaled_results;
+    std::vector<std::unique_ptr<CLScale>>  _scale;
+    std::vector<std::unique_ptr<CLCopy>>   _copy;
+    std::vector<std::unique_ptr<CLTensor>> _crop_results;
+    std::vector<std::unique_ptr<CLTensor>> _scaled_results;
 
-    std::vector<std::unique_ptr<ICLKernel>> _internal_kernels;
+    std::vector<std::unique_ptr<IFunction>> _internal_functions;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CL_CROP_RESIZE_H */

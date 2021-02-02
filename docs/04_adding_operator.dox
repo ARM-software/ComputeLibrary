@@ -117,7 +117,7 @@ Each kernel will have to implement the method:
 
 The structure of the kernel .cpp file should be similar to the next ones.
 For OpenCL:
-@snippet src/core/CL/kernels/CLReshapeLayerKernel.cpp CLReshapeLayerKernel Kernel
+@snippet src/core/gpu/cl/kernels/ClReshapeKernel.cpp ClReshapeKernel Kernel
 The run will call the function defined in the .cl file.
 
 For the NEON backend case:

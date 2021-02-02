@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,39 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLRESHAPELAYERKERNEL_H
-#define ARM_COMPUTE_CLRESHAPELAYERKERNEL_H
+#ifndef ARM_COMPUTE_CL_RESHAPE_H
+#define ARM_COMPUTE_CL_RESHAPE_H
 
-#include "arm_compute/core/Types.h"
-#include "src/core/CL/ICLKernel.h"
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/runtime/gpu/cl/IClOperator.h"
 
 namespace arm_compute
 {
-class ICLTensor;
-
-/** Interface for the kernel to perform tensor reshaping */
-class CLReshapeLayerKernel : public ICLKernel
+namespace opencl
+{
+/** Basic function to run @ref kernels::ClReshapeKernel */
+class ClReshape : public IClOperator
 {
 public:
-    /** Set the input and output of the kernel
+    /** Constructor */
+    ClReshape() = default;
+    /** Initialise the kernel's inputs and outputs
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor info. Data type supported: All.
-     * @param[out] output          Destination tensor info. Data type supported: Same as @p input
+     * @param[in]  input           Input tensor info. Data type supported: All
+     * @param[out] output          Output info. Data type supported: Same as @p input
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref kernels::ClReshapeKernel
      *
-     * @param[in] input  Source tensor info. Data type supported: All
-     * @param[in] output Destination tensor info. Data type supported: Same as @p input
+     * @param[in] input  Input tensor info. Data type supported: All
+     * @param[in] output Output tensor info. Data type supported: Same as @p input
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
+} // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLRESHAPELAYERKERNEL_H */
+#endif /* ARM_COMPUTE_CL_RESHAPE_H */

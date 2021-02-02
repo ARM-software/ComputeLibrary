@@ -21,56 +21,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/functions/CLCopy.h"
+#include "arm_compute/runtime/CL/functions/CLCrop.h"
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClCopy.h"
+#include "src/runtime/gpu/cl/operators/ClCrop.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-struct CLCopy::Impl
+struct CLCrop::Impl
 {
     const ICLTensor                *src{ nullptr };
     ICLTensor                      *dst{ nullptr };
-    std::unique_ptr<opencl::ClCopy> op{ nullptr };
+    std::unique_ptr<opencl::ClCrop> op{ nullptr };
 };
 
-CLCopy::CLCopy()
+CLCrop::CLCrop()
     : _impl(std::make_unique<Impl>())
 {
 }
-CLCopy::CLCopy(CLCopy &&) = default;
-CLCopy &CLCopy::operator=(CLCopy &&) = default;
-CLCopy::~CLCopy()                    = default;
+CLCrop::CLCrop(CLCrop &&) = default;
+CLCrop &CLCrop::operator=(CLCrop &&) = default;
+CLCrop::~CLCrop()                    = default;
 
-void CLCopy::configure(ICLTensor *input, ICLTensor *output, Window *dst_window)
+void CLCrop::configure(const ICLTensor *src, ICLTensor *dst, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value,
+                       Window *dst_window)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, dst_window);
+    configure(CLKernelLibrary::get().get_compile_context(), src, dst, start, end, batch_index, extrapolation_value, dst_window);
 }
 
-void CLCopy::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, Window *dst_window)
+void CLCrop::configure(const CLCompileContext &compile_context, const ICLTensor *src, ICLTensor *dst, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value,
+                       Window *dst_window)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
-    _impl->src = input;
-    _impl->dst = output;
+    _impl->src = src;
+    _impl->dst = dst;
 
-    _impl->op = std::make_unique<opencl::ClCopy>();
-    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), dst_window);
+    _impl->op = std::make_unique<opencl::ClCrop>();
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), start, end, batch_index, extrapolation_value, dst_window);
 }
 
-Status CLCopy::validate(const ITensorInfo *input, const ITensorInfo *output, Window *dst_window)
+Status CLCrop::validate(const ITensorInfo *input, const ITensorInfo *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value, Window *dst_window)
 {
-    return opencl::ClCopy::validate(input, output, dst_window);
+    return opencl::ClCrop::validate(input, output, start, end, batch_index, extrapolation_value, dst_window);
 }
 
-void CLCopy::run()
+void CLCrop::run()
 {
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);

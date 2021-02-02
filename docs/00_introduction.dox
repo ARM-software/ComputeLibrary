@@ -191,7 +191,7 @@ v20.11 Public major release
    - @ref CLFuseBatchNormalizationKernel
    - @ref CLDepthwiseConvolutionLayerNativeKernel
    - @ref CLDepthConvertLayerKernel
-   - @ref CLCopyKernel
+   - CLCopyKernel
    - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
    - CLActivationLayerKernel
    - @ref CLWinogradFilterTransformKernel
@@ -434,7 +434,7 @@ v20.08 Public major release
    - @ref CLArgMinMaxLayerKernel
  - Added new data type U8 support for:
    - @ref NECropKernel
-   - @ref CLCropKernel
+   - CLCropKernel
  - Added aligh_corner support for nearest neighbor interpolation in:
    - @ref NEScaleKernel
    - @ref CLScaleKernel
@@ -777,7 +777,7 @@ v19.05 Public major release
     - @ref NEFFTConvolutionLayer
  - New OpenCL kernels / functions:
     - @ref CLComplexPixelWiseMultiplicationKernel / @ref CLComplexPixelWiseMultiplication
-    - @ref CLCropKernel / @ref CLCropResize
+    - CLCropKernel / @ref CLCropResize
     - @ref CLDeconvolutionReshapeOutputKernel
     - @ref CLFFTDigitReverseKernel
     - @ref CLFFTRadixStageKernel
@@ -1019,7 +1019,7 @@ v18.05 Public major release
  - New OpenCL kernels / functions:
     - @ref CLChannelShuffleLayer / @ref CLChannelShuffleLayerKernel
     - @ref CLConvertFullyConnectedWeightsKernel / @ref CLConvertFullyConnectedWeights
-    - @ref CLCopy / @ref CLCopyKernel
+    - @ref CLCopy / CLCopyKernel
     - @ref CLLSTMLayer
     - @ref CLRNNLayer
     - CLWidthConcatenateLayer / CLWidthConcatenateLayerKernel
@@ -1103,7 +1103,7 @@ v18.01 Public maintenance release
  - Various bug fixes
  - Added some of the missing validate() methods
  - Added @ref CLDeconvolutionLayerUpsampleKernel / @ref CLDeconvolutionLayer @ref CLDeconvolutionLayerUpsample
- - Added @ref CLPermuteKernel / @ref CLPermute
+ - Added CLPermuteKernel / @ref CLPermute
  - Added method to clean the programs cache in the CL Kernel library.
  - Added @ref GCArithmeticAdditionKernel / @ref GCArithmeticAddition
  - Added @ref GCDepthwiseConvolutionLayer3x3Kernel / @ref GCDepthwiseConvolutionLayer3x3
@@ -1218,7 +1218,7 @@ v17.09 Public major release
     - @ref CLQuantizationLayerKernel @ref CLMinMaxLayerKernel / @ref CLQuantizationLayer
     - @ref CLROIPoolingLayerKernel / @ref CLROIPoolingLayer
     - @ref CLReductionOperationKernel / @ref CLReductionOperation
-    - @ref CLReshapeLayerKernel / @ref CLReshapeLayer
+    - CLReshapeLayerKernel / @ref CLReshapeLayer
 
 v17.06 Public major release
  - Various bug fixes

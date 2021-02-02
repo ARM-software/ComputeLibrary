@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,36 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLCopyKernel.h"
+#include "src/core/gpu/cl/kernels/ClCopyKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Validate.h"
+#include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
+namespace opencl
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, Window *output_window = nullptr)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Window *dst_window = nullptr)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
-    // Validate output if initialized
-    if(output->total_size() != 0)
+    // Validate dst if initialized
+    if(dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-        if(output_window == nullptr)
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+        if(dst_window == nullptr)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(input->tensor_shape(), output->tensor_shape());
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(src->tensor_shape(), dst->tensor_shape());
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(input->tensor_shape(), output_window->shape());
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(src->tensor_shape(), dst_window->shape());
         }
     }
 
@@ -59,56 +68,43 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, W
 
 } // namespace
 
-CLCopyKernel::CLCopyKernel()
-    : _input(nullptr), _output(nullptr), _output_window(), _has_output_window(false)
+void ClCopyKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, Window *dst_window)
 {
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, dst_window));
 
-void CLCopyKernel::configure(const ICLTensor *input, ICLTensor *output, Window *output_window)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, output_window);
-}
-
-void CLCopyKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Window *output_window)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), output_window));
-
-    auto padding_info = get_padding_info({ input, output });
-
-    _input  = input;
-    _output = output;
+    auto padding_info = get_padding_info({ src, dst });
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*(output->info()), *(input->info()));
+    auto_init_if_empty(*dst, *src);
 
     // Configure window
-    const unsigned int vec_size_x = adjust_vec_size(16 / input->info()->element_size(), input->info()->dimension(0));
+    const unsigned int vec_size_x = adjust_vec_size(16 / src->element_size(), src->dimension(0));
 
-    const Window win_config = calculate_max_window(*(input->info()), Steps(vec_size_x));
+    const Window win_config = calculate_max_window(*src, Steps(vec_size_x));
 
-    if(output_window != nullptr)
+    if(dst_window != nullptr)
     {
-        _has_output_window             = true;
-        _output_window                 = Window(*output_window);
-        const int  width_x             = output_window->num_iterations(0);
+        _has_dst_window                = true;
+        _dst_window                    = Window(*dst_window);
+        const int  width_x             = dst_window->num_iterations(0);
         const int  vec_size_x_leftover = width_x % vec_size_x;
         const bool multi_access_x      = width_x >= static_cast<int32_t>(vec_size_x);
 
         if(multi_access_x)
         {
-            _output_window.set(Window::DimX, Window::Dimension(output_window->x().start(), ceil_to_multiple(output_window->x().end(), vec_size_x), vec_size_x));
+            _dst_window.set(Window::DimX, Window::Dimension(dst_window->x().start(), ceil_to_multiple(dst_window->x().end(), vec_size_x), vec_size_x));
         }
 
         build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_x_leftover));
     }
     else
     {
-        const int width_x             = input->info()->tensor_shape().x();
+        const int width_x             = src->tensor_shape().x();
         const int vec_size_x_leftover = width_x % vec_size_x;
 
         build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_x_leftover));
@@ -125,32 +121,35 @@ void CLCopyKernel::configure(const CLCompileContext &compile_context, const ICLT
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLCopyKernel::validate(const arm_compute::ITensorInfo *input, const arm_compute::ITensorInfo *output, Window *output_window)
+Status ClCopyKernel::validate(const arm_compute::ITensorInfo *src, const arm_compute::ITensorInfo *dst, Window *dst_window)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, output_window));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, dst_window));
 
     return Status{};
 }
 
-void CLCopyKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClCopyKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+
     Window slice;
 
-    if(_has_output_window)
+    if(_has_dst_window)
     {
         slice            = window.first_slice_window_3D();
-        Window out_slice = _output_window.first_slice_window_3D();
+        Window out_slice = _dst_window.first_slice_window_3D();
         do
         {
             unsigned int idx = 0;
-            add_3D_tensor_argument(idx, _input, slice);
-            add_3D_tensor_argument(idx, _output, out_slice);
+            add_3D_tensor_argument(idx, src, slice);
+            add_3D_tensor_argument(idx, dst, out_slice);
             enqueue(queue, *this, slice, lws_hint());
         }
-        while(window.slide_window_slice_3D(slice) && _output_window.slide_window_slice_3D(out_slice));
+        while(window.slide_window_slice_3D(slice) && _dst_window.slide_window_slice_3D(out_slice));
     }
     else
     {
@@ -159,11 +158,13 @@ void CLCopyKernel::run(const Window &window, cl::CommandQueue &queue)
         do
         {
             unsigned int idx = 0;
-            add_3D_tensor_argument(idx, _input, slice);
-            add_3D_tensor_argument(idx, _output, slice);
+            add_3D_tensor_argument(idx, src, slice);
+            add_3D_tensor_argument(idx, dst, slice);
             enqueue(queue, *this, slice, lws_hint());
         }
         while(collapsed.slide_window_slice_3D(slice));
     }
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

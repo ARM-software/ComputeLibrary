@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,34 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLPermuteKernel.h"
+#include "src/core/gpu/cl/kernels/ClPermuteKernel.h"
+
+#include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
-CLPermuteKernel::CLPermuteKernel()
-    : _input(nullptr), _output(nullptr), _perm()
+namespace opencl
 {
-}
+namespace kernels
+{
 namespace
 {
-TensorShape get_output_shape(const ITensorInfo *input, const PermutationVector &perm)
+TensorShape get_dst_shape(const ITensorInfo *src, const PermutationVector &perm)
 {
-    TensorShape output_shape = input->tensor_shape();
-    permute(output_shape, perm);
-    return output_shape;
+    TensorShape dst_shape = src->tensor_shape();
+    permute(dst_shape, perm);
+    return dst_shape;
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() < 1 || input->num_dimensions() > 4,
-                                    "Permutation upto 4-D input tensor is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->num_dimensions() < 1 || src->num_dimensions() > 4,
+                                    "Permutation upto 4-D src tensor is supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(perm.num_dimensions() < 1 || perm.num_dimensions() > 4,
                                     "Permutation vector size should be less than or equal to 4");
     for(const auto &p : perm)
@@ -56,41 +65,39 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(p >= perm.num_dimensions(), "Permutation vector has invalid values");
     }
 
-    // Validate configured output
-    if(output->total_size() != 0)
+    // Validate configured dst
+    if(dst->total_size() != 0)
     {
-        const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        const TensorShape dst_shape = misc::shape_calculator::compute_permutation_output_shape(*src, perm);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
     return Status{};
 }
 } // namespace
 
-void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+void ClPermuteKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, perm);
+    configure(CLKernelLibrary::get().get_compile_context(), src, dst, perm);
 }
 
-void CLPermuteKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+void ClPermuteKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    auto              padding_info = get_padding_info({ input, output });
-    const TensorShape output_shape = get_output_shape(input->info(), perm);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    auto              padding_info = get_padding_info({ src, dst });
+    const TensorShape dst_shape    = get_dst_shape(src, perm);
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), perm));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, perm));
 
-    _input  = input;
-    _output = output;
-    _perm   = perm;
+    _perm = perm;
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
-    build_opts.add_option("-DDEPTH_IN=" + support::cpp11::to_string(input->info()->dimension(2)));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(src->data_type())));
+    build_opts.add_option("-DDEPTH_IN=" + support::cpp11::to_string(src->dimension(2)));
     // New positions of  width(W), height(H), channel(C) and batch(D) based on permutation vector
     build_opts.add_option("-DP1=" + support::cpp11::to_string((_perm.num_dimensions() >= 1) ? perm[0] : 0));
     build_opts.add_option("-DP2=" + support::cpp11::to_string((_perm.num_dimensions() >= 2) ? perm[1] : 1));
@@ -100,33 +107,36 @@ void CLPermuteKernel::configure(const CLCompileContext &compile_context, const I
     _kernel = create_kernel(compile_context, "permute", build_opts.options());
 
     // Configure  kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
+    Window win = calculate_max_window(*src, Steps());
 
     // The CLPermute doesn't need padding so update_window_and_padding() can be skipped
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    coord.set_num_dimensions(dst->num_dimensions());
+    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
 
     ICLKernel::configure_internal(win);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLPermuteKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
+Status ClPermuteKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, perm));
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, perm));
 
     return Status{};
 }
 
-void CLPermuteKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClPermuteKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+
     Window slice_in = window.first_slice_window_4D().collapse(ICLKernel::window(), 2, 4);
 
-    // Setup output slice
+    // Setup dst slice
     Window slice_out(slice_in);
     slice_out.set(Window::DimX, Window::Dimension(0, 0, 0));
     slice_out.set(Window::DimY, Window::Dimension(0, 0, 0));
@@ -136,10 +146,12 @@ void CLPermuteKernel::run(const Window &window, cl::CommandQueue &queue)
     do
     {
         unsigned int idx = 0;
-        add_4D_tensor_argument(idx, _input, slice_in);
-        add_4D_tensor_argument(idx, _output, slice_out);
+        add_4D_tensor_argument(idx, src, slice_in);
+        add_4D_tensor_argument(idx, dst, slice_out);
         enqueue(queue, *this, slice_in, lws_hint());
     }
     while(window.slide_window_slice_4D(slice_in) && window.slide_window_slice_4D(slice_out));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

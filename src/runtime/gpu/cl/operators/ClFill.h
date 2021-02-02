@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,66 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLFILL_H
-#define ARM_COMPUTE_CLFILL_H
+#ifndef ARM_COMPUTE_CL_FILL_H
+#define ARM_COMPUTE_CL_FILL_H
 
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/runtime/IFunction.h"
-#include <memory>
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/runtime/gpu/cl/IClOperator.h"
 
 namespace arm_compute
 {
-class CLCompileContext;
-class ICLTensor;
-
-/** Basic function to run @ref opencl::kernels::ClFillKernel */
-class CLFill : public IFunction
+namespace opencl
+{
+/** Basic function to run @ref kernels::ClFillKernel */
+class ClFill : public IClOperator
 {
 public:
     /** Constructor */
-    CLFill();
-    /** Destructor */
-    ~CLFill();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLFill(const CLFill &) = delete;
-    /** Default move constructor */
-    CLFill(CLFill &&);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLFill &operator=(const CLFill &) = delete;
-    /** Default move assignment operator */
-    CLFill &operator=(CLFill &&);
-    /** Initialize the kernel's tensor and filling value
-     *
-     * @param[in,out] tensor         Input tensor to fill. Supported data types: All.
-     * @param[in]     constant_value The value used to fill the planes of the tensor
-     * @param[in]     window         Window to be used in case setting only part of a tensor. Default is nullptr.
-     */
-    void configure(ICLTensor *tensor, const PixelValue &constant_value, Window *window = nullptr);
+    ClFill() = default;
     /** Initialise the kernel's tensor and filling value
      *
      * @param[in]     compile_context The compile context to be used.
-     * @param[in,out] tensor          Input tensor to fill. Supported data types: All.
+     * @param[in,out] tensor          Source tensor info. Supported data types: All.
      * @param[in]     constant_value  The value used to fill the planes of the tensor
      * @param[in]     window          Window to be used in case setting only part of a tensor. Default is nullptr.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *tensor, const PixelValue &constant_value, Window *window = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLFill
+    void configure(const CLCompileContext &compile_context, ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
+    /** Static function to check if given info will lead to a valid configuration of @ref kernels::ClFillKernel
      *
      * @param[in] tensor         Source tensor info. Data types supported: All.
-     * @param[in] constant_value The value used to fill the planes of the tensor
+     * @param[in] constant_value The value used to fill the planes of the tensor.
      * @param[in] window         Window to be used in case setting only part of a tensor. Default is nullptr.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    struct Impl;
-    std::unique_ptr<Impl> _impl;
 };
+} // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLFILL_H */
+#endif /* ARM_COMPUTE_CL_FILL_H */
