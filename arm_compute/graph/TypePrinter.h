@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -217,6 +217,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const EltwiseOperation &el
             break;
         case EltwiseOperation::Sub:
             os << "Sub";
+            break;
+        case EltwiseOperation::Div:
+            os << "Div";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");

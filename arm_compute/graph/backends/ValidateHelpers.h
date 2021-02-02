@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -693,6 +693,10 @@ Status validate_eltwise_Layer(EltwiseLayerNode &node)
     else if(eltwise_op == EltwiseOperation::Max)
     {
         return EltwiseLayerFunctions::ElementwiseMax::validate(input1, input2, output, act_info);
+    }
+    else if(eltwise_op == EltwiseOperation::Div)
+    {
+        return EltwiseLayerFunctions::ArithmeticDivision::validate(input1, input2, output, act_info);
     }
     else
     {

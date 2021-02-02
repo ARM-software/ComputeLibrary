@@ -106,6 +106,7 @@ enum class EltwiseOperation
     Sub, /**< Arithmetic subtraction */
     Mul, /**< Arithmetic multiplication */
     Max, /**< Arithmetic maximum */
+    Div, /**< Arithmetic division */
 };
 
 /** Supported Unary Element-wise operations */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,6 +66,7 @@ struct CLEltwiseFunctions
     using Subtraction    = CLArithmeticSubtraction;
     using Multiplication = CLPixelWiseMultiplication;
     using Maximum        = CLElementwiseMax;
+    using Division       = CLArithmeticDivision;
 };
 
 /** Collection of CL unary element-wise functions */
