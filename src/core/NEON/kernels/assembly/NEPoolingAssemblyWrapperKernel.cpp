@@ -148,7 +148,21 @@ void NEPoolingAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window &
     auto       out_ptr       = output->buffer() + output->info()->offset_first_element_in_bytes();
     auto       working_space = workspace->buffer() + workspace->info()->offset_first_element_in_bytes();
 
-    _kernel_asm->execute(in_ptr, out_ptr, working_space, info.thread_id, info.num_threads);
+    const auto input_shape    = input->info()->tensor_shape();
+    const auto output_shape   = output->info()->tensor_shape();
+    const auto input_padding  = input->info()->padding();
+    const auto output_padding = output->info()->padding();
+
+    const size_t ld_input_col    = input_shape[0] + input_padding.left + input_padding.right;
+    const size_t ld_input_row    = ld_input_col * (input_shape[1] + input_padding.top + input_padding.bottom);
+    const size_t ld_input_batch  = ld_input_row * input_shape[2];
+    const size_t ld_output_col   = output_shape[0] + output_padding.right;
+    const size_t ld_output_row   = ld_output_col * (output_shape[1] + output_padding.top + output_padding.bottom);
+    const size_t ld_output_batch = ld_output_row * output_shape[2];
+
+    _kernel_asm->execute(in_ptr, ld_input_col, ld_input_row, ld_input_batch,
+                         out_ptr, ld_output_col, ld_output_row, ld_output_batch,
+                         working_space, info.thread_id, info.num_threads);
 }
 
 size_t NEPoolingAssemblyWrapperKernel::get_working_size(unsigned int num_threads) const
