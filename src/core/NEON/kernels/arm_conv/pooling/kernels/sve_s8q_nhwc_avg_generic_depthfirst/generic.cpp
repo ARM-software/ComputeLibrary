@@ -41,10 +41,10 @@ namespace {
 
   constexpr RescaleParams rescale_params[8] = {
     {0x40000000, -0},  // 1/2
-    {0x55555555, -1},  // 1/3
+    {0x55555556, -1},  // 1/3
     {0x40000000, -1},  // 1/4
     {0x66666666, -2},  // 1/5
-    {0x55555555, -2},  // 1/6
+    {0x55555556, -2},  // 1/6
     {0x49249249, -2},  // 1/7
     {0x40000000, -2},  // 1/8
     {0x71c71c72, -3},  // 1/9
@@ -108,7 +108,7 @@ void sve_s8q_nhwc_avg_generic_depthfirst_impl(
       "mov %w[combined_rescale_value], v18.s[0]\n"
     : [combined_rescale_value] "=r" (combined_rescale_value)
     : [per_layer_mul] "r" (qp.per_layer_mul), [rescale_value] "r" (rescale_value)
-    : "q16", "q17", "q18"
+    : "v16", "v17", "v18"
   );
 
   __asm__ __volatile__(

@@ -42,6 +42,7 @@ struct a64_u8q_nhwc_avg_generic_depthfirst
 
   constexpr static PoolingType pooling_type(void) { return PoolingType::AVERAGE; }
 
+
   kern_type kernel = a64_u8q_nhwc_avg_generic_depthfirst_impl;
 
   a64_u8q_nhwc_avg_generic_depthfirst(const CPUInfo *) {}

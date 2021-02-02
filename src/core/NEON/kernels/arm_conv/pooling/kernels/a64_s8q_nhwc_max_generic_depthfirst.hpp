@@ -42,6 +42,7 @@ struct a64_s8q_nhwc_max_generic_depthfirst
 
   constexpr static PoolingType pooling_type(void) { return PoolingType::MAX; }
 
+
   kern_type kernel = a64_s8q_nhwc_max_generic_depthfirst_impl;
 
   a64_s8q_nhwc_max_generic_depthfirst(const CPUInfo *) {}

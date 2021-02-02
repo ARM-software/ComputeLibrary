@@ -40,10 +40,10 @@ namespace {
 
   constexpr RescaleParams rescale_params[8] = {
     {0x40000000, -0},  // 1/2
-    {0x55555555, -1},  // 1/3
+    {0x55555556, -1},  // 1/3
     {0x40000000, -1},  // 1/4
     {0x66666666, -2},  // 1/5
-    {0x55555555, -2},  // 1/6
+    {0x55555556, -2},  // 1/6
     {0x49249249, -2},  // 1/7
     {0x40000000, -2},  // 1/8
     {0x71c71c72, -3},  // 1/9
@@ -237,22 +237,22 @@ void sve_u8_nhwc_avg_generic_depthfirst_impl(
     "ld1rw { z17.s }, p4/Z, [%x[rescale_ptr]]\n"
     "mov z19.s, #0xff\n"
     "ld1rw { z16.s }, p4/Z, [%x[shift_ptr]]\n"
-    ".inst 0x04b175ef  // sqrdmulh z15.s, z15.s, z17.s\n"
-    ".inst 0x04b175ce  // sqrdmulh z14.s, z14.s, z17.s\n"
-    ".inst 0x04b175ad  // sqrdmulh z13.s, z13.s, z17.s\n"
-    ".inst 0x04b1758c  // sqrdmulh z12.s, z12.s, z17.s\n"
-    ".inst 0x04b1756b  // sqrdmulh z11.s, z11.s, z17.s\n"
-    ".inst 0x04b1754a  // sqrdmulh z10.s, z10.s, z17.s\n"
-    ".inst 0x04b17529  // sqrdmulh z9.s, z9.s, z17.s\n"
-    ".inst 0x04b17508  // sqrdmulh z8.s, z8.s, z17.s\n"
-    ".inst 0x04b174e7  // sqrdmulh z7.s, z7.s, z17.s\n"
-    ".inst 0x04b174c6  // sqrdmulh z6.s, z6.s, z17.s\n"
-    ".inst 0x04b174a5  // sqrdmulh z5.s, z5.s, z17.s\n"
-    ".inst 0x04b17484  // sqrdmulh z4.s, z4.s, z17.s\n"
-    ".inst 0x04b17463  // sqrdmulh z3.s, z3.s, z17.s\n"
-    ".inst 0x04b17442  // sqrdmulh z2.s, z2.s, z17.s\n"
-    ".inst 0x04b17421  // sqrdmulh z1.s, z1.s, z17.s\n"
-    ".inst 0x04b17400  // sqrdmulh z0.s, z0.s, z17.s\n"
+    ".inst 0x04b175ef  // sqdmulh z15.s, z15.s, z17.s\n"
+    ".inst 0x04b175ce  // sqdmulh z14.s, z14.s, z17.s\n"
+    ".inst 0x04b175ad  // sqdmulh z13.s, z13.s, z17.s\n"
+    ".inst 0x04b1758c  // sqdmulh z12.s, z12.s, z17.s\n"
+    ".inst 0x04b1756b  // sqdmulh z11.s, z11.s, z17.s\n"
+    ".inst 0x04b1754a  // sqdmulh z10.s, z10.s, z17.s\n"
+    ".inst 0x04b17529  // sqdmulh z9.s, z9.s, z17.s\n"
+    ".inst 0x04b17508  // sqdmulh z8.s, z8.s, z17.s\n"
+    ".inst 0x04b174e7  // sqdmulh z7.s, z7.s, z17.s\n"
+    ".inst 0x04b174c6  // sqdmulh z6.s, z6.s, z17.s\n"
+    ".inst 0x04b174a5  // sqdmulh z5.s, z5.s, z17.s\n"
+    ".inst 0x04b17484  // sqdmulh z4.s, z4.s, z17.s\n"
+    ".inst 0x04b17463  // sqdmulh z3.s, z3.s, z17.s\n"
+    ".inst 0x04b17442  // sqdmulh z2.s, z2.s, z17.s\n"
+    ".inst 0x04b17421  // sqdmulh z1.s, z1.s, z17.s\n"
+    ".inst 0x04b17400  // sqdmulh z0.s, z0.s, z17.s\n"
     ".inst 0x4482920f  // srshl z15.s, p4/M, z15.s, z16.s\n"
     ".inst 0x4482920e  // srshl z14.s, p4/M, z14.s, z16.s\n"
     ".inst 0x4482920d  // srshl z13.s, p4/M, z13.s, z16.s\n"
@@ -379,10 +379,10 @@ void sve_u8_nhwc_avg_generic_depthfirst_impl(
     "ld1rw { z17.s }, p4/Z, [%x[rescale_ptr]]\n"
     "mov z19.s, #0xff\n"
     "ld1rw { z16.s }, p4/Z, [%x[shift_ptr]]\n"
-    ".inst 0x04b175ef  // sqrdmulh z15.s, z15.s, z17.s\n"
-    ".inst 0x04b175ce  // sqrdmulh z14.s, z14.s, z17.s\n"
-    ".inst 0x04b175ad  // sqrdmulh z13.s, z13.s, z17.s\n"
-    ".inst 0x04b1758c  // sqrdmulh z12.s, z12.s, z17.s\n"
+    ".inst 0x04b175ef  // sqdmulh z15.s, z15.s, z17.s\n"
+    ".inst 0x04b175ce  // sqdmulh z14.s, z14.s, z17.s\n"
+    ".inst 0x04b175ad  // sqdmulh z13.s, z13.s, z17.s\n"
+    ".inst 0x04b1758c  // sqdmulh z12.s, z12.s, z17.s\n"
     ".inst 0x4482920f  // srshl z15.s, p4/M, z15.s, z16.s\n"
     ".inst 0x4482920e  // srshl z14.s, p4/M, z14.s, z16.s\n"
     ".inst 0x4482920d  // srshl z13.s, p4/M, z13.s, z16.s\n"

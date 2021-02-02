@@ -42,6 +42,7 @@ struct sve_fp32_nhwc_avg_generic_depthfirst
 
   constexpr static PoolingType pooling_type(void) { return PoolingType::AVERAGE; }
 
+
   kern_type kernel = sve_fp32_nhwc_avg_generic_depthfirst_impl;
 
   sve_fp32_nhwc_avg_generic_depthfirst(const CPUInfo *) {}
