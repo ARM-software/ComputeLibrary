@@ -381,8 +381,11 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
         const unsigned int pad_left         = conv_info.pad_left();
         const unsigned int pad_top          = conv_info.pad_top();
 
-        build_options.add_option_if(_biases != nullptr, std::string("-DHAS_BIAS"));
-        build_options.add_option_if(_biases != nullptr, std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(_biases->info()->data_type())));
+        if (_biases != nullptr)
+        {
+            build_options.add_option(std::string("-DHAS_BIAS"));
+            build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(_biases->info()->data_type())));
+        }
         build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(_input->info()->dimension(width_idx)));
         build_options.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(_input->info()->dimension(height_idx)));
         build_options.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(_input->info()->dimension(channel_idx)));
