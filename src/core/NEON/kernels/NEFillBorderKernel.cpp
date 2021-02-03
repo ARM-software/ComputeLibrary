@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,12 +33,8 @@
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
 
-#include <algorithm>
-#include <cstdint>
-
 namespace arm_compute
 {
-class Coordinates;
 namespace
 {
 inline void fill_constant_value_single_channel_special(ITensor *tensor, const Window &window, unsigned int right, unsigned int bottom, const PixelValue &constant_border_value)
@@ -100,20 +96,26 @@ NEFillBorderKernel::NEFillBorderKernel()
 void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
-    ARM_COMPUTE_ERROR_ON(tensor->info()->data_type() == DataType::UNKNOWN);
+    _tensor = tensor;
+    configure(tensor->info(), border_size, border_mode, constant_border_value);
+}
 
-    _tensor                = tensor;
+void NEFillBorderKernel::configure(ITensorInfo *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
+    ARM_COMPUTE_ERROR_ON(tensor->data_type() == DataType::UNKNOWN);
+
     _border_size           = border_size;
     _mode                  = border_mode;
     _constant_border_value = constant_border_value;
 
-    _border_size.limit(tensor->info()->padding());
+    _border_size.limit(tensor->padding());
 
     Window win;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     win.set(Window::DimY, Window::Dimension(0, 1, 1));
-    win.use_tensor_dimensions(_tensor->info()->tensor_shape(), Window::DimZ);
+    win.use_tensor_dimensions(tensor->tensor_shape(), Window::DimZ);
     INEKernel::configure(win);
 }
 
@@ -154,6 +156,12 @@ void NEFillBorderKernel::run(const Window &window, const ThreadInfo &info)
         default:
             ARM_COMPUTE_ERROR("Unknown border mode");
     }
+}
+
+void NEFillBorderKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+{
+    _tensor = tensors.get_tensor(TensorType::ACL_SRC_DST);
+    run(window, info);
 }
 
 void NEFillBorderKernel::fill_replicate_single_channel(const Window &window)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,9 +65,21 @@ public:
      *
      */
     void configure(ITensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    /** Initialise the function.
+     *
+     * @note This kernel fills the borders within the XY-planes.
+     *
+     * @param[in,out] tensor                Tensor info to process. Data types supported: All.
+     * @param[in]     border_size           Size of the border to fill in elements.
+     * @param[in]     border_mode           Border mode to use for the convolution.
+     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     *
+     */
+    void configure(ITensorInfo *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
 private:
     void fill_replicate_single_channel(const Window &window);

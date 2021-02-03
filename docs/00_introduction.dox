@@ -166,7 +166,7 @@ v20.11 Public major release
    - NELocallyConnectedMatrixMultiplyKernel
    - @ref NEGEMMLowpOffsetContributionKernel
    - @ref NEGEMMTranspose1xWKernel
-   - @ref NEPoolingLayerKernel
+   - NEPoolingLayerKernel
    - @ref NEConvolutionKernel
    - @ref NEDepthwiseConvolutionLayerNativeKernel
    - @ref NEGEMMLowpMatrixMultiplyKernel
@@ -1120,7 +1120,7 @@ v18.01 Public maintenance release
  - Added QASYMM8 support to the following NEON kernels:
     - NEDepthwiseConvolutionLayer3x3Kernel
     - @ref NEFillBorderKernel
-    - @ref NEPoolingLayerKernel
+    - NEPoolingLayerKernel
  - Added new examples:
     - graph_cl_mobilenet_qasymm8.cpp
     - graph_inception_v3.cpp
@@ -1299,7 +1299,7 @@ v17.03 Sources preview
  - New NEON kernels / functions:
    - NEActivationLayerKernel / @ref NEActivationLayer
    - GEMM refactoring + FP16 support (Requires armv8.2 CPU): @ref NEGEMMInterleave4x4Kernel, @ref NEGEMMTranspose1xWKernel, @ref NEGEMMMatrixMultiplyKernel, @ref NEGEMMMatrixAdditionKernel / @ref NEGEMM
-   - @ref NEPoolingLayerKernel / @ref NEPoolingLayer
+   - NEPoolingLayerKernel / @ref NEPoolingLayer
 
 v17.02.1 Sources preview
  - New OpenCL kernels / functions:

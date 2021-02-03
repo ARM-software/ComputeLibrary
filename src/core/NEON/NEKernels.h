@@ -101,7 +101,6 @@
 #include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
-#include "src/core/NEON/kernels/NEPoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
 #include "src/core/NEON/kernels/NEQuantizationLayerKernel.h"
