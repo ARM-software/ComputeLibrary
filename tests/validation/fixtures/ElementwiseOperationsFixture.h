@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,9 +48,11 @@ public:
     template <typename...>
     void setup(ArithmeticOperation op, const TensorShape &shape0, const TensorShape &shape1,
                DataType data_type0, DataType data_type1, DataType output_data_type,
-               QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
+               QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool use_dyanmic_shape = false)
     {
-        _op        = op;
+        _op                = op;
+        _use_dynamic_shape = use_dyanmic_shape;
+
         _target    = compute_target(shape0, shape1, data_type0, data_type1, output_data_type, qinfo0, qinfo1, qinfo_out);
         _reference = compute_reference(shape0, shape1, data_type0, data_type1, output_data_type, qinfo0, qinfo1, qinfo_out);
     }
@@ -87,9 +89,25 @@ protected:
         TensorType ref_src2 = create_tensor<TensorType>(shape1, data_type1, 1, qinfo1);
         TensorType dst      = create_tensor<TensorType>(TensorShape::broadcast_shape(shape0, shape1), output_data_type, 1, qinfo_out);
 
+        // if _use_dynamic_shape is true, this fixture will test scenario for dynamic shapes.
+        // - At configure time, all input tensors are marked as dynamic using set_tensor_dynamic()
+        // - After configure, tensors are marked as static for run using set_tensor_static()
+        // - The tensors with static shape are given to run()
+        if(_use_dynamic_shape)
+        {
+            set_tensor_dynamic(ref_src1);
+            set_tensor_dynamic(ref_src2);
+        }
+
         // Create and configure function
         FunctionType elem_op;
         elem_op.configure(&ref_src1, &ref_src2, &dst);
+
+        if(_use_dynamic_shape)
+        {
+            set_tensor_static(ref_src1);
+            set_tensor_static(ref_src2);
+        }
 
         ARM_COMPUTE_EXPECT(ref_src1.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(ref_src2.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -133,6 +151,7 @@ protected:
     TensorType          _target{};
     SimpleTensor<T>     _reference{};
     ArithmeticOperation _op{ ArithmeticOperation::ADD };
+    bool                _use_dynamic_shape{ false };
 };
 
 // Arithmetic operation fused with activation function
@@ -222,6 +241,32 @@ public:
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape, shape,
                                                                                              data_type0, data_type1, output_data_type,
                                                                                              QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ArithmeticDivisionBroadcastDynamicShapeValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type)
+    {
+        ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape0, shape1,
+                                                                                             data_type0, data_type1, output_data_type,
+                                                                                             QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), true);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ArithmeticDivisionDynamicShapeValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type)
+    {
+        ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape, shape,
+                                                                                             data_type0, data_type1, output_data_type,
+                                                                                             QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), true);
     }
 };
 

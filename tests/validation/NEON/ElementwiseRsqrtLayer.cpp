@@ -50,6 +50,25 @@ RelativeTolerance<float> tolerance_fp16(0.01f);
 TEST_SUITE(NEON)
 TEST_SUITE(RsqrtLayer)
 
+// Test test cases will execute the function with dynamic-stated shapes
+// Since other elementwise unary operations share the same kernel, this tests are added only here.
+// Also, only FP32 is tested since data type doesn't/shouldn't matter with dynamic shapes.
+TEST_SUITE(DynamicShape)
+TEST_SUITE(FP32)
+
+template <typename T>
+using CpuRsqrtDynamicShapeFixture = RsqrtDynamicShapeValidationFixture<Tensor, Accessor, NERsqrtLayer, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CpuRsqrtDynamicShapeFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                          DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32);
+}
+
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // DynamicShape
+
 template <typename T>
 using NERsqrtLayerFixture = RsqrtValidationFixture<Tensor, Accessor, NERsqrtLayer, T>;
 

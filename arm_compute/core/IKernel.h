@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,11 @@ public:
      * @return The maximum window the kernel can be executed on.
      */
     const Window &window() const;
+    /** Function to check if the embedded window of this kernel has been configured
+     *
+     * @return True if the windows has been configured
+     */
+    bool is_window_configured() const;
 
 protected:
     /** Configure the kernel's window

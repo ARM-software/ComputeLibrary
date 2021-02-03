@@ -34,6 +34,8 @@
 namespace arm_compute
 {
 class ICPPKernel;
+class Window;
+
 using INEKernel = ICPPKernel;
 namespace experimental
 {
@@ -63,6 +65,8 @@ public:
     MemoryRequirements workspace() const override;
 
 protected:
+    void run(ITensorPack &tensors, const Window &window);
+
     std::unique_ptr<INEKernel> _kernel;
     IRuntimeContext           *_ctx;
     MemoryRequirements         _workspace;

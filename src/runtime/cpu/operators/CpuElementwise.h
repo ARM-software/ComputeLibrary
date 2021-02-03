@@ -30,30 +30,36 @@ namespace arm_compute
 {
 namespace cpu
 {
+class CpuElementwiseBase : public ICpuOperator
+{
+public:
+    // Inherited methods overridden:
+    void run(ITensorPack &tensors) override;
+};
 /** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for max
  *
  * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a max operation between two tensors.
  */
-class CpuElementwiseMax : public ICpuOperator
+class CpuElementwiseMax : public CpuElementwiseBase
 {
 public:
-    /** Initialise the kernel's inputs, output and conversion policy.
+    /** Initialise the kernel's inputs, dst and conversion policy.
      *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in, out] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
+    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for max
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 };
 
 /** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for min
@@ -61,25 +67,25 @@ public:
  * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a min operation between two tensors.
  */
-class CpuElementwiseMin : public ICpuOperator
+class CpuElementwiseMin : public CpuElementwiseBase
 {
 public:
-    /** Initialise the kernel's inputs, output and conversion policy.
+    /** Initialise the kernel's inputs, dst and conversion policy.
      *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in, out] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
+    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for min
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 };
 
 /** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for squared difference
@@ -87,25 +93,25 @@ public:
  * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a squared different operation between two tensors (i.e., out[i] = (in1[i] - in2[i])^2
  */
-class CpuElementwiseSquaredDiff : public ICpuOperator
+class CpuElementwiseSquaredDiff : public CpuElementwiseBase
 {
 public:
-    /** Initialise the kernel's inputs, output and conversion policy.
+    /** Initialise the kernel's inputs, dst and conversion policy.
      *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in, out] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
+    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for squared difference
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 };
 
 /** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for division
@@ -113,25 +119,25 @@ public:
  * @note The tensor data type for the inputs must be S32/F16/F32.
  * @note The function performs a division operation between two tensors (i.e., out[i] = in1[i] / in2[i])
  */
-class CpuElementwiseDivision : public ICpuOperator
+class CpuElementwiseDivision : public CpuElementwiseBase
 {
 public:
-    /** Initialise the kernel's inputs, output and conversion policy.
+    /** Initialise the kernel's inputs, dst and conversion policy.
      *
-     * @param[in, out] input1 First tensor input info. Data types supported: S32/F16/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in, out] src0 First tensor input info. Data types supported: S32/F16/F32.
+     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
+    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for division
      *
-     * @param[in] input1 First tensor input info. Data types supported: S32/F16/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] src0 First tensor input info. Data types supported: S32/F16/F32.
+     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 };
 
 /** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for power
@@ -140,25 +146,25 @@ public:
  * @note The function performs a elementwise power of in1 to in2 (i.e., out[i] = in1[i] ^ in2[i])
  * @note For an exponent that is a float, this function will only work with a positive base.
  */
-class CpuElementwisePower : public ICpuOperator
+class CpuElementwisePower : public CpuElementwiseBase
 {
 public:
-    /** Initialise the kernel's inputs, output and conversion policy.
+    /** Initialise the kernel's inputs, dst and conversion policy.
      *
-     * @param[in, out] input1 First tensor input info. Data types supported: F16/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in, out] src0 First tensor input info. Data types supported: F16/F32.
+     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
+    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for power
      *
-     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] src0 First tensor input info. Data types supported: F16/F32.
+     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 };
 
 /** Basic function to run @ref cpu::kernels::CpuComparisonKernel.
@@ -166,27 +172,27 @@ public:
  * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a comparison operation between two tensors.
  */
-class CpuElementwiseComparison : public ICpuOperator
+class CpuElementwiseComparison : public CpuElementwiseBase
 {
 public:
-    /** Initialise the kernel's inputs, output and conversion policy.
+    /** Initialise the kernel's inputs, dst and conversion policy.
      *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: U16/U32.
-     * @param[in]      op     Comparison Operation to be performed.
+     * @param[in, out] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[out]     dst  Output tensor info. Data types supported: U16/U32.
+     * @param[in]      op   Comparison Operation to be performed.
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ComparisonOperation op);
+    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ComparisonOperation op);
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: U16/U32.
-     * @param[in] op     Comparison Operation to be performed.
+     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[in] dst  Output tensor info. Data types supported: U16/U32.
+     * @param[in] op   Comparison Operation to be performed.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op);
+    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ComparisonOperation op);
 };
 
 /** Basic function to run @ref cpu::kernels::CpuComparisonKernel
@@ -195,25 +201,25 @@ public:
  * @note The function performs a comparison operation between two tensors.
  */
 template <ComparisonOperation op>
-class CpuElementwiseComparisonStatic : public ICpuOperator
+class CpuElementwiseComparisonStatic : public CpuElementwiseBase
 {
 public:
-    /** Initialise the kernel's inputs, output and conversion policy.
+    /** Initialise the kernel's inputs, dst and conversion policy.
      *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: U16/U32.
+     * @param[in, out] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[out]     dst  Output tensor info. Data types supported: U16/U32.
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
+    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: U16/U32.
+     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
+     * @param[in] dst  Output tensor info. Data types supported: U16/U32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 };
 
 /** Basic function to run equal comparison. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -167,7 +167,7 @@ arm_compute::Status arm_compute::error_on_unconfigured_kernel(const char *functi
                                                               const arm_compute::IKernel *kernel)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(kernel == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0) && (kernel->window().x().step() == 0),
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(!kernel->is_window_configured(),
                                         function, file, line,
                                         "This kernel hasn't been configured.");
     return arm_compute::Status{};

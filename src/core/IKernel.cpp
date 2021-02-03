@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,11 @@ bool IKernel::is_parallelisable() const
 BorderSize IKernel::border_size() const
 {
     return BorderSize(0);
+}
+
+bool IKernel::is_window_configured() const
+{
+    return !((_window.x().start() == _window.x().end()) && (_window.x().end() == 0));
 }
 
 void IKernel::configure(const Window &window)

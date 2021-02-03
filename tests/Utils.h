@@ -814,6 +814,59 @@ inline void sync_tensor_if_necessary(TensorType &tensor)
 {
     ARM_COMPUTE_UNUSED(tensor);
 }
+
+/** Construct and return object for dimensions' state filled with the given value
+ *
+ * @param[in] value The value to fill
+ *
+ * @return Constructed class
+ */
+inline ITensorInfo::TensorDimsState construct_dims_state(int32_t value)
+{
+    auto states = ITensorInfo::TensorDimsState{};
+    std::fill(states.begin(), states.end(), value);
+    return states;
+}
+
+/** Construct and return object for dimensions' state filled with the value for dynamic state
+ *
+ * @return Constructed class filled with the value for dynamic state
+ */
+inline ITensorInfo::TensorDimsState construct_dynamic_dims_state()
+{
+    return construct_dims_state(ITensorInfo::get_dynamic_state_value());
+}
+
+/** Construct and return object for dimensions' state filled with the value for non-dynamic state
+ *
+ * @return Constructed class filled with the value for non-dynamic state
+ */
+inline ITensorInfo::TensorDimsState construct_static_dims_state()
+{
+    return construct_dims_state(ITensorInfo::get_static_state_value());
+}
+
+/** Set the dimension states of the given tensor to dynamic
+ *
+ * @param[in] t The tensor to set to dynamic state
+ *
+ */
+template <typename TensorType>
+void set_tensor_dynamic(TensorType &t)
+{
+    t.info()->set_tensor_dims_state(construct_dynamic_dims_state());
+}
+
+/** Set the dimension states of the given tensor to state
+ *
+ * @param[in] t The tensor to set to static state
+ *
+ */
+template <typename TensorType>
+void set_tensor_static(TensorType &t)
+{
+    t.info()->set_tensor_dims_state(construct_static_dims_state());
+}
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_UTILS_H */

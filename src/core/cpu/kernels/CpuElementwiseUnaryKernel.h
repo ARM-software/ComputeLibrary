@@ -38,7 +38,7 @@ namespace kernels
 /** Interface for an element-wise unary operation kernel
  *
  * Element-wise operation is computed by:
- * @f[ output(x) = OP(input(x))@f]
+ * @f[ dst(x) = OP(src(x))@f]
  *
  */
 class CpuElementwiseUnaryKernel : public ICpuKernel
@@ -56,21 +56,21 @@ public:
 
     /** Function to configure the @ref CpuElementwiseUnaryKernel
      *
-     * @param[in]  op     Arithmetic operation to be executed.
-     * @param[in]  input  First tensor input. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
-     * @param[out] output Output tensor. Data types supported: Same as @p input.
+     * @param[in]  op  Arithmetic operation to be executed.
+     * @param[in]  src First tensor input. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
+     * @param[out] dst Output tensor. Data types supported: Same as @p src.
      */
-    void configure(ElementWiseUnary op, const ITensorInfo &input, ITensorInfo &output);
+    void configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CpuElementwiseUnaryKernel
      *
-     * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input  First tensor input info. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input.
+     * @param[in] op  Arithmetic operation to be executed.
+     * @param[in] src First tensor input info. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
+     * @param[in] dst Output tensor info. Data types supported: Same as @p src.
      *
      * @return a Status
      */
-    static Status validate(ElementWiseUnary op, const ITensorInfo &input, const ITensorInfo &output);
+    static Status validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;

@@ -293,7 +293,7 @@ public:
     }
     bool is_dynamic() const override
     {
-        return std::find(std::cbegin(_dims_state), std::cend(_dims_state), -1) != std::cend(_dims_state);
+        return std::find(std::cbegin(_dims_state), std::cend(_dims_state), get_dynamic_state_value()) != std::cend(_dims_state);
     }
     ITensorInfo &set_is_resizable(bool is_resizable) override
     {
