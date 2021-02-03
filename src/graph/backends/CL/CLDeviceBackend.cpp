@@ -65,7 +65,7 @@ bool file_exists(const std::string &filename)
 static detail::BackendRegistrar<CLDeviceBackend> CLDeviceBackend_registrar(Target::CL);
 
 CLDeviceBackend::CLDeviceBackend()
-    : _context_count(0), _tuner(), _allocator(nullptr), _tuner_file()
+    : _context_count(0), _tuner(), _gemm_heuristics(), _allocator(nullptr), _tuner_file()
 {
 }
 
@@ -87,7 +87,7 @@ void CLDeviceBackend::set_kernel_tuning_mode(CLTunerMode tuning_mode)
 void CLDeviceBackend::initialize_backend()
 {
     // Setup Scheduler
-    CLScheduler::get().default_init(&_tuner);
+    CLScheduler::get().default_init(&_tuner, &_gemm_heuristics);
     // Create allocator with new context
     _allocator = std::make_unique<CLBufferAllocator>(nullptr /* legacy path for CLCoreRuntimeContext */);
 }
@@ -122,6 +122,10 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
 
     set_kernel_tuning(ctx.config().use_tuner);
     set_kernel_tuning_mode(ctx.config().tuner_mode);
+
+    // Attempt to load mlgo heuristics
+    ARM_COMPUTE_ERROR_ON(CLScheduler::get().gemm_heuristics() == nullptr);
+    CLScheduler::get().gemm_heuristics()->reload_from_file(ctx.config().mlgo_file);
 
     // Setup a management backend
     if(ctx.memory_management_ctx(Target::CL) == nullptr)

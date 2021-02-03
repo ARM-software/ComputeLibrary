@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/graph/IDeviceBackend.h"
 
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
+#include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
 
 namespace arm_compute
@@ -70,10 +71,11 @@ public:
     std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() override;
 
 private:
-    int                                _context_count; /**< Counts how many contexts are currently using the backend */
-    CLTuner                            _tuner;         /**< CL kernel tuner */
-    std::unique_ptr<CLBufferAllocator> _allocator;     /**< CL buffer affinity allocator */
-    std::string                        _tuner_file;    /**< Filename to load/store the tuner's values from */
+    int                                _context_count;   /**< Counts how many contexts are currently using the backend */
+    CLTuner                            _tuner;           /**< CL kernel tuner */
+    CLGEMMHeuristicsHandle             _gemm_heuristics; /**< GEMM heuristics */
+    std::unique_ptr<CLBufferAllocator> _allocator;       /**< CL buffer affinity allocator */
+    std::string                        _tuner_file;      /**< Filename to load/store the tuner's values from */
 };
 } // namespace backends
 } // namespace graph

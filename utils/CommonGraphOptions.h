@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -108,6 +108,7 @@ struct CommonGraphParams
     std::string                      validation_file{};
     std::string                      validation_path{};
     std::string                      tuner_file{};
+    std::string                      mlgo_file{};
     unsigned int                     validation_range_start{ 0 };
     unsigned int                     validation_range_end{ std::numeric_limits<unsigned int>::max() };
 };
@@ -165,6 +166,7 @@ public:
     SimpleOption<std::string>              *validation_path;  /**< Validation data path */
     SimpleOption<std::string>              *validation_range; /**< Validation range */
     SimpleOption<std::string>              *tuner_file;       /**< File to load/store the tuner's values from */
+    SimpleOption<std::string>              *mlgo_file;        /**< File to load the MLGO heuristics from */
 };
 
 /** Consumes the common graph options and creates a structure containing any information
