@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ namespace
 {
 const auto ArgMinMaxSmallDataset = framework::dataset::make("Shape",
 {
-    TensorShape{ 2U, 7U, 1U, 3U },
+    TensorShape{ 1U, 7U, 1U, 3U },
     TensorShape{ 149U, 5U, 1U, 2U },
     TensorShape{ 166U, 5U, 1U, 2U },
     TensorShape{ 322U, 5U, 1U, 2U },

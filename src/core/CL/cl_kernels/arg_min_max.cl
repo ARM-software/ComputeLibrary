@@ -38,8 +38,8 @@
 #define ISGREATER(x, y) (x > y) ? 1 : 0
 #define ISLESS(x, y) (x < y) ? 1 : 0
 #else // !defined(WIDTH)
-#define ISGREATER(x, y) select((VEC_SIGNED_INT_IN)0, (VEC_SIGNED_INT_IN)-1, x > y)
-#define ISLESS(x, y) select((VEC_SIGNED_INT_IN)0, (VEC_SIGNED_INT_IN)-1, x < y)
+#define ISGREATER(x, y) select((VEC_SIGNED_INT_IN)0, (VEC_SIGNED_INT_IN)-1, (VEC_SIGNED_INT_IN)(x > y))
+#define ISLESS(x, y) select((VEC_SIGNED_INT_IN)0, (VEC_SIGNED_INT_IN)-1, (VEC_SIGNED_INT_IN)(x < y))
 #endif // defined(WIDTH)
 #endif // defined(FLOAT_DATA_TYPE)
 
@@ -342,7 +342,7 @@ __kernel void arg_min_max_y(
 }
 #endif // defined(HEIGHT)
 
-#if defined(DEPTH)
+#if defined(DEPTH) && !defined(BATCH)
 /** This kernel performs reduction on z-axis.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
@@ -390,7 +390,7 @@ __kernel void arg_min_max_z(
     // Store result
     STORE_VECTOR_SELECT(indx, DATA_TYPE_OUTPUT, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
-#endif /* defined(DEPTH) */
+#endif /* defined(DEPTH)  && !defined(BATCH) */
 
 #if defined(BATCH) && defined(DEPTH)
 /** This kernel performs reduction on w-axis.
