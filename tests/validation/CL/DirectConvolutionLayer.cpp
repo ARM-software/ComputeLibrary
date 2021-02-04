@@ -43,11 +43,10 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<half>              tolerance_fp16(half(0.2));   /**< Tolerance for floating point tests */
-RelativeTolerance<float>             tolerance_fp32(0.05f);       /**< Tolerance for floating point tests */
-AbsoluteTolerance<float>             tolerance_fp32_abs(0.0003f); /**< Absolute Tolerance for floating point tests */
-constexpr float                      tolerance_num = 0.07f;       /**< Tolerance number */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);        /**< Tolerance for quantized tests */
+RelativeTolerance<half>              tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
+RelativeTolerance<float>             tolerance_fp32(0.05f);     /**< Tolerance for floating point tests */
+constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
 
 const auto data_strides          = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
 const auto data_strides_small    = combine(framework::dataset::make("StrideX", 1), framework::dataset::make("StrideY", 1));
