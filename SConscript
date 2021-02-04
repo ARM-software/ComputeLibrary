@@ -227,6 +227,7 @@ if env['opencl']:
     runtime_files += Glob('src/runtime/gpu/cl/*.cpp')
     runtime_files += Glob('src/runtime/gpu/cl/operators/*.cpp')
     runtime_files += Glob('src/runtime/CL/mlgo/*.cpp')
+    runtime_files += Glob('src/runtime/CL/gemm_auto_heuristics/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 

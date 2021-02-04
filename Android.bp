@@ -613,6 +613,7 @@ cc_library_static {
         "src/runtime/CL/gemm/CLGEMMDefaultTypeBifrost.cpp",
         "src/runtime/CL/gemm/CLGEMMDefaultTypeMidgard.cpp",
         "src/runtime/CL/gemm/CLGEMMDefaultTypeValhall.cpp",
+        "src/runtime/CL/gemm_auto_heuristics/CLGEMMAutoHeuristics.cpp",
         "src/runtime/CL/mlgo/HeuristicTree.cpp",
         "src/runtime/CL/mlgo/MLGOHeuristics.cpp",
         "src/runtime/CL/mlgo/MLGOParser.cpp",
