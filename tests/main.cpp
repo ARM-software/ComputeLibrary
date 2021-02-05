@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,7 @@
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
@@ -143,6 +144,9 @@ int main(int argc, char **argv)
 
     auto tuner_file = parser.add_option<utils::SimpleOption<std::string>>("tuner-file", "");
     tuner_file->set_help("File to load/save CLTuner values");
+
+    auto mlgo_file = parser.add_option<utils::SimpleOption<std::string>>("mlgo-file", "");
+    mlgo_file->set_help("File to load MLGO heuristics");
 #endif /* ARM_COMPUTE_CL */
     auto threads = parser.add_option<utils::SimpleOption<int>>("threads", 1);
     threads->set_help("Number of threads to use");
@@ -190,12 +194,14 @@ int main(int argc, char **argv)
 #endif /* ARM_COMPUTE_GC */
 
 #ifdef ARM_COMPUTE_CL
-        CLTuner cl_tuner(false);
+        CLTuner                cl_tuner(false);
+        CLGEMMHeuristicsHandle gemm_heuristics;
         if(opencl_is_available())
         {
             auto ctx_dev_err = create_opencl_context_and_device();
             ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
-            CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner);
+            gemm_heuristics.reload_from_file(mlgo_file->value());
+            CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner, &gemm_heuristics);
         }
 
         if(enable_tuner->is_set())

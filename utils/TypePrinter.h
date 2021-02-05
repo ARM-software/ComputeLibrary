@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
+#include "arm_compute/runtime/CL/CLTypes.h"
 #include "support/StringSupport.h"
 
 #include <ostream>
@@ -282,7 +283,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &g
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMRHSMatrixInfo &gemm_info)
 {
-    os << "( n0= " << (unsigned int)gemm_info.n0 << " k0= " << gemm_info.k0 << "  h0= " << gemm_info.h0 << "  trans= " << gemm_info.transpose << "  inter= " << gemm_info.interleave << "})";
+    os << "( n0= " << (unsigned int)gemm_info.n0 << " k0= " << gemm_info.k0 << "  h0= " << gemm_info.h0 << "  trans= " << gemm_info.transpose << "  inter= " << gemm_info.interleave << " exp_img=" <<
+       gemm_info.export_to_cl_image << "})";
     return os;
 }
 
@@ -2438,6 +2440,42 @@ inline std::string to_string(const CLTunerMode val)
         {
             ARM_COMPUTE_ERROR("Invalid tuner mode.");
             return std::string("UNDEFINED");
+        }
+    }
+}
+/** Converts a @ref CLGEMMKernelType to string
+ *
+ * @param[in] val CLGEMMKernelType value to be converted
+ *
+ * @return String representing the corresponding CLGEMMKernelType
+ */
+inline std::string to_string(CLGEMMKernelType val)
+{
+    switch(val)
+    {
+        case CLGEMMKernelType::NATIVE_V1:
+        {
+            return "Native_V1";
+        }
+        case CLGEMMKernelType::RESHAPED_V1:
+        {
+            return "Reshaped_V1";
+        }
+        case CLGEMMKernelType::NATIVE:
+        {
+            return "Native";
+        }
+        case CLGEMMKernelType::RESHAPED_ONLY_RHS:
+        {
+            return "Reshaped_Only_RHS";
+        }
+        case CLGEMMKernelType::RESHAPED:
+        {
+            return "Reshaped";
+        }
+        default:
+        {
+            return "Unknown";
         }
     }
 }
