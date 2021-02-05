@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_MLGO_HEURISTICTREE_H
-#define SRC_MLGO_HEURISTICTREE_H
+#ifndef SRC_RUNTIME_CL_MLGO_HEURISTIC_TREE_H
+#define SRC_RUNTIME_CL_MLGO_HEURISTIC_TREE_H
 
 #include "arm_compute/core/Types.h"
 #include "src/runtime/CL/mlgo/Common.h"
@@ -195,4 +195,4 @@ private:
 
 } // namespace arm_compute
 
-#endif //SRC_MLGO_HEURISTICTREE_H
+#endif //SRC_RUNTIME_CL_MLGO_HEURISTIC_TREE_H

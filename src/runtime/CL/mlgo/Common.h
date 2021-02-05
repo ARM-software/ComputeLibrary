@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_MLGO_COMMON_H
-#define SRC_MLGO_COMMON_H
+#ifndef SRC_RUNTIME_CL_MLGO_COMMON_H
+#define SRC_RUNTIME_CL_MLGO_COMMON_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
@@ -78,4 +78,4 @@ struct GEMMConfigReshaped
 
 } // namespace mlgo
 } // namespace arm_compute
-#endif // SRC_MLGO_COMMON_H
+#endif // SRC_RUNTIME_CL_MLGO_COMMON_H

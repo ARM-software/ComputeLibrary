@@ -463,6 +463,7 @@ cc_library_static {
         "src/runtime/BlobMemoryPool.cpp",
         "src/runtime/CL/CLBufferAllocator.cpp",
         "src/runtime/CL/CLDistribution1D.cpp",
+        "src/runtime/CL/CLGEMMHeuristicsHandle.cpp",
         "src/runtime/CL/CLHOG.cpp",
         "src/runtime/CL/CLHelpers.cpp",
         "src/runtime/CL/CLLut.cpp",

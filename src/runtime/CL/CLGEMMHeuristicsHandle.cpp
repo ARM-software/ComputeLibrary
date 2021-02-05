@@ -21,37 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_CL_MLGO_UTILS_H
-#define SRC_RUNTIME_CL_MLGO_UTILS_H
+#include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
 
-#include "src/runtime/CL/mlgo/Common.h"
-#include "src/runtime/CL/mlgo/HeuristicTree.h"
 #include "src/runtime/CL/mlgo/MLGOHeuristics.h"
-#include "src/runtime/CL/mlgo/MLGOParser.h"
-
-#include <ostream>
-#include <string>
 
 namespace arm_compute
 {
-namespace mlgo
+CLGEMMHeuristicsHandle::CLGEMMHeuristicsHandle()
+    : _heuristics(std::make_unique<mlgo::MLGOHeuristics>())
 {
-std::ostream &operator<<(std::ostream &os, const GEMMConfigNative &config);
-std::ostream &operator<<(std::ostream &os, const GEMMConfigReshapedOnlyRHS &config);
-std::ostream &operator<<(std::ostream &os, const GEMMConfigReshaped &config);
-std::ostream &operator<<(std::ostream &os, HeuristicType ht);
-std::ostream &operator<<(std::ostream &os, DataType dt);
-std::ostream &operator<<(std::ostream &os, const HeuristicTree::Index &index);
-std::ostream &operator<<(std::ostream &os, const Query &query);
-std::string to_string(const GEMMConfigNative &config);
-std::string to_string(const GEMMConfigReshapedOnlyRHS &config);
-std::string to_string(const GEMMConfigReshaped &config);
-std::string to_string(const Query &query);
-namespace parser
-{
-std::ostream &operator<<(std::ostream &os, const CharPosition &pos);
-} // namespace parser
-} // namespace mlgo
-} // namespace arm_compute
+}
+CLGEMMHeuristicsHandle::~CLGEMMHeuristicsHandle() = default;
 
-#endif //SRC_RUNTIME_CL_MLGO_UTILS_H
+bool CLGEMMHeuristicsHandle::reload_from_file(const std::string &filename)
+{
+    return _heuristics->reload_from_file(filename);
+}
+const mlgo::MLGOHeuristics *CLGEMMHeuristicsHandle::get() const
+{
+    return _heuristics.get();
+}
+
+} // namespace arm_compute

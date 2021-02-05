@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_MLGO_MLGOPARSER_H
-#define SRC_MLGO_MLGOPARSER_H
+#ifndef SRC_RUNTIME_CL_MLGO_MLGO_PARSER_H
+#define SRC_RUNTIME_CL_MLGO_MLGO_PARSER_H
 
 #include "src/runtime/CL/mlgo/MLGOHeuristics.h"
 
@@ -196,4 +196,4 @@ std::pair<bool, MLGOHeuristics> parse_mlgo(std::istream &in);
 } // namespace parser
 } // namespace mlgo
 } // namespace arm_compute
-#endif //SRC_MLGO_MLGOPARSER_H
+#endif //SRC_RUNTIME_CL_MLGO_MLGO_PARSER_H

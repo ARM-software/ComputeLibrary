@@ -40,12 +40,15 @@ TEST_SUITE(MLGOHeuristics)
 TEST_CASE(CorrectDotMLGOShouldLoadCorrectly, framework::DatasetMode::ALL)
 {
     std::string       mlgo_str = R"_(
+
         <header>
+
         gemm-version, [1,2,1]
         ip-type,gpu
         </header>
         <heuristics-table>
         0, g76 , 8, f32, best-performance, static, gemm-type, [m,n,k,n]
+
         1, g71 , 8, f16, best-performance, static, gemm-config-reshaped-only-rhs, [m,n,k,n]
         2, g76 , 8, f16, best-performance, static, gemm-config-reshaped, [m,n,k,n]
         </heuristics-table>
@@ -53,23 +56,29 @@ TEST_CASE(CorrectDotMLGOShouldLoadCorrectly, framework::DatasetMode::ALL)
         b , 0, var, m, ==, num, 10., 1, 2
         l , 1, gemm-type, reshaped
         b , 2, var, r_mn, >=, num, 2., 3, 6
+
         b , 3, var, n, >=, num, 200., 4, 5
-        l , 4, gemm-type, reshaped-only-rhs
+        l, 4,                          gemm-type, reshaped-only-rhs
         l , 5, gemm-type, reshaped
         l , 6, gemm-type, reshaped-only-rhs
         </heuristic>
         <heuristic, 1>
         b ,0,var, n, >, num, 100., 1, 4
         b ,1,var, r_mnk, <=, num, 20., 2, 3
+
+
         l ,2,gemm-config-reshaped-only-rhs, [4, 4,4,2,1,0,1]
         l ,3,gemm-config-reshaped-only-rhs,[ 2, 2,4,2,1,1, 1 ]
         b ,4,var, n, >=, num, 199.12, 5, 6
         l ,5,gemm-config-reshaped-only-rhs, [1, 4,3,4,0,0,0]
         l ,6,gemm-config-reshaped-only-rhs, [5, 4,4,5,1,1,0]
         </heuristic>
+
         <heuristic, 2>
         l ,0,gemm-config-reshaped,[4,2,4,2,8,1,0,1,0]
+
         </heuristic>
+
     )_";
     std::stringstream ss(mlgo_str);
     MLGOHeuristics    heuristics;
@@ -106,6 +115,7 @@ TEST_CASE(InvalidDotmlgoSyntaxShouldReturnInvalidStatus, framework::DatasetMode:
         </header>
         <heuristics-table>
         0, g76 , 8, f32, best-performance, static, gemm-config-reshaped, [m,n,k,n]
+
         </heurist
         <heuristic, 0>
         l ,0,gemm-config-reshaped,[4,2,4,2,8,1,0,1,0]
@@ -139,7 +149,9 @@ TEST_CASE(MismatchesBetweenHeuristicsTableEntriesAndHeuristicTrees, framework::D
             ip-type,gpu
             </header>
             <heuristics-table>
+
             0, g76 , 8, f32, best-performance, static, gemm-config-reshaped, [m,n,k,n]
+
             </heuristics-table>
         )_";
         std::stringstream ss(mlgo_str);

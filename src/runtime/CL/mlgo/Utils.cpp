@@ -23,10 +23,23 @@
  */
 #include "src/runtime/CL/mlgo/Utils.h"
 
+#include <sstream>
+
 namespace arm_compute
 {
 namespace mlgo
 {
+namespace
+{
+template <typename T>
+inline std::string to_str(const T &val)
+{
+    std::stringstream ss;
+    ss << val;
+    return ss.str();
+}
+} // namespace
+
 std::ostream &operator<<(std::ostream &os, const GEMMConfigNative &config)
 {
     return os << "Native:{"
@@ -61,7 +74,7 @@ std::ostream &operator<<(std::ostream &os, const GEMMConfigReshaped &config)
            << "export_cl_image: " << config.export_cl_image
            << "}";
 }
-std::ostream &operator<<(std::ostream &os, const HeuristicType &ht)
+std::ostream &operator<<(std::ostream &os, HeuristicType ht)
 {
     switch(ht)
     {
@@ -88,7 +101,7 @@ std::ostream &operator<<(std::ostream &os, const HeuristicType &ht)
     }
     return os;
 }
-std::ostream &operator<<(std::ostream &os, const DataType &dt)
+std::ostream &operator<<(std::ostream &os, DataType dt)
 {
     switch(dt)
     {
@@ -128,10 +141,41 @@ std::ostream &operator<<(std::ostream &os, const HeuristicTree::Index &index)
     os << ")";
     return os;
 }
+std::ostream &operator<<(std::ostream &os, const Query &query)
+{
+    os << "Query(";
+    os << "IP=" << query.ip_target << ",";
+    os << "DataType=" << query.data_type << ",";
+    os << "M=" << query.m << ",";
+    os << "N=" << query.n << ",";
+    os << "K=" << query.k << ",";
+    os << "B=" << query.b << ")";
+    return os;
+}
+
+std::string to_string(const GEMMConfigNative &config)
+{
+    return to_str(config);
+}
+
+std::string to_string(const GEMMConfigReshapedOnlyRHS &config)
+{
+    return to_str(config);
+}
+
+std::string to_string(const GEMMConfigReshaped &config)
+{
+    return to_str(config);
+}
+
+std::string to_string(const Query &query)
+{
+    return to_str(query);
+}
 
 namespace parser
 {
-std::ostream &operator<<(std::ostream &os, CharPosition pos)
+std::ostream &operator<<(std::ostream &os, const CharPosition &pos)
 {
     os << "(Ln: " << pos.ln << ", Col: " << pos.col << ")";
     return os;

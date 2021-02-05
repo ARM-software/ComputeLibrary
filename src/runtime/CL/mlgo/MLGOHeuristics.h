@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_MLGO_MLGOHEURISTICS_H
-#define SRC_RUNTIME_MLGO_MLGOHEURISTICS_H
+#ifndef SRC_RUNTIME_CL_MLGO_MLGO_HEURISTICS_H
+#define SRC_RUNTIME_CL_MLGO_MLGO_HEURISTICS_H
 
 #include "src/runtime/CL/mlgo/Common.h"
 #include "src/runtime/CL/mlgo/HeuristicTree.h"
@@ -46,6 +46,7 @@ struct Query
     unsigned int b;         /**< Batch size */
 };
 
+bool operator==(const GEMMConfigNative &lhs, const GEMMConfigNative &rhs);
 bool operator==(const GEMMConfigReshapedOnlyRHS &lhs, const GEMMConfigReshapedOnlyRHS &rhs);
 bool operator==(const GEMMConfigReshaped &lhs, const GEMMConfigReshaped &rhs);
 
@@ -55,34 +56,44 @@ class MLGOHeuristics
 public:
     /** Constructor */
     MLGOHeuristics();
+    /** Default Destructor */
+    ~MLGOHeuristics() = default;
+    /** Prevent Copy Construct */
+    MLGOHeuristics(const MLGOHeuristics &) = delete;
+    /** Prevent Copy Assignment */
+    MLGOHeuristics &operator=(const MLGOHeuristics &) = delete;
+    /** Default Move Constructor */
+    MLGOHeuristics(MLGOHeuristics &&) = default;
+    /** Default Move Assignment */
+    MLGOHeuristics &operator=(MLGOHeuristics &&) = default;
     /** Query the gemm type
      *
      * @param[in] query Query
      *
      * @return std::pair<bool, GEMMType>  signals if the query succeeded or failed
      */
-    std::pair<bool, GEMMType> query_gemm_type(Query) const;
+    std::pair<bool, GEMMType> query_gemm_type(const Query &query) const;
     /** Query the gemm configuration for native kernel
      *
      * @param[in] query Query
      *
      * @return std::pair<bool, GEMMConfigNative>   bool signals if the query succeeded or failed
      */
-    std::pair<bool, GEMMConfigNative> query_gemm_config_native(Query query) const;
+    std::pair<bool, GEMMConfigNative> query_gemm_config_native(const Query &query) const;
     /** Query the gemm configuration for reshaped only rhs kernel
      *
      * @param[in] query Query
      *
      * @return std::pair<bool, GEMMConfigReshapedOnlyRHS>   bool signals if the query succeeded or failed
      */
-    std::pair<bool, GEMMConfigReshapedOnlyRHS> query_gemm_config_reshaped_only_rhs(Query) const;
+    std::pair<bool, GEMMConfigReshapedOnlyRHS> query_gemm_config_reshaped_only_rhs(const Query &query) const;
     /** Query the gemm configuration for reshaped kernel
      *
      * @param[in] query Query
      *
      * @return std::pair<bool, GEMMConfigReshaped>   bool signals if the query succeeded or failed
      */
-    std::pair<bool, GEMMConfigReshaped> query_gemm_config_reshaped(Query) const;
+    std::pair<bool, GEMMConfigReshaped> query_gemm_config_reshaped(const Query &query) const;
     /** (Re)Load the heuristics from reading a dotmlgo file
      *
      * @param[in] filename Path to the dotmlgo file
@@ -136,4 +147,4 @@ private:
 
 } // namespace mlgo
 } // namespace arm_compute
-#endif //SRC_MLGO_MLGOHEURISTICS_H
+#endif //SRC_RUNTIME_CL_MLGO_MLGO_HEURISTICS_H

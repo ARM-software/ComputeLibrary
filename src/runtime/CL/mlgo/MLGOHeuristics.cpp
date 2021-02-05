@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "src/runtime/CL/mlgo/MLGOHeuristics.h"
+
 #include "arm_compute/core/Log.h"
 #include "src/runtime/CL/mlgo/MLGOParser.h"
+#include "src/runtime/CL/mlgo/Utils.h"
 
 #include <fstream>
 
@@ -53,9 +55,9 @@ MLGOHeuristics::MLGOHeuristics()
 {
 }
 
-std::pair<bool, GEMMType> MLGOHeuristics::query_gemm_type(Query query) const
+std::pair<bool, GEMMType> MLGOHeuristics::query_gemm_type(const Query &query) const
 {
-    ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics querying gemm type");
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics querying gemm type. %s.", to_string(query).c_str());
     const auto invalid = GEMMType::RESHAPED;
     if(!_valid)
     {
@@ -71,9 +73,9 @@ std::pair<bool, GEMMType> MLGOHeuristics::query_gemm_type(Query query) const
     }
     return _trees.at(index).query<GEMMType>(shape_query);
 }
-std::pair<bool, GEMMConfigNative> MLGOHeuristics::query_gemm_config_native(Query query) const
+std::pair<bool, GEMMConfigNative> MLGOHeuristics::query_gemm_config_native(const Query &query) const
 {
-    ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics querying gemm config native");
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics querying gemm config native. %s.", to_string(query).c_str());
     const auto invalid = GEMMConfigNative{};
     if(!_valid)
     {
@@ -89,9 +91,9 @@ std::pair<bool, GEMMConfigNative> MLGOHeuristics::query_gemm_config_native(Query
     }
     return _trees.at(index).query<GEMMConfigNative>(shape_query);
 }
-std::pair<bool, GEMMConfigReshapedOnlyRHS> MLGOHeuristics::query_gemm_config_reshaped_only_rhs(Query query) const
+std::pair<bool, GEMMConfigReshapedOnlyRHS> MLGOHeuristics::query_gemm_config_reshaped_only_rhs(const Query &query) const
 {
-    ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics querying gemm config reshaped only rhs");
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics querying gemm config reshaped only rhs. %s.", to_string(query).c_str());
     const auto invalid = GEMMConfigReshapedOnlyRHS{};
     if(!_valid)
     {
@@ -107,9 +109,9 @@ std::pair<bool, GEMMConfigReshapedOnlyRHS> MLGOHeuristics::query_gemm_config_res
     }
     return _trees.at(index).query<GEMMConfigReshapedOnlyRHS>(shape_query);
 }
-std::pair<bool, GEMMConfigReshaped> MLGOHeuristics::query_gemm_config_reshaped(Query query) const
+std::pair<bool, GEMMConfigReshaped> MLGOHeuristics::query_gemm_config_reshaped(const Query &query) const
 {
-    ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics querying gemm config reshaped");
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics querying gemm config reshaped. %s.", to_string(query).c_str());
     const auto invalid = GEMMConfigReshaped{};
     if(!_valid)
     {
