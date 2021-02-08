@@ -123,6 +123,8 @@ v21.02 Public major release
    - NEGEMMMatrixVectorMultiplyKernel
    - NELocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedMatrixMultiplyKernel
    - NEUpsampleLayerKernel / CLUpsampleLayerKernel
+ - Extend OpenCL tuner with workgroup batch size support
+   - Experimental extension for the OpenCL tuner to tune the batches of work groups distribute to compute units
 
 v20.11 Public major release
  - Various bug fixes.

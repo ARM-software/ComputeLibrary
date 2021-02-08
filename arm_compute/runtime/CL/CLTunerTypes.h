@@ -45,7 +45,7 @@ struct CLTuningInfo
     CLTunerMode tuner_mode = CLTunerMode::NORMAL; /**< Parameter to select the level (granularity) of the tuning */
     bool        tune_wbsm  = false;               /**< Flag to tune the batches of work groups distributed to compute units.
                                                        Internally, the library will check if this feature is available on
-                                                       the target platform */
+                                                       the target platform. This OpenCL tuner extension is still in experimental phase */
 };
 
 /** Converts a string to a strong types enumeration @ref CLTunerMode
