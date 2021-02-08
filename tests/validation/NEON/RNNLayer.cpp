@@ -39,9 +39,11 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float> tolerance_f32(0.001f);    /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
-RelativeTolerance<half>  tolerance_f16(half(0.1)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
-constexpr float          abs_tolerance_f16(0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+RelativeTolerance<float> tolerance_f32(0.001f); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+RelativeTolerance<half> tolerance_f16(half(0.1)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+constexpr float         abs_tolerance_f16(0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+#endif                                            /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
 TEST_SUITE(NEON)
