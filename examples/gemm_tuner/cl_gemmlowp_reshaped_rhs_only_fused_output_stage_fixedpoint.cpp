@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -221,7 +221,11 @@ public:
         rhs_reshaped.info()->set_quantization_info(q_info);
         if(rhs_info.export_to_cl_image)
         {
-            examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info());
+            if(!examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info()))
+            {
+                std::cerr << "cl_image is not supported on the device, disable export_to_cl_image" << std::endl;
+                return false;
+            }
         }
 
         // Configure output stage for quantized case
