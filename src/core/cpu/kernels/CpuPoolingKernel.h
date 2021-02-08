@@ -38,10 +38,6 @@ namespace kernels
 class CpuPoolingKernel : public ICpuKernel
 {
 public:
-    const char *name() const override
-    {
-        return "CpuPoolingKernel";
-    }
     /** Default constructor */
     CpuPoolingKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPoolingKernel);
@@ -70,155 +66,16 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
+    BorderSize  border_size() const override;
+    const char *name() const override;
 
 private:
-    /** Function to perform 2x2 pooling.
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void pooling2_f32_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform 2x2 pooling and compute the pooling indices. The indices can be used for max unpool.
-     *
-     * @param[in] window_src src region on which to execute the kernel.
-     * @param[in] window     dst region on which to execute the kernel.
-     */
-    void pooling2_f32_nhwc_maxpool_indices(const Window &window_src, const Window &window);
-    /** Function to perform MxN pooling for 32-bit floating point values.
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void poolingMxN_f32_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform MxN pooling for 32-bit floating point values (NHWC).
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void poolingMxN_f32_nhwc(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform 7x7 pooling.
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void pooling7_f32_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform 3x3 pooling.
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void pooling3_f32_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform 2x2 pooling for float16_t.
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void pooling2_f16_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform 2x2 pooling and compute the pooling indices for FP32/FP16. The indices can be used for max unpool.
-     *
-     * @param[in] window_src src region on which to execute the kernel.
-     * @param[in] window     dst region on which to execute the kernel.
-     */
-    template <typename T>
-    void pooling2_nchw_maxpool_indices(const Window &window_src, const Window &window);
-    /** Function to perform 2x2 pooling and compute the pooling indices. The indices can be used for max unpool.
-     *
-     * @param[in] window_src src region on which to execute the kernel.
-     * @param[in] window     dst region on which to execute the kernel.
-     */
-    void pooling2_f16_nhwc_maxpool_indices(const Window &window_src, const Window &window);
-    /** Function to perform 3x3 pooling.
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void pooling3_f16_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform MxN pooling for 16-bit floating point values.
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void poolingMxN_f16_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform MxN pooling for 16-bit floating point values. (NHWC)
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    void poolingMxN_f16_nhwc(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Template function to perform 2x2 pooling for 8bit quantized fixed point. (NCHW)
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    template <typename T>
-    void pooling2_q8_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Template function to perform 3x3 pooling for 8bit quantized fixed point. (NCHW)
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    template <typename T>
-    void pooling3_q8_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Template function to perform MxN pooling for 8-bit quantized. (NCHW)
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    template <typename T>
-    void poolingMxN_q8_nchw(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Template function to perform MxN pooling for 8-bit quantized. (NHWC)
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    template <typename T>
-    void poolingMxN_q8_nhwc(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Common signature for all the specialised Pooling functions
-     *
-     * @param[in] window_src      src region on which to execute the kernel.
-     * @param[in] window          dst region on which to execute the kernel.
-     * @param[in] pooling_type    Pooling operation to be computed.
-     * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
-     */
-    using PoolingFunction = void (CpuPoolingKernel::*)(const Window &window_src, const Window &window, PoolingType pooling_type, bool exclude_padding);
-
-private:
-    PoolingFunction  _func{ nullptr };
-    const ITensor   *_src{ nullptr };
-    ITensor         *_dst{ nullptr };
-    ITensor         *_indices{ nullptr };
     PoolingLayerInfo _pool_info{};
     DataLayout       _data_layout{ DataLayout::UNKNOWN };
     unsigned int     _num_elems_processed_per_iteration{ 0 };
     BorderSize       _border_size{ 0 };
-    bool             _is_square{ false };
+    Size2D           _pool_size{};
+    int              _pool_stride_x{};
 };
 } // namespace kernels
 } // namespace cpu

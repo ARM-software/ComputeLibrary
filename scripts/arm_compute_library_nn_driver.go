@@ -48,6 +48,17 @@ func globalFlags(ctx android.BaseContext) []string {
         }
     }
 
+    data_layouts := strings.Split(ctx.AConfig().GetenvWithDefault("COMPUTE_LIB_DATA_LAYOUT", "ALL"), ",")
+
+    for _, x := range data_layouts {
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "NHWC" {
+            cppflags = append(cppflags, "-DENABLE_NHWC_KERNELS")
+        }
+        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "NCHW" {
+            cppflags = append(cppflags, "-DENABLE_NCHW_KERNELS")
+        }
+    }
+
     return cppflags
 }
 

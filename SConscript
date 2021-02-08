@@ -295,6 +295,9 @@ if env['neon']:
         core_files += Glob('src/core/cpu/kernels/*/*/qsymm16.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'integer']):
         core_files += Glob('src/core/cpu/kernels/*/*/integer.cpp')
+   
+    if any(i in env['data_layout_support'] for i in ['all', 'nchw']):
+        core_files += Glob('src/core/cpu/kernels/*/*/nchw/all.cpp')
 
     runtime_files += Glob('src/runtime/cpu/*.cpp')
     runtime_files += Glob('src/runtime/cpu/operators/*.cpp')
