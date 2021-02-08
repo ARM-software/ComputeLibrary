@@ -149,6 +149,8 @@ int main(int argc, char **argv)
     threads->set_help("Number of threads to use");
     auto cooldown_sec = parser.add_option<utils::SimpleOption<float>>("delay", -1.f);
     cooldown_sec->set_help("Delay to add between test executions in seconds");
+    auto configure_only = parser.add_option<utils::ToggleOption>("configure-only", false);
+    configure_only->set_help("Only configures kernels, without allocating, running or validating. Needed in order to validate OpenCL kernel run-time compilation, without necessarily running or validating the kernels' execution");
 
     try
     {
@@ -264,6 +266,7 @@ int main(int argc, char **argv)
         fconfig.mode           = dataset_mode->value();
         fconfig.log_level      = options.log_level->value();
         fconfig.cooldown_sec   = cooldown_sec->value();
+        fconfig.configure_only = configure_only->value();
         framework.init(fconfig);
 
         for(auto &p : printers)

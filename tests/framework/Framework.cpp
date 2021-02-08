@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -133,6 +133,7 @@ void Framework::init(const FrameworkConfig &config)
     _num_iterations = config.num_iterations;
     _log_level      = config.log_level;
     _cooldown_sec   = config.cooldown_sec;
+    _configure_only = config.configure_only;
 
     _instruments = std::set<framework::InstrumentsDescription>(std::begin(config.instruments), std::end(config.instruments));
 }
@@ -700,6 +701,21 @@ void Framework::set_instruments_info(InstrumentsInfo instr_info)
 {
     ARM_COMPUTE_ERROR_ON(instruments_info == nullptr);
     *instruments_info = instr_info;
+}
+
+bool Framework::configure_only() const
+{
+    return _configure_only;
+}
+
+bool Framework::new_fixture_call() const
+{
+    return _new_fixture_call;
+}
+
+void Framework::set_new_fixture_call(bool val)
+{
+    _new_fixture_call = val;
 }
 } // namespace framework
 } // namespace test

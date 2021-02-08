@@ -61,21 +61,92 @@ public:
                QuantizationInfo input_quantization_info, QuantizationInfo weights_quantization_info, QuantizationInfo output_quantization_info,
                DataLayout data_layout, ActivationLayerInfo act_info)
     {
-        const DataType bias_data_type = is_data_type_quantized(input_data_type) ? DataType::S32 : input_data_type;
+        _input_shape               = in_shape;
+        _input_data_type           = input_data_type;
+        _weights_data_type         = weights_data_type;
+        _input_quantization_info   = input_quantization_info;
+        _weights_quantization_info = weights_quantization_info;
+        _output_quantization_info  = output_quantization_info;
+        _data_layout               = data_layout;
+        _pad_stride_info           = pad_stride_info;
+        _act_info                  = act_info;
+        _depth_multiplier          = depth_multiplier;
+        _dilation                  = dilation;
 
-        TensorShape weights_shape(kernel_size.width, kernel_size.height);
+        _bias_data_type = is_data_type_quantized(_input_data_type) ? DataType::S32 : _input_data_type;
 
-        const TensorInfo  in_info(in_shape, 1, input_data_type);
-        const TensorInfo  we_info(weights_shape, 1, weights_data_type);
-        const TensorShape out_shape = compute_depthwise_convolution_shape(in_info, we_info, pad_stride_info, depth_multiplier, dilation);
+        _weights_shape = TensorShape(kernel_size.width, kernel_size.height);
 
-        weights_shape.set(2, out_shape.z());
-        const TensorShape biases_shape(weights_shape[2]);
+        const TensorInfo in_info(_input_shape, 1, _input_data_type);
+        const TensorInfo we_info(_weights_shape, 1, _weights_data_type);
+        _output_shape = compute_depthwise_convolution_shape(in_info, we_info, _pad_stride_info, _depth_multiplier, _dilation);
 
-        _target = compute_target(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info, dilation, depth_multiplier,
-                                 input_data_type, weights_data_type, bias_data_type, input_quantization_info, weights_quantization_info, output_quantization_info, data_layout, act_info);
-        _reference = compute_reference(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info, dilation, depth_multiplier,
-                                       input_data_type, weights_data_type, bias_data_type, input_quantization_info, weights_quantization_info, output_quantization_info, act_info);
+        _weights_shape.set(2, _output_shape.z());
+        _biases_shape = TensorShape(_weights_shape[2]);
+    }
+
+    void configure_target()
+    {
+        TensorShape input_shape   = _input_shape;
+        TensorShape weights_shape = _weights_shape;
+        TensorShape output_shape  = _output_shape;
+
+        if(_data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
+        }
+
+        // Create tensors
+        _src     = create_tensor<TensorType>(input_shape, _input_data_type, 1, _input_quantization_info, _data_layout);
+        _weights = create_tensor<TensorType>(weights_shape, _weights_data_type, 1, _weights_quantization_info, _data_layout);
+        _biases  = create_tensor<TensorType>(_biases_shape, _bias_data_type, 1, _input_quantization_info, _data_layout);
+        _target  = create_tensor<TensorType>(output_shape, _input_data_type, 1, _output_quantization_info, _data_layout);
+
+        // Create Depthwise Convolution configure function
+        _dwc.configure(&_src, &_weights, &_biases, &_target, _pad_stride_info, _depth_multiplier, _act_info, _dilation);
+
+        ARM_COMPUTE_EXPECT(_src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+    }
+
+    void allocate_and_run_target()
+    {
+        // Allocate tensors
+        _src.allocator()->allocate();
+        _weights.allocator()->allocate();
+        _biases.allocator()->allocate();
+        _target.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!_src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(_src), 0);
+        fill(AccessorType(_weights), 1);
+        fill(AccessorType(_biases), 2);
+
+        // Compute function
+        _dwc.run();
+    }
+
+    void compute_reference()
+    {
+        SimpleTensor<T>     src{ _input_shape, _input_data_type, 1, _input_quantization_info };
+        SimpleTensor<TW>    weights{ _weights_shape, _weights_data_type, 1, _weights_quantization_info };
+        SimpleTensor<TBias> biases{ _biases_shape, _bias_data_type, 1, _input_quantization_info };
+
+        fill(src, 0);
+        fill(weights, 1);
+        fill(biases, 2);
+
+        SimpleTensor<T> depth_out = reference::depthwise_convolution(src, weights, biases, _output_shape, _pad_stride_info, _depth_multiplier, _dilation, _output_quantization_info);
+        _reference                = (_act_info.enabled()) ? reference::activation_layer<T>(depth_out, _act_info) : depth_out;
     }
 
 protected:
@@ -120,75 +191,29 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape output_shape, PadStrideInfo &pad_stride_info, Size2D dilation,
-                              unsigned int depth_multiplier, const DataType input_data_type, const DataType weights_data_type, const DataType bias_data_type,
-                              const QuantizationInfo &input_quantization_info, const QuantizationInfo &weights_quantization_info, const QuantizationInfo &output_quantization_info,
-                              const DataLayout data_layout, const ActivationLayerInfo &act_info)
-    {
-        if(data_layout == DataLayout::NHWC)
-        {
-            permute(input_shape, PermutationVector(2U, 0U, 1U));
-            permute(weights_shape, PermutationVector(2U, 0U, 1U));
-            permute(output_shape, PermutationVector(2U, 0U, 1U));
-        }
-
-        // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, input_data_type, 1, input_quantization_info, data_layout);
-        TensorType weights = create_tensor<TensorType>(weights_shape, weights_data_type, 1, weights_quantization_info, data_layout);
-        TensorType biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, input_quantization_info, data_layout);
-        TensorType dst     = create_tensor<TensorType>(output_shape, input_data_type, 1, output_quantization_info, data_layout);
-
-        // Create Depthwise Convolution configure function
-        FunctionType dwc;
-        dwc.configure(&src, &weights, &biases, &dst, pad_stride_info, depth_multiplier, act_info, dilation);
-
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-        // Allocate tensors
-        src.allocator()->allocate();
-        weights.allocator()->allocate();
-        biases.allocator()->allocate();
-        dst.allocator()->allocate();
-
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-        // Fill tensors
-        fill(AccessorType(src), 0);
-        fill(AccessorType(weights), 1);
-        fill(AccessorType(biases), 2);
-
-        // Compute function
-        dwc.run();
-
-        return dst;
-    }
-
-    SimpleTensor<T> compute_reference(const TensorShape &in_shape, const TensorShape &weights_shape, const TensorShape &biases_shape, const TensorShape &out_shape,
-                                      const PadStrideInfo &pad_stride_info, const Size2D &dilation, unsigned int depth_multiplier,
-                                      const DataType input_data_type, const DataType weights_data_type, const DataType bias_data_type,
-                                      const QuantizationInfo &input_quantization_info, const QuantizationInfo &weights_quantization_info, const QuantizationInfo &output_quantization_info,
-                                      const ActivationLayerInfo &act_info)
-    {
-        SimpleTensor<T>     src{ in_shape, input_data_type, 1, input_quantization_info };
-        SimpleTensor<TW>    weights{ weights_shape, weights_data_type, 1, weights_quantization_info };
-        SimpleTensor<TBias> biases{ biases_shape, bias_data_type, 1, input_quantization_info };
-
-        fill(src, 0);
-        fill(weights, 1);
-        fill(biases, 2);
-
-        SimpleTensor<T> depth_out = reference::depthwise_convolution(src, weights, biases, out_shape, pad_stride_info, depth_multiplier, dilation, output_quantization_info);
-        return (act_info.enabled()) ? reference::activation_layer<T>(depth_out, act_info) : depth_out;
-    }
-
     TensorType      _target{};
     SimpleTensor<T> _reference{};
+
+    TensorType   _src{};
+    TensorType   _weights{};
+    TensorType   _biases{};
+    FunctionType _dwc{};
+
+    TensorShape         _input_shape{};
+    TensorShape         _weights_shape{};
+    TensorShape         _biases_shape{};
+    TensorShape         _output_shape{};
+    DataType            _input_data_type{};
+    DataType            _weights_data_type{};
+    DataType            _bias_data_type{};
+    QuantizationInfo    _input_quantization_info{};
+    QuantizationInfo    _weights_quantization_info{};
+    QuantizationInfo    _output_quantization_info{};
+    DataLayout          _data_layout{};
+    PadStrideInfo       _pad_stride_info{};
+    ActivationLayerInfo _act_info{};
+    unsigned int        _depth_multiplier{};
+    Size2D              _dilation{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
@@ -213,22 +238,86 @@ public:
     void setup(size_t width, size_t height, size_t channel, size_t batch, Size2D kernel_size, size_t depth_multiplier, Size2D dilation, Size2D stride, bool padding_valid, DataType data_type,
                DataLayout data_layout)
     {
-        const TensorShape src_shape(width, height, channel, batch);
-        const TensorShape weights_shape(kernel_size.width, kernel_size.height, channel * depth_multiplier);
-        const TensorShape biases_shape(weights_shape.z());
+        _dilation         = dilation;
+        _depth_multiplier = depth_multiplier;
+        _data_type        = data_type;
+        _data_layout      = data_layout;
 
-        PadStrideInfo conv_info;
+        _input_shape   = TensorShape(width, height, channel, batch);
+        _weights_shape = TensorShape(kernel_size.width, kernel_size.height, channel * _depth_multiplier);
+        _biases_shape  = TensorShape(_weights_shape.z());
+
         if(padding_valid)
         {
-            conv_info = PadStrideInfo();
+            _conv_info = PadStrideInfo();
         }
         else
         {
-            conv_info = calculate_same_pad(src_shape, weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, dilation);
+            _conv_info = calculate_same_pad(_input_shape, _weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, _dilation);
+        }
+    }
+
+    void configure_target()
+    {
+        TensorShape input_shape   = _input_shape;
+        TensorShape weights_shape = _weights_shape;
+
+        if(_data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
         }
 
-        _target    = compute_target(src_shape, weights_shape, biases_shape, conv_info, dilation, depth_multiplier, data_type, data_layout);
-        _reference = compute_reference(src_shape, weights_shape, biases_shape, conv_info, dilation, depth_multiplier, data_type);
+        // Create tensors
+        _src     = create_tensor<TensorType>(input_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _weights = create_tensor<TensorType>(weights_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _biases  = create_tensor<TensorType>(_biases_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _target  = create_tensor<TensorType>(TensorShape(), _data_type, 1, QuantizationInfo(), _data_layout);
+
+        // Create Depthwise Convolution configure function
+        _dwc.configure(&_src, &_weights, &_biases, &_target, _conv_info, _depth_multiplier, _dilation);
+
+        ARM_COMPUTE_EXPECT(_src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+    }
+
+    void allocate_and_run_target()
+    {
+        // Allocate tensors
+        _src.allocator()->allocate();
+        _weights.allocator()->allocate();
+        _biases.allocator()->allocate();
+        _target.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!_src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(_src), 0);
+        fill(AccessorType(_weights), 1);
+        fill(AccessorType(_biases), 2);
+
+        // Compute function
+        _dwc.run();
+    }
+
+    void compute_reference()
+    {
+        SimpleTensor<T> src{ _input_shape, _data_type };
+        SimpleTensor<T> weights{ _weights_shape, _data_type };
+        SimpleTensor<T> biases{ _biases_shape, _data_type };
+
+        fill(src, 0);
+        fill(weights, 1);
+        fill(biases, 2);
+
+        const TensorShape dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), _conv_info,
+                                                                          _depth_multiplier, _dilation);
+        _reference = reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation);
     }
 
 protected:
@@ -248,70 +337,22 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape biases_shape, PadStrideInfo &conv_info, Size2D dilation,
-                              unsigned int depth_multiplier, const DataType data_type, const DataLayout data_layout)
-    {
-        if(data_layout == DataLayout::NHWC)
-        {
-            permute(input_shape, PermutationVector(2U, 0U, 1U));
-            permute(weights_shape, PermutationVector(2U, 0U, 1U));
-        }
-
-        // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType biases  = create_tensor<TensorType>(biases_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType dst     = create_tensor<TensorType>(TensorShape(), data_type, 1, QuantizationInfo(), data_layout);
-
-        // Create Depthwise Convolution configure function
-        FunctionType dwc;
-        dwc.configure(&src, &weights, &biases, &dst, conv_info, depth_multiplier, dilation);
-
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-        // Allocate tensors
-        src.allocator()->allocate();
-        weights.allocator()->allocate();
-        biases.allocator()->allocate();
-        dst.allocator()->allocate();
-
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-        // Fill tensors
-        fill(AccessorType(src), 0);
-        fill(AccessorType(weights), 1);
-        fill(AccessorType(biases), 2);
-
-        // Compute function
-        dwc.run();
-
-        return dst;
-    }
-
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &biases_shape, const PadStrideInfo &conv_info,
-                                      const Size2D &dilation, unsigned int depth_multiplier, const DataType data_type)
-    {
-        SimpleTensor<T> src{ input_shape, data_type };
-        SimpleTensor<T> weights{ weights_shape, data_type };
-        SimpleTensor<T> biases{ biases_shape, data_type };
-
-        fill(src, 0);
-        fill(weights, 1);
-        fill(biases, 2);
-
-        const TensorShape dst_shape = compute_depthwise_convolution_shape(TensorInfo(input_shape, 1, data_type), TensorInfo(weights_shape, 1, data_type), conv_info,
-                                                                          depth_multiplier, dilation);
-        return reference::depthwise_convolution(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation);
-    }
-
     TensorType      _target{};
     SimpleTensor<T> _reference{};
+
+    TensorType   _src{};
+    TensorType   _weights{};
+    TensorType   _biases{};
+    FunctionType _dwc{};
+
+    TensorShape   _input_shape{};
+    TensorShape   _weights_shape{};
+    TensorShape   _biases_shape{};
+    DataType      _data_type{};
+    DataLayout    _data_layout{};
+    PadStrideInfo _conv_info{};
+    Size2D        _dilation{};
+    unsigned int  _depth_multiplier{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
@@ -322,22 +363,94 @@ public:
     void setup(size_t width, size_t height, size_t channel, size_t batch, Size2D kernel_size, size_t depth_multiplier, Size2D dilation, Size2D stride, bool padding_valid, DataType data_type,
                DataLayout data_layout, const ActivationLayerInfo &act_info, unsigned int n0)
     {
-        const TensorShape src_shape(width, height, channel, batch);
-        const TensorShape weights_shape(kernel_size.width, kernel_size.height, channel * depth_multiplier);
-        const TensorShape biases_shape(weights_shape.z());
+        _dilation         = dilation;
+        _depth_multiplier = depth_multiplier;
+        _data_type        = data_type;
+        _data_layout      = data_layout;
+        _act_info         = act_info;
+        _n0               = n0;
 
-        PadStrideInfo conv_info;
+        _input_shape   = TensorShape(width, height, channel, batch);
+        _weights_shape = TensorShape(kernel_size.width, kernel_size.height, channel * _depth_multiplier);
+        _biases_shape  = TensorShape(_weights_shape.z());
+
         if(padding_valid)
         {
-            conv_info = PadStrideInfo();
+            _conv_info = PadStrideInfo();
         }
         else
         {
-            conv_info = calculate_same_pad(src_shape, weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, dilation);
+            _conv_info = calculate_same_pad(_input_shape, _weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, _dilation);
+        }
+    }
+
+    void configure_target()
+    {
+        TensorShape input_shape   = _input_shape;
+        TensorShape weights_shape = _weights_shape;
+
+        if(_data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
         }
 
-        _target    = compute_target(src_shape, weights_shape, biases_shape, conv_info, dilation, depth_multiplier, data_type, data_layout, act_info, n0);
-        _reference = compute_reference(src_shape, weights_shape, biases_shape, conv_info, dilation, depth_multiplier, data_type, act_info);
+        // Create tensors
+        _src     = create_tensor<TensorType>(input_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _weights = create_tensor<TensorType>(weights_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _biases  = create_tensor<TensorType>(_biases_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _target  = create_tensor<TensorType>(TensorShape(), _data_type, 1, QuantizationInfo(), _data_layout);
+
+        DWCWeightsKernelInfo dwc_weights_info;
+        dwc_weights_info.n0 = _n0;
+
+        DWCKernelInfo dwc_info;
+        dwc_info.activation_info = _act_info;
+
+        // Create Depthwise Convolution configure function
+        _dwc.configure(&_src, &_weights, &_biases, &_target, dwc_weights_info, dwc_info, _conv_info, _depth_multiplier, _dilation);
+
+        ARM_COMPUTE_EXPECT(_src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+    }
+
+    void allocate_and_run_target()
+    {
+        // Allocate tensors
+        _src.allocator()->allocate();
+        _weights.allocator()->allocate();
+        _biases.allocator()->allocate();
+        _target.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!_src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(_src), 0);
+        fill(AccessorType(_weights), 1);
+        fill(AccessorType(_biases), 2);
+
+        // Compute function
+        _dwc.run();
+    }
+
+    void compute_reference()
+    {
+        SimpleTensor<T> src{ _input_shape, _data_type };
+        SimpleTensor<T> weights{ _weights_shape, _data_type };
+        SimpleTensor<T> biases{ _biases_shape, _data_type };
+
+        fill(src, 0);
+        fill(weights, 1);
+        fill(biases, 2);
+
+        const TensorShape dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), _conv_info,
+                                                                          _depth_multiplier, _dilation);
+        _reference = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
     }
 
 protected:
@@ -363,76 +476,24 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape biases_shape, PadStrideInfo &conv_info, Size2D dilation,
-                              unsigned int depth_multiplier, const DataType data_type, const DataLayout data_layout, const ActivationLayerInfo &act_info, unsigned int n0)
-    {
-        if(data_layout == DataLayout::NHWC)
-        {
-            permute(input_shape, PermutationVector(2U, 0U, 1U));
-            permute(weights_shape, PermutationVector(2U, 0U, 1U));
-        }
-
-        // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType biases  = create_tensor<TensorType>(biases_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType dst     = create_tensor<TensorType>(TensorShape(), data_type, 1, QuantizationInfo(), data_layout);
-
-        DWCWeightsKernelInfo dwc_weights_info;
-        dwc_weights_info.n0 = n0;
-
-        DWCKernelInfo dwc_info;
-        dwc_info.activation_info = act_info;
-
-        // Create Depthwise Convolution configure function
-        FunctionType dwc;
-        dwc.configure(&src, &weights, &biases, &dst, dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation);
-
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-        // Allocate tensors
-        src.allocator()->allocate();
-        weights.allocator()->allocate();
-        biases.allocator()->allocate();
-        dst.allocator()->allocate();
-
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-        // Fill tensors
-        fill(AccessorType(src), 0);
-        fill(AccessorType(weights), 1);
-        fill(AccessorType(biases), 2);
-
-        // Compute function
-        dwc.run();
-
-        return dst;
-    }
-
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &biases_shape, const PadStrideInfo &conv_info,
-                                      const Size2D &dilation, unsigned int depth_multiplier, const DataType data_type, const ActivationLayerInfo &act_info)
-    {
-        SimpleTensor<T> src{ input_shape, data_type };
-        SimpleTensor<T> weights{ weights_shape, data_type };
-        SimpleTensor<T> biases{ biases_shape, data_type };
-
-        fill(src, 0);
-        fill(weights, 1);
-        fill(biases, 2);
-
-        const TensorShape dst_shape = compute_depthwise_convolution_shape(TensorInfo(input_shape, 1, data_type), TensorInfo(weights_shape, 1, data_type), conv_info,
-                                                                          depth_multiplier, dilation);
-        return reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation), act_info);
-    }
-
     TensorType      _target{};
     SimpleTensor<T> _reference{};
+
+    TensorType   _src{};
+    TensorType   _weights{};
+    TensorType   _biases{};
+    FunctionType _dwc{};
+
+    TensorShape         _input_shape{};
+    TensorShape         _weights_shape{};
+    TensorShape         _biases_shape{};
+    DataType            _data_type{};
+    DataLayout          _data_layout{};
+    PadStrideInfo       _conv_info{};
+    ActivationLayerInfo _act_info{};
+    Size2D              _dilation{};
+    unsigned int        _depth_multiplier{};
+    unsigned int        _n0{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>

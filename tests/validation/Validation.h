@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -380,6 +380,11 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, U 
 template <typename T, typename U>
 void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
+    if(framework::Framework::get().configure_only() && framework::Framework::get().new_fixture_call())
+    {
+        return;
+    }
+
     uint64_t num_mismatches = 0;
     uint64_t num_elements   = 0;
 
@@ -455,6 +460,11 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
 template <typename T, typename U, typename = typename std::enable_if<std::is_integral<T>::value>::type>
 void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value, float tolerance_number)
 {
+    if(framework::Framework::get().configure_only() && framework::Framework::get().new_fixture_call())
+    {
+        return;
+    }
+
     uint64_t num_mismatches = 0;
     uint64_t num_elements   = 0;
 
@@ -543,6 +553,11 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
 template <typename T, typename U>
 void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const SimpleTensor<T> &valid_mask, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
+    if(framework::Framework::get().configure_only() && framework::Framework::get().new_fixture_call())
+    {
+        return;
+    }
+
     uint64_t num_mismatches = 0;
     uint64_t num_elements   = 0;
 
@@ -622,6 +637,11 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const S
 template <typename T, typename U>
 bool validate(T target, T reference, U tolerance)
 {
+    if(framework::Framework::get().configure_only() && framework::Framework::get().new_fixture_call())
+    {
+        return true;
+    }
+
     ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << framework::make_printable(reference));
     ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target));
     ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << framework::make_printable(static_cast<typename U::value_type>(tolerance)));
@@ -636,6 +656,11 @@ bool validate(T target, T reference, U tolerance)
 template <typename T, typename U>
 void validate_min_max_loc(const MinMaxLocationValues<T> &target, const MinMaxLocationValues<U> &reference)
 {
+    if(framework::Framework::get().configure_only() && framework::Framework::get().new_fixture_call())
+    {
+        return;
+    }
+
     ARM_COMPUTE_EXPECT_EQUAL(target.min, reference.min, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT_EQUAL(target.max, reference.max, framework::LogLevel::ERRORS);
 
@@ -745,6 +770,11 @@ std::pair<int64_t, int64_t> compare_keypoints(T first1, T last1, U first2, U las
 template <typename T, typename U, typename V>
 void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance, float allowed_missing_percentage, float allowed_mismatch_percentage)
 {
+    if(framework::Framework::get().configure_only() && framework::Framework::get().new_fixture_call())
+    {
+        return;
+    }
+
     const int64_t num_elements_target    = std::distance(target_first, target_last);
     const int64_t num_elements_reference = std::distance(reference_first, reference_last);
 
@@ -825,6 +855,11 @@ template <typename T, typename U, typename V>
 void validate_detection_windows(T target_first, T target_last, U reference_first, U reference_last, V tolerance,
                                 float allowed_missing_percentage, float allowed_mismatch_percentage)
 {
+    if(framework::Framework::get().configure_only() && framework::Framework::get().new_fixture_call())
+    {
+        return;
+    }
+
     const int64_t num_elements_target    = std::distance(target_first, target_last);
     const int64_t num_elements_reference = std::distance(reference_first, reference_last);
 

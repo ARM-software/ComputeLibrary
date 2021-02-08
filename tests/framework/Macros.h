@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,15 +111,29 @@
     explicit TEST_NAME(D &&data) : DataTestCase{ std::forward<D>(data) } \
     {                                                                    \
     }
-#define FIXTURE_SETUP(FIXTURE) \
-    void do_setup() override   \
-    {                          \
-        FIXTURE::setup();      \
+#define FIXTURE_SETUP(FIXTURE)                                   \
+    void do_setup() override                                     \
+    {                                                            \
+        framework::Framework::get().set_new_fixture_call(false); \
+        FIXTURE::setup();                                        \
     }
-#define FIXTURE_DATA_SETUP(FIXTURE)                 \
-    void do_setup() override                        \
-    {                                               \
-        apply(this, &FIXTURE::setup<As...>, _data); \
+#define FIXTURE_DATA_SETUP(FIXTURE)                              \
+    void do_setup() override                                     \
+    {                                                            \
+        framework::Framework::get().set_new_fixture_call(false); \
+        apply(this, &FIXTURE::setup<As...>, _data);              \
+    }
+#define FIXTURE_DATA_SETUP_NEW(FIXTURE)                         \
+    void do_setup() override                                    \
+    {                                                           \
+        framework::Framework::get().set_new_fixture_call(true); \
+        apply(this, &FIXTURE::setup<As...>, _data);             \
+        configure_target();                                     \
+        if(!framework::Framework::get().configure_only())       \
+        {                                                       \
+            allocate_and_run_target();                          \
+            compute_reference();                                \
+        }                                                       \
     }
 #define FIXTURE_RUN(FIXTURE) \
     void do_run() override   \
@@ -232,6 +246,29 @@
     FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
 #define DISABLED_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
     FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
+
+#define FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                                  \
+    template <typename T>                                                                                                           \
+    class TEST_NAME;                                                                                                                \
+    template <typename... As>                                                                                                       \
+    class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, public FIXTURE \
+    {                                                                                                                               \
+    public:                                                                                                                     \
+        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                                              \
+        FIXTURE_DATA_SETUP_NEW(FIXTURE)                                                                                             \
+        void do_run() override;                                                                                                     \
+        FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \
+    };                                                                                                                              \
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                                          \
+    template <typename... As>                                                                                                       \
+    void TEST_NAME<std::tuple<As...>>::do_run()
+
+#define FIXTURE_DATA_TEST_CASE_NEW(TEST_NAME, FIXTURE, MODE, DATASET) \
+    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
+#define EXPECTED_FAILURE_FIXTURE_DATA_TEST_CASE_NEW(TEST_NAME, FIXTURE, MODE, DATASET) \
+    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
+#define DISABLED_FIXTURE_DATA_TEST_CASE_NEW(TEST_NAME, FIXTURE, MODE, DATASET) \
+    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
 
 #define REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS)           \
     class TEST_NAME : public arm_compute::test::framework::TestCase, public FIXTURE \

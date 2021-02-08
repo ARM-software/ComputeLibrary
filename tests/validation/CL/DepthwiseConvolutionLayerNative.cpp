@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,7 +129,7 @@ TEST_SUITE(CL)
 TEST_SUITE(DepthwiseConvolutionLayerNative)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_precommit,
                                                                                                 height_values_precommit),
@@ -149,7 +149,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_nightly,
                                                                                                 height_values_nightly),
@@ -171,7 +171,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_precommit,
                                                                                                 height_values_precommit),
@@ -191,7 +191,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>,
         validate(CLAccessor(_target), _reference, rel_tolerance_f16);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_nightly,
                                                                                                 height_values_nightly),
@@ -215,7 +215,7 @@ TEST_SUITE_END() // Float
 TEST_SUITE(DepthMultiplier)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_precommit,
                                                                                                 height_values_precommit),
@@ -235,7 +235,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_nightly,
                                                                                                 height_values_nightly),
@@ -257,7 +257,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_precommit,
                                                                                                 height_values_precommit),
@@ -277,7 +277,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>,
         validate(CLAccessor(_target), _reference, rel_tolerance_f16);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_nightly,
                                                                                                 height_values_nightly),

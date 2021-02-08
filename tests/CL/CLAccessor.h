@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "tests/IAccessor.h"
+#include "tests/framework/Framework.h"
 
 namespace arm_compute
 {
@@ -86,12 +87,18 @@ private:
 inline CLAccessor::CLAccessor(CLTensor &tensor)
     : _tensor{ tensor }
 {
-    _tensor.map();
+    if(!framework::Framework::get().configure_only() || !framework::Framework::get().new_fixture_call())
+    {
+        _tensor.map();
+    }
 }
 
 inline CLAccessor::~CLAccessor()
 {
-    _tensor.unmap();
+    if(!framework::Framework::get().configure_only() || !framework::Framework::get().new_fixture_call())
+    {
+        _tensor.unmap();
+    }
 }
 
 inline TensorShape CLAccessor::shape() const
