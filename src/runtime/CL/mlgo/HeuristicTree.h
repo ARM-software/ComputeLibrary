@@ -125,7 +125,7 @@ public:
     /** Move constructor */
     HeuristicTree(HeuristicTree &&other) noexcept = default;
     /** Move assignment */
-    HeuristicTree &operator=(HeuristicTree &&other) noexcept = default;
+    HeuristicTree &operator=(HeuristicTree &&other) = default;
 
     /** Query a leaf value given a gemm shape
      *
