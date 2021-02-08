@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 Arm Limited.
+* Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,30 @@ inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&... fix
     for(size_t i = 1 + sizeof...(Ts); i < info.num_dimensions(); ++i)
     {
         strides.set(i, shape[i - 1] * strides[i - 1]);
+    }
+
+    size_t first_zero = std::distance(strides.begin(), std::find_if(strides.begin(), strides.end(), [](uint32_t val)
+    {
+        return val == 0U;
+    }));
+
+    if(first_zero > 0)
+    {
+        if(first_zero == 1)
+        {
+            strides.set(1, strides[0] * (shape[0] + info.padding().left + info.padding().right));
+            ++first_zero;
+        }
+        else if(first_zero == 2)
+        {
+            strides.set(2, strides[1] * (shape[1] + info.padding().top + info.padding().bottom));
+            ++first_zero;
+        }
+
+        for(size_t i = first_zero; i < Strides::num_max_dimensions; ++i)
+        {
+            strides.set(i, strides[first_zero - 1]);
+        }
     }
 
     return strides;

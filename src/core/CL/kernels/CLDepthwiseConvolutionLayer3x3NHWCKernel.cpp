@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -233,7 +233,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const CLCompileContext 
 
     if(_is_quantized)
     {
-        _border_size = BorderSize(is_stride_1 ? 0 : conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
+        _border_size = BorderSize(input->info()->padding());
 
         // If QASYMM8 and the 8 bit dot product is available, force _num_planes_processed_per_iteration to 1
         if(is_dot8_supported)

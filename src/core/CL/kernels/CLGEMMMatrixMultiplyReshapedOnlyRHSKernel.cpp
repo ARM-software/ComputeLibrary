@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -352,8 +352,8 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::run(const Window &window, cl::Co
 
     if(_input1->info()->num_dimensions() < 3)
     {
-        // The stride_z for matrix B must be zero if we do not slice
-        ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != 0);
+        // The stride_w for matrix B must be the same as stride_z if we do not slice
+        ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != _input1->info()->strides_in_bytes()[2]);
     }
 
     const size_t lhs_idx_batch_size = _reinterpret_input_as_3d && !_has_pad_y ? 3u : 2u;

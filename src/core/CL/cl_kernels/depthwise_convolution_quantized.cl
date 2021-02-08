@@ -194,11 +194,11 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 #endif //defined(HAS_BIAS)
 )
 {
-    Image    src                = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
-    Image    dst                = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
-    Tensor3D weights            = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
-    Vector   output_multipliers = CONVERT_TO_VECTOR_STRUCT_NO_STEP(output_multipliers);
-    Vector   output_shifts      = CONVERT_TO_VECTOR_STRUCT_NO_STEP(output_shifts);
+    __global uchar *src_addr           = src_ptr + get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + get_global_id(2) * src_step_z;
+    Image           dst                = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+    Tensor3D        weights            = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
+    Vector          output_multipliers = CONVERT_TO_VECTOR_STRUCT_NO_STEP(output_multipliers);
+    Vector          output_shifts      = CONVERT_TO_VECTOR_STRUCT_NO_STEP(output_shifts);
 
     // Extract channel and linearized batch indices
     const int channel = get_global_id(2) % DST_CHANNELS;
@@ -211,7 +211,7 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 #endif //defined(HAS_BIAS)
 
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
-    src.ptr -= batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z + (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    src_addr -= batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z + (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
 
     VEC_DATA_TYPE(WEIGHTS_TYPE, 3)
@@ -235,7 +235,7 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 
     // Row0
     int8 left, middle, right;
-    GET_VALUES(src.ptr + 0 * src_stride_y, left, middle, right);
+    GET_VALUES(src_addr + 0 * src_stride_y, left, middle, right);
     values0 += left * (int8)(w0.s0);
     values0 += middle * (int8)(w0.s1);
     values0 += right * (int8)(w0.s2);
@@ -245,10 +245,11 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 #endif /* WEIGHTS_OFFSET != 0 */
 
     // Row1
-    GET_VALUES(src.ptr + DILATION_Y * src_stride_y, left, middle, right);
+    GET_VALUES(src_addr + DILATION_Y * src_stride_y, left, middle, right);
     values0 += left * (int8)(w1.s0);
     values0 += middle * (int8)(w1.s1);
     values0 += right * (int8)(w1.s2);
+
 #if CONV_STRIDE_Y == 1 && DILATION_Y == 1
     values1 += left * (int8)(w0.s0);
     values1 += middle * (int8)(w0.s1);
@@ -264,7 +265,7 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 #endif /* WEIGHTS_OFFSET != 0 */
 
     // Row2
-    GET_VALUES(src.ptr + 2 * DILATION_Y * src_stride_y, left, middle, right);
+    GET_VALUES(src_addr + 2 * DILATION_Y * src_stride_y, left, middle, right);
     values0 += left * (int8)(w2.s0);
     values0 += middle * (int8)(w2.s1);
     values0 += right * (int8)(w2.s2);
@@ -284,7 +285,7 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 
 #if CONV_STRIDE_Y == 1 && DILATION_Y == 1
     // Row3
-    GET_VALUES(src.ptr + 3 * src_stride_y, left, middle, right);
+    GET_VALUES(src_addr + 3 * src_stride_y, left, middle, right);
     values1 += left * (int8)(w2.s0);
     values1 += middle * (int8)(w2.s1);
     values1 += right * (int8)(w2.s2);
@@ -511,11 +512,11 @@ __kernel void dwc_3x3_native_quantized8_dot8_nchw(
 #endif //defined(HAS_BIAS)
 )
 {
-    Image    src                = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
-    Image    dst                = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
-    Tensor3D weights            = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
-    Vector   output_multipliers = CONVERT_TO_VECTOR_STRUCT_NO_STEP(output_multipliers);
-    Vector   output_shifts      = CONVERT_TO_VECTOR_STRUCT_NO_STEP(output_shifts);
+    __global uchar *src_addr           = src_ptr + get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + get_global_id(2) * src_step_z;
+    Image           dst                = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+    Tensor3D        weights            = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
+    Vector          output_multipliers = CONVERT_TO_VECTOR_STRUCT_NO_STEP(output_multipliers);
+    Vector          output_shifts      = CONVERT_TO_VECTOR_STRUCT_NO_STEP(output_shifts);
 
     // Extract channel and linearized batch indices
     const int channel = get_global_id(2) % DST_CHANNELS;
@@ -528,7 +529,7 @@ __kernel void dwc_3x3_native_quantized8_dot8_nchw(
 #endif //defined(HAS_BIAS)
 
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
-    src.ptr -= batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z + (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    src_addr -= batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z + (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
 
     VEC_TYPE(3)
@@ -551,9 +552,9 @@ __kernel void dwc_3x3_native_quantized8_dot8_nchw(
     int8 values0 = 0;
     int8 sum0    = 0;
 
-    GET_VALUES(src.ptr + 0 * src_stride_y, left0, middle0, right0);
-    GET_VALUES(src.ptr + DILATION_Y * src_stride_y, left1, middle1, right1);
-    GET_VALUES(src.ptr + 2 * DILATION_Y * src_stride_y, left2, middle2, right2);
+    GET_VALUES(src_addr + 0 * src_stride_y, left0, middle0, right0);
+    GET_VALUES(src_addr + DILATION_Y * src_stride_y, left1, middle1, right1);
+    GET_VALUES(src_addr + 2 * DILATION_Y * src_stride_y, left2, middle2, right2);
 
 #if WEIGHTS_OFFSET != 0
     sum0 += convert_int8(left0) + convert_int8(middle0) + convert_int8(right0);
@@ -569,7 +570,7 @@ __kernel void dwc_3x3_native_quantized8_dot8_nchw(
     int8 values1 = 0;
     int8 sum1    = 0;
 
-    GET_VALUES(src.ptr + 3 * src_stride_y, left3, middle3, right3);
+    GET_VALUES(src_addr + 3 * src_stride_y, left3, middle3, right3);
 
 #if WEIGHTS_OFFSET != 0
     sum1 += convert_int8(left1) + convert_int8(middle1) + convert_int8(right1);
@@ -923,7 +924,9 @@ __kernel void dwc_3x3_reshaped_quantized8_nhwc(
     // z_coord can be only negative for z = 0 so we do not need to clamp it
     // Moreover z_coord cannot be out-of-bound for z = 1 so we do not need to clamp the offset
     z_coord = z * (int)CONV_STRIDE_Y - (int)CONV_PAD_TOP + DILATION_Y;
+    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
     offset  = y_offset + (int4)(z_coord * src_stride_z);
+    offset  = min(offset, (int4)max_offset);
     VEC_TYPE(VEC_SIZE)
     values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -934,6 +937,7 @@ __kernel void dwc_3x3_reshaped_quantized8_nhwc(
     // z == 2
     // Offset can be out-of-bound so we need to check if it is greater than max_offset
     z_coord = z * (int)CONV_STRIDE_Y - (int)CONV_PAD_TOP + DILATION_Y * 2;
+    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
     offset  = y_offset + (int4)(z_coord * src_stride_z);
     offset  = min(offset, (int4)max_offset);
     VEC_TYPE(VEC_SIZE)

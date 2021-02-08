@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,11 +60,11 @@ DATA_TEST_CASE(AutoPadding, framework::DatasetMode::ALL, zip(zip(zip(
                PaddingSize{ 4, 36, 4, 4 }})),
                framework::dataset::make("Strides", {
                Strides{},
-               Strides{ 1U, 50U },
-               Strides{ 1U, 50U },
-               Strides{ 1U, 50U, 900U },
-               Strides{ 1U, 50U, 900U, 9000U },
-               Strides{ 1U, 50U, 900U, 9000U, 90000U },
+               Strides{ 1U, 50U, 50U, 50U, 50U, 50U },
+               Strides{ 1U, 50U, 900U, 900U, 900U, 900U },
+               Strides{ 1U, 50U, 900U, 900U, 900U, 900U },
+               Strides{ 1U, 50U, 900U, 9000U, 9000U, 9000U },
+               Strides{ 1U, 50U, 900U, 9000U, 90000U, 90000U },
                Strides{ 1U, 50U, 900U, 9000U, 90000U, 900000U }})),
                framework::dataset::make("Offset", { 0U, 4U, 204U, 204U, 204U, 204U, 204U })),
                shape, auto_padding, strides, offset)
