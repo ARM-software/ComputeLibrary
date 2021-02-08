@@ -141,7 +141,7 @@ inline std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> auto_select_gemm_config_r
             return { config.lhs_info, config.rhs_info };
         }
     }
-    config = select_default_gemm_config_reshaped_only_rhs(query);
+    config = auto_heuristics::select_default_gemm_config_reshaped_only_rhs(query);
     ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use reshaped_only_rhs config from default heuristics: LHS info: %s ; RHS info: %s ", to_string(config.lhs_info).c_str(), to_string(config.rhs_info).c_str());
     return { config.lhs_info, config.rhs_info };
 }
@@ -190,7 +190,7 @@ inline std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> auto_select_gemm_config_r
             return { config.lhs_info, config.rhs_info };
         }
     }
-    config = select_default_gemm_config_reshaped(query);
+    config = auto_heuristics::select_default_gemm_config_reshaped(query);
     ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use reshaped config from default heuristics: LHS info: %s ; RHS info: %s ", to_string(config.lhs_info).c_str(), to_string(config.rhs_info).c_str());
     return { config.lhs_info, config.rhs_info };
 }

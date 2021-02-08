@@ -73,27 +73,39 @@ CLGEMMKernelType auto_select_gemm_kernel(const CommonQuery &query, bool reshape_
 
 /** Select gemm config based on mlgo heuristics
  * @param query Query
- * @return GEMMConfigResult
+ * @return GEMMConfigResult. Result is valid if bool(GEMMCOnfigResult) == true and invalid otherwise
  */
 GEMMConfigResult select_mlgo_gemm_config_reshaped_only_rhs(const CommonQuery &query);
 
 /** Select gemm config based on default heuristics
  * @param query Query
- * @return GEMMConfigResult
+ * @return GEMMConfigResult. Result is valid if bool(GEMMCOnfigResult) == true and invalid otherwise
  */
 GEMMConfigResult select_default_gemm_config_reshaped_only_rhs(const CommonQuery &query);
 
 /** Select gemm config based on mlgo heuristics
  * @param query Query
- * @return GEMMConfigResult
+ * @return GEMMConfigResult. Result is valid if bool(GEMMCOnfigResult) == true and invalid otherwise
  */
 GEMMConfigResult select_mlgo_gemm_config_reshaped(const CommonQuery &query);
 
 /** Select gemm config based on default heuristics
  * @param query Query
- * @return GEMMConfigResult
+ * @return GEMMConfigResult. Result is valid if bool(GEMMCOnfigResult) == true and invalid otherwise
  */
 GEMMConfigResult select_default_gemm_config_reshaped(const CommonQuery &query);
+
+/** Select gemm config based on mlgo heuristics
+ * @param query Query
+ * @return GEMMConfigResult. Result is valid if bool(GEMMCOnfigResult) == true and invalid otherwise
+ */
+GEMMConfigResult select_mlgo_gemm_config_native(const CommonQuery &query);
+
+/** Select gemm config based on default heuristics
+ * @param query Query
+ * @return GEMMConfigResult. Result is valid if bool(GEMMCOnfigResult) == true and invalid otherwise
+ */
+GEMMConfigResult select_default_gemm_config_native(const CommonQuery &query);
 
 } // namespace auto_heuristics
 } // namespace cl_gemm
