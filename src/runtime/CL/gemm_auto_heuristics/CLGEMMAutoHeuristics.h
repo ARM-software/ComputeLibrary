@@ -82,6 +82,19 @@ GEMMConfigResult select_mlgo_gemm_config_reshaped_only_rhs(const CommonQuery &qu
  * @return GEMMConfigResult
  */
 GEMMConfigResult select_default_gemm_config_reshaped_only_rhs(const CommonQuery &query);
+
+/** Select gemm config based on mlgo heuristics
+ * @param query Query
+ * @return GEMMConfigResult
+ */
+GEMMConfigResult select_mlgo_gemm_config_reshaped(const CommonQuery &query);
+
+/** Select gemm config based on default heuristics
+ * @param query Query
+ * @return GEMMConfigResult
+ */
+GEMMConfigResult select_default_gemm_config_reshaped(const CommonQuery &query);
+
 } // namespace auto_heuristics
 } // namespace cl_gemm
 } // namespace arm_compute
