@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,33 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
+#ifndef ARM_COMPUTE_TEST_ROIPOOLLAYER_H
+#define ARM_COMPUTE_TEST_ROIPOOLLAYER_H
+
+#include "arm_compute/core/Types.h"
+#include "tests/SimpleTensor.h"
+#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
-NEROIPoolingLayer::~NEROIPoolingLayer() = default;
-
-NEROIPoolingLayer::NEROIPoolingLayer()
-    : _roi_kernel()
+namespace test
 {
-}
-
-Status NEROIPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+namespace validation
 {
-    return NEROIPoolingLayerKernel::validate(input, rois, output, pool_info);
-}
-
-void NEROIPoolingLayer::configure(const ITensor *input, const ITensor *rois, const ITensor *output, const ROIPoolingLayerInfo &pool_info)
+namespace reference
 {
-    _roi_kernel = std::make_unique<NEROIPoolingLayerKernel>();
-    _roi_kernel->configure(input, rois, output, pool_info);
-}
-
-void NEROIPoolingLayer::run()
-{
-    NEScheduler::get().schedule(_roi_kernel.get(), Window::DimX);
-}
+template <typename T>
+SimpleTensor<T> roi_pool_layer(const SimpleTensor<T> &src, const SimpleTensor<uint16_t> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo);
+} // namespace reference
+} // namespace validation
+} // namespace test
 } // namespace arm_compute
+
+#endif /* ARM_COMPUTE_TEST_ROIPOOLLAYER_H */
