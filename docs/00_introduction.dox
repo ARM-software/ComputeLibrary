@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2020 Arm Limited.
+/// Copyright (c) 2017-2021 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -125,6 +125,8 @@ v21.02 Public major release
    - NEUpsampleLayerKernel / CLUpsampleLayerKernel
  - Extend OpenCL tuner with workgroup batch size support
    - Experimental extension for the OpenCL tuner to tune the batches of work groups distribute to compute units
+ - Add functionality to load the OpenCL GEMM heuristics at runtime
+   - The GEMM heuristic file (MLGO) can be used to update the default GEMM heuristics available for OpenCL
 
 v20.11 Public major release
  - Various bug fixes.
