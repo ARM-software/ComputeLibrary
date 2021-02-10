@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 
 namespace arm_compute
 {
-/** NEON Scheduler */
+/** Neon Scheduler */
 using NEScheduler = Scheduler;
 }
 #endif /*ARM_COMPUTE_NESCHEDULER_H */

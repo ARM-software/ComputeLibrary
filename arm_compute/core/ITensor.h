@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class Coordinates;
 
-/** Interface for NEON tensor */
+/** Interface for Neon tensor */
 class ITensor
 {
 public:

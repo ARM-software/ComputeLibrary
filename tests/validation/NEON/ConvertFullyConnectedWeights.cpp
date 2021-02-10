@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -131,7 +131,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<uint8_t>,
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE_END() // ConvertFullyConnectedWeights
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

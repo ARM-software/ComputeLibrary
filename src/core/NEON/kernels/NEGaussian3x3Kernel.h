@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform a Gaussian 3x3 filter */
+/** Neon kernel to perform a Gaussian 3x3 filter */
 class NEGaussian3x3Kernel : public INESimpleKernel
 {
 public:

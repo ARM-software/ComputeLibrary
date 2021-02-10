@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,7 +113,7 @@ TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
 TEST_SUITE_END() // StridedSlice
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 
 } // namespace validation
 } // namespace test

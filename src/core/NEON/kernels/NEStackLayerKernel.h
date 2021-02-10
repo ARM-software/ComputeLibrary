@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to stacks a rank-R tensor into one with rank-(R+1) along the axis dimension.*/
+/** Neon kernel to stacks a rank-R tensor into one with rank-(R+1) along the axis dimension.*/
 class NEStackLayerKernel : public INEKernel
 {
 public:

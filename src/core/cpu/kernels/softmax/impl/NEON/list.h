@@ -73,7 +73,7 @@ float32x4x4_t convert_int_to_float<float32x4x4_t, int8x16_t>(const int8x16_t &in
 template <typename T>
 void neon_logits_1d_max(const ITensor *in, ITensor *out, const Window &window)
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     constexpr int window_step_x  = 16 / sizeof(T);
@@ -304,7 +304,7 @@ void neon_softmax_logits_1d_float(const ITensor *in, const ITensor *max, void *c
     Iterator max_it(max, window);
     Iterator out_it(out, window);
 
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     constexpr int vec_size   = 16 / sizeof(T);

@@ -36,7 +36,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following NEON kernels:
+/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if padding size is different from zero)
  * -# @ref cpu::kernels::CpuPoolingKernel

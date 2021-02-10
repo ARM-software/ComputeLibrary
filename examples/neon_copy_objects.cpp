@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -140,7 +140,7 @@ public:
     }
     void do_run() override
     {
-        // Run NEON softmax:
+        // Run Neon softmax:
         softmax.run();
     }
     void do_teardown() override

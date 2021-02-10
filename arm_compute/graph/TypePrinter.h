@@ -43,7 +43,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Target &target)
             os << "UNSPECIFIED";
             break;
         case Target::NEON:
-            os << "NEON";
+            os << "Neon";
             break;
         case Target::CL:
             os << "CL";

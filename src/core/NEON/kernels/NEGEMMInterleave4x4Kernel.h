@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to interleave the elements of a matrix
+/** Neon kernel to interleave the elements of a matrix
  *
  * This function puts the values in a 4x4 block of Matrix A on the same row (Interleaved values)
  *

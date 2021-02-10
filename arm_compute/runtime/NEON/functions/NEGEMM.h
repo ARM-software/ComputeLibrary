@@ -43,7 +43,7 @@ class NEGEMMMatrixMultiplyKernel;
 class NEGEMMTranspose1xWKernel;
 class NEGEMMAssemblyDispatch;
 
-/** Basic function to execute GEMM on NEON. This function calls the following NEON kernels:
+/** Basic function to execute GEMM on Neon. This function calls the following Neon kernels:
  *
  * If optimized assembly is available:
  *  -# @ref NEGEMMAssemblyDispatch

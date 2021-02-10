@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to execute laplacian pyramid. This function calls the following NEON kernels and functions:
+/** Basic function to execute laplacian pyramid. This function calls the following Neon kernels and functions:
  *
  * -# @ref NEGaussianPyramidHalf
  * -# @ref NEGaussian5x5

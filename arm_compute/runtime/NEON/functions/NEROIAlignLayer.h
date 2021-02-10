@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ class ITensorInfo;
 
 /** Basic function to run @ref NEROIAlignLayerKernel.
  *
- * This function calls the following NEON kernels:
+ * This function calls the following Neon kernels:
  * -# @ref NEROIAlignLayerKernel
  *
  */

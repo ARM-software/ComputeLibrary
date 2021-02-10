@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ class NEGEMMLowpMatrixBReductionKernel;
 class NEGEMMTranspose1xWKernel;
 class NEGEMMAssemblyDispatch;
 
-/** Basic function to execute GEMMLowpMatrixMultiplyCore on NEON. This function calls the following NEON kernels if the DOT product instruction is not available:
+/** Basic function to execute GEMMLowpMatrixMultiplyCore on Neon. This function calls the following Neon kernels if the DOT product instruction is not available:
  *
  *  -# @ref NEGEMMInterleave4x4Kernel
  *  -# @ref NEGEMMTranspose1xWKernel

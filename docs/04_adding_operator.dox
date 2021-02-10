@@ -71,12 +71,12 @@ Similarly, all common functions that process shapes, like calculating output sha
 
 
 @subsection S4_1_2_add_kernel Add a kernel
-As we mentioned at the beginning, the kernel is the implementation of the operator or algorithm partially using a specific programming language related to the backend we want to use. Adding a kernel in the library means implementing the algorithm in a SIMD technology like NEON or OpenCL. All kernels in Compute Library must implement a common interface IKernel or one of the specific subinterfaces.
+As we mentioned at the beginning, the kernel is the implementation of the operator or algorithm partially using a specific programming language related to the backend we want to use. Adding a kernel in the library means implementing the algorithm in a SIMD technology like Neon or OpenCL. All kernels in Compute Library must implement a common interface IKernel or one of the specific subinterfaces.
 IKernel is the common interface for all the kernels in the core library, it contains the main methods for configure and run the kernel itself, such as window()  that return the maximum window the kernel can be executed on or is_parallelisable() for indicate whether or not the kernel is parallelizable. If the kernel is parallelizable then the window returned by the window() method can be split into sub-windows which can then be run in parallel, in the other case, only the window returned by window() can be passed to the run method.
 There are specific interfaces for OpenCL and Neon: @ref ICLKernel, INEKernel (using INEKernel = @ref ICPPKernel).
 
 - @ref ICLKernel is the common interface for all the OpenCL kernels. It implements the inherited methods and adds all the methods necessary to configure the CL kernel, such as set/return the Local-Workgroup-Size hint, add single, array or tensor argument, set the targeted GPU architecture according to the CL device. All these methods are used during the configuration and the run of the operator.
-- INEKernel inherits from @ref IKernel as well and it's the common interface for all kernels implemented in NEON, it adds just the run and the name methods.
+- INEKernel inherits from @ref IKernel as well and it's the common interface for all kernels implemented in Neon, it adds just the run and the name methods.
 
 There are two others implementation of @ref IKernel called @ref ICLSimpleKernel and INESimpleKernel, they are the interface for simple kernels that have just one input tensor and one output tensor.
 Creating a new kernel implies adding new files:
@@ -120,10 +120,10 @@ For OpenCL:
 @snippet src/core/gpu/cl/kernels/ClReshapeKernel.cpp ClReshapeKernel Kernel
 The run will call the function defined in the .cl file.
 
-For the NEON backend case:
+For the Neon backend case:
 @snippet src/core/cpu/kernels/CpuReshapeKernel.cpp NEReshapeLayerKernel Kernel
 
-In the NEON case, there is no need to add an extra file and we implement the kernel in the same NEReshapeLayerKernel.cpp file.
+In the Neon case, there is no need to add an extra file and we implement the kernel in the same NEReshapeLayerKernel.cpp file.
 If the tests are already in place, the new kernel can be tested using the existing tests by adding the configure and run of the kernel to the compute_target() in the fixture.
 
 
@@ -137,13 +137,13 @@ If the tests are already in place, the new kernel can be tested using the existi
 - (sub[n].start() - max[n].start()) % max[n].step() == 0
 - (sub[n].end() - sub[n].start()) % max[n].step() == 0
 
-@ref CPPScheduler::schedule provides a sample implementation that is used for NEON kernels.
-%Memory management is the other aspect that the runtime layer is supposed to handle. %Memory management of the tensors is abstracted using TensorAllocator. Each tensor holds a pointer to a TensorAllocator object, which is used to allocate and free the memory at runtime. The implementation that is currently supported in Compute Library allows memory blocks, required to be fulfilled for a given operator, to be grouped together under a @ref MemoryGroup. Each group can be acquired and released. The underlying implementation of memory groups vary depending on whether NEON or CL is used. The memory group class uses memory pool to provide the required memory. It also uses the memory manager to manage the lifetime and a IPoolManager to manage the memory pools registered with the memory manager.
+@ref CPPScheduler::schedule provides a sample implementation that is used for Neon kernels.
+%Memory management is the other aspect that the runtime layer is supposed to handle. %Memory management of the tensors is abstracted using TensorAllocator. Each tensor holds a pointer to a TensorAllocator object, which is used to allocate and free the memory at runtime. The implementation that is currently supported in Compute Library allows memory blocks, required to be fulfilled for a given operator, to be grouped together under a @ref MemoryGroup. Each group can be acquired and released. The underlying implementation of memory groups vary depending on whether Neon or CL is used. The memory group class uses memory pool to provide the required memory. It also uses the memory manager to manage the lifetime and a IPoolManager to manage the memory pools registered with the memory manager.
 
 
 We have seen the various interfaces for a kernel in the core library, the same structure the same file structure design exists in the runtime module. IFunction is the base class for all the functions, it has two child interfaces: ICLSimpleFunction and INESimpleFunction that are used as base class for functions which call a single kernel.
 
-The new operator has to implement %validate(), configure() and run(), these methods will call the respective function in the kernel considering that the multi-threading is used for the kernels which are parallelizable, by default std::thread::hardware_concurrency() threads are used. For NEON function can be used CPPScheduler::set_num_threads() to manually set the number of threads, whereas for OpenCL kernels all the kernels are enqueued on the queue associated with CLScheduler and the queue is then flushed.
+The new operator has to implement %validate(), configure() and run(), these methods will call the respective function in the kernel considering that the multi-threading is used for the kernels which are parallelizable, by default std::thread::hardware_concurrency() threads are used. For Neon function can be used CPPScheduler::set_num_threads() to manually set the number of threads, whereas for OpenCL kernels all the kernels are enqueued on the queue associated with CLScheduler and the queue is then flushed.
 For the runtime functions, there is an extra method implemented: prepare(), this method prepares the function for the run, it does all the heavy operations that are done only once (reshape the weight, release the memory not necessary after the reshape, etc). The prepare method can be called standalone or in the first run, if not called before, after then the function will be marked as prepared.
 The files we add are:
 
@@ -214,7 +214,7 @@ void CLAddReshapeLayer::run()
 
 @endcode
 
-For NEON:
+For Neon:
 
 @code{.cpp}
 using namespace arm_compute;

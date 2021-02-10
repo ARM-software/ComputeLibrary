@@ -285,7 +285,7 @@ private:
 
     /** Assembly Gemm kernel */
     std::shared_ptr<arm_gemm::GemmCommon<TypeInput, TypeOutput>> _gemm_kernel_asm{ nullptr };
-    /** Optimised NEON kernel */
+    /** Optimised Neon kernel */
     std::unique_ptr<INEKernel> _optimised_kernel{ nullptr };
     /** Input A */
     const ITensor *_a

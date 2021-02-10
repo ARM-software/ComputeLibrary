@@ -47,7 +47,7 @@ class NEGEMMLowpMatrixAReductionKernel;
 
 /** Basic function to run @ref NEQLSTMLayer
  *
- * This function calls the following NEON functions/kernels:
+ * This function calls the following Neon functions/kernels:
  *
  * -# @ref NEActivationLayer                                     Activation functions (tanh and logistic)
  * -# @ref NEArithmeticAddition                                  Elementwise addition

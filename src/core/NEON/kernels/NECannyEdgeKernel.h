@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,7 +85,7 @@ protected:
     ITensor          *_phase;     /**< Destination tensor - Quantized phase */
 };
 
-/** NEON kernel to perform Non-Maxima suppression for Canny Edge.
+/** Neon kernel to perform Non-Maxima suppression for Canny Edge.
  *
  * @note This kernel is meant to be used alongside CannyEdge and performs a non-maxima suppression using magnitude and phase of input
  *       to characterize points as possible edges. Thus, at the end, each point will be set to EDGE, NO_EDGE or MAYBE.
@@ -148,7 +148,7 @@ private:
     int32_t                  _upper_thr; /**< Upper threshold used for the hysteresis */
 };
 
-/** NEON kernel to perform Edge tracing */
+/** Neon kernel to perform Edge tracing */
 class NEEdgeTraceKernel : public INEKernel
 {
 public:

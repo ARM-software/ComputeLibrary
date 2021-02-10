@@ -44,7 +44,7 @@ struct vector_64_tag {};
 /** 128-bit vector tag */
 struct vector_128_tag {};
 
-/** Create the appropriate NEON vector given its type and size in terms of elements */
+/** Create the appropriate Neon vector given its type and size in terms of elements */
 template <typename T, int S> struct neon_vector;
 
 // Specializations
@@ -88,7 +88,7 @@ enum class BitWidth
     W128, /**< 128-bit width */
 };
 
-/** Create the appropriate NEON vector given its type and size in terms of bits */
+/** Create the appropriate Neon vector given its type and size in terms of bits */
 template <typename T, BitWidth BW> struct neon_bitvector;
 // Specializations
 #ifndef DOXYGEN_SKIP_THIS

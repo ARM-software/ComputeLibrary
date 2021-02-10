@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
     DataType::F16,
 });
 
-/** Aligned corners, this functionality is supported only by NEON and OpenCL backends */
+/** Aligned corners, this functionality is supported only by Neon and OpenCL backends */
 const auto AlignCorners = framework::dataset::make("AlignCorners",
 {
     false,

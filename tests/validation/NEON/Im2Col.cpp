@@ -205,7 +205,7 @@ TEST_CASE(PaddedChannelNHWC, framework::DatasetMode::PRECOMMIT)
 }
 TEST_SUITE_END() // Special Cases
 TEST_SUITE_END() // Im2Col
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

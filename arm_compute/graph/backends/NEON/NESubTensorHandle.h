@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace graph
 {
 namespace backends
 {
-/** NEON Sub-Tensor handle interface object **/
+/** Neon Sub-Tensor handle interface object **/
 class NESubTensorHandle final : public ITensorHandle
 {
 public:

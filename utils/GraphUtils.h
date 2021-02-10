@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -673,7 +673,7 @@ inline TensorShape permute_shape(TensorShape tensor_shape, DataLayout in_data_la
 
 /** Utility function to return the TargetHint
  *
- * @param[in] target Integer value which expresses the selected target. Must be 0 for NEON or 1 for OpenCL or 2 (OpenCL with Tuner)
+ * @param[in] target Integer value which expresses the selected target. Must be 0 for Neon or 1 for OpenCL or 2 (OpenCL with Tuner)
  *
  * @return the TargetHint
  */

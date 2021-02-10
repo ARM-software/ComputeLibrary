@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform a Box 3x3 filter */
+/** Neon kernel to perform a Box 3x3 filter */
 class NEBox3x3Kernel : public INESimpleKernel
 {
 public:
@@ -63,7 +63,7 @@ public:
 };
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-/** NEON kernel to perform a Box 3x3 filter for FP16 datatype
+/** Neon kernel to perform a Box 3x3 filter for FP16 datatype
  */
 class NEBox3x3FP16Kernel : public NEBox3x3Kernel
 {
@@ -88,7 +88,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 };
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-/** NEON kernel to perform a Box 3x3 filter for FP16 datatype */
+/** Neon kernel to perform a Box 3x3 filter for FP16 datatype */
 using NEBox3x3FP16Kernel = NEBox3x3Kernel;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute

@@ -29,7 +29,7 @@ namespace arm_compute
 
 @tableofcontents
 
-@section S6_1 NEON functions
+@section S6_1 Neon functions
 
 - @ref IFunction
     - @ref INESimpleFunction

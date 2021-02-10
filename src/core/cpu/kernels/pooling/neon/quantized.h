@@ -473,7 +473,7 @@ void pooling2_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
     Iterator in(src, window_src);
     Iterator out(dst0, window);
 
-    /** NEON vector types */
+    /** Neon vector types */
     using q8x8_t    = typename wrapper::traits::neon_vector<T, 8>::type;
     using q8x16_t   = typename wrapper::traits::neon_vector<T, 16>::type;
     using q8x8x2_t  = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
@@ -602,7 +602,7 @@ void pooling3_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
     Iterator in(src, window_src);
     Iterator out(dst0, window);
 
-    /** NEON vector types */
+    /** Neon vector types */
     using q8x8_t    = typename wrapper::traits::neon_vector<T, 8>::type;
     using q8x16_t   = typename wrapper::traits::neon_vector<T, 16>::type;
     using q8x8x2_t  = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
@@ -756,7 +756,7 @@ void poolingMxN_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *
     Iterator in(src, window_src);
     Iterator out(dst0, window);
 
-    /** NEON vector types */
+    /** Neon vector types */
     using q8x8_t  = typename wrapper::traits::neon_vector<T, 8>::type;
     using q16_t   = typename wrapper::traits::promote_t<T>;
     using q16x8_t = typename wrapper::traits::neon_vector<q16_t, 8>::type;

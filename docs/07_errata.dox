@@ -42,7 +42,7 @@ namespace arm_compute
         - Mali DDK r1p0 - r8p0, and
         - Linux kernel >= 4.4
 
-- On Android with arm64-v8a/arm64-v8.2-a architecture, NEON validation tests can fail when compiled using Android Ndk
+- On Android with arm64-v8a/arm64-v8.2-a architecture, Neon validation tests can fail when compiled using Android Ndk
   >= r18b in debug mode (https://github.com/android/ndk/issues/1135).
     - Versions Affected: >= v19.11
     - OSs Affected: Android

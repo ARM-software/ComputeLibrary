@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Interface for NEON Array of Internal Key Points. */
+/** Interface for Neon Array of Internal Key Points. */
 using INELKInternalKeypointArray = IArray<NELKInternalKeypoint>;
 
 /** Interface for the Lucas-Kanade tracker kernel */

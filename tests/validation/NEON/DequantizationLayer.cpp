@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,7 +149,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<float>, framework:
 TEST_SUITE_END() // FP32
 
 TEST_SUITE_END() // DequantizationLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ class ITensor;
 class ITensorInfo;
 class NESpaceToDepthLayerKernel;
 
-/** This function calls the following NEON kernels/functions:
+/** This function calls the following Neon kernels/functions:
  *
  *  -# @ref NESpaceToDepthLayerKernel
  */

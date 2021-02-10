@@ -111,7 +111,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 #endif // __ARM_FEATURE_SVE
 
-// NEON hybrid methods
+// Neon hybrid methods
 {
     GemmMethod::GEMM_HYBRID,
     "a64_smallK_hybrid_fp32_mla_8x4",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class ITensor;
 class ITensorInfo;
-/** Basic function to execute HOG detector based on linear SVM. This function calls the following NEON kernel:
+/** Basic function to execute HOG detector based on linear SVM. This function calls the following Neon kernel:
  *
  * -# @ref NEHOGDetectorKernel
  *

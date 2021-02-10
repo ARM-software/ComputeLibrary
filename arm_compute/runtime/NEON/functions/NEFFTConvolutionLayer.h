@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Basic function to execute FFT-based convolution on NEON. This function calls the following NEON functions/kernels:
+/** Basic function to execute FFT-based convolution on Neon. This function calls the following Neon functions/kernels:
  *
  *  -# @ref NEPermute                        Permute input if NHWC(only NCHW is supported).
  *  -# @ref NEPadLayer                       Pad input.
@@ -84,7 +84,7 @@ public:
      *                              Data types supported: Same as @p input.
      * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation.
-     * @param[in]  enable_fast_math (Optional) Enable fast math computation. Unused for NEON backend.
+     * @param[in]  enable_fast_math (Optional) Enable fast math computation. Unused for Neon backend.
      */
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
@@ -101,7 +101,7 @@ public:
      *                             Data types supported: Same as @p input.
      * @param[in] conv_info        Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
-     * @param[in] enable_fast_math (Optional) Enable fast math computation. Unused for NEON backend.
+     * @param[in] enable_fast_math (Optional) Enable fast math computation. Unused for Neon backend.
      *
      * @return a status
      */

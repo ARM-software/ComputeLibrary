@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ class NEFillBorderKernel;
 class NEFillArrayKernel;
 using IImage = ITensor;
 
-/** Basic function to execute fast corners. This function call the following NEON kernels:
+/** Basic function to execute fast corners. This function call the following Neon kernels:
  *
  * -# @ref NEFastCornersKernel
  * -# @ref NENonMaximaSuppression3x3Kernel (executed if nonmax_suppression == true)

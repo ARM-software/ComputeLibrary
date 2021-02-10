@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform col2im reshaping.
+/** Neon kernel to perform col2im reshaping.
  *
  * Rearranges each matrix column into image blocks. It's the inverse operation of @ref NEIm2ColKernel.
  *

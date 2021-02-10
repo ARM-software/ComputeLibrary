@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_NEFUNCTIONS_H
 #define ARM_COMPUTE_NEFUNCTIONS_H
 
-/* Header regrouping all the NEON functions */
+/* Header regrouping all the Neon functions */
 #include "arm_compute/runtime/NEON/functions/NEAbsoluteDifference.h"
 #include "arm_compute/runtime/NEON/functions/NEAccumulate.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"

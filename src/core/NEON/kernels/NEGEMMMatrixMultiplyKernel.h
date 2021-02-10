@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to multiply two input matrices "A" and "B". All elements of the output matrix/vector will be multiplied by alpha after the matrix multiplication
+/** Neon kernel to multiply two input matrices "A" and "B". All elements of the output matrix/vector will be multiplied by alpha after the matrix multiplication
  *
  * @note If the output tensor is a matrix, the implementation assumes that the input tensors @p input0 and @p input1 are both matrices and reshaped respectively with @ref NEGEMMInterleave4x4Kernel" and @ref NEGEMMTranspose1xWKernel
  * @note If the output tensor is a vector and the data type is F32, the implementation assumes that the first input tensor @p input0 is a vector and the second input tensor @p input1 a matrix. The implementation also assumes that both tensors have not been reshaped

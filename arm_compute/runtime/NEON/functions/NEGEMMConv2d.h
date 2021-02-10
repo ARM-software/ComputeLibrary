@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ namespace arm_compute
 class ITensor;
 class NEGEMMAssemblyDispatch;
 
-/** Basic function to compute the convolution layer. This function calls the following NEON kernels/functions:
+/** Basic function to compute the convolution layer. This function calls the following Neon kernels/functions:
  *
  * Supports only NHWC data layout
  *

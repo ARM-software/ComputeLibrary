@@ -150,7 +150,7 @@ private:
 };
 } // namespace weights_transformations
 
-/** Basic function to compute the convolution layer. This function calls the following NEON kernels/functions:
+/** Basic function to compute the convolution layer. This function calls the following Neon kernels/functions:
  *
  * -# @ref NEIm2ColKernel
  * -# @ref NEGEMM (if the data type is BFLOAT16/FP16/FP32)

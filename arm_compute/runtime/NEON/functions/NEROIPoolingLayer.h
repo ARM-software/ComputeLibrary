@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ class ROIPoolingLayerInfo;
 
 /** Basic function to run @ref NEROIPoolingLayerKernel.
  *
- * This function calls the following NEON kernels:
+ * This function calls the following Neon kernels:
  * -# @ref NEROIPoolingLayerKernel
  *
  */

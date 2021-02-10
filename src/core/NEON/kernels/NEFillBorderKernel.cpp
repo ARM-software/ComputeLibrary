@@ -103,7 +103,7 @@ void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, Bord
 void NEFillBorderKernel::configure(ITensorInfo *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
     ARM_COMPUTE_ERROR_ON(tensor->data_type() == DataType::UNKNOWN);
 
     _border_size           = border_size;

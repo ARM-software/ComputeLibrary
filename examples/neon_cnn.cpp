@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -257,7 +257,7 @@ private:
     Tensor out_fc0{};
     Tensor out_softmax{};
 
-    // NEON allocator
+    // Neon allocator
     Allocator allocator{};
 
     // Memory groups

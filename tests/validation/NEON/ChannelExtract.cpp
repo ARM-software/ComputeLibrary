@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,7 +99,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelExtractFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // YUVPlanar
 
 TEST_SUITE_END() // ChannelExtract
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 
 } // namespace validation
 } // namespace test

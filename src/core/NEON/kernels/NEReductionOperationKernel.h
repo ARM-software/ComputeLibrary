@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform a reduction operation
+/** Neon kernel to perform a reduction operation
  *
  * @note For ARG_MIN/ARG_MAX reduction, the default data type for an uninitialized
  *       output tensor is signed 32-bit integer (S32). It is the user's responsibility

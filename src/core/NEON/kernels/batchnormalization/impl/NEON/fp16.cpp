@@ -45,7 +45,7 @@ template <typename T>
 void batch_normalization(ITensor *src, ITensor *dst, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma,
                          float epsilon, ActivationLayerInfo &act_info, const Window &window)
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<float16_t, wrapper::traits::BitWidth::W128>;
 
     const int  window_step_x  = 8;

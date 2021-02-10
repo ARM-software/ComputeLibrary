@@ -40,7 +40,7 @@ namespace cpu
 {
 // Forward Declarations
 class CpuPoolingAssemblyDispatch;
-/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following NEON kernels:
+/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if padding size is different from zero)
  * -# @ref kernels::CpuPoolingKernel

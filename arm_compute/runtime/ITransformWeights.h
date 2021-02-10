@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ class ITensor;
  * to generate a unique id. We use the following conversion using an unsigned 32bit value:
  *
  * Lower two bits store the target:
- * 00 -> NEON
+ * 00 -> Neon
  * 01 -> CL
  * 10 -> GLES
  * 11 -> Unused

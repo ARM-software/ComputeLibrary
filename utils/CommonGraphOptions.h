@@ -40,7 +40,7 @@ namespace utils
  *
  * --help             : Print the example's help message.
  * --threads          : The number of threads to be used by the example during execution.
- * --target           : Execution target to be used by the examples. Supported target options: NEON, CL, GC.
+ * --target           : Execution target to be used by the examples. Supported target options: Neon, CL, GC.
  * --type             : Data type to be used by the examples. Supported data type options: QASYMM8, F16, F32.
  * --layout           : Data layout to be used by the examples. Supported data layout options : NCHW, NHWC.
  * --enable-tuner     : Toggle option to enable the OpenCL dynamic tuner.

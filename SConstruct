@@ -124,7 +124,7 @@ if env['build'] == "embed_only":
     Return()
 
 if env['neon'] and 'x86' in env['arch']:
-    print("Cannot compile NEON for x86")
+    print("Cannot compile Neon for x86")
     Exit(1)
 
 if env['set_soname'] and not version_at_least(SCons.__version__, "2.4"):
@@ -290,7 +290,7 @@ if not GetOption("help"):
             print("GCC 6.2.1 or newer is required to compile armv8.2-a code")
             Exit(1)
         elif env['arch'] == 'arm64-v8a' and not version_at_least(compiler_ver, '4.9'):
-            print("GCC 4.9 or newer is required to compile NEON code for AArch64")
+            print("GCC 4.9 or newer is required to compile Neon code for AArch64")
             Exit(1)
 
         if version_at_least(compiler_ver, '6.1'):

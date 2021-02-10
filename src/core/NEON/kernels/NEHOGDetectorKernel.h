@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform HOG detector kernel using linear SVM */
+/** Neon kernel to perform HOG detector kernel using linear SVM */
 class NEHOGDetectorKernel : public INEKernel
 {
 public:

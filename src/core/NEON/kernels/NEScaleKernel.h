@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform scaling on a tensor */
+/** Neon kernel to perform scaling on a tensor */
 class NEScaleKernel : public INEKernel
 {
 public:

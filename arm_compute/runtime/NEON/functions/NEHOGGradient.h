@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ namespace arm_compute
 class ITensor;
 class ICPPKernel;
 
-/** Basic function to calculate the gradient for HOG. This function calls the following NEON kernels:
+/** Basic function to calculate the gradient for HOG. This function calls the following Neon kernels:
  *
  * -# @ref NEDerivative
  * -# NEMagnitudePhaseKernel

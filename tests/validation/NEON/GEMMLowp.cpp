@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -547,7 +547,7 @@ TEST_SUITE_END() // BoundedReLu
 TEST_SUITE_END() // QuantizeDownInt32ToInt16ScaleByFixedPoint
 TEST_SUITE_END() // OutputStage
 TEST_SUITE_END() // GEMMLowp
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

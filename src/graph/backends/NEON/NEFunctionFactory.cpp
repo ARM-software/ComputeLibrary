@@ -54,7 +54,7 @@ struct NETargetInfo
 
 Target NETargetInfo::TargetType = Target::NEON;
 
-/** Collection of NEON convolution functions */
+/** Collection of Neon convolution functions */
 struct NEConvolutionLayerFunctions
 {
     using GenericConvolutionLayer  = NEConvolutionLayer;
@@ -63,7 +63,7 @@ struct NEConvolutionLayerFunctions
     using WinogradConvolutionLayer = NEWinogradConvolutionLayer;
 };
 
-/** Collection of NEON element-wise functions */
+/** Collection of Neon element-wise functions */
 struct NEEltwiseFunctions
 {
     using Addition       = NEArithmeticAddition;
@@ -73,13 +73,13 @@ struct NEEltwiseFunctions
     using Division       = NEElementwiseDivision;
 };
 
-/** Collection of NEON unary element-wise functions */
+/** Collection of Neon unary element-wise functions */
 struct NEUnaryEltwiseFunctions
 {
     using Exp = NEExpLayer;
 };
 
-/** Function and tensor types to be used inside a NEON fused convolution/batch normalization layer */
+/** Function and tensor types to be used inside a Neon fused convolution/batch normalization layer */
 struct NEFusedLayerTypes
 {
     using ConvolutionLayer          = NEConvolutionLayer;

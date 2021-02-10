@@ -35,7 +35,7 @@ class ITensorInfo;
 class NEFill;
 class NEMaxUnpoolingLayerKernel;
 
-/** Function to perform MaxUnpooling. This function calls the following NEON kernels:
+/** Function to perform MaxUnpooling. This function calls the following Neon kernels:
  *
  * -# @ref NEFill
  * -# @ref NEMaxUnpoolingLayerKernel

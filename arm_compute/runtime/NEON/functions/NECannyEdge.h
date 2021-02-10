@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ class NEFillBorderKernel;
 class NEEdgeNonMaxSuppressionKernel;
 class NEEdgeTraceKernel;
 
-/** Basic function to execute canny edge on NEON. This function calls the following NEON kernels and functions:
+/** Basic function to execute canny edge on Neon. This function calls the following Neon kernels and functions:
  *
  *  -# @ref NEFillBorderKernel (if border_mode == REPLICATE or border_mode == CONSTANT)
  *  -# @ref NESobel3x3 (if gradient_size == 3) or

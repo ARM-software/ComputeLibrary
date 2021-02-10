@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ namespace arm_compute
 class ITensor;
 class ICPPKernel;
 
-/** Basic function to simulate a convolution layer. This function calls the following NEON kernels:
+/** Basic function to simulate a convolution layer. This function calls the following Neon kernels:
  * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
  * -# @ref NEWinogradLayerTransformInputKernel
  * -# @ref NEWinogradLayerTransformOutputKernel

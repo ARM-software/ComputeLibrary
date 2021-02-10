@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ class ICPPKernel;
 using INEKernel = ICPPKernel;
 namespace experimental
 {
-/** Basic interface for functions which have a single async NEON kernel */
+/** Basic interface for functions which have a single async Neon kernel */
 class INEOperator : public IOperator
 {
 public:

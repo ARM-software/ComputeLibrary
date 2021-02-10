@@ -49,7 +49,7 @@ inline float32x4_t mask_float_vector(const float32x4_t &in, const uint32x4_t &ma
 
 void fp32_neon_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename arm_compute::wrapper::traits::neon_bitvector_tag_t<float, wrapper::traits::BitWidth::W128>;
 
     constexpr int                                 window_step_x  = 4;

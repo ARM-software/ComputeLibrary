@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 
 namespace arm_compute
 {
-/** Common interface for all kernels implemented in NEON. */
+/** Common interface for all kernels implemented in Neon. */
 using INEKernel = ICPPKernel;
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_INEKERNEL_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,7 @@ protected:
     BorderSize    _border_size;     /**< Border size */
 };
 
-/** Template NEON kernel to perform Harris Score.
+/** Template Neon kernel to perform Harris Score.
  *  The implementation supports 3, 5, and 7 for the block_size
  */
 template <int32_t block_size>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ public:
     virtual ~IFunction() = default;
     /** Run the kernels contained in the function
      *
-     * For NEON kernels:
+     * For Neon kernels:
      * - Multi-threading is used for the kernels which are parallelisable.
      * - By default std::thread::hardware_concurrency() threads are used.
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel used to add the offset contribution after @ref NEGEMMLowpMatrixMultiplyKernel. The computation is performed in-place
+/** Neon kernel used to add the offset contribution after @ref NEGEMMLowpMatrixMultiplyKernel. The computation is performed in-place
  *
  * This kernel takes a final int32 accumulator value (the output of @ref NEGEMMLowpMatrixMultiplyKernel),
  * and adds to it the offset contribution of matrix A and matrix B in-place.

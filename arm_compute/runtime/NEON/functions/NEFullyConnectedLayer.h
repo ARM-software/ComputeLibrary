@@ -36,7 +36,7 @@
 
 namespace arm_compute
 {
-/** Basic function to reshape the weights of Fully Connected layer with NEON. This function calls the following kernels:
+/** Basic function to reshape the weights of Fully Connected layer with Neon. This function calls the following kernels:
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
@@ -111,7 +111,7 @@ private:
 };
 } // namespace weights_transformations
 
-/** Basic function to compute a Fully Connected layer on NEON. This function calls the following NEON kernels:
+/** Basic function to compute a Fully Connected layer on Neon. This function calls the following Neon kernels:
  *  -# @ref NEIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref NEFullyConnectedLayerReshapeWeights (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref NEGEMMMatrixMultiplyKernel or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)

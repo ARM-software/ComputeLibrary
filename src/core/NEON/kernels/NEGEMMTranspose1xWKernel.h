@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** NEON kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)
+/** Neon kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)
  *
  * Following an example of how the transposition1xW works when the input data is F32
  *

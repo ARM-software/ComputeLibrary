@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_NEKERNELS_H
 #define ARM_COMPUTE_NEKERNELS_H
 
-/* Header regrouping all the NEON kernels */
+/* Header regrouping all the Neon kernels */
 #include "src/core/NEON/kernels/NEAbsoluteDifferenceKernel.h"
 #include "src/core/NEON/kernels/NEAccumulateKernel.h"
 #include "src/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"

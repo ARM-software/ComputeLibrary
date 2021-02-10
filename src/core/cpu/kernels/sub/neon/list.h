@@ -47,7 +47,7 @@ DECLARE_SUB_KERNEL(sub_u8_u8_s16_neon);
 template <typename T>
 void sub_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     bool is_sat = policy == ConvertPolicy::SATURATE;

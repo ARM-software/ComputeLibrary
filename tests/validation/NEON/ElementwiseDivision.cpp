@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
-AbsoluteTolerance<int> tolerance_zero_s32(1); // Tolerance for S32 division
+AbsoluteTolerance<int>   tolerance_zero_s32(1); // Tolerance for S32 division
 
 /** Input data sets **/
 const auto ElementwiseDivisionS32Dataset = combine(combine(framework::dataset::make("DataType", DataType::S32),
@@ -134,7 +134,7 @@ TEST_SUITE_END() // S32
 TEST_SUITE_END() // Integer
 
 TEST_SUITE_END() // ElementwiseDivision
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

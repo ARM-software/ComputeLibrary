@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform HOG Orientation Binning */
+/** Neon kernel to perform HOG Orientation Binning */
 class NEHOGOrientationBinningKernel : public INEKernel
 {
 public:
@@ -91,7 +91,7 @@ private:
     float          _phase_scale;
 };
 
-/** NEON kernel to perform HOG block normalization */
+/** Neon kernel to perform HOG block normalization */
 class NEHOGBlockNormalizationKernel : public INEKernel
 {
 public:

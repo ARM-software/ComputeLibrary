@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,7 @@ TensorShape transposed_tensor_shape(const TensorShape &in)
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     if(output->total_size() != 0)
@@ -125,7 +125,7 @@ void transpose_8bit_elements(const ITensor *in, ITensor *out, const Window &wind
 
     Iterator output(out, window_out);
 
-    // Run the NEON path if and only if the input is not a row-vector
+    // Run the Neon path if and only if the input is not a row-vector
     if(in->info()->dimension(1) != 1)
     {
         Iterator input(in, window_in);
@@ -264,7 +264,7 @@ void transpose_16bit_elements(const ITensor *in, ITensor *out, const Window &win
 
     Iterator output(out, window_out);
 
-    // Run the NEON path if and only if the input is not a row-vector
+    // Run the Neon path if and only if the input is not a row-vector
     if(in->info()->dimension(1) != 1)
     {
         Iterator input(in, window_in);
@@ -377,7 +377,7 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
 
     Iterator output(out, window_out);
 
-    // Run the NEON path if and only if the input is not a row-vector
+    // Run the Neon path if and only if the input is not a row-vector
     if(in->info()->dimension(1) != 1)
     {
         Iterator input(in, window_in);

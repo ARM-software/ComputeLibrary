@@ -36,7 +36,7 @@ class ITensorInfo;
 class NESpaceToBatchLayerKernel;
 class NEFill;
 
-/** Basic function to spatial divide a tensor. This function calls the following NEON kernels/functions:
+/** Basic function to spatial divide a tensor. This function calls the following Neon kernels/functions:
  *
  *  -# @ref NEFill
  *  -# @ref NESpaceToBatchLayerKernel

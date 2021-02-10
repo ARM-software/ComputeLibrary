@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to transpose a matrix on NEON. This function calls the following NEON kernel:
+/** Basic function to transpose a matrix on Neon. This function calls the following Neon kernel:
  *
  *  -# @ref NETransposeKernel
  *

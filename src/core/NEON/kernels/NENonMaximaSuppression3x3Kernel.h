@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Interface to perform Non-Maxima suppression over a 3x3 window using NEON
+/** Interface to perform Non-Maxima suppression over a 3x3 window using Neon
  *
  * @note Used by @ref NEFastCorners and @ref NEHarrisCorners
  */
@@ -83,7 +83,7 @@ protected:
 };
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-/** NEON kernel to perform Non-Maxima suppression 3x3 with intermediate results in FP16 if the input data type is FP32
+/** Neon kernel to perform Non-Maxima suppression 3x3 with intermediate results in FP16 if the input data type is FP32
  */
 class NENonMaximaSuppression3x3FP16Kernel : public NENonMaximaSuppression3x3Kernel
 {
@@ -101,7 +101,7 @@ public:
     void configure(const ITensor *input, ITensor *output, bool border_undefined);
 };
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-/** NEON kernel to perform Non-Maxima suppression 3x3 with intermediate results in FP16 if the input data type is FP32 */
+/** Neon kernel to perform Non-Maxima suppression 3x3 with intermediate results in FP16 if the input data type is FP32 */
 using NENonMaximaSuppression3x3FP16Kernel = NENonMaximaSuppression3x3Kernel;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute

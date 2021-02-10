@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ class NEFFTDigitReverseKernel;
 class NEFFTRadixStageKernel;
 class NEFFTScaleKernel;
 
-/** Basic function to execute one dimensional FFT. This function calls the following NEON kernels:
+/** Basic function to execute one dimensional FFT. This function calls the following Neon kernels:
  *
  * -# @ref NEFFTDigitReverseKernel Performs digit reverse
  * -# @ref NEFFTRadixStageKernel   A list of FFT kernels depending on the radix decomposition

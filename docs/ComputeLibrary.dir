@@ -64,15 +64,15 @@
  */
 
 /** @dir src/core/NEON
- *  @brief NEON backend core: kernels and utilities.
+ *  @brief Neon backend core: kernels and utilities.
  */
 
 /** @file src/core/NEON/NEKernels.h
- *  @brief Includes all the NEON kernels at once
+ *  @brief Includes all the Neon kernels at once
  */
 
 /** @dir src/core/NEON/kernels
- *  @brief Folder containing all the NEON kernels
+ *  @brief Folder containing all the Neon kernels
  */
 
 /** @dir arm_compute/core/utils
@@ -100,7 +100,7 @@
  */
 
 /** @dir arm_compute/graph/backends/NEON
- *  @brief NEON specific operations
+ *  @brief Neon specific operations
  */
 
 /** @dir arm_compute/graph/detail
@@ -160,7 +160,7 @@
  */
 
 /** @file arm_compute/runtime/CPP/CPPScheduler.h
- *  @brief Basic pool of threads to execute CPP/NEON code on several cores in parallel.
+ *  @brief Basic pool of threads to execute CPP/Neon code on several cores in parallel.
  */
 
 /** @dir arm_compute/runtime/CPP/functions
@@ -188,15 +188,15 @@
  */
 
 /** @dir arm_compute/runtime/NEON
- *  @brief NEON backend runtime interface.
+ *  @brief Neon backend runtime interface.
  */
 
 /** @file arm_compute/runtime/NEON/NEFunctions.h
- *  @brief Includes all the NEON functions at once.
+ *  @brief Includes all the Neon functions at once.
  */
 
 /** @dir arm_compute/runtime/NEON/functions
- *  @brief Folder containing all the NEON functions.
+ *  @brief Folder containing all the Neon functions.
  */
 
 /** @dir arm_compute/runtime/OMP
@@ -223,8 +223,8 @@
  *  -# cl_*.cpp --> OpenCL examples
  *  -# gc_*.cpp --> GLES compute shaders examples
  *  -# graph_*.cpp --> Graph examples
- *  -# neoncl_*.cpp --> NEON / OpenCL interoperability examples
- *  -# neon_*.cpp --> NEON examples
+ *  -# neoncl_*.cpp --> Neon / OpenCL interoperability examples
+ *  -# neon_*.cpp --> Neon examples
  */
 
 /** @dir examples/gemm_tuner
@@ -252,11 +252,11 @@
  */
 
 /** @dir src/core/NEON/wrapper
- *  @brief NEON wrapper used to simplify code
+ *  @brief Neon wrapper used to simplify code
  */
 
 /** @file src/core/NEON/wrapper/traits.h
- *  @brief Traits defined on NEON vectors
+ *  @brief Traits defined on Neon vectors
  */
 
 /** @file src/core/NEON/wrapper/wrapper.h
@@ -264,7 +264,7 @@
  */
 
 /** @dir src/core/NEON/wrapper/intrinsics
- *  @brief NEON intrinsics wrappers
+ *  @brief Neon intrinsics wrappers
  */
 
 /** @dir src/core/NEON/wrapper/scalar
@@ -300,7 +300,7 @@
  */
 
 /** @dir tests/NEON
- *  @brief NEON accessors.
+ *  @brief Neon accessors.
  */
 
 /** @dir tests/benchmark
@@ -316,7 +316,7 @@
  */
 
 /** @dir tests/benchmark/NEON
- *  @brief NEON benchmarking tests.
+ *  @brief Neon benchmarking tests.
  */
 
 /** @dir tests/benchmark_examples
@@ -352,7 +352,7 @@
  */
 
 /** @dir tests/validation/NEON
- *  @brief NEON validation tests.
+ *  @brief Neon validation tests.
  */
 
 /** @dir tests/validation/reference

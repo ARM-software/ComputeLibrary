@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Basic function to simulate a convolution layer. This function calls one of the following NEON functions:
+/** Basic function to simulate a convolution layer. This function calls one of the following Neon functions:
  * -# @ref NEGEMMConvolutionLayer     (executed only in case GEMM is required for the operation)
  * -# @ref NEWinogradConvolutionLayer (executed only in case Winograd is required for the operation)
  * -# @ref NEDirectConvolutionLayer   (executed only in case Direct Convolution is required for the operation)

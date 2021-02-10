@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -167,7 +167,7 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QSYMM16)
 
 /** Tests will be targetting
- * - Comparison between NEON kernel and the exact same but scalar version of reference kernel
+ * - Comparison between Neon kernel and the exact same but scalar version of reference kernel
  * - Input shapes of 1D and 2D with the first dimension covers boundary values of 128-bit vector size (0~3 iterations)
  * - Weight and bias 1D shape that have same size as that of input shapes
  * - Quantization scale is greater and smaller than one.
@@ -179,7 +179,7 @@ TEST_SUITE(QSYMM16)
  * - The algorithm has been sensitive to quantization scale but it is hard to fully test
  *   the sensitivity due to aforementioned reason.
  * - Again, it is hard to fully test corner values due to the exact same algorithm of the
- *   reference kernel and the NEON kernel.
+ *   reference kernel and the Neon kernel.
  */
 
 constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
@@ -216,7 +216,7 @@ FIXTURE_DATA_TEST_CASE(RandomValue2D, NEQLSTMLayerNormalizationFixture<int16_t>,
 TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // QLSTMLayerNormalization
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 
 } // namespace validation
 } // namespace test

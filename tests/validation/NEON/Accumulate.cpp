@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,7 +113,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAccumulateSquaredFixture<uint8_t>, framework:
 TEST_SUITE_END() // U8
 TEST_SUITE_END() // AccumulateSquared
 
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

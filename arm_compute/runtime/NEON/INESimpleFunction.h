@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@ namespace arm_compute
 class ICPPKernel;
 class NEFillBorderKernel;
 using INEKernel = ICPPKernel;
-/** Basic interface for functions which have a single NEON kernel */
+/** Basic interface for functions which have a single Neon kernel */
 class INESimpleFunction : public IFunction
 {
 public:
