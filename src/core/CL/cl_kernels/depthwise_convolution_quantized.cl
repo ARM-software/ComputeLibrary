@@ -910,9 +910,7 @@ __kernel void dwc_3x3_reshaped_quantized8_nhwc(
     // A "-1" 32 bit signed variable converted to unsigned gives 4294967295
     z_coord = z * (int)CONV_STRIDE_Y - (int)CONV_PAD_TOP;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
-
+    offset  = select(y_offset + (int4)(z_coord * src_stride_z), (int4)max_offset, (int4)z_coord < 0 || (int4)z_coord >= SRC_DIM_2);
     VEC_TYPE(VEC_SIZE)
     values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -925,8 +923,7 @@ __kernel void dwc_3x3_reshaped_quantized8_nhwc(
     // Moreover z_coord cannot be out-of-bound for z = 1 so we do not need to clamp the offset
     z_coord = z * (int)CONV_STRIDE_Y - (int)CONV_PAD_TOP + DILATION_Y;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
+    offset  = select(y_offset + (int4)(z_coord * src_stride_z), (int4)max_offset, (int4)z_coord < 0 || (int4)z_coord >= SRC_DIM_2);
     VEC_TYPE(VEC_SIZE)
     values3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -938,8 +935,7 @@ __kernel void dwc_3x3_reshaped_quantized8_nhwc(
     // Offset can be out-of-bound so we need to check if it is greater than max_offset
     z_coord = z * (int)CONV_STRIDE_Y - (int)CONV_PAD_TOP + DILATION_Y * 2;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
+    offset  = select(y_offset + (int4)(z_coord * src_stride_z), (int4)max_offset, (int4)z_coord < 0 || (int4)z_coord >= SRC_DIM_2);
     VEC_TYPE(VEC_SIZE)
     values6 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -1156,9 +1152,7 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     // A "-1" 32 bit signed variable converted to unsigned gives 4294967295
     z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
-
+    offset  = select(y_offset + (int4)(z_coord * src_stride_z), (int4)max_offset, (int4)z_coord < 0 || (int4)z_coord >= SRC_DIM_2);
     VEC_TYPE(VEC_SIZE)
     values0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -1171,8 +1165,7 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     // z == 1
     z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 1;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
+    offset  = select(y_offset + (int4)(z_coord * src_stride_z), (int4)max_offset, (int4)z_coord < 0 || (int4)z_coord >= SRC_DIM_2);
     VEC_TYPE(VEC_SIZE)
     values4 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -1185,8 +1178,7 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     // z == 2
     z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 2;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
+    offset  = select(y_offset + (int4)(z_coord * src_stride_z), (int4)max_offset, (int4)z_coord < 0 || (int4)z_coord >= SRC_DIM_2);
     VEC_TYPE(VEC_SIZE)
     values8 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)
@@ -1199,8 +1191,7 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     // z == 3
     z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 3;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
-    offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, (int4)max_offset);
+    offset  = select(y_offset + (int4)(z_coord * src_stride_z), (int4)max_offset, (int4)z_coord < 0 || (int4)z_coord >= SRC_DIM_2);
     VEC_TYPE(VEC_SIZE)
     values12 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(src_addr + offset.s0));
     VEC_TYPE(VEC_SIZE)

@@ -438,8 +438,8 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
         //  |__________________|
         //  |     pad_bottom   |
         //  |******************|
-        const int max_offset = _input->info()->strides_in_bytes().z() * _input->info()->dimension(2) - (_input->info()->padding().bottom + _input->info()->padding().top) *
-                               _input->info()->strides_in_bytes().y();
+        const int max_offset = ((_input->info()->dimension(1) * _input->info()->dimension(2)) + (_input->info()->padding().bottom + _input->info()->padding().top) * (_input->info()->dimension(
+                                    2) - 1)) * _input->info()->strides_in_bytes().y();
         _kernel.setArg(idx, max_offset);
     }
 

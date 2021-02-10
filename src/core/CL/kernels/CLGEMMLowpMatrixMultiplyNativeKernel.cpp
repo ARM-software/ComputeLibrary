@@ -284,8 +284,8 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::run(const Window &window, cl::Command
 
     if(_input1->info()->num_dimensions() < 3)
     {
-        // The stride_w for matrix B must be the same as stride_z if we do not slice
-        ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != _input1->info()->strides_in_bytes()[2]);
+        // The stride_z for matrix B must be zero if we do not slice
+        ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != 0);
     }
 
     Window slice          = window.first_slice_window_3D();
