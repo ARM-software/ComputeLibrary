@@ -99,6 +99,39 @@ void CLGEMMReshapeRHSMatrixKernelManaged::configure(const CLCompileContext &comp
 
 namespace
 {
+inline bool validate_gemm_kernel(CLGEMMKernelType kernel_type)
+{
+    switch(kernel_type)
+    {
+        case CLGEMMKernelType::NATIVE_V1:
+        case CLGEMMKernelType::RESHAPED_ONLY_RHS:
+        case CLGEMMKernelType::RESHAPED_V1:
+        case CLGEMMKernelType::RESHAPED:
+        {
+            return true;
+        }
+        default:
+        {
+            return false;
+        }
+    }
+}
+//Automatically select between mlgo (prioritized) and default heuristics for gemm kernel type
+inline CLGEMMKernelType auto_select_gemm_kernel(auto_heuristics::CommonQuery query, bool reshape_b_only_on_first_run)
+{
+    auto gemm_kernel = auto_heuristics::select_mlgo_gemm_kernel(query, reshape_b_only_on_first_run);
+    if(bool(gemm_kernel))
+    {
+        if(validate_gemm_kernel(gemm_kernel.gemm_type))
+        {
+            ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use gemm kernel from mlgo heuristics: %s.", to_string(gemm_kernel.gemm_type).c_str());
+            return gemm_kernel.gemm_type;
+        }
+    }
+    gemm_kernel = auto_heuristics::select_default_gemm_kernel(query, reshape_b_only_on_first_run);
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use gemm kernel from default heuristics: %s.", to_string(gemm_kernel.gemm_type).c_str());
+    return gemm_kernel.gemm_type;
+}
 // Validate lhs_info and rhs_info for reshaped only rhs kernel
 inline bool validate_lhs_rhs_info_reshaped_only_rhs(const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c,
                                                     const ITensorInfo *output, GEMMKernelInfo gemm_kernel_info)
