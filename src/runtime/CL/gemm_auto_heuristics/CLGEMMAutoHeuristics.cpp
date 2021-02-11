@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
 #include "src/core/CL/ICLGEMMKernelConfiguration.h"
-#include "src/core/CL/gemm/CLGEMMHelpers.cpp"
+#include "src/core/CL/gemm/CLGEMMHelpers.h"
 #include "src/core/CL/gemm/native/CLGEMMNativeKernelConfiguration.h"
 #include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfiguration.h"
 #include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h"
