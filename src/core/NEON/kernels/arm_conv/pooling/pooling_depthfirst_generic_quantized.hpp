@@ -191,6 +191,13 @@ class PoolingDepthfirstGenericQuantized : public PoolingCommon<typename strategy
         const auto pad_top = static_cast<unsigned int>(-std::min(start_in_i, 0));
         const auto pad_bottom = static_cast<unsigned int>(-std::min(static_cast<int>(height) - end_in_i, 0));
 
+        // Compute the number of pooling window rows which are contained in
+        // either the valid region of the input tensor, or the padding.
+        const auto padded_bottom = std::min<unsigned int>(
+          start_in_i + m_args.pool_window.rows, height + padding.bottom
+        );
+        const auto n_total_rows = padded_bottom - start_in_i;
+
         for (int out_j = 0, start_in_j = -padding.left;
              out_j < static_cast<int>(output_width);
              out_j++, start_in_j += m_args.pool_stride.cols)
@@ -200,6 +207,13 @@ class PoolingDepthfirstGenericQuantized : public PoolingCommon<typename strategy
           // Compute left/right padding
           const auto pad_left = static_cast<unsigned int>(-std::min(start_in_j, 0));
           const auto pad_right = static_cast<unsigned int>(-std::min(static_cast<int>(width) - end_in_j, 0));
+
+          // Compute the number of pooling window columns which are contained
+          // in either the valid region of the input tensor, or the padding.
+          const auto padded_right = std::min<unsigned int>(
+            start_in_j + m_args.pool_window.cols, width + padding.right
+          );
+          const auto n_total_cols = padded_right - start_in_j;
 
           // Construct the input pointer array - fill in all valid points
           // contiguously.
@@ -221,7 +235,8 @@ class PoolingDepthfirstGenericQuantized : public PoolingCommon<typename strategy
           const auto valid_rows = input_rows() - pad_top - pad_bottom;
           const auto valid_cols = input_cols() - pad_left - pad_right;
           const auto valid_cells = valid_rows * valid_cols;
-          const auto window_cells = m_args.exclude_padding ? valid_cells : input_rows() * input_cols();
+          const auto cells_in_range = n_total_rows * n_total_cols;
+          const auto window_cells = m_args.exclude_padding ? valid_cells : cells_in_range;
 
           // Get the output pointer for this call
           TOutput *outptr = outptr_batch + out_i * ld_output_row + out_j * ld_output_col;

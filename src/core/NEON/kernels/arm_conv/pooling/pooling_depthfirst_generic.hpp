@@ -191,6 +191,13 @@ class PoolingDepthfirstGeneric : public PoolingCommon<typename strategy::operand
         const auto pad_bottom = static_cast<unsigned int>(std::max<int>(end_in_i - height, 0));
         const auto valid_rows = input_rows() - pad_top - pad_bottom;
 
+        // Compute the number of pooling window rows which are contained in
+        // either the valid region of the input tensor, or the padding.
+        const auto padded_bottom = std::min<unsigned int>(
+          start_in_i + m_args.pool_window.rows, height + padding.bottom
+        );
+        const auto n_total_rows = padded_bottom - start_in_i;
+
         auto outptr_col = outptr_row;
         auto inptr_row = inptr_batch + (start_in_i + pad_top) * ld_input_row;
 
@@ -204,6 +211,13 @@ class PoolingDepthfirstGeneric : public PoolingCommon<typename strategy::operand
           const auto pad_left = static_cast<unsigned int>(std::max(0 - start_in_j, 0));
           const auto pad_right = static_cast<unsigned int>(std::max<int>(0, end_in_j - width));
           const auto valid_cols = input_cols() - pad_left - pad_right;
+
+          // Compute the number of pooling window columns which are contained
+          // in either the valid region of the input tensor, or the padding.
+          const auto padded_right = std::min<unsigned int>(
+            start_in_j + m_args.pool_window.cols, width + padding.right
+          );
+          const auto n_total_cols = padded_right - start_in_j;
 
           // Construct the input pointer array - fill in all valid points
           // contiguously.
@@ -222,7 +236,8 @@ class PoolingDepthfirstGeneric : public PoolingCommon<typename strategy::operand
 
           // Compute the number of valid cells
           const auto valid_cells = valid_rows * valid_cols;
-          const auto window_cells = m_args.exclude_padding ? valid_cells : input_rows() * input_cols();
+          const auto cells_in_range = n_total_rows * n_total_cols;
+          const auto window_cells = m_args.exclude_padding ? valid_cells : cells_in_range;
 
           // Get the output pointer for this call
           TOutput *outptr = outptr_col;

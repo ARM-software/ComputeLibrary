@@ -356,7 +356,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
         dst_shape.set(1, pooled_h);
         TensorInfo dst_info(src->clone()->set_tensor_shape(dst_shape));
         win = calculate_max_window(dst_info, Steps(num_elems_processed_per_iteration));
-        AccessWindowStatic     src_access(src, -pool_pad_left, -pool_pad_top, src_width + border_size.right, src_height + border_size.bottom);
+        AccessWindowStatic     src_access(src, -pool_pad_left, -pool_pad_top, ceil_to_multiple(src_width + border_size.right, pool_size_x), src_height + border_size.bottom);
         AccessWindowHorizontal dst_access(dst, 0, num_elems_horizontal_window);
         if(indices)
         {
@@ -368,6 +368,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
             window_changed = update_window_and_padding(win, src_access, dst_access);
         }
         dst_access.set_valid_region(win, ValidRegion(Coordinates(), dst->tensor_shape()));
+
+        border_size = src->padding();
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -529,7 +531,7 @@ void CpuPoolingKernel::run_op(ITensorPack &tensors, const Window &window, const 
         window_src.set(Window::DimZ, Window::Dimension(0, src->info()->dimension(2), pool_stride_y));
     }
 
-    const auto *uk = get_implementation(src->info()->data_type(), src->info()->data_layout(), _pool_stride_x, _pool_size);
+    const auto *uk = get_implementation(src->info()->data_type(), _data_layout, _pool_stride_x, _pool_size);
     ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     uk->ukernel(src, dst, indices, _pool_info, window_src, window);
