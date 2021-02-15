@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,7 +117,7 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<IFallback> _arm_gemm;        /** Interface for the arm_gemm fallback */
+    std::unique_ptr<IFallback> _arm_gemm;        /**< Interface for the arm_gemm fallback */
     MemoryGroup                _memory_group;    /**< Function memory group */
     IWeightsManager           *_weights_manager; /**< Pointer to the weights manager */
 };

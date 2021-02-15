@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,8 +109,8 @@ NEGEMMConvolutionLayer::~NEGEMMConvolutionLayer() = default;
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager),
-      _col2im_kernel(), _reshape_layer(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _skip_im2col(false),
-      _skip_col2im(false), _is_quantized(false), _is_prepared(false)
+      _col2im_kernel(), _reshape_layer(), _original_weights(nullptr), _original_output(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _gemm_output_3d(), _tmp_output(),
+      _data_layout(DataLayout::NCHW), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _is_prepared(false)
 {
 }
 
@@ -281,6 +281,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
     _is_prepared      = weights_info.retain_internal_weights();
     _original_weights = weights;
+    _original_output  = output;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
     _data_layout      = data_layout;
     _skip_im2col      = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
@@ -368,6 +369,15 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         // Update GEMM output
         gemm_output_to_use = &_gemm_output;
     }
+    else
+    {
+        _gemm_output.allocator()->init(*output->info());
+        _memory_group.manage(&_gemm_output);
+        _gemm_output_3d.allocator()->init(*output->info());
+
+        // Update GEMM output
+        gemm_output_to_use = &_gemm_output_3d;
+    }
 
     // Configure GEMM
     // In case we need to skip col2im, GEMM3D (gemm_3d_depth != 0) must be called in order to avoid reshaping the output matrix
@@ -393,16 +403,18 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
             _reshape_layer.configure(gemm_output_to_use, output);
         }
     }
+    else
+    {
+        // Configure reshape layer
+        _reshape_layer.configure(gemm_output_to_use, output);
+    }
 
     if(_is_quantized && !_skip_col2im)
     {
         _tmp_output.allocator()->allocate();
     }
 
-    if(!_skip_col2im || _is_quantized)
-    {
-        _gemm_output.allocator()->allocate();
-    }
+    _gemm_output.allocator()->allocate();
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(idx_width) != conv_w) || (output->info()->dimension(idx_height) != conv_h),
                              "Output shape does not match the expected one");
@@ -554,12 +566,18 @@ void NEGEMMConvolutionLayer::run()
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
+    bool out_has_padding = _skip_col2im && (_original_output->info()->padding().bottom != 0 || _original_output->info()->padding().top != 0);
+
     if(!_skip_im2col)
     {
         // Run input reshaping
         unsigned int y_dim = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
         NEScheduler::get().schedule(_im2col_kernel.get(), y_dim);
     }
+
+    // Handle the case where output has top/bottom padding
+    const ITensor *out_to_use = out_has_padding ? &_gemm_output : _original_output;
+    _gemm_output_3d.allocator()->import_memory(out_to_use->buffer());
 
     // Runs NEGEMM or NEGEMMLowpMatrixMultiplyCore functions
     if(_is_quantized)
@@ -584,6 +602,10 @@ void NEGEMMConvolutionLayer::run()
         {
             _reshape_layer.run();
         }
+    }
+    else if(out_has_padding)
+    {
+        _reshape_layer.run();
     }
 }
 

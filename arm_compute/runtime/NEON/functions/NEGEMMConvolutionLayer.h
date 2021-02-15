@@ -275,10 +275,12 @@ private:
     NEReshapeLayer                                                     _reshape_layer;
 
     const ITensor *_original_weights;
+    const ITensor *_original_output;
 
     Tensor _im2col_output;
     Tensor _weights_reshaped;
     Tensor _gemm_output;
+    Tensor _gemm_output_3d;
     Tensor _tmp_output;
 
     DataLayout _data_layout;
