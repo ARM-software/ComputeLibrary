@@ -34,7 +34,6 @@ class ITensor;
 
 /** Interface to perform Non-Maxima suppression over a 3x3 window using Neon
  *
- * @note Used by @ref NEFastCorners and @ref NEHarrisCorners
  */
 class NENonMaximaSuppression3x3Kernel : public INEKernel
 {

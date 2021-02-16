@@ -86,6 +86,50 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v21.05 Public major release
+ - Removed computer vision support from Neon backend
+ - Removed the following functions:
+   - NEAbsoluteDifference
+   - NEAccumulate
+   - NEBox3x3
+   - NECannyEdge
+   - NEChannelCombine
+   - NEChannelExtract
+   - NEColorConvert
+   - NEDerivative
+   - NEDilate
+   - NEEqualizeHistogram
+   - NEErode
+   - NEFastCorners
+   - NEGaussian3x3
+   - NEGaussian5x5
+   - NEGaussianPyramid
+   - NEHOGDescriptor
+   - NEHOGDetector
+   - NEHOGGradient
+   - NEHOGMultiDetection
+   - NEHarrisCorners
+   - NEHistogram
+   - NEIntegralImage
+   - NELaplacianPyramid
+   - NELaplacianReconstruct
+   - NEMagnitude
+   - NEMeanStdDev
+   - NEMedian3x3
+   - NEMinMaxLocation
+   - NENonLinearFilter
+   - NEOpticalFlow
+   - NEPhase
+   - NERemap
+   - NEScharr3x3
+   - NESobel3x3
+   - NESobel5x5
+   - NESobel7x7
+   - NETableLookup
+   - NEThreshold
+   - NEWarpAffine
+   - NEWarpPerspective
+ 
 v21.02 Public major release
  - Various bug fixes.
  - Various optimisations.
@@ -169,7 +213,7 @@ v20.11 Public major release
  - Removed padding from Neon kernels:
    - @ref NEComplexPixelWiseMultiplicationKernel
    - @ref NENonMaximaSuppression3x3Kernel
-   - @ref NERemapKernel
+   - NERemapKernel
    - @ref NEGEMMInterleave4x4Kernel
    - @ref NEDirectConvolutionLayerKernel
    - @ref NEScaleKernel
@@ -462,7 +506,7 @@ v20.08 Public major release
  - Removed padding from:
    - @ref NEPixelWiseMultiplicationKernel
    - NEHeightConcatenateLayerKernel
-   - @ref NEThresholdKernel
+   - NEThresholdKernel
    - NEBatchConcatenateLayerKernel
    - @ref NETransposeKernel
    - @ref NEBatchNormalizationLayerKernel
@@ -490,7 +534,7 @@ v20.08 Public major release
    - NEGEMMLowpQuantizeDownInt32ToUint8Scale
    - NEGEMMMatrixAccumulateBiasesKernel
  - Deprecated functions / interfaces:
-   - Non-descriptor based interfaces for @ref NEThreshold, @ref CLThreshold
+   - Non-descriptor based interfaces for NEThreshold, @ref CLThreshold
    - Non-descriptor based interfaces for @ref NEScale, @ref CLScale and @ref GCScale
    - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer :
       The default "axis" value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer is changed from 1 to 0.
@@ -1270,13 +1314,13 @@ v17.04 Public bug fixes release
  -  @ref CLGaussianPyramidHorKernel
  -  @ref CLGaussianPyramidVertKernel
  -  @ref CLGradientKernel
- -  @ref NEChannelCombineKernel
+ -  NEChannelCombineKernel
  -  @ref NEFillArrayKernel
- -  @ref NEGaussianPyramidHorKernel
- -  @ref NEGaussianPyramidVertKernel
+ -  NEGaussianPyramidHorKernel
+ -  NEGaussianPyramidVertKernel
  -  NEHarrisScoreFP16Kernel
- -  @ref NEHarrisScoreKernel
- -  @ref NEHOGDetectorKernel
+ -  NEHarrisScoreKernel
+ -  NEHOGDetectorKernel
  -  NELogits1DMaxKernel
  -  NELogits1DShiftExpSumKernel
  -  NELogits1DNormKernel
@@ -1321,8 +1365,8 @@ v17.02.1 Sources preview
    - @ref CLMinMaxKernel, @ref CLMinMaxLocationKernel / @ref CLMinMaxLocation
    - @ref CLNonLinearFilterKernel / @ref CLNonLinearFilter
  - New Neon FP16 kernels (Requires armv8.2 CPU)
-   - @ref NEAccumulateWeightedFP16Kernel
-   - @ref NEBox3x3FP16Kernel
+   - NEAccumulateWeightedFP16Kernel
+   - NEBox3x3FP16Kernel
    - @ref NENonMaximaSuppression3x3FP16Kernel
 
 v17.02 Sources preview
@@ -1333,8 +1377,8 @@ v17.02 Sources preview
    - @ref CLFastCornersKernel / @ref CLFastCorners
    - @ref CLMeanStdDevKernel / @ref CLMeanStdDev
  - New Neon kernels / functions:
-   - HOG / SVM: @ref NEHOGOrientationBinningKernel, @ref NEHOGBlockNormalizationKernel, @ref NEHOGDetectorKernel, NEHOGNonMaximaSuppressionKernel / @ref NEHOGDescriptor, @ref NEHOGDetector, @ref NEHOGGradient, @ref NEHOGMultiDetection
-   - @ref NENonLinearFilterKernel / @ref NENonLinearFilter
+   - HOG / SVM: NEHOGOrientationBinningKernel, NEHOGBlockNormalizationKernel, NEHOGDetectorKernel, NEHOGNonMaximaSuppressionKernel / NEHOGDescriptor, NEHOGDetector, NEHOGGradient, NEHOGMultiDetection
+   - NENonLinearFilterKernel / NENonLinearFilter
  - Introduced a CLScheduler to manage the default context and command queue used by the runtime library and create synchronisation events.
  - Switched all the kernels / functions to use tensors instead of images.
  - Updated documentation to include instructions to build the library from sources.

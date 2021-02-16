@@ -185,13 +185,13 @@ This is a very basic implementation which was originally used in the Neon runtim
 
 @sa CPPScheduler
 
-@note Some kernels like for example @ref NEHistogramKernel need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and a unique thread_id between 0 and num_threads must be assigned to the @ref ThreadInfo object passed to the ```run``` function.
+@note Some kernels need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and a unique thread_id between 0 and num_threads must be assigned to the @ref ThreadInfo object passed to the ```run``` function.
 
 @subsection S4_2_4 Functions
 
 Functions will automatically allocate the temporary buffers mentioned above, and will automatically multi-thread kernels' executions using the very basic scheduler described in the previous section.
 
-Simple functions only call a single kernel (e.g @ref NEConvolution3x3), while more complex ones consist of several kernels pipelined together (e.g @ref NEGaussianPyramid, @ref NEHarrisCorners). Check their documentation to find out which kernels are used by each function.
+Simple functions only call a single kernel (e.g @ref NEConvolution3x3), while more complex ones consist of several kernels pipelined together (e.g @ref NEFullyConnectedLayer ). Check their documentation to find out which kernels are used by each function.
 
 @code{.cpp}
 //Create a function object:
@@ -230,11 +230,7 @@ For example:
 
 @subsection S4_4_2_cl_neon OpenCL / Neon interoperability
 
-You can mix OpenCL and Neon kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects, for example:
-
-@snippet neoncl_scale_median_gaussian.cpp Neon / OpenCL Interop
-
-@sa main_neoncl_scale_median_gaussian
+You can mix OpenCL and Neon kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects.
 
 @section S4_5_algorithms Algorithms
 
