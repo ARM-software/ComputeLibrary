@@ -1,0 +1,47 @@
+# Library builds
+build/
+
+# Cscope/Ctags files
+*cscope*
+
+# Text files
+*.txt
+*.xml
+*.embed
+
+# Generated Android bp file
+Generated_Android.bp
+
+# Vim swap files
+*.swp
+
+# Logs
+*.log
+
+### C++ ###
+# Object files
+*.o
+
+# Dynamic libraries
+*.so
+
+# Static libraries
+*.a
+
+# Executable binaries
+*.out
+
+### Python ###
+# Byte-compiled files
+*.py[cod]
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
