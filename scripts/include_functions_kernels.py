@@ -11,16 +11,14 @@ Target = collections.namedtuple('Target', 'name prefix basepath')
 core_targets = [
     Target("NEON", "NE", src_path),             # Neon kernels are under src
     Target("CL", "CL", src_path),               # CL kernels are under src
-    Target("CPP", "CPP", armcv_path),           # CPP kernels are under arm_compute
-    Target("GLES_COMPUTE", "GC", armcv_path)    # GLES kernels are under arm_compute
+    Target("CPP", "CPP", armcv_path)            # CPP kernels are under arm_compute
     ]
 
 # All functions are under arm_compute
 runtime_targets = [
     Target("NEON", "NE", armcv_path),
     Target("CL", "CL", armcv_path),
-    Target("CPP", "CPP", armcv_path),
-    Target("GLES_COMPUTE", "GC", armcv_path)
+    Target("CPP", "CPP", armcv_path)
     ]
 
 core_path = "/core/"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1821,10 +1821,10 @@ private:
 
 /** GEMM reshape information class. This class stores the necessary information about matrix A and matrix B reshape.
  *
- * The matrix A can only be reshaped through @ref CLGEMMReshapeLHSMatrixKernel or  @ref NEGEMMInterleave4x4Kernel or  @ref GCGEMMInterleave4x4Kernel
+ * The matrix A can only be reshaped through @ref CLGEMMReshapeLHSMatrixKernel or  @ref NEGEMMInterleave4x4Kernel
  * Note: Optionally just for @ref CLGEMMReshapeLHSMatrixKernel is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block
  *
- * The matrix B can only be reshaped through @ref CLGEMMReshapeRHSMatrixKernel or  @ref NEGEMMTranspose1xWKernel or  @ref GCGEMMTranspose1xWKernel
+ * The matrix B can only be reshaped through @ref CLGEMMReshapeRHSMatrixKernel or  @ref NEGEMMTranspose1xWKernel
  * Note: Optionally just for @ref CLGEMMReshapeRHSMatrixKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
  *
  */

@@ -45,9 +45,6 @@
 #include "arm_compute/runtime/CL/CLDistribution1D.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #endif /* ARM_COMPUTE_CL */
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
-#endif /* ARM_COMPUTE_GC */
 
 #include <cstdlib>
 #include <cstring>
@@ -268,27 +265,6 @@ inline void unmap(CLDistribution1D &distribution)
     distribution.unmap();
 }
 #endif /* ARM_COMPUTE_CL */
-
-#ifdef ARM_COMPUTE_GC
-/** Maps a tensor if needed
- *
- * @param[in] tensor   Tensor to be mapped
- * @param[in] blocking Specified if map is blocking or not
- */
-inline void map(GCTensor &tensor, bool blocking)
-{
-    tensor.map(blocking);
-}
-
-/** Unmaps a tensor if needed
- *
- * @param tensor  Tensor to be unmapped
- */
-inline void unmap(GCTensor &tensor)
-{
-    tensor.unmap();
-}
-#endif /* ARM_COMPUTE_GC */
 
 /** Specialized class to generate random non-zero FP16 values.
  *  uniform_real_distribution<half> generates values that get rounded off to zero, causing

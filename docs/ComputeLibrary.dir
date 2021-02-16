@@ -43,26 +43,6 @@
  *  @brief All experimental interfaces
  */
 
-/** @dir arm_compute/core/GLES_COMPUTE
- *  @brief OpenGLES backend core: kernels and utilities.
- */
-
-/** @file arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h
- *  @brief Manages all the GLES kernels compilation and caching, provides accessors for the GLES Context.
- */
-
-/** @file arm_compute/core/GLES_COMPUTE/GCKernels.h
- *  @brief Includes all the GLES kernels at once
- */
-
-/** @file arm_compute/core/GLES_COMPUTE/OpenGLES.h
- *  @brief Wrapper to configure the Khronos EGL and OpenGL ES C header
- */
-
-/** @dir arm_compute/core/GLES_COMPUTE/kernels
- *  @brief Folder containing all the GLES kernels
- */
-
 /** @dir src/core/NEON
  *  @brief Neon backend core: kernels and utilities.
  */
@@ -93,10 +73,6 @@
 
 /** @dir arm_compute/graph/backends/CL
  *  @brief OpenCL specific operations
- */
-
-/** @dir arm_compute/graph/backends/GLES
- *  @brief OpenGLES specific operations
  */
 
 /** @dir arm_compute/graph/backends/NEON
@@ -171,22 +147,6 @@
  *  @brief Experimental runtime interface.
  */
 
-/** @dir arm_compute/runtime/GLES_COMPUTE
- *  @brief OpenGLES backend runtime interface.
- */
-
-/** @file arm_compute/runtime/GLES_COMPUTE/GCFunctions.h
- *  @brief Includes all the OpenGLES functions at once
- */
-
-/** @file arm_compute/runtime/GLES_COMPUTE/GCScheduler.h
- *  @brief Interface to enqueue GLES kernels and get/set the GLES CommandQueue.
- */
-
-/** @dir arm_compute/runtime/GLES_COMPUTE/functions
- *  @brief Folder containing all the GLES functions.
- */
-
 /** @dir arm_compute/runtime/NEON
  *  @brief Neon backend runtime interface.
  */
@@ -221,7 +181,6 @@
  *  @details Examples have the following structure:
  *
  *  -# cl_*.cpp --> OpenCL examples
- *  -# gc_*.cpp --> GLES compute shaders examples
  *  -# graph_*.cpp --> Graph examples
  *  -# neoncl_*.cpp --> Neon / OpenCL interoperability examples
  *  -# neon_*.cpp --> Neon examples
@@ -295,10 +254,6 @@
  *  @brief OpenCL accessors.
  */
 
-/** @dir tests/GLES_COMPUTE
- *  @brief GLES accessors.
- */
-
 /** @dir tests/NEON
  *  @brief Neon accessors.
  */
@@ -309,10 +264,6 @@
 
 /** @dir tests/benchmark/CL
  *  @brief OpenCL benchmarking tests.
- */
-
-/** @dir tests/benchmark/GLES_COMPUTE
- *  @brief GLES benchmarking tests.
  */
 
 /** @dir tests/benchmark/NEON
@@ -345,10 +296,6 @@
 
 /** @dir tests/validation/CPP
  *  @brief C++ validation tests.
- */
-
-/** @dir tests/validation/GLES_COMPUTE
- *  @brief GLES validation tests.
  */
 
 /** @dir tests/validation/NEON

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,10 +30,6 @@
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #endif /* ARM_COMPUTE_CL */
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/runtime/GLES_COMPUTE/GCRuntimeContext.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
-#endif /* ARM_COMPUTE_GC */
 
 #include <memory>
 
@@ -60,14 +56,6 @@ struct ContextType<CLTensor>
     using type = CLRuntimeContext;
 };
 #endif /* ARM_COMPUTE_CL */
-
-#ifdef ARM_COMPUTE_GC
-template <>
-struct ContextType<GCTensor>
-{
-    using type = GCRuntimeContext;
-};
-#endif /* ARM_COMPUTE_GC */
 
 /** Class that contains all the global parameters used by the tests */
 class ParametersLibrary final

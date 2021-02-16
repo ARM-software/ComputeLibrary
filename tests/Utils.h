@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,11 +39,6 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
-
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
-#endif /* ARM_COMPUTE_GC */
 
 #include <cmath>
 #include <cstddef>
@@ -806,17 +801,7 @@ inline void sync_if_necessary()
 template <typename TensorType>
 inline void sync_tensor_if_necessary(TensorType &tensor)
 {
-#ifdef ARM_COMPUTE_GC
-    if(opengles31_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::GCTensor>::value)
-    {
-        // Force sync the tensor by calling map and unmap.
-        IGCTensor &t = dynamic_cast<IGCTensor &>(tensor);
-        t.map();
-        t.unmap();
-    }
-#else  /* ARM_COMPUTE_GC */
     ARM_COMPUTE_UNUSED(tensor);
-#endif /* ARM_COMPUTE_GC */
 }
 } // namespace test
 } // namespace arm_compute

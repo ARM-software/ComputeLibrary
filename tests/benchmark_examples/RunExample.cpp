@@ -38,9 +38,6 @@
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#endif /* ARM_COMPUTE_GC */
 
 #include <libgen.h>
 

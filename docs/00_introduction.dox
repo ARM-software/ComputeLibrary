@@ -30,7 +30,7 @@ namespace arm_compute
 The Computer Vision and Machine Learning library is a set of functions optimised for both Arm CPUs and GPUs using SIMD technologies.
 
 Several builds of the library are available using various configurations:
- - OS: Android or Linux.
+ - OS: Linux, Android, macOS or bare metal.
  - Architecture: armv7a (32bit) or arm64-v8a (64bit).
  - Technology: Neon / OpenCL / Neon and OpenCL.
  - Debug / Asserts / Release: Use a build with asserts enabled to debug your application and enable extra validation. Once you are sure your application works as expected you can switch to a release build of the library for maximum performance.
@@ -62,7 +62,6 @@ This archive contains:
  - The arm_compute header and source files
  - The latest Khronos OpenCL 1.2 C headers from the <a href="https://www.khronos.org/registry/cl/">Khronos OpenCL registry</a>
  - The latest Khronos cl2.hpp from the <a href="https://www.khronos.org/registry/cl/">Khronos OpenCL registry</a> (API version 2.1 when this document was written)
- - The latest Khronos OpenGL ES 3.1 C headers from the <a href="https://www.khronos.org/registry/gles/">Khronos OpenGL ES registry</a>
  - The latest Khronos EGL 1.5 C headers from the <a href="https://www.khronos.org/registry/gles/">Khronos EGL registry</a>
  - The sources for a stub version of libOpenCL.so, libGLESv1_CM.so, libGLESv2.so and libEGL.so to help you build your application.
  - An examples folder containing a few examples to compile and link against the library.
@@ -129,7 +128,8 @@ v21.05 Public major release
    - NEThreshold
    - NEWarpAffine
    - NEWarpPerspective
- 
+ - Remove all GLES kernels / functions / tests / examples
+
 v21.02 Public major release
  - Various bug fixes.
  - Various optimisations.
@@ -200,7 +200,7 @@ v20.11 Public major release
       - @ref NELogSoftmaxLayer
       - @ref CLSoftmaxLayer
       - @ref CLLogSoftmaxLayer
-      - @ref GCSoftmaxLayer
+      - GCSoftmaxLayer
  - New OpenCL kernels / functions:
    - @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
    - @ref CLLogicalNot
@@ -535,9 +535,9 @@ v20.08 Public major release
    - NEGEMMMatrixAccumulateBiasesKernel
  - Deprecated functions / interfaces:
    - Non-descriptor based interfaces for NEThreshold, @ref CLThreshold
-   - Non-descriptor based interfaces for @ref NEScale, @ref CLScale and @ref GCScale
-   - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer :
-      The default "axis" value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and @ref GCSoftmaxLayer is changed from 1 to 0.
+   - Non-descriptor based interfaces for @ref NEScale, @ref CLScale and GCScale
+   - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and GCSoftmaxLayer :
+      The default "axis" value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and GCSoftmaxLayer is changed from 1 to 0.
       Only axis 0 is supported.
       The default "axis" value for @ref NESoftmaxLayer, @ref NELogSoftmaxLayer is changed from 1 to 0.
       Only axis 0 is supported.
@@ -845,7 +845,7 @@ v19.05 Public major release
     - @ref CLFFTConvolutionLayer
     - @ref CLGEMMDeconvolutionLayer
  - New OpenGLES kernels / functions:
-    - @ref GCConcatenateLayer
+    - GCConcatenateLayer
  - Deprecated functions/interfaces
     - GCDepthConcatenateLayer
     - NEWidthConcatenateLayer
@@ -1151,7 +1151,7 @@ v18.02 Public major release
     - @ref NEWinogradLayerTransformWeightsKernel / NEWinogradLayer
     - Renamed NEWinogradLayerKernel into NEWinogradLayerBatchedGEMMKernel
  - New GLES kernels / functions:
-    - @ref GCTensorShiftKernel / @ref GCTensorShift
+    - GCTensorShiftKernel / GCTensorShift
 
 v18.01 Public maintenance release
  - Various bug fixes
@@ -1159,16 +1159,16 @@ v18.01 Public maintenance release
  - Added @ref CLDeconvolutionLayerUpsampleKernel / @ref CLDeconvolutionLayer @ref CLDeconvolutionLayerUpsample
  - Added CLPermuteKernel / @ref CLPermute
  - Added method to clean the programs cache in the CL Kernel library.
- - Added @ref GCArithmeticAdditionKernel / @ref GCArithmeticAddition
- - Added @ref GCDepthwiseConvolutionLayer3x3Kernel / @ref GCDepthwiseConvolutionLayer3x3
- - Added @ref GCNormalizePlanarYUVLayerKernel / @ref GCNormalizePlanarYUVLayer
- - Added @ref GCScaleKernel / @ref GCScale
- - Added @ref GCWeightsReshapeKernel / @ref GCConvolutionLayer
+ - Added GCArithmeticAdditionKernel / GCArithmeticAddition
+ - Added GCDepthwiseConvolutionLayer3x3Kernel / GCDepthwiseConvolutionLayer3x3
+ - Added GCNormalizePlanarYUVLayerKernel / GCNormalizePlanarYUVLayer
+ - Added GCScaleKernel / GCScale
+ - Added GCWeightsReshapeKernel / GCConvolutionLayer
  - Added FP16 support to the following GLES compute kernels:
-    - @ref GCCol2ImKernel
-    - @ref GCGEMMInterleave4x4Kernel
-    - @ref GCGEMMTranspose1xWKernel
-    - @ref GCIm2ColKernel
+    - GCCol2ImKernel
+    - GCGEMMInterleave4x4Kernel
+    - GCGEMMTranspose1xWKernel
+    - GCIm2ColKernel
  - Refactored Neon Winograd (NEWinogradLayerKernel)
  - Added @ref NEDirectConvolutionLayerOutputStageKernel
  - Added QASYMM8 support to the following Neon kernels:
@@ -1195,23 +1195,23 @@ v17.12 Public major release
  - Added new kernels / functions for GLES compute
 
  - New OpenGL ES kernels / functions
-    - @ref GCAbsoluteDifferenceKernel / @ref GCAbsoluteDifference
-    - @ref GCActivationLayerKernel / @ref GCActivationLayer
-    - @ref GCBatchNormalizationLayerKernel / @ref GCBatchNormalizationLayer
-    - @ref GCCol2ImKernel
-    - @ref GCDepthConcatenateLayerKernel / GCDepthConcatenateLayer
-    - @ref GCDirectConvolutionLayerKernel / @ref GCDirectConvolutionLayer
-    - @ref GCDropoutLayerKernel / @ref GCDropoutLayer
-    - @ref GCFillBorderKernel / @ref GCFillBorder
-    - @ref GCGEMMInterleave4x4Kernel / @ref GCGEMMInterleave4x4
-    - @ref GCGEMMMatrixAccumulateBiasesKernel / @ref GCGEMMMatrixAdditionKernel / @ref GCGEMMMatrixMultiplyKernel / @ref GCGEMM
-    - @ref GCGEMMTranspose1xWKernel / @ref GCGEMMTranspose1xW
-    - @ref GCIm2ColKernel
-    - @ref GCNormalizationLayerKernel / @ref GCNormalizationLayer
-    - @ref GCPixelWiseMultiplicationKernel / @ref GCPixelWiseMultiplication
-    - @ref GCPoolingLayerKernel / @ref GCPoolingLayer
-    - @ref GCLogits1DMaxKernel / @ref GCLogits1DShiftExpSumKernel / @ref GCLogits1DNormKernel / @ref GCSoftmaxLayer
-    - @ref GCTransposeKernel / @ref GCTranspose
+    - GCAbsoluteDifferenceKernel / GCAbsoluteDifference
+    - GCActivationLayerKernel / GCActivationLayer
+    - GCBatchNormalizationLayerKernel / GCBatchNormalizationLayer
+    - GCCol2ImKernel
+    - GCDepthConcatenateLayerKernel / GCDepthConcatenateLayer
+    - GCDirectConvolutionLayerKernel / GCDirectConvolutionLayer
+    - GCDropoutLayerKernel / GCDropoutLayer
+    - GCFillBorderKernel / GCFillBorder
+    - GCGEMMInterleave4x4Kernel / GCGEMMInterleave4x4
+    - GCGEMMMatrixAccumulateBiasesKernel / GCGEMMMatrixAdditionKernel / GCGEMMMatrixMultiplyKernel / GCGEMM
+    - GCGEMMTranspose1xWKernel / GCGEMMTranspose1xW
+    - GCIm2ColKernel
+    - GCNormalizationLayerKernel / GCNormalizationLayer
+    - GCPixelWiseMultiplicationKernel / GCPixelWiseMultiplication
+    - GCPoolingLayerKernel / GCPoolingLayer
+    - GCLogits1DMaxKernel / GCLogits1DShiftExpSumKernel / GCLogits1DNormKernel / GCSoftmaxLayer
+    - GCTransposeKernel / GCTranspose
 
  - New Neon kernels / functions
     - arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
@@ -1432,10 +1432,7 @@ To see the build options available simply run ```scons -h```:
         neon: Enable Neon support (yes|no)
             default: False
 
-        gles_compute: Enable OpenGL ES Compute Shader support (yes|no)
-            default: False
-
-        embed_kernels: Embed OpenCL kernels and OpenGL ES compute shaders in library binary (yes|no)
+        embed_kernels: Embed OpenCL kernels in library binary (yes|no)
             default: True
 
         compress_kernels: Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled as well (yes|no)
@@ -1534,15 +1531,15 @@ To see the build options available simply run ```scons -h```:
 
 @note If you want to natively compile for 32bit on a 64bit Arm device running a 64bit OS then you will have to use cross-compile too.
 
-There is also an 'embed_only' option which will generate all the .embed files for the OpenCL kernels and / or OpenGLES compute shaders. This might be useful if using a different build system to compile the library.
+There is also an 'embed_only' option which will generate all the .embed files for the OpenCL kernels. This might be useful if using a different build system to compile the library.
 
 In addittion the option 'compress_kernels' will compress the embedded OpenCL kernel files using zlib and inject them in the library. This is useful for reducing the binary size. Note, this option is only available for Android when 'embed_kernels' is enabled.
 
 @b Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue on Github).
 
-@b opencl / @b neon / @b gles_compute: Choose which SIMD technology you want to target. (Neon for Arm Cortex-A CPUs or OpenCL / GLES_COMPUTE for Arm Mali GPUs)
+@b opencl / @b neon: Choose which SIMD technology you want to target. (Neon for Arm Cortex-A CPUs or OpenCL for Arm Mali GPUs)
 
-@b embed_kernels: For OpenCL / GLES_COMPUTE only: set embed_kernels=1 if you want the OpenCL / GLES_COMPUTE kernels to be built in the library's binaries instead of being read from separate ".cl" / ".cs" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL / GLES_COMPUTE kernel files by calling CLKernelLibrary::init() / GCKernelLibrary::init(). By default the path is set to "./cl_kernels" / "./cs_shaders".
+@b embed_kernels: For OpenCL only: set embed_kernels=1 if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate ".cl" / ".cs" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to "./cl_kernels".
 
 @b set_soname: Do you want to build the versioned version of the library ?
 
@@ -1612,10 +1609,6 @@ To cross-compile the library in asserts mode, with OpenCL only support, for Linu
 
 	scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
 
-To cross-compile the library in asserts mode, with GLES_COMPUTE only support, for Linux 64bit:
-
-	scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=0 gles_compute=1 embed_kernels=1 os=linux arch=arm64-v8a
-
 You can also compile the library natively on an Arm device by using <b>build=native</b>:
 
 	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=arm64-v8a build=native
@@ -1659,14 +1652,6 @@ To cross compile an OpenCL example for Linux 64bit:
 
 	aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -L. -larm_compute -larm_compute_core -o cl_convolution -DARM_COMPUTE_CL
 
-To cross compile a GLES example for Linux 32bit:
-
-	arm-linux-gnueabihf-g++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude/ -L. -larm_compute -larm_compute_core -std=c++14 -mfpu=neon -DARM_COMPUTE_GC -Iinclude/linux/ -o gc_absdiff
-
-To cross compile a GLES example for Linux 64bit:
-
-	aarch64-linux-gnu-g++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude/ -L. -larm_compute -larm_compute_core -std=c++14 -DARM_COMPUTE_GC -Iinclude/linux/ -o gc_absdiff
-
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
 To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the examples against arm_compute_graph.so too.
@@ -1696,10 +1681,6 @@ To compile natively (i.e directly on an Arm device) for Neon for Linux 64bit:
 To compile natively (i.e directly on an Arm device) for OpenCL for Linux 32bit or Linux 64bit:
 
 	g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute -larm_compute_core -o cl_convolution -DARM_COMPUTE_CL
-
-To compile natively (i.e directly on an Arm device) for GLES for Linux 32bit or Linux 64bit:
-
-	g++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude/ -L. -larm_compute -larm_compute_core -std=c++14 -DARM_COMPUTE_GC -Iinclude/linux/ -o gc_absdiff
 
 To compile natively the examples with the Graph API, such as graph_lenet.cpp, you need to link the examples against arm_compute_graph.so too.
 
@@ -1780,10 +1761,6 @@ To cross-compile the library in asserts mode, with OpenCL only support, for Andr
 
 	CXX=clang++ CC=clang scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=android arch=arm64-v8a
 
-To cross-compile the library in asserts mode, with GLES_COMPUTE only support, for Android 64bit:
-
-	CXX=clang++ CC=clang scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=0 gles_compute=1 embed_kernels=1 os=android arch=arm64-v8a
-
 @subsubsection S3_3_2_examples How to manually build the examples ?
 
 The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.
@@ -1805,13 +1782,6 @@ To cross compile an OpenCL example:
 	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
 	#64 bit:
 	aarch64-linux-android-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
-
-To cross compile a GLES example:
-
-	#32 bit:
-	arm-linux-androideabi-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_arm -static-libstdc++ -pie -DARM_COMPUTE_GC
-	#64 bit:
-	aarch64-linux-android-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_GC
 
 To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the library arm_compute_graph also.
 

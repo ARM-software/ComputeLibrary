@@ -869,7 +869,6 @@ EXCLUDE                = ./arm_compute/core/NEON/kernels/assembly/ \
                          ./src/core/NEON/kernels/convolution/ \
                          ./src/core/NEON/kernels/NELKTrackerKernel.cpp \
                          ./src/core/NEON/kernels/NEL2NormalizeLayerKernel.cpp \
-                         ./src/core/GLES_COMPUTE/cs_shaders/ \
                          ./tests/datasets/ \
                          ./tests/benchmark/fixtures/ \
                          ./tests/validation/fixtures/

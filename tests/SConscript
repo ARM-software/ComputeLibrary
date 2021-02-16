@@ -145,16 +145,6 @@ if env['neon']:
     if env['external_tests_dir']:
         files_validation += Glob(env['external_tests_dir'] + '/tests/validation/NEON/' + filter_pattern)
 
-
-if env['gles_compute']:
-    test_env.Append(CPPDEFINES=['ARM_COMPUTE_GC'])
-
-    files_benchmark += Glob('benchmark/GLES_COMPUTE/*/*.cpp')
-    files_benchmark += Glob('benchmark/GLES_COMPUTE/*.cpp')
-
-    files_validation += Glob('validation/GLES_COMPUTE/*/*.cpp')
-    files_validation += Glob('validation/GLES_COMPUTE/*.cpp')
-
 extra_link_flags = []
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])

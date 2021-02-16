@@ -284,36 +284,7 @@ namespace arm_compute
         - @ref CLWarpPerspective
         - @ref CLWinogradInputTransform
 
-@section S6_3 GLES Compute functions
-
-- @ref IFunction
-    - @ref GCBatchNormalizationLayer
-    - @ref GCConcatenateLayer
-    - @ref GCConvolutionLayer
-    - @ref GCConvolutionLayerReshapeWeights
-    - @ref GCDepthwiseConvolutionLayer3x3
-    - @ref GCDirectConvolutionLayer
-    - @ref GCDropoutLayer
-    - @ref GCFullyConnectedLayer
-    - @ref GCGEMM
-    - @ref GCNormalizationLayer
-    - @ref GCNormalizePlanarYUVLayer
-    - @ref GCPoolingLayer
-    - @ref GCSoftmaxLayer
-    - @ref IGCSimpleFunction
-        - @ref GCAbsoluteDifference
-        - @ref GCActivationLayer
-        - @ref GCArithmeticAddition
-        - @ref GCFillBorder
-        - @ref GCFullyConnectedLayerReshapeWeights
-        - @ref GCGEMMInterleave4x4
-        - @ref GCGEMMTranspose1xW
-        - @ref GCPixelWiseMultiplication
-        - @ref GCScale
-        - @ref GCTensorShift
-        - @ref GCTranspose
-
-@section S6_4 CPP functions
+@section S6_3 CPP functions
 
  - @ref IFunction
     - @ref CPPDetectionOutputLayer

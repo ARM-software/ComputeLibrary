@@ -44,9 +44,6 @@
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "utils/TypePrinter.h"
 #endif /* ARM_COMPUTE_CL */
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#endif /* ARM_COMPUTE_GC */
 #include "arm_compute/runtime/Scheduler.h"
 
 #include <fstream>
@@ -178,20 +175,6 @@ int main(int argc, char **argv)
         // Create parameters
         parameters = std::make_unique<ParametersLibrary>();
         parameters->set_cpu_ctx(std::move(cpu_ctx));
-
-#ifdef ARM_COMPUTE_GC
-        // Setup OpenGL context
-        {
-            auto gles_ctx = std::make_unique<GCRuntimeContext>();
-            ARM_COMPUTE_ERROR_ON(gles_ctx == nullptr);
-            {
-                // Legacy singletons API: This has been deprecated and the singletons will be removed in future releases
-                // Setup singleton for backward compatibility
-                GCScheduler::get().default_init();
-            }
-            parameters->set_gc_ctx(std::move(gles_ctx));
-        };
-#endif /* ARM_COMPUTE_GC */
 
 #ifdef ARM_COMPUTE_CL
         CLTuner                cl_tuner(false);

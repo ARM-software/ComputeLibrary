@@ -54,7 +54,6 @@ vars.AddVariables(
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Neon support", False),
-    BoolVariable("gles_compute", "Enable OpenGL ES Compute Shader support", False),
     BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", True),
     BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled", False),
     BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
@@ -142,8 +141,8 @@ if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['o
     Exit(1)
 
 if not env['exceptions']:
-    if env['opencl'] or env['gles_compute']:
-         print("ERROR: OpenCL and GLES are not supported when building without exceptions. Use opencl=0 gles_compute=0")
+    if env['opencl']:
+         print("ERROR: OpenCL is not supported when building without exceptions. Use opencl=0")
          Exit(1)
 
     env.Append(CPPDEFINES = ['ARM_COMPUTE_EXCEPTIONS_DISABLED'])
@@ -346,15 +345,10 @@ if env['opencl']:
         print("Cannot link OpenCL statically, which is required for bare metal / standalone builds")
         Exit(1)
 
-if env['gles_compute']:
-    if env['os'] in ['bare_metal'] or env['standalone']:
-        print("Cannot link OpenGLES statically, which is required for bare metal / standalone builds")
-        Exit(1)
-
 if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
     env.Append(LIBS = ['pthread'])
 
-if env['opencl'] or env['gles_compute']:
+if env['opencl']:
     if env['embed_kernels']:
         env.Append(CPPDEFINES = ['EMBEDDED_KERNELS'])
     if env['compress_kernels']:
@@ -387,9 +381,6 @@ for dirname in os.listdir("./include"):
     Default( install_include("include/%s" % dirname))
 
 Export('version_at_least')
-
-if env['gles_compute'] and env['os'] != 'android':
-    env.Append(CPPPATH = ['#/include/linux'])
 
 SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
