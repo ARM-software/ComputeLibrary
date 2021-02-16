@@ -364,6 +364,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         TensorInfo info_gemm(shape_gemm, 1, output_data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
+        _gemm_output_3d.allocator()->init(info_gemm);
         _memory_group.manage(&_gemm_output);
 
         // Update GEMM output
@@ -371,9 +372,11 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     }
     else
     {
-        _gemm_output.allocator()->init(*output->info());
+        TensorInfo out_info{ *output->info() };
+        out_info.set_data_type(output_data_type).set_data_layout(input->info()->data_layout());
+        _gemm_output.allocator()->init(out_info);
+        _gemm_output_3d.allocator()->init(out_info);
         _memory_group.manage(&_gemm_output);
-        _gemm_output_3d.allocator()->init(*output->info());
 
         // Update GEMM output
         gemm_output_to_use = &_gemm_output_3d;
@@ -577,6 +580,7 @@ void NEGEMMConvolutionLayer::run()
 
     // Handle the case where output has top/bottom padding
     const ITensor *out_to_use = out_has_padding ? &_gemm_output : _original_output;
+    _gemm_output_3d.info()->extend_padding(out_to_use->info()->padding());
     _gemm_output_3d.allocator()->import_memory(out_to_use->buffer());
 
     // Runs NEGEMM or NEGEMMLowpMatrixMultiplyCore functions
