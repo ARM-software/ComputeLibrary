@@ -37,7 +37,7 @@ Several builds of the library are available using various configurations:
 
 @section S0_1_contact Contact / Support
 
-Please email developer@arm.com
+Please create an issue on <a href="https://github.com/ARM-software/ComputeLibrary/issues">Github</a>.
 
 In order to facilitate the work of the support team please provide the build information of the library you are using. To get the version of the library you are using simply run:
 
@@ -1529,7 +1529,7 @@ There is also an 'embed_only' option which will generate all the .embed files fo
 
 In addittion the option 'compress_kernels' will compress the embedded OpenCL kernel files using zlib and inject them in the library. This is useful for reducing the binary size. Note, this option is only available for Android when 'embed_kernels' is enabled.
 
-@b Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue either on Github or by an email to developer@arm.com so that the issue can be addressed).
+@b Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue on Github).
 
 @b opencl / @b neon / @b gles_compute: Choose which SIMD technology you want to target. (NEON for ARM Cortex-A CPUs or OpenCL / GLES_COMPUTE for ARM Mali GPUs)
 
