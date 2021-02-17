@@ -36,83 +36,39 @@ public:
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 };
-/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for max
+/** Class to run @ref cpu::kernels::CpuArithmeticKernel except for division and power
  *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
- * @note The function performs a max operation between two tensors.
+ * @note Max/Min/Squared difference supports input data type of QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32
+ * @note PRelu supports inpute data type of QASYMM8/QASYMM8_SIGNED/F16/F32.
  */
-class CpuElementwiseMax : public CpuElementwiseBase
+template <ArithmeticOperation op>
+class CpuElementwiseArithmetic : public CpuElementwiseBase
 {
 public:
-    /** Initialise the kernel's inputs, dst and conversion policy.
+    /** Configure the operator
      *
-     * @param[in, out] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
+     * @param[in]  src0 The first source tensor information.
+     * @param[in]  src1 The second source tensor information. With PRelu, this is used as alpha tensor.
+     * @param[out] dst  The output tensor information.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for max
+    /** Static function to check if the given information will lead to a valid configuration
      *
-     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
+     * @param[in]  src0 The first source tensor information.
+     * @param[in]  src1 The second source tensor information. With PRelu, this is used as alpha tensor.
+     * @param[out] dst  The output tensor information.
      *
-     * @return a status
+     * @return A status
      */
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 };
 
-/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for min
- *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
- * @note The function performs a min operation between two tensors.
- */
-class CpuElementwiseMin : public CpuElementwiseBase
-{
-public:
-    /** Initialise the kernel's inputs, dst and conversion policy.
-     *
-     * @param[in, out] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
-     */
-    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for min
-     *
-     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
-};
-
-/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for squared difference
- *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
- * @note The function performs a squared different operation between two tensors (i.e., out[i] = (in1[i] - in2[i])^2
- */
-class CpuElementwiseSquaredDiff : public CpuElementwiseBase
-{
-public:
-    /** Initialise the kernel's inputs, dst and conversion policy.
-     *
-     * @param[in, out] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
-     */
-    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for squared difference
-     *
-     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
-};
+/** Class to run @ref cpu::kernels::CpuArithmeticKernel except for maximum operation */
+using CpuElementwiseMax = CpuElementwiseArithmetic<ArithmeticOperation::MAX>;
+/** Class to run @ref cpu::kernels::CpuArithmeticKernel except for minimum operation */
+using CpuElementwiseMin = CpuElementwiseArithmetic<ArithmeticOperation::MIN>;
+/** Class to run @ref cpu::kernels::CpuArithmeticKernel except for squared difference operation */
+using CpuElementwiseSquaredDiff = CpuElementwiseArithmetic<ArithmeticOperation::SQUARED_DIFF>;
 
 /** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for division
  *

@@ -24,31 +24,18 @@
 #include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "src/core/cpu/kernels/CpuElementwiseKernel.h"
+#include "src/runtime/cpu/operators/CpuPRelu.h"
 
 namespace arm_compute
 {
-namespace experimental
-{
-void NEPRelu::configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output)
-{
-    auto k = std::make_unique<cpu::kernels::CpuArithmeticKernel>();
-    k->configure(ArithmeticOperation::PRELU, input, alpha, output);
-    _kernel = std::move(k);
-}
-
-Status NEPRelu::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
-{
-    return cpu::kernels::CpuArithmeticKernel::validate(ArithmeticOperation::PRELU, input, alpha, output);
-}
-} // nsamespace experimental
+using OperatorType = cpu::CpuPRelu;
 
 struct NEPReluLayer::Impl
 {
-    const ITensor                         *src_0{ nullptr };
-    const ITensor                         *src_1{ nullptr };
-    ITensor                               *dst{ nullptr };
-    std::unique_ptr<experimental::NEPRelu> op{ nullptr };
+    const ITensor                *src_0{ nullptr };
+    const ITensor                *src_1{ nullptr };
+    ITensor                      *dst{ nullptr };
+    std::unique_ptr<OperatorType> op{ nullptr };
 };
 
 NEPReluLayer::NEPReluLayer()
@@ -64,7 +51,7 @@ void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor
     _impl->src_0 = input;
     _impl->src_1 = alpha;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEPRelu>();
+    _impl->op    = std::make_unique<OperatorType>();
     _impl->op->configure(input->info(), alpha->info(), output->info());
 }
 
@@ -79,6 +66,6 @@ void NEPReluLayer::run()
 
 Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
 {
-    return experimental::NEPRelu::validate(input, alpha, output);
+    return OperatorType::validate(input, alpha, output);
 }
 } // namespace arm_compute

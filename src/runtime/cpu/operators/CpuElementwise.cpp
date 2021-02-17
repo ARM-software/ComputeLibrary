@@ -44,41 +44,24 @@ void CpuElementwiseBase::run(ITensorPack &tensors)
     ICpuOperator::run(tensors, shape_and_window.second);
 }
 
-void CpuElementwiseMax::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
+template <ArithmeticOperation op>
+void CpuElementwiseArithmetic<op>::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     auto k = std::make_unique<kernels::CpuArithmeticKernel>();
-    k->configure(ArithmeticOperation::MAX, src0, src1, dst);
+    k->configure(op, src0, src1, dst);
     _kernel = std::move(k);
 }
 
-Status CpuElementwiseMax::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
+template <ArithmeticOperation op>
+Status CpuElementwiseArithmetic<op>::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
-    return kernels::CpuArithmeticKernel::validate(ArithmeticOperation::MAX, src0, src1, dst);
+    return kernels::CpuArithmeticKernel::validate(op, src0, src1, dst);
 }
 
-void CpuElementwiseMin::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
-{
-    auto k = std::make_unique<kernels::CpuArithmeticKernel>();
-    k->configure(ArithmeticOperation::MIN, src0, src1, dst);
-    _kernel = std::move(k);
-}
-
-Status CpuElementwiseMin::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
-{
-    return kernels::CpuArithmeticKernel::validate(ArithmeticOperation::MIN, src0, src1, dst);
-}
-
-void CpuElementwiseSquaredDiff::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
-{
-    auto k = std::make_unique<kernels::CpuArithmeticKernel>();
-    k->configure(ArithmeticOperation::SQUARED_DIFF, src0, src1, dst);
-    _kernel = std::move(k);
-}
-
-Status CpuElementwiseSquaredDiff::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
-{
-    return kernels::CpuArithmeticKernel::validate(ArithmeticOperation::SQUARED_DIFF, src0, src1, dst);
-}
+template class CpuElementwiseArithmetic<ArithmeticOperation::MAX>;
+template class CpuElementwiseArithmetic<ArithmeticOperation::MIN>;
+template class CpuElementwiseArithmetic<ArithmeticOperation::SQUARED_DIFF>;
+template class CpuElementwiseArithmetic<ArithmeticOperation::PRELU>;
 
 void CpuElementwiseDivision::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
