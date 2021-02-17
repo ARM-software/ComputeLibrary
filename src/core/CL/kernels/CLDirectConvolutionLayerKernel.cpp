@@ -317,7 +317,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLDirectConvolutionLayerKernel::CLDirectConvolutionLayerKernel()
-    : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _data_layout(DataLayout::UNKNOWN), _border_size(0), _conv_stride_x(0), _conv_stride_y(0)
+    : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _data_layout(DataLayout::UNKNOWN), _border_size(0), _conv_stride_x(0), _conv_stride_y(0), _conv_info()
 {
 }
 
@@ -350,6 +350,7 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
     _weights       = weights;
     _output        = output;
     _biases        = biases;
+    _conv_info     = conv_info;
 
     const unsigned int width_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
@@ -381,7 +382,7 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
         const unsigned int pad_left         = conv_info.pad_left();
         const unsigned int pad_top          = conv_info.pad_top();
 
-        if (_biases != nullptr)
+        if(_biases != nullptr)
         {
             build_options.add_option(std::string("-DHAS_BIAS"));
             build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(_biases->info()->data_type())));
@@ -440,7 +441,7 @@ void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_c
     }
     else
     {
-        _border_size = BorderSize(conv_info.pad_top(), conv_info.pad_right(), conv_info.pad_bottom(), conv_info.pad_left());
+        _border_size = BorderSize(_input->info()->padding());
 
         kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
 
@@ -549,8 +550,8 @@ void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue 
     {
         Window win_in = window;
 
-        win_in.adjust(Window::DimX, -_border_size.left, true);
-        win_in.adjust(Window::DimY, -_border_size.top, true);
+        win_in.adjust(Window::DimX, -_conv_info.pad_left(), true);
+        win_in.adjust(Window::DimY, -_conv_info.pad_top(), true);
 
         const int width_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
         const int height_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
