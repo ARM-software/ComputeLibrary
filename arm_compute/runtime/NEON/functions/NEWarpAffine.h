@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ class ITensor;
 
 /** Basic function to run @ref NEWarpAffineKernel
  *
- * @deprecated This function is deprecated and will be removed in release 20.02
+ * @deprecated This function is deprecated and will be removed in release 21.05
  *
 */
 class NEWarpAffine : public INESimpleFunction

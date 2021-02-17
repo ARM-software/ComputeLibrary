@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,19 +44,6 @@ class ITensorInfo;
 class NEThreshold : public INESimpleFunctionNoBorder
 {
 public:
-    /** Initialise the function's source, destination, thresholds and threshold type
-     *
-     * @param[in]  input       First tensor input. Data type supported: U8.
-     * @param[out] output      Output tensor. Data type supported: U8.
-     * @param[in]  threshold   Threshold. If upper threshold is specified, this will be used as the lower threshold
-     * @param[in]  false_value Value to assign when the condition is false
-     * @param[in]  true_value  value to assign when the condition is true
-     * @param[in]  type        Thresholding type. Can either be BINARY or RANGE.
-     * @param[in]  upper       Upper threshold. Only used with RANGE thresholding
-     */
-    ARM_COMPUTE_DEPRECATED_REL(20.08)
-    void configure(const ITensor *input, ITensor *output, uint8_t threshold, uint8_t false_value = 0, uint8_t true_value = 0,
-                   ThresholdType type = ThresholdType::BINARY, uint8_t upper = 0);
     /** Initialise the function's source, destination, thresholds and threshold type
      *
      * @param[in]  input  First tensor input. Data type supported: U8.

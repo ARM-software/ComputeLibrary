@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,12 +30,6 @@
 
 namespace arm_compute
 {
-void GCScale::configure(IGCTensor *input, IGCTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
-                        bool align_corners)
-{
-    configure(input, output, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners });
-}
-
 void GCScale::configure(IGCTensor *input, IGCTensor *output, const ScaleKernelInfo &info)
 {
     auto k = std::make_unique<GCScaleKernel>();

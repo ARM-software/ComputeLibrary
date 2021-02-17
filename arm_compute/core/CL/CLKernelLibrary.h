@@ -47,7 +47,7 @@ private:
 
 public:
     /** Access the KernelLibrary singleton.
-     * This method has been deprecated and will be removed in the next release.
+     * This method has been deprecated and will be removed in future releases
      * @return The KernelLibrary instance.
      */
     static CLKernelLibrary &get();

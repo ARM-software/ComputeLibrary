@@ -273,7 +273,7 @@ struct CPPScheduler::Impl final
 };
 
 /*
- * This singleton has been deprecated and will be removed in the next release
+ * This singleton has been deprecated and will be removed in future releases
  */
 CPPScheduler &CPPScheduler::get()
 {

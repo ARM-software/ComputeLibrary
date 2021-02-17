@@ -42,7 +42,7 @@ public:
 
     /** Access the scheduler singleton
      *
-     * @note this method has been deprecated and will be remover in the upcoming releases
+     * @note this method has been deprecated and will be remover in future releases
      * @return The scheduler
      */
     static CPPScheduler &get();

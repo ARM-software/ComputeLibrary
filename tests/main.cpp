@@ -185,7 +185,7 @@ int main(int argc, char **argv)
             auto gles_ctx = std::make_unique<GCRuntimeContext>();
             ARM_COMPUTE_ERROR_ON(gles_ctx == nullptr);
             {
-                // Legacy singletons API: This has been deprecated and the singletons will be removed
+                // Legacy singletons API: This has been deprecated and the singletons will be removed in future releases
                 // Setup singleton for backward compatibility
                 GCScheduler::get().default_init();
             }

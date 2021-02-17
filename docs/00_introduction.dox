@@ -110,6 +110,10 @@ v21.02 Public major release
    - @ref CLBitwiseKernel
    - ClFloorKernel
    - @ref CLTransposeKernel
+ - Deprecate functions in CLTuner:
+    - add_lws_to_table
+    - import_lws_table
+    - lws_table
  - Remove functions:
    - NELocallyConnectedLayer / CLLocallyConnectedLayer
    - NEIm2Col

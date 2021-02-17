@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,11 +29,6 @@
 
 namespace arm_compute
 {
-void NEThreshold::configure(const ITensor *input, ITensor *output, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
-{
-    configure(input, output, ThresholdKernelInfo(threshold, false_value, true_value, type, upper));
-}
-
 void NEThreshold::configure(const ITensor *input, ITensor *output, const ThresholdKernelInfo &info)
 {
     auto k = std::make_unique<NEThresholdKernel>();
