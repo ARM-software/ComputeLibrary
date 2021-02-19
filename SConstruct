@@ -180,10 +180,6 @@ if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])
 
 if env['openmp']:
-    if 'clang++' in cpp_compiler:
-        print( "Clang does not support OpenMP. Use scheduler=cpp.")
-        Exit(1)
-
     env.Append(CPPDEFINES = [('ARM_COMPUTE_OPENMP_SCHEDULER', 1)])
     env.Append(CXXFLAGS = ['-fopenmp'])
     env.Append(LINKFLAGS = ['-fopenmp'])
