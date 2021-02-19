@@ -611,6 +611,8 @@ void NEGEMMConvolutionLayer::run()
     {
         _reshape_layer.run();
     }
+
+    _gemm_output_3d.allocator()->free();
 }
 
 void NEGEMMConvolutionLayer::prepare()
