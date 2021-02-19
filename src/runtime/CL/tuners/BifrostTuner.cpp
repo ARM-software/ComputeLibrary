@@ -28,6 +28,7 @@
 #include "support/Cast.h"
 
 #include "src/core/gpu/cl/kernels/ClPoolingKernel.h"
+#include "src/core/gpu/cl/kernels/ClScaleKernel.h"
 
 namespace arm_compute
 {
@@ -234,18 +235,18 @@ void tune_pooling_kernel(opencl::kernels::ClPoolingKernel &k)
     k.set_lws_hint(lws_hint);
 }
 
-void tune_scale_kernel(CLScaleKernel &k)
+void tune_scale_kernel(opencl::kernels::ClScaleKernel &k)
 {
     cl::NDRange               lws_hint      = k.lws_hint();
     const GPUTarget           gpu_target    = k.get_target();
-    const DataType            dt            = k.input()->info()->data_type();
+    const DataType            dt            = k.get_data_type();
     const InterpolationPolicy interpolation = k.get_interpolation_policy();
 
     // Configure the local work size for Bifrost, interpolation (bilinear) and datatype F32.
     // The value are obtained via exhaustive autotuning.
     if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72) && (dt == DataType::F32) && (interpolation == InterpolationPolicy::BILINEAR))
     {
-        auto dim_0 = k.output()->info()->dimension(0);
+        const auto dim_0 = k.get_output_x_dim();
         if(dim_0 == 480)
         {
             lws_hint = cl::NDRange(2, 1);
@@ -285,9 +286,9 @@ void BifrostTuner::tune_kernel_static(ICLKernel &kernel)
     {
         tune_pooling_kernel(*utils::cast::polymorphic_downcast<opencl::kernels::ClPoolingKernel *>(&kernel));
     }
-    else if(dynamic_cast<CLScaleKernel *>(&kernel) != nullptr)
+    else if(dynamic_cast<opencl::kernels::ClScaleKernel *>(&kernel) != nullptr)
     {
-        tune_scale_kernel(*utils::cast::polymorphic_downcast<CLScaleKernel *>(&kernel));
+        tune_scale_kernel(*utils::cast::polymorphic_downcast<opencl::kernels::ClScaleKernel *>(&kernel));
     }
 }
 

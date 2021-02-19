@@ -193,7 +193,7 @@ v21.02 Public major release
    - @ref CLPadLayerKernel
    - @ref CLROIAlignLayerKernel
    - @ref CLRangeKernel
-   - @ref CLScaleKernel
+   - CLScaleKernel
    - @ref CLSelectKernel
    - @ref CLBitwiseKernel
    - @ref opencl::kernels::ClFloorKernel
@@ -535,7 +535,7 @@ v20.08 Public major release
    - CLCropKernel
  - Added aligh_corner support for nearest neighbor interpolation in:
    - @ref NEScaleKernel
-   - @ref CLScaleKernel
+   - CLScaleKernel
  - New OpenCL kernels / functions:
    - @ref CLMaxUnpoolingLayerKernel
  - New Neon kernels / functions:
@@ -1060,7 +1060,7 @@ v18.11 Public major release
     - @ref CLDeconvolutionLayer
     - @ref CLL2NormalizeLayer
  - Added QASYMM8 support to the following kernels:
-    - @ref CLScaleKernel
+    - CLScaleKernel
     - NEDepthwiseConvolutionLayer3x3Kernel
     - @ref CLPixelWiseMultiplicationKernel
  - Added FP16 support to the following kernels:

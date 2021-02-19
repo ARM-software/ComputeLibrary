@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,28 +26,24 @@
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLScaleKernel.h"
 
-#include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
-// Forward declarations
 class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLScaleKernel */
+/** Basic function to run  @ref opencl::ClScale */
 class CLScale : public IFunction
 {
 public:
     /** Default Constructor */
     CLScale();
     /** Default Destructor */
-    ~CLScale() = default;
+    ~CLScale();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLScale(const CLScale &) = delete;
     /** Default move constructor */
@@ -89,9 +85,9 @@ public:
     // Inherited methods overridden:
     void run() override;
 
-protected:
-    std::unique_ptr<CLFillBorderKernel> _border_handler;
-    std::unique_ptr<CLScaleKernel>      _kernel;
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CLSCALE_H */

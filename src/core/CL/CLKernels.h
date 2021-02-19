@@ -85,7 +85,6 @@
 #include "src/core/CL/kernels/CLRemapKernel.h"
 #include "src/core/CL/kernels/CLReorgLayerKernel.h"
 #include "src/core/CL/kernels/CLReverseKernel.h"
-#include "src/core/CL/kernels/CLScaleKernel.h"
 #include "src/core/CL/kernels/CLSelectKernel.h"
 #include "src/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
 #include "src/core/CL/kernels/CLSpaceToDepthLayerKernel.h"

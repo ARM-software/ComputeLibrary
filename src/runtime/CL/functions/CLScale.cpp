@@ -23,17 +23,26 @@
  */
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/core/KernelDescriptors.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClScale.h"
 
 namespace arm_compute
 {
+struct CLScale::Impl
+{
+    const ICLTensor                 *src{ nullptr };
+    ICLTensor                       *dst{ nullptr };
+    std::unique_ptr<opencl::ClScale> op{ nullptr };
+};
+
 CLScale::CLScale()
-    : _border_handler(std::make_unique<CLFillBorderKernel>()), _kernel()
+    : _impl(std::make_unique<Impl>())
 {
 }
+CLScale::~CLScale() = default;
 
 void CLScale::configure(ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info)
 {
@@ -42,33 +51,23 @@ void CLScale::configure(ICLTensor *input, ICLTensor *output, const ScaleKernelIn
 
 void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info)
 {
-    auto k = std::make_unique<CLScaleKernel>();
-    k->set_target(CLScheduler::get().target());
-    k->configure(compile_context, input, output, info);
-    _kernel = std::move(k);
+    _impl->src = input;
+    _impl->dst = output;
 
-    // Tune kernels
-    CLScheduler::get().tune_kernel_static(*_kernel);
-
-    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : info.data_layout;
-    if(data_layout == DataLayout::NCHW && !_kernel->border_size().empty())
-    {
-        _border_handler->configure(compile_context, input, _kernel->border_size(), info.border_mode, info.constant_border_value);
-    }
+    _impl->op = std::make_unique<opencl::ClScale>();
+    _impl->op->configure(compile_context, input->info(), output->info(), info);
 }
 
 Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info)
 {
-    return CLScaleKernel::validate(input, output, info);
+    return opencl::ClScale::validate(input, output, info);
 }
 
 void CLScale::run()
 {
-    if(!_kernel->border_size().empty())
-    {
-        CLScheduler::get().enqueue(*_border_handler, false);
-    }
-    CLScheduler::get().enqueue(*_kernel);
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
-
 } // namespace arm_compute
