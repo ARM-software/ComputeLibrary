@@ -38,8 +38,17 @@ CLSymbols::CLSymbols() noexcept(false)
     : _loaded(
 {
     false, false
-})
+}),
+_handle(nullptr)
 {
+}
+
+CLSymbols::~CLSymbols()
+{
+    if(_handle != nullptr)
+    {
+        dlclose(_handle);
+    }
 }
 
 CLSymbols &CLSymbols::get()
@@ -75,9 +84,9 @@ bool CLSymbols::load_default()
 
 bool CLSymbols::load(const std::string &library)
 {
-    void *handle = dlopen(library.c_str(), RTLD_LAZY | RTLD_LOCAL);
+    _handle = dlopen(library.c_str(), RTLD_LAZY | RTLD_LOCAL);
 
-    if(handle == nullptr)
+    if(_handle == nullptr)
     {
         std::cerr << "Can't load " << library << ": " << dlerror() << "\n";
         // Set status of loading to failed
@@ -88,60 +97,60 @@ bool CLSymbols::load(const std::string &library)
 #define LOAD_FUNCTION_PTR(func_name, handle) \
     func_name##_ptr = reinterpret_cast<decltype(func_name) *>(dlsym(handle, #func_name));
 
-    LOAD_FUNCTION_PTR(clCreateContext, handle);
-    LOAD_FUNCTION_PTR(clCreateContextFromType, handle);
-    LOAD_FUNCTION_PTR(clCreateCommandQueue, handle);
-    LOAD_FUNCTION_PTR(clGetContextInfo, handle);
-    LOAD_FUNCTION_PTR(clBuildProgram, handle);
-    LOAD_FUNCTION_PTR(clEnqueueNDRangeKernel, handle);
-    LOAD_FUNCTION_PTR(clSetKernelArg, handle);
-    LOAD_FUNCTION_PTR(clReleaseKernel, handle);
-    LOAD_FUNCTION_PTR(clCreateProgramWithSource, handle);
-    LOAD_FUNCTION_PTR(clCreateBuffer, handle);
-    LOAD_FUNCTION_PTR(clRetainKernel, handle);
-    LOAD_FUNCTION_PTR(clCreateKernel, handle);
-    LOAD_FUNCTION_PTR(clGetProgramInfo, handle);
-    LOAD_FUNCTION_PTR(clFlush, handle);
-    LOAD_FUNCTION_PTR(clFinish, handle);
-    LOAD_FUNCTION_PTR(clReleaseProgram, handle);
-    LOAD_FUNCTION_PTR(clRetainContext, handle);
-    LOAD_FUNCTION_PTR(clCreateProgramWithBinary, handle);
-    LOAD_FUNCTION_PTR(clReleaseCommandQueue, handle);
-    LOAD_FUNCTION_PTR(clEnqueueMapBuffer, handle);
-    LOAD_FUNCTION_PTR(clRetainProgram, handle);
-    LOAD_FUNCTION_PTR(clGetProgramBuildInfo, handle);
-    LOAD_FUNCTION_PTR(clEnqueueReadBuffer, handle);
-    LOAD_FUNCTION_PTR(clEnqueueWriteBuffer, handle);
-    LOAD_FUNCTION_PTR(clReleaseEvent, handle);
-    LOAD_FUNCTION_PTR(clReleaseContext, handle);
-    LOAD_FUNCTION_PTR(clRetainCommandQueue, handle);
-    LOAD_FUNCTION_PTR(clEnqueueUnmapMemObject, handle);
-    LOAD_FUNCTION_PTR(clRetainMemObject, handle);
-    LOAD_FUNCTION_PTR(clReleaseMemObject, handle);
-    LOAD_FUNCTION_PTR(clGetDeviceInfo, handle);
-    LOAD_FUNCTION_PTR(clGetDeviceIDs, handle);
-    LOAD_FUNCTION_PTR(clGetMemObjectInfo, handle);
-    LOAD_FUNCTION_PTR(clRetainEvent, handle);
-    LOAD_FUNCTION_PTR(clGetPlatformIDs, handle);
-    LOAD_FUNCTION_PTR(clGetKernelWorkGroupInfo, handle);
-    LOAD_FUNCTION_PTR(clGetCommandQueueInfo, handle);
-    LOAD_FUNCTION_PTR(clGetKernelInfo, handle);
-    LOAD_FUNCTION_PTR(clGetEventProfilingInfo, handle);
-    LOAD_FUNCTION_PTR(clSVMAlloc, handle);
-    LOAD_FUNCTION_PTR(clSVMFree, handle);
-    LOAD_FUNCTION_PTR(clEnqueueSVMMap, handle);
-    LOAD_FUNCTION_PTR(clEnqueueSVMUnmap, handle);
-    LOAD_FUNCTION_PTR(clEnqueueMarker, handle);
-    LOAD_FUNCTION_PTR(clWaitForEvents, handle);
-    LOAD_FUNCTION_PTR(clCreateImage, handle);
-    LOAD_FUNCTION_PTR(clSetKernelExecInfo, handle);
+    LOAD_FUNCTION_PTR(clCreateContext, _handle);
+    LOAD_FUNCTION_PTR(clCreateContextFromType, _handle);
+    LOAD_FUNCTION_PTR(clCreateCommandQueue, _handle);
+    LOAD_FUNCTION_PTR(clGetContextInfo, _handle);
+    LOAD_FUNCTION_PTR(clBuildProgram, _handle);
+    LOAD_FUNCTION_PTR(clEnqueueNDRangeKernel, _handle);
+    LOAD_FUNCTION_PTR(clSetKernelArg, _handle);
+    LOAD_FUNCTION_PTR(clReleaseKernel, _handle);
+    LOAD_FUNCTION_PTR(clCreateProgramWithSource, _handle);
+    LOAD_FUNCTION_PTR(clCreateBuffer, _handle);
+    LOAD_FUNCTION_PTR(clRetainKernel, _handle);
+    LOAD_FUNCTION_PTR(clCreateKernel, _handle);
+    LOAD_FUNCTION_PTR(clGetProgramInfo, _handle);
+    LOAD_FUNCTION_PTR(clFlush, _handle);
+    LOAD_FUNCTION_PTR(clFinish, _handle);
+    LOAD_FUNCTION_PTR(clReleaseProgram, _handle);
+    LOAD_FUNCTION_PTR(clRetainContext, _handle);
+    LOAD_FUNCTION_PTR(clCreateProgramWithBinary, _handle);
+    LOAD_FUNCTION_PTR(clReleaseCommandQueue, _handle);
+    LOAD_FUNCTION_PTR(clEnqueueMapBuffer, _handle);
+    LOAD_FUNCTION_PTR(clRetainProgram, _handle);
+    LOAD_FUNCTION_PTR(clGetProgramBuildInfo, _handle);
+    LOAD_FUNCTION_PTR(clEnqueueReadBuffer, _handle);
+    LOAD_FUNCTION_PTR(clEnqueueWriteBuffer, _handle);
+    LOAD_FUNCTION_PTR(clReleaseEvent, _handle);
+    LOAD_FUNCTION_PTR(clReleaseContext, _handle);
+    LOAD_FUNCTION_PTR(clRetainCommandQueue, _handle);
+    LOAD_FUNCTION_PTR(clEnqueueUnmapMemObject, _handle);
+    LOAD_FUNCTION_PTR(clRetainMemObject, _handle);
+    LOAD_FUNCTION_PTR(clReleaseMemObject, _handle);
+    LOAD_FUNCTION_PTR(clGetDeviceInfo, _handle);
+    LOAD_FUNCTION_PTR(clGetDeviceIDs, _handle);
+    LOAD_FUNCTION_PTR(clGetMemObjectInfo, _handle);
+    LOAD_FUNCTION_PTR(clRetainEvent, _handle);
+    LOAD_FUNCTION_PTR(clGetPlatformIDs, _handle);
+    LOAD_FUNCTION_PTR(clGetKernelWorkGroupInfo, _handle);
+    LOAD_FUNCTION_PTR(clGetCommandQueueInfo, _handle);
+    LOAD_FUNCTION_PTR(clGetKernelInfo, _handle);
+    LOAD_FUNCTION_PTR(clGetEventProfilingInfo, _handle);
+    LOAD_FUNCTION_PTR(clSVMAlloc, _handle);
+    LOAD_FUNCTION_PTR(clSVMFree, _handle);
+    LOAD_FUNCTION_PTR(clEnqueueSVMMap, _handle);
+    LOAD_FUNCTION_PTR(clEnqueueSVMUnmap, _handle);
+    LOAD_FUNCTION_PTR(clEnqueueMarker, _handle);
+    LOAD_FUNCTION_PTR(clWaitForEvents, _handle);
+    LOAD_FUNCTION_PTR(clCreateImage, _handle);
+    LOAD_FUNCTION_PTR(clSetKernelExecInfo, _handle);
 
     // Third-party extensions
-    LOAD_FUNCTION_PTR(clImportMemoryARM, handle);
+    LOAD_FUNCTION_PTR(clImportMemoryARM, _handle);
 
 #undef LOAD_FUNCTION_PTR
 
-    //Don't call dlclose(handle) or all the symbols will be unloaded !
+    //Don't call dlclose(_handle) or all the symbols will be unloaded !
 
     // Disable default loading and set status to successful
     _loaded = std::make_pair(true, true);
