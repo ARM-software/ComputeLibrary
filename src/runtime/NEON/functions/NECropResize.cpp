@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "arm_compute/runtime/NEON/functions/NECropResize.h"
+#include "arm_compute/runtime/Tensor.h"
 #include "src/core/NEON/kernels/NECropKernel.h"
 
 #include <cstddef>

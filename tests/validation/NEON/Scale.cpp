@@ -50,7 +50,7 @@ using datasets::ScaleSamplingPolicySet;
 using datasets::ScaleAlignCornersSamplingPolicySet;
 
 /** We consider vector size in byte 64 since the maximum size of
- * a vector used by @ref NEScaleKernel is currently 64-byte (float32x4x4).
+ * a vector used by the kernel is currently 64-byte (float32x4x4).
  * There are possibility to reduce test time further by using
  * smaller vector sizes for different data types where applicable.
  */
@@ -94,9 +94,8 @@ TEST_SUITE(Validate)
 
 /** Validate test suite is to test ARM_COMPUTE_RETURN_ON_* macros
  * we use to check the validity of given arguments in @ref NEScale
- * and subsequent call to @ref NEScaleKernel.
  * Since this is using validate() of @ref NEScale, which pre-adjust
- * arguments for @ref NEScaleKernel, the following conditions in
+ * arguments for the kernel, the following conditions in
  * the kernel are not currently tested.
  * - The same input and output
  * - Data type of offset, dx and dy

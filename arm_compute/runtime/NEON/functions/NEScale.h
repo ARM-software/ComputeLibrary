@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,24 +24,28 @@
 #ifndef ARM_COMPUTE_NESCALEIMAGE_H
 #define ARM_COMPUTE_NESCALEIMAGE_H
 
+#include "arm_compute/runtime/IFunction.h"
+
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
-#include "arm_compute/runtime/Tensor.h"
+#include "src/core/common/Macros.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
+class ITensorInfo;
 
-/** Basic function to run @ref NEScaleKernel */
-class NEScale : public INESimpleFunctionNoBorder
+/** Basic function to compute Scale */
+class NEScale : public IFunction
 {
 public:
-    /** Constructor
-     *
-     * Initialize NEScale
-     */
+    /** Default Constructor */
     NEScale();
+    /** Default Destructor */
+    ~NEScale();
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(NEScale);
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
      * @param[in, out] input  Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
@@ -59,10 +63,12 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info);
 
+    // Inherited methods overridden:
+    void run() override;
+
 private:
-    Tensor _offsets; /**< Offset to access the element with NEAREST interpolation or the top-left element with BILINEAR interpolation in the input tensor */
-    Tensor _dx;      /**< Element's distance between the X real coordinate and the smallest X following integer */
-    Tensor _dy;      /**< Element's distance between the Y real coordinate and the smallest Y following integer */
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NESCALEIMAGE_H */

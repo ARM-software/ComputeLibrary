@@ -82,7 +82,6 @@
 #include "src/core/NEON/kernels/NERemapKernel.h"
 #include "src/core/NEON/kernels/NEReorgLayerKernel.h"
 #include "src/core/NEON/kernels/NEReverseKernel.h"
-#include "src/core/NEON/kernels/NEScaleKernel.h"
 #include "src/core/NEON/kernels/NESelectKernel.h"
 #include "src/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
 #include "src/core/NEON/kernels/NESpaceToDepthLayerKernel.h"

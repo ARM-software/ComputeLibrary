@@ -180,7 +180,7 @@ v21.02 Public major release
  - Add macOS support
  - Add Armv8-R AArch64 architecture support
  - Add SVE/SVE2 support for:
-   - @ref NEScaleKernel
+   - NEScaleKernel
    - @ref NEActivationLayer
    - @ref NEArithmeticAddition
    - @ref NEBatchNormalizationLayerKernel
@@ -260,7 +260,7 @@ v20.11 Public major release
    - @ref NERemapKernel
    - @ref NEGEMMInterleave4x4Kernel
    - @ref NEDirectConvolutionLayerKernel
-   - @ref NEScaleKernel
+   - NEScaleKernel
    - NELocallyConnectedMatrixMultiplyKernel
    - @ref NEGEMMLowpOffsetContributionKernel
    - @ref NEGEMMTranspose1xWKernel
@@ -534,7 +534,7 @@ v20.08 Public major release
    - @ref NECropKernel
    - CLCropKernel
  - Added aligh_corner support for nearest neighbor interpolation in:
-   - @ref NEScaleKernel
+   - NEScaleKernel
    - CLScaleKernel
  - New OpenCL kernels / functions:
    - @ref CLMaxUnpoolingLayerKernel
@@ -621,7 +621,7 @@ v20.05 Public major release
      - @ref CLReductionOperation
      - @ref CLReduceMean
      - @ref NEScale
-     - @ref NEScaleKernel
+     - NEScaleKernel
      - NEUpsampleLayer
      - @ref NECast
      - @ref NEReductionOperation
@@ -1139,7 +1139,7 @@ v18.05 Public major release
  - Added support for the memory manager in the graph API.
  - Enabled Winograd Convolution method in the graph API.
  - Added support for grouped convolutions in the graph API.
- - Replaced NEDeconvolutionLayerUpsampleKernel with @ref NEScaleKernel in @ref NEDeconvolutionLayer.
+ - Replaced NEDeconvolutionLayerUpsampleKernel with NEScaleKernel in @ref NEDeconvolutionLayer.
  - Added fast maths flag in @ref CLConvolutionLayer.
  - Added new tests and benchmarks in validation and benchmark frameworks
  - Merge Activation layer with Convolution Layer (Neon. CL, GLES)

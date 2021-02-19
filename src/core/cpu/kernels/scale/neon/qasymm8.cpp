@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/scale/impl/NEON/list.h"
+#include "src/core/cpu/kernels/scale/neon/list.h"
 
 namespace arm_compute
 {
@@ -31,13 +31,9 @@ void qasymm8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor
                                  BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
                                  bool align_corners, const Window &window)
 {
-    // Get data layout and width/height indices
-    const DataLayout data_layout = src->info()->data_layout();
-    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-
+    // Data layout is NHWC
     // Compute the ratio between source height and destination height
-    const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(idx_height), dst->info()->dimension(idx_height), align_corners);
+    const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
     Window     win_off;
     win_off.set(Window::DimX, Window::Dimension(0, 0, 0));
     win_off.set(Window::DimY, Window::Dimension(0, 0, 0));
@@ -45,8 +41,8 @@ void qasymm8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor
     // Don't increment in X and Y direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
     Window win_in(window);
-    win_in.set(idx_width, Window::Dimension(0, 0, 0));
-    win_in.set(idx_height, Window::Dimension(0, 0, 0));
+    win_in.set(1, Window::Dimension(0, 0, 0));
+    win_in.set(2, Window::Dimension(0, 0, 0));
 
     for(size_t d = Window::DimZ; d < offsets->info()->num_dimensions(); ++d)
     {
@@ -56,10 +52,10 @@ void qasymm8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor
     Iterator in(src, win_in);
     Iterator out(dst, window);
 
-    const int32_t in_dim_w = src->info()->dimension(idx_width);
-    const int32_t in_dim_h = src->info()->dimension(idx_height);
-    const int32_t stride_w = src->info()->strides_in_bytes()[idx_width];
-    const int32_t stride_h = src->info()->strides_in_bytes()[idx_height];
+    const int32_t in_dim_w = src->info()->dimension(1);
+    const int32_t in_dim_h = src->info()->dimension(2);
+    const int32_t stride_w = src->info()->strides_in_bytes()[1];
+    const int32_t stride_h = src->info()->strides_in_bytes()[2];
 
     const UniformQuantizationInfo iq_info = src->info()->quantization_info().uniform();
     const UniformQuantizationInfo oq_info = dst->info()->quantization_info().uniform();
@@ -69,10 +65,10 @@ void qasymm8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor
         const uint8_t const_border_value = static_cast<uint8_t>(constant_border_value.get<uint8_t>());
         execute_window_loop(window, [&](const Coordinates & id)
         {
-            const int32_t index_h       = std::floor((id[idx_height] + sampling_offset) * hr - sampling_offset);
-            const int32_t index_w       = *(reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-            const auto    dx_val        = *(reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-            const auto    dy_val        = *(reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
+            const int32_t index_h       = std::floor((id[2] + sampling_offset) * hr - sampling_offset);
+            const int32_t index_w       = *(reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id[1], id[2]))));
+            const auto    dx_val        = *(reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id[1], id[2]))));
+            const auto    dy_val        = *(reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id[1], id[2]))));
             const auto    pixel_row_ptr = reinterpret_cast<const uint8_t *>(in.ptr());
 
             const auto a00 = (0 <= index_w && index_w < in_dim_w && 0 <= index_h && index_h < in_dim_h) ?
@@ -100,10 +96,10 @@ void qasymm8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor
     {
         execute_window_loop(window, [&](const Coordinates & id)
         {
-            const int     index_h       = std::floor((id[idx_height] + sampling_offset) * hr - sampling_offset);
-            const int32_t index_w       = *(reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-            const auto    dx_val        = *(reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-            const auto    dy_val        = *(reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
+            const int     index_h       = std::floor((id[2] + sampling_offset) * hr - sampling_offset);
+            const int32_t index_w       = *(reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id[1], id[2]))));
+            const auto    dx_val        = *(reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id[1], id[2]))));
+            const auto    dy_val        = *(reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id[1], id[2]))));
             const auto    pixel_row_ptr = reinterpret_cast<const uint8_t *>(in.ptr());
 
             auto clamped_w  = utility::clamp<int>(index_w, 0, in_dim_w - 1);
