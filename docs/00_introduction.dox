@@ -91,14 +91,15 @@ v21.02 Public major release
  - Various optimisations.
  - Upgrade C++ standard to C++14
  - Add macOS support
+ - Add Armv8-R AArch64 architecture support
  - Add SVE/SVE2 support for:
    - @ref NEScaleKernel
    - @ref NEActivationLayer
    - @ref NEArithmeticAddition
    - @ref NEBatchNormalizationLayerKernel
-   - NELogits1DSoftmaxKernel
-   - NELogits1DMaxKernel
-   - NEElementwiseUnaryKernel
+   - @ref cpu::kernels::CpuLogits1DSoftmaxKernel
+   - @ref cpu::kernels::CpuLogits1DMaxKernel
+   - @ref cpu::kernels::CpuElementwiseUnaryKernel
  - Remove padding from OpenCL kernels:
    - @ref CLDirectConvolutionLayerKernel
    - @ref CLArgMinMaxLayerKernel
@@ -108,7 +109,7 @@ v21.02 Public major release
    - @ref CLScaleKernel
    - @ref CLSelectKernel
    - @ref CLBitwiseKernel
-   - ClFloorKernel
+   - @ref opencl::kernels::ClFloorKernel
    - @ref CLTransposeKernel
  - Deprecate functions in CLTuner:
     - add_lws_to_table
