@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,9 @@ inline bool is_valid_pixel_index(int x, int y, int width, int height, int border
     return ((x >= -border_size) && (y >= -border_size) && (x < (width + border_size)) && (y < height + border_size));
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+
 // Return a tensor element at a specified coordinate with different border modes
 template <typename T>
 T tensor_elem_at(const SimpleTensor<T> &src, Coordinates coord, BorderMode border_mode, T constant_border_value)
@@ -83,6 +86,8 @@ T tensor_elem_at(const SimpleTensor<T> &src, Coordinates coord, BorderMode borde
 
     return src[coord2index(src.shape(), coord)];
 }
+
+#pragma GCC diagnostic pop
 
 template <typename T>
 T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value);
