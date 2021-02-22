@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Log.h"
 #include "support/StringSupport.h"
 
 #include <algorithm>
@@ -290,9 +291,13 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
             }
         }
 
-        if(curcpu >= 0)
+        if(curcpu >= 0 && curcpu < static_cast<int>(cpusv.size()))
         {
             cpusv[curcpu] = midr_to_model(midr);
+        }
+        else
+        {
+            ARM_COMPUTE_LOG_INFO_MSG_CORE("Trying to populate a core id with id greater than the expected number of cores!");
         }
     }
 
