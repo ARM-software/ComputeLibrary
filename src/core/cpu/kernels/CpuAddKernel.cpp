@@ -249,9 +249,7 @@ Status validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, cons
 
 std::pair<Status, Window> validate_and_configure_window(const ITensorInfo &src0, const ITensorInfo &src1, ITensorInfo &dst)
 {
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(src0, src1);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = TensorShape::broadcast_shape(src0.tensor_shape(), src1.tensor_shape());
 
     // Auto initialize dst if not initialized
     {
@@ -287,12 +285,9 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo &src0,
         }
     }
 
-    Window win = calculate_max_window(valid_region, Steps());
+    Window win = calculate_max_window(out_shape, Steps());
 
     // CpuAddKernel doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(dst.num_dimensions());
-    dst.set_valid_region(valid_region);
     return std::make_pair(Status{}, win);
 }
 } // namespace

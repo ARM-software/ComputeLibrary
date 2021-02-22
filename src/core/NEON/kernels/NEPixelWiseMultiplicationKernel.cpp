@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1486,9 +1486,7 @@ void NEPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITensorInfo
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1, input2, output, scale, overflow_policy, rounding_policy));
 
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
 
     // Auto initialize output if not initialized
     set_shape_if_empty(*output, out_shape);
@@ -1624,10 +1622,7 @@ void NEPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITensorInfo
     }
 
     // Configure kernel window
-    Coordinates coord;
-    coord.set_num_dimensions(output->num_dimensions());
-    output->set_valid_region(valid_region);
-    Window win = calculate_max_window(valid_region, Steps());
+    Window win = calculate_max_window(out_shape);
 
     INEKernel::configure(win);
 }
@@ -1692,19 +1687,14 @@ void NEComplexPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITen
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1, input2, output));
 
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
 
     // Auto initialize output if not initialized
     const TensorInfo out_info(out_shape, input1->num_channels(), input1->data_type());
     auto_init_if_empty(*output, out_info);
 
     // Configure kernel window
-    Coordinates coord;
-    coord.set_num_dimensions(output->num_dimensions());
-    output->set_valid_region(valid_region);
-    Window win = calculate_max_window(valid_region, Steps());
+    Window win = calculate_max_window(out_shape);
 
     INEKernel::configure(win);
 }

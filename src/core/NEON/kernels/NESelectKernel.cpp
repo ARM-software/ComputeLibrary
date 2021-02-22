@@ -224,7 +224,7 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
         _function = it->second;
     }
 
-    Window win = calculate_max_window(x->info()->valid_region());
+    Window win = calculate_max_window(*x->info());
     INEKernel::configure(win);
 }
 

@@ -113,14 +113,12 @@ void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo
     ARM_COMPUTE_ERROR_THROW_ON(validate(op, input, output));
 
     // Configure kernel window
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = TensorShape::broadcast_shape(input.tensor_shape());
 
     // Auto initialize output if not initialized
     auto_init_if_empty(output, out_shape, 1, input.data_type());
 
-    Window win = calculate_max_window(valid_region);
+    Window win = calculate_max_window(out_shape);
 
     _op = op;
 
