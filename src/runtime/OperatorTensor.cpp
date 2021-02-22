@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "arm_compute/runtime/OperatorTensor.h"
 #include "arm_compute/runtime/MemoryRegion.h"
+
+#include "support/Cast.h"
 
 namespace arm_compute
 {
@@ -48,7 +50,7 @@ uint8_t *OperatorTensor::buffer() const
     switch(_mem_type)
     {
         case MemoryType::CPU:
-            return (uint8_t *)dynamic_cast<MemoryRegion *>(_memory->region())->buffer();
+            return (uint8_t *)utils::cast::polymorphic_downcast<MemoryRegion *>(_memory->region())->buffer();
         default:
             ARM_COMPUTE_ERROR("Memory type not supported.");
     }
