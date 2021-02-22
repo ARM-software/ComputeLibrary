@@ -1350,171 +1350,130 @@ To see the build options available simply run ```scons -h```:
 
         debug: Debug (yes|no)
             default: False
-            actual: False
 
         asserts: Enable asserts (this flag is forced to 1 for debug=1) (yes|no)
             default: False
-            actual: False
 
         logging: Logging (this flag is forced to 1 for debug=1) (yes|no)
             default: False
-            actual: False
 
         arch: Target Architecture (armv7a|arm64-v8a|arm64-v8.2-a|arm64-v8.2-a-sve|arm64-v8.2-a-sve2|x86_32|x86_64|armv8a|armv8.2-a|armv8.2-a-sve|armv8.6-a|armv8.6-a-sve|armv8.6-a-sve2|armv8r64|x86)
             default: armv7a
-            actual: armv7a
 
         estate: Execution State (auto|32|64)
             default: auto
-            actual: auto
 
         os: Target OS (linux|android|macos|tizen|bare_metal)
             default: linux
-            actual: linux
 
         build: Build type (native|cross_compile|embed_only)
             default: cross_compile
-            actual: cross_compile
 
         examples: Build example programs (yes|no)
             default: True
-            actual: True
 
         gemm_tuner: Build gemm_tuner programs (yes|no)
             default: True
-            actual: True
 
         Werror: Enable/disable the -Werror compilation flag (yes|no)
             default: True
-            actual: True
 
         standalone: Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute (yes|no)
             default: False
-            actual: False
 
         opencl: Enable OpenCL support (yes|no)
             default: True
-            actual: True
 
         neon: Enable Neon support (yes|no)
             default: False
-            actual: False
 
         gles_compute: Enable OpenGL ES Compute Shader support (yes|no)
             default: False
-            actual: False
 
         embed_kernels: Embed OpenCL kernels and OpenGL ES compute shaders in library binary (yes|no)
             default: True
-            actual: True
 
         compress_kernels: Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled as well (yes|no)
             default: False
-            actual: False
 
         set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
             default: False
-            actual: False
 
         tracing: Enable runtime tracing (yes|no)
             default: False
-            actual: False
 
         openmp: Enable OpenMP backend (yes|no)
             default: False
-            actual: False
 
         cppthreads: Enable C++11 threads backend (yes|no)
             default: True
-            actual: True
 
         build_dir: Specify sub-folder for the build ( /path/to/build_dir )
             default: .
-            actual: .
 
         install_dir: Specify sub-folder for the install ( /path/to/install_dir )
             default:
-            actual:
 
         exceptions: Enable/disable C++ exception support (yes|no)
             default: True
-            actual: True
 
         linker_script: Use an external linker script ( /path/to/linker_script )
             default:
-            actual:
 
         custom_options: Custom options that can be used to turn on/off features
             (all|none|comma-separated list of names)
             allowed names: disable_mmla_fp
             default: none
-            actual:
 
         data_type_support: Enable a list of data types to support
             (all|none|comma-separated list of names)
             allowed names: qasymm8 qasymm8_signed qsymm16 fp16 fp32
             default: all
-            actual: qasymm8 qasymm8_signed qsymm16 fp16 fp32
 
         toolchain_prefix: Override the toolchain prefix
             default:
-            actual:
 
         compiler_prefix: Override the compiler prefix
             default:
-            actual:
 
         extra_cxx_flags: Extra CXX flags to be appended to the build command
             default:
-            actual:
 
         extra_link_flags: Extra LD flags to be appended to the build command
             default:
-            actual:
 
         compiler_cache: Command to prefix to the C and C++ compiler (e.g ccache)
             default:
-            actual:
 
         specs_file: Specs file to use
             default: rdimon.specs
-            actual: rdimon.specs
 
         benchmark_examples: Build benchmark examples programs (yes|no)
             default: True
-            actual: True
 
         validate_examples: Build validate examples programs (yes|no)
             default: True
-            actual: True
 
         reference_openmp: Build reference validation with openmp (yes|no)
             default: True
-            actual: True
 
         validation_tests: Build validation test programs (yes|no)
             default: True
-            actual: True
 
         benchmark_tests: Build benchmark test programs (yes|no)
             default: True
-            actual: True
 
         test_filter: Pattern to specify the tests' filenames to be compiled
             default: *.cpp
-            actual: *.cpp
 
         pmu: Enable PMU counters (yes|no)
             default: False
-            actual: False
 
         mali: Enable Mali hardware counters (yes|no)
             default: False
-            actual: False
 
         external_tests_dir: Add examples, benchmarks and tests to the tests suite from an external path ( /path/to/external_tests_dir )
             default:
-            actual:
 
 @b debug / @b asserts:
  - With debug=1 asserts are enabled, and the library is built with symbols and no optimisations enabled.
