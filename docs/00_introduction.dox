@@ -49,10 +49,10 @@ In order to facilitate the work of the support team please provide the build inf
 For each release we provide some pre-built binaries of the library [here](https://github.com/ARM-software/ComputeLibrary/releases)
 
 These binaries have been built using the following toolchains:
-            - Linux armv7a: gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf
-            - Linux arm64-v8a: gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu
+            - Linux armv7a: gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf
+            - Linux arm64-v8a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
             - Android armv7a: clang++ / libc++ NDK r18b
-            - Android am64-v8a: clang++ / libc++ NDK r18b
+            - Android am64-v8a: clang++ / libc++ NDK r20b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
@@ -132,6 +132,7 @@ v21.02 Public major release
    - Experimental extension for the OpenCL tuner to tune the batches of work groups distribute to compute units
  - Add functionality to load the OpenCL GEMM heuristics at runtime
    - The GEMM heuristic file (MLGO) can be used to update the default GEMM heuristics available for OpenCL
+ - Note: there might be performance regressions against v20.08 in Inception v3 using int8 data types on Arm Mali-G77 GPUs. Currently under investigation
 
 v20.11 Public major release
  - Various bug fixes.
@@ -1706,10 +1707,10 @@ An example build command with SVE is:
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
  - clang++ from NDK r18b for armv7a
- - clang++ from NDK r18b for arm64-v8a
- - clang++ from NDK r18b for arm64-v8.2-a with FP16 support
+ - clang++ from NDK r20b for arm64-v8a
+ - clang++ from NDK r20b for arm64-v8.2-a with FP16 support
 
-Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
+Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>. Minimum NDK version required: r18b
 
 - Download the NDK r18b from here: https://developer.android.com/ndk/downloads/index.html to directory $NDK
 - Make sure you have Python 2.7 installed on your machine.
