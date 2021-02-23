@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -761,7 +761,7 @@ NodeID GraphBuilder::add_yolo_node(Graph &g, NodeParams params, NodeIdxPair inpu
 
     // Activation classes and end part of box
     const Coordinates cls_start = is_nhwc ? Coordinates(5, 0, 0) : Coordinates(0, 0, 5);
-    const Coordinates cls_end   = is_nhwc ? Coordinates(-1, -1, -1) : Coordinates(-1, -1, -1);
+    const Coordinates cls_end   = Coordinates(-1, -1, -1);
     NodeID            cls       = g.add_node<SliceLayerNode>(cls_start, cls_end);
     NodeID            cls_act   = g.add_node<ActivationLayerNode>(act_info);
     set_node_params(g, cls, params);
