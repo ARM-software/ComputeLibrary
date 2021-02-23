@@ -21,71 +21,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/gpu/cl/ClContext.h"
-
-#include "src/gpu/cl/ClTensor.h"
+#include "src/common/TensorPack.h"
+#include "src/common/ITensor.h"
+#include "src/common/utils/Validate.h"
 
 namespace arm_compute
 {
-namespace gpu
+TensorPack::TensorPack(IContext *ctx)
+    : AclTensorPack_(), _pack()
 {
-namespace opencl
-{
-namespace
-{
-mlgo::MLGOHeuristics populate_mlgo(const char *filename)
-{
-    bool                 status = false;
-    mlgo::MLGOHeuristics heuristics;
-
-    if(filename != nullptr)
-    {
-        status = heuristics.reload_from_file(filename);
-    }
-    return status ? std::move(heuristics) : mlgo::MLGOHeuristics();
-}
-} // namespace
-
-ClContext::ClContext(const AclContextOptions *options)
-    : IContext(Target::GpuOcl),
-      _mlgo_heuristics(),
-      _cl_context()
-{
-    if(options != nullptr)
-    {
-        _mlgo_heuristics = populate_mlgo(options->kernel_config_file);
-    }
+    ARM_COMPUTE_ASSERT_NOT_NULLPTR(ctx);
+    this->header.ctx = ctx;
+    this->header.ctx->inc_ref();
 }
 
-const mlgo::MLGOHeuristics &ClContext::mlgo() const
+TensorPack::~TensorPack()
 {
-    return _mlgo_heuristics;
+    this->header.ctx->dec_ref();
+    this->header.type = detail::ObjectType::Invalid;
 }
 
-::cl::Context ClContext::cl_ctx()
+AclStatus TensorPack::add_tensor(ITensorV2 *tensor, int32_t slot_id)
 {
-    return _cl_context;
+    _pack.add_tensor(slot_id, tensor->tensor());
+    return AclStatus::AclSuccess;
 }
 
-bool ClContext::set_cl_ctx(::cl::Context ctx)
+size_t TensorPack::size() const
 {
-    if(this->refcount() == 0)
-    {
-        _cl_context = ctx;
-        return true;
-    }
-    return false;
+    return _pack.size();
 }
 
-ITensorV2 *ClContext::create_tensor(const AclTensorDescriptor &desc, bool allocate)
+bool TensorPack::empty() const
 {
-    ClTensor *tensor = new ClTensor(this, desc);
-    if(tensor != nullptr && allocate)
-    {
-        tensor->allocate();
-    }
-    return tensor;
+    return _pack.empty();
 }
-} // namespace opencl
-} // namespace gpu
+
+bool TensorPack::is_valid() const
+{
+    return this->header.type == detail::ObjectType::TensorPack;
+}
+
+arm_compute::ITensor *TensorPack::get_tensor(int32_t slot_id)
+{
+    return _pack.get_tensor(slot_id);
+}
+
+arm_compute::ITensorPack &TensorPack::get_tensor_pack()
+{
+    return _pack;
+}
 } // namespace arm_compute

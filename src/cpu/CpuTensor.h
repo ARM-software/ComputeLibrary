@@ -21,41 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_TYPES_H_
-#define SRC_COMMON_TYPES_H_
+#ifndef SRC_CPU_CPUTENSOR_H
+#define SRC_CPU_CPUTENSOR_H
 
-#include "arm_compute/AclTypes.h"
+#include "src/common/ITensor.h"
+
+#include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
 {
-enum class StatusCode
+namespace cpu
 {
-    Success            = AclSuccess,
-    RuntimeError       = AclRuntimeError,
-    OutOfMemory        = AclOutOfMemory,
-    Unimplemented      = AclUnimplemented,
-    UnsupportedTarget  = AclUnsupportedTarget,
-    InvalidTarget      = AclInvalidTarget,
-    InvalidArgument    = AclInvalidArgument,
-    UnsupportedConfig  = AclUnsupportedConfig,
-    InvalidObjectState = AclInvalidObjectState,
-};
+/** CPU tensor implementation class */
+class CpuTensor final : public ITensorV2
+{
+public:
+    /**  Construct a new Cpu Tensor object
+     *
+     * @param[in] ctx  Context to be used
+     * @param[in] desc Tensor descriptor
+     */
+    CpuTensor(IContext *ctx, const AclTensorDescriptor &desc);
+    /** Allocates tensor
+     *
+     * @return StatusCode A status code
+     */
+    StatusCode allocate();
 
-enum class Target
-{
-    Cpu    = AclTarget::AclCpu,
-    GpuOcl = AclTarget::AclGpuOcl,
-};
+    // Inherrited functions overriden
+    void                 *map() override;
+    StatusCode            unmap() override;
+    arm_compute::ITensor *tensor() override;
+    StatusCode import(void *handle, ImportMemoryType type) override;
 
-enum class ExecutionMode
-{
-    FastRerun = AclPreferFastRerun,
-    FastStart = AclPreferFastStart,
+private:
+    std::unique_ptr<Tensor> _legacy_tensor;
 };
-
-enum class ImportMemoryType
-{
-    HostPtr = AclImportMemoryType::AclHostPtr
-};
+} // namespace cpu
 } // namespace arm_compute
-#endif /* SRC_COMMON_TYPES_H_ */
+
+#endif /* SRC_CPU_CPUTENSOR_H */

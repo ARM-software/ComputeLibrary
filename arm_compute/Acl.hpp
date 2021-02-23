@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <memory>
 #include <string>
+#include <vector>
 
 #if defined(ARM_COMPUTE_EXCEPTIONS_ENABLED)
 #include <exception>
@@ -41,6 +42,8 @@ namespace acl
 {
 // Forward declarations
 class Context;
+class Tensor;
+class TensorPack;
 
 /**< Status code enum */
 enum class StatusCode
@@ -80,6 +83,8 @@ struct ObjectDeleter
     };
 
 OBJECT_DELETER(AclContext, AclDestroyContext)
+OBJECT_DELETER(AclTensor, AclDestroyTensor)
+OBJECT_DELETER(AclTensorPack, AclDestroyTensorPack)
 
 #undef OBJECT_DELETER
 
@@ -256,13 +261,12 @@ private:
  *
  * @return Status code
  */
-static inline StatusCode report_status(StatusCode status, const std::string &msg)
+static inline void report_status(StatusCode status, const std::string &msg)
 {
     if(status != StatusCode::Success)
     {
         throw Status(status, msg);
     }
-    return status;
 }
 #else  /* defined(ARM_COMPUTE_EXCEPTIONS_ENABLED) */
 /** Reports a status code
@@ -275,10 +279,10 @@ static inline StatusCode report_status(StatusCode status, const std::string &msg
  *
  * @return Status code
  */
-static inline StatusCode report_status(StatusCode status, const std::string &msg)
+static inline void report_status(StatusCode status, const std::string &msg)
 {
+    ARM_COMPUTE_IGNORE_UNUSED(status);
     ARM_COMPUTE_IGNORE_UNUSED(msg);
-    return status;
 }
 #endif /* defined(ARM_COMPUTE_EXCEPTIONS_ENABLED) */
 
@@ -313,12 +317,22 @@ public:
     /**< Context options */
     struct Options
     {
+        static constexpr int32_t num_threads_auto = -1; /**< Allow runtime to specify number of threads */
+
         /** Default Constructor
          *
          * @note By default no precision loss is enabled for operators
          * @note By default the preferred execution mode is to favor multiple consecutive reruns of an operator
          */
-        Options() = default;
+        Options()
+            : Options(ExecutionMode::FastRerun /* mode */,
+                      AclCpuCapabilitiesAuto /* caps */,
+                      false /* enable_fast_math */,
+                      nullptr /* kernel_config */,
+                      num_threads_auto /* max_compute_units */,
+                      nullptr /* allocator */)
+        {
+        }
         /** Constructor
          *
          * @param[in] mode              Execution mode to be used
@@ -335,14 +349,15 @@ public:
                 int32_t               max_compute_units,
                 AclAllocator         *allocator)
         {
-            opts.mode               = detail::as_cenum<AclExecutionMode>(mode);
-            opts.capabilities       = caps;
-            opts.enable_fast_math   = enable_fast_math;
-            opts.kernel_config_file = kernel_config;
-            opts.max_compute_units  = max_compute_units;
-            opts.allocator          = allocator;
+            copts.mode               = detail::as_cenum<AclExecutionMode>(mode);
+            copts.capabilities       = caps;
+            copts.enable_fast_math   = enable_fast_math;
+            copts.kernel_config_file = kernel_config;
+            copts.max_compute_units  = max_compute_units;
+            copts.allocator          = allocator;
         }
-        AclContextOptions opts{ acl_default_ctx_options };
+
+        AclContextOptions copts{};
     };
 
 public:
@@ -367,13 +382,222 @@ public:
     Context(Target target, const Options &options, StatusCode *status = nullptr)
     {
         AclContext ctx;
-        const auto st = detail::as_enum<StatusCode>(AclCreateContext(&ctx, detail::as_cenum<AclTarget>(target), &options.opts));
+        const auto st = detail::as_enum<StatusCode>(AclCreateContext(&ctx, detail::as_cenum<AclTarget>(target), &options.copts));
         reset(ctx);
-        report_status(st, "Failure during context creation");
+        report_status(st, "[Arm Compute Library] Failed to create context");
         if(status)
         {
             *status = st;
         }
+    }
+};
+
+/**< Data type enumeration */
+enum class DataType
+{
+    Unknown  = AclDataTypeUnknown,
+    UInt8    = AclUInt8,
+    Int8     = AclInt8,
+    UInt16   = AclUInt16,
+    Int16    = AclInt16,
+    UInt32   = AclUint32,
+    Int32    = AclInt32,
+    Float16  = AclFloat16,
+    BFloat16 = AclBFloat16,
+    Float32  = AclFloat32,
+};
+
+/** Tensor Descriptor class
+ *
+ * Structure that contains all the required meta-data to represent a tensor
+ */
+class TensorDescriptor
+{
+public:
+    /** Constructor
+     *
+     * @param[in] shape Shape of the tensor
+     * @param[in] data_type Data type of the tensor
+     */
+    TensorDescriptor(const std::vector<int32_t> &shape, DataType data_type)
+        : _shape(shape), _data_type(data_type)
+    {
+        _cdesc.ndims     = _shape.size();
+        _cdesc.shape     = _shape.data();
+        _cdesc.data_type = detail::as_cenum<AclDataType>(_data_type);
+        _cdesc.strides   = nullptr;
+        _cdesc.boffset   = 0;
+    }
+    /** Get underlying C tensor descriptor
+     *
+     * @return Underlying structure
+     */
+    const AclTensorDescriptor *get() const
+    {
+        return &_cdesc;
+    }
+
+private:
+    std::vector<int32_t> _shape{};
+    DataType             _data_type{};
+    AclTensorDescriptor  _cdesc{};
+};
+
+/** Import memory types */
+enum class ImportType
+{
+    Host = AclImportMemoryType::AclHostPtr
+};
+
+/** Tensor class
+ *
+ * Tensor is an mathematical construct that can represent an N-Dimensional space.
+ *
+ * @note Maximum dimensionality support is 6 internally at the moment
+ */
+class Tensor : public detail::ObjectBase<AclTensor_>
+{
+public:
+    /** Constructor
+     *
+     * @note Tensor memory is allocated
+     *
+     * @param[in]  ctx    Context from where the tensor will be created from
+     * @param[in]  desc   Tensor descriptor to be used
+     * @param[out] status Status information if requested
+     */
+    Tensor(Context &ctx, const TensorDescriptor &desc, StatusCode *status = nullptr)
+        : Tensor(ctx, desc, true, status)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in]  ctx    Context from where the tensor will be created from
+     * @param[in]  desc   Tensor descriptor to be used
+     * @param[in]  allocate Flag to indicate if the tensor needs to be allocated
+     * @param[out] status Status information if requested
+     */
+    Tensor(Context &ctx, const TensorDescriptor &desc, bool allocate, StatusCode *status)
+    {
+        AclTensor  tensor;
+        const auto st = detail::as_enum<StatusCode>(AclCreateTensor(&tensor, ctx.get(), desc.get(), allocate));
+        reset(tensor);
+        report_status(st, "[Arm Compute Library] Failed to create tensor!");
+        if(status)
+        {
+            *status = st;
+        }
+    }
+    /** Maps the backing memory of a given tensor that can be used by the host to access any contents
+     *
+     * @return A valid non-zero pointer in case of success else nullptr
+     */
+    void *map()
+    {
+        void      *handle = nullptr;
+        const auto st     = detail::as_enum<StatusCode>(AclMapTensor(_object.get(), &handle));
+        report_status(st, "[Arm Compute Library] Failed to map the tensor and extract the tensor's backing memory!");
+        return handle;
+    }
+    /** Unmaps tensor's memory
+     *
+     * @param[in] handle Handle to unmap
+     *
+     * @return Status code
+     */
+    StatusCode unmap(void *handle)
+    {
+        const auto st = detail::as_enum<StatusCode>(AclUnmapTensor(_object.get(), handle));
+        report_status(st, "[Arm Compute Library] Failed to unmap the tensor!");
+        return st;
+    }
+    /** Import external memory to a given tensor object
+     *
+     * @param[in] handle External memory handle
+     * @param[in] type   Type of memory to be imported
+     *
+     * @return Status code
+     */
+    StatusCode import(void *handle, ImportType type)
+    {
+        const auto st = detail::as_enum<StatusCode>(AclTensorImport(_object.get(), handle, detail::as_cenum<AclImportMemoryType>(type)));
+        report_status(st, "[Arm Compute Library] Failed to import external memory to tensor!");
+        return st;
+    }
+};
+
+/** Tensor pack class
+ *
+ * Pack is a utility construct that is used to create a collection of tensors that can then
+ * be passed into operator as inputs.
+ */
+class TensorPack : public detail::ObjectBase<AclTensorPack_>
+{
+public:
+    /** Pack pair construct */
+    struct PackPair
+    {
+        /** Constructor
+         *
+         * @param[in] tensor_ Tensor to pack
+         * @param[in] slot_id_ Slot identification of the tensor in respect with the operator
+         */
+        PackPair(Tensor *tensor_, int32_t slot_id_)
+            : tensor(tensor_), slot_id(slot_id_)
+        {
+        }
+
+        Tensor *tensor{ nullptr };         /**< Tensor object */
+        int32_t slot_id{ AclSlotUnknown }; /**< Slot id in respect with the operator */
+    };
+
+public:
+    /** Constructor
+     *
+     * @param[in]  ctx    Context from where the tensor pack will be created from
+     * @param[out] status Status information if requested
+     */
+    explicit TensorPack(Context &ctx, StatusCode *status = nullptr)
+    {
+        AclTensorPack pack;
+        const auto    st = detail::as_enum<StatusCode>(AclCreateTensorPack(&pack, ctx.get()));
+        reset(pack);
+        report_status(st, "[Arm Compute Library] Failure during tensor pack creation");
+        if(status)
+        {
+            *status = st;
+        }
+    }
+    /** Add tensor to tensor pack
+     *
+     * @param[in] slot_id Slot id of the tensor in respect with the operator
+     * @param[in] tensor  Tensor to be added in the pack
+     *
+     * @return Status code
+     */
+    StatusCode add(Tensor &tensor, int32_t slot_id)
+    {
+        return detail::as_enum<StatusCode>(AclPackTensor(_object.get(), tensor.get(), slot_id));
+    }
+    /** Add a list of tensors to a tensor pack
+     *
+     * @param[in] packed Pair packs to be added
+     *
+     * @return Status code
+     */
+    StatusCode add(std::initializer_list<PackPair> packed)
+    {
+        const size_t           size = packed.size();
+        std::vector<int32_t>   slots(size);
+        std::vector<AclTensor> tensors(size);
+        int                    i = 0;
+        for(auto &p : packed)
+        {
+            slots[i]   = p.slot_id;
+            tensors[i] = AclTensor(p.tensor);
+            ++i;
+        }
+        return detail::as_enum<StatusCode>(AclPackTensors(_object.get(), tensors.data(), slots.data(), size));
     }
 };
 } // namespace acl

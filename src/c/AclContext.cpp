@@ -79,20 +79,20 @@ extern "C" AclStatus AclCreateContext(AclContext              *ctx,
 {
     if(!is_target_valid(target))
     {
-        ARM_COMPUTE_LOG_ERROR_ACL("Target is invalid");
+        ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Target is invalid!");
         return AclUnsupportedTarget;
     }
 
     if(options != nullptr && !are_context_options_valid(options))
     {
-        ARM_COMPUTE_LOG_ERROR_ACL("Context options are invalid");
+        ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Context options are invalid!");
         return AclInvalidArgument;
     }
 
     auto acl_ctx = create_context(target, options);
     if(ctx == nullptr)
     {
-        ARM_COMPUTE_LOG_ERROR_ACL("Couldn't allocate internal resources for context creation");
+        ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Couldn't allocate internal resources for context creation!");
         return AclOutOfMemory;
     }
     *ctx = acl_ctx;
@@ -106,13 +106,12 @@ extern "C" AclStatus AclDestroyContext(AclContext external_ctx)
 
     IContext *ctx = get_internal(external_ctx);
 
-    StatusCode status = StatusCode::Success;
-    status            = detail::validate_internal_context(ctx);
+    StatusCode status = detail::validate_internal_context(ctx);
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 
     if(ctx->refcount() != 0)
     {
-        ARM_COMPUTE_LOG_ERROR_ACL("Context has references on it that haven't been released");
+        ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Context has references on it that haven't been released!");
         // TODO: Fix the refcount with callback when reaches 0
     }
 

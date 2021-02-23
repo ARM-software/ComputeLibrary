@@ -33,6 +33,10 @@ extern "C" {
 
 /**< Opaque Context object */
 typedef struct AclContext_ *AclContext;
+/**< Opaque Tensor object */
+typedef struct AclTensor_ *AclTensor;
+/**< Opaque Tensor pack object */
+typedef struct AclTensorPack_ *AclTensorPack;
 
 // Capabilities bitfield (Note: if multiple are enabled ComputeLibrary will pick the best possible)
 typedef uint64_t AclTargetCapabilities;
@@ -134,16 +138,55 @@ typedef struct AclContextOptions
     AclAllocator         *allocator;          /**< Allocator to be used by all the memory internally */
 } AclContextOptions;
 
-/** Default context */
-const AclContextOptions acl_default_ctx_options =
+/**< Supported data types */
+typedef enum AclDataType
 {
-    AclPreferFastRerun,     /* mode */
-    AclCpuCapabilitiesAuto, /* capabilities */
-    false,                  /* enable_fast_math */
-    "default.mlgo",         /* kernel_config_file */
-    -1,                     /* max_compute_units */
-    nullptr                 /* allocator */
-};
+    AclDataTypeUnknown = 0, /**< Unknown data type */
+    AclUInt8           = 1, /**< 8-bit unsigned integer */
+    AclInt8            = 2, /**< 8-bit signed integer */
+    AclUInt16          = 3, /**< 16-bit unsigned integer */
+    AclInt16           = 4, /**< 16-bit signed integer */
+    AclUint32          = 5, /**< 32-bit unsigned integer */
+    AclInt32           = 6, /**< 32-bit signed integer */
+    AclFloat16         = 7, /**< 16-bit floating point */
+    AclBFloat16        = 8, /**< 16-bit brain floating point */
+    AclFloat32         = 9, /**< 32-bit floating point */
+} AclDataType;
+
+/**< Supported data layouts for operations */
+typedef enum AclDataLayout
+{
+    AclDataLayoutUnknown = 0, /**< Unknown data layout */
+    AclNhwc              = 1, /**< Native, performant, Compute Library data layout */
+    AclNchw              = 2, /**< Data layout where width is the fastest changing dimension */
+} AclDataLayout;
+
+/** Type of memory to be imported */
+typedef enum AclImportMemoryType
+{
+    AclHostPtr = 0 /**< Host allocated memory */
+} AclImportMemoryType;
+
+/**< Tensor Descriptor */
+typedef struct AclTensorDescriptor
+{
+    int32_t     ndims;     /**< Number or dimensions */
+    int32_t    *shape;     /**< Tensor Shape */
+    AclDataType data_type; /**< Tensor Data type */
+    int64_t    *strides;   /**< Strides on each dimension. Linear memory is assumed if nullptr */
+    int64_t     boffset;   /**< Offset in terms of bytes for the first element */
+} AclTensorDescriptor;
+
+/**< Slot type of a tensor */
+typedef enum
+{
+    AclSlotUnknown = -1,
+    AclSrc         = 0,
+    AclSrc0        = 0,
+    AclSrc1        = 1,
+    AclDst         = 30,
+    AclSrcVec      = 256,
+} AclTensorSlot;
 
 #ifdef __cplusplus
 }

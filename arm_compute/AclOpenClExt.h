@@ -63,6 +63,15 @@ AclStatus AclGetClContext(AclContext ctx, cl_context *opencl_context);
  */
 AclStatus AclSetClContext(AclContext ctx, cl_context opencl_context);
 
+/** Extract the underlying OpenCL memory object by a given Compute Library tensor object
+ *
+ * @param[in]  tensor     A valid non-zero tensor
+ * @param[out] opencl_mem Underlyig OpenCL memory object
+ *
+ * @return Status code
+ */
+AclStatus AclGetClMem(AclTensor tensor, cl_mem *opencl_mem);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

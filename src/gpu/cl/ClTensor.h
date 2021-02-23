@@ -21,9 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/gpu/cl/ClContext.h"
+#ifndef SRC_GPU_CLTENSOR_H
+#define SRC_GPU_CLTENSOR_H
 
-#include "src/gpu/cl/ClTensor.h"
+#include "src/common/ITensor.h"
+
+#include "arm_compute/runtime/CL/CLTensor.h"
 
 namespace arm_compute
 {
@@ -31,61 +34,33 @@ namespace gpu
 {
 namespace opencl
 {
-namespace
+/** OpenCL tensor implementation class */
+class ClTensor final : public ITensorV2
 {
-mlgo::MLGOHeuristics populate_mlgo(const char *filename)
-{
-    bool                 status = false;
-    mlgo::MLGOHeuristics heuristics;
+public:
+    /**  Construct a new OpenCL Tensor object
+     *
+     * @param[in] ctx  Context to be used
+     * @param[in] desc Tensor descriptor
+     */
+    ClTensor(IContext *ctx, const AclTensorDescriptor &desc);
+    /** Allocates tensor
+     *
+     * @return StatusCode A status code
+     */
+    StatusCode allocate();
 
-    if(filename != nullptr)
-    {
-        status = heuristics.reload_from_file(filename);
-    }
-    return status ? std::move(heuristics) : mlgo::MLGOHeuristics();
-}
-} // namespace
+    // Inherrited functions overriden
+    void                 *map() override;
+    StatusCode            unmap() override;
+    arm_compute::ITensor *tensor() override;
+    StatusCode import(void *handle, ImportMemoryType type) override;
 
-ClContext::ClContext(const AclContextOptions *options)
-    : IContext(Target::GpuOcl),
-      _mlgo_heuristics(),
-      _cl_context()
-{
-    if(options != nullptr)
-    {
-        _mlgo_heuristics = populate_mlgo(options->kernel_config_file);
-    }
-}
-
-const mlgo::MLGOHeuristics &ClContext::mlgo() const
-{
-    return _mlgo_heuristics;
-}
-
-::cl::Context ClContext::cl_ctx()
-{
-    return _cl_context;
-}
-
-bool ClContext::set_cl_ctx(::cl::Context ctx)
-{
-    if(this->refcount() == 0)
-    {
-        _cl_context = ctx;
-        return true;
-    }
-    return false;
-}
-
-ITensorV2 *ClContext::create_tensor(const AclTensorDescriptor &desc, bool allocate)
-{
-    ClTensor *tensor = new ClTensor(this, desc);
-    if(tensor != nullptr && allocate)
-    {
-        tensor->allocate();
-    }
-    return tensor;
-}
+private:
+    std::unique_ptr<CLTensor> _legacy_tensor;
+};
 } // namespace opencl
 } // namespace gpu
 } // namespace arm_compute
+
+#endif /* SRC_GPU_CLTENSOR_H */

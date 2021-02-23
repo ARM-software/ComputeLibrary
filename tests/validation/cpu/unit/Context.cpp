@@ -21,11 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
-
-#include "arm_compute/Acl.hpp"
+#include "tests/validation/fixtures/UNIT/Context.h"
 
 #include "src/cpu/CpuContext.h"
 
@@ -78,91 +74,17 @@ TEST_CASE(CreateContextWithInvalidOptions, framework::DatasetMode::ALL)
     ARM_COMPUTE_ASSERT(ctx == nullptr);
 }
 
-/** Test-case for AclDestroyContext
- *
- * Validate that AclDestroyContext behaves as expected when invalid inputs as context are given
- *
- * Test Steps:
- *  - Call AclDestroyContext with null context
- *  - Confirm that AclInvalidArgument is reported
- *  - Call AclDestroyContext on empty array
- *  - Confirm that AclInvalidArgument is reported
- *  - Call AclDestroyContext on an ACL object other than AclContext
- *  - Confirm that AclInvalidArgument is reported
- *  - Confirm that context is still nullptr
- */
-TEST_CASE(DestroyInvalidContext, framework::DatasetMode::ALL)
+FIXTURE_TEST_CASE(DestroyInvalidContext, DestroyInvalidContextFixture<AclTarget::AclCpu>, framework::DatasetMode::ALL)
 {
-    AclContext ctx = nullptr;
-    std::array<char, 256> empty_array{};
-    AclContext valid_ctx = nullptr;
-    ARM_COMPUTE_ASSERT(AclCreateContext(&valid_ctx, AclCpu, nullptr) == AclStatus::AclSuccess);
-    ARM_COMPUTE_ASSERT(AclDestroyContext(ctx) == AclStatus::AclInvalidArgument);
-    ARM_COMPUTE_ASSERT(AclDestroyContext(reinterpret_cast<AclContext>(empty_array.data())) == AclStatus::AclInvalidArgument);
-    ARM_COMPUTE_ASSERT(ctx == nullptr);
-    ARM_COMPUTE_ASSERT(AclDestroyContext(valid_ctx) == AclStatus::AclSuccess);
 }
-
-/** Test-case for AclCreateContext and AclDestroy Context
- *
- * Validate that AclCreateContext can create and destroy a context
- *
- * Test Steps:
- *  - Call AclCreateContext with valid target
- *  - Confirm that context is not nullptr and error code is AclSuccess
- *  - Destroy context
- *  - Confirm that AclSuccess is reported
- */
-TEST_CASE(SimpleContextCApi, framework::DatasetMode::ALL)
+FIXTURE_TEST_CASE(SimpleContextCApi, SimpleContextCApiFixture<AclTarget::AclCpu>, framework::DatasetMode::ALL)
 {
-    AclContext ctx = nullptr;
-    ARM_COMPUTE_ASSERT(AclCreateContext(&ctx, AclCpu, nullptr) == AclStatus::AclSuccess);
-    ARM_COMPUTE_ASSERT(ctx != nullptr);
-    ARM_COMPUTE_ASSERT(AclDestroyContext(ctx) == AclStatus::AclSuccess);
 }
-
-/** Test-case for Context from the C++ interface
- *
- * Test Steps:
- *  - Create a Context obejct
- *  - Confirm that StatusCode::Success is reported
- *  - Confirm that equality operator works
- *  - Confirm that inequality operator works
- */
-TEST_CASE(SimpleContextCppApi, framework::DatasetMode::ALL)
+FIXTURE_TEST_CASE(SimpleContextCppApi, SimpleContextCppApiFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
 {
-    acl::StatusCode status = acl::StatusCode::Success;
-    acl::Context    ctx(acl::Target::Cpu, &status);
-    ARM_COMPUTE_ASSERT(status == acl::StatusCode::Success);
-
-    auto ctx_eq = ctx;
-    ARM_COMPUTE_ASSERT(ctx_eq == ctx);
-
-    acl::Context ctx_ienq(acl::Target::Cpu, &status);
-    ARM_COMPUTE_ASSERT(status == acl::StatusCode::Success);
-    ARM_COMPUTE_ASSERT(ctx_ienq != ctx);
 }
-
-/** Test-case for CpuCapabilities
- *
- * Validate that AclCreateContext can create/destroy multiple contexts with different options
- *
- * Test Steps:
- *  - Call AclCreateContext with different targets
- *  - Confirm that AclSuccess is reported
- *  - Destroy all contexts
- *  - Confirm that AclSuccess is reported
- */
-TEST_CASE(MultipleContexts, framework::DatasetMode::ALL)
+FIXTURE_TEST_CASE(MultipleContexts, MultipleContextsFixture<AclTarget::AclCpu>, framework::DatasetMode::ALL)
 {
-    const unsigned int num_tests = 5;
-    std::array<AclContext, num_tests> ctxs{};
-    for(unsigned int i = 0; i < num_tests; ++i)
-    {
-        ARM_COMPUTE_ASSERT(AclCreateContext(&ctxs[i], AclTarget::AclCpu, nullptr) == AclStatus::AclSuccess);
-        ARM_COMPUTE_ASSERT(ctxs[i] != nullptr);
-        ARM_COMPUTE_ASSERT(AclDestroyContext(ctxs[i]) == AclStatus::AclSuccess);
-    }
 }
 
 /** Test-case for CpuCapabilities
@@ -176,9 +98,9 @@ TEST_CASE(MultipleContexts, framework::DatasetMode::ALL)
  */
 TEST_CASE(CpuCapabilities, framework::DatasetMode::ALL)
 {
-    AclContextOptions opts = acl_default_ctx_options;
-    opts.capabilities      = AclCpuCapabilitiesDot | AclCpuCapabilitiesMmlaInt8 | AclCpuCapabilitiesSve2;
-    arm_compute::cpu::CpuContext ctx(&opts);
+    acl::Context::Options opts;
+    opts.copts.capabilities = AclCpuCapabilitiesDot | AclCpuCapabilitiesMmlaInt8 | AclCpuCapabilitiesSve2;
+    arm_compute::cpu::CpuContext ctx(&opts.copts);
 
     ARM_COMPUTE_ASSERT(ctx.capabilities().dot == true);
     ARM_COMPUTE_ASSERT(ctx.capabilities().mmla_int8 == true);

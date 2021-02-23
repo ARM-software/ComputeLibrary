@@ -67,6 +67,9 @@ public:
      */
     AllocatorWrapper &allocator();
 
+    // Inherrited methods overridden
+    ITensorV2 *create_tensor(const AclTensorDescriptor &desc, bool allocate) override;
+
 private:
     AllocatorWrapper _allocator;
     CpuCapabilities  _caps;

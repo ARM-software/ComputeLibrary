@@ -21,71 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/gpu/cl/ClContext.h"
-
-#include "src/gpu/cl/ClTensor.h"
+#include "src/common/utils/LegacySupport.h"
 
 namespace arm_compute
 {
-namespace gpu
-{
-namespace opencl
+namespace detail
 {
 namespace
 {
-mlgo::MLGOHeuristics populate_mlgo(const char *filename)
+DataType data_type_mapper(AclDataType data_type)
 {
-    bool                 status = false;
-    mlgo::MLGOHeuristics heuristics;
-
-    if(filename != nullptr)
+    switch(data_type)
     {
-        status = heuristics.reload_from_file(filename);
+        case AclDataType::AclFloat32:
+            return DataType::F32;
+        case AclDataType::AclFloat16:
+            return DataType::F16;
+        case AclDataType::AclBFloat16:
+            return DataType::BFLOAT16;
+        default:
+            return DataType::UNKNOWN;
+            ;
     }
-    return status ? std::move(heuristics) : mlgo::MLGOHeuristics();
+}
+
+TensorShape tensor_shape_mapper(int32_t ndims, int32_t *shape)
+{
+    TensorShape legacy_shape{};
+    for(int32_t d = 0; d < ndims; ++d)
+    {
+        legacy_shape.set(d, shape[d], false);
+    }
+    return legacy_shape;
 }
 } // namespace
 
-ClContext::ClContext(const AclContextOptions *options)
-    : IContext(Target::GpuOcl),
-      _mlgo_heuristics(),
-      _cl_context()
+TensorInfo convert_to_legacy_tensor_info(const AclTensorDescriptor &desc)
 {
-    if(options != nullptr)
-    {
-        _mlgo_heuristics = populate_mlgo(options->kernel_config_file);
-    }
+    TensorInfo legacy_desc;
+    legacy_desc.init(tensor_shape_mapper(desc.ndims, desc.shape), 1, data_type_mapper(desc.data_type));
+    return legacy_desc;
 }
-
-const mlgo::MLGOHeuristics &ClContext::mlgo() const
-{
-    return _mlgo_heuristics;
-}
-
-::cl::Context ClContext::cl_ctx()
-{
-    return _cl_context;
-}
-
-bool ClContext::set_cl_ctx(::cl::Context ctx)
-{
-    if(this->refcount() == 0)
-    {
-        _cl_context = ctx;
-        return true;
-    }
-    return false;
-}
-
-ITensorV2 *ClContext::create_tensor(const AclTensorDescriptor &desc, bool allocate)
-{
-    ClTensor *tensor = new ClTensor(this, desc);
-    if(tensor != nullptr && allocate)
-    {
-        tensor->allocate();
-    }
-    return tensor;
-}
-} // namespace opencl
-} // namespace gpu
+} // namespace detail
 } // namespace arm_compute

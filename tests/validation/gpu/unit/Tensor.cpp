@@ -21,41 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_TYPES_H_
-#define SRC_COMMON_TYPES_H_
-
-#include "arm_compute/AclTypes.h"
+#include "tests/validation/fixtures/UNIT/Tensor.h"
 
 namespace arm_compute
 {
-enum class StatusCode
+namespace test
 {
-    Success            = AclSuccess,
-    RuntimeError       = AclRuntimeError,
-    OutOfMemory        = AclOutOfMemory,
-    Unimplemented      = AclUnimplemented,
-    UnsupportedTarget  = AclUnsupportedTarget,
-    InvalidTarget      = AclInvalidTarget,
-    InvalidArgument    = AclInvalidArgument,
-    UnsupportedConfig  = AclUnsupportedConfig,
-    InvalidObjectState = AclInvalidObjectState,
-};
+namespace validation
+{
+TEST_SUITE(CL)
+TEST_SUITE(UNIT)
+TEST_SUITE(Tensor)
 
-enum class Target
+FIXTURE_TEST_CASE(CreateTensorWithInvalidContext, CreateTensorWithInvalidContextFixture, framework::DatasetMode::ALL)
 {
-    Cpu    = AclTarget::AclCpu,
-    GpuOcl = AclTarget::AclGpuOcl,
-};
+}
+FIXTURE_TEST_CASE(CreateTensorWithInvalidDescriptor, CreateTensorWithInvalidDescriptorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+{
+}
+FIXTURE_TEST_CASE(DestroyInvalidTensor, DestroyInvalidTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+{
+}
+FIXTURE_TEST_CASE(SimpleTensor, SimpleTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+{
+}
+FIXTURE_TEST_CASE(TensorStress, TensorStressFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+{
+}
+FIXTURE_TEST_CASE(MapInvalidTensor, MapInvalidTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+{
+}
+FIXTURE_TEST_CASE(MapAllocatedTensor, MapAllocatedTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+{
+}
 
-enum class ExecutionMode
-{
-    FastRerun = AclPreferFastRerun,
-    FastStart = AclPreferFastStart,
-};
-
-enum class ImportMemoryType
-{
-    HostPtr = AclImportMemoryType::AclHostPtr
-};
+TEST_SUITE_END() // Tensor
+TEST_SUITE_END() // UNIT
+TEST_SUITE_END() // CL
+} // namespace validation
+} // namespace test
 } // namespace arm_compute
-#endif /* SRC_COMMON_TYPES_H_ */

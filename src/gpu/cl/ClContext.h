@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_GPU_CL_CPUCONTEXT_H
-#define SRC_GPU_CL_CPUCONTEXT_H
+#ifndef SRC_GPU_CLCONTEXT_H
+#define SRC_GPU_CLCONTEXT_H
 
 #include "src/common/IContext.h"
 #include "src/runtime/CL/mlgo/MLGOHeuristics.h"
@@ -65,6 +65,9 @@ public:
      */
     bool set_cl_ctx(::cl::Context ctx);
 
+    // Inherrited methods overridden
+    ITensorV2 *create_tensor(const AclTensorDescriptor &desc, bool allocate) override;
+
 private:
     mlgo::MLGOHeuristics _mlgo_heuristics;
     ::cl::Context        _cl_context;
@@ -73,4 +76,4 @@ private:
 } // namespace gpu
 } // namespace arm_compute
 
-#endif /* SRC_GPU_CL_CPUCONTEXT_H */
+#endif /* SRC_GPU_CLCONTEXT_H */

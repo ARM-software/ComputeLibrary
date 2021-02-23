@@ -41,6 +41,9 @@ protected:
 
 namespace arm_compute
 {
+// Forward declarations
+class ITensorV2;
+
 /**< Context interface */
 class IContext : public AclContext_
 {
@@ -88,6 +91,14 @@ public:
     {
         return header.type == detail::ObjectType::Context;
     }
+    /** Create a tensor object
+     *
+     * @param[in] desc     Descriptor to use
+     * @param[in] allocate Flag to allocate tensor
+     *
+     * @return A pointer to the created tensor object
+     */
+    virtual ITensorV2 *create_tensor(const AclTensorDescriptor &desc, bool allocate) = 0;
 
 private:
     Target                   _target;   /**< Target type of context */

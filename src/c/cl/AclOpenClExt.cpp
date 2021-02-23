@@ -23,8 +23,11 @@
  */
 #include "arm_compute/AclOpenClExt.h"
 
+#include "src/common/ITensor.h"
 #include "src/common/Types.h"
 #include "src/gpu/cl/ClContext.h"
+
+#include "arm_compute/core/CL/ICLTensor.h"
 
 #include "support/Cast.h"
 
@@ -78,6 +81,32 @@ extern "C" AclStatus AclSetClContext(AclContext external_ctx, cl_context opencl_
     {
         return AclStatus::AclRuntimeError;
     }
+
+    return AclStatus::AclSuccess;
+}
+
+extern "C" AclStatus AclGetClMem(AclTensor external_tensor, cl_mem *opencl_mem)
+{
+    using namespace arm_compute;
+    ITensorV2 *tensor = get_internal(external_tensor);
+
+    if(detail::validate_internal_tensor(tensor) != StatusCode::Success)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    if(tensor->header.ctx->type() != Target::GpuOcl)
+    {
+        return AclStatus::AclInvalidTarget;
+    }
+
+    if(opencl_mem == nullptr)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    auto cl_tensor = utils::cast::polymorphic_downcast<arm_compute::ICLTensor *>(tensor->tensor());
+    *opencl_mem    = cl_tensor->cl_buffer().get();
 
     return AclStatus::AclSuccess;
 }

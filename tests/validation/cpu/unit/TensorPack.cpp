@@ -21,41 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_TYPES_H_
-#define SRC_COMMON_TYPES_H_
-
-#include "arm_compute/AclTypes.h"
+#include "tests/validation/fixtures/UNIT/TensorPack.h"
 
 namespace arm_compute
 {
-enum class StatusCode
+namespace test
 {
-    Success            = AclSuccess,
-    RuntimeError       = AclRuntimeError,
-    OutOfMemory        = AclOutOfMemory,
-    Unimplemented      = AclUnimplemented,
-    UnsupportedTarget  = AclUnsupportedTarget,
-    InvalidTarget      = AclInvalidTarget,
-    InvalidArgument    = AclInvalidArgument,
-    UnsupportedConfig  = AclUnsupportedConfig,
-    InvalidObjectState = AclInvalidObjectState,
-};
+namespace validation
+{
+TEST_SUITE(CPU)
+TEST_SUITE(UNIT)
+TEST_SUITE(TensorPack)
 
-enum class Target
+FIXTURE_TEST_CASE(CreateTensorPackWithInvalidContext, CreateTensorPackWithInvalidContextFixture, framework::DatasetMode::ALL)
 {
-    Cpu    = AclTarget::AclCpu,
-    GpuOcl = AclTarget::AclGpuOcl,
-};
+}
+FIXTURE_TEST_CASE(DestroyInvalidTensorPack, DestroyInvalidTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+{
+}
+FIXTURE_TEST_CASE(AddInvalidObjectToTensorPack, AddInvalidObjectToTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+{
+}
+FIXTURE_TEST_CASE(SimpleTensorPack, SimpleTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+{
+}
+FIXTURE_TEST_CASE(MultipleTensorsInPack, MultipleTensorsInPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+{
+}
 
-enum class ExecutionMode
-{
-    FastRerun = AclPreferFastRerun,
-    FastStart = AclPreferFastStart,
-};
-
-enum class ImportMemoryType
-{
-    HostPtr = AclImportMemoryType::AclHostPtr
-};
+TEST_SUITE_END() // Tensor
+TEST_SUITE_END() // UNIT
+TEST_SUITE_END() // CPU
+} // namespace validation
+} // namespace test
 } // namespace arm_compute
-#endif /* SRC_COMMON_TYPES_H_ */

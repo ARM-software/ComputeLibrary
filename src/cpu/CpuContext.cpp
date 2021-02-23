@@ -24,6 +24,7 @@
 #include "src/cpu/CpuContext.h"
 
 #include "arm_compute/core/CPP/CPPTypes.h"
+#include "src/cpu/CpuTensor.h"
 #include "src/runtime/CPUUtils.h"
 
 #include <cstdlib>
@@ -184,6 +185,16 @@ const CpuCapabilities &CpuContext::capabilities() const
 AllocatorWrapper &CpuContext::allocator()
 {
     return _allocator;
+}
+
+ITensorV2 *CpuContext::create_tensor(const AclTensorDescriptor &desc, bool allocate)
+{
+    CpuTensor *tensor = new CpuTensor(this, desc);
+    if(tensor != nullptr && allocate)
+    {
+        tensor->allocate();
+    }
+    return tensor;
 }
 } // namespace cpu
 } // namespace arm_compute

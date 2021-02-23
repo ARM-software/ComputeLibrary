@@ -44,6 +44,22 @@ constexpr E as_cenum(SE v) noexcept
 {
     return static_cast<E>(static_cast<std::underlying_type_t<SE>>(v));
 }
+
+/** Convert plain old enumeration to a strongly typed enum
+ *
+ * @tparam SE Strongly typed resulting enum
+ * @tparam E  Plain old C enum
+ *
+ * @param[in] val Value to convert
+ *
+ * @return A corresponding strongly typed enumeration
+ */
+template <typename SE, typename E>
+constexpr SE as_enum(E val) noexcept
+{
+    return static_cast<SE>(val);
+}
+
 /** Check if the given value is in the given enum value list
  *
  * @tparam E  The type of the enum

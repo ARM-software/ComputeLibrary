@@ -21,41 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_TYPES_H_
-#define SRC_COMMON_TYPES_H_
+#ifndef SRC_COMMON_LEGACY_SUPPORT_H
+#define SRC_COMMON_LEGACY_SUPPORT_H
 
-#include "arm_compute/AclTypes.h"
+#include "arm_compute/Acl.h"
+#include "arm_compute/core/TensorInfo.h"
 
 namespace arm_compute
 {
-enum class StatusCode
+namespace detail
 {
-    Success            = AclSuccess,
-    RuntimeError       = AclRuntimeError,
-    OutOfMemory        = AclOutOfMemory,
-    Unimplemented      = AclUnimplemented,
-    UnsupportedTarget  = AclUnsupportedTarget,
-    InvalidTarget      = AclInvalidTarget,
-    InvalidArgument    = AclInvalidArgument,
-    UnsupportedConfig  = AclUnsupportedConfig,
-    InvalidObjectState = AclInvalidObjectState,
-};
-
-enum class Target
-{
-    Cpu    = AclTarget::AclCpu,
-    GpuOcl = AclTarget::AclGpuOcl,
-};
-
-enum class ExecutionMode
-{
-    FastRerun = AclPreferFastRerun,
-    FastStart = AclPreferFastStart,
-};
-
-enum class ImportMemoryType
-{
-    HostPtr = AclImportMemoryType::AclHostPtr
-};
+/** Convert a descriptor to a legacy format one
+ *
+ * @param[in] desc Descriptor to convert
+ *
+ * @return Legacy tensor meta-data
+ */
+TensorInfo convert_to_legacy_tensor_info(const AclTensorDescriptor &desc);
+} // namespace detail
 } // namespace arm_compute
-#endif /* SRC_COMMON_TYPES_H_ */
+
+#endif /* SRC_COMMON_LEGACY_SUPPORT_H */

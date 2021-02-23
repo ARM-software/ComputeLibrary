@@ -77,4 +77,15 @@
         ARM_COMPUTE_LOG_MSG("ComputeLibrary", arm_compute::logging::LogLevel::ERROR, msg); \
     } while(false)
 
+/** Log an error message to the logger with function name before the message
+ *
+ * @param[in] msg Message to log
+ */
+#define ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL(msg)                                                     \
+    do                                                                                                   \
+    {                                                                                                    \
+        ARM_COMPUTE_CREATE_ACL_LOGGER();                                                                 \
+        ARM_COMPUTE_LOG_MSG_WITH_FUNCNAME("ComputeLibrary", arm_compute::logging::LogLevel::ERROR, msg); \
+    } while(false)
+
 #endif /* SRC_COMMON_LOG_H */

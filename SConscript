@@ -190,6 +190,7 @@ runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
 
 runtime_files += Glob('src/c/*.cpp')
 runtime_files += Glob('src/common/*.cpp')
+runtime_files += Glob('src/common/utils/*.cpp')
 runtime_files += Glob('src/cpu/*.cpp')
 
 # CLHarrisCorners uses the Scheduler to run CPP kernels

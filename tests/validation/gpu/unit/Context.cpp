@@ -21,11 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
-
-#include "arm_compute/Acl.hpp"
+#include "tests/validation/fixtures/UNIT/Context.h"
 
 #include "src/gpu/cl/ClContext.h"
 
@@ -41,66 +37,14 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(Context)
 
-/** Test-case for AclCreateContext and AclDestroy Context
- *
- * Validate that AclCreateContext can create and destroy a context
- *
- * Test Steps:
- *  - Call AclCreateContext with valid target
- *  - Confirm that context is not nullptr and error code is AclSuccess
- *  - Destroy context
- *  - Confirm that AclSuccess is reported
- */
-TEST_CASE(SimpleContextCApi, framework::DatasetMode::ALL)
+FIXTURE_TEST_CASE(SimpleContextCApi, SimpleContextCApiFixture<AclTarget::AclGpuOcl>, framework::DatasetMode::ALL)
 {
-    AclContext ctx = nullptr;
-    ARM_COMPUTE_ASSERT(AclCreateContext(&ctx, AclGpuOcl, nullptr) == AclStatus::AclSuccess);
-    ARM_COMPUTE_ASSERT(ctx != nullptr);
-    ARM_COMPUTE_ASSERT(AclDestroyContext(ctx) == AclStatus::AclSuccess);
 }
-
-/** Test-case for Context from the C++ interface
- *
- * Test Steps:
- *  - Create a Context obejct
- *  - Confirm that StatusCode::Success is reported
- *  - Confirm that equality operator works
- *  - Confirm that inequality operator works
- */
-TEST_CASE(SimpleContextCppApi, framework::DatasetMode::ALL)
+FIXTURE_TEST_CASE(SimpleContextCppApi, SimpleContextCppApiFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
 {
-    acl::StatusCode status = acl::StatusCode::Success;
-    acl::Context    ctx(acl::Target::GpuOcl, &status);
-    ARM_COMPUTE_ASSERT(status == acl::StatusCode::Success);
-
-    auto ctx_eq = ctx;
-    ARM_COMPUTE_ASSERT(ctx_eq == ctx);
-
-    acl::Context ctx_ienq(acl::Target::GpuOcl, &status);
-    ARM_COMPUTE_ASSERT(status == acl::StatusCode::Success);
-    ARM_COMPUTE_ASSERT(ctx_ienq != ctx);
 }
-
-/** Test-case for CpuCapabilities
- *
- * Validate that AclCreateContext can create/destroy multiple contexts with different options
- *
- * Test Steps:
- *  - Call AclCreateContext with different targets
- *  - Confirm that AclSuccess is reported
- *  - Destroy all contexts
- *  - Confirm that AclSuccess is reported
- */
-TEST_CASE(MultipleContexts, framework::DatasetMode::ALL)
+FIXTURE_TEST_CASE(MultipleContexts, MultipleContextsFixture<AclTarget::AclGpuOcl>, framework::DatasetMode::ALL)
 {
-    const unsigned int num_tests = 5;
-    std::array<AclContext, num_tests> ctxs{};
-    for(unsigned int i = 0; i < num_tests; ++i)
-    {
-        ARM_COMPUTE_ASSERT(AclCreateContext(&ctxs[i], AclTarget::AclGpuOcl, nullptr) == AclStatus::AclSuccess);
-        ARM_COMPUTE_ASSERT(ctxs[i] != nullptr);
-        ARM_COMPUTE_ASSERT(AclDestroyContext(ctxs[i]) == AclStatus::AclSuccess);
-    }
 }
 
 /** Test-case for MLGO kernel configuration file
@@ -148,9 +92,9 @@ TEST_CASE(CheckMLGO, framework::DatasetMode::ALL)
     ofs << mlgo_str;
     ofs.close();
 
-    AclContextOptions opts  = acl_default_ctx_options;
-    opts.kernel_config_file = mlgo_filename.c_str();
-    arm_compute::gpu::opencl::ClContext ctx(&opts);
+    acl::Context::Options opts;
+    opts.copts.kernel_config_file = mlgo_filename.c_str();
+    arm_compute::gpu::opencl::ClContext ctx(&opts.copts);
 
     const MLGOHeuristics &heuristics = ctx.mlgo();
 
