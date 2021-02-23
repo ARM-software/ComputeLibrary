@@ -27,7 +27,7 @@ namespace arm_compute
 
 @tableofcontents
 
-The Computer Vision and Machine Learning library is a set of functions optimised for both Arm CPUs and GPUs using SIMD technologies.
+The Compute Library is a collection of low-level machine learning functions optimized for both Arm CPUs and GPUs using SIMD technologies.
 
 Several builds of the library are available using various configurations:
  - OS: Linux, Android, macOS or bare metal.
@@ -95,6 +95,7 @@ v21.05 Public major release
    - NEChannelCombine
    - NEChannelExtract
    - NEColorConvert
+   - NEConvolution
    - NEDerivative
    - NEDilate
    - NEEqualizeHistogram
@@ -119,7 +120,6 @@ v21.05 Public major release
    - NENonLinearFilter
    - NEOpticalFlow
    - NEPhase
-   - NERemap
    - NEScharr3x3
    - NESobel3x3
    - NESobel5x5
@@ -127,9 +127,52 @@ v21.05 Public major release
    - NETableLookup
    - NEThreshold
    - NEWarpAffine
-   - NEWarpPerspective
- - Remove all GLES kernels / functions / tests / examples
+   - NEWarpPerspectiveKernel
 
+ - Remove all GLES kernels / functions / tests / examples
+ - Removed computer vision support from CL backend
+ - Removed the following functions:
+   - CLAbsoluteDifference
+   - CLAccumulate
+   - CLBox3x3
+   - CLCannyEdge
+   - CLChannelCombine
+   - CLChannelExtract
+   - CLColorConvert
+   - CLConvolution
+   - CLDerivative
+   - CLDilate
+   - CLEqualizeHistogram
+   - CLErode
+   - CLFastCorners
+   - CLGaussian3x3
+   - CLGaussian5x5
+   - CLGaussianPyramid
+   - CLHOGDescriptor
+   - CLHOGDetector
+   - CLHOGGradient
+   - CLHOGMultiDetection
+   - CLHarrisCorners
+   - CLHistogram
+   - CLIntegralImage
+   - CLLaplacianPyramid
+   - CLLaplacianReconstruct
+   - CLMagnitude
+   - CLMeanStdDev
+   - CLMedian3x3
+   - CLMinMaxLocation
+   - CLNonLinearFilter
+   - CLOpticalFlow
+   - CLPhase
+   - CLScharr3x3
+   - CLSobel3x3
+   - CLSobel5x5
+   - CLSobel7x7
+   - CLTableLookup
+   - CLThreshold
+   - CLWarpAffine
+   - CLWarpPerspective
+ 
 v21.02 Public major release
  - Various bug fixes.
  - Various optimisations.
@@ -212,8 +255,8 @@ v20.11 Public major release
    - @ref NELogicalOr
  - Removed padding from Neon kernels:
    - @ref NEComplexPixelWiseMultiplicationKernel
-   - @ref NENonMaximaSuppression3x3Kernel
-   - NERemapKernel
+   - NENonMaximaSuppression3x3Kernel
+   - @ref NERemapKernel
    - @ref NEGEMMInterleave4x4Kernel
    - @ref NEDirectConvolutionLayerKernel
    - @ref NEScaleKernel
@@ -221,7 +264,7 @@ v20.11 Public major release
    - @ref NEGEMMLowpOffsetContributionKernel
    - @ref NEGEMMTranspose1xWKernel
    - NEPoolingLayerKernel
-   - @ref NEConvolutionKernel
+   - NEConvolutionKernel
    - @ref NEDepthwiseConvolutionLayerNativeKernel
    - @ref NEGEMMLowpMatrixMultiplyKernel
    - @ref NEGEMMMatrixMultiplyKernel
@@ -534,7 +577,7 @@ v20.08 Public major release
    - NEGEMMLowpQuantizeDownInt32ToUint8Scale
    - NEGEMMMatrixAccumulateBiasesKernel
  - Deprecated functions / interfaces:
-   - Non-descriptor based interfaces for NEThreshold, @ref CLThreshold
+   - Non-descriptor based interfaces for NEThreshold, CLThreshold
    - Non-descriptor based interfaces for @ref NEScale, @ref CLScale and GCScale
    - In @ref NESoftmaxLayer, @ref NELogSoftmaxLayer, @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and GCSoftmaxLayer :
       The default "axis" value for @ref CLSoftmaxLayer, @ref CLLogSoftmaxLayer and GCSoftmaxLayer is changed from 1 to 0.
@@ -791,7 +834,7 @@ v19.08 Public major release
     - @ref CLGEMMLowpMatrixMultiplyNativeKernel
     - CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
     - @ref CLGEMMMatrixMultiplyNativeKernel
-    - @ref CLMeanStdDevNormalizationKernel / @ref CLMeanStdDevNormalizationLayer
+    - CLMeanStdDevNormalizationKernel /CLMeanStdDevNormalizationLayer
     - @ref CLSpaceToDepthLayerKernel / @ref CLSpaceToDepthLayer
  - New examples:
     - neon_opticalflow
@@ -1286,7 +1329,7 @@ v17.06 Public major release
  - New OpenCL kernels / functions:
     - @ref CLBatchNormalizationLayerKernel / @ref CLBatchNormalizationLayer
     - CLDepthConcatenateLayerKernel / CLDepthConcatenateLayer
-    - @ref CLHOGOrientationBinningKernel @ref CLHOGBlockNormalizationKernel, @ref CLHOGDetectorKernel / @ref CLHOGDescriptor @ref CLHOGDetector @ref CLHOGGradient @ref CLHOGMultiDetection
+    - CLHOGOrientationBinningKernel CLHOGBlockNormalizationKernel, CLHOGDetectorKernel / CLHOGDescriptor CLHOGDetector CLHOGGradient CLHOGMultiDetection
     - CLLocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedLayer
     - @ref CLWeightsReshapeKernel / @ref CLConvolutionLayerReshapeWeights
  - New C++ kernels:
@@ -1308,12 +1351,12 @@ v17.05 Public bug fixes release
 v17.04 Public bug fixes release
 
  The following functions have been ported to use the new accurate padding:
- -  @ref CLColorConvertKernel
- -  @ref CLEdgeNonMaxSuppressionKernel
- -  @ref CLEdgeTraceKernel
- -  @ref CLGaussianPyramidHorKernel
- -  @ref CLGaussianPyramidVertKernel
- -  @ref CLGradientKernel
+ -  CLColorConvertKernel
+ -  CLEdgeNonMaxSuppressionKernel
+ -  CLEdgeTraceKernel
+ -  CLGaussianPyramidHorKernel
+ -  CLGaussianPyramidVertKernel
+ -  CLGradientKernel
  -  NEChannelCombineKernel
  -  @ref NEFillArrayKernel
  -  NEGaussianPyramidHorKernel
@@ -1324,8 +1367,8 @@ v17.04 Public bug fixes release
  -  NELogits1DMaxKernel
  -  NELogits1DShiftExpSumKernel
  -  NELogits1DNormKernel
- -  @ref NENonMaximaSuppression3x3FP16Kernel
- -  @ref NENonMaximaSuppression3x3Kernel
+ -  NENonMaximaSuppression3x3FP16Kernel
+ -  NENonMaximaSuppression3x3Kernel
 
 v17.03.1 First Major public release of the sources
  - Renamed the library to arm_compute
@@ -1343,13 +1386,13 @@ v17.03.1 First Major public release of the sources
 
 v17.03 Sources preview
  - New OpenCL kernels / functions:
-   - @ref CLGradientKernel, @ref CLEdgeNonMaxSuppressionKernel, @ref CLEdgeTraceKernel / @ref CLCannyEdge
+   - CLGradientKernel, CLEdgeNonMaxSuppressionKernel, CLEdgeTraceKernel / CLCannyEdge
    - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, CLGEMMMatrixAdditionKernel / @ref CLGEMM
    - CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
    - @ref CLTransposeKernel / @ref CLTranspose
-   - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / @ref CLOpticalFlow
+   - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / CLOpticalFlow
    - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
-   - @ref CLLaplacianPyramid, @ref CLLaplacianReconstruct
+   - CLLaplacianPyramid, CLLaplacianReconstruct
  - New Neon kernels / functions:
    - NEActivationLayerKernel / @ref NEActivationLayer
    - GEMM refactoring + FP16 support (Requires armv8.2 CPU): @ref NEGEMMInterleave4x4Kernel, @ref NEGEMMTranspose1xWKernel, @ref NEGEMMMatrixMultiplyKernel, @ref NEGEMMMatrixAdditionKernel / @ref NEGEMM
@@ -1359,23 +1402,23 @@ v17.02.1 Sources preview
  - New OpenCL kernels / functions:
    - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
    - CLPoolingLayerKernel / @ref CLPoolingLayer
-   - @ref CLIm2ColKernel, @ref CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / @ref CLConvolutionLayer
+   - @ref CLIm2ColKernel, @ref CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / CLConvolutionLayer
    - @ref CLRemapKernel / @ref CLRemap
-   - @ref CLGaussianPyramidHorKernel, @ref CLGaussianPyramidVertKernel / @ref CLGaussianPyramid, @ref CLGaussianPyramidHalf, @ref CLGaussianPyramidOrb
-   - @ref CLMinMaxKernel, @ref CLMinMaxLocationKernel / @ref CLMinMaxLocation
-   - @ref CLNonLinearFilterKernel / @ref CLNonLinearFilter
+   - CLGaussianPyramidHorKernel, CLGaussianPyramidVertKernel / CLGaussianPyramid, CLGaussianPyramidHalf, CLGaussianPyramidOrb
+   - CLMinMaxKernel, CLMinMaxLocationKernel / CLMinMaxLocation
+   - CLNonLinearFilterKernel / CLNonLinearFilter
  - New Neon FP16 kernels (Requires armv8.2 CPU)
    - NEAccumulateWeightedFP16Kernel
    - NEBox3x3FP16Kernel
-   - @ref NENonMaximaSuppression3x3FP16Kernel
+   - NENonMaximaSuppression3x3FP16Kernel
 
 v17.02 Sources preview
  - New OpenCL kernels / functions:
    - CLActivationLayerKernel / @ref CLActivationLayer
-   - @ref CLChannelCombineKernel / @ref CLChannelCombine
-   - @ref CLDerivativeKernel / @ref CLChannelExtract
-   - @ref CLFastCornersKernel / @ref CLFastCorners
-   - @ref CLMeanStdDevKernel / @ref CLMeanStdDev
+   - CLChannelCombineKernel / CLChannelCombine
+   - CLDerivativeKernel / CLChannelExtract
+   - CLFastCornersKernel / CLFastCorners
+   - CLMeanStdDevKernel / CLMeanStdDev
  - New Neon kernels / functions:
    - HOG / SVM: NEHOGOrientationBinningKernel, NEHOGBlockNormalizationKernel, NEHOGDetectorKernel, NEHOGNonMaximaSuppressionKernel / NEHOGDescriptor, NEHOGDetector, NEHOGGradient, NEHOGMultiDetection
    - NENonLinearFilterKernel / NENonLinearFilter
@@ -1892,8 +1935,6 @@ can be followed.
 Compute Library requires OpenCL 1.1 and above with support of non uniform workgroup sizes, which is officially supported in the Mali OpenCL DDK r8p0 and above as an extension (respective extension flag is \a -cl-arm-non-uniform-work-group-size).
 
 Enabling 16-bit floating point calculations require \a cl_khr_fp16 extension to be supported. All Mali GPUs with compute capabilities have native support for half precision floating points.
-
-Use of @ref CLMeanStdDev function requires 64-bit atomics support, thus \a cl_khr_int64_base_atomics should be supported in order to use.
 
 @subsubsection S3_7_2_cl_performance_requirements Performance improvements
 

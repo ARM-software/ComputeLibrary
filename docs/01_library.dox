@@ -191,7 +191,7 @@ This is a very basic implementation which was originally used in the Neon runtim
 
 Functions will automatically allocate the temporary buffers mentioned above, and will automatically multi-thread kernels' executions using the very basic scheduler described in the previous section.
 
-Simple functions only call a single kernel (e.g @ref NEConvolution3x3), while more complex ones consist of several kernels pipelined together (e.g @ref NEFullyConnectedLayer ). Check their documentation to find out which kernels are used by each function.
+Simple functions only call a single kernel (e.g NEConvolution3x3), while more complex ones consist of several kernels pipelined together (e.g @ref NEFullyConnectedLayer ). Check their documentation to find out which kernels are used by each function.
 
 @code{.cpp}
 //Create a function object:
@@ -225,9 +225,6 @@ If the library is compiled with embed_kernels=0 the application can set the path
 
 In order to block until all the jobs in the CLScheduler's command queue are done executing the user can call @ref CLScheduler::sync() or create a sync event using @ref CLScheduler::enqueue_sync_event()
 
-For example:
-@snippet cl_events.cpp OpenCL events
-
 @subsection S4_4_2_cl_neon OpenCL / Neon interoperability
 
 You can mix OpenCL and Neon kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects.
@@ -259,8 +256,6 @@ Moreover both OpenCL and Neon use vector loads and stores instructions to access
 There are different ways padding can be calculated:
 
 - Accurate padding:
-
-@snippet neon_convolution.cpp Accurate padding
 
 @note It's important to call allocate @b after the function is configured: if the image / tensor is already allocated then the function will shrink its execution window instead of increasing the padding. (See below for more details).
 
