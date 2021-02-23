@@ -220,6 +220,7 @@ v21.02 Public major release
  - Add functionality to load the OpenCL GEMM heuristics at runtime
    - The GEMM heuristic file (MLGO) can be used to update the default GEMM heuristics available for OpenCL
  - Note: there might be performance regressions against v20.08 in Inception v3 using int8 data types on Arm Mali-G77 GPUs. Currently under investigation
+ - Note: data-type decoupling is in progress and expiremental. Warning of unused symbols might be raised
 
 v20.11 Public major release
  - Various bug fixes.
