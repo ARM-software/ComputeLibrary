@@ -1,0 +1,25 @@
+var namespacearm__compute_1_1cpu_1_1kernels =
+[
+    [ "CpuActivationKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_activation_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_activation_kernel" ],
+    [ "CpuAddKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_add_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_add_kernel" ],
+    [ "CpuArithmeticKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_arithmetic_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_arithmetic_kernel" ],
+    [ "CpuComparisonKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_comparison_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_comparison_kernel" ],
+    [ "CpuConcatenateBatchKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_concatenate_batch_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_concatenate_batch_kernel" ],
+    [ "CpuConcatenateDepthKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_concatenate_depth_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_concatenate_depth_kernel" ],
+    [ "CpuConcatenateHeightKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_concatenate_height_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_concatenate_height_kernel" ],
+    [ "CpuConcatenateWidthKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_concatenate_width_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_concatenate_width_kernel" ],
+    [ "CpuCopyKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_copy_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_copy_kernel" ],
+    [ "CpuDivisionKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_division_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_division_kernel" ],
+    [ "CpuElementwiseKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_kernel" ],
+    [ "CpuElementwiseUnaryKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_unary_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_unary_kernel" ],
+    [ "CpuFillKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_fill_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_fill_kernel" ],
+    [ "CpuFloorKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_floor_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_floor_kernel" ],
+    [ "CpuLogits1DMaxKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_logits1_d_max_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_logits1_d_max_kernel" ],
+    [ "CpuLogits1DSoftmaxKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_logits1_d_softmax_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_logits1_d_softmax_kernel" ],
+    [ "CpuPermuteKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_permute_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_permute_kernel" ],
+    [ "CpuPoolingAssemblyWrapperKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_pooling_assembly_wrapper_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_pooling_assembly_wrapper_kernel" ],
+    [ "CpuPoolingKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_pooling_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_pooling_kernel" ],
+    [ "CpuPowerKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_power_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_power_kernel" ],
+    [ "CpuReshapeKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_reshape_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_reshape_kernel" ],
+    [ "CpuSubKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_sub_kernel.xhtml", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_sub_kernel" ]
+];

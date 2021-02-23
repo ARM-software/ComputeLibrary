@@ -1,0 +1,4 @@
+var arm__conv_2pooling_2kernels_2a64__s8__nhwc__max__2x2__s1__output2x2__depthfirst_2generic_8cpp =
+[
+    [ "a64_s8_nhwc_max_2x2_s1_output2x2_depthfirst_impl", "arm__conv_2pooling_2kernels_2a64__s8__nhwc__max__2x2__s1__output2x2__depthfirst_2generic_8cpp.xhtml#aeb0dd4784217ad7ae84fb17486657831", null ]
+];

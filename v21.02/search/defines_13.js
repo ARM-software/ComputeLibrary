@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['tanh_5fop',['tanh_op',['../activation__float__helpers_8h.xhtml#a531476f26e9aa243db2939eab63f0d92',1,'activation_float_helpers.h']]],
+  ['tensor3d_5fdeclaration',['TENSOR3D_DECLARATION',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a6b83038822d1ae7ab619b684ed3b7fc0',1,'helpers.h']]],
+  ['tensor4d_5fdeclaration',['TENSOR4D_DECLARATION',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a481bdc6d61b3df9dcdbdb244f0f97790',1,'helpers.h']]],
+  ['tensor_5fdot',['TENSOR_DOT',['../direct__convolution_8cl.xhtml#aa5c795cac11e213e8935d9b1ddac7f29',1,'direct_convolution.cl']]],
+  ['test_5fcase',['TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a846b2e70d2ba2180ccb81045c88b8409',1,'Macros.h']]],
+  ['test_5fcase_5fconstructor',['TEST_CASE_CONSTRUCTOR',['../tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952',1,'Macros.h']]],
+  ['test_5fcase_5fimpl',['TEST_CASE_IMPL',['../tests_2framework_2_macros_8h.xhtml#ad9cb504466989983a34d7ad9674467b2',1,'Macros.h']]],
+  ['test_5fregistrar',['TEST_REGISTRAR',['../tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377',1,'Macros.h']]],
+  ['test_5fsuite',['TEST_SUITE',['../tests_2framework_2_macros_8h.xhtml#acd09bed517e43d28823e69494f259835',1,'Macros.h']]],
+  ['test_5fsuite_5fend',['TEST_SUITE_END',['../tests_2framework_2_macros_8h.xhtml#a603cb7f45efd81606e51686da9aeebd9',1,'Macros.h']]],
+  ['transpose_5f8x8',['TRANSPOSE_8X8',['../_g_c_transpose_kernel_8cpp.xhtml#a2438fdfd446c570d9115fddd9d9fc37b',1,'GCTransposeKernel.cpp']]],
+  ['transpose_5fk0x1',['TRANSPOSE_K0X1',['../gemm__helpers_8h.xhtml#acb22a37573907a23f033a24783199778',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x16',['TRANSPOSE_K0X16',['../gemm__helpers_8h.xhtml#ae640ef7d68f381bf515b267bd5c9db9a',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x2',['TRANSPOSE_K0X2',['../gemm__helpers_8h.xhtml#ad84ce1373a088927bc864e9182b9537d',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x3',['TRANSPOSE_K0X3',['../gemm__helpers_8h.xhtml#a481eec42b717d51d0506b9f7ff2f1e41',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x4',['TRANSPOSE_K0X4',['../gemm__helpers_8h.xhtml#a409a003574940807400d2e001161b5dc',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x8',['TRANSPOSE_K0X8',['../gemm__helpers_8h.xhtml#aafbcd174446d89bcd35b22c9c04ffe78',1,'gemm_helpers.h']]],
+  ['transpose_5fk0xn0',['TRANSPOSE_K0XN0',['../gemm__helpers_8h.xhtml#a94ece2dcf5f2af7300d54a40b2ab56f4',1,'gemm_helpers.h']]],
+  ['type',['TYPE',['../activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b',1,'activation_quant_helpers.h']]]
+];

@@ -1,0 +1,14 @@
+<map id="src/core/NEON/kernels/arm_gemm" name="src/core/NEON/kernels/arm_gemm">
+<area shape="rect" id="node2" href="dir_1b44196555a7bdead4d02cf983e6c404.xhtml" title="indirect&#45;interleaves" alt="" coords="37,159,168,207"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000154_000208.xhtml" title="1" alt="" coords="174,152,182,166"/>
+<area shape="rect" id="node3" href="dir_1bfffff844e6b15c54f06f69450095a2.xhtml" title="kernels" alt="" coords="192,159,264,207"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000154_000155.xhtml" title="21" alt="" coords="264,144,279,159"/>
+<area shape="rect" id="node4" href="dir_736b7cb5ae91601e9fac1dc1b70c4612.xhtml" title="merges" alt="" coords="288,159,360,207"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000154_000209.xhtml" title="1" alt="" coords="328,133,336,147"/>
+<area shape="rect" id="node5" href="dir_f11c7bbf76b3b5417003d346f29c89d2.xhtml" title="transforms" alt="" coords="385,159,469,207"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000154_000210.xhtml" title="1" alt="" coords="389,133,397,147"/>
+<area shape="rect" id="node6" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml" title="support" alt="" coords="501,159,573,207"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000154_000028.xhtml" title="1" alt="" coords="484,143,492,158"/>
+<area shape="rect" id="clust2" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml" alt="" coords="27,52,480,217"/>
+<area shape="rect" id="clust1" href="dir_1ce938f580a6f304b99685e2c1dd19db.xhtml" title="kernels" alt="" coords="16,16,491,228"/>
+</map>

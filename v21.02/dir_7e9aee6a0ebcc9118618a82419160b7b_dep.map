@@ -1,0 +1,10 @@
+<map id="src/core/cpu/kernels/floor" name="src/core/cpu/kernels/floor">
+<area shape="rect" id="node2" href="dir_df9f9414570709b12fd328301de0b403.xhtml" title="NEON" alt="" coords="37,63,109,111"/>
+<area shape="rect" id="node3" href="dir_34b4cee2b5900b653deb3438fc906cf4.xhtml" title="common" alt="" coords="36,255,108,303"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000100_000040.xhtml" title="1" alt="" coords="69,228,77,242"/>
+<area shape="rect" id="node4" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml" title="NEON" alt="" coords="73,159,145,207"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000100_000025.xhtml" title="1" alt="" coords="98,131,106,146"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000025_000040.xhtml" title="13" alt="" coords="89,233,103,248"/>
+<area shape="rect" id="clust2" href="dir_7e9aee6a0ebcc9118618a82419160b7b.xhtml" alt="" coords="27,52,216,121"/>
+<area shape="rect" id="clust1" href="dir_245ee9a9c6615d71b72ba121a052806f.xhtml" title="kernels" alt="" coords="16,16,227,132"/>
+</map>

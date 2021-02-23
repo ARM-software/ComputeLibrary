@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['partial_5fstore_5fm0',['PARTIAL_STORE_M0',['../transpose_8cl.xhtml#a202537333048b910de7fc7ad58567200',1,'transpose.cl']]],
+  ['partial_5fstore_5fn0',['PARTIAL_STORE_N0',['../transpose_8cl.xhtml#a384384e4aff4a5ab95d1e0f9e3808924',1,'transpose.cl']]],
+  ['perform_5factivation_5fquant',['PERFORM_ACTIVATION_QUANT',['../activation__quant__helpers_8h.xhtml#a66c59c0b2362216643d0e9db9a240013',1,'activation_quant_helpers.h']]],
+  ['perform_5freduction',['PERFORM_REDUCTION',['../qlstm__layer__normalization_8cl.xhtml#abea2ff77f3651af783350bd088fbc0d2',1,'qlstm_layer_normalization.cl']]],
+  ['perform_5freduction_5fimpl',['PERFORM_REDUCTION_IMPL',['../qlstm__layer__normalization_8cl.xhtml#ac3d15e2cfcadfc7f2ec843d1bb0f190c',1,'qlstm_layer_normalization.cl']]],
+  ['perform_5freduction_5fstr',['PERFORM_REDUCTION_STR',['../qlstm__layer__normalization_8cl.xhtml#af4d1bdad50c7cb172247cc7967e40bcd',1,'qlstm_layer_normalization.cl']]],
+  ['phase_5fop',['PHASE_OP',['../magnitude__phase_8cl.xhtml#a4434551334149479f843f87424bbb8c8',1,'magnitude_phase.cl']]],
+  ['pixel_5funit16',['PIXEL_UNIT16',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a294d0636e640a664440f563ff8e2695f',1,'helpers.h']]],
+  ['pixel_5funit4',['PIXEL_UNIT4',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ae98f415218d7e04c45177d7c4c81e31a',1,'helpers.h']]],
+  ['pixel_5funit8',['PIXEL_UNIT8',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a195a2c31ae5fa9fe59eceb948e42e4d4',1,'helpers.h']]],
+  ['pixel_5fwise_5fmultiplication_5ffixture_5fdata_5ftest_5fcase',['PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE',['../_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a4567b1c0ed4817ca030cb2cbd0a51d53',1,'PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE():&#160;PixelWiseMultiplication.cpp'],['../_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a3ab20dd587b94b23a3c206149820eafd',1,'PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE():&#160;PixelWiseMultiplication.cpp']]],
+  ['pool_5fop',['POOL_OP',['../pooling__layer_8cl.xhtml#a482ef7d59a5f474ca126e737c7f0978a',1,'pooling_layer.cl']]],
+  ['pooling3x3_5fstride1',['POOLING3x3_STRIDE1',['../pooling__layer_8cl.xhtml#a6b8e66069b8cd3e743141d7f024a7d76',1,'pooling_layer.cl']]],
+  ['pooling3x3_5fstride2',['POOLING3x3_STRIDE2',['../pooling__layer_8cl.xhtml#abb8f7128361a6a1965b1b2a5b3a719b2',1,'pooling_layer.cl']]],
+  ['pooling3x3_5fstride3',['POOLING3x3_STRIDE3',['../pooling__layer_8cl.xhtml#aba30215e4df370ff8935f83046e696ea',1,'pooling_layer.cl']]],
+  ['pow2_5fop',['POW2_OP',['../pooling__layer_8cl.xhtml#a03898439d164d74f8c35bafb67262d95',1,'pooling_layer.cl']]],
+  ['pow_5fop',['POW_OP',['../normalization__layer_8cl.xhtml#a09724da1a9e5ba54260905829ec27db4',1,'normalization_layer.cl']]],
+  ['prelu',['PRELU',['../elementwise__operation__quantized_8cl.xhtml#a01b6a20d51e2db6f1704f2315ead62d3',1,'elementwise_operation_quantized.cl']]],
+  ['process_5f4x_5f1y_5f1z',['PROCESS_4X_1Y_1Z',['../_g_c_direct_convolution_layer_kernel_8cpp.xhtml#ad1d4c667360c7ed862d0abd918234d93',1,'GCDirectConvolutionLayerKernel.cpp']]],
+  ['process_5f4x_5f3y_5f1z',['PROCESS_4X_3Y_1Z',['../_g_c_depthwise_convolution_layer3x3_kernel_8cpp.xhtml#ad291b7b94f105f430dfd66baa77ec740',1,'PROCESS_4X_3Y_1Z():&#160;GCDepthwiseConvolutionLayer3x3Kernel.cpp'],['../_g_c_direct_convolution_layer_kernel_8cpp.xhtml#ad291b7b94f105f430dfd66baa77ec740',1,'PROCESS_4X_3Y_1Z():&#160;GCDirectConvolutionLayerKernel.cpp']]],
+  ['process_5f8x_5f2y_5f1z',['PROCESS_8X_2Y_1Z',['../_g_c_direct_convolution_layer_kernel_8cpp.xhtml#a0067b16287eafbd53df0ac61c44eee71',1,'GCDirectConvolutionLayerKernel.cpp']]]
+];

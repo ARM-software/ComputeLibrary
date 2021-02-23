@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['a64_5ffp32_5fnhwc_5favg_5f3x3_5fs1_5foutput2x2_5fdepthfirst',['a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst',['../structarm__conv_1_1pooling_1_1a64__fp32__nhwc__avg__3x3__s1__output2x2__depthfirst.xhtml',1,'arm_conv::pooling']]],
+  ['a64_5ffp32_5fnhwc_5fmax_5f2x2_5fs1_5foutput2x2_5fdepthfirst',['a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst',['../structarm__conv_1_1pooling_1_1a64__fp32__nhwc__max__2x2__s1__output2x2__depthfirst.xhtml',1,'arm_conv::pooling']]],
+  ['a64_5fs8_5fnhwc_5fmax_5f2x2_5fs1_5foutput2x2_5fdepthfirst',['a64_s8_nhwc_max_2x2_s1_output2x2_depthfirst',['../structarm__conv_1_1pooling_1_1a64__s8__nhwc__max__2x2__s1__output2x2__depthfirst.xhtml',1,'arm_conv::pooling']]],
+  ['a64_5fu8_5fnhwc_5fmax_5f2x2_5fs1_5foutput2x2_5fdepthfirst',['a64_u8_nhwc_max_2x2_s1_output2x2_depthfirst',['../structarm__conv_1_1pooling_1_1a64__u8__nhwc__max__2x2__s1__output2x2__depthfirst.xhtml',1,'arm_conv::pooling']]],
+  ['absolutetolerance',['AbsoluteTolerance',['../classarm__compute_1_1test_1_1validation_1_1_absolute_tolerance.xhtml',1,'arm_compute::test::validation']]],
+  ['absolutetolerance_3c_20u_20_3e',['AbsoluteTolerance&lt; U &gt;',['../classarm__compute_1_1test_1_1validation_1_1_absolute_tolerance.xhtml',1,'arm_compute::test::validation']]],
+  ['accessor',['Accessor',['../classarm__compute_1_1test_1_1_accessor.xhtml',1,'arm_compute::test']]],
+  ['accesswindowautopadding',['AccessWindowAutoPadding',['../classarm__compute_1_1_access_window_auto_padding.xhtml',1,'arm_compute']]],
+  ['accesswindowhorizontal',['AccessWindowHorizontal',['../classarm__compute_1_1_access_window_horizontal.xhtml',1,'arm_compute']]],
+  ['accesswindowrectangle',['AccessWindowRectangle',['../classarm__compute_1_1_access_window_rectangle.xhtml',1,'arm_compute']]],
+  ['accesswindowstatic',['AccessWindowStatic',['../classarm__compute_1_1_access_window_static.xhtml',1,'arm_compute']]],
+  ['accesswindowtranspose',['AccessWindowTranspose',['../classarm__compute_1_1_access_window_transpose.xhtml',1,'arm_compute']]],
+  ['accesswindowvertical',['AccessWindowVertical',['../classarm__compute_1_1_access_window_vertical.xhtml',1,'arm_compute']]],
+  ['activationlayer',['ActivationLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_activation_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['activationlayerinfo',['ActivationLayerInfo',['../classarm__compute_1_1_activation_layer_info.xhtml',1,'arm_compute']]],
+  ['activationlayernode',['ActivationLayerNode',['../classarm__compute_1_1graph_1_1_activation_layer_node.xhtml',1,'arm_compute::graph']]],
+  ['allocator',['Allocator',['../classarm__compute_1_1_allocator.xhtml',1,'arm_compute']]],
+  ['argminmaxlayer',['ArgMinMaxLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_arg_min_max_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['argminmaxlayernode',['ArgMinMaxLayerNode',['../classarm__compute_1_1graph_1_1_arg_min_max_layer_node.xhtml',1,'arm_compute::graph']]],
+  ['array',['Array',['../classarm__compute_1_1_array.xhtml',1,'arm_compute']]],
+  ['array_3c_20nelkinternalkeypoint_20_3e',['Array&lt; NELKInternalKeypoint &gt;',['../classarm__compute_1_1_array.xhtml',1,'arm_compute']]],
+  ['arrayaccessor',['ArrayAccessor',['../classarm__compute_1_1test_1_1_array_accessor.xhtml',1,'arm_compute::test']]],
+  ['asmgemminfo',['AsmGemmInfo',['../structarm__compute_1_1_asm_gemm_info.xhtml',1,'arm_compute']]],
+  ['assetslibrary',['AssetsLibrary',['../classarm__compute_1_1test_1_1_assets_library.xhtml',1,'arm_compute::test']]]
+];

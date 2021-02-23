@@ -1,0 +1,5 @@
+<map id="NESplit" name="NESplit">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_p_p_split.xhtml" title="CPPSplit\&lt; NESlice \&gt;" alt="" coords="5,185,153,212"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="36,5,112,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_c_p_p_split.xhtml" title="Basic function to split a tensor along a given axis. " alt="" coords="96,81,255,123"/>
+</map>

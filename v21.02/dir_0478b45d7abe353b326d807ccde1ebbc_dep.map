@@ -1,0 +1,10 @@
+<map id="src/core/NEON/kernels/arm_conv/pooling" name="src/core/NEON/kernels/arm_conv/pooling">
+<area shape="rect" id="node2" href="dir_760ebd195dc73279e412f00087ad2b15.xhtml" title="kernels" alt="" coords="37,159,109,207"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000115_000116.xhtml" title="3" alt="" coords="78,133,86,147"/>
+<area shape="rect" id="node3" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="141,159,243,207"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000115_000000.xhtml" title="1" alt="" coords="149,133,157,148"/>
+<area shape="rect" id="node4" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml" title="arm_gemm" alt="" coords="267,159,354,207"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000115_000154.xhtml" title="3" alt="" coords="250,142,258,156"/>
+<area shape="rect" id="clust2" href="dir_0478b45d7abe353b326d807ccde1ebbc.xhtml" alt="" coords="27,52,120,217"/>
+<area shape="rect" id="clust1" href="dir_ea98ae4f30fbc97db6231c6535bdb2d9.xhtml" title="arm_conv" alt="" coords="16,16,131,228"/>
+</map>
