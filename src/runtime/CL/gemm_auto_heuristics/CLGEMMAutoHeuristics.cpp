@@ -105,14 +105,14 @@ GEMMConfigResult select_mlgo_gemm_config_reshaped_only_rhs(const CommonQuery &qu
     if(valid)
     {
         ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.", to_string(config).c_str());
+        // Setting irrelevant unsigned int parameters to 1 and bool parameters to false as they do no matter
+        std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, 1, config.h0, false, config.interleave_rhs, !config.transpose_rhs, config.transpose_rhs,
+                                                              config.export_cl_image);
     }
     else
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics query failed");
     }
-    // Setting irrelevant unsigned int parameters to 1 and bool parameters to false as they do no matter
-    std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, 1, config.h0, false, config.interleave_rhs, !config.transpose_rhs, config.transpose_rhs,
-                                                          config.export_cl_image);
     return GEMMConfigResult{ valid, lhs_info, rhs_info };
 }
 
@@ -140,14 +140,13 @@ GEMMConfigResult select_mlgo_gemm_config_reshaped(const CommonQuery &query)
     if(valid)
     {
         ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.", to_string(config).c_str());
+        std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, config.v0, config.h0, config.interleave_lhs, config.interleave_rhs, !config.transpose_rhs,
+                                                              config.transpose_rhs, config.export_cl_image);
     }
     else
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics query failed");
     }
-    std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, config.v0, config.h0, config.interleave_lhs, config.interleave_rhs, !config.transpose_rhs,
-                                                          config.transpose_rhs,
-                                                          config.export_cl_image);
     return GEMMConfigResult{ valid, lhs_info, rhs_info };
 }
 
@@ -175,13 +174,13 @@ GEMMConfigResult select_mlgo_gemm_config_native(const CommonQuery &query)
     if(valid)
     {
         ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.", to_string(config).c_str());
+        // Setting irrelevant unsigned int parameters to 1 and bool parameters to false as they do no matter
+        std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, 1, 1, false, false, false, false, false);
     }
     else
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics query failed");
     }
-    // Setting irrelevant unsigned int parameters to 1 and bool parameters to false as they do no matter
-    std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, 1, 1, false, false, false, false, false);
     return GEMMConfigResult{ valid, lhs_info, rhs_info };
 }
 } // namespace auto_heuristics

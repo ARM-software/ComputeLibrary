@@ -45,35 +45,35 @@ using GEMMType = CLGEMMKernelType;
 /** GEMM Configuration for Native kernel */
 struct GEMMConfigNative
 {
-    unsigned int m0; /**< Number of rows processed by the matrix multiplication */
-    unsigned int n0; /**< Number of columns processed by the matrix multiplication */
-    unsigned int k0; /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int m0{ 1 }; /**< Number of rows processed by the matrix multiplication */
+    unsigned int n0{ 1 }; /**< Number of columns processed by the matrix multiplication */
+    unsigned int k0{ 1 }; /**< Number of partial accumulations performed by the matrix multiplication */
 };
 
 /** GEMM Configuration for Reshaped Only RHS kernel */
 struct GEMMConfigReshapedOnlyRHS
 {
-    unsigned int m0;              /**< Number of rows processed by the matrix multiplication */
-    unsigned int n0;              /**< Number of columns processed by the matrix multiplication */
-    unsigned int k0;              /**< Number of partial accumulations performed by the matrix multiplication */
-    unsigned int h0;              /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
-    bool         interleave_rhs;  /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
-    bool         transpose_rhs;   /**< True if the (k0xn0) block has to be transposed before been stored */
-    bool         export_cl_image; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
+    unsigned int m0{ 1 };                  /**< Number of rows processed by the matrix multiplication */
+    unsigned int n0{ 1 };                  /**< Number of columns processed by the matrix multiplication */
+    unsigned int k0{ 1 };                  /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int h0{ 1 };                  /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool         interleave_rhs{ false };  /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
+    bool         transpose_rhs{ false };   /**< True if the (k0xn0) block has to be transposed before been stored */
+    bool         export_cl_image{ false }; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
 };
 
 /** GEMM Configuration for Reshaped kernel */
 struct GEMMConfigReshaped
 {
-    unsigned int m0;              /**< Number of rows processed by the matrix multiplication */
-    unsigned int n0;              /**< Number of columns processed by the matrix multiplication */
-    unsigned int k0;              /**< Number of partial accumulations performed by the matrix multiplication */
-    unsigned int v0;              /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
-    unsigned int h0;              /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
-    bool         interleave_lhs;  /**< True if the v0 (m0xk0) blocks have to be interleaved in the output row */
-    bool         interleave_rhs;  /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
-    bool         transpose_rhs;   /**< True if the (k0xn0) block has to be transposed before been stored */
-    bool         export_cl_image; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
+    unsigned int m0{ 1 };                  /**< Number of rows processed by the matrix multiplication */
+    unsigned int n0{ 1 };                  /**< Number of columns processed by the matrix multiplication */
+    unsigned int k0{ 1 };                  /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int v0{ 1 };                  /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
+    unsigned int h0{ 1 };                  /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool         interleave_lhs{ false };  /**< True if the v0 (m0xk0) blocks have to be interleaved in the output row */
+    bool         interleave_rhs{ false };  /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
+    bool         transpose_rhs{ false };   /**< True if the (k0xn0) block has to be transposed before been stored */
+    bool         export_cl_image{ false }; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
 };
 
 } // namespace mlgo
