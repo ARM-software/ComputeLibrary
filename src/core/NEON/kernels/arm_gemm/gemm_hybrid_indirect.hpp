@@ -577,7 +577,7 @@ public:
         // Note: Current hybrid kernels don't actually round up height (they
         // have paths for each possible height).  Might need to make this
         // configurable in future.
-        uint64_t total_macs = static_cast<uint64_t>(args._nbatches) * args._nmulti * args._Msize * roundup(args._Nsize, strategy::out_width()) * roundup(args._Ksize, strategy::k_unroll());
+        uint64_t total_macs = static_cast<uint64_t>(args._nbatches) * args._nmulti * args._Msize * roundup(args._Nsize, strategy::out_width()) * get_ktotal(args);
 
         float mac_cycles = static_cast<float>(total_macs) / params.kernel_macs_cycle;
 
@@ -596,7 +596,7 @@ public:
             const Requantize32 *qp = reinterpret_cast<const Requantize32 *>(&os);
 
             // Row sums: need to consider each value in A (batch * multi * M * K)...
-            uint64_t rowsum_bytes = static_cast<uint64_t>(args._nbatches) * args._nmulti * args._Msize * roundup(args._Ksize, strategy::k_unroll());
+            uint64_t rowsum_bytes = static_cast<uint64_t>(args._nbatches) * args._nmulti * args._Msize * get_ktotal(args);
 
             // ... but row sums are skipped if B offset==0.
             if (qp->b_offset == 0) {
