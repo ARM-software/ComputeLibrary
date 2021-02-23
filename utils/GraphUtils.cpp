@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -280,7 +280,8 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
 #else  // __arm__
         ARM_COMPUTE_EXIT_ON_MSG_VAR(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
                                     "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu64 ",%" PRIu64 "].",
-                                    image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
+                                    image_loader->width(), image_loader->height(),
+                                    static_cast<uint64_t>(permuted_shape.x()), static_cast<uint64_t>(permuted_shape.y()));
 #endif // __arm__
 
         // Fill the tensor with the PPM content (BGR)
@@ -363,7 +364,8 @@ bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
 #else  // __arm__
         ARM_COMPUTE_EXIT_ON_MSG_VAR(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
                                     "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu64 ",%" PRIu64 "].",
-                                    jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
+                                    jpeg.width(), jpeg.height(),
+                                    static_cast<uint64_t>(permuted_shape.x()), static_cast<uint64_t>(permuted_shape.y()));
 #endif // __arm__
 
         // Fill the tensor with the JPEG content (BGR)
@@ -743,7 +745,7 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
         }
         case DataType::F16:
         {
-            std::uniform_real_distribution<float> distribution_f16(_lower.get<half>(), _upper.get<half>());
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution_f16(_lower.get<float>(), _upper.get<float>());
             fill<half>(tensor, distribution_f16);
             break;
         }

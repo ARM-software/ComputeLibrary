@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/CL/functions/CLMinMaxLocation.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "src/core/CL/kernels/CLMinMaxLocationKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLMinMaxLocation::CLMinMaxLocation()
-    : _min_max_kernel(support::cpp14::make_unique<CLMinMaxKernel>()),
-      _min_max_loc_kernel(support::cpp14::make_unique<CLMinMaxLocationKernel>()),
+    : _min_max_kernel(std::make_unique<CLMinMaxKernel>()),
+      _min_max_loc_kernel(std::make_unique<CLMinMaxLocationKernel>()),
       _min_max_vals(),
       _min_max_count_vals(),
       _min(nullptr),

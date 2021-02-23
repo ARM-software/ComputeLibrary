@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,8 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/NEON/kernels/NECopyKernel.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
@@ -38,7 +38,7 @@ NEGenerateProposalsLayer::NEGenerateProposalsLayer(std::shared_ptr<IMemoryManage
       _flatten_deltas(),
       _permute_scores(),
       _flatten_scores(),
-      _compute_anchors(),
+      _compute_anchors(nullptr),
       _bounding_box(),
       _pad(),
       _dequantize_anchors(),
@@ -90,7 +90,8 @@ void NEGenerateProposalsLayer::configure(const ITensor *scores, const ITensor *d
 
     // Compute all the anchors
     _memory_group.manage(&_all_anchors);
-    _compute_anchors.configure(anchors, &_all_anchors, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale()));
+    _compute_anchors = std::make_unique<NEComputeAllAnchorsKernel>();
+    _compute_anchors->configure(anchors, &_all_anchors, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale()));
 
     const TensorShape flatten_shape_deltas(values_per_roi, total_num_anchors);
     _deltas_flattened.allocator()->init(TensorInfo(flatten_shape_deltas, 1, scores_data_type, deltas->info()->quantization_info()));
@@ -234,7 +235,7 @@ Status NEGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     }
 
     TensorInfo all_anchors_info(anchors->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEComputeAllAnchors::validate(anchors, &all_anchors_info, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale())));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEComputeAllAnchorsKernel::validate(anchors, &all_anchors_info, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale())));
 
     TensorInfo deltas_permuted_info = deltas->clone()->set_tensor_shape(TensorShape(values_per_roi * num_anchors, feat_width, feat_height)).set_is_resizable(true);
     TensorInfo scores_permuted_info = scores->clone()->set_tensor_shape(TensorShape(num_anchors, feat_width, feat_height)).set_is_resizable(true);
@@ -324,7 +325,7 @@ void NEGenerateProposalsLayer::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Compute all the anchors
-    _compute_anchors.run();
+    NEScheduler::get().schedule(_compute_anchors.get(), Window::DimY);
 
     // Transpose and reshape the inputs
     if(!_is_nhwc)

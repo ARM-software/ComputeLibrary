@@ -56,8 +56,8 @@ TEST_SUITE(HarrisCorners)
 template <typename T>
 using CLHarrisCornersFixture = HarrisCornersValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLHarrisCorners, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageFiles(), data_precommit), framework::dataset::make("Format",
-                                                                                                             Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallImageFiles(), data_precommit), framework::dataset::make("Format",
+                                                                                                           Format::U8)))
 {
     // Validate output
     CLArrayAccessor<KeyPoint> array(_target);

@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLAccumulate.h"
 
 #include "src/core/CL/kernels/CLAccumulateKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLAccumulate::configure(const ICLTensor *input, ICLTensor *accum)
 
 void CLAccumulate::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLAccumulateKernel>();
+    auto k = std::make_unique<CLAccumulateKernel>();
     k->configure(compile_context, input, accum);
     _kernel = std::move(k);
 }
@@ -49,7 +48,7 @@ void CLAccumulateWeighted::configure(const ICLTensor *input, float alpha, ICLTen
 
 void CLAccumulateWeighted::configure(const CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLAccumulateWeightedKernel>();
+    auto k = std::make_unique<CLAccumulateWeightedKernel>();
     k->configure(compile_context, input, alpha, accum);
     _kernel = std::move(k);
 }
@@ -61,7 +60,7 @@ void CLAccumulateSquared::configure(const ICLTensor *input, uint32_t shift, ICLT
 
 void CLAccumulateSquared::configure(const CLCompileContext &compile_context, const ICLTensor *input, uint32_t shift, ICLTensor *accum)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLAccumulateSquaredKernel>();
+    auto k = std::make_unique<CLAccumulateSquaredKernel>();
     k->configure(compile_context, input, shift, accum);
     _kernel = std::move(k);
 }

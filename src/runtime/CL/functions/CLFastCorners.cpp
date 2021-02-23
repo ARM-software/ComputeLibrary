@@ -31,7 +31,6 @@
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "src/core/CL/kernels/CLFastCornersKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 #include <algorithm>
 #include <cstring>
@@ -40,9 +39,9 @@ using namespace arm_compute;
 
 CLFastCorners::CLFastCorners(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _fast_corners_kernel(support::cpp14::make_unique<CLFastCornersKernel>()),
+      _fast_corners_kernel(std::make_unique<CLFastCornersKernel>()),
       _suppr_func(),
-      _copy_array_kernel(support::cpp14::make_unique<CLCopyToArrayKernel>()),
+      _copy_array_kernel(std::make_unique<CLCopyToArrayKernel>()),
       _output(),
       _suppr(),
       _win(),

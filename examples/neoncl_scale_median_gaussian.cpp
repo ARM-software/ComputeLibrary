@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@
 using namespace arm_compute;
 using namespace utils;
 
-/** Example demonstrating how to use both CL and NEON functions in the same pipeline
+/** Example demonstrating how to use both CL and Neon functions in the same pipeline
  *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
@@ -46,7 +46,7 @@ class NEONCLScaleMedianGaussianExample : public Example
 public:
     bool do_setup(int argc, char **argv) override
     {
-        /** [NEON / OpenCL Interop] */
+        /** [Neon / OpenCL Interop] */
         PPMLoader ppm;
 
         CLScheduler::get().default_init();
@@ -88,7 +88,7 @@ public:
             ppm.fill_image(src);
             const std::string output_filename = std::string(argv[1]) + "_out.ppm";
         }
-        /** [NEON / OpenCL Interop] */
+        /** [Neon / OpenCL Interop] */
 
         return true;
     }
@@ -97,11 +97,11 @@ public:
         // Enqueue and flush the OpenCL kernel:
         scale.run();
 
-        // Do a blocking map of the input and output buffers of the NEON function:
+        // Do a blocking map of the input and output buffers of the Neon function:
         scale_median.map();
         median_gauss.map();
 
-        // Run the NEON function:
+        // Run the Neon function:
         median.run();
 
         // Unmap the output buffer before it's used again by OpenCL:

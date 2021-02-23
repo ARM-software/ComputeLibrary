@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,6 +122,17 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     uint32_t            deconv_pad_y    = 0;
     const unsigned int  stride_x        = info.stride().first;
     const unsigned int  stride_y        = info.stride().second;
+    // Guard against overflows in compute_deconvolution_upsampled_shape()
+    const DataLayout data_layout = input->data_layout();
+    const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int out_x = (input->dimension(idx_w) - 1) * stride_x + 1;
+    const unsigned int out_y = (input->dimension(idx_h) - 1) * stride_y + 1;
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) > out_x);
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_h) > out_y);
+    ARM_COMPUTE_RETURN_ERROR_ON((out_x - weights->dimension(idx_w) + 1) > out_dims.first);
+    ARM_COMPUTE_RETURN_ERROR_ON((out_y - weights->dimension(idx_h) + 1 ) > out_dims.second);
+
     const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
     TensorInfo          scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape));
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);

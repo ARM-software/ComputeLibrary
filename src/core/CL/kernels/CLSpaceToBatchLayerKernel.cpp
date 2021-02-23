@@ -95,6 +95,7 @@ void CLSpaceToBatchLayerKernel::configure(const CLCompileContext &compile_contex
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, block_shape, paddings, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), block_shape->info(), paddings->info(), output->info()));
+    auto padding_info = get_padding_info({ input, block_shape, paddings, output });
 
     _input       = input;
     _block_shape = block_shape;
@@ -120,6 +121,7 @@ void CLSpaceToBatchLayerKernel::configure(const CLCompileContext &compile_contex
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps());
     ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLSpaceToBatchLayerKernel::configure(const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right,

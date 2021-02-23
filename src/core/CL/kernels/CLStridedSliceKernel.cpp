@@ -92,6 +92,7 @@ void CLStridedSliceKernel::configure(const CLCompileContext &compile_context, co
                                      int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    auto padding_info = get_padding_info({ input, output });
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask));
 
     const TensorShape &input_shape = input->tensor_shape();
@@ -160,6 +161,7 @@ void CLStridedSliceKernel::configure(const CLCompileContext &compile_context, co
         _config_id += "_";
         _config_id += support::cpp11::to_string(final_strides[i]);
     }
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLStridedSliceKernel::validate(const ITensorInfo *input, const ITensorInfo *output,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to add padding to a tensor
+/** Neon kernel to add padding to a tensor
  *
  * Add padding given padding information
  */

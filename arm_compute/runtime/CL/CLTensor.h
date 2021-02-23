@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ public:
      * @param[in] ctx (Optional)  Pointer to a @ref CLRuntimeContext.
      *                            If nullptr is passed in, the legacy api using the singletons will be used. Otherwise the memory for the
      *                            tensor will allocate on the context passed in.
-     *                            The singletons legacy api has been deprecated and will be removed.
+     *                            The singletons legacy api has been deprecated and will be removed in future releases.
      */
     CLTensor(IRuntimeContext *ctx = nullptr);
 

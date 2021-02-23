@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,7 @@ bool is_target_supported(Target target);
 /** Returns default target for execution
  *
  * @note If an OpenCL backend exists then OpenCL is returned,
- *       else if the NEON backend exists returns NEON as target.
+ *       else if the Neon backend exists returns Neon as target.
  *       If no backends are registered an error is raised.
  *
  * @return Default target

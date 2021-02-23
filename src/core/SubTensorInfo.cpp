@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,8 +27,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 /** Extends parent shape depending on subtensor's coordinates and shape
@@ -56,12 +56,12 @@ TensorShape extend_parent_shape(TensorShape parent_shape, TensorShape shape, Coo
 } // namespace
 
 SubTensorInfo::SubTensorInfo()
-    : _parent(nullptr), _tensor_shape(), _coords(), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(false)
+    : _parent(nullptr), _tensor_shape(), _dims_state(), _coords(), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(false)
 {
 }
 
 SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords, bool extend_parent)
-    : _parent(parent), _tensor_shape(tensor_shape), _coords(coords), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(extend_parent)
+    : _parent(parent), _tensor_shape(tensor_shape), _dims_state(), _coords(coords), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(extend_parent)
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
 
@@ -107,6 +107,13 @@ ITensorInfo &SubTensorInfo::set_tensor_shape(const TensorShape &shape)
     return *this;
 }
 
+ITensorInfo &SubTensorInfo::set_tensor_dims_state(const TensorDimsState &state)
+{
+    ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+    _dims_state = state;
+    return *this;
+}
+
 bool SubTensorInfo::extend_padding(const PaddingSize &padding)
 {
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
@@ -142,3 +149,4 @@ int32_t SubTensorInfo::offset_element_in_bytes(const Coordinates &pos) const
 
     return offset;
 }
+} // namespace arm_compute

@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
 
 #include "arm_compute/core/CPP/kernels/CPPNonMaximumSuppressionKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -32,7 +31,7 @@ void CPPNonMaximumSuppression::configure(
     const ITensor *bboxes, const ITensor *scores, ITensor *indices, unsigned int max_output_size,
     const float score_threshold, const float nms_threshold)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CPPNonMaximumSuppressionKernel>();
+    auto k = std::make_unique<CPPNonMaximumSuppressionKernel>();
     k->configure(bboxes, scores, indices, max_output_size, score_threshold, nms_threshold);
     _kernel = std::move(k);
 }

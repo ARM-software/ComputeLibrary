@@ -28,13 +28,12 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/ICLKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 ICLSimpleFunction::ICLSimpleFunction(CLRuntimeContext *ctx) // NOLINT
     : _kernel(),
-      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _border_handler(std::make_unique<CLFillBorderKernel>()),
       _ctx(ctx)
 {
 }

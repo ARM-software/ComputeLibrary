@@ -28,11 +28,11 @@
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "support/MemorySupport.h"
 #include "tests/Globals.h"
 
 #include <algorithm>
 #include <array>
+#include <memory>
 #include <vector>
 
 namespace arm_compute
@@ -64,7 +64,7 @@ public:
     template <typename... Args>
     void configure(Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->configure(std::forward<Args>(args)...);
         _kernel = std::move(k);
     }
@@ -92,11 +92,11 @@ public:
     template <typename T, typename... Args>
     void configure(T first, Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
 
-        auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+        auto b = std::make_unique<NEFillBorderKernel>();
         b->configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
         _border_handler = std::move(b);
     }
@@ -115,11 +115,11 @@ public:
     template <typename T, typename... Args>
     void configure(T first, Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
 
-        auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+        auto b = std::make_unique<NEFillBorderKernel>();
         b->configure(first, BorderSize(_kernel->border_size()), BorderMode::CONSTANT, PixelValue());
         _border_handler = std::move(b);
     }

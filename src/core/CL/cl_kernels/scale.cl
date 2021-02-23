@@ -189,8 +189,8 @@ __kernel void scale_nearest_neighbour_nhwc(
     float new_x = get_global_id(1) * scale_x;
     float new_y = (get_global_id(2) % DEPTH_OUT) * scale_y;
 #elif SAMPLING_POLICY_CENTER
-    float new_x = (get_global_id(1) + 0.5f) * scale_x;
-    float new_y = ((get_global_id(2) % DEPTH_OUT) + 0.5f) * scale_y;
+    float       new_x = (get_global_id(1) + 0.5f) * scale_x;
+    float       new_y = ((get_global_id(2) % DEPTH_OUT) + 0.5f) * scale_y;
 #else /* SAMPLING_POLICY */
 #error("Unsupported sampling policy");
 #endif /* SAMPLING_POLICY */
@@ -209,6 +209,7 @@ __kernel void scale_nearest_neighbour_nhwc(
  * @note Sampling policy to be used is passed as -DSAMPLING_POLICY_(TYPE) e.g. -DSAMPLING_POLICY_TOP_LEFT
  * @note If border mode replicate is used, is should be passed as -DBORDER_MODE_REPLICATE
  * @note Output tensor's depth should be given as a preprocessor argument using -DDEPTH_OUT=size. e.g. -DDEPTH=16
+ * @note The value to be used at the edges of the images shoud be given as a preprocessor argument using -DCONSTANT_VALUE=value.
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8/S16/F16/F32.
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -230,6 +231,7 @@ __kernel void scale_nearest_neighbour_nhwc(
  * @param[in]  input_height                      Input image height
  * @param[in]  scale_x                           The scale factor along x dimension
  * @param[in]  scale_y                           The scale factor along y dimension
+ *
  */
 __kernel void scale_bilinear_nhwc(
     TENSOR4D_DECLARATION(in),
@@ -252,26 +254,37 @@ __kernel void scale_bilinear_nhwc(
 #error("Unsupported sampling policy");
 #endif /* SAMPLING_POLICY */
 
-    const float new_xf      = floor(new_x);
-    const float new_yf      = floor(new_y);
-    float       clamped_x   = clamp(new_xf, 0.0f, input_width - 1);
-    float       clamped_x1  = clamp(new_xf + 1, 0.0f, input_width - 1);
-    float       clamped_x_  = clamped_x;
-    float       clamped_x1_ = clamped_x1;
-    const float clamped_y   = clamp(new_yf, 0.0f, input_height - 1);
-    const float clamped_y1  = clamp(new_yf + 1, 0.0f, input_height - 1);
+    const float new_xf     = floor(new_x);
+    const float new_yf     = floor(new_y);
+    const float clamped_x  = clamp(new_xf, 0.0f, input_width - 1);
+    const float clamped_x1 = clamp(new_xf + 1, 0.0f, input_width - 1);
+    const float clamped_y  = clamp(new_yf, 0.0f, input_height - 1);
+    const float clamped_y1 = clamp(new_yf + 1, 0.0f, input_height - 1);
 
 #ifndef BORDER_MODE_REPLICATE
-    clamped_x1  = select(clamped_x1, 0.0f - BORDER_SIZE, new_yf + 1 < 0.f || new_yf + 1 > input_height - 1 || new_xf + 1 < 0.f || new_xf + 1 > input_width - 1);
-    clamped_x_  = select(clamped_x_, 0.0f - BORDER_SIZE, new_yf + 1 > input_height - 1 || new_xf < 0.f || new_xf > input_width - 1);
-    clamped_x   = select(clamped_x, 0.0f - BORDER_SIZE, new_yf < 0.f || new_yf > input_height - 1 || new_xf < 0.f || new_xf > input_width - 1);
-    clamped_x1_ = select(clamped_x1_, 0.0f - BORDER_SIZE, new_xf + 1 < 0.f || new_xf + 1 > input_width - 1 || new_yf < 0.f || new_yf > input_height - 1);
+    const bool  check_x = (0.f <= new_xf && new_xf < input_width);
+    const bool  check_x1 = (-1.f <= new_xf && new_xf < input_width - 1);
+    const bool  check_y = (0.f <= new_yf && new_yf < input_height);
+    const bool  check_y1 = (-1.f <= new_yf && new_yf < input_height - 1);
+    const float ins_0   = select((float)(CONSTANT_VALUE), (float)(*((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y),
+                                                                                                          (get_global_id(2) / DEPTH_OUT)))),
+                                 check_x && check_y);
+    const float ins_1 = select((float)(CONSTANT_VALUE), (float)(*((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x1), convert_int(clamped_y),
+                                                                                                        (get_global_id(2) / DEPTH_OUT)))),
+                                 check_x1 && check_y);
+    const float ins_2 = select((float)(CONSTANT_VALUE), (float)(*((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y1),
+                                                                                                        (get_global_id(2) / DEPTH_OUT)))),
+                                 check_x && check_y1);
+    const float ins_3 = select((float)(CONSTANT_VALUE), (float)(*((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x1), convert_int(clamped_y1),
+                                                                                                        (get_global_id(2) / DEPTH_OUT)))),
+                                 check_x1 && check_y1);
+    float4 ins = (float4)(ins_0, ins_1, ins_2, ins_3);
+#else  /* BORDER_MODE_REPLICATE */
+    float4 ins        = (float4)(*((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y), (get_global_id(2) / DEPTH_OUT))),
+                                 *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x1), convert_int(clamped_y), (get_global_id(2) / DEPTH_OUT))),
+                                 *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y1), (get_global_id(2) / DEPTH_OUT))),
+                                 *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x1), convert_int(clamped_y1), (get_global_id(2) / DEPTH_OUT))));
 #endif /* BORDER_MODE_REPLICATE */
-
-    float4 ins = (float4)(*((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y), (get_global_id(2) / DEPTH_OUT))),
-                          *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x1_), convert_int(clamped_y), (get_global_id(2) / DEPTH_OUT))),
-                          *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x_), convert_int(clamped_y1), (get_global_id(2) / DEPTH_OUT))),
-                          *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x1), convert_int(clamped_y1), (get_global_id(2) / DEPTH_OUT))));
 
     const float a  = new_x - new_xf;
     const float b  = 1.f - a;

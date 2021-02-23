@@ -168,8 +168,10 @@ template <typename T>
 using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
 
 const auto QuantizedActivationDataset8 = combine(combine(framework::dataset::make("InPlace", { false }),
-                                                         concat(datasets::ActivationFunctionsQuantized(), framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH))),
-                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+                                                         concat(datasets::ActivationFunctionsQuantized(),
+                                                                framework::dataset::make("ActivationFunction",
+{ ActivationLayerInfo::ActivationFunction::HARD_SWISH, ActivationLayerInfo::ActivationFunction::LEAKY_RELU }))),
+framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 const auto QuantizedActivationDataset16 = combine(combine(framework::dataset::make("InPlace", { false }),
                                                           datasets::ActivationFunctionsQuantized()),

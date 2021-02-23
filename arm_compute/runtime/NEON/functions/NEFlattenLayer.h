@@ -25,7 +25,8 @@
 #define ARM_COMPUTE_NEFLATTENLAYER_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 
 namespace arm_compute
 {
@@ -33,7 +34,7 @@ class ITensor;
 class ITensorInfo;
 
 /** Basic function to execute flatten layer kernel. */
-class NEFlattenLayer : public INESimpleFunctionNoBorder
+class NEFlattenLayer : public IFunction
 {
 public:
     /** Initialise the kernel's input and output.
@@ -54,6 +55,12 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    NEReshapeLayer _reshape{};
 };
 } // namespace arm_compute
 

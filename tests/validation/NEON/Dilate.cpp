@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,9 +53,9 @@ TEST_SUITE(Dilate)
 template <typename T>
 using NEDilateFixture = DilateValidationFixture<Tensor, Accessor, NEDilate, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDilateFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                              DataType::U8)),
-                                                                                                      datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDilateFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                            DataType::U8)),
+                                                                                                    datasets::BorderModes()))
 {
     // Validate output
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));
@@ -69,7 +69,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDilateFixture<uint8_t>, framework::DatasetMod
 }
 
 TEST_SUITE_END() // Dilate
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

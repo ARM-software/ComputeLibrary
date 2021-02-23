@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_NEFUNCTIONS_H
 #define ARM_COMPUTE_NEFUNCTIONS_H
 
-/* Header regrouping all the NEON functions */
+/* Header regrouping all the Neon functions */
 #include "arm_compute/runtime/NEON/functions/NEAbsoluteDifference.h"
 #include "arm_compute/runtime/NEON/functions/NEAccumulate.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
@@ -44,9 +44,7 @@
 #include "arm_compute/runtime/NEON/functions/NEChannelCombine.h"
 #include "arm_compute/runtime/NEON/functions/NEChannelExtract.h"
 #include "arm_compute/runtime/NEON/functions/NEChannelShuffleLayer.h"
-#include "arm_compute/runtime/NEON/functions/NECol2Im.h"
 #include "arm_compute/runtime/NEON/functions/NEColorConvert.h"
-#include "arm_compute/runtime/NEON/functions/NEComputeAllAnchors.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolution.h"
@@ -77,13 +75,10 @@
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFuseBatchNormalization.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMConv2d.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMInterleave4x4.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMTranspose1xW.h"
 #include "arm_compute/runtime/NEON/functions/NEGather.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussian3x3.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
@@ -95,7 +90,6 @@
 #include "arm_compute/runtime/NEON/functions/NEHOGMultiDetection.h"
 #include "arm_compute/runtime/NEON/functions/NEHarrisCorners.h"
 #include "arm_compute/runtime/NEON/functions/NEHistogram.h"
-#include "arm_compute/runtime/NEON/functions/NEIm2Col.h"
 #include "arm_compute/runtime/NEON/functions/NEInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEIntegralImage.h"
 #include "arm_compute/runtime/NEON/functions/NEL2NormalizeLayer.h"
@@ -103,7 +97,6 @@
 #include "arm_compute/runtime/NEON/functions/NELSTMLayerQuantized.h"
 #include "arm_compute/runtime/NEON/functions/NELaplacianPyramid.h"
 #include "arm_compute/runtime/NEON/functions/NELaplacianReconstruct.h"
-#include "arm_compute/runtime/NEON/functions/NELocallyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NELogical.h"
 #include "arm_compute/runtime/NEON/functions/NEMagnitude.h"
 #include "arm_compute/runtime/NEON/functions/NEMaxUnpoolingLayer.h"
@@ -152,10 +145,8 @@
 #include "arm_compute/runtime/NEON/functions/NETile.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/NEON/functions/NEUnstack.h"
-#include "arm_compute/runtime/NEON/functions/NEUpsampleLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpAffine.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEYOLOLayer.h"
 
 #endif /* ARM_COMPUTE_NEFUNCTIONS_H */

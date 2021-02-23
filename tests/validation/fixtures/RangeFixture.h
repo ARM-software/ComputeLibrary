@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,9 +65,9 @@ public:
 protected:
     float get_random_end(const DataType output_data_type, const QuantizationInfo qinfo_out, float start, float step)
     {
-        std::uniform_real_distribution<> distribution(1, 100);
-        std::mt19937                     gen(library->seed());
-        float                            end = start;
+        std::uniform_real_distribution<float> distribution(1, 100);
+        std::mt19937                          gen(library->seed());
+        float                                 end = start;
         switch(output_data_type)
         {
             case DataType::U8:

@@ -157,7 +157,7 @@ public:
     CLComplexPixelWiseMultiplicationKernel &operator=(CLComplexPixelWiseMultiplicationKernel &&) = default;
     /** Initialise the kernel's input, output and border mode.
      *
-     * @param[in]  input1   An input tensor info. Data types supported: F32. Number of channels supported: 2.
+     * @param[in]  input1   An input tensor info. Data types supported: F16/F32. Number of channels supported: 2.
      * @param[in]  input2   An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[out] output   The output tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in]  act_info (Optional) Activation layer information in case of a fused activation.

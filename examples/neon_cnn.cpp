@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,10 +53,10 @@ public:
         // The weights and biases tensors should be initialized with the values inferred with the training
 
         // Set memory manager where allowed to manage internal memory requirements
-        conv0   = arm_compute::support::cpp14::make_unique<NEConvolutionLayer>(mm_layers);
-        conv1   = arm_compute::support::cpp14::make_unique<NEConvolutionLayer>(mm_layers);
-        fc0     = arm_compute::support::cpp14::make_unique<NEFullyConnectedLayer>(mm_layers);
-        softmax = arm_compute::support::cpp14::make_unique<NESoftmaxLayer>(mm_layers);
+        conv0   = std::make_unique<NEConvolutionLayer>(mm_layers);
+        conv1   = std::make_unique<NEConvolutionLayer>(mm_layers);
+        fc0     = std::make_unique<NEFullyConnectedLayer>(mm_layers);
+        softmax = std::make_unique<NESoftmaxLayer>(mm_layers);
 
         /* [Initialize tensors] */
 
@@ -170,8 +170,8 @@ public:
 
         // We need 2 memory groups for handling the input and output
         // We call explicitly allocate after manage() in order to avoid overlapping lifetimes
-        memory_group0 = arm_compute::support::cpp14::make_unique<MemoryGroup>(mm_transitions);
-        memory_group1 = arm_compute::support::cpp14::make_unique<MemoryGroup>(mm_transitions);
+        memory_group0 = std::make_unique<MemoryGroup>(mm_transitions);
+        memory_group1 = std::make_unique<MemoryGroup>(mm_transitions);
 
         memory_group0->manage(&out_conv0);
         out_conv0.allocator()->allocate();
@@ -257,7 +257,7 @@ private:
     Tensor out_fc0{};
     Tensor out_softmax{};
 
-    // NEON allocator
+    // Neon allocator
     Allocator allocator{};
 
     // Memory groups

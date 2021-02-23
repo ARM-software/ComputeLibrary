@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,19 +34,19 @@ namespace validation
 namespace reference
 {
 template <typename T>
-T logical_binary_op(arm_compute::kernels::LogicalOperation op, T src1, T src2)
+T logical_binary_op(arm_compute::LogicalOperation op, T src1, T src2)
 {
     switch(op)
     {
-        case arm_compute::kernels::LogicalOperation::And:
+        case arm_compute::LogicalOperation::And:
             return src1 && src2;
-        case arm_compute::kernels::LogicalOperation::Or:
+        case arm_compute::LogicalOperation::Or:
             return src1 || src2;
         // The following operators are either invalid or not binary operator
-        case arm_compute::kernels::LogicalOperation::Not:
-        /* fall through */
-        case arm_compute::kernels::LogicalOperation::Unknown:
-        /* fall through */
+        case arm_compute::LogicalOperation::Not:
+        // fall through
+        case arm_compute::LogicalOperation::Unknown:
+        // fall through
         default:
             ARM_COMPUTE_ASSERT(true);
     }
@@ -57,7 +57,7 @@ template <size_t dim>
 struct BroadcastUnroll
 {
     template <typename T>
-    static void unroll(arm_compute::kernels::LogicalOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst,
+    static void unroll(arm_compute::LogicalOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst,
                        Coordinates &id_src1, Coordinates &id_src2, Coordinates &id_dst)
     {
         const bool src1_is_broadcast = (src1.shape()[dim - 1] != dst.shape()[dim - 1]);
@@ -84,7 +84,7 @@ template <>
 struct BroadcastUnroll<0>
 {
     template <typename T>
-    static void unroll(arm_compute::kernels::LogicalOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst,
+    static void unroll(arm_compute::LogicalOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst,
                        Coordinates &id_src1, Coordinates &id_src2, Coordinates &id_dst)
     {
         dst[coord2index(dst.shape(), id_dst)] = logical_binary_op(op, src1[coord2index(src1.shape(), id_src1)], src2[coord2index(src2.shape(), id_src2)]);
@@ -99,7 +99,7 @@ SimpleTensor<T> logical_or(const SimpleTensor<T> &src1, const SimpleTensor<T> &s
     Coordinates     id_dst{};
     SimpleTensor<T> dst{ TensorShape::broadcast_shape(src1.shape(), src2.shape()), src1.data_type() };
 
-    BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(arm_compute::kernels::LogicalOperation::Or, src1, src2, dst, id_src1, id_src2, id_dst);
+    BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(arm_compute::LogicalOperation::Or, src1, src2, dst, id_src1, id_src2, id_dst);
 
     return dst;
 }
@@ -112,7 +112,7 @@ SimpleTensor<T> logical_and(const SimpleTensor<T> &src1, const SimpleTensor<T> &
     Coordinates     id_dst{};
     SimpleTensor<T> dst{ TensorShape::broadcast_shape(src1.shape(), src2.shape()), src1.data_type() };
 
-    BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(arm_compute::kernels::LogicalOperation::And, src1, src2, dst, id_src1, id_src2, id_dst);
+    BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(arm_compute::LogicalOperation::And, src1, src2, dst, id_src1, id_src2, id_dst);
 
     return dst;
 }

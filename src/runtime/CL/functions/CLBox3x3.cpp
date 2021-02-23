@@ -26,7 +26,6 @@
 #include "arm_compute/core/PixelValue.h"
 #include "src/core/CL/kernels/CLBox3x3Kernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -39,7 +38,7 @@ void CLBox3x3::configure(ICLTensor *input, ICLTensor *output, BorderMode border_
 
 void CLBox3x3::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLBox3x3Kernel>();
+    auto k = std::make_unique<CLBox3x3Kernel>();
     k->configure(compile_context, input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
     _border_handler->configure(compile_context, input, BorderSize(1), border_mode, PixelValue(constant_border_value));

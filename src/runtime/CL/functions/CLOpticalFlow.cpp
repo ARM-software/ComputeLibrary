@@ -34,7 +34,6 @@
 #include "arm_compute/runtime/CL/functions/CLScharr3x3.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLLKTrackerKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -43,7 +42,7 @@ CLOpticalFlow::CLOpticalFlow(std::shared_ptr<IMemoryManager> memory_manager) // 
       _tracker_init_kernel(),
       _tracker_stage0_kernel(),
       _tracker_stage1_kernel(),
-      _tracker_finalize_kernel(support::cpp14::make_unique<CLLKTrackerFinalizeKernel>()),
+      _tracker_finalize_kernel(std::make_unique<CLLKTrackerFinalizeKernel>()),
       _func_scharr(),
       _scharr_gx(),
       _scharr_gy(),
@@ -104,13 +103,13 @@ void CLOpticalFlow::configure(const CLCompileContext &compile_context, const CLP
     _scharr_gy.resize(_num_levels);
 
     // Create internal keypoint arrays
-    _old_points_internal = arm_compute::support::cpp14::make_unique<CLLKInternalKeypointArray>(list_length);
+    _old_points_internal = std::make_unique<CLLKInternalKeypointArray>(list_length);
     _old_points_internal->resize(list_length);
-    _new_points_internal = arm_compute::support::cpp14::make_unique<CLLKInternalKeypointArray>(list_length);
+    _new_points_internal = std::make_unique<CLLKInternalKeypointArray>(list_length);
     _new_points_internal->resize(list_length);
-    _coefficient_table = arm_compute::support::cpp14::make_unique<CLCoefficientTableArray>(list_length);
+    _coefficient_table = std::make_unique<CLCoefficientTableArray>(list_length);
     _coefficient_table->resize(list_length);
-    _old_values = arm_compute::support::cpp14::make_unique<CLOldValueArray>(old_values_list_length);
+    _old_values = std::make_unique<CLOldValueArray>(old_values_list_length);
     _old_values->resize(old_values_list_length);
     _new_points->resize(list_length);
 
@@ -137,17 +136,17 @@ void CLOpticalFlow::configure(const CLCompileContext &compile_context, const CLP
         _func_scharr[i].configure(compile_context, old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
 
         // Init Lucas-Kanade init kernel
-        _tracker_init_kernel.emplace_back(support::cpp14::make_unique<CLLKTrackerInitKernel>());
+        _tracker_init_kernel.emplace_back(std::make_unique<CLLKTrackerInitKernel>());
         _tracker_init_kernel.back()->configure(compile_context, old_points, new_points_estimates, _old_points_internal.get(), _new_points_internal.get(), use_initial_estimate, i, _num_levels, pyr_scale);
 
         // Init Lucas-Kanade stage0 kernel
-        _tracker_stage0_kernel.emplace_back(support::cpp14::make_unique<CLLKTrackerStage0Kernel>());
+        _tracker_stage0_kernel.emplace_back(std::make_unique<CLLKTrackerStage0Kernel>());
         _tracker_stage0_kernel.back()->configure(compile_context, old_ith_input, &_scharr_gx[i], &_scharr_gy[i],
                                                  _old_points_internal.get(), _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
                                                  window_dimension, i);
 
         // Init Lucas-Kanade stage1 kernel
-        _tracker_stage1_kernel.emplace_back(support::cpp14::make_unique<CLLKTrackerStage1Kernel>());
+        _tracker_stage1_kernel.emplace_back(std::make_unique<CLLKTrackerStage1Kernel>());
         _tracker_stage1_kernel.back()->configure(compile_context, new_ith_input, _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
                                                  termination, epsilon, num_iterations, window_dimension, i);
 

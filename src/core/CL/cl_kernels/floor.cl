@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,13 @@
  */
 #include "helpers.h"
 
+#if defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
+
 /** Perform a floor operation on an input tensor.
  *
- * @attention Data type can be passed using the -DDATA_TYPE compile flag, e.g. -DDATA_TYPE=float
- * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Data type can be passed using the -DDATA_TYPE compile flag, e.g. -DDATA_TYPE=float
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note The leftover size in the X dimension shoud be given as preprocessor argument using -DVEC_SIZE_LEFTOVER is; x_dimension % VEC_SIZE. e.g. -DVEC_SIZE_LEFTOVER=1
  * @note Can only take floating point data types.
  *
  * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
@@ -50,9 +53,16 @@ __kernel void floor_layer(
     TENSOR3D_DECLARATION(input),
     TENSOR3D_DECLARATION(output))
 {
-    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+    // Offset computation
+    const uint x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
-    VSTORE(VEC_SIZE)
-    (floor(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr)), 0, (__global DATA_TYPE *)output.ptr);
+    // Address computation
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) + get_global_id(1) * input_stride_y + get_global_id(2) * input_stride_z;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) + get_global_id(1) * output_stride_y + get_global_id(2) * output_stride_z;
+
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    data0 = floor(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr));
+
+    STORE_VECTOR_SELECT(data, DATA_TYPE, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
+#endif // defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)

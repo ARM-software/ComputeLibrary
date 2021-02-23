@@ -56,6 +56,7 @@ TEST_CASE(CompileContextCache, framework::DatasetMode::ALL)
     std::set<std::string> build_opts;
     build_opts.emplace("-DDATA_TYPE=float");
     build_opts.emplace("-DVEC_SIZE=16");
+    build_opts.emplace("-DVEC_SIZE_LEFTOVER=0");
     compile_context.create_kernel(kernel_name, program_name, kernel_src.first, kernel_path, build_opts, kernel_src.second);
 
     // Check if the program is stored in the cache

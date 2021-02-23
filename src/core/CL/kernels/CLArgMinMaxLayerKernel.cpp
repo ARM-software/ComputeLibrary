@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -41,8 +40,6 @@ namespace arm_compute
 {
 namespace
 {
-constexpr unsigned int vector_size = 16;
-
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *prev_output, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
@@ -67,47 +64,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *prev_outp
 
     return Status{};
 }
-
-std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *prev_output, ITensorInfo *output, unsigned int axis, ReductionOperation op)
-{
-    ARM_COMPUTE_UNUSED(op);
-    // Output tensor auto initialization if not yet initialized
-    TensorShape output_shape{ input->tensor_shape() };
-    output_shape.set(axis, 1);
-    DataType output_data_type = DataType::S32;
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
-
-    Window win            = calculate_max_window((prev_output != nullptr) ? (*prev_output) : (*input), Steps(vector_size));
-    bool   window_changed = false;
-
-    switch(axis)
-    {
-        case 0:
-        {
-            ITensorInfo           *input_tensor_access = prev_output != nullptr ? prev_output : input;
-            AccessWindowStatic     input_access(input_tensor_access, 0, 0, static_cast<int>(input_tensor_access->dimension(0)), 1);
-            AccessWindowHorizontal output_access(output, 0, 1);
-            window_changed = update_window_and_padding(win, input_access, output_access);
-            output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-        }
-        break;
-        case 1:
-        case 2:
-        case 3:
-        {
-            AccessWindowHorizontal input_access(input, 0, vector_size);
-            AccessWindowHorizontal output_access(output, 0, vector_size);
-            window_changed = update_window_and_padding(win, input_access, output_access);
-            output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-        }
-        break;
-        default:
-            ARM_COMPUTE_ERROR("Not supported");
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_tuple(err, win);
-}
 } // namespace
 
 CLArgMinMaxLayerKernel::CLArgMinMaxLayerKernel()
@@ -123,9 +79,14 @@ void CLArgMinMaxLayerKernel::configure(const ICLTensor *input, const ICLTensor *
 void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    TensorShape output_shape{ input->info()->tensor_shape() };
+    output_shape.set(axis, 1);
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(DataType::S32).reset_padding().set_is_resizable(true));
+
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (prev_output != nullptr) ? prev_output->info() : nullptr, output->info(), axis, op));
-    auto win_config = validate_and_configure_window(input->info(), (prev_output != nullptr) ? prev_output->info() : nullptr, output->info(), axis, op);
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
+
+    auto padding_info = get_padding_info({ input, prev_output, output });
 
     _input          = input;
     _prev_output    = prev_output;
@@ -134,14 +95,16 @@ void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, 
     _op             = op;
 
     // Set build options
-    CLBuildOptions build_opts;
+    const auto vector_size = (axis == 0) ? 16U : adjust_vec_size(16U, input->info()->dimension(0));
 
+    CLBuildOptions build_opts;
     build_opts.add_option_if(_prev_output != nullptr, "-DPREV_OUTPUT");
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % vector_size));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vector_size));
     build_opts.add_option_if(is_data_type_float(input->info()->data_type()), "-DFLOAT_DATA_TYPE");
     build_opts.add_option_if_else(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX", "-DARG_MIN");
     build_opts.add_option("-DDATA_TYPE_OUTPUT=" + get_cl_type_from_data_type(output->info()->data_type()));
-    build_opts.add_option("-DDATA_TYPE_SELECT=" + get_cl_signed_type_from_element_size(input->info()->element_size()));
 
     // Create kernel
     cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange();
@@ -176,13 +139,15 @@ void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, 
     _kernel = create_kernel(compile_context, "arg_min_max_" + kernel_axis_name, build_opts.options());
 
     // Configure kernel window
-    ICLKernel::configure_internal(std::get<1>(win_config), lws_hint);
+    Window win = calculate_max_window((prev_output != nullptr) ? (*prev_output->info()) : (*input->info()), Steps(vector_size));
+    ICLKernel::configure_internal(win, lws_hint);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLArgMinMaxLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *prev_output, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, prev_output, output, axis, op));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), (prev_output != nullptr) ? prev_output->clone().get() : nullptr, output->clone().get(), axis, op)));
     return Status{};
 }
 

@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/NEON/functions/NETile.h"
 
 #include "src/core/NEON/kernels/NETileKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void NETile::configure(const ITensor *input, ITensor *output, const Multiples &multiples)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NETileKernel>();
+    auto k = std::make_unique<NETileKernel>();
     k->configure(input, output, multiples);
     _kernel = std::move(k);
 }

@@ -26,7 +26,6 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -39,7 +38,7 @@ NEROIPoolingLayer::NEROIPoolingLayer()
 
 void NEROIPoolingLayer::configure(const ITensor *input, const ITensor *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info)
 {
-    _roi_kernel = arm_compute::support::cpp14::make_unique<NEROIPoolingLayerKernel>();
+    _roi_kernel = std::make_unique<NEROIPoolingLayerKernel>();
     _roi_kernel->configure(input, rois, output, pool_info);
 }
 

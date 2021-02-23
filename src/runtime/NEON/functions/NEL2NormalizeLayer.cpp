@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -50,7 +49,7 @@ void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, int axis, fl
     // Configure Kernels
     const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
     _reduce_func.configure(input, &_sumsq, actual_axis, ReductionOperation::SUM_SQUARE);
-    _normalize_kernel = arm_compute::support::cpp14::make_unique<NEL2NormalizeLayerKernel>();
+    _normalize_kernel = std::make_unique<NEL2NormalizeLayerKernel>();
     _normalize_kernel->configure(input, &_sumsq, output, axis, epsilon);
 
     // Allocate intermediate tensors

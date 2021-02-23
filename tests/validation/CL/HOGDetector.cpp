@@ -65,7 +65,7 @@ using CLHOGDetectorFixture = HOGDetectorValidationFixture<CLTensor,
                                                           uint8_t,
                                                           float>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLHOGDetectorFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLHOGDetectorFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        DetectionWindowStrideDataset,
                        datasets::SmallHOGDescriptorDataset()),

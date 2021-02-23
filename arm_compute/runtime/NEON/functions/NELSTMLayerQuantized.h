@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ class ITensor;
 
 /** Basic function to run @ref NELSTMLayerQuantized
  *
- * This function calls the following NEON functions/kernels:
+ * This function calls the following Neon functions/kernels:
  *
  * -# @ref NEGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16

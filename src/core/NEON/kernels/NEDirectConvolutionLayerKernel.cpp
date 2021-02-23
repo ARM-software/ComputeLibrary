@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,7 +149,7 @@ inline bool run_optim_small_tensor(const ITensor *t)
 
 // Optimized convolver for 1x1 kernels used only where input width and height are both <= 8
 // For big Z as in Input=7x7x832, this implementation is faster than the general code becuase it doesn't need to
-// store intermidiate results in memory. Temporary results are stored in NEON registers directly and then written to the output buffer.
+// store intermidiate results in memory. Temporary results are stored in Neon registers directly and then written to the output buffer.
 template <unsigned int stridex>
 class convolver_w1x1_i8x8_f32
 {

@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_LOGGING_HELPERS_H
 
 #include "arm_compute/core/utils/logging/Types.h"
-#include "support/MemorySupport.h"
 #include "support/ToolchainSupport.h"
 
 #include <cstddef>
@@ -49,7 +48,7 @@ template <typename... Ts>
 inline std::string string_with_format(const std::string &fmt, Ts &&... args)
 {
     size_t size     = support::cpp11::snprintf(nullptr, 0, fmt.c_str(), args...) + 1;
-    auto   char_str = support::cpp14::make_unique<char[]>(size);
+    auto   char_str = std::make_unique<char[]>(size);
     support::cpp11::snprintf(char_str.get(), size, fmt.c_str(), args...);
     return std::string(char_str.get(), char_str.get() + size - 1);
 }

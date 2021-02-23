@@ -43,8 +43,8 @@ template <typename T>
 using CLMinMaxLocationFixture = MinMaxLocationValidationFixture<CLTensor, CLAccessor, CLArray<Coordinates2D>, CLArrayAccessor<Coordinates2D>, CLMinMaxLocation, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMinMaxLocationFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                              DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMinMaxLocationFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                            DataType::U8)))
 {
     validate_min_max_loc(_target, _reference);
 }
@@ -58,8 +58,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMinMaxLocationFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMinMaxLocationFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                              DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMinMaxLocationFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                            DataType::S16)))
 {
     validate_min_max_loc(_target, _reference);
 }
@@ -73,8 +73,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMinMaxLocationFixture<int16_t>, framework::Da
 TEST_SUITE_END() // S16
 
 TEST_SUITE(Float)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMinMaxLocationFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                            DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMinMaxLocationFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                          DataType::F32)))
 {
     validate_min_max_loc(_target, _reference);
 }

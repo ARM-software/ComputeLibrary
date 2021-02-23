@@ -44,12 +44,12 @@ TEST_SUITE(NonLinearFilter)
 template <typename T>
 using CLNonLinearFilterFixture = NonLinearFilterValidationFixture<CLTensor, CLAccessor, CLNonLinearFilter, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNonLinearFilterFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                       datasets::NonLinearFilterFunctions()),
-                                                                                                                       framework::dataset::make("MaskSize", { 3U, 5U })),
-                                                                                                                       datasets::MatrixPatterns()),
-                                                                                                                       datasets::BorderModes()),
-                                                                                                               framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNonLinearFilterFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     datasets::NonLinearFilterFunctions()),
+                                                                                                                     framework::dataset::make("MaskSize", { 3U, 5U })),
+                                                                                                                     datasets::MatrixPatterns()),
+                                                                                                                     datasets::BorderModes()),
+                                                                                                             framework::dataset::make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), _border_size));

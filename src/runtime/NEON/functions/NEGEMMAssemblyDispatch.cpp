@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
 #include "src/core/NEON/kernels/assembly/arm_gemm.hpp"
-
-#include "support/MemorySupport.h"
 
 #include <arm_neon.h>
 #include <cstdlib>
@@ -64,9 +62,10 @@ Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *d, 
     p.M        = d->info()->tensor_shape().y();
     p.K        = a->info()->tensor_shape().x();
     p.N        = d->info()->tensor_shape().x();
+    p.batches  = 1;
     p.multis   = 1;
-    p.indirect = false;
     p.sections = 1;
+    p.indirect = false;
 
     if(info.method == AsmConvMethod::Conv || info.method == AsmConvMethod::Indirect)
     {
@@ -286,7 +285,7 @@ private:
 
     /** Assembly Gemm kernel */
     std::shared_ptr<arm_gemm::GemmCommon<TypeInput, TypeOutput>> _gemm_kernel_asm{ nullptr };
-    /** Optimised NEON kernel */
+    /** Optimised Neon kernel */
     std::unique_ptr<INEKernel> _optimised_kernel{ nullptr };
     /** Input A */
     const ITensor *_a
@@ -445,7 +444,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure_indirect(const ITen
 
         _indirect_buf = std::unique_ptr<const TypeInput *, free_delete>(reinterpret_cast<const TypeInput **>(malloc(multi_size * multis)));
         _indirect_arg = std::unique_ptr<const TypeInput *const *, free_delete>(reinterpret_cast<const TypeInput *const **>(malloc(sizeof(TypeInput **) * kernel_hw * multis * batches)));
-        _indirect_pad = std::vector<TypeInput>(_cp.input_channels, zeropad);
+        _indirect_pad = std::vector<TypeInput>(_cp.input_channels, TypeInput(zeropad));
 
         // Set indirect argument
         int64_t pos = 0;
@@ -485,7 +484,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensor *a, c
     }
 
     // arm_compute wrapper for the Gemm object (see above)
-    std::unique_ptr<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>> acl_gemm_wrapper = support::cpp14::make_unique<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>>();
+    std::unique_ptr<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>> acl_gemm_wrapper = std::make_unique<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>>();
     ARM_COMPUTE_ERROR_ON(acl_gemm_wrapper == nullptr);
     acl_gemm_wrapper->configure(_gemm_kernel_asm.get(), gemm_cfg.filter);
     const size_t workspace_size = _gemm_kernel_asm->get_working_size();
@@ -691,7 +690,7 @@ void create_arm_gemm(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &arm_gem
     arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads);
 
     // Create arm_gemm fallback
-    auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput>>();
+    auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput>>();
     fallback->configure(a, b, c, d, args, info, memory_group, weights_manager);
     arm_gemm = std::move(fallback);
 }
@@ -709,7 +708,7 @@ void create_arm_gemm_quant(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &a
     arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads);
 
     // Create arm_gemm fallback
-    auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();
+    auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();
 
     // Configure requantization info
     const int32_t                 negation = info.negated_offsets ? 1 : -1;

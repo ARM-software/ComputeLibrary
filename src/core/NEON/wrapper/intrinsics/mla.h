@@ -66,6 +66,22 @@ VMLA_IMPL2(float16x8_t, float16x8_t, vaddq, vmulq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #undef VMLA_IMPL
+
+#define VMLAL_IMPL(vtype_in, vtype_out, postfix)                                     \
+    inline vtype_out vmlal(const vtype_out &a, const vtype_in &b, const vtype_in &c) \
+    {                                                                                \
+        return vmlal_##postfix(a, b, c);                                             \
+    }
+
+VMLAL_IMPL(uint8x8_t, uint16x8_t, u8)
+VMLAL_IMPL(int8x8_t, int16x8_t, s8)
+VMLAL_IMPL(uint16x4_t, uint32x4_t, u16)
+VMLAL_IMPL(int16x4_t, int32x4_t, s16)
+VMLAL_IMPL(uint32x2_t, uint64x2_t, u32)
+VMLAL_IMPL(int32x2_t, int64x2_t, s32)
+
+#undef VMLAL_IMPL
+
 } // namespace wrapper
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_WRAPPER_MLA_H */

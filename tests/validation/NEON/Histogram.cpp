@@ -48,8 +48,8 @@ TEST_SUITE(Histogram)
 template <typename T>
 using NEHistogramFixture = HistogramValidationFixture<Tensor, Accessor, NEHistogram, T, Distribution1D>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEHistogramFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                         DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEHistogramFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                       DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

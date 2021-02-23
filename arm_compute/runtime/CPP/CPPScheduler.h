@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ public:
 
     /** Access the scheduler singleton
      *
-     * @note this method has been deprecated and will be remover in the upcoming releases
+     * @note this method has been deprecated and will be remover in future releases
      * @return The scheduler
      */
     static CPPScheduler &get();
@@ -52,7 +52,7 @@ public:
     void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func) override;
     unsigned int num_threads() const override;
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) override;
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors) override;
 
 protected:
     /** Will run the workloads in parallel using num_threads

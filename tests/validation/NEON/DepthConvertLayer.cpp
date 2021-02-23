@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -608,7 +608,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU8Fixture<int32_t>, framew
 TEST_SUITE_END() // S32_to_U8
 
 TEST_SUITE_END() // DepthConvertLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

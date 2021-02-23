@@ -23,8 +23,6 @@
  */
 #include "arm_compute/runtime/SchedulerFactory.h"
 
-#include "support/MemorySupport.h"
-
 #include "arm_compute/core/Error.h"
 #if ARM_COMPUTE_CPP_SCHEDULER
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
@@ -54,12 +52,12 @@ std::unique_ptr<IScheduler> SchedulerFactory::create(Type type)
     {
         case Type::ST:
         {
-            return support::cpp14::make_unique<SingleThreadScheduler>();
+            return std::make_unique<SingleThreadScheduler>();
         }
         case Type::CPP:
         {
 #if ARM_COMPUTE_CPP_SCHEDULER
-            return support::cpp14::make_unique<CPPScheduler>();
+            return std::make_unique<CPPScheduler>();
 #else  /* ARM_COMPUTE_CPP_SCHEDULER */
             ARM_COMPUTE_ERROR("Recompile with cppthreads=1 to use C++11 scheduler.");
 #endif /* ARM_COMPUTE_CPP_SCHEDULER */
@@ -67,7 +65,7 @@ std::unique_ptr<IScheduler> SchedulerFactory::create(Type type)
         case Type::OMP:
         {
 #if ARM_COMPUTE_OPENMP_SCHEDULER
-            return support::cpp14::make_unique<OMPScheduler>();
+            return std::make_unique<OMPScheduler>();
 #else  /* ARM_COMPUTE_OPENMP_SCHEDULER */
             ARM_COMPUTE_ERROR("Recompile with openmp=1 to use openmp scheduler.");
 #endif /* ARM_COMPUTE_OPENMP_SCHEDULER */

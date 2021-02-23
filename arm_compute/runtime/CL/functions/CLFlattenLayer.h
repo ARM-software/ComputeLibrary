@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,8 @@
 #define ARM_COMPUTE_CLFLATTENLAYER_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
+#include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
@@ -35,10 +36,10 @@ class ITensorInfo;
 
 /** Basic function to execute flatten. This function calls the following OpenCL kernel:
 *
-* -# @ref CLFlattenLayerKernel
+* -# @ref CLReshapeLayer
 *
 */
-class CLFlattenLayer : public ICLSimpleFunction
+class CLFlattenLayer : public IFunction
 {
 public:
     /** Initialise the kernel's input and output.
@@ -68,6 +69,12 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    CLReshapeLayer _reshape{};
 };
 } // namespace arm_compute
 

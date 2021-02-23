@@ -391,7 +391,7 @@ In order to deprecate an existing API, these rules should be followed.
 - Deprecation of runtime APIs should strictly follow the aforementioned period, whereas core APIs can have more flexibility as they are mostly used internally rather than user-facing.
 - Any API changes (update, addition and deprecation) in all components should be well documented by the contribution itself.
 
-Also, it is recommended to use the following utility macros which is designed to work with both clang and gcc using C++11 and later.
+Also, it is recommended to use the following utility macros which is designed to work with both clang and gcc using C++14 and later.
 
 - ARM_COMPUTE_DEPRECATED: Just deprecate the wrapped function
 - ARM_COMPUTE_DEPRECATED_REL: Deprecate the wrapped function and also capture the release that was deprecated

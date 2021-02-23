@@ -38,10 +38,10 @@ The Core library is a low level collection of algorithms implementations, it is 
 The Runtime library is a very basic wrapper around the Core library which can be used for quick prototyping, it is basic in the sense that:
 
 - It allocates images and tensors by using standard malloc().
-- It multi-threads NEON code in a very basic way using a very simple pool of threads.
+- It multi-threads Neon code in a very basic way using a very simple pool of threads.
 - For OpenCL it uses the default CLScheduler command queue for all mapping operations and kernels.
 
-For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between NEON and OpenCL, etc.)
+For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between Neon and OpenCL, etc.)
 
 @section S4_1_2 Data-type and Data-layout support
 
@@ -62,7 +62,7 @@ where N = batches, C = channels, H = height, W = width
 @section S4_1_3 Fast-math support
 
 Compute Library supports different types of convolution methods, fast-math flag is only used for the Winograd algorithm.
-When the fast-math flag is enabled, both NEON and CL convolution layers will try to dispatch the fastest implementation available, which may introduce a drop in accuracy as well. The different scenarios involving the fast-math flag are presented below:
+When the fast-math flag is enabled, both Neon and CL convolution layers will try to dispatch the fastest implementation available, which may introduce a drop in accuracy as well. The different scenarios involving the fast-math flag are presented below:
 - For FP32:
     - no-fast-math: Only supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7
     - fast-math: Supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7,5x5,7x7
@@ -116,7 +116,7 @@ kernel.run( q, max_window ); // Enqueue the kernel to process the full window on
 q.finish();
 @endcode
 
-NEON / CPP kernels:
+Neon / CPP kernels:
 
 @code{.cpp}
 //Create a kernel object:
@@ -131,7 +131,7 @@ kernel.run( max_window ); // Run the kernel on the full window
 
 @subsection S4_2_3 Multi-threading
 
-The previous section shows how to run a NEON / CPP kernel in the current thread, however if your system has several CPU cores, you will probably want the kernel to use several cores. Here is how this can be done:
+The previous section shows how to run a Neon / CPP kernel in the current thread, however if your system has several CPU cores, you will probably want the kernel to use several cores. Here is how this can be done:
 
 @code{.cpp}
     ThreadInfo info;
@@ -181,7 +181,7 @@ The previous section shows how to run a NEON / CPP kernel in the current thread,
     }
 @endcode
 
-This is a very basic implementation which was originally used in the NEON runtime library by all the NEON functions.
+This is a very basic implementation which was originally used in the Neon runtime library by all the Neon functions.
 
 @sa CPPScheduler
 
@@ -228,11 +228,11 @@ In order to block until all the jobs in the CLScheduler's command queue are done
 For example:
 @snippet cl_events.cpp OpenCL events
 
-@subsection S4_4_2_cl_neon OpenCL / NEON interoperability
+@subsection S4_4_2_cl_neon OpenCL / Neon interoperability
 
-You can mix OpenCL and NEON kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects, for example:
+You can mix OpenCL and Neon kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects, for example:
 
-@snippet neoncl_scale_median_gaussian.cpp NEON / OpenCL Interop
+@snippet neoncl_scale_median_gaussian.cpp Neon / OpenCL Interop
 
 @sa main_neoncl_scale_median_gaussian
 
@@ -256,7 +256,7 @@ You have 3 types of @ref BorderMode :
 - @ref BorderMode::REPLICATE : Neighbor pixels outside of the image are treated as having the same value as the closest valid pixel.
 - @ref BorderMode::CONSTANT : Neighbor pixels outside of the image are treated as having the same constant value. (The user can choose what this value should be).
 
-Moreover both OpenCL and NEON use vector loads and stores instructions to access the data in buffers, so in order to avoid having special cases to handle for the borders all the images and tensors used in this library must be padded.
+Moreover both OpenCL and Neon use vector loads and stores instructions to access the data in buffers, so in order to avoid having special cases to handle for the borders all the images and tensors used in this library must be padded.
 
 @subsubsection padding Padding
 
@@ -483,7 +483,7 @@ conv2.run();
 
 The implemented @ref TensorAllocator and @ref CLTensorAllocator objects provide an interface capable of importing existing memory to a tensor as backing memory.
 
-A simple NEON example can be the following:
+A simple Neon example can be the following:
 @code{.cpp}
 // External backing memory
 void* external_ptr = ...;
@@ -550,6 +550,6 @@ Consequently, this will allow finer control of these services among pipelines wh
 This feature introduces some changes to our API.
 All the kernels/functions will now accept a Runtime Context object which will allow the function to use the mentioned services.
 
-Finally, we will try to adapt our code-base progressively to use the new mechanism but will continue supporting the legacy mechanism to allow a smooth transition. Changes will apply to all our three backends: NEON, OpenCL and OpenGL ES.
+Finally, we will try to adapt our code-base progressively to use the new mechanism but will continue supporting the legacy mechanism to allow a smooth transition. Changes will apply to all our three backends: Neon, OpenCL and OpenGL ES.
 */
 } // namespace arm_compute

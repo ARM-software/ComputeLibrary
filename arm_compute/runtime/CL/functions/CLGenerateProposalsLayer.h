@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
@@ -42,7 +43,6 @@ class CLBoundingBoxTransformKernel;
 class CLDequantizationLayerKernel;
 class CLComputeAllAnchorsKernel;
 class CLPadLayerKernel;
-class CLPermuteKernel;
 class CLQuantizationLayerKernel;
 class ICLTensor;
 class ITensorInfo;
@@ -50,7 +50,7 @@ class ITensorInfo;
 /** Basic function to generate proposals for a RPN (Region Proposal Network)
  *
  * This function calls the following OpenCL kernels:
- * -# @ref CLComputeAllAnchors
+ * -# @ref CLComputeAllAnchorsKernel
  * -# @ref CLPermute x 2
  * -# @ref CLReshapeLayer x 2
  * -# @ref CLBoundingBoxTransform
@@ -137,9 +137,9 @@ private:
     MemoryGroup _memory_group;
 
     // OpenCL kernels
-    std::unique_ptr<CLPermuteKernel>              _permute_deltas_kernel;
+    CLPermute                                     _permute_deltas;
     CLReshapeLayer                                _flatten_deltas;
-    std::unique_ptr<CLPermuteKernel>              _permute_scores_kernel;
+    CLPermute                                     _permute_scores;
     CLReshapeLayer                                _flatten_scores;
     std::unique_ptr<CLComputeAllAnchorsKernel>    _compute_anchors_kernel;
     std::unique_ptr<CLBoundingBoxTransformKernel> _bounding_box_kernel;

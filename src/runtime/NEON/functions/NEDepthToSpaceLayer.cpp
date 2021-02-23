@@ -30,13 +30,11 @@
 #include "arm_compute/core/Validate.h"
 #include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 void NEDepthToSpaceLayer::configure(const ITensor *input, ITensor *output, int32_t block_shape)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEDepthToSpaceLayerKernel>();
+    auto k = std::make_unique<NEDepthToSpaceLayerKernel>();
     k->configure(input, output, block_shape);
     _kernel = std::move(k);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ class ITensorInfo;
 
 namespace experimental
 {
-/** Basic function to run @ref NEArithmeticOperationKernel for PRELU
+/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for PRELU
  *
  * @note The function implements an activation layer with the PRELU activation function.
  */
@@ -49,7 +49,7 @@ public:
      * @param[out] output Destination tensor info. Data type supported: same as @p input
      */
     void configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
      *
      * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] alpha  Source alpha tensor info. Data types supported: same of @p input.
@@ -61,7 +61,7 @@ public:
 };
 } // namespace experimental
 
-/** Basic function to run @ref NEArithmeticOperationKernel for PRELU
+/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for PRELU
  *
  * @note The function implements an activation layer with the PRELU activation function.
  */

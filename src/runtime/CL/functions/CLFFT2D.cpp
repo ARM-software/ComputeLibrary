@@ -67,6 +67,7 @@ void CLFFT2D::configure(const CLCompileContext &compile_context, const ICLTensor
 Status CLFFT2D::validate(const ITensorInfo *input, const ITensorInfo *output, const FFT2DInfo &config)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
 
     // Create intermediate tensor info
     TensorInfo first_pass_tensor(input->clone()->set_is_resizable(true).reset_padding().set_num_channels(2));

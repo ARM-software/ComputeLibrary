@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,8 +48,7 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_float_sqrt(0.0001f);
-    
-    
+
 /** Define relative tolerance of the activation layer.
  *
  * @param[in] data_type  The data type used.
@@ -62,7 +61,6 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
     switch(activation)
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::ELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
@@ -70,9 +68,25 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
+#if defined(__ARM_FEATURE_SVE)
+                    return RelativeTolerance<float>(0.25f);
+#else  // !defined(__ARM_FEATURE_SVE)
                     return RelativeTolerance<float>(0.1f);
+#endif // defined(__ARM_FEATURE_SVE)
                 default:
                     return RelativeTolerance<float>(0.05f);
+            }
+        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+            switch(data_type)
+            {
+                case DataType::F16:
+#if defined(__ARM_FEATURE_SVE)
+                    return RelativeTolerance<float>(0.9f);
+#else  // !defined(__ARM_FEATURE_SVE)
+                    return RelativeTolerance<float>(0.01f);
+#endif // defined(__ARM_FEATURE_SVE)
+                default:
+                    return RelativeTolerance<float>(0.00001f);
             }
         default:
             return RelativeTolerance<float>(0.f);
@@ -91,14 +105,29 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
     switch(activation)
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
         case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
             switch(data_type)
             {
                 case DataType::F16:
+#if defined(__ARM_FEATURE_SVE)
+                    return AbsoluteTolerance<float>(0.25f);
+#else  // !defined(__ARM_FEATURE_SVE)
                     return AbsoluteTolerance<float>(0.01f);
+#endif // defined(__ARM_FEATURE_SVE)
+                default:
+                    return AbsoluteTolerance<float>(0.00001f);
+            }
+        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+            switch(data_type)
+            {
+                case DataType::F16:
+#if defined(__ARM_FEATURE_SVE)
+                    return AbsoluteTolerance<float>(0.9f);
+#else  // !defined(__ARM_FEATURE_SVE)
+                    return AbsoluteTolerance<float>(0.01f);
+#endif // defined(__ARM_FEATURE_SVE)
                 default:
                     return AbsoluteTolerance<float>(0.00001f);
             }
@@ -107,12 +136,27 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
     }
 }
 
-/** Tolerance for quantized asymmetric operations */
-#if defined(__aarch64__)
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
-#else  // defined(__aarch64__)
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
-#endif // defined(__aarch64__)
+/** Define absolute tolerance of the activation layer for qasymm8.
+ *
+ * @param[in] activation The activation function used.
+ *
+ * @return Absolute tolerance depending on the activation function.
+ */
+AbsoluteTolerance<uint8_t> tolerance_qasymm8(ActivationLayerInfo::ActivationFunction activation)
+{
+    switch(activation)
+    {
+        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
+        case ActivationLayerInfo::ActivationFunction::SQRT:
+        case ActivationLayerInfo::ActivationFunction::TANH:
+        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
+        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+        case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
+            return AbsoluteTolerance<uint8_t>(1);
+        default:
+            return AbsoluteTolerance<uint8_t>(0);
+    }
+}
 
 constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1);
 
@@ -130,7 +174,7 @@ const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions
 /** Input data sets. */
 const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
-template <typename T, REQUIRES_TA(arm_compute::utils::traits::is_floating_point<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(arm_compute::utils::traits::is_floating_point<T>::value)>
 void test_float_sqrt_boundary_value()
 {
     constexpr auto vector_size = uint32_t{ 16 };
@@ -234,12 +278,15 @@ template <typename T>
 using NEActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<Tensor, Accessor, NEActivationLayer, T>;
 
 /** Input data sets. */
-const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::LOGISTIC,
-                                                                                                  ActivationLayerInfo::ActivationFunction::TANH
-                                                                                                });
+const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction",
+{
+    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+    ActivationLayerInfo::ActivationFunction::RELU,
+    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+    ActivationLayerInfo::ActivationFunction::LOGISTIC,
+    ActivationLayerInfo::ActivationFunction::TANH,
+    ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
+});
 
 const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }),
                                                         concat(QuantizedActivationFunctionsDataset, framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH))),
@@ -253,7 +300,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, fra
                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qasymm8(_function));
 }
 TEST_SUITE_END() // QASYMM8
 
@@ -264,7 +311,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, fram
                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qasymm8(_function));
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 
@@ -288,7 +335,7 @@ TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // ActivationLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -23,21 +23,32 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 
-#include "arm_compute/core/Size2D.h"
-#include "src/core/NEON/kernels/NEFlattenLayerKernel.h"
-#include "support/MemorySupport.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute
 {
 void NEFlattenLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEFlattenLayerKernel>();
-    k->configure(input, output);
-    _kernel = std::move(k);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(misc::shape_calculator::compute_flatten_shape(input->info())));
+    _reshape.configure(input, output);
 }
 
 Status NEFlattenLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return NEFlattenLayerKernel::validate(input, output);
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(misc::shape_calculator::compute_flatten_shape(input));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
+    }
+    return NEReshapeLayer::validate(input, output);
+}
+void NEFlattenLayer::run()
+{
+    _reshape.run();
 }
 } // namespace arm_compute

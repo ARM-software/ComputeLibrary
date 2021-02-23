@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,19 +31,24 @@ namespace examples
 {
 namespace gemm_tuner_helpers
 {
-void update_padding_for_cl_image(arm_compute::ITensorInfo *tensor)
+bool update_padding_for_cl_image(arm_compute::ITensorInfo *tensor)
 {
     constexpr unsigned int num_floats_per_pixel = 4;
 
     const unsigned int stride_y_in_elements = tensor->strides_in_bytes()[1] / tensor->element_size();
     const unsigned int pixel_aligment       = arm_compute::get_cl_image_pitch_alignment(
                                                   arm_compute::CLKernelLibrary::get().get_device());
+    if(pixel_aligment == 0)
+    {
+        return false;
+    }
     const unsigned int row_pitch_alignment = pixel_aligment * num_floats_per_pixel;
     const unsigned int round_up_width =
         ((stride_y_in_elements + row_pitch_alignment - 1) / row_pitch_alignment) * row_pitch_alignment;
     const unsigned int padding = round_up_width - stride_y_in_elements;
 
     tensor->extend_padding(arm_compute::PaddingSize(0, padding, 0, 0));
+    return true;
 }
 } // namespace gemm_tuner_helpers
 } // namespace examples

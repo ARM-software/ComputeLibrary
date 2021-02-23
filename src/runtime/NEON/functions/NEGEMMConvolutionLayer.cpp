@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,6 @@
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NEIm2ColKernel.h"
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
-#include "support/MemorySupport.h"
 
 #include <set>
 #include <tuple>
@@ -68,7 +67,7 @@ void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const I
     const bool     append_biases = (biases != nullptr) && !is_data_type_quantized_asymmetric(weights->info()->data_type());
     const ITensor *biases_to_use = (append_biases) ? biases : nullptr;
 
-    _weights_reshape_kernel = arm_compute::support::cpp14::make_unique<NEWeightsReshapeKernel>();
+    _weights_reshape_kernel = std::make_unique<NEWeightsReshapeKernel>();
     _weights_reshape_kernel->configure(weights, biases_to_use, output);
 
     output->info()->set_quantization_info(weights->info()->quantization_info());
@@ -110,8 +109,8 @@ NEGEMMConvolutionLayer::~NEGEMMConvolutionLayer() = default;
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager),
-      _col2im_kernel(), _reshape_layer(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _skip_im2col(false),
-      _skip_col2im(false), _is_quantized(false), _is_prepared(false)
+      _col2im_kernel(), _reshape_layer(), _original_weights(nullptr), _original_output(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _gemm_output_3d(), _tmp_output(),
+      _data_layout(DataLayout::NCHW), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _is_prepared(false)
 {
 }
 
@@ -170,7 +169,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         output_info.is_quantized_per_channel = (weights->info()->data_type() == DataType::QSYMM8_PER_CHANNEL);
         quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
 
-        _mm_gemmlowp.configure(input, weights, biases, output, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info));
+        _mm_gemmlowp.configure(input, weights, biases, output, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info, false, false, act_info));
 
         // Revert back QuantizatioInfo as input and weights could be used in other convolution layers
         input->info()->set_quantization_info(iqinfo);
@@ -233,7 +232,7 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         std::unique_ptr<ITensorInfo> weights_qa = weights->clone();
         input_qa->set_quantization_info(QuantizationInfo(iqinfo.uniform().scale, -iqinfo.uniform().offset));
         weights_qa->set_quantization_info(QuantizationInfo(wqinfo.uniform().scale, -wqinfo.uniform().offset));
-        return NEGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), biases, output, GEMMInfo(false, false, true, gemm_3d_depth, skip_im2col, false, output_info));
+        return NEGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), biases, output, GEMMInfo(false, false, true, gemm_3d_depth, skip_im2col, false, output_info, false, false, act_info));
     }
     else
     {
@@ -282,6 +281,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
     _is_prepared      = weights_info.retain_internal_weights();
     _original_weights = weights;
+    _original_output  = output;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
     _data_layout      = data_layout;
     _skip_im2col      = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
@@ -342,7 +342,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         _memory_group.manage(&_im2col_output);
 
         // Configure
-        _im2col_kernel = arm_compute::support::cpp14::make_unique<NEIm2ColKernel>();
+        _im2col_kernel = std::make_unique<NEIm2ColKernel>();
         _im2col_kernel->configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, false, dilation);
 
         // Update GEMM input
@@ -364,10 +364,22 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         TensorInfo info_gemm(shape_gemm, 1, output_data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
+        _gemm_output_3d.allocator()->init(info_gemm);
         _memory_group.manage(&_gemm_output);
 
         // Update GEMM output
         gemm_output_to_use = &_gemm_output;
+    }
+    else
+    {
+        TensorInfo out_info{ *output->info() };
+        out_info.set_data_type(output_data_type).set_data_layout(input->info()->data_layout());
+        _gemm_output.allocator()->init(out_info);
+        _gemm_output_3d.allocator()->init(out_info);
+        _memory_group.manage(&_gemm_output);
+
+        // Update GEMM output
+        gemm_output_to_use = &_gemm_output_3d;
     }
 
     // Configure GEMM
@@ -385,7 +397,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         if(_data_layout == DataLayout::NCHW)
         {
             // Configure col2im
-            _col2im_kernel = arm_compute::support::cpp14::make_unique<NECol2ImKernel>();
+            _col2im_kernel = std::make_unique<NECol2ImKernel>();
             _col2im_kernel->configure(gemm_output_to_use, output, Size2D(conv_w, conv_h));
         }
         else
@@ -394,16 +406,18 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
             _reshape_layer.configure(gemm_output_to_use, output);
         }
     }
+    else
+    {
+        // Configure reshape layer
+        _reshape_layer.configure(gemm_output_to_use, output);
+    }
 
     if(_is_quantized && !_skip_col2im)
     {
         _tmp_output.allocator()->allocate();
     }
 
-    if(!_skip_col2im || _is_quantized)
-    {
-        _gemm_output.allocator()->allocate();
-    }
+    _gemm_output.allocator()->allocate();
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(idx_width) != conv_w) || (output->info()->dimension(idx_height) != conv_h),
                              "Output shape does not match the expected one");
@@ -417,7 +431,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Grouping (num_groups != 1) is not supported on NEON");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Grouping (num_groups != 1) is not supported on Neon");
 
     const DataLayout data_layout = input->data_layout();
     const DataType   data_type   = input->data_type();
@@ -509,7 +523,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     if(!skip_im2col)
     {
         // Create tensor info for im2col reshaped inputs
-        // For NEON the batch size is on the fourth dimension
+        // For Neon the batch size is on the fourth dimension
         // TODO (giaiod01): Auto-initialize the output shape of im2col COMPMID-1482
         TensorShape shape_im2col = input->tensor_shape();
         shape_im2col.set(0, mat_weights_rows);
@@ -555,12 +569,19 @@ void NEGEMMConvolutionLayer::run()
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
+    bool out_has_padding = _skip_col2im && (_original_output->info()->padding().bottom != 0 || _original_output->info()->padding().top != 0);
+
     if(!_skip_im2col)
     {
         // Run input reshaping
         unsigned int y_dim = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
         NEScheduler::get().schedule(_im2col_kernel.get(), y_dim);
     }
+
+    // Handle the case where output has top/bottom padding
+    const ITensor *out_to_use = out_has_padding ? &_gemm_output : _original_output;
+    _gemm_output_3d.info()->extend_padding(out_to_use->info()->padding());
+    _gemm_output_3d.allocator()->import_memory(out_to_use->buffer());
 
     // Runs NEGEMM or NEGEMMLowpMatrixMultiplyCore functions
     if(_is_quantized)
@@ -586,6 +607,12 @@ void NEGEMMConvolutionLayer::run()
             _reshape_layer.run();
         }
     }
+    else if(out_has_padding)
+    {
+        _reshape_layer.run();
+    }
+
+    _gemm_output_3d.allocator()->free();
 }
 
 void NEGEMMConvolutionLayer::prepare()

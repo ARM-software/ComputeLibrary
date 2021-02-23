@@ -71,7 +71,7 @@ TEST_SUITE(LaplacianReconstruct)
 
 using CLLaplacianReconstructFixture = LaplacianReconstructValidationFixture<CLTensor, CLAccessor, CLLaplacianReconstruct, CLLaplacianPyramid, int16_t, uint8_t, CLPyramid>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLaplacianReconstructFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLLaplacianReconstructFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        datasets::Medium2DShapes(),
                        datasets::BorderModes()),

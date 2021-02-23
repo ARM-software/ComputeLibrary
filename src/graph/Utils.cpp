@@ -83,16 +83,16 @@ PassManager create_default_pass_manager(Target target, const GraphConfig &cfg)
     // Passes that mutate graph IR
     if(cfg.convert_to_uint8)
     {
-        pm.append(support::cpp14::make_unique<SyntheticDataTypeMutator>(), !is_target_gc);
+        pm.append(std::make_unique<SyntheticDataTypeMutator>(), !is_target_gc);
     }
-    pm.append(support::cpp14::make_unique<NodeFusionMutator>(), !is_target_gc);
-    pm.append(support::cpp14::make_unique<GroupedConvolutionMutator>());
-    pm.append(support::cpp14::make_unique<InPlaceOperationMutator>(), !is_target_gc);
+    pm.append(std::make_unique<NodeFusionMutator>(), !is_target_gc);
+    pm.append(std::make_unique<GroupedConvolutionMutator>());
+    pm.append(std::make_unique<InPlaceOperationMutator>(), !is_target_gc);
 
     // Passes that mutate backend information
-    pm.append(support::cpp14::make_unique<DepthConcatSubTensorMutator>(), !is_target_gc);
-    pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>(), !is_target_gc);
-    pm.append(support::cpp14::make_unique<NodeExecutionMethodMutator>());
+    pm.append(std::make_unique<DepthConcatSubTensorMutator>(), !is_target_gc);
+    pm.append(std::make_unique<SplitLayerSubTensorMutator>(), !is_target_gc);
+    pm.append(std::make_unique<NodeExecutionMethodMutator>());
 
     return pm;
 }

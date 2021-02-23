@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,19 +27,12 @@
 #include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCScaleKernel.h"
 #include "arm_compute/core/Validate.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
-void GCScale::configure(IGCTensor *input, IGCTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
-                        bool align_corners)
-{
-    configure(input, output, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners });
-}
-
 void GCScale::configure(IGCTensor *input, IGCTensor *output, const ScaleKernelInfo &info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCScaleKernel>();
+    auto k = std::make_unique<GCScaleKernel>();
     k->configure(input, output, info);
     _kernel = std::move(k);
     _border_handler.configure(input, _kernel->border_size(), info.border_mode, info.constant_border_value);

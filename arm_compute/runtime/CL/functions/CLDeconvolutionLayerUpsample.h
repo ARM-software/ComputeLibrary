@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/CL/functions/CLFill.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
@@ -35,13 +35,12 @@ namespace arm_compute
 // Forward declarations
 class CLDeconvolutionLayerUpsampleKernel;
 class CLCompileContext;
-class CLMemsetKernel;
 class ICLTensor;
 class ITensorInfo;
 
 /** Basic function to execute deconvolution upsample on OpenCL. This function calls the following OpenCL kernels and functions:
  *
- * -# @ref CLMemsetKernel
+ * -# @ref CLFill
  * -# @ref CLDeconvolutionLayerUpsampleKernel
  */
 class CLDeconvolutionLayerUpsample : public IFunction
@@ -90,7 +89,7 @@ public:
 
 private:
     std::unique_ptr<CLDeconvolutionLayerUpsampleKernel> _upsample;
-    std::unique_ptr<CLMemsetKernel>                     _memset;
+    CLFill                                              _fill;
     ICLTensor                                          *_output;
 };
 } // namespace arm_compute

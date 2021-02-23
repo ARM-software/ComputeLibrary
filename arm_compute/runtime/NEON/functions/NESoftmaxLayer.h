@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,33 +26,14 @@
 
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/functions/NEPermute.h"
-#include "arm_compute/runtime/Tensor.h"
 #include <memory>
 
 namespace arm_compute
 {
 class ITensor;
-class NELogits1DMaxKernel;
-template <bool IS_LOG>
-class NELogits1DSoftmaxKernel;
-class NEFillBorderKernel;
+class ITensorInfo;
 
-/** Basic function to compute a SoftmaxLayer and a Log SoftmaxLayer.
- *
- * Softmax is calculated by :
- * @f[ out = exp((x - max(x)) * beta) / sum(exp((x - max(x)) * beta)) @f]
- *
- * Log Softmax is calculated by :
- * @f[ out = (x - max(x) * beta) - log(\sum{e^{x - max(x) * beta}}) @f]
- *
- * This function runs the following function/kernels:
- * -# If axis is not 0:
- * -#   @ref NEPermute
- * -# @ref NEFillBorderKernel
- * -# @ref NELogits1DMaxKernel
- * -# @ref NELogits1DSoftmaxKernel
- */
+/** Basic function to compute a SoftmaxLayer and a Log SoftmaxLayer. */
 template <bool IS_LOG = false>
 class NESoftmaxLayerGeneric : public IFunction
 {
@@ -62,17 +43,17 @@ public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NESoftmaxLayerGeneric(const NESoftmaxLayerGeneric &) = delete;
     /** Default move constructor */
-    NESoftmaxLayerGeneric(NESoftmaxLayerGeneric &&) = default;
+    NESoftmaxLayerGeneric(NESoftmaxLayerGeneric &&);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NESoftmaxLayerGeneric &operator=(const NESoftmaxLayerGeneric &) = delete;
     /** Default move assignment operator */
-    NESoftmaxLayerGeneric &operator=(NESoftmaxLayerGeneric &&) = default;
+    NESoftmaxLayerGeneric &operator=(NESoftmaxLayerGeneric &&);
     /** Default destructor */
     ~NESoftmaxLayerGeneric();
     /** Set the input and output tensors.
      *
      * @param[in,out] input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. If the width is not a
-     *                       multiple of the internal processing block size, @ref NEFillBorderKernel replicates the
+     *                       multiple of the internal processing block size, @ref NEFillBorder replicates the
      *                       last value of each row to the nearest multiple.
      * @param[out]    output Destination tensor. Data types supported: same as @p input.
      * @param[in]     beta   (Optional) A scaling factor for the exponent.
@@ -96,17 +77,9 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                      _memory_group;
-    NEPermute                                        _permute_input;
-    NEPermute                                        _permute_output;
-    std::unique_ptr<NELogits1DMaxKernel>             _max_kernel;
-    std::unique_ptr<NELogits1DSoftmaxKernel<IS_LOG>> _softmax_kernel;
-    std::unique_ptr<NEFillBorderKernel>              _fill_border_kernel;
-    Tensor                                           _max;
-    Tensor                                           _tmp;
-    Tensor                                           _input_permuted;
-    Tensor                                           _output_permuted;
-    bool                                             _needs_permute;
+    MemoryGroup _memory_group;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 using NESoftmaxLayer    = NESoftmaxLayerGeneric<false>;

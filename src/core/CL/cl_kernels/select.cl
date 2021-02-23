@@ -23,11 +23,12 @@
  */
 #include "helpers.h"
 
-#if defined(DATA_TYPE) && defined(VEC_SIZE)
+#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 /** This function perform a select operation between two tensors when condition tensor has the same rank.
  *
  * @attention The data_type need to be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=uchar
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @attention Leftover size in the X dimension should be given as preprocessor argument using -DVEC_SIZE_LEFTOVER=value: e.g. x_dimension % VEC_SIZE
  *
  * @param[in]  c_ptr                             Pointer to the source tensor. Supported data types: U8
  * @param[in]  c_stride_x                        Stride of the source tensor in X dimension (in bytes)
@@ -68,29 +69,34 @@ __kernel void select_same_rank(
     TENSOR3D_DECLARATION(y),
     TENSOR3D_DECLARATION(out))
 {
-    // Get pixels pointer
-    Tensor3D c_t   = CONVERT_TO_TENSOR3D_STRUCT(c);
-    Tensor3D x_t   = CONVERT_TO_TENSOR3D_STRUCT(x);
-    Tensor3D y_t   = CONVERT_TO_TENSOR3D_STRUCT(y);
-    Tensor3D out_t = CONVERT_TO_TENSOR3D_STRUCT(out);
+    // Get pointers
+    uint     offset          = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    __global uchar *c_addr   = c_ptr + c_offset_first_element_in_bytes + offset + get_global_id(1) * c_step_y + get_global_id(2) * c_step_z;
+    __global uchar *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
+    __global uchar *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
     // Load values
     SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_c = CONVERT((VLOAD(VEC_SIZE)(0, (__global uchar *)c_t.ptr)), SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
+    in_c = CONVERT(VLOAD(VEC_SIZE)(0, c_addr), SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_t.ptr);
+    in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_addr);
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_y = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)y_t.ptr);
+    in_y = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)y_addr);
 
-    // Calculate and store result
-    VSTORE(VEC_SIZE)
-    (select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0), 0, (__global DATA_TYPE *)out_t.ptr);
+    // Calculate result
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res0 = select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0);
+
+    // Boundary-aware store
+    STORE_VECTOR_SELECT(res, DATA_TYPE, (__global DATA_TYPE *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 
 /** This function perform a select operation between two tensors when condition tensor has a different rank.
  *
  * @attention The data_type need to be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=uchar
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @attention Leftover size in the X dimension should be given as preprocessor argument using -DVEC_SIZE_LEFTOVER=value: e.g. x_dimension % VEC_SIZE
  *
  * @param[in]  c_ptr                             Pointer to the source tensor. Supported data types: U8
  * @param[in]  c_stride_x                        Stride of the source tensor in X dimension (in bytes)
@@ -129,31 +135,36 @@ __kernel void select_different_rank_2(
 {
     const int c_idx = get_global_id(1);
 
-    // Get pixels pointer
-    Vector   c_t   = CONVERT_TO_VECTOR_STRUCT_NO_STEP(c);
-    Tensor3D x_t   = CONVERT_TO_TENSOR3D_STRUCT(x);
-    Tensor3D y_t   = CONVERT_TO_TENSOR3D_STRUCT(y);
-    Tensor3D out_t = CONVERT_TO_TENSOR3D_STRUCT(out);
+    // Get pointers
+    uint     offset          = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    __global uchar *c_addr   = c_ptr + c_offset_first_element_in_bytes;
+    __global uchar *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
+    __global uchar *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
     // Load values
     SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_c = *((__global uchar *)(c_t.ptr + c_idx * c_t.stride_x));
+    in_c = *((__global uchar *)(c_addr + c_idx * c_stride_x));
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_t.ptr);
+    in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_addr);
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_y = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)y_t.ptr);
+    in_y = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)y_addr);
 
-    // Calculate and store result
-    VSTORE(VEC_SIZE)
-    (select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0), 0, (__global DATA_TYPE *)out_t.ptr);
+    // Calculate result
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res0 = select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0);
+
+    // Boundary-aware store
+    STORE_VECTOR_SELECT(res, DATA_TYPE, (__global DATA_TYPE *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
-#endif /* defined(DATA_TYPE) && defined(VEC_SIZE) */
+#endif /* defined(DATA_TYPE) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) */
 
-#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(DEPTH_SIZE)
+#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(DEPTH_SIZE) && defined(VEC_SIZE_LEFTOVER)
 /** This function perform a select operation between two tensors when condition tensor has a different rank.
  *
  * @attention The data_type need to be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=uchar
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @attention Leftover size in the X dimension should be given as preprocessor argument using -DVEC_SIZE_LEFTOVER=value: e.g. x_dimension % VEC_SIZE
  *
  * @param[in]  c_ptr                             Pointer to the source tensor. Supported data types: U8
  * @param[in]  c_stride_x                        Stride of the source tensor in X dimension (in bytes)
@@ -192,22 +203,26 @@ __kernel void select_different_rank_n(
 {
     const int c_idx = get_global_id(2) / DEPTH_SIZE;
 
-    // Get pixels pointer
-    Vector   c_t   = CONVERT_TO_VECTOR_STRUCT_NO_STEP(c);
-    Tensor3D x_t   = CONVERT_TO_TENSOR3D_STRUCT(x);
-    Tensor3D y_t   = CONVERT_TO_TENSOR3D_STRUCT(y);
-    Tensor3D out_t = CONVERT_TO_TENSOR3D_STRUCT(out);
+    // Get pointers
+    uint     offset          = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    __global uchar *c_addr   = c_ptr + c_offset_first_element_in_bytes;
+    __global uchar *x_addr   = x_ptr + x_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * x_step_y + get_global_id(2) * x_step_z;
+    __global uchar *y_addr   = y_ptr + y_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * y_step_y + get_global_id(2) * y_step_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + offset * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
     // Load values
     SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_c = *((__global uchar *)(c_t.ptr + c_idx * c_t.stride_x));
+    in_c = *((__global uchar *)(c_addr + c_idx * c_stride_x));
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_t.ptr);
+    in_x = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)x_addr);
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    in_y = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)y_t.ptr);
+    in_y = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)y_addr);
 
-    // Calculate and store result
-    VSTORE(VEC_SIZE)
-    (select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0), 0, (__global DATA_TYPE *)out_t.ptr);
+    // Calculate result
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res0 = select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0);
+
+    // Boundary-aware store
+    STORE_VECTOR_SELECT(res, DATA_TYPE, (__global DATA_TYPE *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
-#endif /* defined(DATA_TYPE) && defined(VEC_SIZE) && defined(DEPTH_SIZE) */
+#endif /* defined(DATA_TYPE) && defined(VEC_SIZE) && defined(DEPTH_SIZE) && defined(VEC_SIZE_LEFTOVER) */

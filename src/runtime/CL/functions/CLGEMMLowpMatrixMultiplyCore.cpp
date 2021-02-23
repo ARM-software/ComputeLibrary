@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,14 +27,13 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/core/Log.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/gemm/native/CLGEMMNativeKernelConfiguration.h"
-#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h"
 #include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
@@ -43,8 +42,8 @@
 #include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "src/runtime/CL/gemm/CLGEMMKernelSelection.h"
-#include "support/MemorySupport.h"
+#include "src/runtime/CL/gemm_auto_heuristics/CLGEMMAutoHeuristics.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -53,19 +52,130 @@ using namespace arm_compute::cl_gemm;
 
 namespace
 {
-inline bool is_gemm_reshaped(unsigned int m, unsigned int n, unsigned int k, DataType data_type, bool reshape_b_only_on_first_run)
+inline bool validate_gemm_kernel(CLGEMMKernelType kernel_type)
 {
-    std::unique_ptr<ICLGEMMKernelSelection> gemm_kernel = CLGEMMKernelSelectionFactory::create(CLScheduler::get().target());
-    ARM_COMPUTE_ERROR_ON_NULLPTR(gemm_kernel.get());
+    switch(kernel_type)
+    {
+        case CLGEMMKernelType::NATIVE:
+        case CLGEMMKernelType::RESHAPED_ONLY_RHS:
+        {
+            return true;
+        }
+        default:
+        {
+            return false;
+        }
+    }
+}
+//Automatically select between mlgo (prioritized) and default heuristics for gemm kernel type
+inline CLGEMMKernelType auto_select_gemm_kernel(auto_heuristics::CommonQuery query, bool reshape_b_only_on_first_run)
+{
+    auto gemm_kernel = auto_heuristics::select_mlgo_gemm_kernel(query, reshape_b_only_on_first_run);
+    if(bool(gemm_kernel))
+    {
+        if(validate_gemm_kernel(gemm_kernel.gemm_type))
+        {
+            ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use gemm kernel from mlgo heuristics: %s.", to_string(gemm_kernel.gemm_type).c_str());
+            return gemm_kernel.gemm_type;
+        }
+    }
+    gemm_kernel = auto_heuristics::select_default_gemm_kernel(query, reshape_b_only_on_first_run);
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use gemm kernel from default heuristics: %s.", to_string(gemm_kernel.gemm_type).c_str());
+    return gemm_kernel.gemm_type;
+}
+// Validate lhs_info and rhs_info for native kernel
+inline bool validate_lhs_rhs_info_native(const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const ITensorInfo *a, const ITensorInfo *b, const GEMMReshapeInfo &reshape_info)
+{
+    // Validate GEMMLHSMatrixInfo and GEMMRHSMatrixInfo for reshaped only rhs kernel
+    TensorInfo mm_result_s32_info{};
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(mm_result_s32_info, a->clone()->set_tensor_shape(compute_mm_shape(*a, *b, false, reshape_info)).set_data_type(DataType::S32));
+    // Validate mm kernel
+    // NOTE: Ignore all other parameters (eg. output stage etc.) and only validate lhs and rhs info
+    // NOTE: This assumes:
+    //  1. lhs and rhs info's validity does not depend on these other parameters and vice versa(in CLGEMMLowpMatrixMultiplyNativeKernel.cpp validate_arguments).
+    //  2. lhs and rhs info does not cause window and padding issues through side effects (in CLGEMMLowpMatrixMultiplyNativeKernel.cpp validate_and_configure_window).
+    if(!bool(CLGEMMLowpMatrixMultiplyNativeKernel::validate(a, b, &mm_result_s32_info, lhs_info, rhs_info, reshape_info)))
+    {
+        return false;
+    }
+    return true;
+}
 
-    CLGEMMKernelSelectionParams params;
-    params.m               = m;
-    params.n               = n;
-    params.k               = k;
-    params.is_rhs_constant = reshape_b_only_on_first_run;
-    params.data_type       = data_type;
+// Automatically select between mlgo (prioritized) and default heuristics for native kernel configs
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> auto_select_gemm_config_native(auto_heuristics::CommonQuery query, const ITensorInfo *a, const ITensorInfo *b, const GEMMReshapeInfo &reshape_info)
+{
+    auto config = auto_heuristics::select_mlgo_gemm_config_native(query);
+    if(config)
+    {
+        if(validate_lhs_rhs_info_native(config.lhs_info, config.rhs_info, a, b, reshape_info))
+        {
+            ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use native config from mlgo heuristics: LHS info: %s ; RHS info: %s ", to_string(config.lhs_info).c_str(), to_string(config.rhs_info).c_str());
+            return { config.lhs_info, config.rhs_info };
+        }
+    }
+    config = auto_heuristics::select_default_gemm_config_native(query);
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use native config from default heuristics: LHS info: %s ; RHS info: %s ", to_string(config.lhs_info).c_str(), to_string(config.rhs_info).c_str());
+    return { config.lhs_info, config.rhs_info };
+}
 
-    switch(gemm_kernel->select_kernel(params))
+// Validate lhs_info and rhs_info for reshaped only rhs kernel
+inline bool validate_lhs_rhs_info_reshaped_only_rhs(const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output,
+                                                    unsigned int m, unsigned int n, unsigned int k, bool reinterpret_input_as_3d, int depth_output_gemm3d)
+{
+    // Validate GEMMLHSMatrixInfo and GEMMRHSMatrixInfo for reshaped only rhs kernel
+    TensorInfo tmp_b_info{};
+    // Validate reshape RHS kernel
+    auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_rhs_reshaped_shape(*b, rhs_info)));
+    if(!bool(CLGEMMReshapeRHSMatrixKernel::validate(b, &tmp_b_info, rhs_info)))
+    {
+        return false;
+    }
+    // Validate mm kernel
+    // NOTE: Ignore all other parameters (eg. depth_output_gemm3d, output stage etc.) and only validate lhs and rhs info
+    // NOTE: This assumes:
+    //  1. lhs and rhs info's validity does not depend on these other parameters and vice versa(in CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.cpp validate_arguments).
+    //  2. lhs and rhs info does not cause window and padding issues through side effects (in CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.cpp validate_and_configure_window).
+    GEMMKernelInfo gemm_kernel_info;
+    gemm_kernel_info.m                       = m;
+    gemm_kernel_info.n                       = n;
+    gemm_kernel_info.k                       = k;
+    gemm_kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
+    gemm_kernel_info.depth_output_gemm3d     = depth_output_gemm3d;
+    gemm_kernel_info.lhs_info                = lhs_info;
+    gemm_kernel_info.rhs_info                = rhs_info;
+    // Since we ignore the output stage, output data type has to be S32 to pass the validation
+    TensorInfo output_info_copy(*output);
+    output_info_copy.set_data_type(DataType::S32);
+    if(!bool(CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::validate(a, &tmp_b_info, &output_info_copy, gemm_kernel_info)))
+    {
+        return false;
+    }
+    return true;
+}
+
+// Automatically select between mlgo (prioritized) and default heuristics for reshaped only rhs kernel configs
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> auto_select_gemm_config_reshaped_only_rhs(auto_heuristics::CommonQuery query, bool reinterpret_input_as_3d, int depth_output_gemm3d,
+                                                                                          const ITensorInfo *a,
+                                                                                          const ITensorInfo *b, const ITensorInfo *output)
+{
+    auto config = auto_heuristics::select_mlgo_gemm_config_reshaped_only_rhs(query);
+    if(config)
+    {
+        if(validate_lhs_rhs_info_reshaped_only_rhs(config.lhs_info, config.rhs_info, a, b, output, query.m, query.n, query.k, reinterpret_input_as_3d, depth_output_gemm3d))
+        {
+            ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use reshaped_only_rhs config from mlgo heuristics: LHS info: %s ; RHS info: %s ", to_string(config.lhs_info).c_str(), to_string(config.rhs_info).c_str());
+            return { config.lhs_info, config.rhs_info };
+        }
+    }
+    config = auto_heuristics::select_default_gemm_config_reshaped_only_rhs(query);
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Use reshaped_only_rhs config from default heuristics: LHS info: %s ; RHS info: %s ", to_string(config.lhs_info).c_str(), to_string(config.rhs_info).c_str());
+    return { config.lhs_info, config.rhs_info };
+}
+
+inline bool is_gemm_reshaped(CLGEMMKernelType kernel_type)
+{
+    switch(kernel_type)
     {
         case CLGEMMKernelType::NATIVE:
             return false;
@@ -79,14 +189,14 @@ inline bool is_gemm_reshaped(unsigned int m, unsigned int n, unsigned int k, Dat
 
 CLGEMMLowpMatrixMultiplyCore::CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _weights_to_qasymm8(support::cpp14::make_unique<CLDepthConvertLayerKernel>()),
-      _mm_native_kernel(support::cpp14::make_unique<CLGEMMLowpMatrixMultiplyNativeKernel>()),
-      _mm_reshaped_only_rhs_kernel(support::cpp14::make_unique<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel>()),
-      _mtx_b_reshape_kernel(support::cpp14::make_unique<CLGEMMReshapeRHSMatrixKernel>()),
-      _mtx_a_reduction_kernel(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _mtx_b_reduction_kernel(support::cpp14::make_unique<CLGEMMLowpMatrixBReductionKernel>()),
-      _offset_contribution_kernel(support::cpp14::make_unique<CLGEMMLowpOffsetContributionKernel>()),
-      _offset_contribution_output_stage_kernel(support::cpp14::make_unique<CLGEMMLowpOffsetContributionOutputStageKernel>()),
+      _weights_to_qasymm8(std::make_unique<CLDepthConvertLayerKernel>()),
+      _mm_native_kernel(std::make_unique<CLGEMMLowpMatrixMultiplyNativeKernel>()),
+      _mm_reshaped_only_rhs_kernel(std::make_unique<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel>()),
+      _mtx_b_reshape_kernel(std::make_unique<CLGEMMReshapeRHSMatrixKernel>()),
+      _mtx_a_reduction_kernel(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _mtx_b_reduction_kernel(std::make_unique<CLGEMMLowpMatrixBReductionKernel>()),
+      _offset_contribution_kernel(std::make_unique<CLGEMMLowpOffsetContributionKernel>()),
+      _offset_contribution_output_stage_kernel(std::make_unique<CLGEMMLowpOffsetContributionOutputStageKernel>()),
       _qasymm8_weights(),
       _vector_sum_col(),
       _vector_sum_row(),
@@ -151,8 +261,10 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
     const unsigned int batch_size              = reinterpret_input_as_3d ? a->info()->dimension(3) : a->info()->dimension(2);
     const int          depth_output_gemm3d     = gemm_info.depth_output_gemm3d();
 
+    const auto reshape_info = GEMMReshapeInfo(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d);
+
     // Check if we need to reshape the matrix A and matrix B
-    _is_gemm_reshaped = is_gemm_reshaped(m, n, k, a->info()->data_type(), _reshape_b_only_on_first_run);
+    _is_gemm_reshaped = is_gemm_reshaped(auto_select_gemm_kernel(auto_heuristics::CommonQuery{ gpu_target, a->info()->data_type(), m, n, k, batch_size }, _reshape_b_only_on_first_run));
 
     if(_convert_to_qasymm8)
     {
@@ -174,8 +286,10 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
         }
 
         // Pick up the GEMM configuration
-        // Datatype is DataType::QASYMM8 or DataType::QASYMM8_SIGNED doesn't matter, since it only affect the shape configuration
-        std::tie(lhs_info, rhs_info) = CLGEMMReshapedOnlyRHSKernelConfigurationFactory::create(gpu_target)->configure(m, n, k, batch_size, DataType::QASYMM8);
+        // It doesn't matter whether Datatype is DataType::QASYMM8 or DataType::QASYMM8_SIGNED, since it only affect the shape configuration
+        std::tie(lhs_info, rhs_info) = auto_select_gemm_config_reshaped_only_rhs(auto_heuristics::CommonQuery{ gpu_target, DataType::QASYMM8, m, n, k, batch_size }, reinterpret_input_as_3d,
+                                                                                 depth_output_gemm3d,
+                                                                                 a->info(), _convert_to_qasymm8 ? _qasymm8_weights.info() : b->info(), output->info());
 
         // Configure reshape RHS kernel
         _mtx_b_reshape_kernel->configure(compile_context, _convert_to_qasymm8 ? &_qasymm8_weights : b, &_tmp_b, rhs_info);
@@ -252,10 +366,12 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
             else
             {
                 // Pick up the GEMM configuration
-                std::tie(lhs_info, rhs_info) = CLGEMMNativeKernelConfigurationFactory::create(gpu_target)->configure(m, n, k, batch_size, DataType::QASYMM8);
+                // It doesn't matter whether Datatype is DataType::QASYMM8 or DataType::QASYMM8_SIGNED, since it only affect the shape configuration
+                std::tie(lhs_info, rhs_info) = auto_select_gemm_config_native(auto_heuristics::CommonQuery{ gpu_target, DataType::QASYMM8, m, n, k, batch_size },
+                                                                              _matrix_a->info(), _convert_to_qasymm8 ? _qasymm8_weights.info() : matrix_b->info(), reshape_info);
 
                 // Configure matrix multiply kernel
-                _mm_native_kernel->configure(compile_context, _matrix_a, matrix_b, &_mm_result_s32, lhs_info, rhs_info, GEMMReshapeInfo(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d));
+                _mm_native_kernel->configure(compile_context, _matrix_a, matrix_b, &_mm_result_s32, lhs_info, rhs_info, reshape_info);
 
                 _offset_contribution_output_stage_kernel->configure(compile_context, &_mm_result_s32, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, c, output,
                                                                     a->info()->dimension(0),
@@ -285,10 +401,12 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
         else
         {
             // Pick up the GEMM configuration
-            std::tie(lhs_info, rhs_info) = CLGEMMNativeKernelConfigurationFactory::create(gpu_target)->configure(m, n, k, batch_size, DataType::QASYMM8);
+            // It doesn't matter whether Datatype is DataType::QASYMM8 or DataType::QASYMM8_SIGNED, since it only affect the shape configuration
+            std::tie(lhs_info, rhs_info) = auto_select_gemm_config_native(auto_heuristics::CommonQuery{ gpu_target, DataType::QASYMM8, m, n, k, batch_size },
+                                                                          a->info(), _convert_to_qasymm8 ? _qasymm8_weights.info() : b->info(), reshape_info);
 
             // Configure matrix multiply kernel
-            _mm_native_kernel->configure(compile_context, _matrix_a, matrix_b, output, lhs_info, rhs_info, GEMMReshapeInfo(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d));
+            _mm_native_kernel->configure(compile_context, _matrix_a, matrix_b, output, lhs_info, rhs_info, reshape_info);
         }
 
         // Configure offset contribution kernel
@@ -345,7 +463,7 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     const unsigned int batch_size              = reinterpret_input_as_3d ? a->dimension(3) : a->dimension(2);
     const int          depth_output_gemm3d     = gemm_info.depth_output_gemm3d();
 
-    bool reshape_matrix_b = is_gemm_reshaped(m, n, k, a->data_type(), gemm_info.reshape_b_only_on_first_run());
+    bool reshape_matrix_b = is_gemm_reshaped(auto_select_gemm_kernel(auto_heuristics::CommonQuery{ gpu_target, a->data_type(), m, n, k, batch_size }, gemm_info.reshape_b_only_on_first_run()));
 
     const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d);
 
@@ -364,7 +482,11 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         matrix_b_info = &tmp_b_info;
 
         // Pick up the GEMM configuration
-        std::tie(lhs_info, rhs_info) = CLGEMMReshapedOnlyRHSKernelConfigurationFactory::create(gpu_target)->configure(m, n, k, batch_size, DataType::QASYMM8);
+        // NOTE: No need to validate mlgo configurations as they automatically fall back to default heuristics if validation fails
+        // It doesn't matter whether Datatype is DataType::QASYMM8 or DataType::QASYMM8_SIGNED, since it only affect the shape configuration
+        const auto res = select_default_gemm_config_reshaped_only_rhs(auto_heuristics::CommonQuery{ gpu_target, DataType::QASYMM8, m, n, k, batch_size });
+        lhs_info       = res.lhs_info;
+        rhs_info       = res.rhs_info;
 
         // Validate reshape RHS kernel
         auto_init_if_empty(tmp_b_info, weights_info.clone()->set_tensor_shape(compute_rhs_reshaped_shape(weights_info, rhs_info)));
@@ -440,7 +562,11 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
                 auto_init_if_empty(mm_result_s32_info, a->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, false, reshape_info)).set_data_type(DataType::S32));
 
                 // Pick up the GEMM configuration
-                std::tie(lhs_info, rhs_info) = CLGEMMNativeKernelConfigurationFactory::create(gpu_target)->configure(m, n, k, batch_size, DataType::QASYMM8);
+                // NOTE: No need to validate mlgo configurations as they automatically fall back to default heuristics if validation fails
+                // It doesn't matter whether Datatype is DataType::QASYMM8 or DataType::QASYMM8_SIGNED, since it only affect the shape configuration
+                const auto res = select_default_gemm_config_native(auto_heuristics::CommonQuery{ gpu_target, DataType::QASYMM8, m, n, k, batch_size });
+                lhs_info       = res.lhs_info;
+                rhs_info       = res.rhs_info;
 
                 // Validate matrix multiply
                 ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyNativeKernel::validate(matrix_a_info, matrix_b_info, &mm_result_s32_info, lhs_info, rhs_info, reshape_info));
@@ -468,7 +594,10 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         else
         {
             // Pick up the GEMM configuration
-            std::tie(lhs_info, rhs_info) = CLGEMMNativeKernelConfigurationFactory::create(gpu_target)->configure(m, n, k, batch_size, DataType::QASYMM8);
+            // It doesn't matter whether Datatype is DataType::QASYMM8 or DataType::QASYMM8_SIGNED, since it only affect the shape configuration
+            const auto res = select_default_gemm_config_native(auto_heuristics::CommonQuery{ gpu_target, DataType::QASYMM8, m, n, k, batch_size });
+            lhs_info       = res.lhs_info;
+            rhs_info       = res.rhs_info;
 
             // Validate matrix multiply
             ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyNativeKernel::validate(matrix_a_info, matrix_b_info, output, lhs_info, rhs_info, reshape_info));

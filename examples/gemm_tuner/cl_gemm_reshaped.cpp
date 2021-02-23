@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -260,7 +260,11 @@ public:
 
         if(rhs_info.export_to_cl_image)
         {
-            examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info());
+            if(!examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info()))
+            {
+                std::cerr << "cl_image is not supported on the device, disable export_to_cl_image" << std::endl;
+                return false;
+            }
         }
 
         // Validate argments
@@ -328,7 +332,7 @@ private:
 /** Main program for gemm reshaped test
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] M, [optional] N, [optional] K, [optional] B, [optional] m0, [optional] n0, [optional] k0, [optional] v0, [optional] h0, [optional] interleave_lhs, [optional] interleave_rhs, [optional] transpose_rhs )
+ * @param[in] argv Arguments ( [optional] M, [optional] N, [optional] K, [optional] B, [optional] m0, [optional] n0, [optional] k0, [optional] v0, [optional] h0, [optional] interleave_lhs, [optional] interleave_rhs, [optional] transpose_rhs, [optional] export_to_cl_image )
  */
 int main(int argc, char **argv)
 {

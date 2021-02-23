@@ -27,8 +27,6 @@
 #include "arm_compute/runtime/CL/tuners/BifrostTuner.h"
 #include "arm_compute/runtime/CL/tuners/MidgardTuner.h"
 
-#include "support/MemorySupport.h"
-
 #include <memory>
 
 namespace arm_compute
@@ -45,9 +43,9 @@ public:
         switch(arch)
         {
             case GPUTarget::BIFROST:
-                return support::cpp14::make_unique<BifrostTuner>();
+                return std::make_unique<BifrostTuner>();
             case GPUTarget::MIDGARD:
-                return support::cpp14::make_unique<MidgardTuner>();
+                return std::make_unique<MidgardTuner>();
             default:
                 return nullptr;
         }

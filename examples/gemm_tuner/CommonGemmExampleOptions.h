@@ -65,9 +65,10 @@ class CommonGemmExampleOptions
 public:
     /** Constructor
      *
-     * @param[in,out] parser A parser on which "parse()" hasn't been called yet.
+     * @param[in,out] parser            A parser on which "parse()" hasn't been called yet.
+     * @param[in]     default_data_type Default data type if unspecified.
      */
-    CommonGemmExampleOptions(arm_compute::utils::CommandLineParser &parser);
+    CommonGemmExampleOptions(arm_compute::utils::CommandLineParser &parser, arm_compute::DataType default_data_type = arm_compute::DataType::F32);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CommonGemmExampleOptions(const CommonGemmExampleOptions &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

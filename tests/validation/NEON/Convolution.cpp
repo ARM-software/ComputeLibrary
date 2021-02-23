@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ namespace
 {
 /** Tolerance value for comparing reference's output against implementation
  *
- * This is due to the fact that NEON target performs multiplication with reciprocal of scale,
+ * This is due to the fact that Neon target performs multiplication with reciprocal of scale,
  * while reference performs direct division with scale.
  */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
@@ -289,7 +289,7 @@ TEST_SUITE_END() // S16
 TEST_SUITE_END() // Separable9x9
 
 TEST_SUITE_END() // CustomConvolution
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

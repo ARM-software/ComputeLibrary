@@ -28,7 +28,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryRegion.h"
-#include "support/MemorySupport.h"
 
 #include <cstddef>
 
@@ -136,7 +135,7 @@ void TensorAllocator::allocate()
     const size_t alignment_to_use = (alignment() != 0) ? alignment() : 64;
     if(_associated_memory_group == nullptr)
     {
-        _memory.set_owned_region(support::cpp14::make_unique<MemoryRegion>(info().total_size(), alignment_to_use));
+        _memory.set_owned_region(std::make_unique<MemoryRegion>(info().total_size(), alignment_to_use));
     }
     else
     {
@@ -157,7 +156,7 @@ Status TensorAllocator::import_memory(void *memory)
     ARM_COMPUTE_RETURN_ERROR_ON(_associated_memory_group != nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(alignment() != 0 && !arm_compute::utility::check_aligned(memory, alignment()));
 
-    _memory.set_owned_region(support::cpp14::make_unique<MemoryRegion>(memory, info().total_size()));
+    _memory.set_owned_region(std::make_unique<MemoryRegion>(memory, info().total_size()));
     info().set_is_resizable(false);
 
     return Status{};

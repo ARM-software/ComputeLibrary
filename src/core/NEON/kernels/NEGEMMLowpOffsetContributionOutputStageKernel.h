@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel used to add the offset contribution and perform the output stage after @ref NEGEMMLowpMatrixMultiplyKernel.
+/** Neon kernel used to add the offset contribution and perform the output stage after @ref NEGEMMLowpMatrixMultiplyKernel.
  *
  * The computation is performed in-place
  *

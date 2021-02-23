@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -126,7 +126,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEReorgLayerFixture<int8_t>, framework::Dataset
 TEST_SUITE_END() // S8
 
 TEST_SUITE_END() // ReorgLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

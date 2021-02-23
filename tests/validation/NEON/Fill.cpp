@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,7 +100,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint32_t>, framework::DatasetMode
 }
 TEST_SUITE_END() // U32
 
-
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::S32)))
 {
@@ -118,7 +117,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<float>, framework::DatasetMode::A
 TEST_SUITE_END() // F32
 
 TEST_SUITE_END() // Fill
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

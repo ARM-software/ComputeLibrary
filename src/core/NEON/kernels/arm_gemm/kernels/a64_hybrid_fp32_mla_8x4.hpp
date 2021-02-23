@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,12 +27,12 @@
 #include "../std_transforms_fixed.hpp"
 
 #define ARGLIST  \
-   unsigned int, const unsigned int *, \
-   IndirectInputArg<float>, \
-   size_t, size_t, \
-   const float *, \
-   IndirectOutputArg<float>, \
-   const float *, Activation, bool
+    unsigned int, const unsigned int *, \
+    IndirectInputArg<float>, \
+    size_t, size_t, \
+    const float *, \
+    IndirectOutputArg<float>, \
+    const float *, Activation, bool
 
 namespace arm_gemm
 {

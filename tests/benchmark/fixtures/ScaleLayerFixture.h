@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace arm_compute
 {
 namespace test
 {
-/** Fixture that can be used for NEON, CL and OpenGL ES */
+/** Fixture that can be used for Neon, CL and OpenGL ES */
 template <typename TensorType, typename Function, typename Accessor, typename T>
 class ScaleLayerFixture : public framework::Fixture
 {

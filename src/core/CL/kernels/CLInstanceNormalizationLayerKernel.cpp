@@ -84,6 +84,7 @@ void CLInstanceNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *
 void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    auto padding_info = get_padding_info({ input, output });
 
     _input  = input;
     _output = output == nullptr ? input : output;
@@ -112,6 +113,7 @@ void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compi
     auto win_config = validate_and_configure_window(_input->info(), _output->info());
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
     ICLKernel::configure_internal(std::get<1>(win_config));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLInstanceNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,12 +44,12 @@
 #include "arm_compute/runtime/CL/functions/CLChannelShuffleLayer.h"
 #include "arm_compute/runtime/CL/functions/CLColorConvert.h"
 #include "arm_compute/runtime/CL/functions/CLComparison.h"
-#include "arm_compute/runtime/CL/functions/CLComputeAllAnchors.h"
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/CL/functions/CLConvolution.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLCopy.h"
+#include "arm_compute/runtime/CL/functions/CLCrop.h"
 #include "arm_compute/runtime/CL/functions/CLCropResize.h"
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayerUpsample.h"
@@ -98,7 +98,6 @@
 #include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
 #include "arm_compute/runtime/CL/functions/CLLaplacianPyramid.h"
 #include "arm_compute/runtime/CL/functions/CLLaplacianReconstruct.h"
-#include "arm_compute/runtime/CL/functions/CLLocallyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalAnd.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalNot.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
@@ -150,11 +149,9 @@
 #include "arm_compute/runtime/CL/functions/CLTile.h"
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
 #include "arm_compute/runtime/CL/functions/CLUnstack.h"
-#include "arm_compute/runtime/CL/functions/CLUpsampleLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWarpAffine.h"
 #include "arm_compute/runtime/CL/functions/CLWarpPerspective.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
-#include "arm_compute/runtime/CL/functions/CLYOLOLayer.h"
 
 #endif /* ARM_COMPUTE_CLFUNCTIONS_H */

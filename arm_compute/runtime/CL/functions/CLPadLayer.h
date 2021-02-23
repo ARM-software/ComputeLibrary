@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,19 +26,20 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLCopy.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
 class CLCompileContext;
 class CLPadLayerKernel;
-class CLCopyKernel;
 class ICLTensor;
 
 /** Basic function to pad a tensor. This function calls the following OpenCL functions/kernels:
  *
  *  -# @ref CLPadLayerKernel if there is padding to be added
- *  -# @ref CLCopyKernel otherwise
+ *  -# @ref CLCopy otherwise
  */
 class CLPadLayer : public IFunction
 {
@@ -100,7 +101,7 @@ private:
     void configure_reflect_mode(ICLTensor *input, ICLTensor *output);
 
     std::unique_ptr<CLPadLayerKernel> _pad_kernel;
-    std::unique_ptr<CLCopyKernel>     _copy_kernel;
+    CLCopy                            _copy;
     bool                              _perform_pad;
 };
 } // namespace arm_compute

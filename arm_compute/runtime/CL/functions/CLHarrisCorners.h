@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ class CLFillBorderKernel;
 class ICLTensor;
 using ICLImage = ICLTensor;
 
-/** Basic function to execute harris corners detection. This function calls the following CL and NEON kernels and functions:
+/** Basic function to execute harris corners detection. This function calls the following CL and Neon kernels and functions:
  *
  * @note Requires CPU support for the kernels: CPPCornerCandidatesKernel and CPPSortEuclideanDistanceKernel.
  *

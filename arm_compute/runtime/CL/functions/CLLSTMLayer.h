@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,9 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
+#include "arm_compute/runtime/CL/functions/CLCopy.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
+#include "arm_compute/runtime/CL/functions/CLFill.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLMeanStdDevNormalizationLayer.h"
@@ -44,8 +46,6 @@
 namespace arm_compute
 {
 class CLCompileContext;
-class CLCopyKernel;
-class CLMemsetKernel;
 class CLTransposeKernel;
 class ICLTensor;
 
@@ -239,14 +239,14 @@ private:
     CLPixelWiseMultiplication          _pixelwise_mul_output_state2;
     CLFullyConnectedLayer              _fully_connected_output_state;
     CLActivationLayer                  _projection_clip;
-    std::unique_ptr<CLCopyKernel>      _copy_cell_state;
-    std::unique_ptr<CLCopyKernel>      _copy_output;
+    CLCopy                             _copy_cell_state;
+    CLCopy                             _copy_output;
     CLConcatenateLayer                 _concat_scratch_buffer;
     CLConcatenateLayer                 _concat_inputs_forget_gate;
     CLConcatenateLayer                 _concat_weights_forget_gate;
     CLConcatenateLayer                 _concat_weights_input_gate;
     CLConcatenateLayer                 _concat_weights_output;
-    std::unique_ptr<CLMemsetKernel>    _ones_memset_kernel;
+    CLFill                             _ones_fill;
     CLMeanStdDevNormalizationLayer     _mean_std_norm_input_gate;
     CLPixelWiseMultiplication          _pixelwise_mul_input_gate_coeff;
     CLArithmeticAddition               _accum_input_gate_bias;

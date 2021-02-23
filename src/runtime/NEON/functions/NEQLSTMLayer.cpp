@@ -39,7 +39,6 @@
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -75,7 +74,7 @@ void NEQLSTMLayer::configure_layer_norm(NEQLSTMLayer::LayerNormGate g, const ITe
     _memory_group.manage(&out);
     out.allocator()->init(*(in->info()));
 
-    get_layer_norm(g) = arm_compute::support::cpp14::make_unique<NEQLSTMLayerNormalizationKernel>();
+    get_layer_norm(g) = std::make_unique<NEQLSTMLayerNormalizationKernel>();
     get_layer_norm(g)->configure(in, &out, get_layer_norm_weight(g), get_layer_norm_bias(g));
 }
 
@@ -226,18 +225,18 @@ void NEQLSTMLayer::configure(const ITensor *input,
         _input_to_input_weights     = lstm_params.input_to_input_weights();
         _recurrent_to_input_weights = lstm_params.recurrent_to_input_weights();
 
-        _input_to_input_reduction     = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-        _recurrent_to_input_reduction = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+        _input_to_input_reduction     = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+        _recurrent_to_input_reduction = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
         _input_to_input_reduction->configure(_input_to_input_weights, &_input_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
         _recurrent_to_input_reduction->configure(_recurrent_to_input_weights, &_recurrent_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     }
 
-    _input_to_forget_reduction     = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _recurrent_to_forget_reduction = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _input_to_cell_reduction       = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _recurrent_to_cell_reduction   = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _input_to_output_reduction     = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _recurrent_to_output_reduction = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _input_to_forget_reduction     = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _recurrent_to_forget_reduction = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _input_to_cell_reduction       = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _recurrent_to_cell_reduction   = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _input_to_output_reduction     = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _recurrent_to_output_reduction = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
 
     _recurrent_to_cell_reduction->configure(input_to_forget_weights, &_input_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
     _recurrent_to_forget_reduction->configure(recurrent_to_forget_weights, &_recurrent_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
@@ -247,7 +246,7 @@ void NEQLSTMLayer::configure(const ITensor *input,
     _recurrent_to_output_reduction->configure(recurrent_to_output_weights, &_recurrent_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     if(_has_projection)
     {
-        _projection_reduction = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+        _projection_reduction = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
         _projection_reduction->configure(_projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
         if(_projection_bias != nullptr)
         {

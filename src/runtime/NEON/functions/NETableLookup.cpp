@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NETableLookup.h"
 
 #include "src/core/NEON/kernels/NETableLookupKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,7 +31,7 @@ using namespace arm_compute;
 
 void NETableLookup::configure(const ITensor *input, const ILut *lut, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NETableLookupKernel>();
+    auto k = std::make_unique<NETableLookupKernel>();
     k->configure(input, lut, output);
     _kernel = std::move(k);
 }

@@ -25,8 +25,6 @@
 #include "src/core/CL/kernels/CLConvertFullyConnectedWeightsKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 void CLConvertFullyConnectedWeights::configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
@@ -38,7 +36,7 @@ void CLConvertFullyConnectedWeights::configure(const ICLTensor *input, ICLTensor
 void CLConvertFullyConnectedWeights::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
                                                DataLayout data_layout)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLConvertFullyConnectedWeightsKernel>();
+    auto k = std::make_unique<CLConvertFullyConnectedWeightsKernel>();
     k->configure(compile_context, input, output, original_input_shape, data_layout);
     _kernel = std::move(k);
 }

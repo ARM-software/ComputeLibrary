@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #ifdef __aarch64__
 
 #include "../std_transforms_fixed.hpp"
+#include "../performance_parameters.hpp"
 
 namespace arm_gemm {
 

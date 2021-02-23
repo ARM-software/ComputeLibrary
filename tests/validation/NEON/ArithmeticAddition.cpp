@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,9 +43,11 @@ namespace validation
 {
 namespace
 {
-#ifndef __aarch64__
+#if !defined(__aarch64__) || defined(__ARM_FEATURE_SVE)
 constexpr AbsoluteTolerance<float> tolerance_quant(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-#endif                                                 //__aarch64__
+#else                                                  // !defined(__aarch64__) || defined(__ARM_FEATURE_SVE)
+constexpr AbsoluteTolerance<float> tolerance_quant(0);
+#endif                                                 // !defined(__aarch64__) || defined(__ARM_FEATURE_SVE)
 
 /** Input data sets **/
 const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
@@ -225,11 +227,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
 {
     // Validate output
-#ifdef __aarch64__
-    validate(Accessor(_target), _reference);
-#else  //__aarch64__
     validate(Accessor(_target), _reference, tolerance_quant);
-#endif //__aarch64__
 }
 TEST_SUITE_END() // QASYMM8
 
@@ -244,11 +242,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                framework::dataset::make("OutQInfo", { QuantizationInfo(0.5f, 5) })))
 {
     // Validate output
-#ifdef __aarch64__
-    validate(Accessor(_target), _reference);
-#else  //__aarch64__
     validate(Accessor(_target), _reference, tolerance_quant);
-#endif //__aarch64__
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticAdditionQuantizedBroadcastFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(
@@ -259,11 +253,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticAdditionQuantizedBroadcast
                        framework::dataset::make("OutQInfo", { QuantizationInfo(0.5f, 5) })))
 {
     // Validate output
-#ifdef __aarch64__
-    validate(Accessor(_target), _reference);
-#else  //__aarch64__
     validate(Accessor(_target), _reference, tolerance_quant);
-#endif //__aarch64__
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 
@@ -278,17 +268,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })))
 {
     // Validate output
-#ifdef __aarch64__
-    validate(Accessor(_target), _reference);
-#else  //__aarch64__
     validate(Accessor(_target), _reference, tolerance_quant);
-#endif //__aarch64__
 }
 TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // ArithmeticAddition
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -43,10 +43,10 @@ vars.AddVariables(
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a",
-                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64",
-                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "x86")),
+                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
+                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "bare_metal")),
+    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
@@ -56,6 +56,7 @@ vars.AddVariables(
     BoolVariable("neon", "Enable Neon support", False),
     BoolVariable("gles_compute", "Enable OpenGL ES Compute Shader support", False),
     BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", True),
+    BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled", False),
     BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
     BoolVariable("tracing", "Enable runtime tracing", False),
     BoolVariable("openmp", "Enable OpenMP backend", False),
@@ -64,13 +65,16 @@ vars.AddVariables(
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
+    PathVariable("external_tests_dir", "Add examples, benchmarks and tests to the tests suite", "", PathVariable.PathAccept),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
-    ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32"]),
+    ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]),
+    ListVariable("data_layout_support", "Enable a list of data layout to support", "all", ["nhwc", "nchw"]),
     ("toolchain_prefix", "Override the toolchain prefix", ""),
     ("compiler_prefix", "Override the compiler prefix", ""),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
-    ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
+    ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
+    ("specs_file", "Specs file to use (e.g. rdimon.specs)", "")
 )
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
@@ -120,7 +124,7 @@ if env['build'] == "embed_only":
     Return()
 
 if env['neon'] and 'x86' in env['arch']:
-    print("Cannot compile NEON for x86")
+    print("Cannot compile Neon for x86")
     Exit(1)
 
 if env['set_soname'] and not version_at_least(SCons.__version__, "2.4"):
@@ -133,6 +137,10 @@ if env['os'] == 'bare_metal':
          print("ERROR: OpenMP and C++11 threads not supported in bare_metal. Use cppthreads=0 openmp=0")
          Exit(1)
 
+if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['os'] not in ['android']:
+    print("Compressed kernels are supported only for android builds")
+    Exit(1)
+
 if not env['exceptions']:
     if env['opencl'] or env['gles_compute']:
          print("ERROR: OpenCL and GLES are not supported when building without exceptions. Use opencl=0 gles_compute=0")
@@ -144,13 +152,13 @@ if not env['exceptions']:
 env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
          '-Wextra','-pedantic','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
-         '-std=gnu++11','-Woverloaded-virtual', '-Wformat-security',
+         '-std=c++14','-Woverloaded-virtual', '-Wformat-security',
          '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings'])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
-default_cpp_compiler = 'g++' if env['os'] != 'android' else 'clang++'
-default_c_compiler = 'gcc' if env['os'] != 'android' else 'clang'
+default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos'] else 'clang++'
+default_c_compiler = 'gcc' if env['os'] not in ['android', 'macos'] else 'clang'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 c_compiler = os.environ.get('CC', default_c_compiler)
 
@@ -163,6 +171,10 @@ elif 'armclang' in cpp_compiler:
     pass
 else:
     env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
+
+if cpp_compiler == 'g++':
+    # Don't strip comments that could include markers
+    env.Append(CXXFLAGS = ['-C'])
 
 if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])
@@ -200,9 +212,14 @@ if 'v7a' in env['arch']:
     else:
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
 elif 'v8' in env['arch']:
-    if 'sve' in env['arch']:
+    if 'sve2' in env['arch']:
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
+        env.Append(CPPDEFINES = ['SVE2'])
+    elif 'sve' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
-    elif 'v8.2-a' in env['arch']:
+    elif 'armv8r64' in env['arch']:
+        env.Append(CXXFLAGS = ['-march=armv8.4-a'])
+    elif 'v8.' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
     else:
         env.Append(CXXFLAGS = ['-march=armv8-a'])
@@ -211,7 +228,6 @@ elif 'v8' in env['arch']:
         env.Append(CPPDEFINES = ['MMLA_INT8', 'V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
         if "disable_mmla_fp" not in env['custom_options']:
             env.Append(CPPDEFINES = ['MMLA_FP32'])
-
 elif 'x86' in env['arch']:
     if env['estate'] == '32':
         env.Append(CCFLAGS = ['-m32'])
@@ -274,7 +290,7 @@ if not GetOption("help"):
             print("GCC 6.2.1 or newer is required to compile armv8.2-a code")
             Exit(1)
         elif env['arch'] == 'arm64-v8a' and not version_at_least(compiler_ver, '4.9'):
-            print("GCC 4.9 or newer is required to compile NEON code for AArch64")
+            print("GCC 4.9 or newer is required to compile Neon code for AArch64")
             Exit(1)
 
         if version_at_least(compiler_ver, '6.1'):
@@ -297,6 +313,14 @@ if env['data_type_support']:
         env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_SIGNED_KERNELS'])
     if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
         env.Append(CXXFLAGS = ['-DENABLE_QSYMM16_KERNELS'])
+    if any(i in env['data_type_support'] for i in ['all', 'integer']):
+        env.Append(CXXFLAGS = ['-DENABLE_INTEGER_KERNELS'])
+
+if env['data_layout_support']:
+    if any(i in env['data_layout_support'] for i in ['all', 'nhwc']):
+        env.Append(CXXFLAGS = ['-DENABLE_NHWC_KERNELS'])
+    if any(i in env['data_layout_support'] for i in ['all', 'nchw']):
+        env.Append(CXXFLAGS = ['-DENABLE_NCHW_KERNELS'])
 
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])
@@ -310,12 +334,16 @@ if env['os'] == 'android':
     env.Append(LINKFLAGS = ['-pie', '-static-libstdc++', '-ldl'])
 elif env['os'] == 'bare_metal':
     env.Append(LINKFLAGS = ['-static'])
-    env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
     env.Append(CXXFLAGS = ['-fPIC'])
+    if env['specs_file'] == "":
+        env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
     env.Append(CPPDEFINES = ['NO_MULTI_THREADING'])
     env.Append(CPPDEFINES = ['BARE_METAL'])
 if env['os'] == 'linux' and env['arch'] == 'armv7a':
     env.Append(CXXFLAGS = [ '-Wno-psabi' ])
+
+if env['specs_file'] != "":
+    env.Append(LINKFLAGS = ['-specs='+env['specs_file']])
 
 if env['opencl']:
     if env['os'] in ['bare_metal'] or env['standalone']:
@@ -333,6 +361,9 @@ if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthre
 if env['opencl'] or env['gles_compute']:
     if env['embed_kernels']:
         env.Append(CPPDEFINES = ['EMBEDDED_KERNELS'])
+    if env['compress_kernels']:
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_COMPRESSED_KERNELS'])
+        env.Append(LIBS = ['z'])
 
 if env['debug']:
     env['asserts'] = True

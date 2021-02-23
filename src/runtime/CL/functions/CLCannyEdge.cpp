@@ -35,17 +35,16 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLSobel5x5Kernel.h"
 #include "src/core/CL/kernels/CLSobel7x7Kernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLCannyEdge::CLCannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
       _sobel(),
-      _gradient(support::cpp14::make_unique<CLGradientKernel>()),
-      _border_mag_gradient(support::cpp14::make_unique<CLFillBorderKernel>()),
-      _non_max_suppr(support::cpp14::make_unique<CLEdgeNonMaxSuppressionKernel>()),
-      _edge_trace(support::cpp14::make_unique<CLEdgeTraceKernel>()),
+      _gradient(std::make_unique<CLGradientKernel>()),
+      _border_mag_gradient(std::make_unique<CLFillBorderKernel>()),
+      _non_max_suppr(std::make_unique<CLEdgeNonMaxSuppressionKernel>()),
+      _edge_trace(std::make_unique<CLEdgeTraceKernel>()),
       _gx(),
       _gy(),
       _mag(),
@@ -123,19 +122,19 @@ void CLCannyEdge::configure(const CLCompileContext &compile_context, ICLTensor *
     // Configure/Init sobelNxN
     if(gradient_size == 3)
     {
-        auto k = arm_compute::support::cpp14::make_unique<CLSobel3x3>();
+        auto k = std::make_unique<CLSobel3x3>();
         k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 5)
     {
-        auto k = arm_compute::support::cpp14::make_unique<CLSobel5x5>();
+        auto k = std::make_unique<CLSobel5x5>();
         k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 7)
     {
-        auto k = arm_compute::support::cpp14::make_unique<CLSobel7x7>();
+        auto k = std::make_unique<CLSobel7x7>();
         k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }

@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEGather.h"
 
 #include "src/core/NEON/kernels/NEGatherKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,7 +31,7 @@ namespace arm_compute
 {
 void NEGather::configure(const ITensor *input, const ITensor *indices, ITensor *output, int axis)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEGatherKernel>();
+    auto k = std::make_unique<NEGatherKernel>();
     k->configure(input, indices, output, axis);
     _kernel = std::move(k);
 }

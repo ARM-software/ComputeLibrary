@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,14 +28,13 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
-#include "support/MemorySupport.h"
+#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 
 #include "src/core/NEON/kernels/convolution/common/utils.hpp"
 #include "src/core/NEON/kernels/convolution/winograd/winograd.hpp"
@@ -351,18 +350,18 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
             if(input->info()->dimension(width_idx) > 4 && input->info()->dimension(height_idx) > 4)
             {
                 using config             = NEWinogradLayerConfiguration<float, float, 4, 4, 3, 3>;
-                transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-                transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-                transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+                transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+                transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+                transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
                 n_gemms                  = config::WinogradBase::N_GEMMS;
                 N_BLOCK                  = config::WinogradConv::N_BLOCK;
             }
             else
             {
                 using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 3, 3>;
-                transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-                transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-                transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+                transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+                transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+                transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
                 n_gemms                  = config::WinogradBase::N_GEMMS;
                 N_BLOCK                  = config::WinogradConv::N_BLOCK;
             }
@@ -370,63 +369,63 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         else if(kernel_size == Size2D(5, 5))
         {
             using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 5, 5>;
-            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
         else if(kernel_size == Size2D(1, 3))
         {
             using config             = NEWinogradLayerConfiguration<float, float, 6, 1, 3, 1>;
-            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
         else if(kernel_size == Size2D(3, 1))
         {
             using config             = NEWinogradLayerConfiguration<float, float, 1, 6, 1, 3>;
-            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
         else if(kernel_size == Size2D(1, 5))
         {
             using config             = NEWinogradLayerConfiguration<float, float, 4, 1, 5, 1>;
-            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
         else if(kernel_size == Size2D(5, 1))
         {
             using config             = NEWinogradLayerConfiguration<float, float, 1, 4, 1, 5>;
-            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
         else if(kernel_size == Size2D(1, 7))
         {
             using config             = NEWinogradLayerConfiguration<float, float, 2, 1, 7, 1>;
-            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
         else if(kernel_size == Size2D(7, 1))
         {
             using config             = NEWinogradLayerConfiguration<float, float, 1, 2, 1, 7>;
-            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
@@ -441,9 +440,9 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         if(kernel_size == Size2D(3, 3))
         {
             using config             = NEWinogradLayerConfiguration<__fp16, __fp16, 4, 4, 3, 3>;
-            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            transform_input_kernel   = std::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = std::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = std::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
@@ -767,8 +766,14 @@ void NEWinogradConvolutionLayer::prepare()
         // Transform weights
         _kernel_storage.allocator()->allocate();
         NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
-
         _weights_hwio.allocator()->free();
+
+        _gemm_function.prepare();
+        if(!_kernel_storage.is_used())
+        {
+            _kernel_storage.allocator()->free();
+        }
+
         _is_prepared = true;
     }
 }

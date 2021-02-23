@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,12 +29,13 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/Utils.h"
-#include "support/MemorySupport.h"
+
+#include <memory>
 
 using namespace arm_compute;
 
 TensorInfo::TensorInfo()
-    : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true }, _is_dynamic{ false },
+    : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _dims_state(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true },
       _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW)
 {
 }
@@ -47,10 +48,10 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _strides_in_bytes              = info.strides_in_bytes();
     _num_channels                  = info.num_channels();
     _tensor_shape                  = info.tensor_shape();
+    _dims_state                    = info.tensor_dims_state();
     _data_type                     = info.data_type();
     _format                        = info.format();
     _is_resizable                  = info.is_resizable();
-    _is_dynamic                    = info.is_dynamic();
     _valid_region                  = info.valid_region();
     _padding                       = info.padding();
     _quantization_info             = info.quantization_info();
@@ -314,7 +315,7 @@ bool TensorInfo::extend_padding(const PaddingSize &padding)
 
 std::unique_ptr<ITensorInfo> TensorInfo::clone() const
 {
-    return support::cpp14::make_unique<TensorInfo>(*this);
+    return std::make_unique<TensorInfo>(*this);
 }
 
 ITensorInfo &TensorInfo::set_data_type(DataType data_type)
@@ -367,6 +368,12 @@ ITensorInfo &TensorInfo::set_tensor_shape(const TensorShape &shape)
     std::tie(_strides_in_bytes, _offset_first_element_in_bytes, _total_size) = calculate_padding_requirements(_padding);
 
     _valid_region = ValidRegion{ Coordinates(), _tensor_shape };
+    return *this;
+}
+
+ITensorInfo &TensorInfo::set_tensor_dims_state(const TensorDimsState &state)
+{
+    _dims_state = state;
     return *this;
 }
 

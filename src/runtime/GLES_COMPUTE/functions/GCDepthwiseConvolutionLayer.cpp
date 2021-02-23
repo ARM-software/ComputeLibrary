@@ -26,7 +26,6 @@
 #include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -40,7 +39,7 @@ void GCDepthwiseConvolutionLayer3x3::configure(IGCTensor *input, const IGCTensor
 {
     ARM_COMPUTE_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
     ARM_COMPUTE_UNUSED(dilation);
-    auto k = arm_compute::support::cpp14::make_unique<GCDepthwiseConvolutionLayer3x3Kernel>();
+    auto k = std::make_unique<GCDepthwiseConvolutionLayer3x3Kernel>();
     k->configure(input, weights, biases, output, conv_info, depth_multiplier);
     _kernel = std::move(k);
 

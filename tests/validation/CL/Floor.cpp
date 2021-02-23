@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,18 +47,16 @@ TEST_SUITE(Floor)
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),  // Wrong data type
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid data type combination
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         })),
-        framework::dataset::make("Expected", { false, false, false, false, true })),
+        framework::dataset::make("Expected", { false, false, false, true })),
         input_info, output_info, expected)
 {
     const Status status = CLFloor::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false));

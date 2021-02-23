@@ -32,6 +32,7 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 
@@ -42,7 +43,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const FFTRadixStageKernelInfo &config)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(CLFFTRadixStageKernel::supported_radix().count(config.radix) == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(std::set<unsigned int>({ 0, 1 }).count(config.axis) == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[config.axis] % config.radix);
@@ -92,6 +93,7 @@ void CLFFTRadixStageKernel::configure(const CLCompileContext &compile_context, I
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, config));
+    auto padding_info = get_padding_info({ input, output });
 
     _input        = input;
     _output       = output;
@@ -99,6 +101,7 @@ void CLFFTRadixStageKernel::configure(const CLCompileContext &compile_context, I
 
     // Create build options
     CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
 
     // Create kernel
@@ -132,6 +135,7 @@ void CLFFTRadixStageKernel::configure(const CLCompileContext &compile_context, I
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLFFTRadixStageKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const FFTRadixStageKernelInfo &config)

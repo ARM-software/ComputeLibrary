@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -198,7 +198,7 @@ public:
     /** Prevent instances of this class from being copied */
     const GCKernelLibrary &operator=(const GCKernelLibrary &) = delete;
     /** Get the static instance of @ref GCKernelLibrary.
-     * This method has been deprecated and will be removed in the next release.
+     * This method has been deprecated and will be removed in future releases.
      * @return The static instance of GCKernelLibrary.
      */
     static GCKernelLibrary &get();

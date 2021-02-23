@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "utils/command_line/CommandLineParser.h"
 
 #ifdef ARM_COMPUTE_CL
+#include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
@@ -127,12 +128,13 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
     }
 
 #ifdef ARM_COMPUTE_CL
+    CLGEMMHeuristicsHandle gemm_h;
     if(opencl_is_available())
     {
         auto ctx_dev_err = create_opencl_context_and_device();
         ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
         CLScheduler::get()
-        .default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err));
+        .default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), nullptr, &gemm_h);
     }
 #endif /* ARM_COMPUTE_CL */
 

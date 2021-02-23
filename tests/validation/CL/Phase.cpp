@@ -49,8 +49,8 @@ template <typename T>
 using CLPhaseFixture = PhaseValidationFixture<CLTensor, CLAccessor, CLPhase, T>;
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPhaseFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S16)),
-                                                                                                     framework::dataset::make("PhaseType", { PhaseType::SIGNED, PhaseType::UNSIGNED })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPhaseFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S16)),
+                                                                                                   framework::dataset::make("PhaseType", { PhaseType::SIGNED, PhaseType::UNSIGNED })))
 {
     // Validate output
     validate_wrap(CLAccessor(_target), _reference, tolerance_value, 0);
@@ -65,8 +65,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPhaseFixture<int16_t>, framework::DatasetMode
 TEST_SUITE_END() // S16
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPhaseFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S32)),
-                                                                                                     framework::dataset::make("PhaseType", { PhaseType::SIGNED, PhaseType::UNSIGNED })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPhaseFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S32)),
+                                                                                                   framework::dataset::make("PhaseType", { PhaseType::SIGNED, PhaseType::UNSIGNED })))
 {
     // Validate output
     validate_wrap(CLAccessor(_target), _reference, tolerance_value, 0);

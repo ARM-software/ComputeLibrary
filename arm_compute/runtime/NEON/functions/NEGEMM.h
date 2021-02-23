@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,18 +30,20 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
 
 namespace arm_compute
 {
+// Forward declarations
 class NEGEMMInterleave4x4Kernel;
 class NEGEMMMatrixAdditionKernel;
 class NEGEMMMatrixMultiplyKernel;
 class NEGEMMTranspose1xWKernel;
-/** Basic function to execute GEMM on NEON. This function calls the following NEON kernels:
+class NEGEMMAssemblyDispatch;
+
+/** Basic function to execute GEMM on Neon. This function calls the following Neon kernels:
  *
  * If optimized assembly is available:
  *  -# @ref NEGEMMAssemblyDispatch
@@ -53,7 +55,7 @@ class NEGEMMTranspose1xWKernel;
  * In both cases:
  *  -# @ref NEGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0 and is not reshaped once)
  * Else:
- *  -# @ref NEArithmeticAdditionKernel (if c != nullptr and is reshaped once and not optimized assembly in place)
+ *  -# @ref NEArithmeticAddition (if c != nullptr and is reshaped once and not optimized assembly in place)
  *
  *  -# @ref NEActivationLayer (if activation is specified in GEMMInfo)
  */
@@ -112,7 +114,7 @@ private:
     std::unique_ptr<NEGEMMInterleave4x4Kernel>  _interleave_kernel;
     std::unique_ptr<NEGEMMTranspose1xWKernel>   _transpose_kernel;
     std::unique_ptr<NEGEMMMatrixMultiplyKernel> _mm_kernel;
-    NEGEMMAssemblyDispatch                      _asm_glue;
+    std::unique_ptr<NEGEMMAssemblyDispatch>     _asm_glue;
     std::unique_ptr<NEGEMMMatrixAdditionKernel> _ma_kernel;
     NEActivationLayer                           _alpha_scale_func;
     NEArithmeticAddition                        _add_bias;

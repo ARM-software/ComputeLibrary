@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform a remap on a tensor */
+/** Neon kernel to perform a remap on a tensor */
 class NERemapKernel : public INEKernel
 {
 public:

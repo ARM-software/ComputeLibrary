@@ -61,8 +61,22 @@ struct GemmImplementation {
         return instantiate(args, os);
     }
 
+    static GemmImplementation with_estimate(GemmMethod m, const char *n,
+                       std::function<bool(const GemmArgs &, const OutputStage &)> is_supported, std::function<uint64_t(const GemmArgs &, const OutputStage &)> cycle_estimate,
+                       std::function<GemmCommon<Top, Tret> *(const GemmArgs &, const OutputStage &)> instantiate) {
+        GemmImplementation impl(m,n);
+
+        impl.is_supported=is_supported;
+        impl.cycle_estimate=cycle_estimate;
+        impl.instantiate=instantiate;
+
+        return impl;
+    }
+
     GemmImplementation(const GemmImplementation &) = default;
     GemmImplementation & operator= (const GemmImplementation &) = default;
+
+    GemmImplementation(GemmMethod m, const char * n) : method(m), name(n) {}
 
     GemmImplementation(GemmMethod m, const char *n,
                        std::function<bool(const GemmArgs &, const OutputStage &)> is_supported, std::function<bool(const GemmArgs &, const OutputStage &)> is_recommended,

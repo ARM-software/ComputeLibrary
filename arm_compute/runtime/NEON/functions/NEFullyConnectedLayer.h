@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
@@ -35,9 +36,7 @@
 
 namespace arm_compute
 {
-class NEFlattenLayerKernel;
-
-/** Basic function to reshape the weights of Fully Connected layer with NEON. This function calls the following kernels:
+/** Basic function to reshape the weights of Fully Connected layer with Neon. This function calls the following kernels:
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
@@ -112,7 +111,7 @@ private:
 };
 } // namespace weights_transformations
 
-/** Basic function to compute a Fully Connected layer on NEON. This function calls the following NEON kernels:
+/** Basic function to compute a Fully Connected layer on Neon. This function calls the following Neon kernels:
  *  -# @ref NEIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref NEFullyConnectedLayerReshapeWeights (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref NEGEMMMatrixMultiplyKernel or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
@@ -181,7 +180,7 @@ private:
 
     MemoryGroup                                                         _memory_group;
     IWeightsManager                                                    *_weights_manager;
-    std::unique_ptr<NEFlattenLayerKernel>                               _flatten_kernel;
+    NEFlattenLayer                                                      _flatten;
     NEConvertFullyConnectedWeights                                      _convert_weights;
     weights_transformations::NEConvertFullyConnectedWeightsManaged      _convert_weights_managed;
     NEFullyConnectedLayerReshapeWeights                                 _reshape_weights_function;

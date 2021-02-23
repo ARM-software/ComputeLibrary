@@ -24,7 +24,6 @@
 #include "Framework.h"
 
 #include "arm_compute/runtime/Scheduler.h"
-#include "support/MemorySupport.h"
 #include "tests/framework/ParametersLibrary.h"
 #include "tests/framework/TestFilter.h"
 
@@ -36,6 +35,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <type_traits>
 
@@ -94,7 +94,7 @@ Framework::Framework()
                                    Instrument::make_instrument<OpenCLMemoryUsage, ScaleFactor::SCALE_1M>);
 #endif /* ARM_COMPUTE_CL */
 
-    instruments_info = support::cpp14::make_unique<InstrumentsInfo>();
+    instruments_info = std::make_unique<InstrumentsInfo>();
 }
 
 std::set<InstrumentsDescription> Framework::available_instruments() const

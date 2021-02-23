@@ -54,7 +54,7 @@ using CLHOGDescriptorFixture = HOGDescriptorValidationFixture<CLTensor, CLHOG, C
 
 // *INDENT-OFF*
 // clang-format off
-FIXTURE_DATA_TEST_CASE(RunSmall, CLHOGDescriptorFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLHOGDescriptorFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(
                        datasets::SmallHOGDescriptorDataset(),
                        framework::dataset::make("Format", Format::U8)),

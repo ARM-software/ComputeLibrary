@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEHOGDetector.h"
 
 #include "src/core/NEON/kernels/NEHOGDetectorKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -32,7 +31,7 @@ NEHOGDetector::~NEHOGDetector() = default;
 
 void NEHOGDetector::configure(const ITensor *input, const IHOG *hog, IDetectionWindowArray *detection_windows, const Size2D &detection_window_stride, float threshold, size_t idx_class)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEHOGDetectorKernel>();
+    auto k = std::make_unique<NEHOGDetectorKernel>();
     k->configure(input, hog, detection_windows, detection_window_stride, threshold, idx_class);
     _kernel = std::move(k);
 }

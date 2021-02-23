@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,7 +110,7 @@ private:
                                                                           const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1,
                                                                           ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
-    /** Basic function to execute optimized depthwise convolution routines. This function calls the following NEON kernels:
+    /** Basic function to execute optimized depthwise convolution routines. This function calls the following Neon kernels:
     *
     * @note At the moment 3x3 and 5x5 convolution of stride 1, 2 are supported
     *
@@ -192,7 +192,7 @@ private:
         bool                                   _is_prepared;
     };
 
-    /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernel:
+    /** Basic function to execute a generic depthwise convolution. This function calls the following Neon kernel:
      *
      * -# @ref NEDepthwiseConvolutionLayerNativeKernel
      *

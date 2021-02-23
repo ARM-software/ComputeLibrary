@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "support/MemorySupport.h"
 #include "support/StringSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/framework/DatasetModes.h"
@@ -39,6 +38,7 @@
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
@@ -144,6 +144,9 @@ int main(int argc, char **argv)
 
     auto tuner_file = parser.add_option<utils::SimpleOption<std::string>>("tuner-file", "");
     tuner_file->set_help("File to load/save CLTuner values");
+
+    auto mlgo_file = parser.add_option<utils::SimpleOption<std::string>>("mlgo-file", "");
+    mlgo_file->set_help("File to load MLGO heuristics");
 #endif /* ARM_COMPUTE_CL */
     auto threads = parser.add_option<utils::SimpleOption<int>>("threads", 1);
     threads->set_help("Number of threads to use");
@@ -166,23 +169,23 @@ int main(int argc, char **argv)
         Scheduler::get().set_num_threads(threads->value());
 
         // Create CPU context
-        auto cpu_ctx = support::cpp14::make_unique<RuntimeContext>();
+        auto cpu_ctx = std::make_unique<RuntimeContext>();
         cpu_ctx->set_scheduler(&Scheduler::get());
 
         // Track CPU context
-        auto cpu_ctx_track = support::cpp14::make_unique<ContextSchedulerUser>(cpu_ctx.get());
+        auto cpu_ctx_track = std::make_unique<ContextSchedulerUser>(cpu_ctx.get());
 
         // Create parameters
-        parameters = support::cpp14::make_unique<ParametersLibrary>();
+        parameters = std::make_unique<ParametersLibrary>();
         parameters->set_cpu_ctx(std::move(cpu_ctx));
 
 #ifdef ARM_COMPUTE_GC
         // Setup OpenGL context
         {
-            auto gles_ctx = support::cpp14::make_unique<GCRuntimeContext>();
+            auto gles_ctx = std::make_unique<GCRuntimeContext>();
             ARM_COMPUTE_ERROR_ON(gles_ctx == nullptr);
             {
-                // Legacy singletons API: This has been deprecated and the singletons will be removed
+                // Legacy singletons API: This has been deprecated and the singletons will be removed in future releases
                 // Setup singleton for backward compatibility
                 GCScheduler::get().default_init();
             }
@@ -191,12 +194,14 @@ int main(int argc, char **argv)
 #endif /* ARM_COMPUTE_GC */
 
 #ifdef ARM_COMPUTE_CL
-        CLTuner cl_tuner(false);
+        CLTuner                cl_tuner(false);
+        CLGEMMHeuristicsHandle gemm_heuristics;
         if(opencl_is_available())
         {
             auto ctx_dev_err = create_opencl_context_and_device();
             ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
-            CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner);
+            gemm_heuristics.reload_from_file(mlgo_file->value());
+            CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner, &gemm_heuristics);
         }
 
         if(enable_tuner->is_set())
@@ -312,8 +317,8 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        library       = support::cpp14::make_unique<AssetsLibrary>(assets->value(), seed->value());
-        fixed_library = support::cpp14::make_unique<AssetsLibrary>(assets->value(), fixed_seed);
+        library       = std::make_unique<AssetsLibrary>(assets->value(), seed->value());
+        fixed_library = std::make_unique<AssetsLibrary>(assets->value(), fixed_seed);
 
         if(!parser.validate())
         {

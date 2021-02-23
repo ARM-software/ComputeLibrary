@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform scaling on a tensor */
+/** Neon kernel to perform scaling on a tensor */
 class NEScaleKernel : public INEKernel
 {
 public:
@@ -96,17 +96,11 @@ private:
     void scale_bilinear_nchw(const Window &window);
     /** function to perform scale using bilinear interpolation on the given window */
     template <typename T>
-    void scale_bilinear_nhwc(const Window &window);
-    /** function to perform scale using bilinear interpolation on the given window */
-    template <typename T>
     void scale_bilinear_qasymm(const Window &window);
 
     /** function to perform scale using nearest neighbour on the given window */
     template <typename T>
     void scale_nearest_nchw(const Window &window);
-    /** function to perform scale using nearest neighbour on the given window */
-    template <typename T>
-    void scale_nearest_nhwc(const Window &window);
 
     /** Scale function to use for the particular function to use */
     using ScaleFunctionPtr = void (NEScaleKernel::*)(const Window &window);
@@ -122,6 +116,7 @@ private:
     PixelValue          _constant_border_value;
     float               _sampling_offset;
     bool                _align_corners;
+    DataLayout          _data_layout;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NESCALEKERNEL_H */

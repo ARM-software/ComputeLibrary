@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,12 +28,12 @@
 #include "../bfloat.hpp"
 
 #define ARGLIST  \
-   unsigned int, const unsigned int *, \
-   IndirectInputArg<bfloat16>, \
-   size_t, size_t, \
-   const bfloat16 *, \
-   IndirectOutputArg<float>, \
-   const float *, Activation, bool
+    unsigned int, const unsigned int *, \
+    IndirectInputArg<bfloat16>, \
+    size_t, size_t, \
+    const bfloat16 *, \
+    IndirectOutputArg<float>, \
+    const float *, Activation, bool
 
 namespace arm_gemm
 {

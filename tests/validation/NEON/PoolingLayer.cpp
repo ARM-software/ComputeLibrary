@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ const auto PoolingLayerDatasetFPSmall = combine(combine(combine(datasets::Poolin
 
 /** Input data sets for asymmetric data type */
 
-const auto PoolingLayerDatasetQASYMM8Small = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(3, 7) })),
+const auto PoolingLayerDatasetQASYMM8Small = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(3, 7), Size2D(7, 7) })),
                                                              framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(1, 2, 1, 1) })),
                                                      framework::dataset::make("ExcludePadding", { true }));
 
@@ -66,6 +66,21 @@ constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);   /**< Tolerance valu
 constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1); /**< Tolerance value for comparing reference's output against implementation's output for signed 8-bit asymmetric type */
 const auto                           pool_data_layout_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
 
+const auto qasymm8_in_qinfo_dataset  = framework::dataset::make("InputQuantInfo", { QuantizationInfo(.2f, 10) });
+const auto qasymm8_out_qinfo_dataset = framework::dataset::make("OutputQuantInfo",
+{
+    QuantizationInfo(.2f, 10), // Same qinfo
+    QuantizationInfo(.1f, 5),  // Multiplier <= 1
+    QuantizationInfo(2.f, 3)   // Multiplier > 1
+});
+
+const auto qasymm8_signed_in_qinfo_dataset  = framework::dataset::make("InputQuantInfo", { QuantizationInfo(.2f, -10) });
+const auto qasymm8_signed_out_qinfo_dataset = framework::dataset::make("OutputQuantInfo",
+{
+    QuantizationInfo(.2f, -10), // Same qinfo
+    QuantizationInfo(.1f, -5),  // Multiplier <= 1
+    QuantizationInfo(2.f, -3)   // Multiplier > 1
+});
 } // namespace
 
 TEST_SUITE(NEON)
@@ -186,18 +201,44 @@ template <typename T>
 using NEPoolingLayerQuantizedFixture = PoolingLayerValidationQuantizedFixture<Tensor, Accessor, NEPoolingLayer, T>;
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8Small,
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8))),
-                                                                                                                     pool_data_layout_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallNCHW, NEPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                       combine(PoolingLayerDatasetQASYMM8Small,
+                               framework::dataset::make("DataType", DataType::QASYMM8))),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                       qasymm8_in_qinfo_dataset),
+                       qasymm8_in_qinfo_dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     combine(PoolingLayerDatasetQASYMM8Small,
+                                                                                                                             framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                     qasymm8_in_qinfo_dataset),
+                                                                                                                     qasymm8_out_qinfo_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8Small,
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
-                                                                                                                    pool_data_layout_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallNCHW, NEPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                        combine(PoolingLayerDatasetQASYMM8Small,
+                                                                                                                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                        qasymm8_signed_in_qinfo_dataset),
+                                                                                                                        qasymm8_signed_in_qinfo_dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_s);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                    combine(PoolingLayerDatasetQASYMM8Small,
+                                                                                                                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                    qasymm8_signed_in_qinfo_dataset),
+                                                                                                                    qasymm8_signed_out_qinfo_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_s);
@@ -205,7 +246,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<int8_t>, framewo
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // PoolingLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

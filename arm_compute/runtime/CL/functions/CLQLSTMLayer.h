@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLCopy.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
@@ -38,7 +39,6 @@ namespace arm_compute
 {
 // Forward declarations
 class CLCompileContext;
-class CLCopyKernel;
 class ICLTensor;
 class CLGEMMLowpMatrixAReductionKernel;
 class CLQLSTMLayerNormalizationKernel;
@@ -49,12 +49,12 @@ class ITensorInfo;
  * This function calls the following CL functions/kernels:
  *
  * -# @ref CLActivationLayer                                     Activation functions (tanh and logistic)
- * -# @ref CLCopyKernel                                          Copy kernel for copying output_state_out to output
- * -# @ref CLArithmeticAddition                  Elementwise addition and subtraction
+ * -# @ref CLCopy                                                Copy function for copying output_state_out to output
+ * -# @ref CLArithmeticAddition                                  Elementwise addition and subtraction
  * -# @ref CLGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16
  * -# @ref CLGEMMLowpMatrixAReductionKernel                      For precomputing effective biases to use
- * -# @ref CLPixelWiseMultiplication                       Elementwise multiplication
+ * -# @ref CLPixelWiseMultiplication                             Elementwise multiplication
  * -# @ref CLTranspose                                           Transpose function for reshaping the weights
  * */
 class CLQLSTMLayer : public IFunction
@@ -354,7 +354,7 @@ private:
     CLArithmeticAddition                              _accumulate_projection{};
     CLActivationLayer                                 _projection_clip{};
     std::array<std::unique_ptr<CLQLSTMLayerNormalizationKernel>, _layer_norm_count> _layer_norms;
-    std::unique_ptr<CLCopyKernel> _copy_output;
+    CLCopy _copy_output;
 
     TensorCopyKernel _projection_bias_copy{};
     TensorCopyKernel _projection_output_to_accumulate_copy{};

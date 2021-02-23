@@ -31,7 +31,6 @@
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLGaussian5x5Kernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -39,9 +38,9 @@ using namespace arm_compute;
 
 CLGaussian5x5::CLGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _kernel_hor(support::cpp14::make_unique<CLGaussian5x5HorKernel>()),
-      _kernel_vert(support::cpp14::make_unique<CLGaussian5x5VertKernel>()),
-      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _kernel_hor(std::make_unique<CLGaussian5x5HorKernel>()),
+      _kernel_vert(std::make_unique<CLGaussian5x5VertKernel>()),
+      _border_handler(std::make_unique<CLFillBorderKernel>()),
       _tmp()
 {
 }

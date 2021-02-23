@@ -71,7 +71,7 @@ TEST_SUITE(LaplacianReconstruct)
 
 using NELaplacianReconstructFixture = LaplacianReconstructValidationFixture<Tensor, Accessor, NELaplacianReconstruct, NELaplacianPyramid, int16_t, uint8_t, Pyramid>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NELaplacianReconstructFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NELaplacianReconstructFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        datasets::Medium2DShapes(),
                        datasets::BorderModes()),

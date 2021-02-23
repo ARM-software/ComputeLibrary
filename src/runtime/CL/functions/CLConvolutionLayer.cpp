@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <memory>
@@ -66,7 +65,7 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
         case ConvolutionMethod::WINOGRAD:
         {
             ARM_COMPUTE_ERROR_ON(num_groups != 1);
-            auto f = arm_compute::support::cpp14::make_unique<CLWinogradConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<CLWinogradConvolutionLayer>(_memory_manager);
             f->configure(compile_context, input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _function = std::move(f);
             break;
@@ -74,22 +73,22 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
         case ConvolutionMethod::DIRECT:
         {
             ARM_COMPUTE_ERROR_ON(num_groups != 1);
-            auto f = arm_compute::support::cpp14::make_unique<CLDirectConvolutionLayer>();
+            auto f = std::make_unique<CLDirectConvolutionLayer>();
             f->configure(compile_context, input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::GEMM:
         {
-            auto f = arm_compute::support::cpp14::make_unique<CLGEMMConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<CLGEMMConvolutionLayer>(_memory_manager);
             f->configure(compile_context, input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::FFT:
         {
-            auto f = arm_compute::support::cpp14::make_unique<CLFFTConvolutionLayer>(_memory_manager);
-            f->configure(compile_context, input, weights, biases, output, conv_info, act_info);
+            auto f = std::make_unique<CLFFTConvolutionLayer>(_memory_manager);
+            f->configure(compile_context, input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _function = std::move(f);
             break;
         }
@@ -132,7 +131,7 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         case ConvolutionMethod::FFT:
         {
             // Validate FFT-based convolution layer
-            ARM_COMPUTE_RETURN_ON_ERROR(CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math));
             break;
         }
         default:
@@ -199,21 +198,42 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
     }
     else
     {
-        // SRGAN
-        if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9) && (conv_info.pad_top() < 3)
-           && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+        if(input->data_layout() == DataLayout::NCHW)
         {
-            return ConvolutionMethod::DIRECT;
+            // SRGAN
+            if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9) && (conv_info.pad_top() < 3)
+               && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+            {
+                return ConvolutionMethod::DIRECT;
+            }
+            if((weights->dimension(idx_h) > 5) && (input->dimension(idx_c) > output->dimension(idx_c)) && (CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)))
+            {
+                return ConvolutionMethod::FFT;
+            }
+            if(input->dimension(idx_c) < 16)
+            {
+                return ConvolutionMethod::GEMM;
+            }
+            return bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
         }
-        if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && (CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+        else
         {
-            return ConvolutionMethod::FFT;
+            // SRGAN
+            if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9) && (conv_info.pad_top() < 3)
+               && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+            {
+                return ConvolutionMethod::DIRECT;
+            }
+            if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+            {
+                return ConvolutionMethod::DIRECT;
+            }
+            if(input->dimension(idx_c) < 16)
+            {
+                return ConvolutionMethod::GEMM;
+            }
+            return bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
         }
-        if(input->dimension(idx_c) < 16)
-        {
-            return ConvolutionMethod::GEMM;
-        }
-        return bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
     }
 }
 

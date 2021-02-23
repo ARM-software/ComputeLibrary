@@ -27,7 +27,6 @@
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -46,7 +45,7 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
     // Configure Kernels
     _is_nchw = data_layout == DataLayout::NCHW;
 
-    _normalization_kernel = arm_compute::support::cpp14::make_unique<NEInstanceNormalizationLayerKernel>();
+    _normalization_kernel = std::make_unique<NEInstanceNormalizationLayerKernel>();
 
     if(!_is_nchw)
     {

@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCTranspose.h"
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,7 +31,7 @@ using namespace arm_compute;
 
 void GCTranspose::configure(const IGCTensor *input, IGCTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCTransposeKernel>();
+    auto k = std::make_unique<GCTransposeKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

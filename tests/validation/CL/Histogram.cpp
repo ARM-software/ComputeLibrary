@@ -48,8 +48,8 @@ TEST_SUITE(Histogram)
 template <typename T>
 using CLHistogramFixture = HistogramValidationFixture<CLTensor, CLAccessor, CLHistogram, T, CLDistribution1D>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLHistogramFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                         DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLHistogramFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                       DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

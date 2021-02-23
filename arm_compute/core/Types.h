@@ -556,6 +556,15 @@ enum class ElementWiseUnary
     LOGICAL_NOT, /**< Logical Not */
 };
 
+/** Available bitwise operations */
+enum class BitwiseOperation
+{
+    AND, /**< Bitwise AND operation */
+    NOT, /**< Bitwise NOT operation */
+    OR,  /**< Bitwise OR operation  */
+    XOR, /**< Bitwise XOR operation  */
+};
+
 /** The normalization type used for the normalization layer */
 enum class NormType
 {

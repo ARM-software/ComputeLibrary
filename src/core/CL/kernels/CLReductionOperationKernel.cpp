@@ -55,7 +55,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F16, DataType::F32);
     }
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op == ReductionOperation::SUM_SQUARE && input->data_type() == DataType::QASYMM8, "Not supported reduction operation for QASYMM8");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");

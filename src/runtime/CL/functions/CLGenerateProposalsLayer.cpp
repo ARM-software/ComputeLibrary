@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,25 +29,23 @@
 #include "src/core/CL/kernels/CLDequantizationLayerKernel.h"
 #include "src/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
 #include "src/core/CL/kernels/CLPadLayerKernel.h"
-#include "src/core/CL/kernels/CLPermuteKernel.h"
 #include "src/core/CL/kernels/CLQuantizationLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager),
-      _permute_deltas_kernel(support::cpp14::make_unique<CLPermuteKernel>()),
+      _permute_deltas(),
       _flatten_deltas(),
-      _permute_scores_kernel(support::cpp14::make_unique<CLPermuteKernel>()),
+      _permute_scores(),
       _flatten_scores(),
-      _compute_anchors_kernel(support::cpp14::make_unique<CLComputeAllAnchorsKernel>()),
-      _bounding_box_kernel(support::cpp14::make_unique<CLBoundingBoxTransformKernel>()),
-      _pad_kernel(support::cpp14::make_unique<CLPadLayerKernel>()),
-      _dequantize_anchors(support::cpp14::make_unique<CLDequantizationLayerKernel>()),
-      _dequantize_deltas(support::cpp14::make_unique<CLDequantizationLayerKernel>()),
-      _quantize_all_proposals(support::cpp14::make_unique<CLQuantizationLayerKernel>()),
+      _compute_anchors_kernel(std::make_unique<CLComputeAllAnchorsKernel>()),
+      _bounding_box_kernel(std::make_unique<CLBoundingBoxTransformKernel>()),
+      _pad_kernel(std::make_unique<CLPadLayerKernel>()),
+      _dequantize_anchors(std::make_unique<CLDequantizationLayerKernel>()),
+      _dequantize_deltas(std::make_unique<CLDequantizationLayerKernel>()),
+      _quantize_all_proposals(std::make_unique<CLQuantizationLayerKernel>()),
       _cpp_nms(memory_manager),
       _is_nhwc(false),
       _is_qasymm8(false),
@@ -111,7 +109,7 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
     if(!_is_nhwc)
     {
         _memory_group.manage(&_deltas_permuted);
-        _permute_deltas_kernel->configure(compile_context, deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
+        _permute_deltas.configure(compile_context, deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
         _flatten_deltas.configure(compile_context, &_deltas_permuted, &_deltas_flattened);
         _deltas_permuted.allocator()->allocate();
     }
@@ -128,7 +126,7 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
     if(!_is_nhwc)
     {
         _memory_group.manage(&_scores_permuted);
-        _permute_scores_kernel->configure(compile_context, scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
+        _permute_scores.configure(compile_context, scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
         _flatten_scores.configure(compile_context, &_scores_permuted, &_scores_flattened);
         _scores_permuted.allocator()->allocate();
     }
@@ -245,8 +243,8 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(deltas, &deltas_permuted_info, PermutationVector{ 2, 0, 1 }));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(scores, &scores_permuted_info, PermutationVector{ 2, 0, 1 }));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(deltas, &deltas_permuted_info, PermutationVector{ 2, 0, 1 }));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(scores, &scores_permuted_info, PermutationVector{ 2, 0, 1 }));
     }
 
     TensorInfo deltas_flattened_info(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
@@ -357,8 +355,8 @@ void CLGenerateProposalsLayer::run()
     // Transpose and reshape the inputs
     if(!_is_nhwc)
     {
-        CLScheduler::get().enqueue(*_permute_deltas_kernel, false);
-        CLScheduler::get().enqueue(*_permute_scores_kernel, false);
+        _permute_deltas.run();
+        _permute_scores.run();
     }
     _flatten_deltas.run();
     _flatten_scores.run();

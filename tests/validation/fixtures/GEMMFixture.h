@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,9 +63,14 @@ protected:
         switch(tensor.data_type())
         {
             case DataType::F16:
+            {
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ float(lo), float(hi) };
+                library->fill(tensor, distribution, i);
+                break;
+            }
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(lo, hi);
+                std::uniform_real_distribution<float> distribution(lo, hi);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -191,11 +196,14 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
 
         // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
-        std::uniform_real_distribution<> distribution_inf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
         library->fill_borders_with_garbage(tensor, distribution_inf, i);
     }
 
@@ -308,7 +316,10 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
     }
 
@@ -431,11 +442,14 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
 
         // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
-        std::uniform_real_distribution<> distribution_inf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
         library->fill_borders_with_garbage(tensor, distribution_inf, i);
     }
 
@@ -574,7 +588,10 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
     }
 
@@ -713,11 +730,14 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
 
         // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
-        std::uniform_real_distribution<> distribution_inf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
         library->fill_borders_with_garbage(tensor, distribution_inf, i);
     }
 
@@ -882,7 +902,10 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
     }
 
@@ -1042,11 +1065,14 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
 
         // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
-        std::uniform_real_distribution<> distribution_inf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
         library->fill_borders_with_garbage(tensor, distribution_inf, i);
     }
 
@@ -1194,7 +1220,10 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
     }
 
@@ -1341,11 +1370,14 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
 
         // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
-        std::uniform_real_distribution<> distribution_inf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
         library->fill_borders_with_garbage(tensor, distribution_inf, i);
     }
 
@@ -1469,7 +1501,10 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
     }
 

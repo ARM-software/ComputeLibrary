@@ -28,14 +28,13 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLHOGGradient::CLHOGGradient(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
       _derivative(),
-      _mag_phase(support::cpp14::make_unique<CLMagnitudePhaseKernel>()),
+      _mag_phase(std::make_unique<CLMagnitudePhaseKernel>()),
       _gx(),
       _gy()
 {

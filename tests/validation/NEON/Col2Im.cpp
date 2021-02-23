@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NECol2Im.h"
+#include "src/core/NEON/kernels/NECol2ImKernel.h"
+#include "tests/NEON/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -37,6 +38,8 @@ namespace validation
 {
 TEST_SUITE(NEON)
 TEST_SUITE(Col2Im)
+
+using NECol2Im = NESynthetizeFunction<NECol2ImKernel>;
 
 // *INDENT-OFF*
 // clang-format off

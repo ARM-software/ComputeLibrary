@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ class NEFillBorderKernel;
 
 /** Function to run the direct convolution.
  *
- *  This function calls the following NEON kernels:
+ *  This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel for the input
  * -# @ref NEDirectConvolutionLayerOutputStageKernel

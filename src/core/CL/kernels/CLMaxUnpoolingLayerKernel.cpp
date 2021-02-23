@@ -81,6 +81,7 @@ void CLMaxUnpoolingLayerKernel::configure(const CLCompileContext &compile_contex
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, indices->info()));
+    auto padding_info = get_padding_info({ input, indices, output });
 
     _input   = input;
     _output  = output;
@@ -115,6 +116,7 @@ void CLMaxUnpoolingLayerKernel::configure(const CLCompileContext &compile_contex
     _config_id += support::cpp11::to_string(output->info()->dimension(2));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(3));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLMaxUnpoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, const PoolingLayerInfo &pool_info)

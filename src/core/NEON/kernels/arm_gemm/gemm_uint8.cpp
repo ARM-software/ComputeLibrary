@@ -27,7 +27,6 @@
 #include "gemm_common.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
-#include "gemm_interleaved_pretransposed_2d.hpp"
 #include "gemm_hybrid.hpp"
 #include "gemm_hybrid_indirect.hpp"
 
@@ -106,7 +105,7 @@ static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_u16_8x12",
     nullptr,
-    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53; },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A53 && args._Msize > 4; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_u16_8x12, uint8_t, uint32_t>(args); },
 },
 {

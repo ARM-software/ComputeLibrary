@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,7 @@ namespace arm_compute
 {
 class ICPPKernel;
 class ITensor;
+class Window;
 
 /** Scheduler interface to run kernels */
 class IScheduler
@@ -168,9 +169,10 @@ public:
      *
      * @param[in] kernel  Kernel to execute.
      * @param[in] hints   Hints for the scheduler.
+     * @param[in] window  Window to use for kernel execution.
      * @param[in] tensors Vector containing the tensors to operate on.
      */
-    virtual void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) = 0;
+    virtual void schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors) = 0;
 
     /** Execute all the passed workloads
      *
@@ -205,7 +207,14 @@ protected:
     virtual void run_workloads(std::vector<Workload> &workloads) = 0;
     CPUInfo _cpu_info;
 
-    void schedule_common(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors);
+    /** Common scheduler logic to execute the given kernel
+     *
+     * @param[in] kernel  Kernel to execute.
+     * @param[in] hints   Hints for the scheduler.
+     * @param[in] window  Window to use for kernel execution.
+     * @param[in] tensors Vector containing the tensors to operate on.
+     */
+    void schedule_common(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors);
 
 private:
     unsigned int _num_threads_hint = {};

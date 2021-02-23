@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "src/core/NEON/wrapper/intrinsics/ceq.h"
 #include "src/core/NEON/wrapper/intrinsics/cge.h"
 #include "src/core/NEON/wrapper/intrinsics/cgt.h"
+#include "src/core/NEON/wrapper/intrinsics/cgtz.h"
 #include "src/core/NEON/wrapper/intrinsics/cle.h"
 #include "src/core/NEON/wrapper/intrinsics/clt.h"
 #include "src/core/NEON/wrapper/intrinsics/combine.h"
@@ -71,5 +72,18 @@
 #include "src/core/NEON/wrapper/intrinsics/sub.h"
 #include "src/core/NEON/wrapper/intrinsics/tanh.h"
 #include "src/core/NEON/wrapper/intrinsics/tbl.h"
+
+#if defined(__ARM_FEATURE_SVE)
+#include "src/core/NEON/wrapper/intrinsics/svcnt.h"
+#include "src/core/NEON/wrapper/intrinsics/svcvt.h"
+#include "src/core/NEON/wrapper/intrinsics/svdup_n.h"
+#include "src/core/NEON/wrapper/intrinsics/svexp.h"
+#include "src/core/NEON/wrapper/intrinsics/svlog.h"
+#include "src/core/NEON/wrapper/intrinsics/svpow.h"
+#include "src/core/NEON/wrapper/intrinsics/svptrue.h"
+#include "src/core/NEON/wrapper/intrinsics/svqadd.h"
+#include "src/core/NEON/wrapper/intrinsics/svsin.h"
+#include "src/core/NEON/wrapper/intrinsics/svwhilelt.h"
+#endif /* defined(__ARM_FEATURE_SVE) */
 
 #endif /* ARM_COMPUTE_WRAPPER_INTRINSICS_H */

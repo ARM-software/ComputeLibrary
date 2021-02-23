@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,11 +37,11 @@ std::string to_string(const PaddingType &arg)
     return ((arg == PADDING_SAME) ? "PADDING_SAME" : "PADDING_VALID");
 }
 
-TRACE_TO_STRING(INELKInternalKeypointArray)
-TRACE_TO_STRING(std::unique_ptr<INEGEMMWrapperKernel>)
+ARM_COMPUTE_TRACE_TO_STRING(INELKInternalKeypointArray)
+ARM_COMPUTE_TRACE_TO_STRING(std::unique_ptr<INEGEMMWrapperKernel>)
 
-CONST_PTR_CLASS(INELKInternalKeypointArray)
-CONST_PTR_CLASS(std::unique_ptr<INEGEMMWrapperKernel>)
+ARM_COMPUTE_CONST_PTR_CLASS(INELKInternalKeypointArray)
+ARM_COMPUTE_CONST_PTR_CLASS(std::unique_ptr<INEGEMMWrapperKernel>)
 
 template <>
 TracePoint::Args &&operator<<(TracePoint::Args &&tp, const PaddingType &arg)

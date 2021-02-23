@@ -47,13 +47,6 @@ namespace backends
 {
 namespace detail
 {
-// Address rule DR-9R5 (1579. Return by converting move constructor)
-#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 5))
-#define RETURN_UNIQUE_PTR(x) (x)
-#else /* defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 5)) */
-#define RETURN_UNIQUE_PTR(x) (std::move(x))
-#endif /* defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 5)) */
-
 /** Returns backing tensor of a given tensor
  *
  * @tparam TargetInfo Target information
@@ -113,7 +106,7 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
     const ActivationLayerInfo        act_info = node.activation_info();
 
     // Create function
-    auto func = support::cpp14::make_unique<ActivationLayerFunction>();
+    auto func = std::make_unique<ActivationLayerFunction>();
     func->configure(input, output, act_info);
 
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -128,7 +121,7 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
                                << " InPlace : " << is_in_place_operation(input, output)
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Creates a backend argminmax layer function
@@ -152,7 +145,7 @@ std::unique_ptr<IFunction> create_arg_min_max_layer(ArgMinMaxLayerNode &node)
     unsigned int                     axis   = node.axis();
 
     // Create function
-    auto func = support::cpp14::make_unique<ArgMinMaxLayerFunction>();
+    auto func = std::make_unique<ArgMinMaxLayerFunction>();
     func->configure(input, axis, output, op);
 
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -165,7 +158,7 @@ std::unique_ptr<IFunction> create_arg_min_max_layer(ArgMinMaxLayerNode &node)
                                << " axis: " << axis
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend batch normalization layer function
@@ -194,7 +187,7 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
     const ActivationLayerInfo        fused_act = node.fused_activation();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<BatchNormalizationLayerFunction>();
+    auto func = std::make_unique<BatchNormalizationLayerFunction>();
     func->configure(input, output, mean, var, beta, gamma, epsilon, fused_act);
 
     // Log info
@@ -209,7 +202,7 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
                                << " InPlace: " << is_in_place_operation(input, output)
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend batch normalization layer function
@@ -266,7 +259,7 @@ std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(Fu
                                << " Output shape: " << output->info()->tensor_shape()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend fused depthwise convolution batch normalization layer function
@@ -322,7 +315,7 @@ std::unique_ptr<IFunction> create_fused_depthwise_convolution_batch_normalizatio
                                << " Output shape: " << output->info()->tensor_shape()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend bounding box transform layer function
@@ -346,7 +339,7 @@ std::unique_ptr<IFunction> create_bounding_box_transform_layer(BoundingBoxTransf
     const BoundingBoxTransformInfo   bbox_info = node.info();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<BoundingBoxTransformLayerFunction>();
+    auto func = std::make_unique<BoundingBoxTransformLayerFunction>();
     func->configure(input, output, deltas, bbox_info);
 
     // Log info
@@ -360,7 +353,7 @@ std::unique_ptr<IFunction> create_bounding_box_transform_layer(BoundingBoxTransf
                                << " BoundingBox Info img H: " << bbox_info.img_height() << " "
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend channel shuffle layer function
@@ -383,7 +376,7 @@ std::unique_ptr<IFunction> create_channel_shuffle_layer(ChannelShuffleLayerNode 
     const unsigned int               num_groups = node.num_groups();
 
     // Create function
-    auto func = support::cpp14::make_unique<ChannelShuffleLayerFunction>();
+    auto func = std::make_unique<ChannelShuffleLayerFunction>();
     func->configure(input, output, num_groups);
 
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -395,7 +388,7 @@ std::unique_ptr<IFunction> create_channel_shuffle_layer(ChannelShuffleLayerNode 
                                << " Num groups: " << num_groups
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend layer concatenate function
@@ -430,7 +423,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
     const size_t                     concat_axis = get_dimension_idx(data_layout, node.concatenation_axis());
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ConcatenateLayerFunction>();
+    auto func = std::make_unique<ConcatenateLayerFunction>();
     func->configure(inputs, output, concat_axis);
 
     // Log info
@@ -451,7 +444,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
                                << qss.str()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend convolution layer function
@@ -542,7 +535,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
                                << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend deconvolution layer function
@@ -648,7 +641,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
                                << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend depth to space layer function
@@ -673,7 +666,7 @@ std::unique_ptr<IFunction> create_depth_to_space_layer(DepthToSpaceLayerNode &no
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<DepthToSpaceLayerFunction>();
+    auto func = std::make_unique<DepthToSpaceLayerFunction>();
     func->configure(input, output, node.block_shape());
 
     // Log info
@@ -687,7 +680,7 @@ std::unique_ptr<IFunction> create_depth_to_space_layer(DepthToSpaceLayerNode &no
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend dequantize layer function
@@ -712,7 +705,7 @@ std::unique_ptr<IFunction> create_dequantization_layer(DequantizationLayerNode &
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<DequantizationLayerFunction>();
+    auto func = std::make_unique<DequantizationLayerFunction>();
     func->configure(input, output);
 
     // Log info
@@ -726,7 +719,7 @@ std::unique_ptr<IFunction> create_dequantization_layer(DequantizationLayerNode &
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 /** Create a backend detection output layer function
  *
@@ -755,7 +748,7 @@ std::unique_ptr<IFunction> create_detection_output_layer(DetectionOutputLayerNod
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<DetectionOutputLayerFunction>();
+    auto func = std::make_unique<DetectionOutputLayerFunction>();
     func->configure(input0, input1, input2, output, detect_info);
 
     // Log info
@@ -771,7 +764,7 @@ std::unique_ptr<IFunction> create_detection_output_layer(DetectionOutputLayerNod
                                << " DetectionOutputLayer info: " << detect_info
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend detection post process layer function
@@ -807,7 +800,7 @@ std::unique_ptr<IFunction> create_detection_post_process_layer(DetectionPostProc
     ARM_COMPUTE_ERROR_ON(output3 == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<DetectionPostProcessLayerFunction>();
+    auto func = std::make_unique<DetectionPostProcessLayerFunction>();
     func->configure(input0, input1, input2, output0, output1, output2, output3, detect_info);
 
     // Log info
@@ -826,7 +819,7 @@ std::unique_ptr<IFunction> create_detection_post_process_layer(DetectionPostProc
                                << " DetectionPostProcessLayer info: " << detect_info
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend element-wise operation layer function
@@ -895,7 +888,7 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
                                << " Shape: " << input1->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend unary element-wise operation layer function
@@ -943,7 +936,7 @@ std::unique_ptr<IFunction> create_unary_eltwise_layer(UnaryEltwiseLayerNode &nod
                                << " Shape: " << input->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend flatten layer function
@@ -968,7 +961,7 @@ std::unique_ptr<IFunction> create_flatten_layer(FlattenLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<FlattenLayerFunction>();
+    auto func = std::make_unique<FlattenLayerFunction>();
     func->configure(input, output);
 
     // Log info
@@ -981,7 +974,7 @@ std::unique_ptr<IFunction> create_flatten_layer(FlattenLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend fully connected layer function
@@ -1013,7 +1006,7 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     // Create and configure function
     auto wm   = get_weights_manager(ctx, TargetInfo::TargetType);
     auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
-    auto func = support::cpp14::make_unique<FullyConnectedLayerFunction>(mm, wm.get());
+    auto func = std::make_unique<FullyConnectedLayerFunction>(mm, wm.get());
     func->configure(input, weights, biases, output, fc_info);
 
     const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
@@ -1037,7 +1030,7 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend generate proposals layer function
@@ -1071,7 +1064,7 @@ std::unique_ptr<IFunction> create_generate_proposals_layer(GenerateProposalsLaye
     ARM_COMPUTE_ERROR_ON(scores_out == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<GenerateProposalsLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    auto func = std::make_unique<GenerateProposalsLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
     func->configure(scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
 
     // Log info
@@ -1086,7 +1079,7 @@ std::unique_ptr<IFunction> create_generate_proposals_layer(GenerateProposalsLaye
                                << " Scores Out shape: " << scores_out->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend l2 normalization layer function
@@ -1115,7 +1108,7 @@ std::unique_ptr<IFunction> create_l2_normalize_layer(L2NormalizeLayerNode &node,
 
     // Create and configure function
     auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
-    auto func = support::cpp14::make_unique<L2NormalizeLayerFunction>(mm);
+    auto func = std::make_unique<L2NormalizeLayerFunction>(mm);
     func->configure(input, output, axis, epsilon);
 
     // Log info
@@ -1130,7 +1123,7 @@ std::unique_ptr<IFunction> create_l2_normalize_layer(L2NormalizeLayerNode &node,
                                << " Epsilon: " << epsilon
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend normalization layer function
@@ -1158,7 +1151,7 @@ std::unique_ptr<IFunction> create_normalization_layer(NormalizationLayerNode &no
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<NormalizationLayerFunction>();
+    auto func = std::make_unique<NormalizationLayerFunction>();
     func->configure(input, output, norm_info);
 
     // Log info
@@ -1172,7 +1165,7 @@ std::unique_ptr<IFunction> create_normalization_layer(NormalizationLayerNode &no
                                << " Normalization info: " << norm_info.type()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend normalize planar YUV layer function
@@ -1200,7 +1193,7 @@ std::unique_ptr<IFunction> create_normalize_planar_yuv_layer(NormalizePlanarYUVL
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<NormalizePlanarYUVLayerFunction>();
+    auto func = std::make_unique<NormalizePlanarYUVLayerFunction>();
     func->configure(input, output, mean, std);
 
     // Log info
@@ -1212,7 +1205,7 @@ std::unique_ptr<IFunction> create_normalize_planar_yuv_layer(NormalizePlanarYUVL
                                << " Shape: " << input->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend pad layer function
@@ -1238,7 +1231,7 @@ std::unique_ptr<IFunction> create_pad_layer(PadLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PadLayerFunction>();
+    auto func = std::make_unique<PadLayerFunction>();
     func->configure(input, output, padding, pad_value);
 
     // Log info
@@ -1251,7 +1244,7 @@ std::unique_ptr<IFunction> create_pad_layer(PadLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend permute layer function
@@ -1276,7 +1269,7 @@ std::unique_ptr<IFunction> create_permute_layer(PermuteLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PermuteLayerFunction>();
+    auto func = std::make_unique<PermuteLayerFunction>();
     func->configure(input, output, perm);
 
     // Log info
@@ -1290,7 +1283,7 @@ std::unique_ptr<IFunction> create_permute_layer(PermuteLayerNode &node)
                                << " Permutation vector: " << perm
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend pooling layer function
@@ -1315,7 +1308,7 @@ std::unique_ptr<IFunction> create_pooling_layer(PoolingLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PoolingLayerFunction>();
+    auto func = std::make_unique<PoolingLayerFunction>();
     func->configure(input, output, pool_info);
 
     // Log info
@@ -1329,7 +1322,7 @@ std::unique_ptr<IFunction> create_pooling_layer(PoolingLayerNode &node)
                                << " Pooling info: " << pool_info.pool_type
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend PRelu layer function
@@ -1354,7 +1347,7 @@ std::unique_ptr<IFunction> create_prelu_layer(PReluLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PReluFunction>();
+    auto func = std::make_unique<PReluFunction>();
     func->configure(input, alpha, output);
 
     // Log info
@@ -1367,7 +1360,7 @@ std::unique_ptr<IFunction> create_prelu_layer(PReluLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend print layer function
@@ -1423,7 +1416,7 @@ std::unique_ptr<IFunction> create_priorbox_layer(PriorBoxLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<PriorBoxLayerFunction>();
+    auto func = std::make_unique<PriorBoxLayerFunction>();
     func->configure(input0, input1, output, prior_info);
 
     // Log info
@@ -1438,7 +1431,7 @@ std::unique_ptr<IFunction> create_priorbox_layer(PriorBoxLayerNode &node)
                                << " PriorBoxLayer info: " << prior_info
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend quantization layer function
@@ -1462,7 +1455,7 @@ std::unique_ptr<IFunction> create_quantization_layer(QuantizationLayerNode &node
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<QuantizationLayerFunction>();
+    auto func = std::make_unique<QuantizationLayerFunction>();
     func->configure(input, output);
 
     // Log info
@@ -1475,7 +1468,7 @@ std::unique_ptr<IFunction> create_quantization_layer(QuantizationLayerNode &node
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend reduction operation layer function
@@ -1503,7 +1496,7 @@ std::unique_ptr<IFunction> create_reduction_operation_layer(ReductionLayerNode &
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ReductionOperationFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    auto func = std::make_unique<ReductionOperationFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
     func->configure(input, output, axis, op, keep_dims);
 
     // Log info
@@ -1519,7 +1512,7 @@ std::unique_ptr<IFunction> create_reduction_operation_layer(ReductionLayerNode &
                                << " Keep dimensions:" << keep_dims
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend reorg layer function
@@ -1543,7 +1536,7 @@ std::unique_ptr<IFunction> create_reorg_layer(ReorgLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ReorgLayerFunction>();
+    auto func = std::make_unique<ReorgLayerFunction>();
     func->configure(input, output, node.stride());
 
     // Log info
@@ -1556,7 +1549,7 @@ std::unique_ptr<IFunction> create_reorg_layer(ReorgLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend reshape layer function
@@ -1580,7 +1573,7 @@ std::unique_ptr<IFunction> create_reshape_layer(ReshapeLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ReshapeLayerFunction>();
+    auto func = std::make_unique<ReshapeLayerFunction>();
     func->configure(input, output);
 
     // Log info
@@ -1593,7 +1586,7 @@ std::unique_ptr<IFunction> create_reshape_layer(ReshapeLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend resize layer function
@@ -1618,8 +1611,8 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
     const InterpolationPolicy policy = node.policy();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ResizeLayerFunction>();
-    func->configure(input, output, ScaleKernelInfo{ policy, BorderMode::CONSTANT });
+    auto func = std::make_unique<ResizeLayerFunction>();
+    func->configure(input, output, ScaleKernelInfo{ policy, BorderMode::CONSTANT, PixelValue(), SamplingPolicy::CENTER, false, false });
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -1632,7 +1625,7 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
                                << " Interpolation: " << policy
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend ROI align layer function
@@ -1660,7 +1653,7 @@ std::unique_ptr<IFunction> create_roi_align_layer(ROIAlignLayerNode &node)
     const ROIPoolingLayerInfo pool_info = node.pooling_info();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<ROIAlignLayerFunction>();
+    auto func = std::make_unique<ROIAlignLayerFunction>();
 
     func->configure(input, rois, output, pool_info);
 
@@ -1677,7 +1670,7 @@ std::unique_ptr<IFunction> create_roi_align_layer(ROIAlignLayerNode &node)
                                << " ROIPooling height: " << pool_info.pooled_height()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend slice layer function
@@ -1701,7 +1694,7 @@ std::unique_ptr<IFunction> create_slice_layer(SliceLayerNode &node)
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<SliceLayerFunction>();
+    auto func = std::make_unique<SliceLayerFunction>();
     func->configure(input, output, node.starts(), node.ends());
 
     // Log info
@@ -1714,7 +1707,7 @@ std::unique_ptr<IFunction> create_slice_layer(SliceLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend softmax layer function
@@ -1740,7 +1733,7 @@ std::unique_ptr<IFunction> create_softmax_layer(SoftmaxLayerNode &node, GraphCon
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<SoftmaxLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    auto func = std::make_unique<SoftmaxLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
     func->configure(input, output, beta);
 
     // Log info
@@ -1753,7 +1746,7 @@ std::unique_ptr<IFunction> create_softmax_layer(SoftmaxLayerNode &node, GraphCon
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend layer stack function
@@ -1781,7 +1774,7 @@ std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
     const int                        axis   = node.axis();
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<StackLayerFunction>();
+    auto func = std::make_unique<StackLayerFunction>();
     func->configure(inputs, axis, output);
 
     // Log info
@@ -1796,7 +1789,7 @@ std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
                                << " Axis: " << axis
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 
 /** Create a backend slice layer function
@@ -1825,7 +1818,7 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<StridedSliceLayerFunction>();
+    auto func = std::make_unique<StridedSliceLayerFunction>();
     func->configure(input, output, starts, ends, strides, info.begin_mask(), info.end_mask(), info.shrink_axis_mask());
 
     // Log info
@@ -1838,95 +1831,7 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
-}
-
-/** Create a backend Upsample layer function
- *
- * @tparam UpsampleLayerFunction Backend Upsample function
- * @tparam TargetInfo            Target-specific information
- *
- * @param[in] node Node to create the backend function for
- * @param[in] ctx  Graph context
- *
- * @return Backend Upsample layer function
- */
-template <typename UpsampleLayerFunction, typename TargetInfo>
-std::unique_ptr<IFunction> create_upsample_layer(UpsampleLayerNode &node, GraphContext &ctx)
-{
-    ARM_COMPUTE_UNUSED(ctx);
-    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
-
-    // Extract IO and info
-    typename TargetInfo::TensorType *input             = get_backing_tensor<TargetInfo>(node.input(0));
-    typename TargetInfo::TensorType *output            = get_backing_tensor<TargetInfo>(node.output(0));
-    const Size2D                     info              = node.info();
-    const InterpolationPolicy        upsampling_policy = node.upsampling_policy();
-    ARM_COMPUTE_ERROR_ON(upsampling_policy != InterpolationPolicy::NEAREST_NEIGHBOR);
-    ARM_COMPUTE_ERROR_ON(info.x() != 2 || info.y() != 2);
-    ARM_COMPUTE_ERROR_ON(input == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
-
-    // Create and configure function
-    auto func = support::cpp14::make_unique<UpsampleLayerFunction>();
-    func->configure(input, output, info, upsampling_policy);
-
-    // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Type: " << node.type()
-                               << " Target: " << TargetInfo::TargetType
-                               << " Data Type: " << input->info()->data_type()
-                               << " Input shape: " << input->info()->tensor_shape()
-                               << " Output shape: " << output->info()->tensor_shape()
-                               << " Strides: " << info
-                               << " Upsampling policy: " << upsampling_policy
-                               << std::endl);
-
-    return RETURN_UNIQUE_PTR(func);
-}
-/** Create a backend YOLO layer function
- *
- * @tparam YoloLayerFunction Backend YOLO function
- * @tparam TargetInfo        Target-specific information
- *
- * @param[in] node Node to create the backend function for
- * @param[in] ctx  Graph context
- *
- * @return Backend YOLO layer function
- */
-template <typename YOLOlayerFunction, typename TargetInfo>
-std::unique_ptr<IFunction> create_yolo_layer(YOLOLayerNode &node, GraphContext &ctx)
-{
-    ARM_COMPUTE_UNUSED(ctx);
-    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
-
-    // Extract IO and info
-    typename TargetInfo::TensorType *input       = get_backing_tensor<TargetInfo>(node.input(0));
-    typename TargetInfo::TensorType *output      = get_backing_tensor<TargetInfo>(node.output(0));
-    const ActivationLayerInfo        act_info    = node.activation_info();
-    const int32_t                    num_classes = node.num_classes();
-    ARM_COMPUTE_ERROR_ON(num_classes <= 0);
-    ARM_COMPUTE_ERROR_ON(input == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
-
-    // Create and configure function
-    auto func = support::cpp14::make_unique<YOLOlayerFunction>();
-    func->configure(input, output, act_info, num_classes);
-
-    // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Type: " << node.type()
-                               << " Target: " << TargetInfo::TargetType
-                               << " Data Type: " << input->info()->data_type()
-                               << " Input shape: " << input->info()->tensor_shape()
-                               << " Output shape: " << output->info()->tensor_shape()
-                               << " Activation function: " << act_info.activation()
-                               << " Num classes: " << num_classes
-                               << std::endl);
-
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 } // namespace detail
 } // namespace backends

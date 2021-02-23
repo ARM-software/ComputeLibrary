@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@ namespace arm_compute
  * The weights used by Deconvolution are supposed to be the same as the ones used for Convolution. Therefore, it will be necessary to use the weights in the
  * reverse order to perform an actual convolution. This is achieved by using @ref NEReverse.
  *
- * This function calls the following NEON kernels/functions:
+ * This function calls the following Neon kernels/functions:
  *
  * -# @ref CPPUpsample
  * -# @ref NEConvolutionLayer

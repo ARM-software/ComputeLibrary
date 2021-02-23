@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,11 +83,11 @@ void NEDerivativeKernel::configure(const ITensor *input, ITensor *output_x, ITen
     AccessWindowHorizontal out_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal out_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, num_elems_processed_per_iteration);
 
-    // TODO(COMPMID-1503) Fix x-access input bug in NEON kernel instead of '+2'
+    // TODO(COMPMID-1503) Fix x-access input bug in Neon kernel instead of '+2'
     AccessWindowHorizontal in_x_access(input->info(), -border_size().left, num_elems_processed_per_iteration + 2);
     AccessWindowRectangle  in_y_access(input->info(), 0, -border_size().left, num_elems_processed_per_iteration, num_rows_read_per_iteration);
 
-    // TODO(COMPMID-1503) Fix x-access input bug in NEON kernel instead of '+2'
+    // TODO(COMPMID-1503) Fix x-access input bug in Neon kernel instead of '+2'
     AccessWindowRectangle in_xy_access(input->info(), -border_size().left, -border_size().top, num_elems_processed_per_iteration + 2, num_rows_read_per_iteration);
 
     if(run_der_x && run_der_y)

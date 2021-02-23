@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,16 +24,16 @@
 #pragma once
 #ifdef __aarch64__
 
-#include "../performance_parameters.hpp"
 #include "../std_transforms_fixed.hpp"
+#include "../performance_parameters.hpp"
 
 #define ARGLIST  \
-   unsigned int, const unsigned int *, \
-   IndirectInputArg<float>, \
-   size_t, size_t, \
-   const float *, \
-   IndirectOutputArg<float>, \
-   const float *, Activation, bool
+    unsigned int, const unsigned int *, \
+    IndirectInputArg<float>, \
+    size_t, size_t, \
+    const float *, \
+    IndirectOutputArg<float>, \
+    const float *, Activation, bool
 
 namespace arm_gemm
 {
@@ -70,23 +70,20 @@ public:
         return true;
     }
 
+    StdTransformsFixed<operand_type, result_type, 6, 16, 1> transforms = {};
+
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
         switch (ci->get_cpu_model()) {
             case CPUModel::A55r1:
                 return { 2.287 };
-
             case CPUModel::A53:
                 return { 1.43 };
-
             case CPUModel::A73:
                 return { 2.56 };
-
             default:
                 return { 6.667 };
         }
     }
-
-    StdTransformsFixed<operand_type, result_type, 6, 16, 1> transforms = {};
 
     // Default to the generic kernel
     kern_type kernel=a64_hybrid_fp32_mla_6x16;

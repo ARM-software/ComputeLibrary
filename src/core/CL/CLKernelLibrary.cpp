@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,10 +29,150 @@
 #include "support/StringSupport.h"
 
 #include <algorithm>
+#include <array>
 #include <fstream>
-#include <iostream>
 #include <utility>
 #include <vector>
+
+#ifdef ARM_COMPUTE_COMPRESSED_KERNELS
+#include <zlib.h>
+
+namespace
+{
+/* Decoding table */
+constexpr std::array<uint8_t, 256> b64_invtab =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 63,
+    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0, 0, 0, 0, 0,
+    0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+
+/** Decode a base64 encoded string
+ *
+ * @param[in] str Base64 encoded string to decode
+ *
+ * @return The decode string in case of a valid, non-empty string otherwise an empty string
+ */
+std::string decode_base64(const std::string &str)
+{
+    constexpr const char pad_char = '=';
+
+    // Handle empty string
+    if(str.empty())
+    {
+        return {};
+    }
+
+    // Base64 encoded string has size multiple of 4
+    if(str.length() % 4)
+    {
+        return {};
+    }
+
+    //
+    // Check encoded string padding
+    std::size_t padding = (str.rbegin()[0] == pad_char) + (str.rbegin()[1] == pad_char);
+    const int   str_len = str.size();
+
+    // Reserve memory for the decoded string
+    // Note each 4 consecutive elements of 6-bit encode 3 bytes
+    std::string dec_b64;
+    dec_b64.reserve(((str_len / 4) * 3));
+
+    // Block decoding function (exclude padding)
+    int       c   = 0;
+    const int end = str_len - 4 - padding;
+    for(; c <= end; c += 4)
+    {
+        const int byte0 = b64_invtab[str[c]];
+        const int byte1 = b64_invtab[str[c + 1]];
+        const int byte2 = b64_invtab[str[c + 2]];
+        const int byte3 = b64_invtab[str[c + 3]];
+
+        dec_b64.push_back((byte0 << 2) | (byte1 >> 4));
+        dec_b64.push_back((byte1 << 4) | (byte2 >> 2));
+        dec_b64.push_back((byte2 << 6) | (byte3));
+    }
+
+    // Last step that might contain padding symbols
+    if(padding == 1)
+    {
+        const int byte0 = b64_invtab[str[c]];
+        const int byte1 = b64_invtab[str[c + 1]];
+        const int byte2 = b64_invtab[str[c + 2]];
+
+        dec_b64.push_back((byte0 << 2) | (byte1 >> 4));
+        dec_b64.push_back((byte1 << 4) | (byte2 >> 2));
+    }
+    else if(padding == 2)
+    {
+        const int byte0 = b64_invtab[str[c]];
+        const int byte1 = b64_invtab[str[c + 1]];
+
+        dec_b64.push_back((byte0 << 2) | (byte1 >> 4));
+    }
+
+    return dec_b64;
+}
+
+/** Decompress a zlib compressed string
+ *
+ * @param[in] str ZLib compressed string
+ *
+ * @return The decompressed string if successful, otherwise false.
+ */
+std::string decompress_zlib(const std::string &str)
+{
+    // Create and initialize decompression stream
+    z_stream ds{};
+    if(inflateInit(&ds) != Z_OK)
+    {
+        return std::string();
+    }
+    ds.avail_in = str.size();
+    ds.next_in  = (Bytef *)str.data();
+
+    // Roll-over the string using a buffer and decompress
+    int         status = Z_OK;
+    char        roll_buff[16384];
+    std::string inflated_str;
+    do
+    {
+        ds.avail_out = sizeof(roll_buff);
+        ds.next_out  = reinterpret_cast<Bytef *>(roll_buff);
+
+        status = inflate(&ds, 0);
+        if(inflated_str.size() < ds.total_out)
+        {
+            inflated_str.append(roll_buff, ds.total_out - inflated_str.size());
+        }
+    }
+    while(status == Z_OK);
+
+    // Finalize decompression stream
+    inflateEnd(&ds);
+    if(status != Z_STREAM_END)
+    {
+        return std::string();
+    }
+
+    return inflated_str;
+}
+} // namespace
+#endif /* ARM_COMPUTE_COMPRESSED_KERNELS */
 
 using namespace arm_compute;
 const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
@@ -137,17 +277,14 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "dequantization_layer_per_channel_nchw", "dequantization_layer.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
+    { "direct_convolution_nhwc", "direct_convolution.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
-    { "direct_convolution1x1_nhwc", "direct_convolution1x1.cl" },
     { "direct_convolution1x1_f32_bifrost", "direct_convolution1x1.cl" },
     { "direct_convolution3x3", "direct_convolution3x3.cl" },
-    { "direct_convolution3x3_nhwc", "direct_convolution3x3.cl" },
     { "direct_convolution3x3_f32_bifrost", "direct_convolution3x3.cl" },
     { "direct_convolution5x5", "direct_convolution5x5.cl" },
-    { "direct_convolution5x5_nhwc", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
     { "direct_convolution_quantized", "direct_convolution_quantized.cl" },
-    { "direct_convolution9x9_nhwc", "direct_convolution9x9.cl" },
     { "elementwise_operation_ADD", "elementwise_operation.cl" },
     { "elementwise_operation_SUB", "elementwise_operation.cl" },
     { "elementwise_operation_MAX", "elementwise_operation.cl" },
@@ -198,7 +335,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "fill_image_borders_constant", "fill_border.cl" },
     { "fill_image_borders_replicate", "fill_border.cl" },
     { "finalize", "optical_flow_pyramid_lk.cl" },
-    { "flatten", "flatten.cl" },
     { "floor_layer", "floor.cl" },
     { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
     { "gather", "gather.cl" },
@@ -632,8 +768,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/direct_convolution_quantized.clembed"
     },
     {
-        "direct_convolution9x9.cl",
-#include "./cl_kernels/direct_convolution9x9.clembed"
+        "direct_convolution.cl",
+#include "./cl_kernels/direct_convolution.clembed"
     },
     {
         "elementwise_operation.cl",
@@ -670,10 +806,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "fill_border.cl",
 #include "./cl_kernels/fill_border.clembed"
-    },
-    {
-        "flatten.cl",
-#include "./cl_kernels/flatten.clembed"
     },
     {
         "floor.cl",
@@ -979,7 +1111,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 };
 
 CLKernelLibrary::CLKernelLibrary()
-    : _compile_context(), _kernel_path()
+    : _compile_context(), _kernel_path(), _decompressed_source_map()
 {
     opencl_is_available(); // Make sure the OpenCL symbols are initialised *before* the CLKernelLibrary is built
 }
@@ -1074,17 +1206,37 @@ bool CLKernelLibrary::int64_base_atomics_supported() const
     return _compile_context.int64_base_atomics_supported();
 }
 
+bool CLKernelLibrary::is_wbsm_supported()
+{
+    return _compile_context.is_wbsm_supported();
+}
+
 std::pair<std::string, bool> CLKernelLibrary::get_program(const std::string &program_name) const
 {
 #ifdef EMBEDDED_KERNELS
-    const auto program_source_it = _program_source_map.find(program_name);
+#ifdef ARM_COMPUTE_COMPRESSED_KERNELS
+    const auto inflatted_program_source_it = _decompressed_source_map.find(program_name);
+    if(inflatted_program_source_it != _decompressed_source_map.end())
+    {
+        return std::make_pair(inflatted_program_source_it->second, false);
+    }
+#endif /* ARM_COMPUTE_COMPRESSED_KERNELS */
 
+    const auto program_source_it = _program_source_map.find(program_name);
     if(program_source_it == _program_source_map.end())
     {
         ARM_COMPUTE_ERROR_VAR("Embedded program for %s does not exist.", program_name.c_str());
     }
+    std::string program_source = program_source_it->second;
 
-    return std::make_pair(program_source_it->second, false);
+#ifdef ARM_COMPUTE_COMPRESSED_KERNELS
+    std::string decompressed_program_source = decompress_zlib(decode_base64(program_source_it->second));
+    ARM_COMPUTE_ERROR_ON_MSG(decompressed_program_source.empty(), "Cannot de-compress requested program");
+    _decompressed_source_map.insert(std::make_pair(program_name, decompressed_program_source));
+    program_source = std::move(decompressed_program_source);
+#endif /* ARM_COMPUTE_COMPRESSED_KERNELS */
+
+    return std::make_pair(program_source, false);
 #else  /* EMBEDDED_KERNELS */
     // Check for binary
     std::string source_name = _kernel_path + program_name;

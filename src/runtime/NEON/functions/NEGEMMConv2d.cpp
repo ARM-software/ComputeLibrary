@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEGEMMConv2d.h"
+
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+
 #include <set>
+
 namespace arm_compute
 {
 namespace
@@ -79,9 +83,13 @@ AsmGemmInfo init_assembly_metadata(const Conv2dInfo &info, bool is_indirect)
 } // namespace
 
 NEGEMMConv2d::NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager)
-    : _gemm_asm_func(memory_manager), _activation_func(), _weights_permute_func(), _original_weights(nullptr), _permuted_weights(), _is_prepared(false), _run_activation(false)
+    : _gemm_asm_func(std::make_unique<NEGEMMAssemblyDispatch>(memory_manager)), _activation_func(), _weights_permute_func(), _original_weights(nullptr), _permuted_weights(), _is_prepared(false),
+      _run_activation(false)
 {
 }
+
+NEGEMMConv2d::~NEGEMMConv2d() = default;
+
 void NEGEMMConv2d::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv2dInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
@@ -99,10 +107,10 @@ void NEGEMMConv2d::configure(ITensor *input, const ITensor *weights, const ITens
     {
         asm_info.output_stage = calculate_output_stage_metadata(input->info(), weights->info(), output->info(), info.act_info);
     }
-    _gemm_asm_func.configure(input, &_permuted_weights, biases, output, asm_info);
+    _gemm_asm_func->configure(input, &_permuted_weights, biases, output, asm_info);
 
     // Configure activation
-    if(info.act_info.enabled() && !_gemm_asm_func.is_activation_supported(info.act_info))
+    if(info.act_info.enabled() && !_gemm_asm_func->is_activation_supported(info.act_info))
     {
         _activation_func.configure(output, nullptr, info.act_info);
         _run_activation = true;
@@ -114,7 +122,7 @@ Status NEGEMMConv2d::validate(const ITensorInfo *input, const ITensorInfo *weigh
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.num_groups > 1, "Grouping (num_groups != 1) is not supported on NEON");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.num_groups > 1, "Grouping (num_groups != 1) is not supported on Neon");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() != DataLayout::NHWC, "Data layout supported is NHWC");
     const DataType    data_type = input->data_type();
     const TensorShape i_shape   = input->tensor_shape();
@@ -148,7 +156,7 @@ void NEGEMMConv2d::run()
 {
     prepare();
 
-    _gemm_asm_func.run();
+    _gemm_asm_func->run();
     if(_run_activation)
     {
         _activation_func.run();

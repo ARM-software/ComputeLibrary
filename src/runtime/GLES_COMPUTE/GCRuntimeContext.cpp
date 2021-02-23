@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@
 namespace arm_compute
 {
 GCRuntimeContext::GCRuntimeContext()
-    : _gpu_owned_scheduler(support::cpp14::make_unique<GCScheduler>()),
+    : _gpu_owned_scheduler(std::make_unique<GCScheduler>()),
       _gpu_scheduler(_gpu_owned_scheduler.get()),
       _core_context()
 {

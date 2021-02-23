@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLChannelCombine.h"
 
 #include "src/core/CL/kernels/CLChannelCombineKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLChannelCombine::configure(const ICLTensor *plane0, const ICLTensor *plane
 
 void CLChannelCombine::configure(const CLCompileContext &compile_context, const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLChannelCombineKernel>();
+    auto k = std::make_unique<CLChannelCombineKernel>();
     k->configure(compile_context, plane0, plane1, plane2, plane3, output);
     _kernel = std::move(k);
 }
@@ -49,7 +48,7 @@ void CLChannelCombine::configure(const ICLImage *plane0, const ICLImage *plane1,
 
 void CLChannelCombine::configure(const CLCompileContext &compile_context, const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLChannelCombineKernel>();
+    auto k = std::make_unique<CLChannelCombineKernel>();
     k->configure(compile_context, plane0, plane1, plane2, output);
     _kernel = std::move(k);
 }

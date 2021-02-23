@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLMAXUNPOOLINGLAYER_H
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/CL/functions/CLFill.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
@@ -35,12 +36,11 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 class CLMaxUnpoolingLayerKernel;
-class CLMemsetKernel;
 struct PoolingLayerInfo;
 
 /** Function to perform MaxUnpooling. This function calls the following OpenCL kernels:
  *
- * -# @ref CLMemsetKernel
+ * -# @ref CLFill
  * -# @ref CLMaxUnpoolingLayerKernel
  */
 class CLMaxUnpoolingLayer : public IFunction
@@ -99,7 +99,7 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<CLMemsetKernel>            _memset_kernel;
+    CLFill                                     _fill;
     std::unique_ptr<CLMaxUnpoolingLayerKernel> _unpooling_layer_kernel;
 };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 class ITensor;
 struct GEMMLowpReductionKernelInfo;
 
-/** Common interface for all NEON reduction kernels */
+/** Common interface for all Neon reduction kernels */
 class INEGEMMLowpReductionKernel : public INEKernel
 {
 public:
@@ -69,7 +69,7 @@ protected:
     bool           _mul_by_scalar;
 };
 
-/** NEON kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
+/** Neon kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
  *
  * @note This stage is needed to handle the offset of matrix product
  *       https://github.com/google/gemmlowp/blob/master/doc/low-precision.md
@@ -130,7 +130,7 @@ private:
     void run_internal(const Window &window);
 };
 
-/** NEON kernel used to compute the row-vectors of sums of all the entries in each column of Matrix B.
+/** Neon kernel used to compute the row-vectors of sums of all the entries in each column of Matrix B.
  *
  * @note This stage is needed to handle the offset of matrix product
  *       https://github.com/google/gemmlowp/blob/master/doc/low-precision.md

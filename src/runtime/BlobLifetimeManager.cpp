@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/BlobMemoryPool.h"
 #include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
-#include "support/MemorySupport.h"
 
 #include <algorithm>
 #include <cmath>
@@ -48,7 +47,7 @@ const BlobLifetimeManager::info_type &BlobLifetimeManager::info() const
 std::unique_ptr<IMemoryPool> BlobLifetimeManager::create_pool(IAllocator *allocator)
 {
     ARM_COMPUTE_ERROR_ON(allocator == nullptr);
-    return support::cpp14::make_unique<BlobMemoryPool>(allocator, _blobs);
+    return std::make_unique<BlobMemoryPool>(allocator, _blobs);
 }
 
 MappingType BlobLifetimeManager::mapping_type() const

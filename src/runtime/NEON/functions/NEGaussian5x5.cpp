@@ -30,7 +30,6 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEGaussian5x5Kernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -50,9 +49,9 @@ void NEGaussian5x5::configure(ITensor *input, ITensor *output, BorderMode border
     // Manage intermediate buffers
     _memory_group.manage(&_tmp);
 
-    _kernel_hor     = arm_compute::support::cpp14::make_unique<NEGaussian5x5HorKernel>();
-    _kernel_vert    = arm_compute::support::cpp14::make_unique<NEGaussian5x5VertKernel>();
-    _border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _kernel_hor     = std::make_unique<NEGaussian5x5HorKernel>();
+    _kernel_vert    = std::make_unique<NEGaussian5x5VertKernel>();
+    _border_handler = std::make_unique<NEFillBorderKernel>();
 
     // Create and configure kernels for the two passes
     _kernel_hor->configure(input, &_tmp, border_mode == BorderMode::UNDEFINED);

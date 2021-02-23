@@ -27,7 +27,6 @@
 #include "gemm_hybrid_indirect.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
-#include "gemm_interleaved_pretransposed_2d.hpp"
 #include "gemv_batched.hpp"
 #include "gemv_pretransposed.hpp"
 
@@ -112,7 +111,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 #endif // __ARM_FEATURE_SVE
 
-// NEON hybrid methods
+// Neon hybrid methods
 {
     GemmMethod::GEMM_HYBRID,
     "a64_smallK_hybrid_fp32_mla_8x4",

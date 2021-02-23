@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,8 +39,11 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float> tolerance_f32(0.001f);
-RelativeTolerance<half>  tolerance_f16(half(0.1));
+RelativeTolerance<float> tolerance_f32(0.001f); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+RelativeTolerance<half> tolerance_f16(half(0.1)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+constexpr float         abs_tolerance_f16(0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+#endif                                            /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -136,12 +139,12 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NERNNLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallRNNLayerDataset(), framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END() // RNNLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

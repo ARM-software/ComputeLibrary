@@ -58,7 +58,7 @@ TEST_SUITE(CannyEdge)
 template <typename T>
 using NECannyEdgeFixture = CannyEdgeValidationFixture<Tensor, Accessor, KeyPointArray, NECannyEdge, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NECannyEdgeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format", Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NECannyEdgeFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format", Format::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference, AbsoluteTolerance<uint8_t>(0), allowed_mismatch_ratio);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,18 +34,18 @@
 #include <fstream>
 #include <map>
 
-#ifndef BARE_METAL
+#if !defined(BARE_METAL)
 /* C++ std::regex takes up a lot of space in the standalone builds */
 #include <regex.h>
 #include <thread>
-#endif /* BARE_METAL */
+#endif /* !defined(BARE_METAL) */
 
-#if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
+#if !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__))
 #include <sys/auxv.h>
 
 /* Get HWCAP bits from asm/hwcap.h */
 #include <asm/hwcap.h>
-#endif /* !BARE_METAL */
+#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
 
 /* Make sure the bits we care about are defined, just in case asm/hwcap.h is
  * out of date (or for bare metal mode) */
@@ -65,7 +65,7 @@ namespace
 {
 using namespace arm_compute;
 
-#if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
+#if !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__))
 
 bool model_supports_dot(CPUModel model)
 {
@@ -346,7 +346,7 @@ int get_max_cpus()
     }
     return max_cpus;
 }
-#endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
+#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
 
 } // namespace
 
@@ -358,7 +358,7 @@ namespace cpu
 {
 void get_cpu_configuration(CPUInfo &cpuinfo)
 {
-#if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
+#if !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__))
     bool cpuid               = false;
     bool hwcaps_fp16_support = false;
     bool hwcaps_dot_support  = false;
@@ -406,9 +406,9 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
     }
     cpuinfo.set_dotprod(one_supports_dot || hwcaps_dot_support);
     cpuinfo.set_fp16(one_supports_fp16 || hwcaps_fp16_support);
-#else  /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
+#else  /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
     ARM_COMPUTE_UNUSED(cpuinfo);
-#endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
+#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
 }
 
 unsigned int get_threads_hint()

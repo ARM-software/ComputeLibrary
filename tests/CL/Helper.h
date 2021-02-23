@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,16 +24,15 @@
 #ifndef ARM_COMPUTE_TEST_CL_HELPER_H
 #define ARM_COMPUTE_TEST_CL_HELPER_H
 
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLMemsetKernel.h"
-
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/CL/functions/CLFill.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 
 #include "src/core/CL/ICLKernel.h"
 
-#include "support/MemorySupport.h"
+#include <memory>
 
 namespace arm_compute
 {
@@ -51,7 +50,7 @@ public:
     template <typename... Args>
     void configure(Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->configure(std::forward<Args>(args)...);
         _kernel = std::move(k);
     }
@@ -63,7 +62,7 @@ public:
     template <typename... Args>
     void configure(GPUTarget gpu_target, Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->set_target(gpu_target);
         k->configure(std::forward<Args>(args)...);
         _kernel = std::move(k);
@@ -92,7 +91,7 @@ public:
     template <typename T, typename... Args>
     void configure(T first, Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
         _border_handler->configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
@@ -113,12 +112,12 @@ public:
     template <typename T, typename... Args>
     void configure(T first, T second, Args &&... args)
     {
-        auto k = arm_compute::support::cpp14::make_unique<K>();
+        auto k = std::make_unique<K>();
         k->set_target(CLScheduler::get().target());
         k->configure(first, second, std::forward<Args>(args)...);
         _kernel = std::move(k);
         _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
-        _memset_kernel.configure(second, PixelValue());
+        _fill.configure(second, PixelValue());
     }
 
     // Inherited method overridden:
@@ -126,13 +125,13 @@ public:
     {
         ARM_COMPUTE_ERROR_ON_MSG(!_kernel, "The CL kernel or function isn't configured");
 
-        CLScheduler::get().enqueue(_memset_kernel, false);
+        _fill.run();
         CLScheduler::get().enqueue(_border_handler, false);
         CLScheduler::get().enqueue(*_kernel);
     }
 
 private:
-    CLMemsetKernel             _memset_kernel{};  /**< Kernel to initialize the tensor */
+    CLFill                     _fill{};           /**< Kernel to initialize the tensor */
     CLFillBorderKernel         _border_handler{}; /**< Kernel to handle  borders */
     std::unique_ptr<ICLKernel> _kernel{};         /**< Kernel to run */
 };

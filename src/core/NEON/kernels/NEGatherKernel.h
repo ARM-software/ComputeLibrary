@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Kernel to perform other operation on NEON */
+/** Kernel to perform other operation on Neon */
 class NEGatherKernel : public INEKernel
 {
 public:

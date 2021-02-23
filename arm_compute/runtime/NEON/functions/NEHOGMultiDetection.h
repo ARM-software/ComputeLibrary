@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ namespace arm_compute
 class NEHOGOrientationBinningKernel;
 class NEHOGBlockNormalizationKernel;
 
-/** Basic function to detect multiple objects (or the same object at different scales) on the same input image using HOG. This function calls the following NEON kernels:
+/** Basic function to detect multiple objects (or the same object at different scales) on the same input image using HOG. This function calls the following Neon kernels:
  *
  * -# @ref NEHOGGradient
  * -# @ref NEHOGOrientationBinningKernel

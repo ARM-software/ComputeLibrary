@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace detail
 template <typename T, int S>
 struct dummy
 {
-    /** NEON vector type. */
+    /** Neon vector type. */
     using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
 
     /** Construct a dummy activation object.
@@ -68,9 +68,9 @@ struct dummy
 template <typename T, int S>
 struct linear
 {
-    /** NEON vector type. */
+    /** Neon vector type. */
     using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     /** Construct a Linear activation object.
@@ -112,9 +112,9 @@ struct linear
 template <typename T, int S>
 struct square
 {
-    /** NEON vector type. */
+    /** Neon vector type. */
     using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     /** Construct a Square activation object.
@@ -148,9 +148,9 @@ struct square
 template <typename T, int S>
 struct logistic
 {
-    /** NEON vector type. */
+    /** Neon vector type. */
     using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     /** Construct a Logistic activation object.
@@ -188,9 +188,9 @@ struct logistic
 template <typename T, int S>
 struct relu
 {
-    /** NEON vector type. */
+    /** Neon vector type. */
     using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     /** Construct a RELU activation object.
@@ -228,9 +228,9 @@ struct relu
 template <typename T, int S>
 struct brelu
 {
-    /** NEON vector type. */
+    /** Neon vector type. */
     using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     /** Construct a bounded RELU activation object.
@@ -270,9 +270,9 @@ struct brelu
 template <typename T, int S>
 struct lubrelu
 {
-    /** NEON vector type. */
+    /** Neon vector type. */
     using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     /** Construct a lower-upper bounded RELU activation object.

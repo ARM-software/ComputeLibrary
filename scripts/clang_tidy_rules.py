@@ -11,12 +11,11 @@ def get_list_includes():
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \
            "include/linux include " \
-           ". " \
-           "3rdparty/include kernels".split()
+           ". ".split()
 
 def get_list_flags( filename, arch):
     assert arch in ["armv7", "aarch64"]
-    flags = ["-std=c++11"]
+    flags = ["-std=c++14"]
     flags.append("-DARM_COMPUTE_CPP_SCHEDULER=1")
     flags.append("-DARM_COMPUTE_CL")
     flags.append("-DARM_COMPUTE_GC")
@@ -44,6 +43,9 @@ def filter_clang_tidy_lines( lines ):
     for i in range(0, len(lines)):
         line = lines[i]
 
+        if "/arm_conv/" in line:
+            continue
+
         if "/arm_gemm/" in line:
             continue
 
@@ -64,7 +66,6 @@ def filter_clang_tidy_lines( lines ):
                 ("Utils.h" in line and "no member named 'unmap' in 'arm_compute::Tensor'" in line) or
                 ("Utils.h" in line and "no member named 'map' in 'arm_compute::Tensor'" in line) or
                 ("CPUUtils.cpp" in line and "'asm/hwcap.h' file not found" in line) or
-                "3rdparty" in line or
                 ("'arm_compute_version.embed' file not found" in line) ):
                 print_context=False
                 continue
@@ -119,8 +120,7 @@ def filter_clang_tidy_lines( lines ):
                ("GCKernelLibrary.cpp" in line and "warning: do not declare C-style arrays" in line) or
                ("Utils.h" in line and "warning: Use of zero-allocated memory" in line) or
                ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line) or # This is to prevent false positive, should be reassessed with the newer clang-tidy
-               ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "cppcoreguidelines-pro-type-member-init" in line) or # This is to prevent false positive, should be reassessed with the newer clang-tidy
-               "3rdparty" in line):
+               ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "cppcoreguidelines-pro-type-member-init" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
                 print_context=False
                 continue
 

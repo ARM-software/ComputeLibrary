@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 
 #include "src/core/CL/kernels/CLDequantizationLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -35,7 +34,7 @@ void CLDequantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLDequantizationLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLDequantizationLayerKernel>();
+    auto k = std::make_unique<CLDequantizationLayerKernel>();
     k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }

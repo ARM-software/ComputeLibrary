@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ namespace
 // *INDENT-OFF*
 // clang-format off
 constexpr AbsoluteTolerance<float> tolerance_f32(0.002f);
-const AbsoluteTolerance<half> tolerance_f16(half(0.5f));
+const AbsoluteTolerance<half> tolerance_f16(half(1.f));
 constexpr AbsoluteTolerance<float> tolerance_convolution_layer_f32(0.1f);
 const AbsoluteTolerance<half> tolerance_convolution_layer_f16(half(0.4f));
 RelativeTolerance<half_float::half> rel_tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for FP16 data types */

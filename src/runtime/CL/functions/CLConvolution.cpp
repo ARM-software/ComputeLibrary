@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,6 @@
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "src/core/CL/kernels/CLConvolutionKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -47,7 +46,7 @@ void CLConvolution3x3::configure(ICLTensor *input, ICLTensor *output, const int1
 void CLConvolution3x3::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode,
                                  uint8_t constant_border_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLConvolution3x3Kernel>();
+    auto k = std::make_unique<CLConvolution3x3Kernel>();
     k->configure(compile_context, input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
     _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
@@ -55,9 +54,8 @@ void CLConvolution3x3::configure(const CLCompileContext &compile_context, ICLTen
 
 template <unsigned int matrix_size>
 CLConvolutionSquare<matrix_size>::CLConvolutionSquare(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _tmp(), _is_separable(false), _kernel_hor(support::cpp14::make_unique<CLSeparableConvolutionHorKernel<matrix_size>>()),
-      _kernel_vert(support::cpp14::make_unique<CLSeparableConvolutionVertKernel<matrix_size>>()), _kernel(support::cpp14::make_unique<CLConvolutionKernel<matrix_size>>()),
-      _border_handler(support::cpp14::make_unique<CLFillBorderKernel>())
+    : _memory_group(std::move(memory_manager)), _tmp(), _is_separable(false), _kernel_hor(std::make_unique<CLSeparableConvolutionHorKernel<matrix_size>>()),
+      _kernel_vert(std::make_unique<CLSeparableConvolutionVertKernel<matrix_size>>()), _kernel(std::make_unique<CLConvolutionKernel<matrix_size>>()), _border_handler(std::make_unique<CLFillBorderKernel>())
 {
 }
 
@@ -138,8 +136,9 @@ void CLConvolutionRectangle::configure(ICLTensor *input, ICLTensor *output, cons
 void CLConvolutionRectangle::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t rows, uint32_t cols, uint32_t scale,
                                        BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLConvolutionRectangleKernel>();
-    k->configure(compile_context, input, output, conv, rows, cols, scale, border_mode == BorderMode::UNDEFINED);
+    border_mode = (border_mode == BorderMode::UNDEFINED) ? BorderMode::CONSTANT : border_mode;
+    auto k      = std::make_unique<CLConvolutionRectangleKernel>();
+    k->configure(compile_context, input, output, conv, rows, cols, scale, false);
     _kernel = std::move(k);
     _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
 }

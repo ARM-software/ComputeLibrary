@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ class GraphContext;
 
 namespace backends
 {
-/** Factory for generating NEON backend functions **/
+/** Factory for generating Neon backend functions **/
 class NEFunctionFactory final
 {
 public:

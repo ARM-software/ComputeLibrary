@@ -10,10 +10,6 @@ Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
 
 **Make sure you are using the latest version of the library before opening an issue. Thanks**
 
-Deprecation notice:
-- We have deprecated the GLES backend and it will be removed from the library in the release 21.05
-- We have deprecated the NEON and OpenCL computer vision functions and they will be removed in 21.05
-
 News:
 
 - [Gian Marco's talk on Performance Analysis for Optimizing Embedded Deep Learning Inference Software](https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2019-embedded-vision-summit)
@@ -33,7 +29,30 @@ Documentation (API, changelogs, build guide, contribution guide, errata, etc.) a
 
 Binaries available at https://github.com/ARM-software/ComputeLibrary/releases.
 
-License & Contributions: The software is provided under MIT license. Contributions to this project are accepted under the same license.
+### Supported Architectures/Technologies
+
+- Arm® CPUs:
+    - Arm® Cortex®-A processor family using Arm® Neon™ technology
+    - Arm® Cortex®-R processor family with Armv8-R AArch64 architecture using Arm® Neon™ technology
+    - Arm® Cortex®-X1 processor using Arm® Neon™ technology
+
+- Arm® Mali™ GPUs:
+    - Arm® Mali™-G processor family
+    - Arm® Mali™-T processor family
+
+- x86
+
+### Supported OS
+
+- Android™
+- Bare Metal
+- Linux®
+- macOS®
+- Tizen™
+
+## License and Contributions
+
+The software is provided under MIT license. Contributions to this project are accepted under the same license.
 
 ### Public mailing list
 For technical discussion, the ComputeLibrary project has a public mailing list: acl-dev@lists.linaro.org
@@ -48,3 +67,16 @@ To indicate that you agree to the the terms of the DCO, you "sign off" your cont
 ```Signed-off-by: John Doe <john.doe@example.org>```
 
 You must use your real name, no pseudonyms or anonymous contributions are accepted.
+
+## Trademarks and Copyrights
+
+Android is a trademark of Google LLC.
+
+Arm, Cortex and Mali are registered trademarks or trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
+
+Linux® is the registered trademark of Linus Torvalds in the U.S. and other countries.
+
+Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other
+countries.
+
+Tizen is a registered trademark of The Linux Foundation.

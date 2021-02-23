@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLCopyKernel.h"
 #include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
@@ -41,7 +40,6 @@
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -97,21 +95,21 @@ void CLQLSTMLayer::TensorCopyKernel::run()
 }
 
 CLQLSTMLayer::CLQLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _input_to_input_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _recurrent_to_input_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _input_to_forget_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _recurrent_to_forget_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _input_to_cell_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _recurrent_to_cell_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _input_to_output_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _recurrent_to_output_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
-      _projection_reduction(support::cpp14::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+    : _input_to_input_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_input_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_forget_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_forget_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_cell_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_cell_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _input_to_output_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _recurrent_to_output_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
+      _projection_reduction(std::make_unique<CLGEMMLowpMatrixAReductionKernel>()),
       _layer_norms(),
-      _copy_output(support::cpp14::make_unique<CLCopyKernel>())
+      _copy_output()
 {
     for(auto &norm : _layer_norms)
     {
-        norm = support::cpp14::make_unique<CLQLSTMLayerNormalizationKernel>();
+        norm = std::make_unique<CLQLSTMLayerNormalizationKernel>();
     }
 
     _memory_group = MemoryGroup(std::move(memory_manager));
@@ -594,7 +592,7 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
     }
 
     // Copy output_state_out to output
-    _copy_output->configure(compile_context, output_state_out, output);
+    _copy_output.configure(compile_context, output_state_out, output);
 }
 
 Status CLQLSTMLayer::validate(const ITensorInfo *input,
@@ -958,7 +956,7 @@ Status CLQLSTMLayer::validate(const ITensorInfo *input,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output_state_in, output_state_out);
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(output_state_out, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLCopy::validate(output_state_out, output));
     return Status{};
 }
 
@@ -1100,7 +1098,7 @@ void CLQLSTMLayer::run()
     }
 
     // Copy output_state_out to output
-    CLScheduler::get().enqueue(*_copy_output);
+    _copy_output.run();
 }
 
 void CLQLSTMLayer::prepare()

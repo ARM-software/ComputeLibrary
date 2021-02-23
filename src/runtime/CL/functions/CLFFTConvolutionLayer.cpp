@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
-#include "src/core/CL/kernels/CLCopyKernel.h"
 #include "src/core/CL/kernels/CLFFTDigitReverseKernel.h"
 #include "src/core/CL/kernels/CLFFTRadixStageKernel.h"
 #include "src/core/CL/kernels/CLFFTScaleKernel.h"
@@ -38,8 +37,6 @@
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/helpers/fft.h"
-
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -106,14 +103,17 @@ CLFFTConvolutionLayer::CLFFTConvolutionLayer(std::shared_ptr<IMemoryManager> mem
 }
 
 void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                      const ActivationLayerInfo &act_info)
+                                      const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info);
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info, enable_fast_math);
 }
 
 void CLFFTConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                      const ActivationLayerInfo &act_info)
+                                      const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
+    ARM_COMPUTE_UNUSED(enable_fast_math);
+    ARM_COMPUTE_ERROR_THROW_ON(CLFFTConvolutionLayer::validate(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info, act_info, enable_fast_math));
+
     _original_weights = weights;
     _original_bias    = biases;
 
@@ -168,7 +168,7 @@ void CLFFTConvolutionLayer::configure(const CLCompileContext &compile_context, I
     _pad_weights_func.configure(compile_context, &_flipped_weights, &_padded_weights, padding_w);
 
     // Transform weights
-    _transform_weights_func = support::cpp14::make_unique<CLFFT2D>();
+    _transform_weights_func = std::make_unique<CLFFT2D>();
     _transform_weights_func->configure(compile_context, &_padded_weights, &_transformed_weights, FFT2DInfo());
 
     // Pad input
@@ -267,9 +267,10 @@ void CLFFTConvolutionLayer::configure(const CLCompileContext &compile_context, I
 }
 
 Status CLFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                       const ActivationLayerInfo &act_info)
+                                       const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON((input->data_type() == DataType::F16) && !enable_fast_math);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
     // Get indices for the width and height
@@ -289,9 +290,8 @@ Status CLFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorIn
     // Validate biases
     if(biases != nullptr)
     {
-        const size_t idx_channels = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channels] != biases->tensor_shape().x());
+        ARM_COMPUTE_RETURN_ERROR_ON(weights->tensor_shape()[3] != biases->tensor_shape().x());
     }
 
     // Checks performed when output is configured

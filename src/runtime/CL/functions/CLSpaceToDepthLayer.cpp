@@ -30,12 +30,11 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLSpaceToDepthLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLSpaceToDepthLayer::CLSpaceToDepthLayer()
-    : _space_to_depth_kernel(support::cpp14::make_unique<CLSpaceToDepthLayerKernel>())
+    : _space_to_depth_kernel(std::make_unique<CLSpaceToDepthLayerKernel>())
 {
 }
 

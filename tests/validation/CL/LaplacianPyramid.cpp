@@ -85,7 +85,7 @@ TEST_SUITE(LaplacianPyramid)
 
 using CLLaplacianPyramidFixture = LaplacianPyramidValidationFixture<CLTensor, CLAccessor, CLLaplacianPyramid, uint8_t, int16_t, CLPyramid>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLaplacianPyramidFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLLaplacianPyramidFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        datasets::Medium2DShapes(),
                        datasets::BorderModes()),

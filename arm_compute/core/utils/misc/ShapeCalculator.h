@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -915,8 +915,6 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
 }
 
 /** Calculate the matrix multiplication output shape of two tensors
- *
- * @note Deprecated. Remove when GEMMReshapeInfo is not used anymore by any other kernels
  *
  * @param[in] input0    First input tensor info
  * @param[in] input1    Second input tensor info

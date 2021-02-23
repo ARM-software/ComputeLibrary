@@ -28,7 +28,6 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLMemoryRegion.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "support/MemorySupport.h"
 
 #include <cstddef>
 
@@ -63,6 +62,6 @@ void CLBufferAllocator::free(void *ptr)
 std::unique_ptr<IMemoryRegion> CLBufferAllocator::make_region(size_t size, size_t alignment)
 {
     ARM_COMPUTE_UNUSED(alignment);
-    return arm_compute::support::cpp14::make_unique<CLBufferMemoryRegion>(_ctx, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size);
+    return std::make_unique<CLBufferMemoryRegion>(_ctx, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size);
 }
 } // namespace arm_compute

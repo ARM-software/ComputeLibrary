@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,15 +41,15 @@
 #include <set>
 #include <string>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
-inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input, const ITensorInfo &output, bool align_corners)
+inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input, const ITensorInfo &output, const ScaleKernelInfo &info)
 {
-    DataLayout data_layout = input.data_layout();
-    const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input.data_layout() : info.data_layout;
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     // Compute the ratio between source width/height and destination width/height
     const unsigned int input_width   = input.dimension(idx_width);
@@ -57,8 +57,8 @@ inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input,
     const unsigned int output_width  = output.dimension(idx_width);
     const unsigned int output_height = output.dimension(idx_height);
 
-    float wr = arm_compute::scale_utils::calculate_resize_ratio(input_width, output_width, align_corners);
-    float hr = arm_compute::scale_utils::calculate_resize_ratio(input_height, output_height, align_corners);
+    float wr = arm_compute::scale_utils::calculate_resize_ratio(input_width, output_width, info.align_corners);
+    float hr = arm_compute::scale_utils::calculate_resize_ratio(input_height, output_height, info.align_corners);
 
     return std::make_pair(wr, hr);
 }
@@ -73,11 +73,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
     ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy));
 
-    const bool will_use_align_corners = info.align_corners;
-
     float wr = 0.f;
     float hr = 0.f;
-    std::tie(wr, hr) = calculate_scale_factors(*input, *output, will_use_align_corners);
+    std::tie(wr, hr) = calculate_scale_factors(*input, *output, info);
 
     ARM_COMPUTE_RETURN_ERROR_ON(info.interpolation_policy == InterpolationPolicy::AREA && (wr > 1.f || hr > 1.f));
 
@@ -86,10 +84,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const ScaleKernelInfo &info, BorderSize &border)
 {
-    Window       win{};
-    bool         window_changed{};
-    unsigned int num_elems_processed_per_iteration = 0;
-    DataLayout   data_layout                       = input->data_layout();
+    Window           win{};
+    bool             window_changed{};
+    unsigned int     num_elems_processed_per_iteration = 0;
+    const DataLayout data_layout                       = info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : info.data_layout;
 
     switch(data_layout)
     {
@@ -120,15 +118,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         break;
         case DataLayout::NHWC:
         {
-            num_elems_processed_per_iteration = 1;
             // Configure kernel window
-            win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-            AccessWindowStatic input_access(input, -border.left, -border.top,
-                                            input->dimension(0) + border.right,
-                                            input->dimension(1) + border.bottom);
-            AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-            window_changed = update_window_and_padding(win, input_access, output_access);
-            output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+            win = calculate_max_window(*output, Steps());
         }
         break;
         default:
@@ -142,14 +133,14 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
 BorderSize CLScaleKernel::border_size() const
 {
-    return BorderSize(1);
+    return BorderSize(static_cast<size_t>(_data_layout == DataLayout::NCHW));
 }
 
 Status CLScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info)
 {
-    BorderSize border = BorderSize(1);
-
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, info));
+    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : info.data_layout;
+    BorderSize       border      = BorderSize(static_cast<size_t>(data_layout == DataLayout::NCHW));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), info, border).first);
 
     return Status{};
@@ -173,16 +164,17 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, const S
 void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), info));
+    auto padding_info = get_padding_info({ input, output });
 
     _input                = input;
     _output               = output;
     _interpolation_policy = info.interpolation_policy;
-    _data_layout          = input->info()->data_layout();
+    _data_layout          = info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : info.data_layout;
     _align_corners        = info.align_corners;
 
     float wr = 0.f;
     float hr = 0.f;
-    std::tie(wr, hr) = calculate_scale_factors(*input->info(), *output->info(), _align_corners);
+    std::tie(wr, hr) = calculate_scale_factors(*input->info(), *output->info(), info);
 
     const bool call_quantized_kernel = is_data_type_quantized_asymmetric(input->info()->data_type()) && _interpolation_policy == InterpolationPolicy::BILINEAR;
 
@@ -208,6 +200,7 @@ void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICL
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(info.constant_border_value, input->info()->data_type()));
     build_opts.add_option("-DBORDER_SIZE=" + support::cpp11::to_string(border.right));
     build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
     build_opts.add_option_if(is_nhwc, "-DDEPTH_OUT=" + support::cpp11::to_string(output->info()->dimension(2)));
@@ -219,7 +212,6 @@ void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICL
         build_opts.add_option("-DSCALE=" + support::cpp11::to_string(qinfo.scale));
         build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qinfo.offset));
     }
-
     std::string interpolation_name = string_from_interpolation_policy(interpolation_policy_to_use);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
     std::string kernel_name = "scale_" + interpolation_name;
@@ -250,13 +242,16 @@ void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICL
     _config_id += support::cpp11::to_string(output->info()->dimension(2));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(3));
+    if(is_nhwc)
+    {
+        ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
+    }
 }
 
 void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
-
     switch(_data_layout)
     {
         case DataLayout::NCHW:
@@ -288,3 +283,4 @@ void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
             ARM_COMPUTE_ERROR("Data layout not supported");
     }
 }
+} // namespace arm_compute

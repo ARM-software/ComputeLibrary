@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ class NEMinMaxKernel;
 class NEMinMaxLocationKernel;
 using IImage = ITensor;
 
-/** Basic function to execute min and max location. This function calls the following NEON kernels:
+/** Basic function to execute min and max location. This function calls the following Neon kernels:
  *
  * -# NEMinMaxKernel
  * -# NEMinMaxLocationKernel

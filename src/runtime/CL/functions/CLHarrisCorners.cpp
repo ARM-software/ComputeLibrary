@@ -37,7 +37,6 @@
 #include "src/core/CL/kernels/CLHarrisCornersKernel.h"
 #include "src/core/CL/kernels/CLSobel5x5Kernel.h"
 #include "src/core/CL/kernels/CLSobel7x7Kernel.h"
-#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <utility>
@@ -47,12 +46,12 @@ using namespace arm_compute;
 CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
       _sobel(nullptr),
-      _harris_score(support::cpp14::make_unique<CLHarrisScoreKernel>()),
+      _harris_score(std::make_unique<CLHarrisScoreKernel>()),
       _non_max_suppr(),
       _candidates(),
       _sort_euclidean(),
-      _border_gx(support::cpp14::make_unique<CLFillBorderKernel>()),
-      _border_gy(support::cpp14::make_unique<CLFillBorderKernel>()),
+      _border_gx(std::make_unique<CLFillBorderKernel>()),
+      _border_gy(std::make_unique<CLFillBorderKernel>()),
       _gx(),
       _gy(),
       _score(),
@@ -106,21 +105,21 @@ void CLHarrisCorners::configure(const CLCompileContext &compile_context, ICLImag
     {
         case 3:
         {
-            auto k = arm_compute::support::cpp14::make_unique<CLSobel3x3>();
+            auto k = std::make_unique<CLSobel3x3>();
             k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 5:
         {
-            auto k = arm_compute::support::cpp14::make_unique<CLSobel5x5>();
+            auto k = std::make_unique<CLSobel5x5>();
             k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 7:
         {
-            auto k = arm_compute::support::cpp14::make_unique<CLSobel7x7>();
+            auto k = std::make_unique<CLSobel7x7>();
             k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;

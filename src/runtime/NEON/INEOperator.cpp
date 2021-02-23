@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ void INEOperator::run(ITensorPack &tensors)
         ARM_COMPUTE_ERROR("No inputs provided");
     }
 
-    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, tensors);
+    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }
 
 void INEOperator::prepare(ITensorPack &constants)
@@ -54,7 +54,7 @@ void INEOperator::prepare(ITensorPack &constants)
 
 MemoryRequirements INEOperator::workspace() const
 {
-    return {};
+    return _workspace;
 }
 } // namespace experimental
 } // namespace arm_compute

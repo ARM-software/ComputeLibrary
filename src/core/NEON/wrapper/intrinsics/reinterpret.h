@@ -42,7 +42,7 @@ namespace wrapper
     }
 
 VREINTERPRET_IMPL(int16x4_t, uint16x4_t, vreinterpret, s16, u16)
-
+VREINTERPRET_IMPL(int16x8_t, uint16x8_t, vreinterpretq, s16, u16)
 VREINTERPRET_IMPL(int32x4_t, uint32x4_t, vreinterpretq, s32, u32)
 } // namespace wrapper
 } // namespace arm_compute

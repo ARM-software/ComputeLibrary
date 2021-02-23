@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ namespace bit_ops
  *
  * @return True if the idx-th bit is set else false
  */
-template <typename T, REQUIRES_TA(std::is_integral<T>::value)>
+template <typename T, ARM_COMPUTE_REQUIRES_TA(std::is_integral<T>::value)>
 bool is_bit_set(T v, unsigned int idx)
 {
     return (v & 1 << idx) != 0;

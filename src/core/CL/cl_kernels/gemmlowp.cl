@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,6 @@
 
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
-/** Specialized macros to perform the dot product instruction between two vectors of size N [1,16]. These macros use the dot8 instruction */
 #define ARM_DOT1(a, b, c)                                                                                                                               \
     ({                                                                                                                                                  \
         ARM_DOT((VEC_DATA_TYPE(DATA_TYPE, 4))(a, (VEC_DATA_TYPE(DATA_TYPE, 3))0), (VEC_DATA_TYPE(DATA_TYPE, 4))(b, (VEC_DATA_TYPE(DATA_TYPE, 3))0), c); \

@@ -33,7 +33,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLStackLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -61,7 +60,7 @@ void CLStackLayer::configure(const CLCompileContext &compile_context, const std:
 
     for(unsigned int i = 0; i < _num_inputs; i++)
     {
-        _stack_kernels.emplace_back(support::cpp14::make_unique<CLStackLayerKernel>());
+        _stack_kernels.emplace_back(std::make_unique<CLStackLayerKernel>());
         _stack_kernels.back()->configure(compile_context, input[i], axis_u, i, _num_inputs, output);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,8 +51,9 @@ namespace
 RelativeTolerance<float>           rel_tolerance_f32(0.05f);   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                                                   // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+constexpr AbsoluteTolerance<float> abs_tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+#endif                                                       // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 const auto act_infos = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -148,7 +149,7 @@ FIXTURE_DATA_TEST_CASE(RandomSmall, NEBatchNormalizationLayerFixture<half>, fram
                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16, 0);
+    validate(Accessor(_target), _reference, abs_tolerance_f16, 0);
 }
 
 FIXTURE_DATA_TEST_CASE(RandomLarge, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::LargeRandomBatchNormalizationLayerDataset(),
@@ -159,7 +160,7 @@ FIXTURE_DATA_TEST_CASE(RandomLarge, NEBatchNormalizationLayerFixture<half>, fram
                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16, 0);
+    validate(Accessor(_target), _reference, abs_tolerance_f16, 0);
 }
 TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -219,7 +220,7 @@ TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
 TEST_SUITE_END() // BatchNormalizationLayerFusion
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

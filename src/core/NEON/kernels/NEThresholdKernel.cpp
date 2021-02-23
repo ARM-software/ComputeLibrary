@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,7 +112,7 @@ Status NEThresholdKernel::validate(const ITensorInfo *input, const ITensorInfo *
 
 inline void NEThresholdKernel::run_binary(const Window &window)
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using Type         = uint8_t;
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<Type, wrapper::traits::BitWidth::W128>;
 
@@ -158,7 +158,7 @@ inline void NEThresholdKernel::run_binary(const Window &window)
 
 inline void NEThresholdKernel::run_range(const Window &window)
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using Type         = uint8_t;
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<Type, wrapper::traits::BitWidth::W128>;
 

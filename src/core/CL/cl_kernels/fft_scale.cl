@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,10 @@
  */
 #include "helpers.h"
 
+#if defined(VEC_SIZE) && defined(DATA_TYPE)
 /** Computes the fft scale stage
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -62,17 +63,19 @@ __kernel void fft_scale_conj(
 
     // Store result
 #if VEC_SIZE == 1
-    *((__global float *)dst.ptr) = (*(__global float *)src.ptr) / scale;
+    *((__global DATA_TYPE *)dst.ptr) = (*(__global DATA_TYPE *)src.ptr) / (DATA_TYPE)scale;
 #elif VEC_SIZE == 2
     // Load data
-    float2 data = vload2(0, (__global float *)src.ptr);
-    data /= scale;
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    data = vload2(0, (__global DATA_TYPE *)src.ptr);
+    data /= (DATA_TYPE)scale;
 #if defined(CONJ)
-    vstore2((float2)(data.s0, -data.s1), 0, (__global float *)dst.ptr);
+    vstore2((VEC_DATA_TYPE(DATA_TYPE, 2))(data.s0, -data.s1), 0, (__global DATA_TYPE *)dst.ptr);
 #else  // defined(CONJ)
-    vstore2(data, 0, (__global float *)dst.ptr);
+    vstore2(data, 0, (__global DATA_TYPE *)dst.ptr);
 #endif // defined(CONJ)
 #else  // VEC_SIZE == 1
 #error "vec_size of 1 and 2 are supported"
 #endif // VEC_SIZE == 1
 }
+#endif // defined(VEC_SIZE) && defined(DATA_TYPE)

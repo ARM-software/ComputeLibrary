@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
 
 #include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -32,7 +31,7 @@ NEMeanStdDevNormalizationLayer::~NEMeanStdDevNormalizationLayer() = default;
 
 void NEMeanStdDevNormalizationLayer::configure(ITensor *input, ITensor *output, float epsilon)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEMeanStdDevNormalizationKernel>();
+    auto k = std::make_unique<NEMeanStdDevNormalizationKernel>();
     k->configure(input, output, epsilon);
     _kernel = std::move(k);
 }

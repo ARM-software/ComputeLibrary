@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -139,8 +139,8 @@ public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type, DataType output_data_type)
     {
-        std::mt19937                     gen(library->seed());
-        std::uniform_real_distribution<> float_dist(0, 1);
+        std::mt19937                          gen(library->seed());
+        std::uniform_real_distribution<float> float_dist(0, 1);
 
         _alpha = float_dist(gen);
 

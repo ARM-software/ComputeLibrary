@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 
 namespace arm_compute
 {
-/** Interface for simple NEON kernels having 1 tensor input and 1 tensor output */
+/** Interface for simple Neon kernels having 1 tensor input and 1 tensor output */
 using INESimpleKernel = ICPPSimpleKernel;
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_INESIMPLEKERNEL_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ TEST_SUITE(HOGDescriptor)
 // clang-format off
 using NEHOGDescriptorFixture = HOGDescriptorValidationFixture<Tensor, HOG, Accessor, NEHOGDescriptor, uint8_t, float>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEHOGDescriptorFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEHOGDescriptorFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(
                        datasets::SmallHOGDescriptorDataset(),
                        framework::dataset::make("Format", Format::U8)),

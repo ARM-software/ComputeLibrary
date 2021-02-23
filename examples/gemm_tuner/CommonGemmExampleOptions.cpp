@@ -38,7 +38,7 @@ using namespace utils;
     return os;
 }
 
-CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser)
+CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser, DataType default_data_type)
     : help(parser.add_option<ToggleOption>("help")),
       M(parser.add_positional_option<SimpleOption<size_t>>("M", 100)),
       N(parser.add_positional_option<SimpleOption<size_t>>("N", 100)),
@@ -50,9 +50,11 @@ CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser)
     {
         DataType::F16,
         DataType::F32,
+        DataType::QASYMM8,
     };
+    ARM_COMPUTE_ERROR_ON_MSG(supported_data_types.find(default_data_type) == supported_data_types.end(), "Default data type unsupported");
 
-    data_type = parser.add_option<EnumOption<DataType>>("type", supported_data_types, DataType::F32);
+    data_type = parser.add_option<EnumOption<DataType>>("type", supported_data_types, default_data_type);
 
     help->set_help("Show this help message.");
     M->set_help("Number of lhs matrix rows.");

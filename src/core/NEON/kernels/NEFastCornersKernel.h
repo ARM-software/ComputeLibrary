@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 using IImage = ITensor;
 
-/** NEON kernel to perform fast corners */
+/** Neon kernel to perform fast corners */
 class NEFastCornersKernel : public INEKernel
 {
 public:

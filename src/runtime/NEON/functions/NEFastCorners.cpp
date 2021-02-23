@@ -35,7 +35,6 @@
 #include "src/core/NEON/kernels/NEFillArrayKernel.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -68,9 +67,9 @@ void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppre
     _output.allocator()->init(tensor_info);
     _memory_group.manage(&_output);
 
-    _fast_corners_kernel = arm_compute::support::cpp14::make_unique<NEFastCornersKernel>();
-    _border_handler      = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
-    _fill_kernel         = arm_compute::support::cpp14::make_unique<NEFillArrayKernel>();
+    _fast_corners_kernel = std::make_unique<NEFastCornersKernel>();
+    _border_handler      = std::make_unique<NEFillBorderKernel>();
+    _fill_kernel         = std::make_unique<NEFillArrayKernel>();
     // If border is UNDEFINED _fast_corners_kernel will operate in xwindow (3,
     // width - 3) and ywindow (3, height -3) so the output image will leave the
     // pixels on the borders unchanged. This is reflected in the valid region
@@ -87,7 +86,7 @@ void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppre
     {
         _suppressed.allocator()->init(tensor_info);
         _memory_group.manage(&_suppressed);
-        _nonmax_kernel = arm_compute::support::cpp14::make_unique<NENonMaximaSuppression3x3Kernel>();
+        _nonmax_kernel = std::make_unique<NENonMaximaSuppression3x3Kernel>();
         _nonmax_kernel->configure(&_output, &_suppressed, BorderMode::UNDEFINED == border_mode);
         _fill_kernel->configure(&_suppressed, 1 /* we keep all texels >0 */, corners);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,19 +24,34 @@
 #ifndef ARM_COMPUTE_NEFLOOR_H
 #define ARM_COMPUTE_NEFLOOR_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/Types.h"
 
+#include <memory>
+
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEFloorKernel */
-class NEFloor : public INESimpleFunctionNoBorder
+/** Basic function to run @ref cpu::kernels::CpuFloorKernel */
+class NEFloor : public IFunction
 {
 public:
+    /** Constructor */
+    NEFloor();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFloor(const NEFloor &) = delete;
+    /** Default move constructor */
+    NEFloor(NEFloor &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFloor &operator=(const NEFloor &) = delete;
+    /** Default move assignment operator */
+    NEFloor &operator=(NEFloor &&);
+    /** Destructor */
+    ~NEFloor();
     /** Set the source, destination of the kernel
      *
      * @param[in]  input  Source tensor. Data type supported: F16/F32.
@@ -51,6 +66,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEFLOOR_H */

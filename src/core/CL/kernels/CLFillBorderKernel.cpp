@@ -69,6 +69,7 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ITen
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
     ARM_COMPUTE_ERROR_ON(tensor->num_channels() != 1);
+    auto padding_info = get_padding_info({ tensor });
 
     border_size.limit(tensor->padding());
 
@@ -166,6 +167,7 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ITen
     _config_id += support::cpp11::to_string(tensor->dimension(1));
     _config_id += "_";
     _config_id += lower_string(string_from_border_mode(border_mode));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLFillBorderKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)

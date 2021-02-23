@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ class NEFillBorderKernel;
 class INEHarrisScoreKernel;
 using IImage = ITensor;
 
-/** Basic function to execute harris corners detection. This function calls the following NEON kernels and functions:
+/** Basic function to execute harris corners detection. This function calls the following Neon kernels and functions:
  *
  * -# @ref NESobel3x3 (if gradient_size == 3) or<br/>
  *    @ref NESobel5x5 (if gradient_size == 5) or<br/>

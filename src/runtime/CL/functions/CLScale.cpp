@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,26 +27,22 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLScaleKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
+CLScale::CLScale()
+    : _border_handler(std::make_unique<CLFillBorderKernel>()), _kernel()
+{
+}
+
 void CLScale::configure(ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
 }
 
-void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
-                        bool align_corners)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners });
-}
-
 void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLScaleKernel>();
+    auto k = std::make_unique<CLScaleKernel>();
     k->set_target(CLScheduler::get().target());
     k->configure(compile_context, input, output, info);
     _kernel = std::move(k);
@@ -54,30 +50,25 @@ void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *inpu
     // Tune kernels
     CLScheduler::get().tune_kernel_static(*_kernel);
 
-    auto border_mode_to_use = info.border_mode;
-    // In the case of NHWC we can't have undefined border mode as this would require to access elements outside z dimension,
-    // so we treat it like border constant.
-    if(info.border_mode == BorderMode::UNDEFINED && input->info()->data_layout() == DataLayout::NHWC)
+    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : info.data_layout;
+    if(data_layout == DataLayout::NCHW && !_kernel->border_size().empty())
     {
-        border_mode_to_use = BorderMode::CONSTANT;
+        _border_handler->configure(compile_context, input, _kernel->border_size(), info.border_mode, info.constant_border_value);
     }
-    _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode_to_use, info.constant_border_value);
-}
-
-void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value,
-                        SamplingPolicy sampling_policy, bool use_padding, bool align_corners)
-{
-    configure(compile_context, input, output, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners });
-}
-
-Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy,
-                         bool use_padding, bool align_corners)
-{
-    return CLScale::validate(input, output, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners });
 }
 
 Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info)
 {
     return CLScaleKernel::validate(input, output, info);
 }
+
+void CLScale::run()
+{
+    if(!_kernel->border_size().empty())
+    {
+        CLScheduler::get().enqueue(*_border_handler, false);
+    }
+    CLScheduler::get().enqueue(*_kernel);
+}
+
 } // namespace arm_compute

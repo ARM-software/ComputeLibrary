@@ -31,7 +31,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEStackLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -54,7 +53,7 @@ void NEStackLayer::configure(const std::vector<ITensor *> &input, int axis, ITen
 
     for(unsigned int i = 0; i < _num_inputs; i++)
     {
-        _stack_kernels[i] = arm_compute::support::cpp14::make_unique<NEStackLayerKernel>();
+        _stack_kernels[i] = std::make_unique<NEStackLayerKernel>();
         _stack_kernels[i]->configure(input[i], axis_u, i, _num_inputs, output);
     }
 }

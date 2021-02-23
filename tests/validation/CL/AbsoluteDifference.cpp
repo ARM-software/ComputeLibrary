@@ -57,7 +57,7 @@ template <typename T>
 using CLAbsoluteDifferenceFixture = AbsoluteDifferenceValidationFixture<CLTensor, CLAccessor, CLAbsoluteDifference, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLAbsoluteDifferenceFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLAbsoluteDifferenceFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -70,7 +70,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLAbsoluteDifferenceFixture<uint8_t>, framework
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLAbsoluteDifferenceFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLAbsoluteDifferenceFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform a Gaussian 5x5 filter (horizontal pass) */
+/** Neon kernel to perform a Gaussian 5x5 filter (horizontal pass) */
 class NEGaussian5x5HorKernel : public INESimpleKernel
 {
 public:
@@ -67,7 +67,7 @@ private:
     BorderSize _border_size;
 };
 
-/** NEON kernel to perform a Gaussian 5x5 filter (vertical pass) */
+/** Neon kernel to perform a Gaussian 5x5 filter (vertical pass) */
 class NEGaussian5x5VertKernel : public INESimpleKernel
 {
 public:

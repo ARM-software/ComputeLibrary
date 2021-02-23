@@ -31,8 +31,6 @@
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 GCConcatenateLayer::GCConcatenateLayer()
@@ -61,7 +59,7 @@ void GCConcatenateLayer::configure(std::vector<IGCTensor *> inputs_vector, IGCTe
         {
             for(unsigned int i = 0; i < _num_inputs; ++i)
             {
-                auto kernel = support::cpp14::make_unique<GCDepthConcatenateLayerKernel>();
+                auto kernel = std::make_unique<GCDepthConcatenateLayerKernel>();
                 kernel->configure(inputs_vector.at(i), offset, output);
                 offset += inputs_vector.at(i)->info()->dimension(axis);
                 _concat_kernels.emplace_back(std::move(kernel));

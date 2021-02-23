@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to simulate a quantization layer. This function calls the following NEON kernels:
+/** Basic function to simulate a quantization layer. This function calls the following Neon kernels:
  *
  *
  * -# @ref NEQuantizationLayerKernel

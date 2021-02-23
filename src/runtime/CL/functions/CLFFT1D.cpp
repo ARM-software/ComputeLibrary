@@ -30,15 +30,14 @@
 #include "src/core/CL/kernels/CLFFTRadixStageKernel.h"
 #include "src/core/CL/kernels/CLFFTScaleKernel.h"
 #include "src/core/utils/helpers/fft.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLFFT1D::CLFFT1D(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _digit_reverse_kernel(support::cpp14::make_unique<CLFFTDigitReverseKernel>()),
+      _digit_reverse_kernel(std::make_unique<CLFFTDigitReverseKernel>()),
       _fft_kernels(),
-      _scale_kernel(support::cpp14::make_unique<CLFFTScaleKernel>()),
+      _scale_kernel(std::make_unique<CLFFTScaleKernel>()),
       _digit_reversed_input(),
       _digit_reverse_indices(),
       _num_ffts(0),
@@ -90,7 +89,7 @@ void CLFFT1D::configure(const CLCompileContext &compile_context, const ICLTensor
         fft_kernel_info.radix          = radix_for_stage;
         fft_kernel_info.Nx             = Nx;
         fft_kernel_info.is_first_stage = (i == 0);
-        _fft_kernels.emplace_back(support::cpp14::make_unique<CLFFTRadixStageKernel>());
+        _fft_kernels.emplace_back(std::make_unique<CLFFTRadixStageKernel>());
         _fft_kernels.back()->configure(compile_context, &_digit_reversed_input, ((i == (_num_ffts - 1)) && !is_c2r) ? output : nullptr, fft_kernel_info);
 
         Nx *= radix_for_stage;
@@ -119,7 +118,7 @@ void CLFFT1D::configure(const CLCompileContext &compile_context, const ICLTensor
 Status CLFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, const FFT1DInfo &config)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() != 1 && input->num_channels() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(std::set<unsigned int>({ 0, 1 }).count(config.axis) == 0);
 

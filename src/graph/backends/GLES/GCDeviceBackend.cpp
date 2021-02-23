@@ -112,7 +112,7 @@ std::unique_ptr<ITensorHandle> GCDeviceBackend::create_tensor(const Tensor &tens
     TensorInfo info(tensor_desc.shape, 1, tensor_desc.data_type, tensor_desc.quant_info);
     info.set_data_layout(tensor_desc.layout);
 
-    return support::cpp14::make_unique<GCTensorHandle>(info);
+    return std::make_unique<GCTensorHandle>(info);
 }
 
 std::unique_ptr<ITensorHandle> GCDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent)

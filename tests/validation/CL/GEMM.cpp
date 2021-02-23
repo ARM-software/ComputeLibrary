@@ -49,8 +49,7 @@ RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for compari
 constexpr float          abs_tolerance_f32(
     0.0001f);                                                 /**< Absolute tolerance value for comparing reference's output against implementation's output for floating point data types in case using relative tolerance fails because of small values */
 RelativeTolerance<half_float::half> tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
-constexpr float                     tolerance_num   = 0.02f;  /**< Tolerance number */
-const auto                          data_interleave = framework::dataset::make("M", 8, 14) * framework::dataset::make("N", 7, 14);
+constexpr float                     tolerance_num = 0.02f;    /**< Tolerance number */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -59,8 +58,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F32,
 });
 } // namespace
-
-const auto data_transpose = framework::dataset::make("M", 8, 14) * framework::dataset::make("N", 7, 14);
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMM)

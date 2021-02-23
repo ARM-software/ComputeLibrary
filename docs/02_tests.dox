@@ -371,7 +371,7 @@ To run the OpenCL precommit validation tests:
 
 	LD_LIBRARY_PATH=. ./arm_compute_validation --mode=precommit --filter="^CL.*"
 
-To run the NEON precommit benchmark tests with PMU and Wall Clock timer in miliseconds instruments enabled:
+To run the Neon precommit benchmark tests with PMU and Wall Clock timer in miliseconds instruments enabled:
 
 	LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^NEON.*" --instruments="pmu,wall_clock_timer_ms" --iterations=10
 

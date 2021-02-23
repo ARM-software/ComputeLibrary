@@ -65,7 +65,7 @@ using CLHOGMultiDetectionFixture = HOGMultiDetectionValidationFixture<CLTensor,
                                                                       float>;
 
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLHOGMultiDetectionFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLHOGMultiDetectionFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        datasets::SmallHOGMultiDetectionDataset(),
                        framework::dataset::make("Format", Format::U8)),

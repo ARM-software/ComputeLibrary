@@ -26,8 +26,6 @@
 #include "arm_compute/runtime/NEON/functions/NECropResize.h"
 #include "src/core/NEON/kernels/NECropKernel.h"
 
-#include "support/MemorySupport.h"
-
 #include <cstddef>
 
 namespace arm_compute
@@ -82,18 +80,18 @@ void NECropResize::configure(const ITensor *input, const ITensor *boxes, const I
 
     for(unsigned int i = 0; i < _num_boxes; ++i)
     {
-        auto       crop_tensor = support::cpp14::make_unique<Tensor>();
+        auto       crop_tensor = std::make_unique<Tensor>();
         TensorInfo crop_result_info(1, DataType::F32);
         crop_result_info.set_data_layout(DataLayout::NHWC);
         crop_tensor->allocator()->init(crop_result_info);
 
-        auto       scale_tensor = support::cpp14::make_unique<Tensor>();
+        auto       scale_tensor = std::make_unique<Tensor>();
         TensorInfo scaled_result_info(out_shape, 1, DataType::F32);
         scaled_result_info.set_data_layout(DataLayout::NHWC);
         scale_tensor->allocator()->init(scaled_result_info);
 
-        auto crop_kernel  = support::cpp14::make_unique<NECropKernel>();
-        auto scale_kernel = support::cpp14::make_unique<NEScale>();
+        auto crop_kernel  = std::make_unique<NECropKernel>();
+        auto scale_kernel = std::make_unique<NEScale>();
         crop_kernel->configure(input, boxes, box_ind, crop_tensor.get(), i, _extrapolation_value);
 
         _crop.emplace_back(std::move(crop_kernel));

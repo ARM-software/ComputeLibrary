@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Interface for the NEON kernel to perform Winograd input transform. */
+/** Interface for the Neon kernel to perform Winograd input transform. */
 class INEWinogradLayerTransformInputKernel : public INEKernel
 {
 public:
@@ -96,7 +96,7 @@ public:
     }
 };
 
-/** NEON kernel to perform Winograd input transform. */
+/** Neon kernel to perform Winograd input transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 class NEWinogradLayerTransformInputKernel : public INEWinogradLayerTransformInputKernel
 {
@@ -227,7 +227,7 @@ private:
     ITensor                        *_workspace;
 };
 
-/** Interface for the NEON kernel to perform Winograd output transform. */
+/** Interface for the Neon kernel to perform Winograd output transform. */
 class INEWinogradLayerTransformOutputKernel : public INEKernel
 {
 public:
@@ -310,7 +310,7 @@ public:
     }
 };
 
-/** NEON kernel to perform Winograd output transform. */
+/** Neon kernel to perform Winograd output transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 class NEWinogradLayerTransformOutputKernel : public INEWinogradLayerTransformOutputKernel
 {
@@ -437,7 +437,7 @@ private:
     int                              _num_channels;
 };
 
-/** Interface for the NEON kernel to perform Winograd weights transform. */
+/** Interface for the Neon kernel to perform Winograd weights transform. */
 class INEWinogradLayerTransformWeightsKernel : public INEKernel
 {
 public:
@@ -495,7 +495,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights);
 };
 
-/** NEON kernel to perform Winograd weights transform. */
+/** Neon kernel to perform Winograd weights transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 class NEWinogradLayerTransformWeightsKernel final : public INEWinogradLayerTransformWeightsKernel
 {
@@ -577,7 +577,7 @@ private:
     int                               _num_input_channels;
 };
 
-/** NEON kernel to perform Winograd. */
+/** Neon kernel to perform Winograd. */
 template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 class NEWinogradLayerConfiguration
 {

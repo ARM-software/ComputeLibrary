@@ -26,7 +26,6 @@
 #include "arm_compute/core/PixelValue.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLWarpPerspectiveKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -40,7 +39,7 @@ void CLWarpPerspective::configure(ICLTensor *input, ICLTensor *output, const std
 void CLWarpPerspective::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
                                   uint8_t constant_border_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLWarpPerspectiveKernel>();
+    auto k = std::make_unique<CLWarpPerspectiveKernel>();
     k->configure(compile_context, input, output, matrix, policy);
     _kernel = std::move(k);
     _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,10 @@
  */
 #include "helpers.h"
 
-#if defined(VEC_SIZE)
+#if defined(VEC_SIZE) && defined(DATA_TYPE)
 /** Computes the digit reverse stage on axis X
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -61,33 +61,36 @@ __kernel void fft_digit_reverse_axis_0(
 
     // Load data
 #if VEC_SIZE == 1
-    float data = *((__global float *)tensor3D_offset(&src, iidx, get_global_id(1), get_global_id(2)));
+    DATA_TYPE data = *((__global DATA_TYPE *)tensor3D_offset(&src, iidx, get_global_id(1), get_global_id(2)));
 #elif VEC_SIZE == 2
-    float2 data = vload2(0, (__global float *)tensor3D_offset(&src, iidx, get_global_id(1), get_global_id(2)));
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    data = vload2(0, (__global DATA_TYPE *)tensor3D_offset(&src, iidx, get_global_id(1), get_global_id(2)));
 #else // VEC_SIZE == 1
 #error "vec_size of 1 and 2 are supported"
 #endif // VEC_SIZE == 1
 
     // Create result
 #if VEC_SIZE == 1
-    float2 res = { data, 0 };
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    res = { data, 0 };
 #elif VEC_SIZE == 2
-    float2 res  = data;
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    res = data;
 #else // VEC_SIZE == 1
 #error "vec_size of 1 and 2 are supported"
 #endif // VEC_SIZE == 1
 
     // Store result
 #if defined(CONJ)
-    vstore2((float2)(res.s0, -res.s1), 0, (__global float *)dst.ptr);
+    vstore2((VEC_DATA_TYPE(DATA_TYPE, 2))(res.s0, -res.s1), 0, (__global DATA_TYPE *)dst.ptr);
 #else  // defined(CONJ)
-    vstore2(res, 0, (__global float *)dst.ptr);
+    vstore2(res, 0, (__global DATA_TYPE *)dst.ptr);
 #endif // defined(CONJ)
 }
 
 /** Computes the digit reverse stage on axis Y
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -122,27 +125,30 @@ __kernel void fft_digit_reverse_axis_1(
 
     // Load data
 #if VEC_SIZE == 1
-    float data = *((__global float *)tensor3D_offset(&src, get_global_id(0), iidx, get_global_id(2)));
+    DATA_TYPE data = *((__global DATA_TYPE *)tensor3D_offset(&src, get_global_id(0), iidx, get_global_id(2)));
 #elif VEC_SIZE == 2
-    float2 data = vload2(0, (__global float *)tensor3D_offset(&src, get_global_id(0), iidx, get_global_id(2)));
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    data = vload2(0, (__global DATA_TYPE *)tensor3D_offset(&src, get_global_id(0), iidx, get_global_id(2)));
 #else // VEC_SIZE == 1
 #error "vec_size of 1 and 2 are supported"
 #endif // VEC_SIZE == 1
 
     // Create result
 #if VEC_SIZE == 1
-    float2 res = { data, 0 };
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    res = { data, 0 };
 #elif VEC_SIZE == 2
-    float2 res  = data;
+    VEC_DATA_TYPE(DATA_TYPE, 2)
+    res = data;
 #else // VEC_SIZE == 1
 #error "vec_size of 1 and 2 are supported"
 #endif // VEC_SIZE == 1
 
     // Store result
 #if defined(CONJ)
-    vstore2((float2)(res.s0, -res.s1), 0, (__global float *)dst.ptr);
+    vstore2((VEC_DATA_TYPE(DATA_TYPE, 2))(res.s0, -res.s1), 0, (__global DATA_TYPE *)dst.ptr);
 #else  // defined(CONJ)
-    vstore2(res, 0, (__global float *)dst.ptr);
+    vstore2(res, 0, (__global DATA_TYPE *)dst.ptr);
 #endif // defined(CONJ)
 }
-#endif // defined(VEC_SIZE)
+#endif // defined(VEC_SIZE) && defined(DATA_TYPE)

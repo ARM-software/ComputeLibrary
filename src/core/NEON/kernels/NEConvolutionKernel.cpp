@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -374,7 +374,7 @@ void NEConvolutionKernel<3>::convolution(const Window &win)
     Iterator input(_input, win);
     Iterator output(_output, win);
 
-    // Load the matrix's coefficients into NEON registers:
+    // Load the matrix's coefficients into Neon registers:
     const int16x4_t   mat00     = vld1_dup_s16(_convolution.data());
     const int16x4_t   mat01     = vld1_dup_s16(_convolution.data() + 1);
     const int16x4_t   mat02     = vld1_dup_s16(_convolution.data() + 2);

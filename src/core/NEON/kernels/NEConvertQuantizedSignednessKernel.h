@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** NEON kernel to convert asymmetric signed to asymmetric signed and vice-versa */
+/** Neon kernel to convert asymmetric signed to asymmetric signed and vice-versa */
 class NEConvertQuantizedSignednessKernel : public INEKernel
 {
 public:
@@ -58,7 +58,7 @@ public:
      * @param[out] output Destination tensor. Data types supported: opposite of @p input.
      */
     void configure(const ITensor *input, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NECopyKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref NEConvertQuantizedSignednessKernel
      *
      * @param[in] input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED.
      * @param[in] output Destination tensor. Data types supported: opposite of @p input.

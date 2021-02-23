@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,20 +23,47 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
 
-#include "src/core/NEON/kernels/NEFloorKernel.h"
-#include "support/MemorySupport.h"
+#include "arm_compute/core/Validate.h"
+#include "src/runtime/cpu/operators/CpuFloor.h"
 
 namespace arm_compute
 {
+struct NEFloor::Impl
+{
+    const ITensor                 *src{ nullptr };
+    ITensor                       *dst{ nullptr };
+    std::unique_ptr<cpu::CpuFloor> op{ nullptr };
+};
+
+NEFloor::NEFloor()
+    : _impl(std::make_unique<Impl>())
+{
+}
+NEFloor::NEFloor(NEFloor &&) = default;
+NEFloor &NEFloor::operator=(NEFloor &&) = default;
+NEFloor::~NEFloor()                     = default;
+
 void NEFloor::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEFloorKernel>();
-    k->configure(input, output);
-    _kernel = std::move(k);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    _impl->src = input;
+    _impl->dst = output;
+
+    _impl->op = std::make_unique<cpu::CpuFloor>();
+    _impl->op->configure(_impl->src->info(), _impl->dst->info());
 }
 
 Status NEFloor::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return NEFloorKernel::validate(input, output);
+    return cpu::CpuFloor::validate(input, output);
+}
+
+void NEFloor::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

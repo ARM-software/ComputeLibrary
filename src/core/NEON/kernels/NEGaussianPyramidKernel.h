@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform a GaussianPyramid (horizontal pass) */
+/** Neon kernel to perform a GaussianPyramid (horizontal pass) */
 class NEGaussianPyramidHorKernel : public INESimpleKernel
 {
 public:
@@ -66,7 +66,7 @@ private:
     int _l2_load_offset;
 };
 
-/** NEON kernel to perform a GaussianPyramid (vertical pass) */
+/** Neon kernel to perform a GaussianPyramid (vertical pass) */
 class NEGaussianPyramidVertKernel : public INESimpleKernel
 {
 public:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,109 +23,22 @@
  */
 #include "arm_compute/runtime/CL/functions/CLElementWiseUnaryLayer.h"
 
-#include "src/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
-#include "support/MemorySupport.h"
-
-#include <utility>
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClElementwiseUnary.h"
 
 namespace arm_compute
 {
-namespace experimental
-{
-void CLRsqrt::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(compile_context, input, output, ElementWiseUnary::RSQRT);
-    _kernel = std::move(k);
-}
-
-Status CLRsqrt::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return arm_compute::CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::RSQRT);
-}
-
-void CLExp::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(compile_context, input, output, ElementWiseUnary::EXP);
-    _kernel = std::move(k);
-}
-
-Status CLExp::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return arm_compute::CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::EXP);
-}
-
-void CLNeg::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(compile_context, input, output, ElementWiseUnary::NEG);
-    _kernel = std::move(k);
-}
-
-Status CLNeg::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return arm_compute::CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::NEG);
-}
-
-void CLSin::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(compile_context, input, output, ElementWiseUnary::SIN);
-    _kernel = std::move(k);
-}
-
-Status CLSin::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return arm_compute::CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::SIN);
-}
-
-void CLAbs::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(compile_context, input, output, ElementWiseUnary::ABS);
-    _kernel = std::move(k);
-}
-
-Status CLAbs::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return arm_compute::CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::ABS);
-}
-
-void CLLog::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(compile_context, input, output, ElementWiseUnary::LOG);
-    _kernel = std::move(k);
-}
-
-Status CLLog::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return arm_compute::CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::LOG);
-}
-
-void CLRound::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(compile_context, input, output, ElementWiseUnary::ROUND);
-    _kernel = std::move(k);
-}
-
-Status CLRound::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return arm_compute::CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::ROUND);
-}
-} // namespace experimental
-
 struct CLRsqrtLayer::Impl
 {
-    const ICLTensor                       *src{ nullptr };
-    ICLTensor                             *dst{ nullptr };
-    std::unique_ptr<experimental::CLRsqrt> op{ nullptr };
+    const ICLTensor                 *src{ nullptr };
+    ICLTensor                       *dst{ nullptr };
+    std::unique_ptr<opencl::ClRsqrt> op{ nullptr };
 };
 
 CLRsqrtLayer::CLRsqrtLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -142,13 +55,13 @@ void CLRsqrtLayer::configure(const CLCompileContext &compile_context, const ICLT
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLRsqrt>();
+    _impl->op  = std::make_unique<opencl::ClRsqrt>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 
 Status CLRsqrtLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return experimental::CLRsqrt::validate(input, output);
+    return opencl::ClRsqrt::validate(input, output);
 }
 
 void CLRsqrtLayer::run()
@@ -161,13 +74,13 @@ void CLRsqrtLayer::run()
 
 struct CLExpLayer::Impl
 {
-    const ICLTensor                     *src{ nullptr };
-    ICLTensor                           *dst{ nullptr };
-    std::unique_ptr<experimental::CLExp> op{ nullptr };
+    const ICLTensor               *src{ nullptr };
+    ICLTensor                     *dst{ nullptr };
+    std::unique_ptr<opencl::ClExp> op{ nullptr };
 };
 
 CLExpLayer::CLExpLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -184,13 +97,13 @@ void CLExpLayer::configure(const CLCompileContext &compile_context, const ICLTen
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLExp>();
+    _impl->op  = std::make_unique<opencl::ClExp>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 
 Status CLExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return experimental::CLExp::validate(input, output);
+    return opencl::ClExp::validate(input, output);
 }
 
 void CLExpLayer::run()
@@ -203,13 +116,13 @@ void CLExpLayer::run()
 
 struct CLNegLayer::Impl
 {
-    const ICLTensor                     *src{ nullptr };
-    ICLTensor                           *dst{ nullptr };
-    std::unique_ptr<experimental::CLNeg> op{ nullptr };
+    const ICLTensor               *src{ nullptr };
+    ICLTensor                     *dst{ nullptr };
+    std::unique_ptr<opencl::ClNeg> op{ nullptr };
 };
 
 CLNegLayer::CLNegLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -226,12 +139,12 @@ void CLNegLayer::configure(const CLCompileContext &compile_context, const ICLTen
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLNeg>();
+    _impl->op  = std::make_unique<opencl::ClNeg>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 Status CLNegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return experimental::CLNeg::validate(input, output);
+    return opencl::ClNeg::validate(input, output);
 }
 
 void CLNegLayer::run()
@@ -244,13 +157,13 @@ void CLNegLayer::run()
 
 struct CLSinLayer::Impl
 {
-    const ICLTensor                     *src{ nullptr };
-    ICLTensor                           *dst{ nullptr };
-    std::unique_ptr<experimental::CLSin> op{ nullptr };
+    const ICLTensor               *src{ nullptr };
+    ICLTensor                     *dst{ nullptr };
+    std::unique_ptr<opencl::ClSin> op{ nullptr };
 };
 
 CLSinLayer::CLSinLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -267,12 +180,12 @@ void CLSinLayer::configure(const CLCompileContext &compile_context, const ICLTen
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLSin>();
+    _impl->op  = std::make_unique<opencl::ClSin>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 Status CLSinLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return experimental::CLSin::validate(input, output);
+    return opencl::ClSin::validate(input, output);
 }
 
 void CLSinLayer::run()
@@ -285,13 +198,13 @@ void CLSinLayer::run()
 
 struct CLAbsLayer::Impl
 {
-    const ICLTensor                     *src{ nullptr };
-    ICLTensor                           *dst{ nullptr };
-    std::unique_ptr<experimental::CLAbs> op{ nullptr };
+    const ICLTensor               *src{ nullptr };
+    ICLTensor                     *dst{ nullptr };
+    std::unique_ptr<opencl::ClAbs> op{ nullptr };
 };
 
 CLAbsLayer::CLAbsLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -308,12 +221,12 @@ void CLAbsLayer::configure(const CLCompileContext &compile_context, const ICLTen
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLAbs>();
+    _impl->op  = std::make_unique<opencl::ClAbs>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 Status CLAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return experimental::CLAbs::validate(input, output);
+    return opencl::ClAbs::validate(input, output);
 }
 
 void CLAbsLayer::run()
@@ -326,13 +239,13 @@ void CLAbsLayer::run()
 
 struct CLLogLayer::Impl
 {
-    const ICLTensor                     *src{ nullptr };
-    ICLTensor                           *dst{ nullptr };
-    std::unique_ptr<experimental::CLLog> op{ nullptr };
+    const ICLTensor               *src{ nullptr };
+    ICLTensor                     *dst{ nullptr };
+    std::unique_ptr<opencl::ClLog> op{ nullptr };
 };
 
 CLLogLayer::CLLogLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -349,12 +262,12 @@ void CLLogLayer::configure(const CLCompileContext &compile_context, const ICLTen
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLLog>();
+    _impl->op  = std::make_unique<opencl::ClLog>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 Status CLLogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return experimental::CLLog::validate(input, output);
+    return opencl::ClLog::validate(input, output);
 }
 
 void CLLogLayer::run()
@@ -367,13 +280,13 @@ void CLLogLayer::run()
 
 struct CLRoundLayer::Impl
 {
-    const ICLTensor                       *src{ nullptr };
-    ICLTensor                             *dst{ nullptr };
-    std::unique_ptr<experimental::CLRound> op{ nullptr };
+    const ICLTensor                 *src{ nullptr };
+    ICLTensor                       *dst{ nullptr };
+    std::unique_ptr<opencl::ClRound> op{ nullptr };
 };
 
 CLRoundLayer::CLRoundLayer()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -390,12 +303,12 @@ void CLRoundLayer::configure(const CLCompileContext &compile_context, const ICLT
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLRound>();
+    _impl->op  = std::make_unique<opencl::ClRound>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 Status CLRoundLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return experimental::CLRound::validate(input, output);
+    return opencl::ClRound::validate(input, output);
 }
 
 void CLRoundLayer::run()

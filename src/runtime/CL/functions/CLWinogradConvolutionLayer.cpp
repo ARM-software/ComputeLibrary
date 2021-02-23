@@ -36,7 +36,6 @@
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "src/core/CL/kernels/CLWinogradOutputTransformKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -99,8 +98,8 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 } // namespace
 
 CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _batched_mm(memory_manager), _input_transform(), _filter_transform(support::cpp14::make_unique<CLWinogradFilterTransformKernel>()),
-      _output_transform(support::cpp14::make_unique<CLWinogradOutputTransformKernel>()), _input0(), _input1(), _batched_mm_output(), _original_weights(nullptr), _is_prepared(false)
+    : _memory_group(memory_manager), _batched_mm(memory_manager), _input_transform(), _filter_transform(std::make_unique<CLWinogradFilterTransformKernel>()),
+      _output_transform(std::make_unique<CLWinogradOutputTransformKernel>()), _input0(), _input1(), _batched_mm_output(), _original_weights(nullptr), _is_prepared(false)
 {
 }
 

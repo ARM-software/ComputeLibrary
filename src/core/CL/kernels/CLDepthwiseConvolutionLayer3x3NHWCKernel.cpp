@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -233,7 +233,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const CLCompileContext 
 
     if(_is_quantized)
     {
-        _border_size = BorderSize(is_stride_1 ? 0 : conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
+        _border_size = BorderSize(input->info()->padding());
 
         // If QASYMM8 and the 8 bit dot product is available, force _num_planes_processed_per_iteration to 1
         if(is_dot8_supported)
@@ -438,8 +438,8 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
         //  |__________________|
         //  |     pad_bottom   |
         //  |******************|
-        const int max_offset = _input->info()->strides_in_bytes().z() * _input->info()->dimension(2) - (_input->info()->padding().bottom + _input->info()->padding().top) *
-                               _input->info()->strides_in_bytes().y();
+        const int max_offset = ((_input->info()->dimension(1) * _input->info()->dimension(2)) + (_input->info()->padding().bottom + _input->info()->padding().top) * (_input->info()->dimension(
+                                    2) - 1)) * _input->info()->strides_in_bytes().y();
         _kernel.setArg(idx, max_offset);
     }
 

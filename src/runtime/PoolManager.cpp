@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IMemoryPool.h"
-#include "support/MemorySupport.h"
 
 #include <algorithm>
 #include <list>
@@ -71,7 +70,7 @@ void PoolManager::register_pool(std::unique_ptr<IMemoryPool> pool)
     _free_pools.push_front(std::move(pool));
 
     // Update semaphore
-    _sem = arm_compute::support::cpp14::make_unique<arm_compute::Semaphore>(_free_pools.size());
+    _sem = std::make_unique<arm_compute::Semaphore>(_free_pools.size());
 }
 
 std::unique_ptr<IMemoryPool> PoolManager::release_pool()
@@ -86,7 +85,7 @@ std::unique_ptr<IMemoryPool> PoolManager::release_pool()
         _free_pools.pop_front();
 
         // Update semaphore
-        _sem = arm_compute::support::cpp14::make_unique<arm_compute::Semaphore>(_free_pools.size());
+        _sem = std::make_unique<arm_compute::Semaphore>(_free_pools.size());
 
         return pool;
     }

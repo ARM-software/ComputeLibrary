@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -226,7 +226,6 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "ldr w19, [%x[args_ptr], %[offsetof_num_strings]]\n"
       "cmp x12, x19\n"
       "bne 5b\n"
-      "prfm pstl1keep, [x13, #0x0]\n"
       "ld1w { z0.s }, p2/Z, [x16]\n"
       "add z8.s, z8.s, z0.s\n"
       "ld1w { z1.s }, p2/Z, [x16, #1, MUL VL]\n"
@@ -306,9 +305,8 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "st1b { z8.b }, p1, [x13]\n"
       "addvl x13, x13, #1\n"
       "14:"  // Height 1: Writeback done
-      "mov x19, #0x0\n"
-      "incw x19, ALL, MUL #4\n"
-      "subs x15, x15, x19\n"
+      "decw x15, ALL, MUL #4\n"
+      "cmp x15, XZR\n"
       "bgt 3b\n"
       "b 86f\n"
       "15:"  // Height 2
@@ -491,8 +489,6 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "ldr w19, [%x[args_ptr], %[offsetof_num_strings]]\n"
       "cmp x12, x19\n"
       "bne 19b\n"
-      "prfm pstl1keep, [x13, #0x0]\n"
-      "prfm pstl1keep, [x9, #0x0]\n"
       "ld1w { z0.s }, p2/Z, [x16]\n"
       "add z8.s, z8.s, z0.s\n"
       "ld1w { z1.s }, p2/Z, [x16, #1, MUL VL]\n"
@@ -613,9 +609,8 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "st1b { z12.b }, p1, [x9]\n"
       "addvl x9, x9, #1\n"
       "28:"  // Height 2: Writeback done
-      "mov x19, #0x0\n"
-      "incw x19, ALL, MUL #4\n"
-      "subs x15, x15, x19\n"
+      "decw x15, ALL, MUL #4\n"
+      "cmp x15, XZR\n"
       "bgt 17b\n"
       "b 86f\n"
       "29:"  // Height 3
@@ -846,9 +841,6 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "ldr w19, [%x[args_ptr], %[offsetof_num_strings]]\n"
       "cmp x12, x19\n"
       "bne 33b\n"
-      "prfm pstl1keep, [x13, #0x0]\n"
-      "prfm pstl1keep, [x9, #0x0]\n"
-      "prfm pstl1keep, [x27, #0x0]\n"
       "ld1w { z0.s }, p2/Z, [x16]\n"
       "add z8.s, z8.s, z0.s\n"
       "ld1w { z1.s }, p2/Z, [x16, #1, MUL VL]\n"
@@ -1010,9 +1002,8 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "st1b { z16.b }, p1, [x27]\n"
       "addvl x27, x27, #1\n"
       "42:"  // Height 3: Writeback done
-      "mov x19, #0x0\n"
-      "incw x19, ALL, MUL #4\n"
-      "subs x15, x15, x19\n"
+      "decw x15, ALL, MUL #4\n"
+      "cmp x15, XZR\n"
       "bgt 31b\n"
       "b 86f\n"
       "43:"  // Height 4
@@ -1291,10 +1282,6 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "ldr w19, [%x[args_ptr], %[offsetof_num_strings]]\n"
       "cmp x12, x19\n"
       "bne 47b\n"
-      "prfm pstl1keep, [x13, #0x0]\n"
-      "prfm pstl1keep, [x9, #0x0]\n"
-      "prfm pstl1keep, [x27, #0x0]\n"
-      "prfm pstl1keep, [x25, #0x0]\n"
       "ld1w { z0.s }, p2/Z, [x16]\n"
       "add z8.s, z8.s, z0.s\n"
       "ld1w { z1.s }, p2/Z, [x16, #1, MUL VL]\n"
@@ -1497,9 +1484,8 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "st1b { z20.b }, p1, [x25]\n"
       "addvl x25, x25, #1\n"
       "56:"  // Height 4: Writeback done
-      "mov x19, #0x0\n"
-      "incw x19, ALL, MUL #4\n"
-      "subs x15, x15, x19\n"
+      "decw x15, ALL, MUL #4\n"
+      "cmp x15, XZR\n"
       "bgt 45b\n"
       "b 86f\n"
       "57:"  // Height 5
@@ -1826,11 +1812,6 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "ldr w19, [%x[args_ptr], %[offsetof_num_strings]]\n"
       "cmp x12, x19\n"
       "bne 61b\n"
-      "prfm pstl1keep, [x13, #0x0]\n"
-      "prfm pstl1keep, [x9, #0x0]\n"
-      "prfm pstl1keep, [x27, #0x0]\n"
-      "prfm pstl1keep, [x25, #0x0]\n"
-      "prfm pstl1keep, [x23, #0x0]\n"
       "ld1w { z0.s }, p2/Z, [x16]\n"
       "add z8.s, z8.s, z0.s\n"
       "ld1w { z1.s }, p2/Z, [x16, #1, MUL VL]\n"
@@ -2074,9 +2055,8 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "st1b { z24.b }, p1, [x23]\n"
       "addvl x23, x23, #1\n"
       "70:"  // Height 5: Writeback done
-      "mov x19, #0x0\n"
-      "incw x19, ALL, MUL #4\n"
-      "subs x15, x15, x19\n"
+      "decw x15, ALL, MUL #4\n"
+      "cmp x15, XZR\n"
       "bgt 59b\n"
       "b 86f\n"
       "71:"  // Height 6
@@ -2453,12 +2433,6 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "ldr w19, [%x[args_ptr], %[offsetof_num_strings]]\n"
       "cmp x12, x19\n"
       "bne 75b\n"
-      "prfm pstl1keep, [x13, #0x0]\n"
-      "prfm pstl1keep, [x9, #0x0]\n"
-      "prfm pstl1keep, [x27, #0x0]\n"
-      "prfm pstl1keep, [x25, #0x0]\n"
-      "prfm pstl1keep, [x23, #0x0]\n"
-      "prfm pstl1keep, [x21, #0x0]\n"
       "ld1w { z0.s }, p2/Z, [x16]\n"
       "add z8.s, z8.s, z0.s\n"
       "ld1w { z1.s }, p2/Z, [x16, #1, MUL VL]\n"
@@ -2743,9 +2717,8 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "st1b { z28.b }, p1, [x21]\n"
       "addvl x21, x21, #1\n"
       "84:"  // Height 6: Writeback done
-      "mov x19, #0x0\n"
-      "incw x19, ALL, MUL #4\n"
-      "subs x15, x15, x19\n"
+      "decw x15, ALL, MUL #4\n"
+      "cmp x15, XZR\n"
       "bgt 73b\n"
       "subs %x[M], %x[M], #0x6\n"
       "beq 86f\n"
@@ -2760,7 +2733,7 @@ void sve_hybrid_s8qs_dot_6x4VL (
       "b 1b\n"
       "86:"  // Exit
 
-      : [M] "+r" (M), [input_ptr] "+r" (input_ptr), [output_ptr] "+r" (output_ptr)
+      : [M] "+&r" (M), [input_ptr] "+&r" (input_ptr), [output_ptr] "+&r" (output_ptr)
       : [args_ptr] "r" (&ka), [c_offset] "I" (offsetof(Requantize32, c_offset)), [col_bias] "r" (col_bias), [flags] "r" (flags), [maxval] "I" (offsetof(Requantize32, maxval)), [minval] "I" (offsetof(Requantize32, minval)), [offsetof_B_ptr] "I" (offsetof(KernelArgs, B_ptr)), [offsetof_N] "I" (offsetof(KernelArgs, N)), [offsetof_input_initial_col] "I" (offsetof(KernelArgs, input_initial_col)), [offsetof_input_offset] "I" (offsetof(KernelArgs, input_offset)), [offsetof_multiplier_ptr] "I" (offsetof(KernelArgs, multiplier_ptr)), [offsetof_num_strings] "I" (offsetof(KernelArgs, num_strings)), [offsetof_output_offset] "I" (offsetof(KernelArgs, output_offset)), [offsetof_shift_ptr] "I" (offsetof(KernelArgs, shift_ptr)), [offsetof_string_lengths] "I" (offsetof(KernelArgs, string_lengths)), [per_layer_mul] "I" (offsetof(Requantize32, per_layer_mul)), [per_layer_right_shift] "I" (offsetof(Requantize32, per_layer_right_shift)), [qp] "r" (qp)
       : "cc", "memory", "p0", "p1", "p2", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );

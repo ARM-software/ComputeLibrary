@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/runtime/CL/CLTuningParams.h"
 
 #include <string>
 
@@ -67,19 +68,30 @@ private:
 protected:
     /** Configure the kernel's window and local workgroup size hint.
      *
-     * @param[in] window   The maximum window which will be returned by window()
-     * @param[in] lws_hint (Optional) Local-Workgroup-Size to use.
+     * @param[in] window    The maximum window which will be returned by window()
+     * @param[in] lws_hint  Local-Workgroup-Size to use.
+     * @param[in] wbsm_hint (Optional) Workgroup-Batch-Size-Modifier to use.
      */
-    void configure_internal(const Window &window, cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange())
+    void configure_internal(const Window &window, cl::NDRange lws_hint, cl_int wbsm_hint = 0)
     {
-        _lws_hint = lws_hint;
+        configure_internal(window, CLTuningParams(lws_hint, wbsm_hint));
+    }
+
+    /** Configure the kernel's window and tuning parameters hints.
+     *
+     * @param[in] window             The maximum window which will be returned by window()
+     * @param[in] tuning_params_hint (Optional) Tuning parameters to use.
+     */
+    void configure_internal(const Window &window, CLTuningParams tuning_params_hint = CLTuningParams(CLKernelLibrary::get().default_ndrange(), 0))
+    {
+        _tuning_params_hint = tuning_params_hint;
         IKernel::configure(window);
     }
 
 public:
     /** Constructor */
     ICLKernel()
-        : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _lws_hint()
+        : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _tuning_params_hint()
     {
     }
     /** Returns a reference to the OpenCL kernel of this object.
@@ -254,7 +266,7 @@ public:
     void set_lws_hint(const cl::NDRange &lws_hint)
     {
         ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this); // lws_hint will be overwritten by configure()
-        _lws_hint = lws_hint;
+        _tuning_params_hint.set_lws(lws_hint);
     }
 
     /** Return the Local-Workgroup-Size hint
@@ -263,7 +275,28 @@ public:
      */
     cl::NDRange lws_hint() const
     {
-        return _lws_hint;
+        return _tuning_params_hint.get_lws();
+    }
+
+    /** Set the workgroup batch size modifier hint
+     *
+     * @note This method should be called after the configuration of the kernel
+     *
+     * @param[in] wbsm_hint workgroup batch size modifier value
+     */
+    void set_wbsm_hint(const cl_int &wbsm_hint)
+    {
+        ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this); // wbsm_hint will be overwritten by configure()
+        _tuning_params_hint.set_wbsm(wbsm_hint);
+    }
+
+    /** Return the workgroup batch size modifier hint
+     *
+     * @return Current wbsm hint
+     */
+    cl_int wbsm_hint() const
+    {
+        return _tuning_params_hint.get_wbsm();
     }
 
     /** Get the configuration ID
@@ -344,7 +377,7 @@ protected:
     std::string _config_id;          /**< Configuration ID */
     size_t      _max_workgroup_size; /**< The maximum workgroup size for this kernel */
 private:
-    cl::NDRange _lws_hint; /**< Local workgroup size hint for the OpenCL kernel */
+    CLTuningParams _tuning_params_hint; /**< Tuning parameters hint for the OpenCL kernel */
 };
 
 /** Add the kernel to the command queue with the given window.

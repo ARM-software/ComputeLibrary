@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #ifndef ARM_COMPUTE_RUNTIME_CLTYPES_H
 #define ARM_COMPUTE_RUNTIME_CLTYPES_H
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {

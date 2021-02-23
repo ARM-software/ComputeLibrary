@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,17 +55,20 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i, DataType data_type)
     {
+        using FloatType             = typename std::conditional < std::is_same<T, half>::value || std::is_floating_point<T>::value, T, float >::type;
+        using FloatDistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<FloatType>>::type;
+
         switch(_op)
         {
             case ElementWiseUnary::EXP:
             {
-                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                FloatDistributionType distribution{ FloatType(-1.0f), FloatType(1.0f) };
                 library->fill(tensor, distribution, i);
                 break;
             }
             case ElementWiseUnary::RSQRT:
             {
-                std::uniform_real_distribution<> distribution(1.0f, 2.0f);
+                FloatDistributionType distribution{ FloatType(1.0f), FloatType(2.0f) };
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -74,10 +77,15 @@ protected:
             {
                 switch(data_type)
                 {
-                    case DataType::F32:
                     case DataType::F16:
                     {
-                        std::uniform_real_distribution<> distribution(-2.0f, 2.0f);
+                        arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -2.0f, 2.0f };
+                        library->fill(tensor, distribution, i);
+                        break;
+                    }
+                    case DataType::F32:
+                    {
+                        FloatDistributionType distribution{ FloatType(-2.0f), FloatType(2.0f) };
                         library->fill(tensor, distribution, i);
                         break;
                     }
@@ -94,19 +102,19 @@ protected:
             }
             case ElementWiseUnary::LOG:
             {
-                std::uniform_real_distribution<> distribution(0.0000001f, 100.0f);
+                FloatDistributionType distribution{ FloatType(0.0000001f), FloatType(100.0f) };
                 library->fill(tensor, distribution, i);
                 break;
             }
             case ElementWiseUnary::SIN:
             {
-                std::uniform_real_distribution<> distribution(-100.00f, 100.00f);
+                FloatDistributionType distribution{ FloatType(-100.00f), FloatType(100.00f) };
                 library->fill(tensor, distribution, i);
                 break;
             }
             case ElementWiseUnary::ROUND:
             {
-                std::uniform_real_distribution<> distribution(100.0f, -100.0f);
+                FloatDistributionType distribution{ FloatType(100.0f), FloatType(-100.0f) };
                 library->fill(tensor, distribution, i);
                 break;
             }

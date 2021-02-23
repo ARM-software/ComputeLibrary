@@ -32,7 +32,7 @@ examples_env.Append(CPPPATH = ["#"])
 # Build examples
 utils = examples_env.Object("../utils/Utils.cpp")
 
-if env['os'] in ['android', 'bare_metal'] or env['standalone']:
+if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import('arm_compute_graph_a')
     Import('arm_compute_a')
     Import('arm_compute_core_a')
@@ -52,6 +52,12 @@ extra_link_flags = []
 if env['os'] != 'bare_metal':
     extra_link_flags += ['-fstack-protector-strong']
 
+load_whole_archive = '-Wl,--whole-archive'
+noload_whole_archive = '-Wl,--no-whole-archive'
+if 'macos' in examples_env['os']:
+    load_whole_archive = '-Wl,-force_load'
+    noload_whole_archive = '-Wl,-noall_load'
+
 # Build graph examples
 graph_utils = examples_env.Object("../utils/GraphUtils.cpp")
 graph_utils += examples_env.Object("../utils/CommonGraphOptions.cpp")
@@ -60,8 +66,8 @@ for file in Glob("./graph_*.cpp"):
     example = os.path.basename(os.path.splitext(str(file))[0])
     prog = None
 
-    if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-        prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'] + extra_link_flags)
+    if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive] + extra_link_flags)
         Depends(prog, graph_dependency)
         prog = install_bin(prog)
     else:
@@ -95,8 +101,8 @@ if env['gemm_tuner'] and env['opencl']:
     for file in Glob("./gemm_tuner/cl_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
         example = os.path.join("gemm_tuner", example)
-        if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-            prog = examples_env.Program(example, ["{}.cpp".format(example), utils, gemm_tuner_common_options], CPPDEFINES=['ARM_COMPUTE_CL'], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive', '-fstack-protector-strong'] )
+        if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils, gemm_tuner_common_options], CPPDEFINES=['ARM_COMPUTE_CL'], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive, '-fstack-protector-strong'] )
             Depends(prog, graph_dependency)
             prog = install_bin(prog)
         else:
@@ -131,3 +137,19 @@ if env['gles_compute']:
         alias = examples_env.Alias(example, prog)
         Default(alias)
 
+if env['external_tests_dir']:
+    for file in Glob(env['external_tests_dir'] + "/examples/graph_*.cpp"):
+        example = os.path.basename(os.path.splitext(str(file))[0])
+        prog = None
+
+        if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+            prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive] + extra_link_flags)
+            Depends(prog, graph_dependency)
+            prog = install_bin(prog)
+        else:
+            #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
+            prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+            Depends(prog, graph_dependency)
+            prog = install_bin(prog)
+        alias = examples_env.Alias(example, prog)
+        Default(alias)

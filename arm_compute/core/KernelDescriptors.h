@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,8 +73,8 @@ struct GEMMKernelInfo
         int32_t             ina_offset,
         int32_t             inb_offset)
         : m(im), n(in), k(ik), depth_output_gemm3d(idepth_output_gemm3d), reinterpret_input_as_3d(ireinterpret_input_as_3d), broadcast_bias(ibroadcast_bias), fp_mixed_precision(ifp_mixed_precision),
-          has_pad_y(ihas_pad_y), activation_info(iactivation_info), mult_transpose1xW_width(inmult_transpose1xW_width), mult_interleave4x4_height(imult_interleave4x4_height), lhs_info(ilhs_info), rhs_info(irhs_info),
-          a_offset(ina_offset), b_offset(inb_offset)
+          has_pad_y(ihas_pad_y), activation_info(iactivation_info), mult_transpose1xW_width(inmult_transpose1xW_width), mult_interleave4x4_height(imult_interleave4x4_height), lhs_info(ilhs_info),
+          rhs_info(irhs_info), a_offset(ina_offset), b_offset(inb_offset)
     {
     }
 
@@ -182,19 +182,22 @@ struct ScaleKernelInfo
      * @param[in] sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
      * @param[in] use_padding           (Optional) Is padding in use or not. Defaults to true.
      * @param[in] align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
+     * @param[in] data_layout           (Optional) Data layout used by the layer. Defaults to @ref DataLayout::UNKNOWN
      */
     ScaleKernelInfo(InterpolationPolicy interpolation_policy,
                     BorderMode          border_mode,
                     PixelValue          constant_border_value = PixelValue(),
                     SamplingPolicy      sampling_policy       = SamplingPolicy::CENTER,
                     bool                use_padding           = true,
-                    bool                align_corners         = false)
+                    bool                align_corners         = false,
+                    DataLayout          data_layout           = DataLayout::UNKNOWN)
         : interpolation_policy{ interpolation_policy },
           border_mode{ border_mode },
           constant_border_value{ constant_border_value },
           sampling_policy{ sampling_policy },
           use_padding{ use_padding },
-          align_corners{ align_corners }
+          align_corners{ align_corners },
+          data_layout{ data_layout }
     {
     }
 
@@ -204,6 +207,7 @@ struct ScaleKernelInfo
     SamplingPolicy      sampling_policy;       /**< Sampling policy used by the interpolation. */
     bool                use_padding;           /**< Indication of using padding */
     bool                align_corners;         /**< Align corners of input and output */
+    DataLayout          data_layout;           /**< Data layout to use */
 };
 
 struct ThresholdKernelInfo

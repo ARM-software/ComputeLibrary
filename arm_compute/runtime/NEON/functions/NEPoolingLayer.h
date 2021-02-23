@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,28 +24,29 @@
 #ifndef ARM_COMPUTE_NEPOOLINGLAYER_H
 #define ARM_COMPUTE_NEPOOLINGLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
 #include <memory>
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 class ITensorInfo;
-class NEPoolingLayerKernel;
-class NEFillBorderKernel;
 
-/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following NEON kernels:
+/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if padding size is different from zero)
- * -# @ref NEPoolingLayerKernel
+ * -# @ref cpu::kernels::CpuPoolingKernel
+ * -# @ref cpu::CpuPoolingAssemblyDispatch
  */
 class NEPoolingLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEPoolingLayer();
+    NEPoolingLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEPoolingLayer(const NEPoolingLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -83,10 +84,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<NEPoolingLayerKernel> _pooling_layer_kernel;
-    std::unique_ptr<NEFillBorderKernel>   _border_handler;
-    bool                                  _is_global_pooling_layer;
-    DataLayout                            _data_layout;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 }
 #endif /* ARM_COMPUTE_NEPOOLINGLAYER_H */

@@ -34,7 +34,6 @@
 #include "src/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "src/core/CL/kernels/CLHOGDetectorKernel.h"
 #include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
@@ -188,7 +187,7 @@ void CLHOGMultiDetection::configure(const CLCompileContext &compile_context, ICL
         _memory_group.manage(&_hog_space[i]);
 
         // Initialise orientation binning kernel
-        _orient_bin_kernel.emplace_back(support::cpp14::make_unique<CLHOGOrientationBinningKernel>());
+        _orient_bin_kernel.emplace_back(std::make_unique<CLHOGOrientationBinningKernel>());
         _orient_bin_kernel.back()->configure(compile_context, &_mag, &_phase, &_hog_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
@@ -210,7 +209,7 @@ void CLHOGMultiDetection::configure(const CLCompileContext &compile_context, ICL
         _memory_group.manage(&_hog_norm_space[i]);
 
         // Initialize block normalization kernel
-        _block_norm_kernel.emplace_back(support::cpp14::make_unique<CLHOGBlockNormalizationKernel>());
+        _block_norm_kernel.emplace_back(std::make_unique<CLHOGBlockNormalizationKernel>());
         _block_norm_kernel.back()->configure(compile_context, &_hog_space[idx_orient_bin], &_hog_norm_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 

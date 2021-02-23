@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEBitwiseOr.h"
 
 #include "src/core/NEON/kernels/NEBitwiseOrKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,7 +31,7 @@ using namespace arm_compute;
 
 void NEBitwiseOr::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEBitwiseOrKernel>();
+    auto k = std::make_unique<NEBitwiseOrKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }

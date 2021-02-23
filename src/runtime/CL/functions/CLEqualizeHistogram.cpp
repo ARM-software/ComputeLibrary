@@ -30,7 +30,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLHistogramKernel.h"
 #include "src/core/CL/kernels/CLTableLookupKernel.h"
-#include "support/MemorySupport.h"
 
 #include <algorithm>
 #include <cmath>
@@ -86,9 +85,9 @@ void calculate_cum_dist_and_lut(CLDistribution1D &dist, CLDistribution1D &cum_di
 } // namespace
 
 CLEqualizeHistogram::CLEqualizeHistogram()
-    : _histogram_kernel(support::cpp14::make_unique<CLHistogramKernel>()),
-      _border_histogram_kernel(support::cpp14::make_unique<CLHistogramBorderKernel>()),
-      _map_histogram_kernel(support::cpp14::make_unique<CLTableLookupKernel>()),
+    : _histogram_kernel(std::make_unique<CLHistogramKernel>()),
+      _border_histogram_kernel(std::make_unique<CLHistogramBorderKernel>()),
+      _map_histogram_kernel(std::make_unique<CLTableLookupKernel>()),
       _hist(nr_bins, 0, max_range),
       _cum_dist(nr_bins, 0, max_range),
       _cd_lut(nr_bins, DataType::U8)

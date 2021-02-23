@@ -30,7 +30,6 @@
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
 #include "src/core/NEON/kernels/NEFFTScaleKernel.h"
 #include "src/core/utils/helpers/fft.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -64,7 +63,7 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
     TensorInfo digit_reverse_indices_info(TensorShape(input->info()->tensor_shape()[config.axis]), 1, DataType::U32);
     _digit_reverse_indices.allocator()->init(digit_reverse_indices_info);
     _memory_group.manage(&_digit_reversed_input);
-    _digit_reverse_kernel = arm_compute::support::cpp14::make_unique<NEFFTDigitReverseKernel>();
+    _digit_reverse_kernel = std::make_unique<NEFFTDigitReverseKernel>();
     _digit_reverse_kernel->configure(input, &_digit_reversed_input, &_digit_reverse_indices, digit_reverse_config);
 
     // Create and configure FFT kernels
@@ -82,7 +81,7 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
         fft_kernel_info.radix          = radix_for_stage;
         fft_kernel_info.Nx             = Nx;
         fft_kernel_info.is_first_stage = (i == 0);
-        _fft_kernels[i]                = arm_compute::support::cpp14::make_unique<NEFFTRadixStageKernel>();
+        _fft_kernels[i]                = std::make_unique<NEFFTRadixStageKernel>();
         _fft_kernels[i]->configure(&_digit_reversed_input, ((i == (_num_ffts - 1)) && !is_c2r) ? output : nullptr, fft_kernel_info);
 
         Nx *= radix_for_stage;
@@ -94,7 +93,7 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
         FFTScaleKernelInfo scale_config;
         scale_config.scale     = static_cast<float>(N);
         scale_config.conjugate = config.direction == FFTDirection::Inverse;
-        _scale_kernel          = arm_compute::support::cpp14::make_unique<NEFFTScaleKernel>();
+        _scale_kernel          = std::make_unique<NEFFTScaleKernel>();
         is_c2r ? _scale_kernel->configure(&_digit_reversed_input, output, scale_config) : _scale_kernel->configure(output, nullptr, scale_config);
     }
 

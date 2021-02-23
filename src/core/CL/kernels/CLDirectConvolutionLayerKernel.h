@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -120,6 +120,7 @@ public:
     BorderSize       _border_size;
     int              _conv_stride_x;
     int              _conv_stride_y;
+    PadStrideInfo    _conv_info;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYERKERNEL_H */

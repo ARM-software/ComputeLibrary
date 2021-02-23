@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,7 @@ public:
         std::string data_path = common_params.data_path;
 
         // Create a preprocessor object
-        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>(0.f);
+        std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>(0.f);
 
         // Create input descriptor
         const TensorShape tensor_shape     = permute_shape(TensorShape(608U, 608U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
@@ -171,7 +171,7 @@ public:
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("conv2d_59")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_59/Linear")
-              << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo1")
+              << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f)).set_name("Yolo1")
               << OutputLayer(get_output_accessor(common_params, 5));
         route_1 << ConvolutionLayer(
                     1U, 1U, 256U,
@@ -187,7 +187,7 @@ public:
                     0.000001f)
                 .set_name("conv2d_59/BatchNorm")
                 << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d_60/LeakyRelu")
-                << UpsampleLayer(Size2D(2, 2), InterpolationPolicy::NEAREST_NEIGHBOR).set_name("Upsample_60");
+                << ResizeLayer(InterpolationPolicy::NEAREST_NEIGHBOR, 2, 2).set_name("Upsample_60");
         SubStream concat_1(route_1);
         concat_1 << ConcatLayer(std::move(route_1), std::move(intermediate_layers.second)).set_name("Route1")
                  << ConvolutionLayer(
@@ -282,7 +282,7 @@ public:
                      PadStrideInfo(1, 1, 0, 0))
                  .set_name("conv2d_67")
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_67/Linear")
-                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo2")
+                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f)).set_name("Yolo2")
                  << OutputLayer(get_output_accessor(common_params, 5));
         route_2 << ConvolutionLayer(
                     1U, 1U, 128U,
@@ -298,7 +298,7 @@ public:
                     0.000001f)
                 .set_name("conv2d_66/BatchNorm")
                 << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d_68/LeakyRelu")
-                << UpsampleLayer(Size2D(2, 2), InterpolationPolicy::NEAREST_NEIGHBOR).set_name("Upsample_68");
+                << ResizeLayer(InterpolationPolicy::NEAREST_NEIGHBOR, 2, 2).set_name("Upsample_68");
         SubStream concat_2(route_2);
         concat_2 << ConcatLayer(std::move(route_2), std::move(intermediate_layers.first)).set_name("Route2")
                  << ConvolutionLayer(
@@ -392,7 +392,7 @@ public:
                      PadStrideInfo(1, 1, 0, 0))
                  .set_name("conv2d_75")
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_75/Linear")
-                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo3")
+                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f)).set_name("Yolo3")
                  << OutputLayer(get_output_accessor(common_params, 5));
 
         // Finalize graph
@@ -401,6 +401,7 @@ public:
         config.use_tuner   = common_params.enable_tuner;
         config.tuner_mode  = common_params.tuner_mode;
         config.tuner_file  = common_params.tuner_file;
+        config.mlgo_file   = common_params.mlgo_file;
 
         graph.finalize(common_params.target, config);
 

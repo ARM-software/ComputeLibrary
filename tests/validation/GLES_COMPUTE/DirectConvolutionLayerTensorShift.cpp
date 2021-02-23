@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,7 @@ using GCDirectConvolutionLayerTensorShiftFixture = DirectConvolutionValidationTe
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerTensorShiftFixture<half_float::half>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerTensorShiftFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(data, framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_fp16, tolerance_num);
@@ -76,7 +76,7 @@ FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerTensorShiftFixture<half_floa
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerTensorShiftFixture<float>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerTensorShiftFixture<float>, framework::DatasetMode::NIGHTLY, combine(data, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_fp32, 0.f, abs_tolerance_fp32);

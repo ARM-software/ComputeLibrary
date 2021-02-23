@@ -29,12 +29,11 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFuseBatchNormalizationKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLFuseBatchNormalization::CLFuseBatchNormalization()
-    : _fuse_bn_kernel(support::cpp14::make_unique<CLFuseBatchNormalizationKernel>())
+    : _fuse_bn_kernel(std::make_unique<CLFuseBatchNormalizationKernel>())
 {
 }
 

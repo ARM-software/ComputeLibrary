@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref NEArithmeticOperationKernel for max
+/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for max
  *
  * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a max operation between two tensors.
@@ -60,7 +60,7 @@ public:
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for max
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for max
      *
      * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
@@ -79,7 +79,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref NEArithmeticOperationKernel for min
+/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for min
  *
  * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a min operation between two tensors.
@@ -107,7 +107,7 @@ public:
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for min
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for min
      *
      * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
@@ -126,7 +126,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref NEArithmeticOperationKernel for squared difference
+/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for squared difference
  *
  * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a squared different operation between two tensors (i.e., out[i] = (in1[i] - in2[i])^2
@@ -154,7 +154,7 @@ public:
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for squared difference
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for squared difference
      *
      * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
@@ -173,7 +173,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref NEArithmeticOperationKernel for division
+/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for division
  *
  * @note The tensor data type for the inputs must be F16/F32.
  * @note The function performs a squared different operation between two tensors (i.e., out[i] = in1[i] / in2[i])
@@ -201,7 +201,7 @@ public:
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for division
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for division
      *
      * @param[in] input1   First tensor input info. Data types supported: F16/F32.
      * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
@@ -220,7 +220,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref NEArithmeticOperationKernel for power
+/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for power
  *
  * @note The tensor data type for the inputs must be F16/F32.
  * @note The function performs a elementwise power of in1 to in2 (i.e., out[i] = in1[i] ^ in2[i])
@@ -249,7 +249,7 @@ public:
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for power
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for power
      *
      * @param[in] input1   First tensor input info. Data types supported: F16/F32.
      * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
@@ -268,7 +268,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref NEComparisonOperationKernel.
+/** Basic function to run @ref cpu::kernels::CpuComparisonKernel.
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a comparison operation between two tensors.
@@ -296,7 +296,7 @@ public:
      * @param[in]      op     Comparison Operation to be performed.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, ComparisonOperation op);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
      *
      * @param[in] input1 First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
@@ -315,7 +315,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref NEComparisonOperationKernel
+/** Basic function to run @ref cpu::kernels::CpuComparisonKernel
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
  * @note The function performs a comparison operation between two tensors.
@@ -343,7 +343,7 @@ public:
      * @param[out]     output Output tensor. Data types supported: U16/U32.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
      *
      * @param[in] input1 First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
@@ -374,206 +374,5 @@ using NELess = NEElementwiseComparisonStatic<ComparisonOperation::Less>;
 /** Basic function to run less-equal comparison. */
 using NELessEqual = NEElementwiseComparisonStatic<ComparisonOperation::LessEqual>;
 
-namespace experimental
-{
-/** Basic function to run @ref NEArithmeticOperationKernel for max
- *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
- * @note The function performs a max operation between two tensors.
- */
-class NEElementwiseMax : public INEOperator
-{
-public:
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
-     */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for max
-     *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
-};
-
-/** Basic function to run @ref NEArithmeticOperationKernel for min
- *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
- * @note The function performs a min operation between two tensors.
- */
-class NEElementwiseMin : public INEOperator
-{
-public:
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
-     */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for min
-     *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
-};
-
-/** Basic function to run @ref NEArithmeticOperationKernel for squared difference
- *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
- * @note The function performs a squared different operation between two tensors (i.e., out[i] = (in1[i] - in2[i])^2
- */
-class NEElementwiseSquaredDiff : public INEOperator
-{
-public:
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
-     */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for squared difference
-     *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
-};
-
-/** Basic function to run @ref NEArithmeticOperationKernel for division
- *
- * @note The tensor data type for the inputs must be S32/F16/F32.
- * @note The function performs a division operation between two tensors (i.e., out[i] = in1[i] / in2[i])
- */
-class NEElementwiseDivision : public INEOperator
-{
-public:
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * @param[in, out] input1 First tensor input info. Data types supported: S32/F16/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
-     */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for division
-     *
-     * @param[in] input1 First tensor input info. Data types supported: S32/F16/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
-};
-
-/** Basic function to run @ref NEArithmeticOperationKernel for power
- *
- * @note The tensor data type for the inputs must be F16/F32.
- * @note The function performs a elementwise power of in1 to in2 (i.e., out[i] = in1[i] ^ in2[i])
- * @note For an exponent that is a float, this function will only work with a positive base.
- */
-class NEElementwisePower : public INEOperator
-{
-public:
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * @param[in, out] input1 First tensor input info. Data types supported: F16/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: Same as @p input1.
-     */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for power
-     *
-     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
-};
-
-/** Basic function to run @ref NEComparisonOperationKernel.
- *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
- * @note The function performs a comparison operation between two tensors.
- */
-class NEElementwiseComparison : public INEOperator
-{
-public:
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: U16/U32.
-     * @param[in]      op     Comparison Operation to be performed.
-     */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ComparisonOperation op);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
-     *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: U16/U32.
-     * @param[in] op     Comparison Operation to be performed.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op);
-};
-
-/** Basic function to run @ref NEComparisonOperationKernel
- *
- * @note The tensor data type for the inputs must be QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
- * @note The function performs a comparison operation between two tensors.
- */
-template <ComparisonOperation op>
-class NEElementwiseComparisonStatic : public INEOperator
-{
-public:
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * @param[in, out] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor info. Data types supported: U16/U32.
-     */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
-     *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: U16/U32.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
-};
-
-/** Basic function to run equal comparison. */
-using NEEqual = NEElementwiseComparisonStatic<ComparisonOperation::Equal>;
-/** Basic function to run not equal comparison. */
-using NENotEqual = NEElementwiseComparisonStatic<ComparisonOperation::NotEqual>;
-/** Basic function to run greater comparison. */
-using NEGreater = NEElementwiseComparisonStatic<ComparisonOperation::Greater>;
-/** Basic function to run greater-equal comparison. */
-using NEGreaterEqual = NEElementwiseComparisonStatic<ComparisonOperation::GreaterEqual>;
-/** Basic function to run less comparison. */
-using NELess = NEElementwiseComparisonStatic<ComparisonOperation::Less>;
-/** Basic function to run less-equal comparison. */
-using NELessEqual = NEElementwiseComparisonStatic<ComparisonOperation::LessEqual>;
-} // namespace experimental
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEELEMENTWISEOPERATIONS_H */

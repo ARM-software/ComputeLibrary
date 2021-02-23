@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,8 +95,8 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<TW> &wei
 }
 
 // 3D convolution for QASYMM8 type
-template < typename T, typename TW, typename TB, REQUIRES_TA((std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) &&(std::is_same<TW, uint8_t>::value
-                                                             || std::is_same<TW, int8_t>::value)) >
+template < typename T, typename TW, typename TB, ARM_COMPUTE_REQUIRES_TA((std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) &&(std::is_same<TW, uint8_t>::value
+                                                                         || std::is_same<TW, int8_t>::value)) >
 inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &out,
                           int i_offset, int w_offset, int b_offset, int o_offset,
                           int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x = 1, int dilation_y = 1, int filter_id = 0)

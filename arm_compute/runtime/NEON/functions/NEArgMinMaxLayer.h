@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ class ITensor;
 /** Function to calculate the index of the minimum or maximum values in a
  *  tensor based on an axis.
  *
- *  This function calls the following NEON kernels:
+ *  This function calls the following Neon kernels:
  *
  * -# @ref NEReductionOperationKernel
  * -# @ref NEFillBorderKernel

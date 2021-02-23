@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8
+/** Neon kernel used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8
  *
  * This kernel takes a final int32 accumulator value (the output of @ref NEGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QASYMM8 value.
  * The following computations will be performed by the kernel:

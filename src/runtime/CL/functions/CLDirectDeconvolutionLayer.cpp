@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,6 @@
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLMemsetKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 

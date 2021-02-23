@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEAccumulate.h"
 
 #include "src/core/NEON/kernels/NEAccumulateKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -34,7 +33,7 @@ NEAccumulate::~NEAccumulate() = default;
 
 void NEAccumulate::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEAccumulateKernel>();
+    auto k = std::make_unique<NEAccumulateKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
@@ -45,13 +44,13 @@ void NEAccumulateWeighted::configure(const ITensor *input, float alpha, ITensor 
 {
     if(use_fp16)
     {
-        auto k = arm_compute::support::cpp14::make_unique<NEAccumulateWeightedFP16Kernel>();
+        auto k = std::make_unique<NEAccumulateWeightedFP16Kernel>();
         k->configure(input, alpha, output);
         _kernel = std::move(k);
     }
     else
     {
-        auto k = arm_compute::support::cpp14::make_unique<NEAccumulateWeightedKernel>();
+        auto k = std::make_unique<NEAccumulateWeightedKernel>();
         k->configure(input, alpha, output);
         _kernel = std::move(k);
     }
@@ -61,7 +60,7 @@ NEAccumulateSquared::~NEAccumulateSquared() = default;
 
 void NEAccumulateSquared::configure(const ITensor *input, uint32_t shift, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEAccumulateSquaredKernel>();
+    auto k = std::make_unique<NEAccumulateSquaredKernel>();
     k->configure(input, shift, output);
     _kernel = std::move(k);
 }

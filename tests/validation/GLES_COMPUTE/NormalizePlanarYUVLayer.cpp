@@ -54,7 +54,7 @@ using GCNormalizePlanarYUVLayerFixture = NormalizePlanarYUVLayerValidationFixtur
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::NIGHTLY, zip(zip(zip(
                     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),     // Mismatching data types
                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),     // Window shrink
                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Unsupported data type
@@ -89,9 +89,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, GCNormalizePlanarYUVLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+FIXTURE_DATA_TEST_CASE(Random, GCNormalizePlanarYUVLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
+                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16, 0);

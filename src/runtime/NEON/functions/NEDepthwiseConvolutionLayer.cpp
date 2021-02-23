@@ -28,7 +28,6 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;
@@ -246,7 +245,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::configure(
     }
     _original_weights = weights_to_use;
 
-    _depthwise_conv_kernel = arm_compute::support::cpp14::make_unique<NEDepthwiseConvolutionLayerNativeKernel>();
+    _depthwise_conv_kernel = std::make_unique<NEDepthwiseConvolutionLayerNativeKernel>();
     _depthwise_conv_kernel->configure(input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier, dilation);
 
     if(_is_nchw)

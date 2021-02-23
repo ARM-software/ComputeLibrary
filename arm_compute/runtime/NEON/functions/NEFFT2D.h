@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ namespace arm_compute
 // Forward declaration
 class ITensor;
 
-/** Basic function to execute two dimensional FFT. This function calls the following NEON kernels:
+/** Basic function to execute two dimensional FFT. This function calls the following Neon kernels:
  *
  * -# @ref NEFFT1D 1D FFT is performed on the first given axis
  * -# @ref NEFFT1D 1D FFT is performed on the second given axis

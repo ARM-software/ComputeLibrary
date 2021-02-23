@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLMagnitude.h"
 
 #include "src/core/CL/kernels/CLMagnitudePhaseKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -37,7 +36,7 @@ void CLMagnitude::configure(const ICLTensor *input1, const ICLTensor *input2, IC
 
 void CLMagnitude::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, MagnitudeType mag_type)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLMagnitudePhaseKernel>();
+    auto k = std::make_unique<CLMagnitudePhaseKernel>();
     k->configure(compile_context, input1, input2, output, nullptr, mag_type);
     _kernel = std::move(k);
 }

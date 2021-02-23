@@ -53,9 +53,9 @@ TEST_SUITE(Gaussian3x3)
 template <typename T>
 using NEGaussian3x3Fixture = Gaussian3x3ValidationFixture<Tensor, Accessor, NEGaussian3x3, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGaussian3x3Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                           datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGaussian3x3Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::U8)),
+                                                                                                         datasets::BorderModes()))
 {
     // Validate output
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,10 +51,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                           bool has_bias, const Size2D &dilation, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(input->data_type()) && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Number of groups greater than one are not supported on NEON");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Number of groups greater than one are not supported on Neon");
+
+    // Since there's no implicit padding added, check the total input spatial dimensions (with conv paddings) are big enough for the kernel dimensions
+    const unsigned int width_idx    = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const unsigned int height_idx   = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const unsigned     total_width  = input->dimension(width_idx) + conv_info.pad_left() + conv_info.pad_right();
+    const unsigned     total_height = input->dimension(height_idx) + conv_info.pad_top() + conv_info.pad_bottom();
+    ARM_COMPUTE_RETURN_ERROR_ON((total_width < kernel_dims.width) || (total_height < kernel_dims.height));
 
     if(output->total_size() > 0)
     {
@@ -70,16 +78,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
                                                         bool has_bias, const Size2D &dilation)
 {
-    const unsigned int width_idx   = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
-    const unsigned int height_idx  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
-    const unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false)));
+
+    const DataLayout   data_layout = input->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     std::pair<unsigned int, unsigned int> convolved_dims = scaled_dimensions(input->dimension(width_idx), input->dimension(height_idx),
                                                                              kernel_dims.width, kernel_dims.height,
                                                                              conv_info, dilation);
-
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false)));
 
     Window win = calculate_max_window(*input, Steps());
     win.set(width_idx, Window::Dimension(0, convolved_dims.first, 1));

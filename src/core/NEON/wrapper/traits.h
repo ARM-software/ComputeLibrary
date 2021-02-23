@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,10 @@
 
 #include <arm_neon.h>
 
+#if defined(__ARM_FEATURE_SVE)
+#include <arm_sve.h>
+#endif /* defined(__ARM_FEATURE_SVE) */
+
 namespace arm_compute
 {
 namespace wrapper
@@ -40,7 +44,7 @@ struct vector_64_tag {};
 /** 128-bit vector tag */
 struct vector_128_tag {};
 
-/** Create the appropriate NEON vector given its type and size in terms of elements */
+/** Create the appropriate Neon vector given its type and size in terms of elements */
 template <typename T, int S> struct neon_vector;
 
 // Specializations
@@ -84,7 +88,7 @@ enum class BitWidth
     W128, /**< 128-bit width */
 };
 
-/** Create the appropriate NEON vector given its type and size in terms of bits */
+/** Create the appropriate Neon vector given its type and size in terms of bits */
 template <typename T, BitWidth BW> struct neon_bitvector;
 // Specializations
 #ifndef DOXYGEN_SKIP_THIS
@@ -110,6 +114,16 @@ template <> struct neon_bitvector<float_t, BitWidth::W128>{ using type = float32
 template <> struct neon_bitvector<float16_t, BitWidth::W64>{ using type = float16x4_t; using tag_type = vector_64_tag; };
 template <> struct neon_bitvector<float16_t, BitWidth::W128>{ using type = float16x8_t; using tag_type = vector_128_tag; };
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+
+#if defined(__ARM_FEATURE_SVE)
+/** Create the appropriate SVE vector given its type */
+template <typename T> struct sve_vector;
+
+template <> struct sve_vector<uint8_t>{ using scalar_type = uint8_t; using type = svuint8_t; };
+template <> struct sve_vector<int8_t>{ using scalar_type = int8_t; using type = svint8_t; };
+#endif /* defined(__ARM_FEATURE_SVE) */
+
 #endif /* DOXYGEN_SKIP_THIS */
 
 /**  Helper type template to get the type of a neon vector */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@
         if(__logger != nullptr)                                                               \
         {                                                                                     \
             size_t size     = ::snprintf(nullptr, 0, fmt, __VA_ARGS__) + 1;                   \
-            auto   char_str = support::cpp14::make_unique<char[]>(size);                      \
+            auto   char_str = std::make_unique<char[]>(size);                                 \
             ::snprintf(char_str.get(), size, #fmt, __VA_ARGS__);                              \
             __logger->log(log_level, std::string(char_str.get(), char_str.get() + size - 1)); \
         }                                                                                     \

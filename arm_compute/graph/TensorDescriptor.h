@@ -27,7 +27,6 @@
 #include "arm_compute/graph/Types.h"
 
 #include "support/ICloneable.h"
-#include "support/MemorySupport.h"
 
 #include <memory>
 
@@ -104,7 +103,7 @@ struct TensorDescriptor final : public misc::ICloneable<TensorDescriptor>
     // Inherited methods overridden:
     std::unique_ptr<TensorDescriptor> clone() const override
     {
-        return support::cpp14::make_unique<TensorDescriptor>(*this);
+        return std::make_unique<TensorDescriptor>(*this);
     }
 
     TensorShape      shape{};                        /**< Tensor shape */

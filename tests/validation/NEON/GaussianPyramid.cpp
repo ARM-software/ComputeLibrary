@@ -72,7 +72,7 @@ TEST_SUITE(Half)
 template <typename T>
 using NEGaussianPyramidHalfFixture = GaussianPyramidHalfValidationFixture<Tensor, Accessor, NEGaussianPyramidHalf, T, Pyramid>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallGaussianPyramidHalf, NEGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::ALL, small_gaussian_pyramid_levels)
+FIXTURE_DATA_TEST_CASE(RunSmallGaussianPyramidHalf, NEGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::NIGHTLY, small_gaussian_pyramid_levels)
 {
     validate_gaussian_pyramid(_target, _reference, _border_mode);
 }

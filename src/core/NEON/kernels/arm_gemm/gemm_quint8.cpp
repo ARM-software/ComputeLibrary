@@ -69,15 +69,15 @@ static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_meth
 },
 #ifdef SVE2 // Requantizing kernels include some SVE2 only instructions (SQRDMULH, SRSHL)
 {
-    GemmMethod::GEMM_HYBRID, 
+    GemmMethod::GEMM_HYBRID,
     "sve_hybrid_u8qa_dot_4x4VL",
-    [](const GemmArgs &args, const Requantize32 &qp) { return quant_hybrid_asymmetric(qp); },
+    [](const GemmArgs &, const Requantize32 &qp) { return quant_hybrid_asymmetric(qp); },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_u8qa_dot_4x4VL, uint8_t, uint8_t, Requantize32>(args, qp); }
 },
 #endif
 {
-    GemmMethod::GEMM_HYBRID, 
+    GemmMethod::GEMM_HYBRID,
     "sve_hybrid_u8u32_dot_6x4VL",
     nullptr,
     nullptr,
@@ -118,42 +118,42 @@ static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_meth
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_u16_8x12",
     nullptr,
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() == CPUModel::A53; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() == CPUModel::A53 && args._Msize > 4; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_u16_8x12, uint8_t, uint8_t>(args, qp); },
 },
-{
+GemmImplementation<uint8_t, uint8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_u8qa_dot_4x16",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_dotprod() && quant_hybrid_asymmetric(qp); },
-    [](const GemmArgs &args, const Requantize32 &) { return args._Nsize<=256 && args._Ksize>128; },
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_u8qa_dot_4x16, int8_t, int8_t, Requantize32>::estimate_cycles(args, cls_a64_hybrid_u8qa_dot_4x16::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_u8qa_dot_4x16, uint8_t, uint8_t, Requantize32>(args, qp); }
-},
-{
+),
+GemmImplementation<uint8_t, uint8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_u8u32_dot_6x16",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod(); },
-    [](const GemmArgs &args, const Requantize32 &) { return args._Nsize<=256 && args._Ksize>128; },
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_u8u32_dot_6x16, int8_t, int8_t, Requantize32, true>::estimate_cycles(args, cls_a64_hybrid_u8u32_dot_6x16::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_u8u32_dot_6x16, uint8_t, uint8_t, Requantize32, true>(args, qp); }
-},
-{
+),
+GemmImplementation<uint8_t, uint8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_u8_8x12",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod(); },
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_a64_gemm_u8_8x12, int8_t, int8_t>::estimate_cycles(args, cls_a64_gemm_u8_8x12::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_u8_8x12, uint8_t, uint8_t>(args, qp); }
-},
+),
 {
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_u8_4x4",
     nullptr,
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &) { return !args._ci->has_dotprod(); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_u8_4x4, uint8_t, uint8_t>(args, qp); }
 },
 {
     GemmMethod::QUANTIZE_WRAPPER,
     "quantized_wrapper",
     [](const GemmArgs &args, const Requantize32 &) { return !args._indirect_input; },
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &) { return !args._ci->has_dotprod(); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new QuantizeWrapper<uint8_t, uint8_t, uint32_t>(args, qp); }
 },
 {

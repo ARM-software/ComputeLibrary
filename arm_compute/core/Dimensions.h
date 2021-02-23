@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <limits>
 #include <numeric>
 
 namespace arm_compute
@@ -68,14 +69,19 @@ public:
 
     /** Accessor to set the value of one of the dimensions.
      *
-     * @param[in] dimension Dimension for which the value is set.
-     * @param[in] value     Value to be set for the dimension.
+     * @param[in] dimension         Dimension for which the value is set.
+     * @param[in] value             Value to be set for the dimension.
+     * @param[in] increase_dim_unit (Optional) Set to true if new unit dimensions increase the number of dimensions (e.g. for Coordinates), false otherwise (e.g. for TensorShapes)
      */
-    void set(size_t dimension, T value)
+    void set(size_t dimension, T value, bool increase_dim_unit = true)
     {
         ARM_COMPUTE_ERROR_ON(dimension >= num_max_dimensions);
-        _id[dimension]  = value;
-        _num_dimensions = std::max(_num_dimensions, dimension + 1);
+        _id[dimension] = value;
+        // Don't increase the number of dimensions if the new dimension is 1
+        if(increase_dim_unit || value != 1)
+        {
+            _num_dimensions = std::max(_num_dimensions, dimension + 1);
+        }
     }
     /** Alias to access the size of the first dimension */
     T x() const
@@ -91,6 +97,21 @@ public:
     T z() const
     {
         return _id[2];
+    }
+    /** Increments the given dimension by a step size, avoiding overflows
+     *
+     * @note Precondition: dim < _num_dimensions
+     *
+     * @param[in] dim  Dimension to increment.
+     * @param[in] step Step to increment @p dim by.
+     */
+    void increment(size_t dim, T step = 1)
+    {
+        ARM_COMPUTE_ERROR_ON(dim >= _num_dimensions);
+        if((std::numeric_limits<T>::max() - _id[dim]) >= step)
+        {
+            _id[dim] += step;
+        }
     }
     /** Generic accessor to get the size of any dimension
      *

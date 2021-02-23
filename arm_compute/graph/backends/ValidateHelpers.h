@@ -654,50 +654,6 @@ Status validate_strided_slice_layer(StridedSliceLayerNode &node)
     return StridedSliceLayer::validate(input, output, starts, ends, strides, info.begin_mask(), info.end_mask(), info.shrink_axis_mask());
 }
 
-/** Validates a Upsample layer node
- *
- * @tparam UpsampleLayer Upsample layer type
- *
- * @param[in] node Node to validate
- *
- * @return Status
- */
-template <typename UpsampleLayer>
-Status validate_upsample_layer(UpsampleLayerNode &node)
-{
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating UpsampleLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
-    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
-    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
-
-    // Extract input and output
-    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
-    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
-
-    // Validate function
-    return UpsampleLayer::validate(input, output, node.info(), node.upsampling_policy());
-}
-/** Validates a YOLO layer node
- *
- * @tparam YOLOLayer YOLO layer type
- *
- * @param[in] node Node to validate
- *
- * @return Status
- */
-template <typename YOLOLayer>
-Status validate_yolo_layer(YOLOLayerNode &node)
-{
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating YOLOLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
-    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
-    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
-
-    // Extract input and output
-    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
-    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
-
-    // Validate function
-    return YOLOLayer::validate(input, output, node.activation_info(), node.num_classes());
-}
 /** Validates a element-wise layer node
  *
  * @param[in] node Node to validate

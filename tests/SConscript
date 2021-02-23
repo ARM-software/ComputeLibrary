@@ -31,8 +31,9 @@ variables = [
     BoolVariable("benchmark_examples", "Build benchmark examples programs", True),
     BoolVariable("validate_examples", "Build validate examples programs", True),
     BoolVariable("reference_openmp", "Build reference validation with openmp", True),
-    BoolVariable("validation_tests", "Build validation test programs", False),
-    BoolVariable("benchmark_tests", "Build benchmark test programs", False),
+    #FIXME Switch the following two options to False before releasing
+    BoolVariable("validation_tests", "Build validation test programs", True),
+    BoolVariable("benchmark_tests", "Build benchmark test programs", True),
     ("test_filter", "Pattern to specify the tests' filenames to be compiled", "*.cpp")
 ]
 
@@ -72,7 +73,13 @@ test_env.Append(CXXFLAGS = ['-ffp-contract=off'])
 if 'g++' in test_env['CXX'] and '-Wnoexcept' in test_env['CXXFLAGS']:
     test_env['CXXFLAGS'].remove("-Wnoexcept")
 
-if env['os'] in ['android', 'bare_metal'] or env['standalone']:
+load_whole_archive = '-Wl,--whole-archive'
+noload_whole_archive = '-Wl,--no-whole-archive'
+if 'macos' in test_env['os']:
+    load_whole_archive = '-Wl,-force_load'
+    noload_whole_archive = '-Wl,-noall_load'
+
+if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")
     Import("arm_compute_graph_a")
@@ -87,13 +94,16 @@ else:
 if env['os'] in ['bare_metal']:
     Import("bootcode_o")
 
-test_env.Append(CPPPATH = ["#3rdparty/include"])
-test_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
+if env['external_tests_dir']:
+    test_env.Append(CPPPATH = [env['external_tests_dir'] + "/include"])
+    test_env.Append(LIBPATH = [env['external_tests_dir'] + "/%s/%s" % (env['os'], env['arch'])])
 
 common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]
 
 files_benchmark = Glob('benchmark/*.cpp')
+if env['external_tests_dir']:
+    files_benchmark += Glob(env['external_tests_dir'] + '/tests/benchmark/*.cpp')
 
 # Add unit tests
 files_validation = Glob('validation/UNIT/*/*.cpp')
@@ -110,13 +120,21 @@ if env['opencl']:
 
     files_benchmark += Glob('benchmark/CL/*/' + filter_pattern)
     files_benchmark += Glob('benchmark/CL/' + filter_pattern)
+    if env['external_tests_dir']:
+        files_benchmark += Glob(env['external_tests_dir'] + '/tests/benchmark/CL/' + filter_pattern)
+
     files_validation += Glob('validation/CL/*/' + filter_pattern)
     files_validation += Glob('validation/CL/' + filter_pattern)
+    if env['external_tests_dir']:
+        files_validation += Glob(env['external_tests_dir'] + '/tests/validation/CL/' + filter_pattern)
 
 if env['neon']:
     filter_pattern = test_env['test_filter']
     files_benchmark += Glob('benchmark/NEON/*/' + filter_pattern)
     files_benchmark += Glob('benchmark/NEON/' + filter_pattern)
+    if env['external_tests_dir']:
+        files_benchmark += Glob(env['external_tests_dir'] + '/tests/benchmark/NEON/' + filter_pattern)
+
     files_validation += Glob('validation/NEON/' + filter_pattern)
     if env['os'] == 'bare_metal':
         files_validation += Glob('validation/NEON/UNIT/MemoryManager.cpp' + filter_pattern)
@@ -124,6 +142,8 @@ if env['neon']:
         files_validation += Glob('validation/NEON/UNIT/TensorAllocator.cpp' + filter_pattern)
     else:
         files_validation += Glob('validation/NEON/*/' + filter_pattern)
+    if env['external_tests_dir']:
+        files_validation += Glob(env['external_tests_dir'] + '/tests/validation/NEON/' + filter_pattern)
 
 
 if env['gles_compute']:
@@ -138,7 +158,7 @@ if env['gles_compute']:
 extra_link_flags = []
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
-elif env['os'] != 'bare_metal':
+elif env['os'] not in ['bare_metal', 'macos']:
     test_env.Append(LIBS = ["rt"])
     extra_link_flags += ['-fstack-protector-strong']
 
@@ -154,7 +174,7 @@ bm_link_flags = []
 if test_env['linker_script']:
     bm_link_flags += ['-Wl,--build-id=none', '-T', env['linker_script']]
 
-if test_env['reference_openmp'] and env['os'] != 'bare_metal':
+if test_env['reference_openmp'] and env['os'] not in ['bare_metal', 'macos']:
    test_env['CXXFLAGS'].append('-fopenmp')
    test_env['LINKFLAGS'].append('-fopenmp')
 
@@ -201,8 +221,8 @@ if test_env['validation_tests']:
                 graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
                 for file in Glob("validate_examples/graph_*.cpp"):
                     example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
-                    if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + [ arm_compute_validation_framework ], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'] + bm_link_flags + extra_link_flags)
+                    if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + [ arm_compute_validation_framework ], LINKFLAGS=test_env["LINKFLAGS"]+[load_whole_archive, arm_compute_lib, noload_whole_archive] + bm_link_flags + extra_link_flags)
                         arm_compute_validate_examples += [ prog ]
                     else:
                         #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
@@ -222,7 +242,10 @@ if test_env['benchmark_examples']:
     graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
     graph_params = test_env.Object(source="../utils/CommonGraphOptions.cpp", target="CommonGraphOptions")
     arm_compute_benchmark_examples = []
-    for examples_folder in [ "../examples", "../3rdparty/examples"]:
+    all_examples_folders = ["../examples"]
+    if env['external_tests_dir']:
+        all_examples_folders.append(env['external_tests_dir'] + "/examples")
+    for examples_folder in all_examples_folders:
         if test_env['neon']:
             for file in Glob("%s/neon_*.cpp" % examples_folder):
                 example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
@@ -250,8 +273,8 @@ if test_env['benchmark_examples']:
         # Graph examples
         for file in Glob("%s/graph_*.cpp" % examples_folder ):
             example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
-            if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'] + bm_link_flags + extra_link_flags)
+            if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+[load_whole_archive, arm_compute_lib, noload_whole_archive] + bm_link_flags + extra_link_flags)
                 arm_compute_benchmark_examples += [ prog ]
             else:
                 #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies

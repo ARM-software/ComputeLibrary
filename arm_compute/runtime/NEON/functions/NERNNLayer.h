@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
+#include "arm_compute/runtime/NEON/functions/NECopy.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 
@@ -34,7 +35,6 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensor;
-class NECopyKernel;
 
 /** Basic function to run @ref NERNNLayer */
 class NERNNLayer : public IFunction
@@ -83,16 +83,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                   _memory_group;
-    NEGEMM                        _gemm_state_f;
-    NEArithmeticAddition          _add_f;
-    NEActivationLayer             _activation;
-    NEFullyConnectedLayer         _fully_connected;
-    std::unique_ptr<NECopyKernel> _copy_kernel;
-    Tensor                        _fully_connected_out;
-    Tensor                        _gemm_output;
-    Tensor                        _add_output;
-    bool                          _is_prepared;
+    MemoryGroup           _memory_group;
+    NEGEMM                _gemm_state_f;
+    NEArithmeticAddition  _add_f;
+    NEActivationLayer     _activation;
+    NEFullyConnectedLayer _fully_connected;
+    NECopy                _copy_f;
+    Tensor                _fully_connected_out;
+    Tensor                _gemm_output;
+    Tensor                _add_output;
+    bool                  _is_prepared;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NERNNLAYER_H */

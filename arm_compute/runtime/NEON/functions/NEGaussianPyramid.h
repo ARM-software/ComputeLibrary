@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,7 +79,7 @@ protected:
     Pyramid        _tmp;
 };
 
-/** Basic function to execute gaussian pyramid with HALF scale factor. This function calls the following NEON kernels:
+/** Basic function to execute gaussian pyramid with HALF scale factor. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NEGaussianPyramidHorKernel
@@ -116,7 +116,7 @@ private:
     std::vector<std::unique_ptr<NEGaussianPyramidVertKernel>> _vertical_reduction;
 };
 
-/** Basic function to execute gaussian pyramid with ORB scale factor. This function calls the following NEON kernels and functions:
+/** Basic function to execute gaussian pyramid with ORB scale factor. This function calls the following Neon kernels and functions:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NEGaussian5x5

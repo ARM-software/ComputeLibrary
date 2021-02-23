@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,9 +63,10 @@ public:
      *
      * @param[in] kernel  Kernel to execute.
      * @param[in] hints   Hints for the scheduler.
+     * @param[in] window  Window to use for kernel execution.
      * @param[in] tensors Vector containing the tensors to operate on.
      */
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) override;
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors) override;
 
 protected:
     /** Execute all the passed workloads

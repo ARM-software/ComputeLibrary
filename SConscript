@@ -23,9 +23,12 @@ import collections
 import os.path
 import re
 import subprocess
+import zlib
+import base64
+import string
 
-VERSION = "v20.11"
-LIBRARY_VERSION_MAJOR = 21
+VERSION = "v21.02"
+LIBRARY_VERSION_MAJOR = 22
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -42,18 +45,29 @@ def build_bootcode_objs(sources):
     Default(obj)
     return obj
 
-def build_library(name, sources, static=False, libs=[]):
+def build_library(name, build_env, sources, static=False, libs=[]):
     if static:
-        obj = arm_compute_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+        obj = build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
     else:
         if env['set_soname']:
-            obj = arm_compute_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
+            obj = build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
         else:
-            obj = arm_compute_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+            obj = build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
     obj = install_lib(obj)
     Default(obj)
     return obj
+
+def remove_incode_comments(code):
+    def replace_with_empty(match):
+        s = match.group(0)
+        if s.startswith('/'):
+            return " "
+        else:
+            return s
+
+    comment_regex = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE)
+    return re.sub(comment_regex, replace_with_empty, code)
 
 def resolve_includes(target, source, env):
     # File collection
@@ -67,7 +81,8 @@ def resolve_includes(target, source, env):
     for i in range(len(source)):
         src = source[i]
         dst = target[i]
-        contents = src.get_contents().decode('utf-8').splitlines()
+        contents = src.get_contents().decode('utf-8')
+        contents = remove_incode_comments(contents).splitlines()
         entry = FileEntry(target_name=dst, file_contents=contents)
         files.append((os.path.basename(src.get_path()),entry))
 
@@ -100,15 +115,17 @@ def resolve_includes(target, source, env):
             tmp_file = updated_file
 
         # Append and prepend string literal identifiers and add expanded file to final list
-        tmp_file.insert(0, "R\"(\n")
-        tmp_file.append("\n)\"")
         entry = FileEntry(target_name=file[1].target_name, file_contents=tmp_file)
         final_files.append((file[0], entry))
 
     # Write output files
     for file in final_files:
         with open(file[1].target_name.get_path(), 'w+') as out_file:
-            out_file.write( "\n".join( file[1].file_contents ))
+            file_to_write = "\n".join( file[1].file_contents )
+            if env['compress_kernels']:
+                file_to_write = zlib.compress(file_to_write, 9).encode("base64").replace("\n", "")
+            file_to_write = "R\"(" + file_to_write + ")\""
+            out_file.write(file_to_write)
 
 def create_version_file(target, source, env):
 # Generate string with build options library version to embed in the library:
@@ -124,6 +141,9 @@ def create_version_file(target, source, env):
 arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
 arm_compute_env.AlwaysBuild(version_file)
+
+default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos'] else 'clang++'
+cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 
 # Generate embed files
 generate_embed = [ version_file ]
@@ -156,7 +176,8 @@ arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSI
 
 
 # Don't allow undefined references in the libraries:
-arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined'])
+undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else '-Wl,--no-undefined'
+arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 arm_compute_env.Append(LIBS = ['dl'])
@@ -196,11 +217,17 @@ if env['opencl']:
     core_files += Glob('src/core/CL/gemm/native/*.cpp')
     core_files += Glob('src/core/CL/gemm/reshaped/*.cpp')
     core_files += Glob('src/core/CL/gemm/reshaped_only_rhs/*.cpp')
+    core_files += Glob('src/core/gpu/cl/*.cpp')
+    core_files += Glob('src/core/gpu/cl/kernels/*.cpp')
 
     runtime_files += Glob('src/runtime/CL/*.cpp')
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
     runtime_files += Glob('src/runtime/CL/gemm/*.cpp')
     runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
+    runtime_files += Glob('src/runtime/gpu/cl/*.cpp')
+    runtime_files += Glob('src/runtime/gpu/cl/operators/*.cpp')
+    runtime_files += Glob('src/runtime/CL/mlgo/*.cpp')
+    runtime_files += Glob('src/runtime/CL/gemm_auto_heuristics/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
@@ -211,6 +238,9 @@ if env['neon']:
     core_files += Glob('src/core/NEON/kernels/assembly/*.cpp')
 
     core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/arm_conv/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_*/*.cpp')
 
     # build winograd/depthwise sources for either v7a / v8a
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
@@ -228,23 +258,49 @@ if env['neon']:
 
     if env['estate'] == '64':
         core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/a64_*/*.cpp')
         if "sve" in env['arch']:
              core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/sve_*/*.cpp')
+             core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/sve_*/*.cpp')
 
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/fp16_*.cpp')
+        core_files += Glob('src/core/NEON/kernels/*/impl/*/fp16.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'fp32']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/fp32_*.cpp')
+        core_files += Glob('src/core/NEON/kernels/*/impl/*/fp32.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/qasymm8_neon*.cpp')
+        core_files += Glob('src/core/NEON/kernels/*/impl/*/qasymm8.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/qasymm8_signed_*.cpp')
+        core_files += Glob('src/core/NEON/kernels/*/impl/*/qasymm8_signed.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/qsymm16_*.cpp')
+        core_files += Glob('src/core/NEON/kernels/*/impl/*/qsymm16.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'integer']):
+        core_files += Glob('src/core/NEON/kernels/*/impl/*/integer.cpp')
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/assembly/*.cpp')
+
+    core_files += Glob('src/core/cpu/*.cpp')
+    core_files += Glob('src/core/cpu/kernels/*.cpp')
+    core_files += Glob('src/core/cpu/kernels/*/*.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'fp16']):
+        core_files += Glob('src/core/cpu/kernels/*/*/fp16.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'fp32']):
+        core_files += Glob('src/core/cpu/kernels/*/*/fp32.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
+        core_files += Glob('src/core/cpu/kernels/*/*/qasymm8.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
+        core_files += Glob('src/core/cpu/kernels/*/*/qasymm8_signed.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
+        core_files += Glob('src/core/cpu/kernels/*/*/qsymm16.cpp')
+    if any(i in env['data_type_support'] for i in ['all', 'integer']):
+        core_files += Glob('src/core/cpu/kernels/*/*/integer.cpp')
+   
+    if any(i in env['data_layout_support'] for i in ['all', 'nchw']):
+        core_files += Glob('src/core/cpu/kernels/*/*/nchw/all.cpp')
+
+    runtime_files += Glob('src/runtime/cpu/*.cpp')
+    runtime_files += Glob('src/runtime/cpu/operators/*.cpp')
 
 if env['gles_compute']:
     if env['os'] != 'android':
@@ -270,26 +326,30 @@ if env['os'] == 'bare_metal':
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
-arm_compute_core_a = build_library('arm_compute_core-static', core_files, static=True)
+arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, core_files, static=True)
 Export('arm_compute_core_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_core_so = build_library('arm_compute_core', core_files, static=False)
+    arm_compute_core_so = build_library('arm_compute_core', arm_compute_env, core_files, static=False)
     Export('arm_compute_core_so')
 
-arm_compute_a = build_library('arm_compute-static', runtime_files, static=True, libs = [ arm_compute_core_a ])
+arm_compute_a = build_library('arm_compute-static', arm_compute_env, runtime_files, static=True, libs = [ arm_compute_core_a ])
 Export('arm_compute_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_so = build_library('arm_compute', runtime_files, static=False, libs = [ "arm_compute_core" ])
+    arm_compute_so = build_library('arm_compute', arm_compute_env, runtime_files, static=False, libs = [ "arm_compute_core" ])
     Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
 
-arm_compute_graph_a = build_library('arm_compute_graph-static', graph_files, static=True, libs = [ arm_compute_a])
+arm_compute_graph_env = arm_compute_env.Clone()
+
+arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-redundant-move', '-Wno-pessimizing-move'])
+
+arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a])
 Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_graph_so = build_library('arm_compute_graph', graph_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
+    arm_compute_graph_so = build_library('arm_compute_graph', arm_compute_graph_env, graph_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
     Depends(arm_compute_graph_so, arm_compute_so)
     Export('arm_compute_graph_so')
 

@@ -53,10 +53,10 @@ TEST_SUITE(Remap)
 template <typename T>
 using NERemapFixture = RemapValidationFixture<Tensor, Accessor, NERemap, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NERemapFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                             framework::dataset::make("DataType",
-                                                                                                                     DataType::U8)),
-                                                                                                     framework::dataset::make("BorderModes", { BorderMode::UNDEFINED, BorderMode::CONSTANT })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NERemapFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                           framework::dataset::make("DataType",
+                                                                                                                   DataType::U8)),
+                                                                                                   framework::dataset::make("BorderModes", { BorderMode::UNDEFINED, BorderMode::CONSTANT })))
 {
     // Validate output
     validate(Accessor(_target), _reference, _valid_mask, tolerance_value, tolerance_number);

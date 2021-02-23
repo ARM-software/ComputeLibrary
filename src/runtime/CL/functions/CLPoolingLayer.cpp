@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,14 +23,27 @@
  */
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLPoolingLayerKernel.h"
-#include "support/MemorySupport.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClPooling.h"
 
 namespace arm_compute
 {
+struct CLPoolingLayer::Impl
+{
+    const ICLTensor                   *src{ nullptr };
+    ICLTensor                         *dst{ nullptr };
+    ICLTensor                         *indices{ nullptr };
+    std::unique_ptr<opencl::ClPooling> op{ nullptr };
+};
+
+CLPoolingLayer::CLPoolingLayer()
+    : _impl(std::make_unique<Impl>())
+{
+}
+CLPoolingLayer::~CLPoolingLayer() = default;
+
 void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, pool_info, indices);
@@ -38,56 +51,25 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
 
 void CLPoolingLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
-    // Configure pooling kernel
-    auto k = arm_compute::support::cpp14::make_unique<CLPoolingLayerKernel>();
-    k->set_target(CLScheduler::get().target());
-    k->configure(compile_context, input, output, pool_info, indices);
-    _kernel = std::move(k);
+    _impl->src     = input;
+    _impl->dst     = output;
+    _impl->indices = indices;
 
-    const DataType data_type = input->info()->data_type();
-
-    // Configure border depending on operation required (quantize border in case of asymmetric data_type)
-    BorderMode border_mode{};
-    PixelValue pixel_value(0.f);
-    if(is_data_type_quantized_asymmetric(data_type) && !pool_info.exclude_padding)
-    {
-        pixel_value = PixelValue(0, data_type, input->info()->quantization_info());
-    }
-
-    // Data layout
-    const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
-
-    switch(data_layout)
-    {
-        case DataLayout::NCHW:
-            border_mode = (PoolingType::MAX == pool_info.pool_type) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
-            break;
-        case DataLayout::NHWC:
-            border_mode = BorderMode::CONSTANT;
-            if(PoolingType::MAX == pool_info.pool_type)
-            {
-                if(is_data_type_quantized(data_type))
-                {
-                    std::tie(pixel_value, std::ignore) = get_min_max(data_type);
-                }
-                else
-                {
-                    pixel_value = PixelValue(std::numeric_limits<float>::lowest());
-                }
-            }
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Data layout not supported");
-    }
-    _border_handler->configure(compile_context, input, _kernel->border_size(), border_mode, pixel_value);
-
-    // Tune kernels
-    CLScheduler::get().tune_kernel_static(*_kernel);
+    _impl->op = std::make_unique<opencl::ClPooling>();
+    _impl->op->configure(compile_context, input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr);
 }
 
 Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    return CLPoolingLayerKernel::validate(input, output, pool_info, indices);
+    return opencl::ClPooling::validate(input, output, pool_info, indices);
+}
+
+void CLPoolingLayer::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST_0, _impl->dst);
+    pack.add_tensor(TensorType::ACL_DST_1, _impl->indices);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

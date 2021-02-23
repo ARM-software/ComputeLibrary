@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,8 +53,8 @@ RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.01)); /**< 
 constexpr float                     tolerance_num = 0.05f;                 /**< Tolerance number */
 #endif                                                                     // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 2, 5 });
-const auto large_depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5, 8 });
+const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 2, 8 });
+const auto large_depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5, 32 });
 
 //Activation Functions
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
@@ -832,7 +832,7 @@ TEST_SUITE_END() // QSYMM8_PER_CHANNEL
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // DepthwiseConvLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

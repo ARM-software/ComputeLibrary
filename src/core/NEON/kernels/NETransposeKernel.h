@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel which transposes the elements of a matrix.
+/** Neon kernel which transposes the elements of a matrix.
  *
  * [width, height, batch] -> [height, width, batch]
  *

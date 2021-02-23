@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,6 @@ void GCBufferAllocator::free(void *ptr)
 std::unique_ptr<IMemoryRegion> GCBufferAllocator::make_region(size_t size, size_t alignment)
 {
     ARM_COMPUTE_UNUSED(alignment);
-    return arm_compute::support::cpp14::make_unique<GCBufferMemoryRegion>(size);
+    return std::make_unique<GCBufferMemoryRegion>(size);
 }
 } // namespace arm_compute

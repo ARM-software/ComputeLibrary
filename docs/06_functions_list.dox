@@ -29,7 +29,7 @@ namespace arm_compute
 
 @tableofcontents
 
-@section S6_1 NEON functions
+@section S6_1 Neon functions
 
 - @ref IFunction
     - @ref INESimpleFunction
@@ -40,7 +40,6 @@ namespace arm_compute
         - @ref NEBox3x3
         - @ref NECast
         - @ref NEComplexPixelWiseMultiplication
-        - @ref NEComputeAllAnchors
         - @ref NEConvolution3x3
         - @ref NEConvolutionRectangle
         - @ref NEDilate
@@ -85,7 +84,6 @@ namespace arm_compute
         - @ref NEChannelCombine
         - @ref NEChannelExtract
         - @ref NEChannelShuffleLayer
-        - @ref NECol2Im
         - @ref NEColorConvert
         - @ref NECopy
         - @ref NEDepthConvertLayer
@@ -93,10 +91,8 @@ namespace arm_compute
         - @ref NEFloor
         - @ref NEFullyConnectedLayerReshapeWeights
         - @ref NEGather
-        - @ref NEGEMMInterleave4x4
         - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
-        - @ref NEGEMMTranspose1xW
         - @ref NEHOGDetector
         - @ref NEMagnitude
         - @ref NEMeanStdDevNormalizationLayer
@@ -111,7 +107,6 @@ namespace arm_compute
         - @ref NEThreshold
         - @ref NETile
         - @ref NETranspose
-        - @ref NEYOLOLayer
     - @ref NEArgMinMaxLayer
     - @ref NEBatchNormalizationLayer
     - @ref NECannyEdge
@@ -153,12 +148,10 @@ namespace arm_compute
     - @ref NEHOGDescriptor
     - @ref NEHOGGradient
     - @ref NEHOGMultiDetection
-    - @ref NEIm2Col
     - @ref NEInstanceNormalizationLayer
     - @ref NEL2NormalizeLayer
     - @ref NELaplacianPyramid
     - @ref NELaplacianReconstruct
-    - @ref NELocallyConnectedLayer
     - @ref NELSTMLayer
     - @ref NELSTMLayerQuantized
     - @ref NEQLSTMLayer
@@ -184,7 +177,6 @@ namespace arm_compute
     - @ref NESplit
     - @ref NEStackLayer
     - @ref NEUnstack
-    - @ref NEUpsampleLayer
     - @ref NEWinogradConvolutionLayer
 
 @section S6_2 OpenCL functions
@@ -232,7 +224,6 @@ namespace arm_compute
     - @ref CLL2NormalizeLayer
     - @ref CLLaplacianPyramid
     - @ref CLLaplacianReconstruct
-    - @ref CLLocallyConnectedLayer
     - @ref CLLogicalAnd
     - @ref CLLogicalNot
     - @ref CLLogicalOr
@@ -258,7 +249,6 @@ namespace arm_compute
     - @ref CLSplit
     - @ref CLStackLayer
     - @ref CLUnstack
-    - @ref CLUpsampleLayer
     - @ref CLWinogradConvolutionLayer
     - @ref ICLSimpleFunction
         - @ref CLAbsoluteDifference
@@ -283,7 +273,6 @@ namespace arm_compute
         - @ref CLColorConvert
         - @ref CLComparison
         - @ref CLComparisonStatic
-        - @ref CLComputeAllAnchors
         - @ref CLConvertFullyConnectedWeights
         - @ref CLConvolution3x3
         - @ref CLConvolutionRectangle
@@ -338,7 +327,6 @@ namespace arm_compute
         - @ref CLWarpAffine
         - @ref CLWarpPerspective
         - @ref CLWinogradInputTransform
-        - @ref CLYOLOLayer
 
 @section S6_3 GLES Compute functions
 

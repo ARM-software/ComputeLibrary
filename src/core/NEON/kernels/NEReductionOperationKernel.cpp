@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -386,7 +386,7 @@ public:
 template <typename T, int S>
 struct RedOpX
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, const ReductionOperation op)
@@ -859,7 +859,7 @@ struct RedOpX_quantized
 template <typename T, int S>
 struct RedOpYZW
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
     using neon_vector  = typename wrapper::traits::neon_vector<T, S>::type;
 
@@ -1078,7 +1078,7 @@ struct RedOpYZW
 template <typename T, int S, int axis, ReductionOperation op>
 struct RedOpYZW_complex
 {
-    /** NEON vector tag type. */
+    /** Neon vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
     using neon_vector  = typename wrapper::traits::neon_vector<T, S>::type;
 

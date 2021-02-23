@@ -51,7 +51,7 @@ template <typename T>
 using NETableLookupFixture = TableLookupValidationFixture<Tensor, Accessor, NETableLookup, LutAccessor<T>, Lut, T>;
 TEST_SUITE(U8)
 
-FIXTURE_DATA_TEST_CASE(RunSmallU8, NETableLookupFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmallU8, NETableLookupFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -64,7 +64,7 @@ FIXTURE_DATA_TEST_CASE(RunLargeU8, NETableLookupFixture<uint8_t>, framework::Dat
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmallS16, NETableLookupFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmallS16, NETableLookupFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::S16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

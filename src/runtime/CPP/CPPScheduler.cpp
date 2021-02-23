@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,13 +28,13 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
 #include "src/runtime/CPUUtils.h"
-#include "support/MemorySupport.h"
 #include "support/Mutex.h"
 
 #include <atomic>
 #include <condition_variable>
 #include <iostream>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <system_error>
 #include <thread>
@@ -98,11 +98,12 @@ void set_thread_affinity(int core_id)
         return;
     }
 
+#if !defined(__APPLE__)
     cpu_set_t set;
     CPU_ZERO(&set);
     CPU_SET(core_id, &set);
-    ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set),
-                            "Error setting thread affinity");
+    ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
+#endif /* !defined(__APPLE__) */
 }
 
 class Thread final
@@ -272,7 +273,7 @@ struct CPPScheduler::Impl final
 };
 
 /*
- * This singleton has been deprecated and will be removed in the next release
+ * This singleton has been deprecated and will be removed in future releases
  */
 CPPScheduler &CPPScheduler::get()
 {
@@ -281,7 +282,7 @@ CPPScheduler &CPPScheduler::get()
 }
 
 CPPScheduler::CPPScheduler()
-    : _impl(support::cpp14::make_unique<Impl>(num_threads_hint()))
+    : _impl(std::make_unique<Impl>(num_threads_hint()))
 {
 }
 
@@ -351,14 +352,14 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 }
 #endif /* DOXYGEN_SKIP_THIS */
 
-void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
+void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors)
 {
-    schedule_common(kernel, hints, tensors);
+    schedule_common(kernel, hints, window, tensors);
 }
 
 void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
     ITensorPack tensors;
-    schedule_common(kernel, hints, tensors);
+    schedule_common(kernel, hints, kernel->window(), tensors);
 }
 } // namespace arm_compute

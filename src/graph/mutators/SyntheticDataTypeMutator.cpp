@@ -222,7 +222,7 @@ void handle_nodes_with_bias(Graph &g)
                     auto             depth  = b_desc.shape[get_dimension_idx(b_desc.layout, DataLayoutDimension::BATCHES)];
                     b_desc.shape            = TensorShape(depth);
 
-                    auto accessor = support::cpp14::make_unique<EmptyAccessor>();
+                    auto accessor = std::make_unique<EmptyAccessor>();
                     auto b_nid    = GraphBuilder::add_const_node(g, params, b_desc, std::move(accessor));
                     g.add_connection(b_nid, 0, node_id, 2);
                 }

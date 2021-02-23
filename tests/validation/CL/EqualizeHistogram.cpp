@@ -42,8 +42,8 @@ TEST_SUITE(EqualizeHistogram)
 template <typename T>
 using CLEqualizeHistogramFixture = EqualizeHistogramValidationFixture<CLTensor, CLAccessor, CLEqualizeHistogram, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLEqualizeHistogramFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLEqualizeHistogramFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                               DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

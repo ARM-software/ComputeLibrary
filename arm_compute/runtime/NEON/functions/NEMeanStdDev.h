@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ namespace arm_compute
 class NEMeanStdDevKernel;
 class NEFillBorderKernel;
 
-/** Basic function to execute mean and std deviation. This function calls the following NEON kernels:
+/** Basic function to execute mean and std deviation. This function calls the following Neon kernels:
  *
  * @ref NEMeanStdDevKernel
  *

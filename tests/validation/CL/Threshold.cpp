@@ -42,9 +42,9 @@ TEST_SUITE(Threshold)
 template <typename T>
 using CLThresholdFixture = ThresholdValidationFixture<CLTensor, CLAccessor, CLThreshold, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLThresholdFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), datasets::MixedThresholdDataset()),
-                                                                                                         framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLThresholdFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), datasets::MixedThresholdDataset()),
+                                                                                                       framework::dataset::make("DataType",
+                                                                                                               DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

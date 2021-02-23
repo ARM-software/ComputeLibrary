@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@ using NEHOGMultiDetectionFixture = HOGMultiDetectionValidationFixture<Tensor,
                                                                       uint8_t,
                                                                       float>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEHOGMultiDetectionFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEHOGMultiDetectionFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        datasets::SmallHOGMultiDetectionDataset(),
                        framework::dataset::make("Format", Format::U8)),

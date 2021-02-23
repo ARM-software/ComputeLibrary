@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ class NESobel7x7HorKernel;
 class NESobel7x7VertKernel;
 class NEFillBorderKernel;
 
-/** Basic function to execute sobel 7x7 filter. This function calls the following NEON kernels:
+/** Basic function to execute sobel 7x7 filter. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NESobel7x7HorKernel

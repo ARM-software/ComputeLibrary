@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,14 +28,12 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
-#include "src/core/CL/kernels/CLMemsetKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLDeconvolutionLayerUpsample::CLDeconvolutionLayerUpsample() // NOLINT
-    : _upsample(support::cpp14::make_unique<CLDeconvolutionLayerUpsampleKernel>()),
-      _memset(support::cpp14::make_unique<CLMemsetKernel>()),
+    : _upsample(std::make_unique<CLDeconvolutionLayerUpsampleKernel>()),
+      _fill(),
       _output(nullptr)
 {
 }
@@ -57,13 +55,13 @@ void CLDeconvolutionLayerUpsample::configure(const CLCompileContext &compile_con
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _output = output;
-    _memset->configure(compile_context, _output, PixelValue(0, _output->info()->data_type(), _output->info()->quantization_info()));
+    _fill.configure(compile_context, _output, PixelValue(0, _output->info()->data_type(), _output->info()->quantization_info()));
     _upsample->configure(compile_context, input, _output, info);
 }
 
 void CLDeconvolutionLayerUpsample::run()
 {
-    CLScheduler::get().enqueue(*_memset, false);
+    _fill.run();
     CLScheduler::get().enqueue(*_upsample, true);
 }
 } // namespace arm_compute

@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/kernels/CLReverseKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -36,7 +35,7 @@ void CLReverse::configure(const ICLTensor *input, ICLTensor *output, const ICLTe
 
 void CLReverse::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLReverseKernel>();
+    auto k = std::make_unique<CLReverseKernel>();
     k->configure(compile_context, input, output, axis);
     _kernel = std::move(k);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,9 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Window.h"
 
-//FIXME: Delete the "PRINTF" before the release. In the meantime it's probably going to be useful to debug
-//#define PRINTF printf
-#define PRINTF(...)
+//FIXME: Delete the "ARM_COMPUTE_PRINTF" before the release. In the meantime it's probably going to be useful to debug
+//#define ARM_COMPUTE_PRINTF printf
+#define ARM_COMPUTE_PRINTF(...)
 
 namespace arm_compute
 {
@@ -170,14 +170,14 @@ public:
     {
         while(_end.z() != _position.z())
         {
-            PRINTF("New slice %d\n", _position.z());
+            ARM_COMPUTE_PRINTF("New slice %d\n", _position.z());
             iterate_2D_internal(on_new_row_size, _w.x().end() - _w.x().step(), _w.y().end() - _w.y().step());
             _position[2] += _w.z().step();
             _position[1] = _w.y().start();
             _position[0] = _w.x().start();
         }
         // Left over:
-        PRINTF("Left over slice\n");
+        ARM_COMPUTE_PRINTF("Left over slice\n");
         iterate_2D(on_new_row_size);
     }
 
@@ -220,7 +220,7 @@ private:
         if(end_y == _position.y())
         {
             // Single row:
-            PRINTF("Partial row only\n");
+            ARM_COMPUTE_PRINTF("Partial row only\n");
             // Both start and end belong to the same row:
             iterate_over_dim0(end_x + _w.x().step(), on_new_row_size);
         }
@@ -230,7 +230,7 @@ private:
             if(_w.x().start() != _position.x())
             {
                 //Start in the middle of a row: process left-over X
-                PRINTF("Partial row first\n");
+                ARM_COMPUTE_PRINTF("Partial row first\n");
                 iterate_over_dim0(_w.x().end(), on_new_row_size);
                 _position[1] += _w.y().step();
             }
@@ -239,7 +239,7 @@ private:
             bool no_leftover = end_x + _w.x().step() == _w.x().end();
             if(no_leftover)
             {
-                PRINTF("no left over\n");
+                ARM_COMPUTE_PRINTF("no left over\n");
                 //Switch to full row size:
                 on_new_row_size(_w[0].start(), _w.x().end());
                 // Shouldn't be possible to reach that point and not have at least one entire row to process
@@ -249,17 +249,17 @@ private:
             }
             else
             {
-                PRINTF("with left over\n");
+                ARM_COMPUTE_PRINTF("with left over\n");
                 // Are there full rows to process ?
                 if(_position[1] != end_y)
                 {
-                    PRINTF("full rows\n");
+                    ARM_COMPUTE_PRINTF("full rows\n");
                     //Switch to full row size:
                     on_new_row_size(_w[0].start(), _w.x().end());
                     iterate_over_dim1(end_y);
                 }
 
-                PRINTF("Final leftover\n");
+                ARM_COMPUTE_PRINTF("Final leftover\n");
                 //Leftover end x
                 _position[0] = _w.x().start();
                 iterate_over_dim0(end_x + _w.x().step(), on_new_row_size);
@@ -298,7 +298,7 @@ private:
      */
     void iterate_over_dim0(int end)
     {
-        PRINTF("X [%d, %d, %d]\n", _position.x(), end, _w[0].step());
+        ARM_COMPUTE_PRINTF("X [%d, %d, %d]\n", _position.x(), end, _w[0].step());
         // Both start and end belong to the same row:
         ARM_COMPUTE_ERROR_ON(_position[0] > end);
         for(; _position.x() < end; _position[0] += _w[0].step())

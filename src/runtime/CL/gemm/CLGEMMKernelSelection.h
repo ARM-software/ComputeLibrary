@@ -25,11 +25,9 @@
 #define SRC_CLGEMMKERNELSELECTION_H
 
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
-#include "src/runtime/CL/gemm/CLGEMMKernelSelectionBifrost.h"
-#include "src/runtime/CL/gemm/CLGEMMKernelSelectionMidgard.h"
-#include "src/runtime/CL/gemm/CLGEMMKernelSelectionValhall.h"
-
-#include "support/MemorySupport.h"
+#include "src/runtime/CL/gemm/CLGEMMDefaultTypeBifrost.h"
+#include "src/runtime/CL/gemm/CLGEMMDefaultTypeMidgard.h"
+#include "src/runtime/CL/gemm/CLGEMMDefaultTypeValhall.h"
 
 namespace arm_compute
 {
@@ -50,11 +48,11 @@ public:
         switch(get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
-                return support::cpp14::make_unique<CLGEMMKernelSelectionMidgard>(gpu);
+                return std::make_unique<CLGEMMDefaultTypeMidgard>(gpu);
             case GPUTarget::BIFROST:
-                return support::cpp14::make_unique<CLGEMMKernelSelectionBifrost>(gpu);
+                return std::make_unique<CLGEMMDefaultTypeBifrost>(gpu);
             case GPUTarget::VALHALL:
-                return support::cpp14::make_unique<CLGEMMKernelSelectionValhall>(gpu);
+                return std::make_unique<CLGEMMDefaultTypeValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
         }

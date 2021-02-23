@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLLogicalAnd.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/core/CL/kernels/CLElementwiseOperationKernel.h"
-#include "support/MemorySupport.h"
+#include "src/core/gpu/cl/kernels/ClElementwiseKernel.h"
 
 #include <utility>
 
@@ -34,14 +33,14 @@ namespace experimental
 {
 void CLLogicalAnd::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLLogicalBinaryKernel>();
-    k->configure(compile_context, kernels::LogicalOperation::And, input1, input2, output);
+    auto k = std::make_unique<arm_compute::opencl::kernels::ClLogicalBinaryKernel>();
+    k->configure(compile_context, LogicalOperation::And, input1, input2, output);
     _kernel = std::move(k);
 }
 
 Status CLLogicalAnd::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    return CLLogicalBinaryKernel::validate(kernels::LogicalOperation::And, input1, input2, output);
+    return arm_compute::opencl::kernels::ClLogicalBinaryKernel::validate(LogicalOperation::And, input1, input2, output);
 }
 
 void CLLogicalAnd::run(ITensorPack &tensors)
@@ -59,7 +58,7 @@ struct CLLogicalAnd::Impl
 };
 
 CLLogicalAnd::CLLogicalAnd()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLLogicalAnd::CLLogicalAnd(CLLogicalAnd &&) = default;
@@ -76,7 +75,7 @@ void CLLogicalAnd::configure(const CLCompileContext &compile_context, ICLTensor 
     _impl->src0 = input1;
     _impl->src1 = input2;
     _impl->dst  = output;
-    _impl->op   = arm_compute::support::cpp14::make_unique<experimental::CLLogicalAnd>();
+    _impl->op   = std::make_unique<experimental::CLLogicalAnd>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info());
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -194,7 +194,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<int8_t>, f
 TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE_END() // ReductionOperation
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

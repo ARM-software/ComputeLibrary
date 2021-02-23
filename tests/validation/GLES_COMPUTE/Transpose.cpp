@@ -49,7 +49,7 @@ template <typename T>
 using GCTransposeFixture = TransposeValidationFixture<GCTensor, GCAccessor, GCTranspose, T>;
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCTransposeFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCTransposeFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference);
@@ -62,7 +62,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCTransposeFixture<half>, framework::DatasetMod
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCTransposeFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCTransposeFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference);

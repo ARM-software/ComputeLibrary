@@ -30,12 +30,11 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLDirectConvolutionLayer::CLDirectConvolutionLayer()
-    : _direct_conv_kernel(support::cpp14::make_unique<CLDirectConvolutionLayerKernel>()), _input_border_handler(support::cpp14::make_unique<CLFillBorderKernel>()), _activationlayer_function(),
+    : _direct_conv_kernel(std::make_unique<CLDirectConvolutionLayerKernel>()), _input_border_handler(std::make_unique<CLFillBorderKernel>()), _activationlayer_function(),
       _is_activationlayer_enabled(false)
 {
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,19 +23,40 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEFill.h"
 
-#include "arm_compute/core/Window.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/NEON/kernels/NEMemsetKernel.h"
-#include "support/MemorySupport.h"
+#include "arm_compute/core/Validate.h"
+#include "src/runtime/cpu/operators/CpuFill.h"
 
 #include <utility>
 
 namespace arm_compute
 {
+struct NEFill::Impl
+{
+    ITensor                      *tensor{ nullptr };
+    std::unique_ptr<cpu::CpuFill> op{ nullptr };
+};
+
+NEFill::NEFill()
+    : _impl(std::make_unique<Impl>())
+{
+}
+NEFill::NEFill(NEFill &&) = default;
+NEFill &NEFill::operator=(NEFill &&) = default;
+NEFill::~NEFill()                    = default;
+
 void NEFill::configure(ITensor *tensor, PixelValue constant_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEMemsetKernel>();
-    k->configure(tensor, constant_value);
-    _kernel = std::move(k);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+
+    _impl->tensor = tensor;
+    _impl->op     = std::make_unique<cpu::CpuFill>();
+    _impl->op->configure(tensor->info(), constant_value);
+}
+
+void NEFill::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_DST, _impl->tensor);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

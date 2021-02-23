@@ -37,8 +37,6 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-#include "support/MemorySupport.h"
-
 #include <set>
 
 namespace arm_compute
@@ -59,10 +57,10 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_qasymm8_convolver(int kern
             switch(stride_x)
             {
                 case 1:
-                    return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 1, 1>>(
+                    return std::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 1, 1>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 case 2:
-                    return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 2, 2>>(
+                    return std::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 2, 2>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
@@ -73,10 +71,10 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_qasymm8_convolver(int kern
             switch(stride_x)
             {
                 case 1:
-                    return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 1, 1>>(
+                    return std::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 1, 1>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 case 2:
-                    return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 2, 2>>(
+                    return std::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 2, 2>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
@@ -101,10 +99,10 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_qsymm8_perchannel_convolve
             switch(stride_x)
             {
                 case 1:
-                    return arm_compute::support::cpp14::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 3, 3, 1, 1>>(
+                    return std::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 3, 3, 1, 1>>(
                                n_batches, in_rows, in_cols, n_channels, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 case 2:
-                    return arm_compute::support::cpp14::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 3, 3, 2, 2>>(
+                    return std::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 3, 3, 2, 2>>(
                                n_batches, in_rows, in_cols, n_channels, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
@@ -115,10 +113,10 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_qsymm8_perchannel_convolve
             switch(stride_x)
             {
                 case 1:
-                    return arm_compute::support::cpp14::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 5, 5, 1, 1>>(
+                    return std::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 5, 5, 1, 1>>(
                                n_batches, in_rows, in_cols, n_channels, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 case 2:
-                    return arm_compute::support::cpp14::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 5, 5, 2, 2>>(
+                    return std::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 5, 5, 2, 2>>(
                                n_batches, in_rows, in_cols, n_channels, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
@@ -142,10 +140,10 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_fp16_convolver(int kernel_
             switch(stride_x)
             {
                 case 1:
-                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 1, 1, float16_t, float16_t, float16_t>>(
+                    return std::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 1, 1, float16_t, float16_t, float16_t>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
                 case 2:
-                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float16_t, float16_t, float16_t>>(
+                    return std::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float16_t, float16_t, float16_t>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
@@ -156,10 +154,10 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_fp16_convolver(int kernel_
             switch(stride_x)
             {
                 case 1:
-                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 1, 1, float16_t, float16_t, float16_t>>(
+                    return std::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 1, 1, float16_t, float16_t, float16_t>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
                 case 2:
-                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 2, 2, float16_t, float16_t, float16_t>>(
+                    return std::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 2, 2, float16_t, float16_t, float16_t>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
@@ -183,10 +181,10 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_fp32_convolver(int kernel_
             switch(stride_x)
             {
                 case 1:
-                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<4, 4, 3, 3, 1, 1, float, float, float>>(
+                    return std::make_unique<depthwise::DilatedDepthwiseConvolution<4, 4, 3, 3, 1, 1, float, float, float>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
                 case 2:
-                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float, float, float>>(
+                    return std::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float, float, float>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
@@ -197,10 +195,10 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_fp32_convolver(int kernel_
             switch(stride_x)
             {
                 case 1:
-                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<4, 4, 5, 5, 1, 1, float, float, float>>(
+                    return std::make_unique<depthwise::DilatedDepthwiseConvolution<4, 4, 5, 5, 1, 1, float, float, float>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
                 case 2:
-                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 2, 2, float, float, float>>(
+                    return std::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 2, 2, float, float, float>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
@@ -339,7 +337,7 @@ struct NEDepthwiseConvolutionAssemblyDispatch::LocalImpl
 #ifndef DOXYGEN_SKIP_THIS
 NEDepthwiseConvolutionAssemblyDispatch::NEDepthwiseConvolutionAssemblyDispatch(std::shared_ptr<arm_compute::IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _input(nullptr), _weights(nullptr), _bias(nullptr), _output(nullptr), _packed_weights(), _workspace(), _is_prepared(false),
-      _pImpl(support::cpp14::make_unique<LocalImpl>())
+      _pImpl(std::make_unique<LocalImpl>())
 {
 }
 #endif /* DOXYGEN_SKIP_THIS */

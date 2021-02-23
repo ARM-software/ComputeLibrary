@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,17 +33,17 @@
 
 namespace arm_compute
 {
-TRACE_TO_STRING(KeyPointArray)
-TRACE_TO_STRING(Pyramid)
-TRACE_TO_STRING(LSTMParams<ITensor>)
-TRACE_TO_STRING(FullyConnectedLayerInfo)
-TRACE_TO_STRING(arm_gemm::Requantize32)
+ARM_COMPUTE_TRACE_TO_STRING(KeyPointArray)
+ARM_COMPUTE_TRACE_TO_STRING(Pyramid)
+ARM_COMPUTE_TRACE_TO_STRING(LSTMParams<ITensor>)
+ARM_COMPUTE_TRACE_TO_STRING(FullyConnectedLayerInfo)
+ARM_COMPUTE_TRACE_TO_STRING(arm_gemm::Requantize32)
 
-CONST_PTR_CLASS(KeyPointArray)
-CONST_PTR_CLASS(Pyramid)
-CONST_PTR_CLASS(LSTMParams<ITensor>)
-CONST_PTR_CLASS(DetectionPostProcessLayerInfo)
-CONST_PTR_CLASS(FullyConnectedLayerInfo)
-CONST_PTR_CLASS(GenerateProposalsInfo)
-CONST_PTR_CLASS(arm_gemm::Requantize32)
+ARM_COMPUTE_CONST_PTR_CLASS(KeyPointArray)
+ARM_COMPUTE_CONST_PTR_CLASS(Pyramid)
+ARM_COMPUTE_CONST_PTR_CLASS(LSTMParams<ITensor>)
+ARM_COMPUTE_CONST_PTR_CLASS(DetectionPostProcessLayerInfo)
+ARM_COMPUTE_CONST_PTR_CLASS(FullyConnectedLayerInfo)
+ARM_COMPUTE_CONST_PTR_CLASS(GenerateProposalsInfo)
+ARM_COMPUTE_CONST_PTR_CLASS(arm_gemm::Requantize32)
 } // namespace arm_compute

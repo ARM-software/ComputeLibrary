@@ -31,7 +31,6 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NERemapKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -45,11 +44,11 @@ void NERemap::configure(ITensor *input, const ITensor *map_x, const ITensor *map
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(map_y, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(policy == InterpolationPolicy::AREA, "Area interpolation is not supported");
 
-    auto k = arm_compute::support::cpp14::make_unique<NERemapKernel>();
+    auto k = std::make_unique<NERemapKernel>();
     k->configure(input, map_x, map_y, output, policy);
     _kernel = std::move(k);
 
-    auto b = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    auto b = std::make_unique<NEFillBorderKernel>();
     b->configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
     _border_handler = std::move(b);
 }

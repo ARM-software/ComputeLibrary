@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,8 +33,6 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
-#include "support/MemorySupport.h"
-
 #include <cmath>
 #include <tuple>
 #include <utility>
@@ -61,35 +59,35 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
     {
         case ConvolutionMethod::WINOGRAD:
         {
-            auto f = arm_compute::support::cpp14::make_unique<NEWinogradConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<NEWinogradConvolutionLayer>(_memory_manager);
             f->configure(input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::GEMM:
         {
-            auto f = arm_compute::support::cpp14::make_unique<NEGEMMConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<NEGEMMConvolutionLayer>(_memory_manager);
             f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::GEMM_CONV2D:
         {
-            auto f = arm_compute::support::cpp14::make_unique<NEGEMMConv2d>(_memory_manager);
+            auto f = std::make_unique<NEGEMMConv2d>(_memory_manager);
             f->configure(input, weights, biases, output, info);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::DIRECT:
         {
-            auto f = arm_compute::support::cpp14::make_unique<NEDirectConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<NEDirectConvolutionLayer>(_memory_manager);
             f->configure(input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::FFT:
         {
-            auto f = arm_compute::support::cpp14::make_unique<NEFFTConvolutionLayer>(_memory_manager);
+            auto f = std::make_unique<NEFFTConvolutionLayer>(_memory_manager);
             f->configure(input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
             break;
@@ -103,7 +101,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
 Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                     const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1), "Grouping (num_groups != 1) is not supported on NEON");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1), "Grouping (num_groups != 1) is not supported on Neon");
 
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
     switch(NEConvolutionLayer::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info, enable_fast_math))

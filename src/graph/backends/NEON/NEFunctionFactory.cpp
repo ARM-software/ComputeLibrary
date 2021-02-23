@@ -32,7 +32,6 @@
 #include "arm_compute/graph/nodes/Nodes.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
-#include "src/core/NEON/NEKernels.h"
 #include "support/Cast.h"
 #include "support/ToolchainSupport.h"
 
@@ -55,7 +54,7 @@ struct NETargetInfo
 
 Target NETargetInfo::TargetType = Target::NEON;
 
-/** Collection of NEON convolution functions */
+/** Collection of Neon convolution functions */
 struct NEConvolutionLayerFunctions
 {
     using GenericConvolutionLayer  = NEConvolutionLayer;
@@ -64,7 +63,7 @@ struct NEConvolutionLayerFunctions
     using WinogradConvolutionLayer = NEWinogradConvolutionLayer;
 };
 
-/** Collection of NEON element-wise functions */
+/** Collection of Neon element-wise functions */
 struct NEEltwiseFunctions
 {
     using Addition       = NEArithmeticAddition;
@@ -73,13 +72,13 @@ struct NEEltwiseFunctions
     using Maximum        = NEElementwiseMax;
 };
 
-/** Collection of NEON unary element-wise functions */
+/** Collection of Neon unary element-wise functions */
 struct NEUnaryEltwiseFunctions
 {
     using Exp = NEExpLayer;
 };
 
-/** Function and tensor types to be used inside a NEON fused convolution/batch normalization layer */
+/** Function and tensor types to be used inside a Neon fused convolution/batch normalization layer */
 struct NEFusedLayerTypes
 {
     using ConvolutionLayer          = NEConvolutionLayer;
@@ -102,7 +101,7 @@ std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETa
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<NENormalizationLayer>(get_memory_manager(ctx, NETargetInfo::TargetType));
+    auto func = std::make_unique<NENormalizationLayer>(get_memory_manager(ctx, NETargetInfo::TargetType));
     func->configure(input, output, norm_info);
 
     // Log info
@@ -116,7 +115,7 @@ std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETa
                                << " Normalization info: " << norm_info.type()
                                << std::endl);
 
-    return RETURN_UNIQUE_PTR(func);
+    return std::move(func);
 }
 } // namespace detail
 
@@ -192,16 +191,14 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_reshape_layer<NEReshapeLayer, NETargetInfo>(*polymorphic_downcast<ReshapeLayerNode *>(node));
         case NodeType::ResizeLayer:
             return detail::create_resize_layer<NEScale, NETargetInfo>(*polymorphic_downcast<ResizeLayerNode *>(node));
+        case NodeType::SliceLayer:
+            return detail::create_slice_layer<NESlice, NETargetInfo>(*polymorphic_downcast<SliceLayerNode *>(node));
         case NodeType::SoftmaxLayer:
             return detail::create_softmax_layer<NESoftmaxLayer, NETargetInfo>(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
         case NodeType::StackLayer:
             return detail::create_stack_layer<NEStackLayer, NETargetInfo>(*polymorphic_downcast<StackLayerNode *>(node));
         case NodeType::StridedSliceLayer:
             return detail::create_strided_slice_layer<NEStridedSlice, NETargetInfo>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
-        case NodeType::UpsampleLayer:
-            return detail::create_upsample_layer<NEUpsampleLayer, NETargetInfo>(*polymorphic_downcast<UpsampleLayerNode *>(node), ctx);
-        case NodeType::YOLOLayer:
-            return detail::create_yolo_layer<NEYOLOLayer, NETargetInfo>(*polymorphic_downcast<YOLOLayerNode *>(node), ctx);
         default:
             return nullptr;
     }

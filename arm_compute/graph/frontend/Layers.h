@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -300,12 +300,12 @@ public:
     ConcatLayer(SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
         : _sub_streams(), _concat_descriptor(DataLayoutDimension::CHANNEL)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream2)));
 
         utility::for_each([&](SubStream && sub_stream)
         {
-            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+            _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
     }
@@ -320,12 +320,12 @@ public:
     ConcatLayer(descriptors::ConcatLayerDescriptor concat_descriptor, SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
         : _sub_streams(), _concat_descriptor(concat_descriptor)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream2)));
 
         utility::for_each([&](SubStream && sub_stream)
         {
-            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+            _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
     }
@@ -337,7 +337,7 @@ public:
     ConcatLayer(SubStream &&sub_stream)
         : _sub_streams(), _concat_descriptor(DataLayoutDimension::CHANNEL)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
     }
     NodeID create_layer(IStream &s) override
     {
@@ -754,8 +754,8 @@ public:
         : _num_outputs(num_outputs),
           _weights(nullptr),
           _bias(nullptr),
-          _weights_ss(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream_weights))),
-          _bias_ss(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream_bias))),
+          _weights_ss(std::make_unique<SubStream>(std::move(sub_stream_weights))),
+          _bias_ss(std::make_unique<SubStream>(std::move(sub_stream_bias))),
           _fc_info(fc_info),
           _weights_quant_info(std::move(weights_quant_info)),
           _out_quant_info(std::move(out_quant_info))
@@ -1357,12 +1357,12 @@ public:
     StackLayer(SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
         : _sub_streams(), _axis(0)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream2)));
 
         utility::for_each([&](SubStream && sub_stream)
         {
-            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+            _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
     }
@@ -1377,12 +1377,12 @@ public:
     StackLayer(int axis, SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
         : _sub_streams(), _axis(axis)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream2)));
 
         utility::for_each([&](SubStream && sub_stream)
         {
-            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+            _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
     }
@@ -1394,7 +1394,7 @@ public:
     StackLayer(SubStream &&sub_stream)
         : _sub_streams(), _axis(0)
     {
-        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+        _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
     }
     NodeID create_layer(IStream &s) override
     {
@@ -1459,43 +1459,16 @@ private:
     StridedSliceLayerInfo _info;
 };
 
-/** Upsample Layer */
-class UpsampleLayer final : public ILayer
-{
-public:
-    /** Construct a Upsample layer.
-     *
-     * @param[in] info              Stride info
-     * @param[in] upsampling_policy Upsampling policy
-     */
-    UpsampleLayer(Size2D info, InterpolationPolicy upsampling_policy)
-        : _info(info), _upsampling_policy(upsampling_policy)
-    {
-    }
-
-    NodeID create_layer(IStream &s) override
-    {
-        NodeParams  common_params = { name(), s.hints().target_hint };
-        NodeIdxPair input         = { s.tail_node(), 0 };
-        return GraphBuilder::add_upsample_node(s.graph(), common_params, input, _info, _upsampling_policy);
-    }
-
-private:
-    Size2D              _info;
-    InterpolationPolicy _upsampling_policy;
-};
-
 /** YOLO Layer */
 class YOLOLayer final : public ILayer
 {
 public:
     /** Construct a YOLO layer.
      *
-     * @param[in] act_info    Activation info
-     * @param[in] num_classes Number of classes to activate
+     * @param[in] act_info Activation info
      */
-    YOLOLayer(ActivationLayerInfo act_info, int32_t num_classes)
-        : _act_info(act_info), _num_classes(num_classes)
+    YOLOLayer(ActivationLayerInfo act_info)
+        : _act_info(act_info)
     {
     }
 
@@ -1503,12 +1476,11 @@ public:
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
-        return GraphBuilder::add_yolo_node(s.graph(), common_params, input, _act_info, _num_classes);
+        return GraphBuilder::add_yolo_node(s.graph(), common_params, input, _act_info);
     }
 
 private:
     ActivationLayerInfo _act_info;
-    int32_t             _num_classes;
 };
 } // namespace frontend
 } // namespace graph

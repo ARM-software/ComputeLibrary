@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -150,7 +150,7 @@ inline void base_test_case(DetectionPostProcessLayerInfo info, DataType data_typ
         quantize_and_fill_tensor(Accessor(anchors), anchors_vector);
     }
 
-    // Determine the output through the NEON kernel
+    // Determine the output through the Neon kernel
     Tensor                      output_boxes;
     Tensor                      output_classes;
     Tensor                      output_scores;
@@ -384,7 +384,7 @@ TEST_CASE(Quantized_regular, framework::DatasetMode::ALL)
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE_END() // DetectionPostProcessLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

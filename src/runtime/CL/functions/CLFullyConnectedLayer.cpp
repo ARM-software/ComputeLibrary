@@ -42,7 +42,6 @@
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLTransposeKernel.h"
 #include "support/Cast.h"
-#include "support/MemorySupport.h"
 
 #include <algorithm>
 
@@ -149,7 +148,7 @@ void CLFullyConnectedLayerReshapeWeights::configure(const ICLTensor *input, ICLT
 
 void CLFullyConnectedLayerReshapeWeights::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLTransposeKernel>();
+    auto k = std::make_unique<CLTransposeKernel>();
     k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }

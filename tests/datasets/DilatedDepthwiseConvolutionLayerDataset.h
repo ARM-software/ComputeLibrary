@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,9 +68,9 @@ class SmallDepthwiseDilatedConvolutionLayerDataset3x3 final : public DepthwiseCo
 public:
     SmallDepthwiseDilatedConvolutionLayerDataset3x3()
     {
-        add_config(TensorShape(7U, 7U, 1U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 0), Size2D(2U, 2U));
+        add_config(TensorShape(1U, 1U, 1U), Size2D(3U, 3U), PadStrideInfo(1, 1, 2, 2), Size2D(2U, 2U));
         add_config(TensorShape(7U, 7U, 1U), Size2D(3U, 3U), PadStrideInfo(1, 1, 2, 0), Size2D(2U, 2U));
-        add_config(TensorShape(7U, 7U, 1U), Size2D(3U, 3U), PadStrideInfo(1, 1, 3, 0), Size2D(2U, 2U));
+        add_config(TensorShape(16U, 7U, 1U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 1), Size2D(2U, 2U));
 
         // Different strides and dilations
         add_config(TensorShape(7U, 7U, 1U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0), Size2D(2U, 2U));
@@ -119,7 +119,7 @@ class LargeDepthwiseDilatedConvolutionLayerDataset3x3 final : public DepthwiseCo
 public:
     LargeDepthwiseDilatedConvolutionLayerDataset3x3()
     {
-        add_config(TensorShape(33U, 27U, 11U, 3U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 1), Size2D(2U, 1U));
+        add_config(TensorShape(32U, 27U, 11U, 3U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 1), Size2D(2U, 1U));
         add_config(TensorShape(33U, 27U, 11U, 3U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1), Size2D(2U, 2U));
         add_config(TensorShape(21U, 31U, 9U, 4U), Size2D(3U, 3U), PadStrideInfo(1, 2, 1, 0), Size2D(2U, 2U));
         add_config(TensorShape(33U, 27U, 11U, 3U), Size2D(3U, 3U), PadStrideInfo(1, 2, 0, 1), Size2D(2U, 1U));

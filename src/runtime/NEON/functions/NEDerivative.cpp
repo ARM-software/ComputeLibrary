@@ -29,7 +29,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEDerivativeKernel.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -45,8 +44,8 @@ void NEDerivative::configure(ITensor *input, ITensor *output_x, ITensor *output_
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON((output_x == nullptr) && (output_y == nullptr));
 
-    _kernel         = arm_compute::support::cpp14::make_unique<NEDerivativeKernel>();
-    _border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel>();
+    _kernel         = std::make_unique<NEDerivativeKernel>();
+    _border_handler = std::make_unique<NEFillBorderKernel>();
 
     _kernel->configure(input, output_x, output_y, border_mode == BorderMode::UNDEFINED);
     _border_handler->configure(input, BorderSize(1), border_mode, PixelValue(constant_border_value));

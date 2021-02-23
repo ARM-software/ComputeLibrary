@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -140,7 +140,7 @@ const auto ScaleAlignCornersSamplingPolicySet = combine(framework::dataset::make
 }),
 framework::dataset::make("AlignCorners", { true }));
 
-/** Generated shapes: Used by NEON precommit and nightly
+/** Generated shapes: Used by Neon precommit and nightly
  * - 2D shapes with 0, 1, 2 vector iterations
  * - 3D shapes with 0, 1 vector iterations
  * - 4D shapes with 0 vector iterations

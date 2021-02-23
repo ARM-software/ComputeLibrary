@@ -29,7 +29,6 @@
 #include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -38,7 +37,7 @@ NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::~NEGEMMLowpQuantizeDownInt3
 void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
                                                                     int result_offset_after_shift, int min, int max)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
+    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
     k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
     _kernel = std::move(k);
 }
@@ -53,7 +52,7 @@ NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::~NEGEMMLowpQuantizeDownInt32
 void NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
                                                                    int result_offset_after_shift, int min, int max)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
+    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
     k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
     _kernel = std::move(k);
 }
@@ -67,7 +66,7 @@ NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::~NEGEMMLowpQuantizeDownInt3
 
 void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift, int min, int max)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
+    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
     k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
     _kernel = std::move(k);
 }
@@ -93,21 +92,21 @@ void NEGEMMLowpOutputStage::configure(const ITensor *input, const ITensor *bias,
             {
                 case DataType::QASYMM8:
                 {
-                    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
+                    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
                     k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
                     _kernel = std::move(k);
                     break;
                 }
                 case DataType::QASYMM8_SIGNED:
                 {
-                    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
+                    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
                     k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
                     _kernel = std::move(k);
                     break;
                 }
                 case DataType::QSYMM16:
                 {
-                    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
+                    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
                     k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
                     _kernel = std::move(k);
                     break;
@@ -127,7 +126,7 @@ void NEGEMMLowpOutputStage::configure(const ITensor *input, const ITensor *bias,
                 case DataType::QASYMM8:
                 case DataType::QASYMM8_SIGNED:
                 {
-                    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ScaleKernel>();
+                    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ScaleKernel>();
                     k->configure(input, bias, output, &info);
                     _kernel = std::move(k);
                     break;

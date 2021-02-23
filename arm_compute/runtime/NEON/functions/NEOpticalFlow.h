@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ class NELKTrackerKernel;
 
 /** Array of LK Internel Keypoints */
 using LKInternalKeypointArray = Array<NELKInternalKeypoint>;
-/** Basic function to execute optical flow. This function calls the following NEON kernels and functions:
+/** Basic function to execute optical flow. This function calls the following Neon kernels and functions:
  *
  * -# @ref NEScharr3x3
  * -# @ref NELKTrackerKernel

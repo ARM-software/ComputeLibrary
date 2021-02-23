@@ -53,8 +53,8 @@ template <typename T>
 using CLMagnitudeFixture = MagnitudeValidationFixture<CLTensor, CLAccessor, CLMagnitude, T>;
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S16)),
-                                                                                                         framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S16)),
+                                                                                                       framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance<int16_t>(_magnitude_type));
@@ -69,8 +69,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMagnitudeFixture<int16_t>, framework::Dataset
 TEST_SUITE_END() // S16
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S32)),
-                                                                                                         framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), framework::dataset::make("Format", Format::S32)),
+                                                                                                       framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance<int32_t>(_magnitude_type));

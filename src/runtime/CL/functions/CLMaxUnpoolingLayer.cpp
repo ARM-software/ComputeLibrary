@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,14 +28,12 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
-#include "src/core/CL/kernels/CLMemsetKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLMaxUnpoolingLayer::CLMaxUnpoolingLayer()
-    : _memset_kernel(support::cpp14::make_unique<CLMemsetKernel>()),
-      _unpooling_layer_kernel(support::cpp14::make_unique<CLMaxUnpoolingLayerKernel>())
+    : _fill(),
+      _unpooling_layer_kernel(std::make_unique<CLMaxUnpoolingLayerKernel>())
 {
 }
 
@@ -49,7 +47,7 @@ void CLMaxUnpoolingLayer::configure(ICLTensor *input, ICLTensor *indices, ICLTen
 void CLMaxUnpoolingLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *indices, ICLTensor *output, const PoolingLayerInfo &pool_info)
 {
     const PixelValue zero_value(0.f);
-    _memset_kernel->configure(output, zero_value);
+    _fill.configure(output, zero_value);
 
     _unpooling_layer_kernel->configure(compile_context, input, indices, output, pool_info);
 }
@@ -61,8 +59,8 @@ Status CLMaxUnpoolingLayer::validate(const ITensorInfo *input, const ITensorInfo
 
 void CLMaxUnpoolingLayer::run()
 {
-    // Run memset
-    CLScheduler::get().enqueue(*_memset_kernel, false);
+    // Run fill
+    _fill.run();
 
     // Run max unpooling layer
     CLScheduler::get().enqueue(*_unpooling_layer_kernel);

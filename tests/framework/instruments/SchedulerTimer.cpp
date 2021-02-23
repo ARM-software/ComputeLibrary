@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,10 +91,10 @@ public:
         _kernels.push_back(std::move(info));
     }
 
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors) override
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors) override
     {
         _timer.start();
-        _real_scheduler.schedule_op(kernel, hints, tensors);
+        _real_scheduler.schedule_op(kernel, hints, window, tensors);
         _timer.stop();
 
         typename SchedulerClock<output_timestamps>::kernel_info info;
@@ -188,7 +188,7 @@ void           SchedulerClock<output_timestamps>::test_start()
         {
             if(user != nullptr && user->scheduler() != nullptr)
             {
-                user->intercept_scheduler(support::cpp14::make_unique<Interceptor<output_timestamps>>(_kernels, *user->scheduler(), _scale_factor));
+                user->intercept_scheduler(std::make_unique<Interceptor<output_timestamps>>(_kernels, *user->scheduler(), _scale_factor));
             }
         });
     }

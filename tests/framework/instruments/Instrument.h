@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_TEST_INSTRUMENT
 #define ARM_COMPUTE_TEST_INSTRUMENT
 
-#include "support/MemorySupport.h"
-
 #include "../Utils.h"
 #include "Measurement.h"
 
@@ -135,7 +133,7 @@ protected:
 template <typename T, ScaleFactor scale>
 inline std::unique_ptr<Instrument> Instrument::make_instrument()
 {
-    return support::cpp14::make_unique<T>(scale);
+    return std::make_unique<T>(scale);
 }
 
 } // namespace framework

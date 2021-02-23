@@ -31,60 +31,37 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
-unsigned int get_num_elems_processed_per_iteration(const DataType dt)
-{
-    unsigned int num_elems_processed_per_iteration = preferred_vector_width(CLKernelLibrary::get().get_device(), dt);
-    if(num_elems_processed_per_iteration > 8)
-    {
-        num_elems_processed_per_iteration = 8; //kernel uses only 8 lanes.
-    }
-    return num_elems_processed_per_iteration;
-}
+constexpr unsigned int vector_size_byte_opencl = 16;
 
-Status validate_arguments(const ITensorInfo &output, const float start, const float end, const float step)
+Status validate_arguments(const ITensorInfo *output, const float start, const float end, const float step)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output,
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output,
                                                          1,
                                                          DataType::U8, DataType::S8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(output);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((start == end), "start of the requested sequence must not be equal to the end");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((start < end) && (step <= 0)), "step must be greater than 0 when start < end");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((start > end) && (step >= 0)), "step must be less than 0 when start > end");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(start, output.data_type(), output.quantization_info()), "start value is outside the range of the data type");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(end, output.data_type(), output.quantization_info()), "end value is outside the range of the data type");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(step, output.data_type(), output.quantization_info()), "step value is outside the range of the data type");
-
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((start == end), "start of the requested sequence must not be equal to the end");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output.num_dimensions() != 1, "Output has to be a 1-D tensor");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output.tensor_shape().total_size() < num_of_elements_in_range(start, end, step), "Output tensor size is incorrect");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(start, output->data_type(), output->quantization_info()), "start value is outside the range of the data type");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(end, output->data_type(), output->quantization_info()), "end value is outside the range of the data type");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(step, output->data_type(), output->quantization_info()), "step value is outside the range of the data type");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->num_dimensions() != 1, "Output has to be a 1-D tensor");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->tensor_shape().total_size() < num_of_elements_in_range(start, end, step), "Output tensor size is incorrect");
 
     return Status{};
-}
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo &output, const float start, const float end, const float step)
-{
-    unsigned int num_elems_processed_per_iteration = get_num_elems_processed_per_iteration(output.data_type());
-    // Auto initialize output if not initialized
-    auto_init_if_empty(output, TensorShape(num_of_elements_in_range(start, end, step)), 1, output.data_type(), output.quantization_info());
-
-    // Configure kernel window
-    Window win = calculate_max_window(output, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), TensorShape(num_of_elements_in_range(start, end, step))));
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
 }
 } // namespace
 
@@ -101,12 +78,13 @@ void CLRangeKernel::configure(ICLTensor *output, const float start, const float 
 void CLRangeKernel::configure(const CLCompileContext &compile_context, ICLTensor *output, const float start, const float end, const float step)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*(output->info()), start, end, step));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(output->info(), start, end, step));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(*(output->info()), start, end, step);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / output->info()->element_size(), output->info()->dimension(0));
+    Window       win                               = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+
+    auto padding_info = get_padding_info({ output });
 
     _start  = start;
     _end    = end;
@@ -115,11 +93,11 @@ void CLRangeKernel::configure(const CLCompileContext &compile_context, ICLTensor
 
     std::string kernel_name = "range";
 
-    unsigned int num_elems_processed_per_iteration = get_num_elems_processed_per_iteration(output->info()->data_type());
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
     build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(output->info()->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DSTART=" + support::cpp11::to_string(start));
     build_opts.add_option("-DSTEP=" + support::cpp11::to_string(step));
     if(is_data_type_quantized_asymmetric(output->info()->data_type()))
@@ -131,7 +109,7 @@ void CLRangeKernel::configure(const CLCompileContext &compile_context, ICLTensor
     }
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
-    ICLKernel::configure_internal(win_config.second);
+    ICLKernel::configure_internal(win);
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
@@ -139,15 +117,12 @@ void CLRangeKernel::configure(const CLCompileContext &compile_context, ICLTensor
     _config_id += lower_string(string_from_data_type(output->info()->data_type()));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLRangeKernel::validate(const ITensorInfo *output, const float start, const float end, const float step)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*output, start, end, step));
-    ARM_COMPUTE_RETURN_ON_ERROR((validate_and_configure_window(*(output->clone()), start, end, step)).first);
-
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(output, start, end, step));
     return Status{};
 }
 
@@ -160,3 +135,4 @@ void CLRangeKernel::run(const Window &window, cl::CommandQueue &queue)
 
     enqueue(queue, *this, window, lws_hint());
 }
+} // namespace arm_compute

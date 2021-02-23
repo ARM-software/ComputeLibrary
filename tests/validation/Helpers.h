@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "tests/Globals.h"
 #include "tests/SimpleTensor.h"
 
+#include <math.h>
 #include <random>
 #include <type_traits>
 #include <utility>

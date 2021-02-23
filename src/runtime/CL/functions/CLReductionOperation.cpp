@@ -34,7 +34,6 @@
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/runtime/Utils.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -224,7 +223,7 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
             _memory_group.manage(&_results_vector.back());
         }
 
-        _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLReductionOperationKernel>());
+        _reduction_kernels_vector.emplace_back(std::make_unique<CLReductionOperationKernel>());
         _reduction_kernels_vector[0]->configure(compile_context, input, output_internal, axis, op, 0);
     }
     else
@@ -273,10 +272,10 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
                 ARM_COMPUTE_ERROR("Not supported");
         }
 
-        _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLReductionOperationKernel>());
+        _reduction_kernels_vector.emplace_back(std::make_unique<CLReductionOperationKernel>());
         _reduction_kernels_vector[0]->configure(compile_context, input, &_results_vector[0], axis, first_kernel_op);
 
-        _border_handlers_vector.emplace_back(support::cpp14::make_unique<CLFillBorderKernel>());
+        _border_handlers_vector.emplace_back(std::make_unique<CLFillBorderKernel>());
         _border_handlers_vector[0]->configure(compile_context, input, _reduction_kernels_vector[0]->border_size(), BorderMode::CONSTANT, pixelValue);
 
         // Apply ReductionOperation on intermediate stages
@@ -284,10 +283,10 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
         {
             _memory_group.manage(&_results_vector[i]);
 
-            _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLReductionOperationKernel>());
+            _reduction_kernels_vector.emplace_back(std::make_unique<CLReductionOperationKernel>());
             _reduction_kernels_vector[i]->configure(compile_context, &_results_vector[i - 1], &_results_vector[i], axis, intermediate_kernel_op);
 
-            _border_handlers_vector.emplace_back(support::cpp14::make_unique<CLFillBorderKernel>());
+            _border_handlers_vector.emplace_back(std::make_unique<CLFillBorderKernel>());
             _border_handlers_vector[i]->configure(compile_context, &_results_vector[i - 1], _reduction_kernels_vector[i]->border_size(), BorderMode::CONSTANT, pixelValue);
 
             _results_vector[i - 1].allocator()->allocate();
@@ -302,10 +301,10 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
             _memory_group.manage(&_results_vector.back());
         }
 
-        _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLReductionOperationKernel>());
+        _reduction_kernels_vector.emplace_back(std::make_unique<CLReductionOperationKernel>());
         _reduction_kernels_vector[last_stage]->configure(compile_context, &_results_vector[last_stage - 1], output_internal, axis, last_kernel_op, input_width);
 
-        _border_handlers_vector.emplace_back(support::cpp14::make_unique<CLFillBorderKernel>());
+        _border_handlers_vector.emplace_back(std::make_unique<CLFillBorderKernel>());
         _border_handlers_vector[last_stage]->configure(compile_context, &_results_vector[last_stage - 1], _reduction_kernels_vector[last_stage]->border_size(), BorderMode::CONSTANT, pixelValue);
 
         _results_vector[last_stage - 1].allocator()->allocate();

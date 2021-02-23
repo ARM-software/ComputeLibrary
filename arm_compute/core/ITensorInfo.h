@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,9 @@ namespace arm_compute
 /** Store the tensor's metadata */
 class ITensorInfo : public misc::ICloneable<ITensorInfo>
 {
+public:
+    using TensorDimsState = Coordinates;
+
 public:
     /** Default virtual destructor */
     virtual ~ITensorInfo() = default;
@@ -81,6 +84,17 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_tensor_shape(const TensorShape &shape) = 0;
+    /** Set the state for each dimension of the tensor
+     *
+     * This sets the state of each dimension of the shape in terms of dynamic behavior using -1 where appropriate.
+     * The index in the state is a 1 to 1 mapping with the shape dimension index.
+     * For example if you want to express [?, 3, 3] as a dynamic input then [-1, 3, 3] has to be set as a state
+     *
+     * @param[in] state Tensor dimensions state
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_tensor_dims_state(const TensorDimsState &state) = 0;
     /** Set the quantization settings (scale and offset) of the tensor.
      *
      * @param[in] quantization_info QuantizationInfo containing the scale and offset
@@ -170,6 +184,11 @@ public:
      * @return A vector with the size for each dimension of the tensor
      */
     virtual const TensorShape &tensor_shape() const = 0;
+    /** State of each dimension of the tensor shape
+     *
+     * @return A vector with the state for each dimension of the tensor, where -1 specifies dynamic dimension
+     */
+    virtual const TensorDimsState &tensor_dims_state() const = 0;
     /** Data type used for each element of the tensor
      *
      * @return Tensor data type
@@ -212,13 +231,6 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_is_resizable(bool is_resizable) = 0;
-    /** Set the flag whether the tensor size is dynamic.
-     *
-     * @param[in] is_dynamic Flag that marks the tensor if it's dynamic.
-     *
-     * @return Reference to this ITensorInfo object
-     */
-    virtual ITensorInfo &set_is_dynamic(bool is_dynamic) = 0;
     /** Valid region of the tensor. All elements in the valid region have defined values, i.e. are not undefined.
      *
      * @return The valid region.

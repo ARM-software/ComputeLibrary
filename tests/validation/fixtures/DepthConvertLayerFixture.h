@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,8 +67,8 @@ protected:
         }
         else
         {
-            // When converting S32 to F16, both reference and NEON implementations are + or - infinity outside the F16 range.
-            if(dt_in==DataType::S32 && dt_out==DataType::F16)
+            // When converting S32 to F16, both reference and Neon implementations are + or - infinity outside the F16 range.
+            if(dt_in == DataType::S32 && dt_out == DataType::F16)
             {
                 std::uniform_int_distribution<int32_t> distribution_s32(-65504, 65504);
                 library->fill(tensor, distribution_s32, i);

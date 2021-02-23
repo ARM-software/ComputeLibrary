@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,7 +89,7 @@ public:
         const DataLayout weights_layout = DataLayout::NCHW;
 
         // Create preprocessor
-        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>(0);
+        std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>(0);
 
         graph << common_params.target
               << common_params.fast_math_hint
@@ -148,6 +148,7 @@ public:
         config.use_tuner   = common_params.enable_tuner;
         config.tuner_mode  = common_params.tuner_mode;
         config.tuner_file  = common_params.tuner_file;
+        config.mlgo_file   = common_params.mlgo_file;
 
         graph.finalize(common_params.target, config);
 

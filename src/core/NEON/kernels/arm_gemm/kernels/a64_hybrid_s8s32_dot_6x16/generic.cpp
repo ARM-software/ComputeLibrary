@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -3325,7 +3325,7 @@ void a64_hybrid_s8s32_dot_6x16 (
       "b 1b\n"
       "212:"  // Exit
 
-      : [M] "+r" (M), [input_ptr] "+r" (input_ptr), [output_ptr] "+r" (output_ptr)
+      : [M] "+&r" (M), [input_ptr] "+&r" (input_ptr), [output_ptr] "+&r" (output_ptr)
       : [args_ptr] "r" (&ka), [flags] "r" (flags), [offsetof_B_ptr] "I" (offsetof(KernelArgs, B_ptr)), [offsetof_N] "I" (offsetof(KernelArgs, N)), [offsetof_input_initial_col] "I" (offsetof(KernelArgs, input_initial_col)), [offsetof_input_offset] "I" (offsetof(KernelArgs, input_offset)), [offsetof_num_strings] "I" (offsetof(KernelArgs, num_strings)), [offsetof_output_offset] "I" (offsetof(KernelArgs, output_offset)), [offsetof_string_lengths] "I" (offsetof(KernelArgs, string_lengths))
       : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
     );

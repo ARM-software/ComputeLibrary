@@ -31,12 +31,11 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include "src/core/CL/kernels/CLBatchToSpaceLayerKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 CLBatchToSpaceLayer::CLBatchToSpaceLayer()
-    : _batch_to_space_kernel(support::cpp14::make_unique<CLBatchToSpaceLayerKernel>())
+    : _batch_to_space_kernel(std::make_unique<CLBatchToSpaceLayerKernel>())
 {
 }
 

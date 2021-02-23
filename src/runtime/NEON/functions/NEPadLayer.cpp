@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,10 +27,8 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/NEON/kernels/NECopyKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -53,13 +51,13 @@ uint32_t last_padding_dimension(const PaddingList &padding)
 NEPadLayer::~NEPadLayer() = default;
 
 NEPadLayer::NEPadLayer()
-    : _copy_kernel(), _pad_kernel(), _mode(), _padding(), _num_dimensions(0), _slice_functions(), _concat_functions(), _slice_results(), _concat_results()
+    : _copy_function(), _pad_kernel(), _mode(), _padding(), _num_dimensions(0), _slice_functions(), _concat_functions(), _slice_results(), _concat_results()
 {
 }
 
 void NEPadLayer::configure_constant_mode(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value)
 {
-    _pad_kernel = arm_compute::support::cpp14::make_unique<NEPadLayerKernel>();
+    _pad_kernel = std::make_unique<NEPadLayerKernel>();
     _pad_kernel->configure(input, output, padding, constant_value, PaddingMode::CONSTANT);
 }
 
@@ -201,8 +199,7 @@ void NEPadLayer::configure(ITensor *input, ITensor *output, const PaddingList &p
     else
     {
         // Copy the input to the whole output if no padding is applied
-        _copy_kernel = arm_compute::support::cpp14::make_unique<NECopyKernel>();
-        _copy_kernel->configure(input, output);
+        _copy_function.configure(input, output);
     }
 }
 
@@ -287,7 +284,7 @@ void NEPadLayer::run()
     }
     else
     {
-        NEScheduler::get().schedule(_copy_kernel.get(), Window::DimY);
+        _copy_function.run();
     }
 }
 } // namespace arm_compute

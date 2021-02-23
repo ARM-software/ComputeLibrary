@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
 #include "arm_compute/core/Helpers.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -34,7 +33,7 @@ using namespace arm_compute;
 
 void GCFillBorder::configure(IGCTensor *tensor, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCFillBorderKernel>();
+    auto k = std::make_unique<GCFillBorderKernel>();
     k->configure(tensor, BorderSize(border_width), border_mode, constant_border_value);
     _kernel = std::move(k);
 }

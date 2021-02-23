@@ -33,7 +33,6 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -42,8 +41,8 @@ CLSoftmaxLayerGeneric<IS_LOG>::CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryMana
     : _memory_group(std::move(memory_manager)),
       _permute_input(),
       _permute_output(),
-      _max_shift_exp_sum_kernel(support::cpp14::make_unique<CLLogits1DMaxShiftExpSumKernel>()),
-      _norm_kernel(support::cpp14::make_unique<CLLogits1DNormKernel>()),
+      _max_shift_exp_sum_kernel(std::make_unique<CLLogits1DMaxShiftExpSumKernel>()),
+      _norm_kernel(std::make_unique<CLLogits1DNormKernel>()),
       _max(),
       _sum(),
       _tmp(),

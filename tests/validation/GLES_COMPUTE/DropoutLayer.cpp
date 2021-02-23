@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ using GCDropoutLayerFixture = DropoutLayerValidationFixture<GCTensor, GCAccessor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Random, GCDropoutLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(Random, GCDropoutLayerFixture<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(datasets::SmallShapes(), testparam), framework::dataset::make("DataType", DataType::F32)))
 {
     // FIXME(APPBROWSER-302)
@@ -65,7 +65,7 @@ FIXTURE_DATA_TEST_CASE(Random, GCDropoutLayerFixture<float>, framework::DatasetM
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, GCDropoutLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(Random, GCDropoutLayerFixture<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(datasets::SmallShapes(), testparam), framework::dataset::make("DataType", DataType::F16)))
 {
     // FIXME(APPBROWSER-302)

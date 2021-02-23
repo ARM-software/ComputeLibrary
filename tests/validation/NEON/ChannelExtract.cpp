@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ template <typename T>
 using NEChannelExtractFixture = ChannelExtractValidationFixture<MultiImage, Tensor, Accessor, NEChannelExtract, T>;
 
 TEST_SUITE(RGBA)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -73,7 +73,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelExtractFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // RGBA
 
 TEST_SUITE(YUV)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -86,7 +86,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelExtractFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // YUV
 
 TEST_SUITE(YUVPlanar)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -99,7 +99,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelExtractFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // YUVPlanar
 
 TEST_SUITE_END() // ChannelExtract
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 
 } // namespace validation
 } // namespace test

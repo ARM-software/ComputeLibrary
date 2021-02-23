@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCActivationLayerKernel.h"
 #include "arm_compute/core/Helpers.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -38,7 +37,7 @@ void GCActivationLayer::configure(IGCTensor *input, IGCTensor *output, Activatio
 {
     auto core_ctx = _ctx ? _ctx->core_runtime_context() : /* Legacy */ nullptr;
 
-    auto k = arm_compute::support::cpp14::make_unique<GCActivationLayerKernel>(core_ctx);
+    auto k = std::make_unique<GCActivationLayerKernel>(core_ctx);
     k->configure(input, output, act_info);
     _kernel = std::move(k);
 }

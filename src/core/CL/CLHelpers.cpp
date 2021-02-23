@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -415,4 +415,26 @@ cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimensio
     const unsigned int num_of_threads = ((input_dimension + border_width) / 16);
     return cl::NDRange(std::min(8U, num_of_threads));
 }
+
+bool get_wbsm_support_info(const cl::Device &device)
+{
+    cl_bitfield capabilities = 0;
+    cl_int      err          = clGetDeviceInfo(device.get(), ARM_COMPUTE_LIBRARY_OPENCL_DEVICE_CAPABILITIES_ARM, sizeof(cl_bitfield), &capabilities, nullptr);
+    if((err == CL_SUCCESS) && (capabilities & ARM_COMPUTE_LIBRARY_OPENCL_EXEC_WBSM_ARM))
+    {
+        return true;
+    }
+    return false;
+}
+
+void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint)
+{
+    cl_int err = clSetKernelExecInfo(kernel.get(),
+                                     ARM_COMPUTE_LIBRARY_OPENCL_EXEC_WBSM_ARM,
+                                     sizeof(cl_int),
+                                     &wbsm_hint);
+    ARM_COMPUTE_UNUSED(err);
+    ARM_COMPUTE_ERROR_ON(err != CL_SUCCESS);
+}
+
 } // namespace arm_compute

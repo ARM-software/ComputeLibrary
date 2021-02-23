@@ -38,7 +38,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F16, DataType::F32);
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
@@ -85,6 +85,7 @@ void CLFFTScaleKernel::configure(const CLCompileContext &compile_context, ICLTen
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr));
+    auto padding_info = get_padding_info({ input, output });
 
     _input        = input;
     _output       = output;
@@ -94,6 +95,7 @@ void CLFFTScaleKernel::configure(const CLCompileContext &compile_context, ICLTen
     CLBuildOptions build_opts;
     build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(output != nullptr ? output->info()->num_channels() : input->info()->num_channels()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option_if(config.conjugate, "-DCONJ");
     std::string kernel_name = "fft_scale_conj";
     _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
@@ -115,6 +117,7 @@ void CLFFTScaleKernel::configure(const CLCompileContext &compile_context, ICLTen
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLFFTScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const FFTScaleKernelInfo &config)

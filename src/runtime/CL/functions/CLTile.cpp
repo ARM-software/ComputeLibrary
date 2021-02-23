@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLTile.h"
 
 #include "src/core/CL/kernels/CLTileKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -35,7 +34,7 @@ void CLTile::configure(const ICLTensor *input, ICLTensor *output, const Multiple
 
 void CLTile::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Multiples &multiples)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLTileKernel>();
+    auto k = std::make_unique<CLTileKernel>();
     k->configure(compile_context, input, output, multiples);
     _kernel = std::move(k);
 }

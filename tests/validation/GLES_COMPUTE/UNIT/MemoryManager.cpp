@@ -57,7 +57,7 @@ using GCBlobMemoryManagerSimpleWithinFunctionLevelFixture = BlobMemoryManagerSim
       GCFullyConnectedLayer>;
 FIXTURE_TEST_CASE(BlobMemoryManagerSimpleWithinFunctionLevel,
                   GCBlobMemoryManagerSimpleWithinFunctionLevelFixture,
-                  framework::DatasetMode::ALL)
+                  framework::DatasetMode::NIGHTLY)
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
@@ -70,7 +70,7 @@ using GCBlobMemoryManagerReconfigureFixture = BlobMemoryManagerReconfigureTestCa
       GCFullyConnectedLayer>;
 FIXTURE_TEST_CASE(BlobMemoryManagerReconfigure,
                   GCBlobMemoryManagerReconfigureFixture,
-                  framework::DatasetMode::ALL)
+                  framework::DatasetMode::NIGHTLY)
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
@@ -84,7 +84,7 @@ using GCBlobMemoryManagerReconfigure2Fixture = BlobMemoryManagerReconfigure2Test
       GCSoftmaxLayer>;
 FIXTURE_TEST_CASE(BlobMemoryManagerReconfigure2,
                   GCBlobMemoryManagerReconfigure2Fixture,
-                  framework::DatasetMode::ALL)
+                  framework::DatasetMode::NIGHTLY)
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);

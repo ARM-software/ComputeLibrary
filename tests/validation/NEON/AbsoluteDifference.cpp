@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,7 @@ using NEAbsoluteDifferenceFixture = AbsoluteDifferenceValidationFixture<Tensor, 
 
 TEST_SUITE(U8)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -72,7 +72,7 @@ TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsoluteDifferenceFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -86,7 +86,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsoluteDifferenceFixture<int16_t>, framework
 TEST_SUITE_END() // S16
 
 TEST_SUITE_END() // AbsoluteDifference
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

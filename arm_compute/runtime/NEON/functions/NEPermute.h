@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,11 @@
 #ifndef ARM_COMPUTE_NEPERMUTE_H
 #define ARM_COMPUTE_NEPERMUTE_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/Types.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -34,11 +36,23 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEPermuteKernel */
-class NEPermute : public INESimpleFunctionNoBorder
+/** Basic function to run @ref cpu::kernels::CpuPermuteKernel */
+class NEPermute : public IFunction
 {
 public:
-    /** Configure the permute NEON kernel
+    /** Default Constructor */
+    NEPermute();
+    /** Default Destructor */
+    ~NEPermute();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEPermute(const NEPermute &) = delete;
+    /** Default move constructor */
+    NEPermute(NEPermute &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEPermute &operator=(const NEPermute &) = delete;
+    /** Default move assignment operator */
+    NEPermute &operator=(NEPermute &&);
+    /** Configure the permute Neon kernel
      *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4
      *
@@ -58,6 +72,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm);
+
+    // Inherited methods overridden
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEPERMUTE_H */

@@ -47,8 +47,8 @@ TEST_SUITE(MeanStdDev)
 template <typename T>
 using NEMeanStdDevFixture = MeanStdDevValidationFixture<Tensor, Accessor, NEMeanStdDev, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                          DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                        DataType::U8)))
 {
     // Validate mean output
     validate(_target.first, _reference.first);

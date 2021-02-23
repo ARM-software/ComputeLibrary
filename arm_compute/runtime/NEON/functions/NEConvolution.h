@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ class NESeparableConvolutionHorKernel;
 template <unsigned int matrix_size>
 class NESeparableConvolutionVertKernel;
 
-/** Basic function to execute convolution of size 3x3. This function calls the following NEON kernels:
+/** Basic function to execute convolution of size 3x3. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NEConvolution3x3Kernel
@@ -80,7 +80,7 @@ public:
     void configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 
-/** Basic function to execute convolution of size 5x5, 7x7, 9x9. This function calls the following NEON kernels:
+/** Basic function to execute convolution of size 5x5, 7x7, 9x9. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NEConvolutionKernel or<br/>
@@ -136,7 +136,7 @@ using NEConvolution7x7 = NEConvolutionSquare<7>;
 /** Basic function to run 9x9 convolution. */
 using NEConvolution9x9 = NEConvolutionSquare<9>;
 
-/** Basic function to execute non-square convolution. This function calls the following NEON kernels:
+/** Basic function to execute non-square convolution. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NEConvolutionRectangleKernel or<br/>

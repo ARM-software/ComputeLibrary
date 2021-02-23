@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,42 +24,17 @@
 #ifndef ARM_COMPUTE_CLLOGICALNOT_H
 #define ARM_COMPUTE_CLLOGICALNOT_H
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/IFunction.h"
+
+#include "arm_compute/core/Types.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
-
-namespace experimental
-{
-class CLLogicalNot : public ICLOperator
-{
-public:
-    /** Default Constructor */
-    CLLogicalNot() = default;
-    /** Initialise the kernel's inputs, output and conversion policy.
-     *
-     * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input           Tensor input. Data types supported: U8.
-     * @param[out]     output          Output tensor. Data types supported: U8.
-     */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLElementWiseUnaryLayerKernel
-     *
-     * @param[in] input  Tensor input info. Data types supported: U8.
-     * @param[in] output Output tensor info. Data types supported: U8.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-    // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-};
-} // namespace experimental
 
 /** Basic function to do logical NOT operation
  *
@@ -84,20 +59,20 @@ public:
     /** Initialize the function
      *
      * @param[in]  input  Input tensor. Data types supported: U8.
-     * @param[out] output Output tensor. Data types supported: U8.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Input tensor. Data types supported: U8.
-     * @param[out] output          Output tensor. Data types supported: U8.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration
      *
      * @param[in] input  Tensor input info. Data types supported: U8.
-     * @param[in] output Output tensor info. Data types supported: U8.
+     * @param[in] output Output tensor info. Data types supported: same as @p input.
      *
      * @return a status
      */

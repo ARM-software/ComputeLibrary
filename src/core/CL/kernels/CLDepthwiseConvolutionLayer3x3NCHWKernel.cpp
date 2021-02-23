@@ -211,8 +211,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x + (conv_stride_x > 1 ? 1 : 0);
         num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
     }
-    num_elems_read_per_iteration_x += (num_elems_read_per_iteration_x - 1) * (dilation.x() - 1);
-    num_elems_read_per_iteration_y += (num_elems_read_per_iteration_y - 1) * (dilation.y() - 1);
+    // The OpenCL routine convolution1x3 does loadn(addr), loadn(addr + dilation_x) and loadn(addr + 2 * dilation_x) on the input.
+    // Each of the three convolution1x3 gets called by passing addr, (addr + dilation_y) and (addr + 2 * dilation_y)
+    // Hence we must add 2 * dilation.x/y() to the number of elements read in those axes per thread
+    num_elems_read_per_iteration_x += 2 * dilation.x();
+    num_elems_read_per_iteration_y += 2 * dilation.y();
 
     // Create window and update padding
     Window win = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
@@ -267,7 +270,6 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const CLCompileContext 
     _conv_stride_y      = conv_info.stride().second;
     _conv_pad_left      = conv_info.pad_left();
     _conv_pad_top       = conv_info.pad_top();
-    _border_size        = BorderSize(_conv_pad_top, conv_info.pad_right(), conv_info.pad_bottom(), _conv_pad_left);
     _output_multipliers = output_multipliers;
     _output_shifts      = output_shifts;
     _is_quantized       = is_data_type_quantized_asymmetric(input->info()->data_type());
@@ -279,6 +281,8 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const CLCompileContext 
     auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name, dilation);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
+
+    _border_size = BorderSize(input->info()->padding());
 
     // Set build options
     CLBuildOptions build_opts;

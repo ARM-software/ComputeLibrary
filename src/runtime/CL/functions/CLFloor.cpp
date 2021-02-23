@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,11 +23,30 @@
  */
 #include "arm_compute/runtime/CL/functions/CLFloor.h"
 
-#include "src/core/CL/kernels/CLFloorKernel.h"
-#include "support/MemorySupport.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClFloor.h"
 
 namespace arm_compute
 {
+struct CLFloor::Impl
+{
+    const ICLTensor                 *src{ nullptr };
+    ICLTensor                       *dst{ nullptr };
+    std::unique_ptr<opencl::ClFloor> op{ nullptr };
+};
+
+CLFloor::CLFloor()
+    : _impl(std::make_unique<Impl>())
+{
+}
+CLFloor::CLFloor(CLFloor &&) = default;
+CLFloor &CLFloor::operator=(CLFloor &&) = default;
+CLFloor::~CLFloor()                     = default;
+
 void CLFloor::configure(const ICLTensor *input, ICLTensor *output)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
@@ -35,13 +54,25 @@ void CLFloor::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLFloor::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLFloorKernel>();
-    k->configure(compile_context, input, output);
-    _kernel = std::move(k);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+
+    _impl->src = input;
+    _impl->dst = output;
+
+    _impl->op = std::make_unique<opencl::ClFloor>();
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info());
 }
 
 Status CLFloor::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return CLFloorKernel::validate(input, output);
+    return opencl::ClFloor::validate(input, output);
+}
+
+void CLFloor::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

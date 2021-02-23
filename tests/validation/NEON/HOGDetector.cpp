@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ namespace validation
 namespace
 {
 /* Set the tolerance (percentage) used when validating the score of detection window.
-   Note: High tolerance is required due to divergence between CL and NEON detection window scores. */
+   Note: High tolerance is required due to divergence between CL and Neon detection window scores. */
 RelativeTolerance<float> tolerance(1.0f);
 
 /* Input dataset (values must be a multiple of the HOGInfo block_size) */
@@ -66,7 +66,7 @@ using NEHOGDetectorFixture = HOGDetectorValidationFixture<Tensor,
                                                           uint8_t,
                                                           float>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEHOGDetectorFixture, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEHOGDetectorFixture, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(
                        DetectionWindowStrideDataset,
                        datasets::SmallHOGDescriptorDataset()),

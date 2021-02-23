@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to execute non-maxima suppression over a 3x3 window. This function calls the following NEON kernels:
+/** Basic function to execute non-maxima suppression over a 3x3 window. This function calls the following Neon kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NENonMaximaSuppression3x3Kernel

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,6 @@
 
 #include "src/core/utils/ScaleUtils.h"
 
-#include "support/MemorySupport.h"
 #include "support/Rounding.h"
 
 #include <cmath>
@@ -110,7 +109,7 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     const bool is_align_corners_used = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy);
 
     // Get data layout and width/height indices
-    const DataLayout data_layout = input->info()->data_layout();
+    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : info.data_layout;
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
@@ -125,7 +124,7 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
     const auto policy_to_use = (info.interpolation_policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f) ? InterpolationPolicy::NEAREST_NEIGHBOR : info.interpolation_policy;
 
-    auto scale_kernel = arm_compute::support::cpp14::make_unique<NEScaleKernel>();
+    auto scale_kernel = std::make_unique<NEScaleKernel>();
     switch(policy_to_use)
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
@@ -183,7 +182,7 @@ Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, co
     ITensorInfo *dy      = nullptr;
 
     // Get data layout and width/height indices
-    const DataLayout data_layout = input->data_layout();
+    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : info.data_layout;
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 

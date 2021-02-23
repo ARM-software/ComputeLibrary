@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,6 @@
 
 namespace arm_compute
 {
-namespace kernels
-{
 /** List of supported logical operations */
 enum class LogicalOperation
 {
@@ -36,6 +34,5 @@ enum class LogicalOperation
     Or,      /**< Logical Or || */
     Not,     /**< Logical Not ! */
 };
-} // namespace kernels
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_KERNEL_TYPES_H */

@@ -56,7 +56,7 @@ TEST_SUITE(U8)
 template <typename T1>
 using CLAccumulateFixture = AccumulateValidationFixture<CLTensor, CLAccessor, CLAccumulate, T1, int16_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLAccumulateFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AccumulateS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLAccumulateFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AccumulateS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance);
@@ -76,7 +76,7 @@ TEST_SUITE(U8)
 template <typename T1>
 using CLAccumulateWeightedFixture = AccumulateWeightedValidationFixture<CLTensor, CLAccessor, CLAccumulateWeighted, T1, uint8_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLAccumulateWeightedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AccumulateU8Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLAccumulateWeightedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AccumulateU8Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance);
@@ -96,7 +96,7 @@ TEST_SUITE(U8)
 template <typename T1>
 using CLAccumulateSquaredFixture = AccumulateSquaredValidationFixture<CLTensor, CLAccessor, CLAccumulateSquared, T1, int16_t>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLAccumulateSquaredFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), AccumulateS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLAccumulateSquaredFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), AccumulateS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance);

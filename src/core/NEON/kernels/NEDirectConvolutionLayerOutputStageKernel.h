@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@
 namespace arm_compute
 {
 class ITensor;
-/** NEON kernel to accumulate the biases, if provided, or downscale in case of quantized input.
+/** Neon kernel to accumulate the biases, if provided, or downscale in case of quantized input.
  *
  * @note We assume bias to be shared
  * @note For quantized computations (i.e. @p input of S32 type) the output data type for auto-initialization must be passed as part

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -222,7 +222,7 @@ public:
  *
  * ((FixedPointMul(input[i][k] + bias[k], result_fixedpoint_multiplier)) >> result_shift) + result_offset_after_shift
  *
- *  This function calls the following NEON kernels:
+ *  This function calls the following CL kernels:
  *
  * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
  *

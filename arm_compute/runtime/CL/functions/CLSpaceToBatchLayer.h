@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLFill.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
@@ -33,14 +34,13 @@
 namespace arm_compute
 {
 class CLCompileContext;
-class CLMemsetKernel;
 class CLSpaceToBatchLayerKernel;
 class ICLTensor;
 class ITensorInfo;
 
 /** Basic function to spatial divide a tensor. This function calls the following OpenCL kernels/functions:
  *
- *  -# @ref CLMemsetKernel
+ *  -# @ref CLFill
  *  -# @ref CLSpaceToBatchLayerKernel
  */
 class CLSpaceToBatchLayer : public IFunction
@@ -125,7 +125,7 @@ public:
 
 private:
     std::unique_ptr<CLSpaceToBatchLayerKernel> _space_to_batch_kernel; /**< SpaceToBatch kernel to run */
-    std::unique_ptr<CLMemsetKernel>            _memset_kernel;         /**< Memset kernel to run */
+    CLFill                                     _fill;                  /**< Fill function to run */
     bool                                       _has_padding;           /**< Flag to check if the output has padding */
 };
 } // namespace arm_compute

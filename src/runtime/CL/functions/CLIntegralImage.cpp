@@ -25,13 +25,12 @@
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLIntegralImageKernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 CLIntegralImage::CLIntegralImage()
-    : _integral_hor(support::cpp14::make_unique<CLIntegralImageHorKernel>()),
-      _integral_vert(support::cpp14::make_unique<CLIntegralImageVertKernel>())
+    : _integral_hor(std::make_unique<CLIntegralImageHorKernel>()),
+      _integral_vert(std::make_unique<CLIntegralImageVertKernel>())
 {
 }
 

@@ -25,7 +25,6 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NERangeKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -38,7 +37,7 @@ NERange::NERange()
 
 void NERange::configure(ITensor *output, const float start, const float end, const float step)
 {
-    _kernel = arm_compute::support::cpp14::make_unique<NERangeKernel>();
+    _kernel = std::make_unique<NERangeKernel>();
     _kernel->configure(output, start, end, step);
 }
 

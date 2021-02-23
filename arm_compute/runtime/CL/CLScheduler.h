@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
 
 namespace arm_compute
@@ -57,15 +58,17 @@ public:
      *  and sets a default device and kernel path for the @ref CLKernelLibrary.
      *
      * @param[in] cl_tuner (Optional) Pointer to ICLTuner (default=nullptr)
+     * @param[in] gemm_h   (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
      */
-    void default_init(ICLTuner *cl_tuner = nullptr);
+    void default_init(ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr);
     /** Initialises the scheduler with context and device provided by the user
      *
      * @param[in] device   OpenCL device to be used
      * @param[in] ctx      OpenCL ctx to be used
      * @param[in] cl_tuner (Optional) Pointer to ICLTuner (default=nullptr)
+     * @param[in] gemm_h   (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
      */
-    void default_init_with_context(cl::Device &device, cl::Context &ctx, ICLTuner *cl_tuner = nullptr);
+    void default_init_with_context(cl::Device &device, cl::Context &ctx, ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr);
 
     /** Schedule the execution of the passed kernel if possible.
      *
@@ -88,8 +91,9 @@ public:
      * @param[in] device   A CL device.
      * @param[in] cl_tuner (Optional) Pointer to OpenCL tuner (default=nullptr)
      *                     Note: It is caller's responsibility to release the allocated memory for CLTuner
+     * @param[in] gemm_h   (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
      */
-    void init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner = nullptr);
+    void init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr);
 
     /** Accessor for the associated CL context.
      *
@@ -108,6 +112,12 @@ public:
      * @return The target GPU.
      */
     GPUTarget target() const;
+
+    /** Accessor for the associated CLGEMMHeuristicsHandle
+     *
+     * @return Pointer to CLGEMMHeuristicsHandle
+     */
+    CLGEMMHeuristicsHandle *gemm_heuristics() const;
 
     /** Accessor to set the CL context to be used by the scheduler.
      *
@@ -161,6 +171,7 @@ private:
     bool                      _is_initialised;
     ICLTuner                 *_cl_tuner;
     std::unique_ptr<ICLTuner> _cl_default_static_tuner;
+    CLGEMMHeuristicsHandle   *_gemm_heuristics;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLSCHEDULER_H */

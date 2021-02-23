@@ -30,7 +30,6 @@
 #include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/MemoryRegion.h"
 #include "arm_compute/runtime/Types.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -75,6 +74,6 @@ MappingType OffsetMemoryPool::mapping_type() const
 std::unique_ptr<IMemoryPool> OffsetMemoryPool::duplicate()
 {
     ARM_COMPUTE_ERROR_ON(!_allocator);
-    return support::cpp14::make_unique<OffsetMemoryPool>(_allocator, _blob_info);
+    return std::make_unique<OffsetMemoryPool>(_allocator, _blob_info);
 }
 } // namespace arm_compute

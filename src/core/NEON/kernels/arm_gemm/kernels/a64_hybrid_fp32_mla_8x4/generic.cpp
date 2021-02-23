@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "../../utils.hpp"
 
 #include <cassert>
+#include <limits>
 
 namespace arm_gemm {
 
@@ -2185,7 +2186,7 @@ void a64_hybrid_fp32_mla_8x4 (
       "b 1b\n"
       "178:"  // Exit
 
-      : [M] "+r" (M), [input_ptr] "+r" (input_ptr), [output_ptr] "+r" (output_ptr)
+      : [M] "+&r" (M), [input_ptr] "+&r" (input_ptr), [output_ptr] "+&r" (output_ptr)
       : [args_ptr] "r" (&ka), [bias] "r" (bias), [flags] "r" (flags), [offset_max] "I" (offsetof(KernelArgs, maxval)), [offset_min] "I" (offsetof(KernelArgs, minval)), [offsetof_B_ptr] "I" (offsetof(KernelArgs, B_ptr)), [offsetof_N] "I" (offsetof(KernelArgs, N)), [offsetof_input_initial_col] "I" (offsetof(KernelArgs, input_initial_col)), [offsetof_input_offset] "I" (offsetof(KernelArgs, input_offset)), [offsetof_num_strings] "I" (offsetof(KernelArgs, num_strings)), [offsetof_output_offset] "I" (offsetof(KernelArgs, output_offset)), [offsetof_string_lengths] "I" (offsetof(KernelArgs, string_lengths))
       : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
     );

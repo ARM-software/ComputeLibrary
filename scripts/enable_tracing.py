@@ -72,7 +72,7 @@ def do_insert_tracing(source, function, fd):
     if len(arg_names):
         assert len(arg_names), "No argument to configure for %s ?" % class_name
         spaces = re.match("([ ]*)void", function[0]).group(1)
-        fd.write("%s    CREATE_TRACEPOINT(%s, \"%s\", this, TracePoint::Args()" % (spaces, source, class_name))
+        fd.write("%s    ARM_COMPUTE_CREATE_TRACEPOINT(%s, \"%s\", this, TracePoint::Args()" % (spaces, source, class_name))
         for arg in arg_names:
             fd.write("<<%s" % arg)
         fd.write(");\n")

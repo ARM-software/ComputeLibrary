@@ -24,13 +24,12 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCGEMMInterleave4x4.h"
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMInterleave4x4Kernel.h"
-#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 void GCGEMMInterleave4x4::configure(const IGCTensor *input, IGCTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCGEMMInterleave4x4Kernel>();
+    auto k = std::make_unique<GCGEMMInterleave4x4Kernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

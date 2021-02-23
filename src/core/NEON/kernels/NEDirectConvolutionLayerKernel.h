@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON interface for Direct Convolution Layer kernel */
+/** Neon interface for Direct Convolution Layer kernel */
 class NEDirectConvolutionLayerKernel : public INEKernel
 {
 public:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -614,9 +614,7 @@ inline void colorconvert_rgb_to_yuv4(const SimpleTensor<T> src, std::vector<Simp
 
     rgb_to_yuv_calculation(rvec, gvec, bvec, dst[0], uvec_top, uvec_bottom, vvec_top, vvec_bottom);
 
-    int         uvec_coord_x = 0;
-    int         uvec_coord_y = 0;
-    Coordinates uvec_coord{ uvec_coord_x, uvec_coord_y };
+    Coordinates uvec_coord{ 0, 0 };
     for(int y = 0; y < height; y++)
     {
         for(int x = 0; x < width; x += 2)
@@ -638,7 +636,7 @@ inline void colorconvert_rgb_to_yuv4(const SimpleTensor<T> src, std::vector<Simp
             plane_2_pixel[0] = vvec_top_val;
             plane_2_pixel[1] = vvec_bottom_val;
 
-            uvec_coord.set(0, ++uvec_coord_x);
+            uvec_coord.increment(0);
         }
     }
 }

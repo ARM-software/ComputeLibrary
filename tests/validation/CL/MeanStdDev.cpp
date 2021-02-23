@@ -67,8 +67,8 @@ template <typename T>
 using CLMeanStdDevFixture = MeanStdDevValidationFixture<CLTensor, CLAccessor, CLMeanStdDev, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                          DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                        DataType::U8)))
 {
     // Validate mean output
     validate(_target.first, _reference.first);
@@ -88,8 +88,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevFixture<uint8_t>, framework::Datase
 TEST_SUITE_END() // U8
 
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<half>, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                 DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                     DataType::F16)))
 {
     // Validate mean output
     validate(_target.first, _reference.first, tolerance_rel_low_error_f16);
@@ -100,8 +100,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<half>, framework::DatasetMo
 TEST_SUITE_END() // F16
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                        DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                      DataType::F32)))
 {
     // Validate mean output
     validate(_target.first, _reference.first, tolerance_rel_low_error_f32);

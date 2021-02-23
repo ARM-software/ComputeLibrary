@@ -28,7 +28,6 @@
 #include "src/core/NEON/kernels/NEDerivativeKernel.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEMagnitudePhaseKernel.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -66,13 +65,13 @@ void NEHOGGradient::configure(ITensor *input, ITensor *output_magnitude, ITensor
     // Initialise magnitude/phase kernel
     if(PhaseType::UNSIGNED == phase_type)
     {
-        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::UNSIGNED>>();
+        auto k = std::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::UNSIGNED>>();
         k->configure(&_gx, &_gy, output_magnitude, output_phase);
         _mag_phase = std::move(k);
     }
     else
     {
-        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
+        auto k = std::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
         k->configure(&_gx, &_gy, output_magnitude, output_phase);
         _mag_phase = std::move(k);
     }

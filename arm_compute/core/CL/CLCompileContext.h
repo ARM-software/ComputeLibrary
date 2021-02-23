@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -296,6 +296,12 @@ public:
      */
     bool int64_base_atomics_supported() const;
 
+    /* Returns true if the workgroup batch size modifier parameter is supported on the cl device
+    *
+    * @return true if the workgroup batch size modifier parameter is supported, false otherwise
+    */
+    bool is_wbsm_supported() const;
+
 private:
     /** Load program and its dependencies.
      *
@@ -327,6 +333,7 @@ private:
     CLDevice    _device;                                              /**< Underlying CL device. */
     mutable std::map<std::string, const Program> _programs_map;       /**< Map with all already loaded program data. */
     mutable std::map<std::string, cl::Program>   _built_programs_map; /**< Map with all already built program data. */
+    bool _is_wbsm_supported;                                          /**< Support of worksize batch size modifier support boolean*/
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLCOMPILECONTEXT_H */

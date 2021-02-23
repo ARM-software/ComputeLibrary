@@ -29,8 +29,6 @@
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
-#include "support/MemorySupport.h"
-
 namespace arm_compute
 {
 namespace experimental
@@ -42,7 +40,7 @@ void NESlice::configure(const ITensorInfo *input, ITensorInfo *output, const Coo
     // Get absolute end coordinates
     const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);
 
-    auto k = arm_compute::support::cpp14::make_unique<NEStridedSliceKernel>();
+    auto k = std::make_unique<NEStridedSliceKernel>();
     k->configure(input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
     _kernel = std::move(k);
 }
@@ -72,7 +70,7 @@ struct NESlice::Impl
 };
 
 NESlice::NESlice()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NESlice::NESlice(NESlice &&) = default;
@@ -88,7 +86,7 @@ void NESlice::configure(const ITensor *input, ITensor *output, const Coordinates
 {
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::NESlice>();
+    _impl->op  = std::make_unique<experimental::NESlice>();
     _impl->op->configure(input->info(), output->info(), starts, ends);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,9 @@
 #define ARM_COMPUTE_CLPERMUTE_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
 
-#include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -35,10 +35,22 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to execute an @ref CLPermuteKernel. */
-class CLPermute : public ICLSimpleFunction
+/** Basic function to execute an @ref opencl::kernels::ClPermuteKernel. */
+class CLPermute : public IFunction
 {
 public:
+    /** Constructor */
+    CLPermute();
+    /** Destructor */
+    ~CLPermute();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLPermute(const CLPermute &) = delete;
+    /** Default move constructor */
+    CLPermute(CLPermute &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLPermute &operator=(const CLPermute &) = delete;
+    /** Default move assignment operator */
+    CLPermute &operator=(CLPermute &&);
     /** Set the input and output tensors.
      *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4
@@ -69,6 +81,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLPERMUTE_H */

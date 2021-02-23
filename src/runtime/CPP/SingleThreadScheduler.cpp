@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,12 +53,12 @@ void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     kernel->run(kernel->window(), info);
 }
 
-void SingleThreadScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, ITensorPack &tensors)
+void SingleThreadScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors)
 {
     ARM_COMPUTE_UNUSED(hints);
     ThreadInfo info;
     info.cpu_info = &_cpu_info;
-    kernel->run_op(tensors, kernel->window(), info);
+    kernel->run_op(tensors, window, info);
 }
 
 void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)

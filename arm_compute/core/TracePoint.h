@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
 namespace arm_compute
 {
 #ifdef ARM_COMPUTE_TRACING_ENABLED
-#define CREATE_TRACEPOINT(...) TracePoint __tp(__VA_ARGS__)
+#define ARM_COMPUTE_CREATE_TRACEPOINT(...) TracePoint __tp(__VA_ARGS__)
 
 /** Class used to dump configuration values in functions and kernels  */
 class TracePoint final
@@ -77,7 +77,7 @@ TracePoint::Args &&operator<<(typename std::enable_if < !std::is_pointer<T>::val
 template <typename T>
 TracePoint::Args &&operator<<(TracePoint::Args &&tp, const T *arg);
 
-#define CONST_REF_CLASS(type)                                             \
+#define ARM_COMPUTE_CONST_REF_CLASS(type)                                 \
     template <>                                                           \
     TracePoint::Args &&operator<<(TracePoint::Args &&tp, const type &arg) \
     {                                                                     \
@@ -86,7 +86,7 @@ TracePoint::Args &&operator<<(TracePoint::Args &&tp, const T *arg);
         return std::move(tp);                                             \
     }
 
-#define CONST_PTR_ADDRESS(type)                                           \
+#define ARM_COMPUTE_CONST_PTR_ADDRESS(type)                               \
     template <>                                                           \
     TracePoint::Args &&operator<<(TracePoint::Args &&tp, const type *arg) \
     {                                                                     \
@@ -94,7 +94,7 @@ TracePoint::Args &&operator<<(TracePoint::Args &&tp, const T *arg);
         tp.args.push_back(#type "*(" + to_ptr_string(arg) + ")");         \
         return std::move(tp);                                             \
     }
-#define CONST_PTR_CLASS(type)                                             \
+#define ARM_COMPUTE_CONST_PTR_CLASS(type)                                 \
     template <>                                                           \
     TracePoint::Args &&operator<<(TracePoint::Args &&tp, const type *arg) \
     {                                                                     \
@@ -106,7 +106,7 @@ TracePoint::Args &&operator<<(TracePoint::Args &&tp, const T *arg);
         return std::move(tp);                                             \
     }
 
-#define CONST_REF_SIMPLE(type)                                               \
+#define ARM_COMPUTE_CONST_REF_SIMPLE(type)                                   \
     template <>                                                              \
     TracePoint::Args &&operator<<(TracePoint::Args &&tp, const type &arg)    \
     {                                                                        \
@@ -115,19 +115,19 @@ TracePoint::Args &&operator<<(TracePoint::Args &&tp, const T *arg);
         return std::move(tp);                                                \
     }
 
-#define TRACE_TO_STRING(type)              \
+#define ARM_COMPUTE_TRACE_TO_STRING(type)  \
     std::string to_string(const type &arg) \
     {                                      \
         ARM_COMPUTE_UNUSED(arg);           \
         return "";                         \
     }
 #else /* ARM_COMPUTE_TRACING_ENABLED */
-#define CREATE_TRACEPOINT(...)
-#define CONST_REF_CLASS(type)
-#define CONST_PTR_ADDRESS(type)
-#define CONST_PTR_CLASS(type)
-#define CONST_REF_SIMPLE(type)
-#define TRACE_TO_STRING(type)
+#define ARM_COMPUTE_CREATE_TRACEPOINT(...)
+#define ARM_COMPUTE_CONST_REF_CLASS(type)
+#define ARM_COMPUTE_CONST_PTR_ADDRESS(type)
+#define ARM_COMPUTE_CONST_PTR_CLASS(type)
+#define ARM_COMPUTE_CONST_REF_SIMPLE(type)
+#define ARM_COMPUTE_TRACE_TO_STRING(type)
 #endif /* ARM_COMPUTE_TRACING_ENABLED */
 } //namespace arm_compute
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,89 +22,63 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
-
-#include "src/core/NEON/kernels/NEElementwiseUnaryKernel.h"
-#include "support/MemorySupport.h"
-
+#include "src/runtime/cpu/operators/CpuElementwiseUnary.h"
 #include <utility>
 
 namespace arm_compute
 {
-void NERsqrtLayer::configure(const ITensor *input, ITensor *output)
+using OperatorType = cpu::CpuElementwiseUnary;
+
+template <ElementWiseUnary op>
+struct NEElementwiseUnaryLayer<op>::Impl
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
-    k->configure(ElementWiseUnary::RSQRT, input, output);
-    _kernel = std::move(k);
+    const ITensor                *src{ nullptr };
+    ITensor                      *dst{ nullptr };
+    std::unique_ptr<OperatorType> cpu_op{ nullptr };
+};
+
+template <ElementWiseUnary op>
+NEElementwiseUnaryLayer<op>::NEElementwiseUnaryLayer()
+    : _impl(std::make_unique<Impl>())
+{
 }
-Status NERsqrtLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+template <ElementWiseUnary op>
+NEElementwiseUnaryLayer<op>::~NEElementwiseUnaryLayer() = default;
+template <ElementWiseUnary op>
+NEElementwiseUnaryLayer<op>::NEElementwiseUnaryLayer(NEElementwiseUnaryLayer &&) = default;
+template <ElementWiseUnary   op>
+NEElementwiseUnaryLayer<op> &NEElementwiseUnaryLayer<op>::operator=(NEElementwiseUnaryLayer &&) = default;
+
+template <ElementWiseUnary op>
+void NEElementwiseUnaryLayer<op>::configure(const ITensor *input, ITensor *output)
 {
-    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::RSQRT, input, output);
+    _impl->src    = input;
+    _impl->dst    = output;
+    _impl->cpu_op = std::make_unique<OperatorType>();
+    _impl->cpu_op->configure(op, *_impl->src->info(), *_impl->dst->info());
 }
 
-void NEExpLayer::configure(const ITensor *input, ITensor *output)
+template <ElementWiseUnary op>
+Status NEElementwiseUnaryLayer<op>::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
-    k->configure(ElementWiseUnary::EXP, input, output);
-    _kernel = std::move(k);
-}
-Status NEExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::EXP, input, output);
+    return OperatorType::validate(op, *input, *output);
 }
 
-void NENegLayer::configure(const ITensor *input, ITensor *output)
+template <ElementWiseUnary op>
+void                       NEElementwiseUnaryLayer<op>::run()
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
-    k->configure(ElementWiseUnary::NEG, input, output);
-    _kernel = std::move(k);
-}
-Status NENegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::NEG, input, output);
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->cpu_op->run(pack);
 }
 
-void NELogLayer::configure(const ITensor *input, ITensor *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
-    k->configure(ElementWiseUnary::LOG, input, output);
-    _kernel = std::move(k);
-}
-Status NELogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::LOG, input, output);
-}
-
-void NEAbsLayer::configure(const ITensor *input, ITensor *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
-    k->configure(ElementWiseUnary::ABS, input, output);
-    _kernel = std::move(k);
-}
-Status NEAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::ABS, input, output);
-}
-
-void NERoundLayer::configure(const ITensor *input, ITensor *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
-    k->configure(ElementWiseUnary::ROUND, input, output);
-    _kernel = std::move(k);
-}
-Status NERoundLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::ROUND, input, output);
-}
-
-void NESinLayer::configure(const ITensor *input, ITensor *output)
-{
-    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
-    k->configure(ElementWiseUnary::SIN, input, output);
-    _kernel = std::move(k);
-}
-Status NESinLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::SIN, input, output);
-}
+template class NEElementwiseUnaryLayer<ElementWiseUnary::RSQRT>;
+template class NEElementwiseUnaryLayer<ElementWiseUnary::EXP>;
+template class NEElementwiseUnaryLayer<ElementWiseUnary::NEG>;
+template class NEElementwiseUnaryLayer<ElementWiseUnary::LOG>;
+template class NEElementwiseUnaryLayer<ElementWiseUnary::ABS>;
+template class NEElementwiseUnaryLayer<ElementWiseUnary::ROUND>;
+template class NEElementwiseUnaryLayer<ElementWiseUnary::SIN>;
 
 } // namespace arm_compute

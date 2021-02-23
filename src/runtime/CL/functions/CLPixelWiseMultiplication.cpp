@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
-#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -56,14 +55,14 @@ ITensorPack select_border_input(ITensorPack &tensors)
 namespace experimental
 {
 CLPixelWiseMultiplication::CLPixelWiseMultiplication()
-    : _border_handler(support::cpp14::make_unique<CLFillBorderKernel>())
+    : _border_handler(std::make_unique<CLFillBorderKernel>())
 {
 }
 
 void CLPixelWiseMultiplication::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale,
                                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLPixelWiseMultiplicationKernel>();
+    auto k = std::make_unique<CLPixelWiseMultiplicationKernel>();
     k->configure(compile_context, input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
     _kernel = std::move(k);
 
@@ -92,13 +91,13 @@ void CLPixelWiseMultiplication::run(ITensorPack &tensors)
 }
 
 CLComplexPixelWiseMultiplication::CLComplexPixelWiseMultiplication()
-    : _border_handler(support::cpp14::make_unique<CLFillBorderKernel>())
+    : _border_handler(std::make_unique<CLFillBorderKernel>())
 {
 }
 
 void CLComplexPixelWiseMultiplication::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLComplexPixelWiseMultiplicationKernel>();
+    auto k = std::make_unique<CLComplexPixelWiseMultiplicationKernel>();
     k->configure(compile_context, input1, input2, output, act_info);
     _kernel = std::move(k);
 
@@ -135,7 +134,7 @@ struct CLPixelWiseMultiplication::Impl
 };
 
 CLPixelWiseMultiplication::CLPixelWiseMultiplication()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLPixelWiseMultiplication::CLPixelWiseMultiplication(CLPixelWiseMultiplication &&) = default;
@@ -154,7 +153,7 @@ void CLPixelWiseMultiplication::configure(const CLCompileContext &compile_contex
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLPixelWiseMultiplication>();
+    _impl->op    = std::make_unique<experimental::CLPixelWiseMultiplication>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), scale, overflow_policy, rounding_policy, act_info);
 }
 
@@ -183,7 +182,7 @@ struct CLComplexPixelWiseMultiplication::Impl
 };
 
 CLComplexPixelWiseMultiplication::CLComplexPixelWiseMultiplication()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 CLComplexPixelWiseMultiplication::CLComplexPixelWiseMultiplication(CLComplexPixelWiseMultiplication &&) = default;
@@ -200,7 +199,7 @@ void CLComplexPixelWiseMultiplication::configure(const CLCompileContext &compile
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::CLComplexPixelWiseMultiplication>();
+    _impl->op    = std::make_unique<experimental::CLComplexPixelWiseMultiplication>();
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), act_info);
 }
 

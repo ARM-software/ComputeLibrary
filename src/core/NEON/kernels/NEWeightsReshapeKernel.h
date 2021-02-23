@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform reshaping on the weights used by convolution and locally connected layer
+/** Neon kernel to perform reshaping on the weights used by convolution and locally connected layer
  *
  * Rearranges each 3-dimensional kernel to a single row leading to a matrix with linearized kernels.
  * In combination with the @ref NEIm2ColKernel can transform a convolution to a matrix multiplication.

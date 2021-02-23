@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,42 +23,23 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 
-#include "arm_compute/core/ITensor.h"
-#include "src/core/NEON/kernels/NEArithmeticAdditionKernel.h"
-#include "support/MemorySupport.h"
+#include "arm_compute/core/Validate.h"
+#include "src/runtime/cpu/operators/CpuAdd.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-namespace experimental
-{
-NEArithmeticAddition::~NEArithmeticAddition() = default;
-
-void NEArithmeticAddition::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(act_info);
-    auto k = arm_compute::support::cpp14::make_unique<NEArithmeticAdditionKernel>();
-    k->configure(input1, input2, output, policy);
-    _kernel = std::move(k);
-}
-Status NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return NEArithmeticAdditionKernel::validate(input1, input2, output, policy);
-}
-} // namespace experimental
-
 struct NEArithmeticAddition::Impl
 {
-    const ITensor                                      *src_0{ nullptr };
-    const ITensor                                      *src_1{ nullptr };
-    ITensor                                            *dst{ nullptr };
-    std::unique_ptr<experimental::NEArithmeticAddition> op{ nullptr };
+    const ITensor               *src_0{ nullptr };
+    const ITensor               *src_1{ nullptr };
+    ITensor                     *dst{ nullptr };
+    std::unique_ptr<cpu::CpuAdd> op{ nullptr };
 };
 
 NEArithmeticAddition::NEArithmeticAddition()
-    : _impl(support::cpp14::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
 }
 NEArithmeticAddition::NEArithmeticAddition(NEArithmeticAddition &&) = default;
@@ -67,7 +48,7 @@ NEArithmeticAddition::~NEArithmeticAddition()                                  =
 
 Status NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
-    return experimental::NEArithmeticAddition::validate(input1, input2, output, policy, act_info);
+    return cpu::CpuAdd::validate(input1, input2, output, policy, act_info);
 }
 
 void NEArithmeticAddition::configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
@@ -75,8 +56,8 @@ void NEArithmeticAddition::configure(const ITensor *input1, const ITensor *input
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEArithmeticAddition>();
-    _impl->op->configure(input1->info(), input2->info(), output->info(), policy, act_info);
+    _impl->op    = std::make_unique<cpu::CpuAdd>();
+    _impl->op->configure(_impl->src_0->info(), _impl->src_1->info(), _impl->dst->info(), policy, act_info);
 }
 
 void NEArithmeticAddition::run()

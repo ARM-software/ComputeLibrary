@@ -64,7 +64,7 @@ using GCDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<GCTe
  *  change the input and output size requesting more memory and go through the manage/allocate process.
  *  The memory manager should be able to update the inner structures and allocate the requested memory
  * */
-FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, GCDynamicTensorType3SingleFunction, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, GCDynamicTensorType3SingleFunction, framework::DatasetMode::NIGHTLY,
                        framework::dataset::zip(framework::dataset::make("Level0Shape", { TensorShape(12U, 11U, 3U), TensorShape(256U, 8U, 12U) }),
                                                framework::dataset::make("Level1Shape", { TensorShape(67U, 31U, 15U), TensorShape(11U, 2U, 3U) })))
 {

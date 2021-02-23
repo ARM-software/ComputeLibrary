@@ -120,7 +120,7 @@ public:
     /** Initialise the kernel's inputs, output.
      *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input1          An input tensor. Data types supported: F32. Number of channels supported: 2.
+     * @param[in, out] input1          An input tensor. Data types supported: F16/F32. Number of channels supported: 2.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[in, out] input2          An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
@@ -130,7 +130,7 @@ public:
     void configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLComplexPixelWiseMultiplication
      *
-     * @param[in] input1   An input tensor info. Data types supported: F32. Number of channels supported: 2.
+     * @param[in] input1   An input tensor info. Data types supported: F16/F32. Number of channels supported: 2.
      * @param[in] input2   An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in] output   The output tensor info, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
@@ -277,7 +277,7 @@ public:
     CLComplexPixelWiseMultiplication &operator=(CLComplexPixelWiseMultiplication &&);
     /** Initialise the kernel's inputs, output.
      *
-     * @param[in, out] input1   An input tensor. Data types supported: F32. Number of channels supported: 2.
+     * @param[in, out] input1   An input tensor. Data types supported: F16/F32. Number of channels supported: 2.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[in, out] input2   An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
@@ -288,7 +288,7 @@ public:
     /** Initialise the kernel's inputs, output.
      *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input1          An input tensor. Data types supported: F32. Number of channels supported: 2.
+     * @param[in, out] input1          An input tensor. Data types supported: F16/F32. Number of channels supported: 2.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[in, out] input2          An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
@@ -298,7 +298,7 @@ public:
     void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLComplexPixelWiseMultiplication
      *
-     * @param[in] input1   An input tensor info. Data types supported: F32. Number of channels supported: 2.
+     * @param[in] input1   An input tensor info. Data types supported: F16/F32. Number of channels supported: 2.
      * @param[in] input2   An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in] output   The output tensor info, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.

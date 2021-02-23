@@ -33,7 +33,6 @@
 #include "src/core/CL/kernels/CLArgMinMaxLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/runtime/Utils.h"
-#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -132,7 +131,7 @@ void CLArgMinMaxLayer::configure(const CLCompileContext &compile_context, const 
 
     auto add_reduction_kernel = [this, &compile_context, axis, op](const ICLTensor * input, const ICLTensor * prev_output, ICLTensor * output)
     {
-        _reduction_kernels_vector.emplace_back(support::cpp14::make_unique<CLArgMinMaxLayerKernel>());
+        _reduction_kernels_vector.emplace_back(std::make_unique<CLArgMinMaxLayerKernel>());
         _reduction_kernels_vector.back()->configure(compile_context, input, prev_output, output, axis, op);
     };
 

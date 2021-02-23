@@ -70,13 +70,13 @@ using GCConvolutionLayerFixture = ConvolutionValidationFixture<GCTensor, GCAcces
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
-                                                                                                                     framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                     framework::dataset::make("DataType",
-                                                                                                                             DataType::F16)),
-                                                                                                                     framework::dataset::make("DataLayout",
-                                                                                                                             DataLayout::NCHW)),
-                                                                                                             ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
+                                                                                                                   framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::F16)),
+                                                                                                                   framework::dataset::make("DataLayout",
+                                                                                                                           DataLayout::NCHW)),
+                                                                                                           ActivationFunctionsDataset))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -95,12 +95,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCConvolutionLayerFixture<half>, framework::Dat
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
-                                                                                                                      framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                      framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                      framework::dataset::make("DataLayout",
-                                                                                                                              DataLayout::NCHW)),
-                                                                                                              ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
+                                                                                                                    framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                    framework::dataset::make("DataLayout",
+                                                                                                                            DataLayout::NCHW)),
+                                                                                                            ActivationFunctionsDataset))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32, tolerance_num);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,16 +65,19 @@ protected:
     template <typename U>
     void fill(U &&src, U &&w_tensor, U &&b_tensor, U &&mean_tensor, U &&var_tensor, U &&beta_tensor, U &&gamma_tensor)
     {
-        std::uniform_real_distribution<> distribution(-1.f, 1.f);
-        std::uniform_real_distribution<> distribution_gz(0, 1.f);
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.f), T(1.f) };
+        DistributionType distribution_gz{ T(0.f), T(1.f) };
 
         library->fill(src, distribution, 0);
         library->fill(w_tensor, distribution, 1);
         library->fill(mean_tensor, distribution, 2);
         library->fill(var_tensor, distribution_gz, 3);
-        _use_conv_b ? library->fill(b_tensor, distribution, 4) : library->fill_tensor_value(b_tensor, 0.f);
-        _use_beta ? library->fill(beta_tensor, distribution, 5) : library->fill_tensor_value(beta_tensor, 0.f);
-        _use_gamma ? library->fill(gamma_tensor, distribution, 6) : library->fill_tensor_value(gamma_tensor, 1.f);
+        _use_conv_b ? library->fill(b_tensor, distribution, 4) : library->fill_tensor_value(b_tensor, T(0.f));
+        _use_beta ? library->fill(beta_tensor, distribution, 5) : library->fill_tensor_value(beta_tensor, T(0.f));
+        _use_gamma ? library->fill(gamma_tensor, distribution, 6) : library->fill_tensor_value(gamma_tensor, T(1.f));
     }
 
     TensorType compute_target(TensorShape src_shape, TensorShape w_shape, TensorShape b_shape, TensorShape dst_shape, PadStrideInfo info, float epsilon)
