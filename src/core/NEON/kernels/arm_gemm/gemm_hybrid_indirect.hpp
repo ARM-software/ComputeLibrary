@@ -327,8 +327,8 @@ public:
 
         // In convolution mode, we need input pointers.
         if (_convolver) {
-            in_row_ptrs = std::vector<const To *>(strategy::out_height() * _args._Ksections, nullptr);
-            in_row_strings = std::vector<const To * const *>(_args._Ksections, nullptr);
+            in_row_ptrs.resize(strategy::out_height() * _args._Ksections, nullptr);
+            in_row_strings.resize(_args._Ksections, nullptr);
 
             for (unsigned int i=0; i<_args._Ksections; i++) {
                 in_row_strings[i] = &(in_row_ptrs[i * strategy::out_height()]);
