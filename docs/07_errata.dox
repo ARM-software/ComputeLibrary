@@ -50,5 +50,11 @@ namespace arm_compute
         - arm64-v8a/arm64-v8.2-a architecture, and
         - Compiled using Android NDK >= r18b in debug mode.
 
+- Under certain conditions, CLFullyConnectedLayer quantized tests may fail due to an issue in the test framework.
+    - Versions Affected: >= 21.02
+    - OSs Affected: Linux
+	- Conditions:
+	    - armv7a architecture
+	    - release mode
 */
 } // namespace
