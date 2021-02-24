@@ -336,6 +336,8 @@ elif env['os'] == 'bare_metal':
     env.Append(CPPDEFINES = ['BARE_METAL'])
 if env['os'] == 'linux' and env['arch'] == 'armv7a':
     env.Append(CXXFLAGS = [ '-Wno-psabi' ])
+    if not env['debug']:
+        env.Append(CPPDEFINES = ['LINUX_V7_RELEASE'])
 
 if env['specs_file'] != "":
     env.Append(LINKFLAGS = ['-specs='+env['specs_file']])

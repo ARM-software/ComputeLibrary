@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,18 @@ public:
         apply_dimension_correction();
     }
     /** Allow instances of this class to be copy constructed */
+    // Avoid -O3 aggressive optimization for the copy constructor when building in release mode for armv7a
+#if defined(LINUX_V7_RELEASE)
+#pragma GCC push_options
+#pragma GCC optimize("O2")
+    TensorShape(const TensorShape &other)
+        : Dimensions(static_cast<const Dimensions &>(other))
+    {
+    }
+#pragma GCC pop_options
+#else  // defined(LINUX_V7_RELEASE)
     TensorShape(const TensorShape &) = default;
+#endif // defined(LINUX_V7_RELEASE)
     /** Allow instances of this class to be copied */
     TensorShape &operator=(const TensorShape &) = default;
     /** Allow instances of this class to be move constructed */
