@@ -71,7 +71,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, c
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input)
 {
     Window window = calculate_max_window(*input, Steps());
     window.set(Window::DimX, Window::Dimension(0, input->dimension(0), input->dimension(0)));
@@ -79,7 +79,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     window.set(Window::DimZ, Window::Dimension(0, input->dimension(2), input->dimension(2)));
 
     // The NEConvolutionLayerWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     return std::make_pair(Status{}, window);
 }
@@ -107,7 +106,7 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
     _output = output;
 
     // Configure kernel
-    auto win_config = validate_and_configure_window(input->info(), output->info());
+    auto win_config = validate_and_configure_window(input->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 }
@@ -115,7 +114,7 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
 Status NEWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, biases, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get()).first);
 
     return Status{};
 }

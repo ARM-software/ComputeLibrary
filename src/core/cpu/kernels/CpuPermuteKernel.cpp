@@ -256,9 +256,6 @@ void CpuPermuteKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const
     Window win = calculate_max_window(*src, Steps());
 
     // The NEPermute doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
 
     ICpuKernel::configure(win);
 }

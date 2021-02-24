@@ -977,9 +977,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     {
         // Configure window NHWC without any padding
         win = calculate_max_window(*output, Steps());
-        Coordinates coord;
-        coord.set_num_dimensions(output->num_dimensions());
-        output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};

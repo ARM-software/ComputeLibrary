@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -386,10 +386,7 @@ void NEGEMMLowpOffsetContributionKernel::configure(ITensor *mm_result, const ITe
     }
 
     // Configure kernel window
-    Window      win = calculate_max_window(*mm_result->info(), Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(mm_result->info()->num_dimensions());
-    mm_result->info()->set_valid_region(ValidRegion(coord, mm_result->info()->tensor_shape()));
+    Window win = calculate_max_window(*mm_result->info(), Steps());
     INEKernel::configure(win);
 }
 

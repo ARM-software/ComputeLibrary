@@ -406,18 +406,7 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
         auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(output_dt));
     }
 
-    Window      win = calculate_max_window(*input->info(), Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(input->info()->num_dimensions());
-
-    if(output != nullptr && (output->info()->total_size() != 0))
-    {
-        output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
-    }
-    else
-    {
-        input->info()->set_valid_region(ValidRegion(coord, input->info()->tensor_shape()));
-    }
+    Window win = calculate_max_window(*input->info(), Steps());
 
     INEKernel::configure(win);
 

@@ -82,12 +82,10 @@ void CpuReshapeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
+    ARM_COMPUTE_UNUSED(dst);
 
     // Configure kernel window
     Window win = calculate_max_window(*src);
-
-    // Set the destination valid region
-    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
 
     ICpuKernel::configure(win);
 }

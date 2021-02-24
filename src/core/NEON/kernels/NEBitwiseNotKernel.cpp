@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,7 +78,6 @@ void NEBitwiseNotKernel::configure(const ITensor *input, ITensor *output)
     Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration), output_access);
-    output_access.set_valid_region(win, input->info()->valid_region());
 
     INEKernel::configure(win);
 }

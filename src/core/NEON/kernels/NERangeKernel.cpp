@@ -126,10 +126,7 @@ void NERangeKernel::configure(ITensor *output, float start, float end, float ste
     auto_init_if_empty(*output->info(), TensorShape(num_of_elements_in_range(start, end, step)), 1, output->info()->data_type(), output->info()->quantization_info());
 
     // Configure kernel window
-    Window      win = calculate_max_window(*output->info(), Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    Window win = calculate_max_window(*output->info(), Steps());
 
     _start  = start;
     _end    = end;

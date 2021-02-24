@@ -101,10 +101,6 @@ void NEGEMMInterleave4x4Kernel::configure(const ITensor *input, ITensor *output)
 
     Window win = calculate_max_window(*input->info(), Steps(1, 4));
 
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
-
     INEKernel::configure(win);
 }
 

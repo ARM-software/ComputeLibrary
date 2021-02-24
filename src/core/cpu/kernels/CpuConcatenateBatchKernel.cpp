@@ -183,10 +183,7 @@ void CpuConcatenateBatchKernel::configure(const ITensorInfo *src, unsigned int b
     }
 
     // Configure kernel window
-    Window      win = calculate_max_window(*dst, Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
+    Window win = calculate_max_window(*dst, Steps());
     ICpuKernel::configure(win);
 }
 

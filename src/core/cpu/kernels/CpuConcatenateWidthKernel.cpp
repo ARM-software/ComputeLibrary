@@ -72,14 +72,12 @@ void CpuConcatenateWidthKernel::configure(const ITensorInfo *src, unsigned int w
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, width_offset, dst));
+    ARM_COMPUTE_UNUSED(dst);
 
     _width_offset = width_offset;
 
     // Configure kernel window
-    Window      win = calculate_max_window(*src, Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
+    Window win = calculate_max_window(*src, Steps());
 
     ICpuKernel::configure(win);
 }

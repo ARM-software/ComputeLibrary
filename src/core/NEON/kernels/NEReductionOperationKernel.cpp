@@ -1669,9 +1669,6 @@ void NEReductionOperationKernel::configure(const ITensor *input, ITensor *output
     _reduction_axis = axis;
 
     // Configure kernel window
-    Coordinates coord;
-    coord.set_num_dimensions(input->info()->num_dimensions());
-    input->info()->set_valid_region(ValidRegion(coord, input->info()->tensor_shape()));
     Window win = calculate_max_window(*input->info(), Steps());
     INEKernel::configure(win);
 
@@ -1681,7 +1678,6 @@ void NEReductionOperationKernel::configure(const ITensor *input, ITensor *output
     const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
     DataType   output_data_type = is_arg_min_max ? DataType::S32 : input->info()->data_type();
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
-    output->info()->set_valid_region(ValidRegion(coord, output_shape));
 }
 
 Status NEReductionOperationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)

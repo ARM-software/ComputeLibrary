@@ -67,9 +67,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     Window win = calculate_max_window(*input, Steps());
 
     // The NECol2ImKernel doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(output->num_dimensions());
-    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
 
     return std::make_pair(Status{}, win);
 }

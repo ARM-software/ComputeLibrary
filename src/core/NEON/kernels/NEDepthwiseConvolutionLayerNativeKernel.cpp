@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -847,10 +847,7 @@ void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, co
     const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier, dilation);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(output->info()->quantization_info()));
 
-    Window      win = calculate_max_window(*output->info(), Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    Window win = calculate_max_window(*output->info(), Steps());
     INEKernel::configure(win);
 }
 

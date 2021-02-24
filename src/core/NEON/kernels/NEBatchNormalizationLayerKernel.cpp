@@ -359,10 +359,6 @@ void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output,
     {
         // Output auto initialization if not yet initialized
         auto_init_if_empty(*output->info(), *input->info()->clone());
-
-        Coordinates coord;
-        coord.set_num_dimensions(output->info()->num_dimensions());
-        output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
     }
 }
 

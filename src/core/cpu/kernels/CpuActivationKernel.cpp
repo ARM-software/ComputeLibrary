@@ -197,10 +197,6 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, 
     {
         // dst auto inizialitation if not yet initialized
         auto_init_if_empty(*dst, *src->clone());
-
-        Coordinates coord;
-        coord.set_num_dimensions(dst->num_dimensions());
-        dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
     }
 
     return std::make_pair(Status{}, win);

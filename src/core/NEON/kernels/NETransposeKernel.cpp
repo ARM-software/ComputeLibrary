@@ -494,11 +494,6 @@ void NETransposeKernel::configure(const ITensor *input, ITensor *output)
             break;
     }
 
-    // Configure kernel window
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
-
     // Note: This kernel performs 16 elements per iteration.
     // However, since we use a left-over for loop on both dimensions (X and Y), we cannot have any read or write out of memory
     // For this reason num_elems_processed_per_iteration_x is set to 1

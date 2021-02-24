@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -184,7 +184,6 @@ void NEGatherKernel::configure(const ITensor *input, const ITensor *indices, ITe
 
     // Create window
     Window win = calculate_max_window(*output->info(), Steps());
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }

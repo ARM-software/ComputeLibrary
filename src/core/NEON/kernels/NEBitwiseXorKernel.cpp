@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,10 +83,6 @@ void NEBitwiseXorKernel::configure(const ITensor *input1, const ITensor *input2,
 
     update_window_and_padding(win, AccessWindowHorizontal(input1->info(), 0, num_elems_processed_per_iteration),
                               AccessWindowHorizontal(input2->info(), 0, num_elems_processed_per_iteration), output_access);
-
-    const ValidRegion valid_region = intersect_valid_regions(input1->info()->valid_region(), input2->info()->valid_region());
-
-    output_access.set_valid_region(win, valid_region);
 
     INEKernel::configure(win);
 }

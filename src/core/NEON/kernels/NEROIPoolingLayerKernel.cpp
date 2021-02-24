@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,10 +78,6 @@ void NEROIPoolingLayerKernel::configure(const ITensor *input, const ITensor *roi
     Window window;
     window.set(Window::DimX, Window::Dimension(0, rois->info()->dimension(1)));
     window.set(Window::DimY, Window::Dimension(0, 1));
-
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     INEKernel::configure(window);
 }

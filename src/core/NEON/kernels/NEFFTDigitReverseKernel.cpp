@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     auto_init_if_empty(*output, input->clone()->set_num_channels(2));
 
     Window win = calculate_max_window(*input, Steps());
-    input->set_valid_region(ValidRegion(Coordinates(), input->tensor_shape()));
 
     return std::make_pair(Status{}, win);
 }

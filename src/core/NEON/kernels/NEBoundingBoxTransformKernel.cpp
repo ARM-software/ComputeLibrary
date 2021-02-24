@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,9 +101,6 @@ void NEBoundingBoxTransformKernel::configure(const ITensor *boxes, ITensor *pred
 
     const unsigned int num_boxes = boxes->info()->dimension(1);
     Window             win       = calculate_max_window(*pred_boxes->info(), Steps());
-    Coordinates        coord;
-    coord.set_num_dimensions(pred_boxes->info()->num_dimensions());
-    pred_boxes->info()->set_valid_region(ValidRegion(coord, pred_boxes->info()->tensor_shape()));
     win.set(Window::DimX, Window::Dimension(0, 1u));
     win.set(Window::DimY, Window::Dimension(0, num_boxes));
 

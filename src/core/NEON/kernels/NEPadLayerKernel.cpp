@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -236,9 +236,6 @@ void NEPadLayerKernel::configure(ITensor *input, ITensor *output, const PaddingL
     Window win = calculate_max_window(*output->info(), Steps());
 
     // The NEPad doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     ICPPKernel::configure(win);
 }

@@ -281,10 +281,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     }
 
     // Configure window
-    Window      win = calculate_max_window(*output->info(), Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    Window win = calculate_max_window(*output->info(), Steps());
     INEKernel::configure(win);
 }
 

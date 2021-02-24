@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,9 +77,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         auto_init_if_empty(*output, *input->clone());
 
         // NEFFTScaleKernel doesn't need padding so update_window_and_padding() can be skipped
-        Coordinates coord;
-        coord.set_num_dimensions(output->num_dimensions());
-        output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
     }
 
     return std::make_pair(Status{}, win);

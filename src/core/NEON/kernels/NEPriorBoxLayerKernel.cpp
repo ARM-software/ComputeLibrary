@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -209,11 +209,8 @@ void NEPriorBoxLayerKernel::configure(const ITensor *input1, const ITensor *inpu
     _output = output;
 
     // Configure kernel window
-    const int   num_priors = info.aspect_ratios().size() * info.min_sizes().size() + info.max_sizes().size();
-    Window      win        = calculate_max_window(*output->info(), Steps(num_priors * 4));
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    const int num_priors = info.aspect_ratios().size() * info.min_sizes().size() + info.max_sizes().size();
+    Window    win        = calculate_max_window(*output->info(), Steps(num_priors * 4));
 
     INEKernel::configure(win);
 }

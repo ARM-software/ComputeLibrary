@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -851,9 +851,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, 
     // Note: This kernel performs 16 elements per iteration.
     // However, since we use a left-over for loop, we cannot have any read or write out of memory
     // For this reason num_elems_processed_per_iteration is 1 and so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(output->num_dimensions());
-    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
 
     return std::make_pair(Status{}, win);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -496,7 +496,6 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     Window win;
     auto   win_last = _transform->get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
-    _output_nhwc->info()->set_valid_region(ValidRegion(Coordinates(), _output_nhwc->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
