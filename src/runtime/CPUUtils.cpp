@@ -220,8 +220,9 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
     if(file.is_open())
     {
         std::string line;
-        int         midr   = 0;
-        int         curcpu = -1;
+        int         midr     = 0;
+        int         curcpu   = -1;
+        const int   num_cpus = static_cast<int>(cpusv.size());
 
         while(bool(getline(file, line)))
         {
@@ -238,9 +239,13 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
                     return;
                 }
 
-                if(curcpu >= 0)
+                if(curcpu >= 0 && curcpu < num_cpus)
                 {
                     cpusv[curcpu] = midr_to_model(midr);
+                }
+                else
+                {
+                    ARM_COMPUTE_LOG_INFO_MSG_CORE("Trying to populate a core id with id greater than the expected number of cores!");
                 }
 
                 midr   = 0;
@@ -291,7 +296,7 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
             }
         }
 
-        if(curcpu >= 0 && curcpu < static_cast<int>(cpusv.size()))
+        if(curcpu >= 0 && curcpu < num_cpus)
         {
             cpusv[curcpu] = midr_to_model(midr);
         }
