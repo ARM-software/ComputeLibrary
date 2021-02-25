@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,13 +24,8 @@
 #include "helpers.h"
 
 #ifdef SATURATE
-#if defined(IS_DATA_TYPE_FLOAT)
-#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
-#define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
-#else /* defined(IS_DATA_TYPE_FLOAT) */
 #define CONVERT_DOWN(x, type) CONVERT_SAT(x, type)
-#endif /* defined(IS_DATA_TYPE_FLOAT) */
-#else  /* SATURATE */
+#else /* SATURATE */
 #define CONVERT_DOWN(x, type) CONVERT(x, type)
 #endif /* SATURATE */
 
