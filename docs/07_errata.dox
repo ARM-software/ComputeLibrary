@@ -30,6 +30,20 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- Under certain conditions, CLFullyConnectedLayer quantized tests may fail due to an issue in the test framework.
+    - Versions Affected: 21.02
+    - OSs Affected: Linux
+    - Conditions:
+        - armv7a architecture
+        - release mode
+        - asserts enabled
+
+- A wrong test configuration has been found in CLGEMMMatrixMultiplyReshapedOnlyRHS set of tests.
+    - Versions Affected: >= 20.11
+    - Conditions:
+        - Data type input: F32/F16
+        - Fused bounded relu activation with coefficient 'a' being negative
+
 - Under certain conditions, the validation test case 'CL/DirectConvolutionLayer/Float/FP32/RunSmall9x9\@InputShape=32x37x3x4:StrideX=1:StrideY=1:PadX=0:PadY=0:KernelSize=9:NumKernels=1:DataType=F32:ActivationInfo=LU_BOUNDED_RELU:DataLayout=NHWC' may fail.
     - Versions Affected: >= v20.08
     - Conditions:
@@ -50,11 +64,13 @@ namespace arm_compute
         - arm64-v8a/arm64-v8.2-a architecture, and
         - Compiled using Android NDK >= r18b in debug mode.
 
-- Under certain conditions, CLFullyConnectedLayer quantized tests may fail due to an issue in the test framework.
-    - Versions Affected: >= 21.02
-    - OSs Affected: Linux
-	- Conditions:
-	    - armv7a architecture
-	    - release mode
+- An issue has been identified with CLCast.
+    - Versions Affected: >= 18.11
+    - Conditions:
+        - Data type input: F32
+        - Data type output: All integer types
+        - Conversion policy: SATURATE
+    - Result: OpenCL backend will always wrap around instead of saturating for out-of-range inputs
+
 */
 } // namespace
