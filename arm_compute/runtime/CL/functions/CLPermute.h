@@ -46,11 +46,11 @@ public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLPermute(const CLPermute &) = delete;
     /** Default move constructor */
-    CLPermute(CLPermute &&);
+    CLPermute(CLPermute &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLPermute &operator=(const CLPermute &) = delete;
     /** Default move assignment operator */
-    CLPermute &operator=(CLPermute &&);
+    CLPermute &operator=(CLPermute &&) = default;
     /** Set the input and output tensors.
      *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4

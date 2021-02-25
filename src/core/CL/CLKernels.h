@@ -89,7 +89,6 @@
 #include "src/core/CL/kernels/CLStackLayerKernel.h"
 #include "src/core/CL/kernels/CLStridedSliceKernel.h"
 #include "src/core/CL/kernels/CLTileKernel.h"
-#include "src/core/CL/kernels/CLTransposeKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "src/core/CL/kernels/CLWinogradInputTransformKernel.h"

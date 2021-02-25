@@ -38,21 +38,12 @@ namespace kernels
  *
  * Permutes given a permutation vector
  */
-class ClPermuteKernel : public ICLKernel
+class ClPermuteKernel : public IClKernel
 {
 public:
     /** Default constructor */
     ClPermuteKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClPermuteKernel);
-    /** Set the src and dst of the kernel.
-     *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
-     *
-     * @param[in] src  The src tensor info. Data types supported: All.
-     * @param[in] dst  The dst tensor info. Data types supported: Same as @p src
-     * @param[in] perm Permutation vector
-     */
-    void configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
     /** Set the src and dst of the kernel.
      *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4

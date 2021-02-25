@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_PERMUTE_H
-#define ARM_COMPUTE_CL_PERMUTE_H
+#ifndef ARM_COMPUTE_CL_TRANSPOSE_H
+#define ARM_COMPUTE_CL_TRANSPOSE_H
 
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/runtime/gpu/cl/IClOperator.h"
@@ -31,34 +31,28 @@ namespace arm_compute
 {
 namespace opencl
 {
-/** Basic function to run @ref kernels::ClPermuteKernel */
-class ClPermute : public IClOperator
+/** Basic function to run @ref kernels::ClTransposeKernel */
+class ClTranspose : public IClOperator
 {
 public:
     /** Constructor */
-    ClPermute() = default;
-    /** Initialise the kernel's inputs and outputs and permute vector
-     *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
+    ClTranspose() = default;
+    /** Initialise the kernel's inputs and outputs
      *
      * @param[in] compile_context The compile context to be used.
      * @param[in] src             The src tensor info. Data types supported: All.
      * @param[in] dst             The dst tensor info. Data types supported: Same as @p src
-     * @param[in] perm            Permutation vector
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
-    /**  Static function to check if given info will lead to a valid configuration of @ref kernels::ClPermuteKernel.
+    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
+    /**  Static function to check if given info will lead to a valid configuration of @ref kernels::ClTransposeKernel.
      *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
-     *
-     * @param[in] src  First tensor src info. Data types supported: All.
-     * @param[in] dst  Output tensor info. Data types supported: same as @p src.
-     * @param[in] perm Permutation vector
+     * @param[in] src First tensor src info. Data types supported: All.
+     * @param[in] dst Output tensor info. Data types supported: same as @p src.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_PERMUTE_H */
+#endif /* ARM_COMPUTE_CL_TRANSPOSE_H */

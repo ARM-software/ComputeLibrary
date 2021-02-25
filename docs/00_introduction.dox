@@ -197,7 +197,7 @@ v21.02 Public major release
    - @ref CLSelectKernel
    - @ref CLBitwiseKernel
    - @ref opencl::kernels::ClFloorKernel
-   - @ref CLTransposeKernel
+   - CLTransposeKernel
  - Deprecate functions in CLTuner:
     - add_lws_to_table
     - import_lws_table
@@ -1390,7 +1390,7 @@ v17.03 Sources preview
    - CLGradientKernel, CLEdgeNonMaxSuppressionKernel, CLEdgeTraceKernel / CLCannyEdge
    - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, CLGEMMMatrixAdditionKernel / @ref CLGEMM
    - CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
-   - @ref CLTransposeKernel / @ref CLTranspose
+   - CLTransposeKernel / @ref CLTranspose
    - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / CLOpticalFlow
    - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
    - CLLaplacianPyramid, CLLaplacianReconstruct

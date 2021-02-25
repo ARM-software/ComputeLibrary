@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,9 @@
 #define ARM_COMPUTE_CLTRANSPOSE_H
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -33,14 +35,22 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to transpose a matrix on OpenCL. This function calls the following OpenCL kernel:
- *
- *  -# @ref CLTransposeKernel
- *
- */
-class CLTranspose : public ICLSimpleFunction
+/** Basic function to execute an @ref opencl::kernels::ClTransposeKernel. */
+class CLTranspose : public IFunction
 {
 public:
+    /** Constructor */
+    CLTranspose();
+    /** Destructor */
+    ~CLTranspose();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLTranspose(const CLTranspose &) = delete;
+    /** Default move constructor */
+    CLTranspose(CLTranspose &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLTranspose &operator=(const CLTranspose &) = delete;
+    /** Default move assignment operator */
+    CLTranspose &operator=(CLTranspose &&) = default;
     /** Initialise the kernel's inputs and output
      *
      * @param[in]  input  Input tensor. Data types supported: All.
@@ -62,6 +72,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 }
 

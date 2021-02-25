@@ -41,7 +41,7 @@
 #include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLTransposeKernel.h"
+#include "src/core/gpu/cl/kernels/ClTransposeKernel.h"
 
 namespace arm_compute
 {
@@ -51,7 +51,7 @@ using namespace arm_compute::utils::info_helpers;
 CLLSTMLayer::CLLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _fully_connected_input_gate(), _accum_input_gate1(), _subtract_input_gate(), _pixelwise_mul_input_gate(), _activation_input_gate(),
       _fully_connected_forget_gate(), _accum_forget_gate1(), _pixelwise_mul_forget_gate(), _activation_forget_gate(), _fully_connected_cell_state(), _gemm_cell_state1(),
-      _transpose_cell_state(std::make_unique<CLTransposeKernel>()), _accum_cell_state1(), _accum_cell_state2(), _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(),
+      _transpose_cell_state(std::make_unique<opencl::kernels::ClTransposeKernel>()), _accum_cell_state1(), _accum_cell_state2(), _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(),
       _pixelwise_mul_cell_state2(), _fully_connected_output(), _pixelwise_mul_output_state1(), _accum_output1(), _activation_output(), _activation_output_state(), _pixelwise_mul_output_state2(),
       _fully_connected_output_state(), _projection_clip(), _copy_cell_state(), _copy_output(), _concat_scratch_buffer(), _concat_inputs_forget_gate(), _concat_weights_forget_gate(),
       _concat_weights_input_gate(), _concat_weights_output(), _ones_fill(), _mean_std_norm_input_gate(), _pixelwise_mul_input_gate_coeff(), _accum_input_gate_bias(), _mean_std_norm_forget_gate(),
@@ -256,7 +256,8 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
     _memory_group.manage(&_cell_state_out1);
     _fully_connected_cell_state.configure(compile_context, input, input_to_cell_weights, (_is_layer_norm_lstm) ? nullptr : cell_bias, &_cell_state_out1);
     _memory_group.manage(&_cell_state_out2);
-    _transpose_cell_state->configure(compile_context, recurrent_to_cell_weights, &_cell_state_out2);
+    _transpose_cell_state->configure(compile_context, recurrent_to_cell_weights->info(), _cell_state_out2.info());
+    _recurrent_to_cell_weights = recurrent_to_cell_weights;
     _memory_group.manage(&_cell_state_out3);
     _gemm_cell_state1.configure(compile_context, output_state_in, &_cell_state_out2, nullptr, &_cell_state_out3, 1.f, 0.f);
     _cell_state_out2.allocator()->allocate();
@@ -680,7 +681,12 @@ void CLLSTMLayer::run()
     }
 
     _fully_connected_cell_state.run();
-    CLScheduler::get().enqueue(*_transpose_cell_state);
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _recurrent_to_cell_weights);
+    pack.add_tensor(TensorType::ACL_DST, &_cell_state_out2);
+    CLScheduler::get().enqueue_op(*_transpose_cell_state,
+                                  pack,
+                                  false);
     _gemm_cell_state1.run();
     _accum_cell_state1.run();
     if(_is_layer_norm_lstm)

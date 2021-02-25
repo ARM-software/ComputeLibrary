@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@
 #include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLTransposeKernel.h"
+#include "src/core/gpu/cl/kernels/ClTransposeKernel.h"
 #include "support/Cast.h"
 
 #include <algorithm>
@@ -141,6 +141,20 @@ Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const I
 }
 } // namespace
 
+struct CLFullyConnectedLayerReshapeWeights::Impl
+{
+    const ITensor                                      *src{ nullptr };
+    ITensor                                            *dst{ nullptr };
+    std::unique_ptr<opencl::kernels::ClTransposeKernel> op{ nullptr };
+};
+
+CLFullyConnectedLayerReshapeWeights::CLFullyConnectedLayerReshapeWeights()
+    : _impl(std::make_unique<Impl>())
+{
+}
+
+CLFullyConnectedLayerReshapeWeights::~CLFullyConnectedLayerReshapeWeights() = default;
+
 void CLFullyConnectedLayerReshapeWeights::configure(const ICLTensor *input, ICLTensor *output)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
@@ -148,14 +162,23 @@ void CLFullyConnectedLayerReshapeWeights::configure(const ICLTensor *input, ICLT
 
 void CLFullyConnectedLayerReshapeWeights::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    auto k = std::make_unique<CLTransposeKernel>();
-    k->configure(compile_context, input, output);
-    _kernel = std::move(k);
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = std::make_unique<opencl::kernels::ClTransposeKernel>();
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info());
 }
 
 Status CLFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return CLTransposeKernel::validate(input, output);
+    return opencl::kernels::ClTransposeKernel::validate(input, output);
+}
+
+void CLFullyConnectedLayerReshapeWeights::run()
+{
+    ITensorPack pack{};
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    CLScheduler::get().enqueue_op(*_impl->op.get(), pack, false);
 }
 
 CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
@@ -164,6 +187,7 @@ CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> mem
       _are_weights_reshaped(true), _is_fc_after_conv(true), _is_quantized(false), _is_prepared(false), _original_weights(nullptr)
 {
 }
+
 void CLFullyConnectedLayer::configure_mm(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output,
                                          const FullyConnectedLayerInfo &fc_info)
 {
