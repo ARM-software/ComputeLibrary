@@ -73,10 +73,17 @@ void update_padding_for_cl_image(ITensorInfo *tensor)
     constexpr unsigned int num_floats_per_pixel = 4;
 
     const unsigned int stride_y_in_elements = tensor->strides_in_bytes()[1] / tensor->element_size();
-    const unsigned int pixel_aligment       = get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device());
-    const unsigned int row_pitch_alignment  = pixel_aligment * num_floats_per_pixel;
-    const unsigned int round_up_width       = ((stride_y_in_elements + row_pitch_alignment - 1) / row_pitch_alignment) * row_pitch_alignment;
-    const unsigned int padding              = round_up_width - stride_y_in_elements;
+    const unsigned int pixel_alignment       = get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device());
+
+    ARM_COMPUTE_ERROR_ON_MSG(pixel_alignment == 0, "Cannot retrieve cl_image pitch alignment");
+    if(pixel_alignment == 0)
+    {
+        return;
+    }
+
+    const unsigned int row_pitch_alignment = pixel_alignment * num_floats_per_pixel;
+    const unsigned int round_up_width      = ((stride_y_in_elements + row_pitch_alignment - 1) / row_pitch_alignment) * row_pitch_alignment;
+    const unsigned int padding             = round_up_width - stride_y_in_elements;
 
     tensor->extend_padding(PaddingSize(0, padding, 0, 0));
 }

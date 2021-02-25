@@ -336,8 +336,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     _output      = output;
     _is_prepared = false;
 
-    int n_gemms = 0;
-    int N_BLOCK = 0; // Size of block used by GEMM.
+    int n_gemms = 1;
+    int N_BLOCK = 1; // Size of block used by GEMM.
 
     std::unique_ptr<INEWinogradLayerTransformInputKernel>   transform_input_kernel;
     std::unique_ptr<INEWinogradLayerTransformWeightsKernel> transform_weights_kernel;
@@ -452,6 +452,10 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         }
     }
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    else
+    {
+        ARM_COMPUTE_ERROR("Not supported.");
+    }
 
     const PaddingType use_padding_type = (conv_info.pad_top() != 0u || conv_info.pad_left() != 0) ? PADDING_SAME : PADDING_VALID;
     const bool        use_same_padding = use_padding_type == PADDING_SAME;
