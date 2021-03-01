@@ -25,11 +25,11 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/functions/CLQuantizationLayer.h"
 #include "src/core/CL/kernels/CLBoundingBoxTransformKernel.h"
 #include "src/core/CL/kernels/CLDequantizationLayerKernel.h"
 #include "src/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
 #include "src/core/CL/kernels/CLPadLayerKernel.h"
-#include "src/core/CL/kernels/CLQuantizationLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute
@@ -45,7 +45,7 @@ CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManage
       _pad_kernel(std::make_unique<CLPadLayerKernel>()),
       _dequantize_anchors(std::make_unique<CLDequantizationLayerKernel>()),
       _dequantize_deltas(std::make_unique<CLDequantizationLayerKernel>()),
-      _quantize_all_proposals(std::make_unique<CLQuantizationLayerKernel>()),
+      _quantize_all_proposals(std::make_unique<CLQuantizationLayer>()),
       _cpp_nms(memory_manager),
       _is_nhwc(false),
       _is_qasymm8(false),
@@ -270,7 +270,7 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
         ARM_COMPUTE_RETURN_ON_ERROR(CLBoundingBoxTransformKernel::validate(&all_anchors_f32_info, &proposals_4_roi_values_f32, &deltas_flattened_f32_info,
                                                                            BoundingBoxTransformInfo(info.im_width(), info.im_height(), 1.f)));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(CLQuantizationLayerKernel::validate(&proposals_4_roi_values_f32, &proposals_4_roi_values_quantized));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLQuantizationLayer::validate(&proposals_4_roi_values_f32, &proposals_4_roi_values_quantized));
         proposals_4_roi_values_to_use = &proposals_4_roi_values_quantized;
     }
     else
@@ -372,7 +372,7 @@ void CLGenerateProposalsLayer::run()
 
     if(_is_qasymm8)
     {
-        CLScheduler::get().enqueue(*_quantize_all_proposals, false);
+        _quantize_all_proposals->run();
     }
 
     // Non maxima suppression

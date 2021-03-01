@@ -43,7 +43,7 @@ class CLBoundingBoxTransformKernel;
 class CLDequantizationLayerKernel;
 class CLComputeAllAnchorsKernel;
 class CLPadLayerKernel;
-class CLQuantizationLayerKernel;
+class CLQuantizationLayer;
 class ICLTensor;
 class ITensorInfo;
 
@@ -56,7 +56,7 @@ class ITensorInfo;
  * -# @ref CLBoundingBoxTransform
  * -# @ref CLPadLayerKernel
  * -# @ref CLDequantizationLayerKernel x 2
- * -# @ref CLQuantizationLayerKernel
+ * -# @ref CLQuantizationLayer
  * And the following CPP functions:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit
  */
@@ -146,7 +146,7 @@ private:
     std::unique_ptr<CLPadLayerKernel>             _pad_kernel;
     std::unique_ptr<CLDequantizationLayerKernel>  _dequantize_anchors;
     std::unique_ptr<CLDequantizationLayerKernel>  _dequantize_deltas;
-    std::unique_ptr<CLQuantizationLayerKernel>    _quantize_all_proposals;
+    std::unique_ptr<CLQuantizationLayer>          _quantize_all_proposals;
 
     // CPP functions
     CPPBoxWithNonMaximaSuppressionLimit _cpp_nms;

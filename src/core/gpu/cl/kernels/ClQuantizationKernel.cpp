@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLQuantizationLayerKernel.h"
+#include "src/core/gpu/cl/kernels/ClQuantizationKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -33,58 +34,54 @@
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
+namespace opencl
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F32, DataType::F16);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
 
     // Output must always be initialized
-    ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape().total_size() == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QASYMM16);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(dst->tensor_shape().total_size() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QASYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
 
     return Status{};
 }
 } // namespace
 
-CLQuantizationLayerKernel::CLQuantizationLayerKernel()
-    : _input(nullptr), _output(nullptr)
+ClQuantizationKernel::ClQuantizationKernel()
 {
 }
 
-void CLQuantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
+void ClQuantizationKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output);
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
-void CLQuantizationLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    auto padding_info = get_padding_info({ src, dst });
 
-    auto padding_info = get_padding_info({ input, output });
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
-
-    _input  = input;
-    _output = output;
-
-    const int  vec_size_x     = 16 / input->info()->element_size();
-    const int  input_width_x  = input->info()->tensor_shape().x();
+    const int  vec_size_x     = 16 / src->element_size();
+    const int  input_width_x  = src->tensor_shape().x();
     const bool multi_access_x = (input_width_x / vec_size_x > 0);
 
-    const UniformQuantizationInfo qinfo            = output->info()->quantization_info().uniform();
-    const DataType                output_data_type = output->info()->data_type();
+    const UniformQuantizationInfo qinfo            = dst->quantization_info().uniform();
+    const DataType                output_data_type = dst->data_type();
 
     float   scale_to_apply  = qinfo.scale;
     int32_t offset_to_apply = qinfo.offset;
-    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
+    if(is_data_type_quantized_asymmetric(src->data_type()))
     {
         /*
          * In case of requantization of a quantized input tensor to an output tensor with another quantization
@@ -116,7 +113,7 @@ void CLQuantizationLayerKernel::configure(const CLCompileContext &compile_contex
          * z_n = - z_i * s_i / s_o + z_o
          *
          */
-        const UniformQuantizationInfo qinfo_in = _input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo qinfo_in = src->quantization_info().uniform();
         scale_to_apply /= qinfo_in.scale;
         // In order to minimize flooring we convert the offset to a float,
         // then compute the new offset in the float domain,
@@ -126,11 +123,11 @@ void CLQuantizationLayerKernel::configure(const CLCompileContext &compile_contex
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option_if(is_data_type_float(_input->info()->data_type()), "-DIS_FLOAT");
+    build_opts.add_option_if(is_data_type_float(src->data_type()), "-DIS_FLOAT");
     build_opts.add_option("-DSCALE=" + float_to_string_with_full_precision(scale_to_apply));
     build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(offset_to_apply));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
-    build_opts.add_option("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output_data_type));
     build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(input_width_x - vec_size_x, 0)));
     std::pair<int, int> min_max_quant_values = quantization::get_min_max_values_from_quantized_data_type(output_data_type);
@@ -140,28 +137,31 @@ void CLQuantizationLayerKernel::configure(const CLCompileContext &compile_contex
     _kernel = create_kernel(compile_context, "quantization_layer", build_opts.options());
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
+    Window win = calculate_max_window(*src, Steps());
     if(multi_access_x)
     {
         win.set(Window::DimX, Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
     }
     ICLKernel::configure_internal(win);
 
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLQuantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status ClQuantizationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
     return Status{};
 }
 
-void CLQuantizationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClQuantizationKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), 3);
     Window slice            = window_collapsed.first_slice_window_3D();
@@ -169,10 +169,12 @@ void CLQuantizationLayerKernel::run(const Window &window, cl::CommandQueue &queu
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, src, slice);
+        add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
     while(window_collapsed.slide_window_slice_3D(slice));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

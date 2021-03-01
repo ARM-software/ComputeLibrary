@@ -79,7 +79,6 @@
 #include "src/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "src/core/CL/kernels/CLPriorBoxLayerKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
-#include "src/core/CL/kernels/CLQuantizationLayerKernel.h"
 #include "src/core/CL/kernels/CLROIAlignLayerKernel.h"
 #include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 #include "src/core/CL/kernels/CLRangeKernel.h"

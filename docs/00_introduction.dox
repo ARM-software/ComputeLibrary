@@ -1312,7 +1312,7 @@ v17.09 Public major release
     - CLGEMMTranspose1xW
     - CLGEMMMatrixVectorMultiplyKernel
     - @ref CLL2NormalizeLayerKernel / @ref CLL2NormalizeLayer
-    - @ref CLQuantizationLayerKernel @ref CLMinMaxLayerKernel / @ref CLQuantizationLayer
+    - CLQuantizationLayerKernel @ref CLMinMaxLayerKernel / @ref CLQuantizationLayer
     - @ref CLROIPoolingLayerKernel / @ref CLROIPoolingLayer
     - @ref CLReductionOperationKernel / @ref CLReductionOperation
     - CLReshapeLayerKernel / @ref CLReshapeLayer
