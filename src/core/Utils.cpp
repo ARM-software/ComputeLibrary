@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -330,6 +330,7 @@ DataType data_type_from_name(const std::string &name)
         { "f16", DataType::F16 },
         { "f32", DataType::F32 },
         { "qasymm8", DataType::QASYMM8 },
+        { "qasymm8_signed", DataType::QASYMM8_SIGNED },
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED

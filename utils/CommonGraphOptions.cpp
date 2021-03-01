@@ -145,6 +145,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
         DataType::F16,
         DataType::F32,
         DataType::QASYMM8,
+        DataType::QASYMM8_SIGNED,
     };
 
     std::set<DataLayout> supported_data_layouts
