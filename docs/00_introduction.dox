@@ -1735,15 +1735,16 @@ For Android, the library was successfully built and tested using Google's standa
  - clang++ from NDK r20b for arm64-v8a
  - clang++ from NDK r20b for arm64-v8.2-a with FP16 support
 
-Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>. Minimum NDK version required: r18b
-
+For NDK r18 or older, here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>:
 - Download the NDK r18b from here: https://developer.android.com/ndk/downloads/index.html to directory $NDK
 - Make sure you have Python 2.7 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands to your toolchain dirctory $MY_TOOLCHAINS:
 
-
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r18b --stl libc++ --api 21
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r18b --stl libc++ --api 21
+
+For NDK r19 or newer, you can directly <a href="https://developer.android.com/ndk/downloads">Download</a> the NDK package for your development platform, without the need to launch the make_standalone_toolchain.py script. You can find all the prebuilt binaries inside $NDK/toolchains/llvm/prebuilt/$OS_ARCH/bin/.
+@attention the building script will look for a binary named "aarch64-linux-android-clang++", while the prebuilt binaries will have their API version as a suffix to their filename (e.g. "aarch64-linux-android21-clang++"). You should copy/rename the binary removing this suffix, or - alternatively - create an alias for it.
 
 @attention We used to use gnustl but as of NDK r17 it is deprecated so we switched to libc++
 
