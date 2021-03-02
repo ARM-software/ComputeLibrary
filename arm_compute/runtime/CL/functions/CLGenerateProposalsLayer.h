@@ -40,7 +40,7 @@ namespace arm_compute
 {
 class CLCompileContext;
 class CLBoundingBoxTransformKernel;
-class CLDequantizationLayerKernel;
+class CLDequantizationLayer;
 class CLComputeAllAnchorsKernel;
 class CLPadLayerKernel;
 class CLQuantizationLayer;
@@ -55,7 +55,7 @@ class ITensorInfo;
  * -# @ref CLReshapeLayer x 2
  * -# @ref CLBoundingBoxTransform
  * -# @ref CLPadLayerKernel
- * -# @ref CLDequantizationLayerKernel x 2
+ * -# @ref CLDequantizationLayer x 2
  * -# @ref CLQuantizationLayer
  * And the following CPP functions:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit
@@ -144,8 +144,8 @@ private:
     std::unique_ptr<CLComputeAllAnchorsKernel>    _compute_anchors_kernel;
     std::unique_ptr<CLBoundingBoxTransformKernel> _bounding_box_kernel;
     std::unique_ptr<CLPadLayerKernel>             _pad_kernel;
-    std::unique_ptr<CLDequantizationLayerKernel>  _dequantize_anchors;
-    std::unique_ptr<CLDequantizationLayerKernel>  _dequantize_deltas;
+    std::unique_ptr<CLDequantizationLayer>        _dequantize_anchors;
+    std::unique_ptr<CLDequantizationLayer>        _dequantize_deltas;
     std::unique_ptr<CLQuantizationLayer>          _quantize_all_proposals;
 
     // CPP functions

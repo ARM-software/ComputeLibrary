@@ -42,7 +42,6 @@
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsKernel.h"
-#include "src/core/CL/kernels/CLDequantizationLayerKernel.h"
 #include "src/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
 #include "src/core/CL/kernels/CLFFTDigitReverseKernel.h"
 #include "src/core/CL/kernels/CLFFTRadixStageKernel.h"
