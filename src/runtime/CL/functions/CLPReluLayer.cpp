@@ -21,44 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/gpu/cl/kernels/ClElementwiseKernel.h"
-
-#include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLPReluLayer.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "src/core/gpu/cl/IClKernel.h"
+#include "src/runtime/gpu/cl/operators/ClPRelu.h"
 
 namespace arm_compute
 {
-namespace experimental
-{
-CLPReluLayer::CLPReluLayer()
-{
-}
-
-void CLPReluLayer::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output)
-{
-    auto k = std::make_unique<arm_compute::opencl::kernels::ClArithmeticKernel>();
-    k->configure(compile_context, ArithmeticOperation::PRELU, input, alpha, output);
-    _kernel = std::move(k);
-}
-
-Status CLPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
-{
-    return arm_compute::opencl::kernels::ClArithmeticKernel::validate(ArithmeticOperation::PRELU, input, alpha, output);
-}
-
-void CLPReluLayer::run(ITensorPack &tensors)
-{
-    ICLOperator::run(tensors);
-}
-} // namespace experimental
+using OperatorType = opencl::ClPRelu;
 
 struct CLPReluLayer::Impl
 {
-    const ICLTensor                            *src_0{ nullptr };
-    const ICLTensor                            *src_1{ nullptr };
-    ICLTensor                                  *dst{ nullptr };
-    std::unique_ptr<experimental::CLPReluLayer> op{ nullptr };
+    const ICLTensor              *src_0{ nullptr };
+    const ICLTensor              *src_1{ nullptr };
+    ICLTensor                    *dst{ nullptr };
+    std::unique_ptr<OperatorType> op{ nullptr };
 };
 
 CLPReluLayer::CLPReluLayer()
@@ -79,13 +57,13 @@ void CLPReluLayer::configure(const CLCompileContext &compile_context, ICLTensor 
     _impl->src_0 = input;
     _impl->src_1 = alpha;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::CLPReluLayer>();
-    _impl->op->configure(compile_context, input->info(), alpha->info(), output->info());
+    _impl->op    = std::make_unique<OperatorType>();
+    _impl->op->configure(compile_context, input->info(), alpha->info(), (output == nullptr ? input->info() : output->info()));
 }
 
 Status CLPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
 {
-    return experimental::CLPReluLayer::validate(input, alpha, output);
+    return OperatorType::validate(input, alpha, output);
 }
 
 void CLPReluLayer::run()

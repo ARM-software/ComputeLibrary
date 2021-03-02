@@ -677,6 +677,7 @@ cc_library_static {
         "src/runtime/gpu/cl/operators/ClFill.cpp",
         "src/runtime/gpu/cl/operators/ClFloor.cpp",
         "src/runtime/gpu/cl/operators/ClLogicalNot.cpp",
+        "src/runtime/gpu/cl/operators/ClPRelu.cpp",
         "src/runtime/gpu/cl/operators/ClPermute.cpp",
         "src/runtime/gpu/cl/operators/ClPooling.cpp",
         "src/runtime/gpu/cl/operators/ClReshape.cpp",

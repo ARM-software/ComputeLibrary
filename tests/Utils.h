@@ -514,6 +514,21 @@ inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coor
 
 /** Create and initialize a tensor of the given type.
  *
+ * @param[in] info Tensor information to be used to create the tensor
+ * @param[in] ctx  (Optional) Pointer to the runtime context.
+ *
+ * @return Initialized tensor of given type.
+ */
+template <typename T>
+inline T create_tensor(const TensorInfo &info, IRuntimeContext *ctx = nullptr)
+{
+    T tensor(ctx);
+    tensor.allocator()->init(info);
+    return tensor;
+}
+
+/** Create and initialize a tensor of the given type.
+ *
  * @param[in] shape             Tensor shape.
  * @param[in] data_type         Data type.
  * @param[in] num_channels      (Optional) Number of channels.
@@ -531,9 +546,8 @@ inline T create_tensor(const TensorShape &shape, DataType data_type, int num_cha
     TensorInfo info(shape, num_channels, data_type);
     info.set_quantization_info(quantization_info);
     info.set_data_layout(data_layout);
-    tensor.allocator()->init(info);
 
-    return tensor;
+    return create_tensor<T>(info, ctx);
 }
 
 /** Create and initialize a tensor of the given type.
@@ -549,10 +563,7 @@ inline T create_tensor(const TensorShape &shape, Format format, IRuntimeContext 
 {
     TensorInfo info(shape, format);
 
-    T tensor(ctx);
-    tensor.allocator()->init(info);
-
-    return tensor;
+    return create_tensor<T>(info, ctx);
 }
 
 /** Create and initialize a multi-image of the given type.

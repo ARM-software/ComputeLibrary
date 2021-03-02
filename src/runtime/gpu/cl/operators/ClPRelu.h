@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,45 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLPRELULAYER_H
-#define ARM_COMPUTE_CLPRELULAYER_H
+#ifndef ARM_COMPUTE_CL_PRELU_H
+#define ARM_COMPUTE_CL_PRELU_H
 
-#include "arm_compute/runtime/CL/ICLOperator.h"
-#include "arm_compute/runtime/IFunction.h"
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/runtime/gpu/cl/IClOperator.h"
 
 namespace arm_compute
 {
-class CLCompileContext;
-class ICLTensor;
-class ITensorInfo;
-/** Basic function to run @ref opencl::kernels::ClArithmeticKernel for PRELU
+namespace opencl
+{
+/** Basic operator to run @ref arm_compute::opencl::kernels::ClArithmeticKernel for PRELU
  *
- * @note The function implements an activation layer with the PRELU activation function.
+ * @note The operator implements an activation layer with the PRELU activation function.
  */
-class CLPReluLayer : public IFunction
+class ClPRelu : public IClOperator
 {
 public:
-    /** Default Constructor */
-    CLPReluLayer();
-    /** Default Destructor */
-    ~CLPReluLayer();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLPReluLayer(const CLPReluLayer &) = delete;
-    /** Default move constructor */
-    CLPReluLayer(CLPReluLayer &&);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLPReluLayer &operator=(const CLPReluLayer &) = delete;
-    /** Default move assignment operator */
-    CLPReluLayer &operator=(CLPReluLayer &&);
-    /** Set the input and output tensor.
-     *
-     * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
-     *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  alpha  PRelu layer parameters. Data types supported: same of @p input.
-     * @param[out] output Destination tensor. Data type supported: same as @p input
-     */
-    void configure(ICLTensor *input, ICLTensor *alpha, ICLTensor *output);
+    /** Default constructor */
+    ClPRelu() = default;
     /** Set the input and output tensor.
      *
      * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
@@ -69,8 +49,8 @@ public:
      * @param[in]  alpha           PRelu layer parameters. Data types supported: same of @p input.
      * @param[out] output          Destination tensor. Data type supported: same as @p input
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *alpha, ICLTensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLPReluLayer
+    void configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref arm_compute::opencl::kernels::ClArithmeticKernel for PRELU
      *
      * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] alpha  PRelu layer parameters. Data types supported: same of @p input.
@@ -81,11 +61,8 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run() override;
-
-private:
-    struct Impl;
-    std::unique_ptr<Impl> _impl;
+    void run(ITensorPack &tensors) override;
 };
+} // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLPRELULAYER_H */
+#endif /* ARM_COMPUTE_CL_PRELU_H */
