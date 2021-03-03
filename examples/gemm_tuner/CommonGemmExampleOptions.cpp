@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,7 @@ using namespace utils;
     os << "K : " << common_params.K << std::endl;
     os << "B : " << common_params.B << std::endl;
     os << "Data type : " << common_params.data_type << std::endl;
+    os << "OpenCL tuner mode : " << common_params.tuner_mode << std::endl;
     return os;
 }
 
@@ -44,7 +45,8 @@ CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser, Da
       N(parser.add_positional_option<SimpleOption<size_t>>("N", 100)),
       K(parser.add_positional_option<SimpleOption<size_t>>("K", 50)),
       B(parser.add_positional_option<SimpleOption<size_t>>("B", 1)),
-      data_type()
+      data_type(),
+      tuner_mode()
 {
     const std::set<DataType> supported_data_types
     {
@@ -52,9 +54,18 @@ CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser, Da
         DataType::F32,
         DataType::QASYMM8,
     };
+
+    const std::set<CLTunerMode> supported_tuner_modes
+    {
+        CLTunerMode::EXHAUSTIVE,
+        CLTunerMode::NORMAL,
+        CLTunerMode::RAPID
+    };
+
     ARM_COMPUTE_ERROR_ON_MSG(supported_data_types.find(default_data_type) == supported_data_types.end(), "Default data type unsupported");
 
-    data_type = parser.add_option<EnumOption<DataType>>("type", supported_data_types, default_data_type);
+    data_type  = parser.add_option<EnumOption<DataType>>("type", supported_data_types, default_data_type);
+    tuner_mode = parser.add_option<EnumOption<CLTunerMode>>("tuner-mode", supported_tuner_modes, CLTunerMode::RAPID);
 
     help->set_help("Show this help message.");
     M->set_help("Number of lhs matrix rows.");
@@ -62,16 +73,18 @@ CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser, Da
     K->set_help("Number of lhs matrix columns/rhs matrix rows.");
     B->set_help("Batch size.");
     data_type->set_help("Data type to use");
+    tuner_mode->set_help("OpenCL tuner mode");
 }
 
 CommonGemmExampleParams consume_common_gemm_example_parameters(const CommonGemmExampleOptions &options)
 {
     CommonGemmExampleParams common_params;
-    common_params.M         = options.M->value();
-    common_params.N         = options.N->value();
-    common_params.K         = options.K->value();
-    common_params.B         = options.B->value();
-    common_params.data_type = options.data_type->value();
+    common_params.M          = options.M->value();
+    common_params.N          = options.N->value();
+    common_params.K          = options.K->value();
+    common_params.B          = options.B->value();
+    common_params.data_type  = options.data_type->value();
+    common_params.tuner_mode = options.tuner_mode->value();
     return common_params;
 }
 } // namespace gemm_tuner

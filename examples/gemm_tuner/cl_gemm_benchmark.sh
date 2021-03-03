@@ -54,7 +54,10 @@ DEFAULT_ID_EXPERIMENT_START=0
 DEFAULT_NUM_EXPERIMENTS="all"
 
 # Default output file extension
-DEFAULT_OUT_EXTENSION="gemm_benchmark"
+DEFAULT_OUT_EXTENSION="mlgo_benchmark"
+
+# Default OpenCL tuner mode
+DEFAULT_TUNER_MODE="rapid"
 
 # Number of iterations for each benchmark run
 NUM_ITERATION=5
@@ -269,6 +272,10 @@ Options:
         Output file extension.
         Default: ${DEFAULT_OUT_EXTENSION}
 
+        -m <tuner_mode>
+        OpenCL tuner mode.
+        Default: ${DEFAULT_TUNER_MODE}
+
 EOF
 # Print help messages about gemm shapes and various gemm configs
 $HELP && help_gemm_shape_file
@@ -347,6 +354,7 @@ function arr_contains() {
 # Globals:
 #   OUT_DIR
 #   OUT_EXTENSION
+#   TUNER_MODE
 #   EXAMPLE_BIN_DIR
 #   NUM_ITERATION
 #   GEMM_CONFIGS_FILE
@@ -437,7 +445,7 @@ function run() {
 
     echo "Running shape[$array_shapes_idx]=$gemm_shape with config[$array_configs_idx]=$gemm_config" 1>&2
 
-    example_args="${gemm_shape},${gemm_config},--type=${DATA_TYPE}"
+    example_args="${gemm_shape},${gemm_config},--type=${DATA_TYPE},--tuner-mode=${TUNER_MODE}"
     json_filename="${STRATEGY_OPTION}_${gemm_shape}_${gemm_config}_${DATA_TYPE}"
     # Replace "," with "_"
     json_filename=${json_filename//,/_}
@@ -510,11 +518,13 @@ ID_EXPERIMENT_START=${DEFAULT_ID_EXPERIMENT_START}
 NUM_EXPERIMENTS=${DEFAULT_NUM_EXPERIMENTS}
 # Output benchmark result file extension
 OUT_EXTENSION=${DEFAULT_OUT_EXTENSION}
+# OpenCL tuner mode
+TUNER_MODE=${DEFAULT_TUNER_MODE}
 # Toggle help
 HELP=false
 
 # Obtain options
-while getopts "hs:e:g:c:d:o:i:n:t:" opt; do
+while getopts "hs:e:g:c:d:o:i:n:t:m:" opt; do
   case "$opt" in
     h) HELP=true ;;
     s) STRATEGY_OPTION=$(to_lower "${OPTARG}");;
@@ -526,6 +536,7 @@ while getopts "hs:e:g:c:d:o:i:n:t:" opt; do
     i) ID_EXPERIMENT_START="${OPTARG}";;
     n) NUM_EXPERIMENTS="${OPTARG}";;
     t) OUT_EXTENSION="${OPTARG}";;
+    m) TUNER_MODE="${OPTARG}";;
   esac
 done
 shift $((OPTIND - 1))

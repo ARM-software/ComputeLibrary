@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -169,6 +169,8 @@ public:
         std::cout << params << std::endl;
         std::cout << "Gemm configurations:" << std::endl;
         std::cout << configs << std::endl;
+
+        tuner.set_tuner_mode(params.tuner_mode);
 
         CLScheduler::get().default_init(&tuner);
 
