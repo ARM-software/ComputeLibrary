@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,21 +52,14 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in, out] input  Source tensor. Data types supported: F16/F32. Data layout supported: NCHW, NHWC
-     *                        In case of @p output tensor = nullptr this tensor will store the result of the normalization.
-     * @param[out]     output Destination tensor. Data types and data layouts supported: same as @p input.
-     * @param[in]      info   Kernel meta-data descriptor
-     */
-    void configure(ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info);
-    /** Set the input and output tensors.
-     *
      * @param[in]      compile_context The compile context to be used.
      * @param[in, out] input           Source tensor. Data types supported: F16/F32. Data layout supported: NCHW, NHWC
      *                                 In case of @p output tensor = nullptr this tensor will store the result of the normalization.
+     * @param[in]      mean_var        Tensor containing the precomputed mean and variance values. Data types supported: F32.
      * @param[out]     output          Destination tensor. Data types and data layouts supported: same as @p input.
      * @param[in]      info            Kernel meta-data descriptor
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info);
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *mean_var, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLInstanceNormalizationLayer.
      *
@@ -84,7 +77,51 @@ public:
 private:
     ICLTensor *_input;
     ICLTensor *_output;
+    ICLTensor *_mean;
     bool       _run_in_place;
+};
+
+/** Interface for compute Mean and Variance per channel */
+class CLComputeMeanVariance : public ICLKernel
+{
+public:
+    /** Constructor */
+    CLComputeMeanVariance();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLComputeMeanVariance(const CLComputeMeanVariance &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLComputeMeanVariance &operator=(const CLComputeMeanVariance &) = delete;
+    /** Default Move Constructor. */
+    CLComputeMeanVariance(CLComputeMeanVariance &&) = default;
+    /** Default move assignment operator */
+    CLComputeMeanVariance &operator=(CLComputeMeanVariance &&) = default;
+    /** Default destructor */
+    ~CLComputeMeanVariance() = default;
+
+    /** Set the input and output tensors.
+     *
+     * @param[in]      compile_context The compile context to be used.
+     * @param[in, out] input           Source tensor. Data types supported: F16/F32. Data layout supported: NCHW, NHWC
+     *                                 In case of @p output tensor = nullptr this tensor will store the result of the normalization.
+     * @param[out]     output          Destination tensor. Data types and data layouts supported: same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref CLInstanceNormalizationLayer.
+     *
+     * @param[in] input  Source tensor info. Data types supported: F16/F32. Data layout supported: NHWC, NCHW
+     * @param[in] output Destination tensor info. Data types and data layouts supported: same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run(const Window &window, cl::CommandQueue &queue) override;
+
+private:
+    ICLTensor *_input;
+    ICLTensor *_output;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYERKERNEL_H */

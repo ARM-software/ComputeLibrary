@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,118 @@
  * SOFTWARE.
  */
 #include "helpers.h"
+
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z)
+/** This function computes the mean and variance of each plane of the input tensor and provides it as output.
+ *
+ * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @attention Data type should be passed using the -DDATA_TYPE=data_type compile flag, e.g. -DDATA_TYPE=float
+ * @attention Dimensions X, Y, and Z should be given as a preprocessor argument with -DDIM_X=value, -DDIM_Y=value, -DDIM_Z=value. e.g. -DDIM_X=6, -DDIM_Y=2, -DDIM_Z=7
+ *
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
+ * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  input_stride_z                       Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  input_stride_w                       Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  input_step_w                         input_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the first source tensor
+ * @param[out] output_ptr                           (Optional) Pointer to the destination tensor. Supported data types: same as @p input_ptr
+ * @param[in]  output_stride_x                      (Optional) Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  output_stride_y                      (Optional) Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  output_stride_z                      (Optional) Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination tensor
+ */
+__kernel void compute_mean_var(
+    TENSOR4D_DECLARATION(input),
+    TENSOR3D_DECLARATION(output))
+{
+    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
+
+#if defined(NHWC)
+    const int ch             = get_global_id(0); // Current channel
+    const int batch          = get_global_id(1); // Current batch
+    const int elements_plane = DIM_Y * DIM_Z;
+    float     part_sum       = 0.f;
+    float     part_sum_sq    = 0.f;
+    const int in_offset      = input_offset_first_element_in_bytes + batch * input_stride_w + ch * sizeof(DATA_TYPE);
+    for(int i = 0; i < (DIM_Y * DIM_Z); ++i)
+    {
+        const float data = *((__global DATA_TYPE *)(input_ptr + in_offset + i * input_stride_y));
+        part_sum += data;
+        part_sum_sq += data * data;
+    }
+    float    mean                       = (part_sum / elements_plane);
+    float    var                        = (part_sum_sq / elements_plane) - (mean * mean);
+    __global DATA_TYPE *output_address0 = (__global DATA_TYPE *)tensor3D_offset(&out, ch, 0, batch);
+    *output_address0                    = mean;
+    __global DATA_TYPE *output_address1 = (__global DATA_TYPE *)tensor3D_offset(&out, ch, 1, batch);
+    *output_address1                    = var;
+#else // !defined(NHWC)
+    const int ch             = get_global_id(2) % DIM_Z; // Current channel
+    const int batch          = get_global_id(2) / DIM_Z; // Current batch
+    const int elements_plane = DIM_X * DIM_Y;
+
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    part_sum = 0.f;
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    part_sum_sq = 0.f;
+    // Calculate partial sum
+    for(int y = 0; y < DIM_Y; ++y)
+    {
+        int x = 0;
+        for(; x <= (DIM_X - VEC_SIZE); x += VEC_SIZE)
+        {
+            // Load data
+            VEC_DATA_TYPE(float, VEC_SIZE)
+            data = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch)), VEC_DATA_TYPE(float, VEC_SIZE));
+            part_sum += data;
+            part_sum_sq += data * data;
+        }
+        // Left-overs loop
+        for(; x < DIM_X; ++x)
+        {
+            float data = (float)(*((__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch)));
+            part_sum.s0 += data;
+            part_sum_sq.s0 += data * data;
+        }
+    }
+    // Perform reduction
+#if VEC_SIZE > 8
+    part_sum.s01234567 += part_sum.s89abcdef;
+    part_sum_sq.s01234567 += part_sum_sq.s89abcdef;
+#endif // VEC_SIZE > 8
+#if VEC_SIZE > 4
+    part_sum.s0123 += part_sum.s4567;
+    part_sum_sq.s0123 += part_sum_sq.s4567;
+#endif // VEC_SIZE > 4
+#if VEC_SIZE > 2
+    part_sum.s01 += part_sum.s23;
+    part_sum_sq.s01 += part_sum_sq.s23;
+#endif // VEC_SIZE > 2
+    part_sum.s0 += part_sum.s1;
+    part_sum_sq.s0 += part_sum_sq.s1;
+
+    float sum    = (float)part_sum.s0;
+    float sum_sq = (float)part_sum_sq.s0;
+
+    const float mean = (sum / elements_plane);
+    const float var  = (sum_sq / elements_plane) - (mean * mean);
+
+    __global DATA_TYPE *output_address0 = (__global DATA_TYPE *)tensor3D_offset(&out, ch, 0, batch);
+    *output_address0                    = mean;
+    __global DATA_TYPE *output_address1 = (__global DATA_TYPE *)tensor3D_offset(&out, ch, 1, batch);
+    *output_address1                    = var;
+
+#endif // defined(NHWC)
+}
+#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z) */
 
 #if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(INTERNAL_DATA_TYPE) && defined(GAMMA) && defined(BETA) && defined(EPSILON) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z)
 /** This function normalizes the input 2D tensor across the first dimension with respect to mean and standard deviation of the same dimension.
@@ -51,105 +163,50 @@
  * @param[in]  output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination tensor
  */
 __kernel void instance_normalization(
-    TENSOR4D_DECLARATION(input)
+    TENSOR4D_DECLARATION(input),
+    TENSOR3D_DECLARATION(mean_var)
 #ifndef IN_PLACE
     ,
     TENSOR4D_DECLARATION(output)
 #endif /* IN_PLACE */
 )
 {
-    Tensor4D in = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor4D in       = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor3D mean_var = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(mean_var);
 #ifndef IN_PLACE
     Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
 #endif /* IN_PLACE */
 
-    INTERNAL_DATA_TYPE sum    = 0.f;
-    INTERNAL_DATA_TYPE sum_sq = 0.f;
+#if defined(NHWC)
+    const int ch    = get_global_id(0); // Current channel
+    const int batch = get_global_id(2); // Current batch
+#else                                   /* defined(NHWC) */
+    const int ch    = get_global_id(2) % DIM_Z; // Current channel
+    const int batch = get_global_id(2) / DIM_Z; // Current batch
+#endif                                  /* defined(NHWC) */
+
+    const __global DATA_TYPE *mean_ptr                   = (__global DATA_TYPE *)tensor3D_offset(&mean_var, ch, 0, batch);
+    const __global DATA_TYPE *var_ptr                    = (__global DATA_TYPE *)tensor3D_offset(&mean_var, ch, 1, batch);
+    const INTERNAL_DATA_TYPE                      mean   = (INTERNAL_DATA_TYPE) * mean_ptr;
+    const INTERNAL_DATA_TYPE                      var    = (INTERNAL_DATA_TYPE) * var_ptr;
+    const INTERNAL_DATA_TYPE                      multip = GAMMA / sqrt(var + EPSILON);
+    const INTERNAL_DATA_TYPE                      beta   = (INTERNAL_DATA_TYPE)BETA;
 
 #if defined(NHWC)
-
-    const int ch             = get_global_id(0); // Current channel
-    const int batch          = get_global_id(2); // Current batch
-    const int elements_plane = DIM_Y * DIM_Z;
-
-    for(int i_w = 0; i_w < DIM_Y; ++i_w)
-    {
-        for(int i_h = 0; i_h < DIM_Z; ++i_h)
-        {
-            INTERNAL_DATA_TYPE data = (INTERNAL_DATA_TYPE) * ((__global DATA_TYPE *)tensor4D_offset(&in, ch, i_w, i_h, batch));
-            sum += data;
-            sum_sq += data * data;
-        }
-    }
-
-#else // !defined(NHWC)
-    const int ch             = get_global_id(2) % DIM_Z; // Current channel
-    const int batch          = get_global_id(2) / DIM_Z; // Current batch
-    const int elements_plane = DIM_X * DIM_Y;
-
-    VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE)
-    part_sum = 0.f;
-    VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE)
-    part_sum_sq = 0.f;
-    // Calculate partial sum
-    for(int y = 0; y < DIM_Y; ++y)
-    {
-        int x = 0;
-        for(; x <= (DIM_X - VEC_SIZE); x += VEC_SIZE)
-        {
-            // Load data
-            VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE)
-            data = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch)), VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE));
-            part_sum += data;
-            part_sum_sq += data * data;
-        }
-        // Left-overs loop
-        for(; x < DIM_X; ++x)
-        {
-            INTERNAL_DATA_TYPE data = (INTERNAL_DATA_TYPE)(*((__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch)));
-            part_sum.s0 += data;
-            part_sum_sq.s0 += data * data;
-        }
-    }
-    // Perform reduction
-#if VEC_SIZE > 8
-    part_sum.s01234567 += part_sum.s89abcdef;
-    part_sum_sq.s01234567 += part_sum_sq.s89abcdef;
-#endif // VEC_SIZE > 8
-#if VEC_SIZE > 4
-    part_sum.s0123 += part_sum.s4567;
-    part_sum_sq.s0123 += part_sum_sq.s4567;
-#endif // VEC_SIZE > 4
-#if VEC_SIZE > 2
-    part_sum.s01 += part_sum.s23;
-    part_sum_sq.s01 += part_sum_sq.s23;
-#endif // VEC_SIZE > 2
-    part_sum.s0 += part_sum.s1;
-    part_sum_sq.s0 += part_sum_sq.s1;
-
-    sum    = (INTERNAL_DATA_TYPE)part_sum.s0;
-    sum_sq = (INTERNAL_DATA_TYPE)part_sum_sq.s0;
-
-#endif // defined(NHWC)
-
-    const INTERNAL_DATA_TYPE mean   = (sum / elements_plane);
-    const INTERNAL_DATA_TYPE var    = (sum_sq / elements_plane) - (mean * mean);
-    const INTERNAL_DATA_TYPE multip = GAMMA / sqrt(var + EPSILON);
-
-#if defined(NHWC)
-
-    for(int i_w = 0; i_w < DIM_Y; ++i_w)
-    {
-        for(int i_h = 0; i_h < DIM_Z; ++i_h)
-        {
-            __global DATA_TYPE *input_address = (__global DATA_TYPE *)tensor4D_offset(&in, ch, i_w, i_h, batch);
-#ifdef IN_PLACE
-            __global DATA_TYPE *output_address = input_address;
-#else  /* !IN_PLACE */
-            __global DATA_TYPE *output_address = (__global DATA_TYPE *)tensor4D_offset(&out, ch, i_w, i_h, batch);
+    const int in_offset = input_offset_first_element_in_bytes + batch * input_stride_w + ch * sizeof(DATA_TYPE);
+#ifndef IN_PLACE
+    const int out_offset = output_offset_first_element_in_bytes + batch * input_stride_w + ch * sizeof(DATA_TYPE);
 #endif /* IN_PLACE */
-            *(output_address) = (*(input_address) - mean) * multip + (INTERNAL_DATA_TYPE)BETA;
-        }
+
+    for(int i = 0; i < (DIM_Y * DIM_Z); ++i)
+    {
+        __global DATA_TYPE *input_address = (__global DATA_TYPE *)(input_ptr + in_offset + i * input_stride_y);
+#ifdef IN_PLACE
+        __global DATA_TYPE *output_address = input_address;
+#else  /* !IN_PLACE */
+        __global DATA_TYPE *output_address = (__global DATA_TYPE *)(output_ptr + out_offset + i * output_stride_y);
+#endif /* IN_PLACE */
+        *(output_address) = (*(input_address) - mean) * multip + beta;
     }
 
 #else // !defined(NHWC)

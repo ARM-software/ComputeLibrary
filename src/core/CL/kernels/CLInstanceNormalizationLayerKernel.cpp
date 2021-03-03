@@ -32,7 +32,6 @@
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -54,25 +53,108 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
     return Status{};
 }
+
+Status validate_arguments_meanvar(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
+
+    if(output != nullptr && output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_channels() != output->num_channels(), "Input and output have different number of channels");
+    }
+
+    return Status{};
+}
 } // namespace
 
-CLInstanceNormalizationLayerKernel::CLInstanceNormalizationLayerKernel()
-    : _input(nullptr), _output(nullptr), _run_in_place(false)
+CLComputeMeanVariance::CLComputeMeanVariance()
+    : _input(nullptr), _output(nullptr)
 {
 }
 
-void CLInstanceNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
-}
-
-void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info)
+void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     auto padding_info = get_padding_info({ input, output });
 
     _input  = input;
     _output = output == nullptr ? input : output;
+
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_meanvar(_input->info(), _output->info()));
+    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
+
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DDIM_X=" + support::cpp11::to_string(input->info()->dimension(0)));
+    build_opts.add_option("-DDIM_Y=" + support::cpp11::to_string(input->info()->dimension(1)));
+    build_opts.add_option("-DDIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
+    build_opts.add_option_if(_input->info()->data_layout() == DataLayout::NHWC, "-DNHWC");
+    // Create kernel
+    _kernel = create_kernel(compile_context, "compute_mean_var", build_opts.options());
+
+    // We handle the planes manually
+    Window             win           = calculate_max_window(*(input->info()), Steps(1));
+    const auto         data_layout   = input->info()->data_layout();
+    const unsigned int channel_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const unsigned int batches_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
+    const unsigned int input_channel = input->info()->dimension(channel_idx);
+    const unsigned int input_batches = input->info()->dimension(batches_idx);
+    const TensorShape  out_shape(input_channel, 2u, input_batches);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), out_shape, 1, input->info()->data_type());
+
+    ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
+}
+
+Status CLComputeMeanVariance::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_meanvar(input, output));
+    return Status{};
+}
+
+void CLComputeMeanVariance::run(const Window &window, cl::CommandQueue &queue)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
+
+    Window collapsed_window = window.collapse(window, Window::DimZ);
+
+    // We will process the planes together
+    if(_input->info()->data_layout() == DataLayout::NCHW)
+    {
+        collapsed_window.set(Window::DimX, Window::Dimension(0, 1, 1));
+        collapsed_window.set(Window::DimY, Window::Dimension(0, 1, 1));
+    }
+    else
+    {
+        collapsed_window.set(Window::DimZ, Window::Dimension(0, 1, 1));
+        collapsed_window.set(Window::DimY, Window::Dimension(0, _input->info()->dimension(3), 1));
+    }
+    unsigned int idx = 0;
+    add_4D_tensor_argument(idx, _input, collapsed_window);
+    add_3D_tensor_argument(idx, _output, collapsed_window);
+
+    enqueue(queue, *this, collapsed_window, lws_hint());
+}
+
+CLInstanceNormalizationLayerKernel::CLInstanceNormalizationLayerKernel()
+    : _input(nullptr), _output(nullptr), _mean(nullptr), _run_in_place(false)
+{
+}
+
+void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *mean_var, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    auto padding_info = get_padding_info({ input, output });
+
+    _input  = input;
+    _output = output == nullptr ? input : output;
+    _mean   = mean_var;
 
     _run_in_place = (output == nullptr) || (output == input);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(_input->info(), _output->info(), info));
@@ -132,6 +214,8 @@ void CLInstanceNormalizationLayerKernel::run(const Window &window, cl::CommandQu
 
     unsigned int idx = 0;
     add_4D_tensor_argument(idx, _input, collapsed_window);
+    add_3D_tensor_argument(idx, _mean, collapsed_window);
+
     if(!_run_in_place)
     {
         add_4D_tensor_argument(idx, _output, collapsed_window);

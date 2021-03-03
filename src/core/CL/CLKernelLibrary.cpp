@@ -356,6 +356,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "im2col9x9_nhwc", "im2col.cl" },
     { "im2col_generic_nhwc", "im2col.cl" },
     { "instance_normalization", "instance_normalization.cl" },
+    { "compute_mean_var", "instance_normalization.cl" },
     { "l2_normalize_x", "l2_normalize.cl" },
     { "l2_normalize_y", "l2_normalize.cl" },
     { "l2_normalize_z", "l2_normalize.cl" },
