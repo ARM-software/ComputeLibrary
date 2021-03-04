@@ -193,7 +193,7 @@ public:
 
         lhs.allocator()->init(TensorInfo(TensorShape(params.K, params.M, params.B), 1, params.data_type));
         rhs.allocator()->init(TensorInfo(TensorShape(params.N, params.K, params.B), 1, params.data_type));
-        bias.allocator()->init(TensorInfo(TensorShape(params.N, 1, params.B), 1, DataType::S32));
+        bias.allocator()->init(TensorInfo(TensorShape(params.N), 1, DataType::S32));
         dst.allocator()->init(TensorInfo(TensorShape(params.N, params.M, params.B), 1, params.data_type));
 
         // Set arbitrary quantization information (non-zero offset to ensure offset contribution stage is included)
