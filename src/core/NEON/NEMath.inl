@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -385,6 +385,34 @@ inline void convert_float32x4x4_to_int8x16(const float32x4x4_t &in, int8x16_t &o
     const auto high = vcombine_s16(vqmovn_s32(vcvtq_s32_f32(in.val[2])),
                                    vqmovn_s32(vcvtq_s32_f32(in.val[3])));
     out = vcombine_s8(vqmovn_s16(low), vqmovn_s16(high));
+}
+
+template <>
+inline uint8x16_t convert_float_to_int<float32x4x4_t, uint8x16_t>(const float32x4x4_t &in)
+{
+    uint8x16_t out;
+    convert_float32x4x4_to_uint8x16(in, out);
+    return out;
+}
+
+template <>
+inline float32x4x4_t convert_int_to_float<float32x4x4_t, uint8x16_t>(const uint8x16_t &in)
+{
+    return convert_uint8x16_to_float32x4x4(in);
+}
+
+template <>
+inline int8x16_t convert_float_to_int<float32x4x4_t, int8x16_t>(const float32x4x4_t &in)
+{
+    int8x16_t out;
+    convert_float32x4x4_to_int8x16(in, out);
+    return out;
+}
+
+template <>
+inline float32x4x4_t convert_int_to_float<float32x4x4_t, int8x16_t>(const int8x16_t &in)
+{
+    return convert_int8x16_to_float32x4x4(in);
 }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
