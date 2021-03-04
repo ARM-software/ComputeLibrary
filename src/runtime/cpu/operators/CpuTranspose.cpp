@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,50 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NETranspose.h"
-
-#include "arm_compute/core/Validate.h"
 #include "src/runtime/cpu/operators/CpuTranspose.h"
+
+#include "src/core/cpu/kernels/CpuTransposeKernel.h"
 
 namespace arm_compute
 {
-struct NETranspose::Impl
+namespace cpu
 {
-    const ITensor                     *src{ nullptr };
-    ITensor                           *dst{ nullptr };
-    std::unique_ptr<cpu::CpuTranspose> op{ nullptr };
-};
-
-NETranspose::NETranspose()
-    : _impl(std::make_unique<Impl>())
+void CpuTranspose::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    auto k = std::make_unique<kernels::CpuTransposeKernel>();
+    k->configure(src, dst);
+    _kernel = std::move(k);
 }
 
-NETranspose::~NETranspose() = default;
-
-void NETranspose::configure(const ITensor *input, ITensor *output)
+Status CpuTranspose::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    _impl->src = input;
-    _impl->dst = output;
-    _impl->op  = std::make_unique<cpu::CpuTranspose>();
-    _impl->op->configure(input->info(), output->info());
+    return kernels::CpuTransposeKernel::validate(src, dst);
 }
-
-Status NETranspose::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuTranspose::validate(input, output));
-    return Status{};
-}
-
-void NETranspose::run()
-{
-    ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-    _impl->op->run(pack);
-}
-
+} // namesapce cpu
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,58 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NETransposeKernel.h"
+#include "src/core/cpu/kernels/CpuTransposeKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/AccessWindowStatic.h"
-#include "src/core/AccessWindowTranspose.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
-TensorShape transposed_tensor_shape(const TensorShape &in)
-{
-    TensorShape  output_shape{ in };
-    const size_t w_out = in[1];
-    const size_t h_out = in[0];
-    output_shape.set(0, w_out);
-    output_shape.set(1, h_out);
-
-    return output_shape;
-}
-
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-
-    if(output->total_size() != 0)
-    {
-        const TensorInfo tensor_info = input->clone()->set_tensor_shape(transposed_tensor_shape(input->tensor_shape()));
-
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-    }
-
-    return Status{};
-}
 unsigned int num_elems_processed(size_t element_size)
 {
     switch(element_size)
@@ -454,64 +424,87 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
 }
 } // namespace
 
-Status NETransposeKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+void CpuTransposeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    return Status{};
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
-NETransposeKernel::NETransposeKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr)
-{
-}
+    // Destination auto inizialitation if not yet initialized
+    const TensorShape dst_shape = misc::shape_calculator::compute_transposed_shape(*src);
+    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
 
-void NETransposeKernel::configure(const ITensor *input, ITensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(transposed_tensor_shape(input->info()->tensor_shape())));
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
-
-    _input  = input;
-    _output = output;
-
-    switch(input->info()->element_size())
-    {
-        case 1:
-            _func = &transpose_8bit_elements;
-            break;
-        case 2:
-            _func = &transpose_16bit_elements;
-            break;
-        case 4:
-            _func = &transpose_32bit_elements;
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Element size not supported");
-            break;
-    }
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate(src, dst));
 
     // Note: This kernel performs 16 elements per iteration.
     // However, since we use a left-over for loop on both dimensions (X and Y), we cannot have any read or write out of memory
     // For this reason num_elems_processed_per_iteration_x is set to 1
     const unsigned int num_elems_processed_per_iteration_x = 1;
-    const unsigned int num_elems_processed_per_iteration_y = num_elems_processed(input->info()->element_size());
+    const unsigned int num_elems_processed_per_iteration_y = num_elems_processed(src->element_size());
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    Window win = calculate_max_window(*src, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-    INEKernel::configure(win);
+    // The CpuTranspose doesn't need padding so update_window_and_padding() can be skipped
+    Coordinates coord;
+    coord.set_num_dimensions(dst->num_dimensions());
+    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
+
+    ICpuKernel::configure(win);
 }
 
-void NETransposeKernel::run(const Window &window, const ThreadInfo &info)
+Status CpuTransposeKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
+
+    // Error if input is not 8 bit, 16bit or 32bit
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->element_size() != 1 && src->element_size() != 2 && src->element_size() != 4,
+                                    "Element size not supported");
+
+    // Validate configured destination
+    if(dst->total_size() != 0)
+    {
+        const TensorShape dst_shape = misc::shape_calculator::compute_transposed_shape(*src);
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+    }
+
+    return Status{};
+}
+
+void CpuTransposeKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    (*_func)(_input, _output, window);
+    const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto       dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    switch(src->info()->element_size())
+    {
+        case 1:
+            transpose_8bit_elements(src, dst, window);
+            break;
+        case 2:
+            transpose_16bit_elements(src, dst, window);
+            break;
+        case 4:
+            transpose_32bit_elements(src, dst, window);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Element size not supported");
+            break;
+    }
 }
+
+const char *CpuTransposeKernel::name() const
+{
+    return "CpuTransposeKernel";
+}
+} // namespace kernels
+} // namespace cpu
+} // namespace arm_compute

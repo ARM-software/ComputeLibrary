@@ -255,7 +255,7 @@ void CpuPermuteKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const
     // Configure kernel window
     Window win = calculate_max_window(*src, Steps());
 
-    // The NEPermute doesn't need padding so update_window_and_padding() can be skipped
+    // This kernel doesn't need padding so update_window_and_padding() can be skipped
 
     ICpuKernel::configure(win);
 }

@@ -24,22 +24,34 @@
 #ifndef ARM_COMPUTE_NETRANSPOSE_H
 #define ARM_COMPUTE_NETRANSPOSE_H
 
+#include "arm_compute/runtime/IFunction.h"
+
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+
+#include <memory>
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to transpose a matrix on Neon. This function calls the following Neon kernel:
- *
- *  -# @ref NETransposeKernel
- *
- */
-class NETranspose : public INESimpleFunctionNoBorder
+/** Basic function to run @ref cpu::kernels::CpuTransposeKernel */
+class NETranspose : public IFunction
 {
 public:
+    /** Default Constructor */
+    NETranspose();
+    /** Default Destructor */
+    ~NETranspose();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NETranspose(const NETranspose &) = delete;
+    /** Default move constructor */
+    NETranspose(NETranspose &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NETranspose &operator=(const NETranspose &) = delete;
+    /** Default move assignment operator */
+    NETranspose &operator=(NETranspose &&) = default;
     /** Initialise the kernel's inputs and output
      *
      * @param[in]  input  Input tensor. Data types supported: All
@@ -54,7 +66,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-
 #endif /* ARM_COMPUTE_NETRANSPOSE_H */

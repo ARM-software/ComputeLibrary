@@ -552,7 +552,7 @@ v20.08 Public major release
    - NEHeightConcatenateLayerKernel
    - NEThresholdKernel
    - NEBatchConcatenateLayerKernel
-   - @ref NETransposeKernel
+   - NETransposeKernel
    - @ref NEBatchNormalizationLayerKernel
    - NEArithmeticSubtractionKernel
    - @ref NEBoundingBoxTransformKernel
@@ -1379,7 +1379,7 @@ v17.03.1 First Major public release of the sources
    - CLGEMMLowpMatrixMultiplyKernel / CLGEMMLowp
  - New Neon kernels / functions:
    - @ref NENormalizationLayerKernel / @ref NENormalizationLayer
-   - @ref NETransposeKernel / @ref NETranspose
+   - NETransposeKernel / @ref NETranspose
    - NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
    - @ref NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
    - NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer

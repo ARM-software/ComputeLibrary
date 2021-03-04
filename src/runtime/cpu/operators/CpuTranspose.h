@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_PERMUTE_H
-#define ARM_COMPUTE_CPU_PERMUTE_H
+#ifndef ARM_COMPUTE_CPU_TRANSPOSE_H
+#define ARM_COMPUTE_CPU_TRANSPOSE_H
 
 #include "src/runtime/cpu/ICpuOperator.h"
 
@@ -30,33 +30,27 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref kernels::CpuPermuteKernel */
-class CpuPermute : public ICpuOperator
+/** Basic function to run @ref kernels::CpuTransposeKernel */
+class CpuTranspose : public ICpuOperator
 {
 public:
     /** Constructor */
-    CpuPermute() = default;
+    CpuTranspose() = default;
     /** Configure operator for a given list of arguments
      *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
-     *
-     * @param[in]  src  Source tensor to permute. Data types supported: All
-     * @param[out] dst  Destintation tensor. Data types supported: Same as @p src
-     * @param[in]  perm Permutation vector
+     * @param[in]  src Source tensor to permute. Data types supported: All
+     * @param[out] dst Destintation tensor. Data types supported: Same as @p src
      */
-    void configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuPermute
+    void configure(const ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuTranspose
      *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
-     *
-     * @param[in] src  Source tensor to permute. Data types supported: All
-     * @param[in] dst  Destination tensor. Data types supported: Same as @p dst
-     * @param[in] perm Permutation vector
+     * @param[in] src Source tensor to permute. Data types supported: All
+     * @param[in] dst Destination tensor. Data types supported: Same as @p dst
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_PERMUTE_H */
+#endif /* ARM_COMPUTE_CPU_TRANSPOSE_H */

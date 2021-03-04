@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
@@ -40,11 +39,11 @@ namespace arm_compute
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
-class NEFullyConnectedLayerReshapeWeights : public INESimpleFunctionNoBorder
+class NEFullyConnectedLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    NEFullyConnectedLayerReshapeWeights() = default;
+    NEFullyConnectedLayerReshapeWeights();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEFullyConnectedLayerReshapeWeights(const NEFullyConnectedLayerReshapeWeights &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -54,7 +53,7 @@ public:
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */
     NEFullyConnectedLayerReshapeWeights &operator=(NEFullyConnectedLayerReshapeWeights &&) = delete;
     /** Default destructor */
-    ~NEFullyConnectedLayerReshapeWeights() = default;
+    ~NEFullyConnectedLayerReshapeWeights();
     /** Set the input and output tensors.
      *
      * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -69,6 +68,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 namespace weights_transformations

@@ -21,42 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_PERMUTE_H
-#define ARM_COMPUTE_CPU_PERMUTE_H
+#ifndef ARM_COMPUTE_CPU_TRANSPOSE_KERNEL_H
+#define ARM_COMPUTE_CPU_TRANSPOSE_KERNEL_H
 
-#include "src/runtime/cpu/ICpuOperator.h"
+#include "src/core/common/Macros.h"
+#include "src/core/cpu/ICpuKernel.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref kernels::CpuPermuteKernel */
-class CpuPermute : public ICpuOperator
+namespace kernels
+{
+/** Kernel which transposes the elements of a matrix */
+class CpuTransposeKernel : public ICpuKernel
 {
 public:
-    /** Constructor */
-    CpuPermute() = default;
-    /** Configure operator for a given list of arguments
+    CpuTransposeKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuTransposeKernel);
+    /** Configure kernel for a given list of arguments
      *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
-     *
-     * @param[in]  src  Source tensor to permute. Data types supported: All
-     * @param[out] dst  Destintation tensor. Data types supported: Same as @p src
-     * @param[in]  perm Permutation vector
+     * @param[in]  src Srouce tensor to permute. Data types supported: All
+     * @param[out] dst Destination tensor. Data types supported: Same as @p src
      */
-    void configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuPermute
+    void configure(const ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuTransposeKernel
      *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
-     *
-     * @param[in] src  Source tensor to permute. Data types supported: All
-     * @param[in] dst  Destination tensor. Data types supported: Same as @p dst
-     * @param[in] perm Permutation vector
+     * @param[in] src Source tensor to permute. Data types supported: All
+     * @param[in] dst Destination tensor. Data types supported: Same as @p src
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
+
+    // Inherited methods overridden:
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    const char *name() const override;
 };
+} // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_PERMUTE_H */
+#endif /* ARM_COMPUTE_CPU_TRANSPOSE_KERNEL_H */

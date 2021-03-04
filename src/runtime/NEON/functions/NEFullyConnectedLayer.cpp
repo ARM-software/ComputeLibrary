@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -39,9 +40,8 @@
 #include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
-#include "src/core/NEON/kernels/NETransposeKernel.h"
+#include "src/core/cpu/kernels/CpuTransposeKernel.h"
 
-#include <algorithm>
 #include <cmath>
 
 namespace arm_compute
@@ -142,16 +142,39 @@ Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const I
 }
 } // namespace
 
+struct NEFullyConnectedLayerReshapeWeights::Impl
+{
+    const ITensor                                    *src{ nullptr };
+    ITensor                                          *dst{ nullptr };
+    std::unique_ptr<cpu::kernels::CpuTransposeKernel> op{ nullptr };
+};
+
+NEFullyConnectedLayerReshapeWeights::NEFullyConnectedLayerReshapeWeights()
+    : _impl(std::make_unique<Impl>())
+{
+}
+
+NEFullyConnectedLayerReshapeWeights::~NEFullyConnectedLayerReshapeWeights() = default;
+
 void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITensor *output)
 {
-    auto k = std::make_unique<NETransposeKernel>();
-    k->configure(input, output);
-    _kernel = std::move(k);
+    _impl->op = std::make_unique<cpu::kernels::CpuTransposeKernel>();
+    _impl->op->configure(input->info(), output->info());
+    _impl->src = input;
+    _impl->dst = output;
 }
 
 Status NEFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return NETransposeKernel::validate(input, output);
+    return cpu::kernels::CpuTransposeKernel::validate(input, output);
+}
+
+void NEFullyConnectedLayerReshapeWeights::run()
+{
+    ITensorPack pack{};
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    NEScheduler::get().schedule_op(_impl->op.get(), Window::DimY, _impl->op->window(), pack);
 }
 
 NEFullyConnectedLayer::~NEFullyConnectedLayer() = default;
