@@ -325,6 +325,7 @@ inline svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b)
 #endif /* defined(__ARM_FEATURE_SVE2) */
 }
 
+#if defined(__ARM_FEATURE_SVE2)
 template <>
 inline svuint8_t convert_float_to_int<svuint8_t>(const svfloat32_t &in_0, const svfloat32_t &in_1, const svfloat32_t &in_2, const svfloat32_t &in_3)
 {
@@ -392,6 +393,7 @@ inline svint8_t convert_float_to_int<svint8_t>(const svfloat32_t &in_0, const sv
 
     return out;
 }
+#endif /* defined(__ARM_FEATURE_SVE2) */
 
 } // namespace arm_compute
 #endif /* defined(__ARM_FEATURE_SVE) */
