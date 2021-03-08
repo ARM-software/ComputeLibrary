@@ -373,7 +373,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     else
     {
         TensorInfo out_info{ *output->info() };
-        out_info.set_data_type(output_data_type).set_data_layout(input->info()->data_layout());
+        out_info.set_data_type(output_data_type).set_data_layout(input->info()->data_layout()).set_is_resizable(true);
         _gemm_output.allocator()->init(out_info);
         _gemm_output_3d.allocator()->init(out_info);
         _memory_group.manage(&_gemm_output);
