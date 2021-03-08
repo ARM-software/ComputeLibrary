@@ -51,30 +51,30 @@ static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_u8u32_mmla_8x3VL",
-    [](const GemmArgs &args) { return (args._Ksize>8); },
-    nullptr,
+    [](const GemmArgs &args) {  args._ci->has_sve() && return (args._Ksize>8); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_u8u32_mmla_8x3VL, uint8_t, uint32_t>(args); }
 },
 #endif
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_u8u32_dot_8x1VL",
-    [](const GemmArgs &args) { return args._Ksize<=64 && !args._indirect_input; },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._Ksize<=64 && !args._indirect_input; },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmHybrid<cls_sve_smallK_hybrid_u8u32_dot_8x1VL, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_u8u32_dot_6x4VL",
-    nullptr,
-    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs &args) { return args._ci->has_sve(); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN && (((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8))); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_u8u32_dot_6x4VL, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_u8u32_dot_8x3VL",
-    [](const GemmArgs &args) { return (args._Ksize>4); },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>4); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; }, 
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_u8u32_dot_8x3VL, uint8_t, uint32_t>(args); }
 },
 #endif

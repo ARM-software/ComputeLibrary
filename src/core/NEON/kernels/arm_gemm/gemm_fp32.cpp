@@ -62,8 +62,8 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 {
     GemmMethod::GEMM_HYBRID,
     "sve_gemv_fp32_mla_8VL",
-    [](const GemmArgs &args) { return args._Msize==1 && args._nbatches==1 && !args._indirect_input; },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._Msize==1 && args._nbatches==1 && !args._indirect_input; },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemvPretransposed<cls_sve_gemv_fp32_mla_8VL, float, float>(args); }
 },
 #endif
@@ -80,8 +80,8 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_fp32_mmla_8x3VL",
-    [](const GemmArgs &args) { return (args._Ksize>4); },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>4); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_fp32_mmla_8x3VL, float, float>(args); }
 },
 #endif // __ARM_FEATURE_SVE && MMLA_FP32
@@ -91,22 +91,22 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 {
     GemmMethod::GEMM_HYBRID,
     "sve_smallK_hybrid_fp32_mla_8x1VL",
-    [](const GemmArgs &args) { return args._Ksize <= 24 && !args._indirect_input; },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._Ksize <= 24 && !args._indirect_input; },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmHybrid<cls_sve_smallK_hybrid_fp32_mla_8x1VL, float, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_fp32_mla_8x1VL",
-    nullptr,
-    [](const GemmArgs &args) { return (args._Nsize < 12); },
+    [](const GemmArgs &args) { return args._ci->has_sve(); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN && (args._Nsize < 12); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_fp32_mla_8x1VL, float, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_fp32_mla_6x4VL",
-    nullptr,
-    [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs &args) { return args._ci->has_sve(); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN && (((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8))); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_fp32_mla_6x4VL, float, float>(args); }
 },
 #endif // __ARM_FEATURE_SVE
@@ -144,8 +144,8 @@ GemmImplementation<float, float>::with_estimate(
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_fp32_mla_8x3VL",
-    [](const GemmArgs &args) { return (args._Ksize>4); },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>4); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_fp32_mla_8x3VL, float, float>(args); }
 },
 #endif // __ARM_FEATURE_SVE

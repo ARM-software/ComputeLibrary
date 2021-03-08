@@ -42,6 +42,11 @@ void CPUInfo::set_dotprod(const bool dotprod)
     _dotprod = dotprod;
 }
 
+void CPUInfo::set_sve(const bool sve)
+{
+    _sve = sve;
+}
+
 void CPUInfo::set_cpu_model(unsigned int cpuid, CPUModel model)
 {
     ARM_COMPUTE_ERROR_ON(cpuid >= _percpu.size());
@@ -55,6 +60,12 @@ unsigned int CPUInfo::get_cpu_num() const
 {
     return _percpu.size();
 }
+
+bool CPUInfo::has_sve() const
+{
+    return _sve;
+}
+
 bool CPUInfo::has_fp16() const
 {
     return _fp16;
