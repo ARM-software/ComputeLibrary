@@ -45,3 +45,7 @@ pip-delete-this-directory.txt
 env/
 venv/
 ENV/
+
+# IDE folders
+.idea/
+.vscode/
