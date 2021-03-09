@@ -42,7 +42,8 @@ namespace arm_compute
 class ITensor;
 class ICPPKernel;
 
-/** Basic function to simulate a convolution layer. This function calls the following Neon kernels:
+/** Basic function to simulate a convolution layer. This function calls the following kernels:
+ *
  * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
  * -# @ref NEWinogradLayerTransformInputKernel
  * -# @ref NEWinogradLayerTransformOutputKernel

@@ -140,7 +140,7 @@ public:
     }
     void do_run() override
     {
-        // Run Neon softmax:
+        // Run softmax:
         softmax.run();
     }
     void do_teardown() override

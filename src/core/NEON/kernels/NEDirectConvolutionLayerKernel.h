@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon interface for Direct Convolution Layer kernel */
+/** Interface for the kernel to perform Direct Convolution Layer. */
 class NEDirectConvolutionLayerKernel : public INEKernel
 {
 public:

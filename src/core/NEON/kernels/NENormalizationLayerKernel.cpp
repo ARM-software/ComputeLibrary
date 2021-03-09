@@ -170,7 +170,7 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
 template <typename T, unsigned int S, unsigned int dim, bool do_2D_norm>
 void NENormalizationLayerKernel::normalize_float(const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     Window win(window);

@@ -192,7 +192,7 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
 
 /** Each bit of the result is set to the corresponding bit of either then_val or
  * else_val depending on whether the corresponding bit of if_mask is set.
- * Equivalent to the VBSL instruction in Arm Neon.
+ * Equivalent to the VBSL instruction in Arm® Neon™.
  *
  * @param[in] size Size of vector.
  *
@@ -320,7 +320,7 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
     }
 
 /** Calculates (a+b)/2, rounded to the nearest integer.
- * Equivalent to VRHADD in the Arm Neon instruction set.
+ * Equivalent to VRHADD in the Arm Arm® Neon™ instruction set.
  *
  * @param[in] size Size of vector.
  *

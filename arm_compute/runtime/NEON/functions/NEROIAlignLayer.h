@@ -32,12 +32,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEROIAlignLayerKernel.
- *
- * This function calls the following Neon kernels:
- * -# @ref NEROIAlignLayerKernel
- *
- */
+/** Basic function to run @ref NEROIAlignLayerKernel. */
 class NEROIAlignLayer : public INESimpleFunctionNoBorder
 {
 public:

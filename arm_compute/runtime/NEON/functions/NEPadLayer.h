@@ -38,7 +38,7 @@ namespace arm_compute
 {
 class NEPadLayerKernel;
 
-/** Basic function to pad a tensor. This function calls the following Neon functions/kernels:
+/** Basic function to pad a tensor. This function calls the following functions/kernels:
  *
  *  - For padding mode = PaddingMode::CONSTANT:
  *      -# @ref NEPadLayerKernel

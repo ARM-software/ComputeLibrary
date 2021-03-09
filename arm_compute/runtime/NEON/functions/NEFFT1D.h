@@ -40,7 +40,7 @@ class NEFFTDigitReverseKernel;
 class NEFFTRadixStageKernel;
 class NEFFTScaleKernel;
 
-/** Basic function to execute one dimensional FFT. This function calls the following Neon kernels:
+/** Basic function to execute one dimensional FFT. This function calls the following kernels:
  *
  * -# @ref NEFFTDigitReverseKernel Performs digit reverse
  * -# @ref NEFFTRadixStageKernel   A list of FFT kernels depending on the radix decomposition

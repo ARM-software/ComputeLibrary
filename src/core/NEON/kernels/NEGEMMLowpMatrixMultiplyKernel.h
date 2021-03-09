@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to multiply matrices
+/** Kernel to multiply matrices
  *
  * @note @ref NEGEMMLowpMatrixMultiplyKernel low precision matrix product kernel
  *  This kernel performs the following computation:

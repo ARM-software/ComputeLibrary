@@ -30,7 +30,7 @@
 namespace arm_compute
 {
 class ITensor;
-/** Neon kernel to accumulate the biases, if provided, or downscale in case of quantized input.
+/** Kernel to accumulate the biases, if provided, or downscale in case of quantized input.
  *
  * @note We assume bias to be shared
  * @note For quantized computations (i.e. @p input of S32 type) the output data type for auto-initialization must be passed as part

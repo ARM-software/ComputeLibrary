@@ -37,7 +37,7 @@ class ITensor;
 /** Function to calculate the index of the minimum or maximum values in a
  *  tensor based on an axis.
  *
- *  This function calls the following Neon kernels:
+ *  This function calls the following kernels:
  *
  * -# @ref NEReductionOperationKernel
  * -# @ref NEFillBorderKernel

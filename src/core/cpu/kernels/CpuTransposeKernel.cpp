@@ -95,7 +95,7 @@ void transpose_8bit_elements(const ITensor *in, ITensor *out, const Window &wind
 
     Iterator output(out, window_out);
 
-    // Run the Neon path if and only if the input is not a row-vector
+    // Run the SIMD path if and only if the input is not a row-vector
     if(in->info()->dimension(1) != 1)
     {
         Iterator input(in, window_in);
@@ -234,7 +234,7 @@ void transpose_16bit_elements(const ITensor *in, ITensor *out, const Window &win
 
     Iterator output(out, window_out);
 
-    // Run the Neon path if and only if the input is not a row-vector
+    // Run the SIMD path if and only if the input is not a row-vector
     if(in->info()->dimension(1) != 1)
     {
         Iterator input(in, window_in);
@@ -347,7 +347,7 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
 
     Iterator output(out, window_out);
 
-    // Run the Neon path if and only if the input is not a row-vector
+    // Run the SIMD path if and only if the input is not a row-vector
     if(in->info()->dimension(1) != 1)
     {
         Iterator input(in, window_in);
@@ -455,7 +455,7 @@ void CpuTransposeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 Status CpuTransposeKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
     // Error if input is not 8 bit, 16bit or 32bit

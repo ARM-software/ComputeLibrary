@@ -167,7 +167,7 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QSYMM16)
 
 /** Tests will be targetting
- * - Comparison between Neon kernel and the exact same but scalar version of reference kernel
+ * - Comparison between optimized kernel and the exact same but scalar version of reference kernel
  * - Input shapes of 1D and 2D with the first dimension covers boundary values of 128-bit vector size (0~3 iterations)
  * - Weight and bias 1D shape that have same size as that of input shapes
  * - Quantization scale is greater and smaller than one.
@@ -179,7 +179,7 @@ TEST_SUITE(QSYMM16)
  * - The algorithm has been sensitive to quantization scale but it is hard to fully test
  *   the sensitivity due to aforementioned reason.
  * - Again, it is hard to fully test corner values due to the exact same algorithm of the
- *   reference kernel and the Neon kernel.
+ *   reference kernel and the optimized kernel.
  */
 
 constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);

@@ -34,7 +34,7 @@ namespace graph
 {
 namespace backends
 {
-/** Neon device backend */
+/** CPU device backend */
 class NEDeviceBackend final : public IDeviceBackend
 {
 public:
@@ -54,7 +54,7 @@ public:
     std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() override;
 
 private:
-    Allocator _allocator; /**< Neon backend allocator */
+    Allocator _allocator; /**< Backend allocator */
 };
 } // namespace backends
 } // namespace graph

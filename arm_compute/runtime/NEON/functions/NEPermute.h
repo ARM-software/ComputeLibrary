@@ -52,7 +52,7 @@ public:
     NEPermute &operator=(const NEPermute &) = delete;
     /** Default move assignment operator */
     NEPermute &operator=(NEPermute &&) = default;
-    /** Configure the permute Neon kernel
+    /** Configure the permute function
      *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4
      *

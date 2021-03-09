@@ -96,7 +96,7 @@ struct GraphConfig
 enum class Target
 {
     UNSPECIFIED, /**< Unspecified Target */
-    NEON,        /**< Neon capable target device */
+    NEON,        /**< Arm® Neon™ capable target device */
     CL,          /**< OpenCL capable target device */
 };
 

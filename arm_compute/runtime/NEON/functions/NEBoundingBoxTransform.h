@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,11 +32,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEBoundingBoxTransformKernel.
- *
- * This function calls the following Neon kernels:
- * -# @ref NEBoundingBoxTransformKernel
- */
+/** Basic function to run @ref NEBoundingBoxTransformKernel. */
 class NEBoundingBoxTransform : public INESimpleFunctionNoBorder
 {
 public:

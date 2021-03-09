@@ -52,7 +52,7 @@ namespace graph
 {
 namespace backends
 {
-/** Register Neon backend */
+/** Register CPU backend */
 static detail::BackendRegistrar<NEDeviceBackend> NEDeviceBackend_registrar(Target::NEON);
 
 NEDeviceBackend::NEDeviceBackend()
@@ -138,7 +138,7 @@ std::unique_ptr<ITensorHandle> NEDeviceBackend::create_subtensor(ITensorHandle *
 
 std::unique_ptr<arm_compute::IFunction> NEDeviceBackend::configure_node(INode &node, GraphContext &ctx)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Configuring Neon node with ID : " << node.id() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Configuring CPU node with ID : " << node.id() << std::endl);
     ARM_COMPUTE_ERROR_ON(node.assigned_target() != Target::NEON);
 
     // Configure node
@@ -147,7 +147,7 @@ std::unique_ptr<arm_compute::IFunction> NEDeviceBackend::configure_node(INode &n
 
 arm_compute::Status NEDeviceBackend::validate_node(INode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating Neon node with ID : " << node.id() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating CPU node with ID : " << node.id() << std::endl);
     ARM_COMPUTE_ERROR_ON(node.assigned_target() != Target::NEON);
 
     return NENodeValidator::validate(&node);

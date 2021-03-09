@@ -39,7 +39,7 @@ class Window;
 using INEKernel = ICPPKernel;
 namespace experimental
 {
-/** Basic interface for functions which have a single async Neon kernel */
+/** Basic interface for functions which have a single async CPU kernel */
 class INEOperator : public IOperator
 {
 public:

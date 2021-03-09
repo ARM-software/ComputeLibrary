@@ -38,7 +38,7 @@ namespace arm_compute
 class ITensor;
 class NEGEMMAssemblyDispatch;
 
-/** Basic function to compute the convolution layer. This function calls the following Neon kernels/functions:
+/** Basic function to compute the convolution layer. This function calls the following kernels/functions:
  *
  * Supports only NHWC data layout
  *

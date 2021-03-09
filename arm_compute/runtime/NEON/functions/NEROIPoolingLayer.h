@@ -35,12 +35,7 @@ class ITensorInfo;
 class NEROIPoolingLayerKernel;
 class ROIPoolingLayerInfo;
 
-/** Basic function to run @ref NEROIPoolingLayerKernel.
- *
- * This function calls the following Neon kernels:
- * -# @ref NEROIPoolingLayerKernel
- *
- */
+/** Basic function to run @ref NEROIPoolingLayerKernel. */
 class NEROIPoolingLayer : public IFunction
 {
 public:

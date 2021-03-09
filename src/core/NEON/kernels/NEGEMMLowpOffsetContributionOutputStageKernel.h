@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel used to add the offset contribution and perform the output stage after @ref NEGEMMLowpMatrixMultiplyKernel.
+/** Kernel used to add the offset contribution and perform the output stage after @ref NEGEMMLowpMatrixMultiplyKernel.
  *
  * The computation is performed in-place
  *

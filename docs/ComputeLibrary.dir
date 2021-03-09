@@ -44,15 +44,15 @@
  */
 
 /** @dir src/core/NEON
- *  @brief Neon backend core: kernels and utilities.
+ *  @brief Arm® Neon™ backend core: kernels and utilities.
  */
 
 /** @file src/core/NEON/NEKernels.h
- *  @brief Includes all the Neon kernels at once
+ *  @brief Includes all the Arm® Neon™ kernels at once
  */
 
 /** @dir src/core/NEON/kernels
- *  @brief Folder containing all the Neon kernels
+ *  @brief Folder containing all the Arm® Neon™ kernels
  */
 
 /** @dir arm_compute/core/utils
@@ -76,7 +76,7 @@
  */
 
 /** @dir arm_compute/graph/backends/NEON
- *  @brief Neon specific operations
+ *  @brief Arm® Neon™ specific operations
  */
 
 /** @dir arm_compute/graph/detail
@@ -148,15 +148,15 @@
  */
 
 /** @dir arm_compute/runtime/NEON
- *  @brief Neon backend runtime interface.
+ *  @brief Arm® Neon™ backend runtime interface.
  */
 
 /** @file arm_compute/runtime/NEON/NEFunctions.h
- *  @brief Includes all the Neon functions at once.
+ *  @brief Includes all the Arm® Neon™ functions at once.
  */
 
 /** @dir arm_compute/runtime/NEON/functions
- *  @brief Folder containing all the Neon functions.
+ *  @brief Folder containing all the Arm® Neon™ functions.
  */
 
 /** @dir arm_compute/runtime/OMP
@@ -182,8 +182,8 @@
  *
  *  -# cl_*.cpp --> OpenCL examples
  *  -# graph_*.cpp --> Graph examples
- *  -# neoncl_*.cpp --> Neon / OpenCL interoperability examples
- *  -# neon_*.cpp --> Neon examples
+ *  -# neoncl_*.cpp --> Arm® Neon™ / OpenCL interoperability examples
+ *  -# neon_*.cpp --> Arm® Neon™ examples
  */
 
 /** @dir examples/gemm_tuner
@@ -211,11 +211,11 @@
  */
 
 /** @dir src/core/NEON/wrapper
- *  @brief Neon wrapper used to simplify code
+ *  @brief Arm® Neon™ wrapper used to simplify code
  */
 
 /** @file src/core/NEON/wrapper/traits.h
- *  @brief Traits defined on Neon vectors
+ *  @brief Traits defined on Arm® Neon™ vectors
  */
 
 /** @file src/core/NEON/wrapper/wrapper.h
@@ -223,7 +223,7 @@
  */
 
 /** @dir src/core/NEON/wrapper/intrinsics
- *  @brief Neon intrinsics wrappers
+ *  @brief Arm® Neon™ intrinsics wrappers
  */
 
 /** @dir src/core/NEON/wrapper/scalar
@@ -255,7 +255,7 @@
  */
 
 /** @dir tests/NEON
- *  @brief Neon accessors.
+ *  @brief Arm® Neon™ accessors.
  */
 
 /** @dir tests/benchmark
@@ -267,7 +267,7 @@
  */
 
 /** @dir tests/benchmark/NEON
- *  @brief Neon benchmarking tests.
+ *  @brief Arm® Neon™ benchmarking tests.
  */
 
 /** @dir tests/benchmark_examples
@@ -299,7 +299,7 @@
  */
 
 /** @dir tests/validation/NEON
- *  @brief Neon validation tests.
+ *  @brief Arm® Neon™ validation tests.
  */
 
 /** @dir tests/validation/reference

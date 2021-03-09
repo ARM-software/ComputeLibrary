@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to perform a reduction operation
+/** Kernel to perform a reduction operation
  *
  * @note For ARG_MIN/ARG_MAX reduction, the default data type for an uninitialized
  *       output tensor is signed 32-bit integer (S32). It is the user's responsibility

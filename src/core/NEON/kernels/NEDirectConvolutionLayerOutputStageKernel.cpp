@@ -93,7 +93,7 @@ typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value,
 output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
                   int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift, bool has_bias)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::UNKNOWN);

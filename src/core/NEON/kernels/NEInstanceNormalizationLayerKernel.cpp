@@ -82,7 +82,7 @@ inline float16x8_t vector_float_norm(const float16x8_t &inputs, const float32x4_
 template <typename T, typename AccType = T>
 void instance_normalization_nchw(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     // Clear X/Y dimensions on execution window as we handle the planes manually

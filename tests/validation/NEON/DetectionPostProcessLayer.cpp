@@ -150,7 +150,7 @@ inline void base_test_case(DetectionPostProcessLayerInfo info, DataType data_typ
         quantize_and_fill_tensor(Accessor(anchors), anchors_vector);
     }
 
-    // Determine the output through the Neon kernel
+    // Determine the output through the Compute Library operator
     Tensor                      output_boxes;
     Tensor                      output_classes;
     Tensor                      output_scores;

@@ -35,10 +35,7 @@ class ITensor;
 class ITensorInfo;
 class NESpaceToDepthLayerKernel;
 
-/** This function calls the following Neon kernels/functions:
- *
- *  -# @ref NESpaceToDepthLayerKernel
- */
+/** Basic function to run @ref NESpaceToDepthLayerKernel. */
 class NESpaceToDepthLayer : public IFunction
 {
 public:

@@ -39,7 +39,7 @@ namespace arm_compute
 class ITensor;
 class NENormalizationLayerKernel;
 
-/** Basic function to compute a normalization layer. This function calls the following Neon kernels:
+/** Basic function to compute a normalization layer. This function calls the following kernels:
  *
  * -# @ref NEPixelWiseMultiplication
  * -# @ref NEFillBorderKernel

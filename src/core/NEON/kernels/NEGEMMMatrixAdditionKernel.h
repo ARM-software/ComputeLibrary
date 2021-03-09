@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to perform the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
+/** Kernel to perform the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
  *
  * @note [ MTX_OUT = MTX_0 + beta * MTX_1 ] with MTX_0 and MTX_1 of the same size
  *

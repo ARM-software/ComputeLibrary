@@ -37,7 +37,6 @@ namespace arm_compute
 {
 class ITensor;
 class NEConvertQuantizedSignednessKernel;
-class NEConvertQuantizedSignednessKernel;
 class NEGEMMInterleave4x4Kernel;
 class NEGEMMLowpMatrixMultiplyKernel;
 class NEGEMMLowpOffsetContributionKernel;
@@ -47,7 +46,7 @@ class NEGEMMLowpMatrixBReductionKernel;
 class NEGEMMTranspose1xWKernel;
 class NEGEMMAssemblyDispatch;
 
-/** Basic function to execute GEMMLowpMatrixMultiplyCore on Neon. This function calls the following Neon kernels if the DOT product instruction is not available:
+/** Basic function to execute GEMMLowpMatrixMultiplyCore. This function calls the following kernels if the DOT product instruction is not available:
  *
  *  -# @ref NEGEMMInterleave4x4Kernel
  *  -# @ref NEGEMMTranspose1xWKernel

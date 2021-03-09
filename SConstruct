@@ -1,4 +1,6 @@
-# Copyright (c) 2016, 2017 Arm Limited.
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2016-2021 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -53,7 +55,7 @@ vars.AddVariables(
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
-    BoolVariable("neon", "Enable Neon support", False),
+    BoolVariable("neon", "Enable Arm® Neon™ support", False),
     BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", True),
     BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled", False),
     BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
@@ -123,7 +125,7 @@ if env['build'] == "embed_only":
     Return()
 
 if env['neon'] and 'x86' in env['arch']:
-    print("Cannot compile Neon for x86")
+    print("Cannot compile Arm® Neon™ for x86")
     Exit(1)
 
 if env['set_soname'] and not version_at_least(SCons.__version__, "2.4"):
@@ -285,7 +287,7 @@ if not GetOption("help"):
             print("GCC 6.2.1 or newer is required to compile armv8.2-a code")
             Exit(1)
         elif env['arch'] == 'arm64-v8a' and not version_at_least(compiler_ver, '4.9'):
-            print("GCC 4.9 or newer is required to compile Neon code for AArch64")
+            print("GCC 4.9 or newer is required to compile Arm® Neon™ code for AArch64")
             Exit(1)
 
         if version_at_least(compiler_ver, '6.1'):

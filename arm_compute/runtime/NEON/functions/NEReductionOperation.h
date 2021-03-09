@@ -35,7 +35,7 @@ namespace arm_compute
 class ITensor;
 class NEReductionOperationKernel;
 
-/** Basic function to simulate a reduction operation. This function calls the following Neon kernels:
+/** Basic function to simulate a reduction operation. This function calls the following kernels:
  *
  * -# @ref NEReshapeLayer
  * -# @ref NEReductionOperationKernel

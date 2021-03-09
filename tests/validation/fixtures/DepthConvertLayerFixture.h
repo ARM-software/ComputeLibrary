@@ -67,7 +67,7 @@ protected:
         }
         else
         {
-            // When converting S32 to F16, both reference and Neon implementations are + or - infinity outside the F16 range.
+            // When converting S32 to F16, both reference and Compute Library implementations are + or - infinity outside the F16 range.
             if(dt_in == DataType::S32 && dt_out == DataType::F16)
             {
                 std::uniform_int_distribution<int32_t> distribution_s32(-65504, 65504);

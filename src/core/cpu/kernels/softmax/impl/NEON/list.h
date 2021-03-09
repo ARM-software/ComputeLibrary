@@ -36,7 +36,7 @@ namespace cpu
 template <typename T>
 void neon_logits_1d_max(const ITensor *in, ITensor *out, const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     constexpr int window_step_x  = 16 / sizeof(T);
@@ -267,7 +267,7 @@ void neon_softmax_logits_1d_float(const ITensor *in, const ITensor *max, void *c
     Iterator max_it(max, window);
     Iterator out_it(out, window);
 
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     constexpr int vec_size   = 16 / sizeof(T);

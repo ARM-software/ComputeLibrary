@@ -47,7 +47,7 @@ class ITensor;
 
 /** Basic function to run @ref NELSTMLayerQuantized
  *
- * This function calls the following Neon functions/kernels:
+ * This function calls the following functions/kernels:
  *
  * -# @ref NEGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16

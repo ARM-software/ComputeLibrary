@@ -50,7 +50,7 @@ inline float16x8_t mask_float_vector(const float16x8_t &in, const uint16x8_t &ma
 
 void fp16_neon_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType                                = typename wrapper::traits::neon_bitvector_tag_t<float16_t, wrapper::traits::BitWidth::W128>;
     const ActivationLayerInfo::ActivationFunction act = act_info.activation();
 

@@ -34,7 +34,7 @@ namespace graph
 {
 namespace backends
 {
-/** Neon Sub-Tensor handle interface object **/
+/** CPU Sub-Tensor handle interface object **/
 class NESubTensorHandle final : public ITensorHandle
 {
 public:

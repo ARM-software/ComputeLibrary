@@ -36,7 +36,7 @@ namespace arm_compute
 // Forward declaration
 class ITensor;
 
-/** Basic function to execute two dimensional FFT. This function calls the following Neon kernels:
+/** Basic function to execute two dimensional FFT. This function calls the following kernels:
  *
  * -# @ref NEFFT1D 1D FFT is performed on the first given axis
  * -# @ref NEFFT1D 1D FFT is performed on the second given axis

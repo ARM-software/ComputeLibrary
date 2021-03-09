@@ -41,7 +41,7 @@ class NEFillBorderKernel;
 
 /** Function to run the direct convolution.
  *
- *  This function calls the following Neon kernels:
+ *  This function calls the following kernels:
  *
  * -# @ref NEFillBorderKernel for the input
  * -# @ref NEDirectConvolutionLayerOutputStageKernel

@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to interleave the elements of a matrix
+/** Kernel to interleave the elements of a matrix
  *
  * This function puts the values in a 4x4 block of Matrix A on the same row (Interleaved values)
  *

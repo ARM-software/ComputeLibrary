@@ -33,7 +33,7 @@ namespace arm_compute
 {
 class ICPPKernel;
 using INEKernel = ICPPKernel;
-/** Basic interface for functions which have a single Neon kernel and no border */
+/** Basic interface for functions which have a single CPU kernel and no border */
 class INESimpleFunctionNoBorder : public IFunction
 {
 public:

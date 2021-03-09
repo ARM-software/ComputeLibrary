@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ enum
 /*
      * "Short names" for hardware counters used by Streamline. Counters names are
      * stored in accordance with their memory layout in the binary counter block
-     * emitted by the Mali GPU. Each "master" in the GPU emits a fixed-size block
+     * emitted by the Arm® Mali™ GPU. Each "master" in the GPU emits a fixed-size block
      * of 64 counters, and each GPU implements the same set of "masters" although
      * the counters each master exposes within its block of 64 may vary.
      *

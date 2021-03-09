@@ -353,7 +353,7 @@ You can use the `--instruments` option to select one or more instruments to meas
 
 `PMU` will try to read the CPU PMU events from the kernel (They need to be enabled on your platform)
 
-`MALI` will try to collect Mali hardware performance counters. (You need to have a recent enough Mali driver)
+`MALI` will try to collect Arm® Mali™ hardware performance counters. (You need to have a recent enough Arm® Mali™ driver)
 
 `WALL_CLOCK_TIMER` will measure time using `gettimeofday`: this should work on all platforms.
 
@@ -371,7 +371,7 @@ To run the OpenCL precommit validation tests:
 
 	LD_LIBRARY_PATH=. ./arm_compute_validation --mode=precommit --filter="^CL.*"
 
-To run the Neon precommit benchmark tests with PMU and Wall Clock timer in miliseconds instruments enabled:
+To run the Arm® Neon™ precommit benchmark tests with PMU and Wall Clock timer in miliseconds instruments enabled:
 
 	LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^NEON.*" --instruments="pmu,wall_clock_timer_ms" --iterations=10
 

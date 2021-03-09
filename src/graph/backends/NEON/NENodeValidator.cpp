@@ -50,7 +50,7 @@ namespace graph
 {
 namespace backends
 {
-/** Collection of Neon element-wise functions */
+/** Collection of CPU element-wise functions */
 struct NEEltwiseLayerFunctions
 {
     using ArithmeticAddition      = NEArithmeticAddition;
@@ -60,7 +60,7 @@ struct NEEltwiseLayerFunctions
     using ArithmeticDivision      = NEElementwiseDivision;
 };
 
-/** Collection of Neon unary element-wise functions */
+/** Collection of CPU unary element-wise functions */
 struct NEUnaryEltwiseLayerFunctions
 {
     using ExpLayer = NEExpLayer;

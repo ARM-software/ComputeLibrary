@@ -43,7 +43,7 @@ namespace
 template <typename T>
 void range_function(ITensor *output, float start, float step, const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector<T, wrapper::traits::BitWidth::W128>::tag_type;
 
     const auto step_vec  = wrapper::vdup_n(static_cast<T>(step), ExactTagType{});

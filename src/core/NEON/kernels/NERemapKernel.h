@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to perform a remap on a tensor */
+/** Kernel to perform a remap on a tensor */
 class NERemapKernel : public INEKernel
 {
 public:

@@ -35,12 +35,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to simulate a quantization layer. This function calls the following Arm(R) Neon(TM) implementation layers:
- *
- *
- * -# @ref cpu::CpuQuantization
- *
- */
+/** Basic function to run a quantization layer using @ref cpu::CpuQuantization */
 class NEQuantizationLayer : public IFunction
 {
 public:

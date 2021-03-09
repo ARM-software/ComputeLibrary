@@ -34,7 +34,7 @@ namespace graph
 {
 namespace backends
 {
-/** Neon Tensor handle interface object **/
+/** CPU Tensor handle interface object **/
 class NETensorHandle final : public ITensorHandle
 {
 public:

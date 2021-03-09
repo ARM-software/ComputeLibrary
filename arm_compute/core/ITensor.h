@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class Coordinates;
 
-/** Interface for Neon tensor */
+/** Interface for CPU tensor */
 class ITensor
 {
 public:

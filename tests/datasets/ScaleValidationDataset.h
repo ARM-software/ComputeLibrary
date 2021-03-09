@@ -140,7 +140,7 @@ const auto ScaleAlignCornersSamplingPolicySet = combine(framework::dataset::make
 }),
 framework::dataset::make("AlignCorners", { true }));
 
-/** Generated shapes: Used by Neon precommit and nightly
+/** Generated shapes: used by precommit and nightly for CPU tests
  * - 2D shapes with 0, 1, 2 vector iterations
  * - 3D shapes with 0, 1 vector iterations
  * - 4D shapes with 0 vector iterations
