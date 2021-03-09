@@ -71,6 +71,7 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_co
 
     SoftmaxKernelInfo softmax_info{ beta, IS_LOG, input->info()->data_type(), axis };
     _impl->op->configure(compile_context, *input->info(), *output->info(), softmax_info);
+    allocate_workspace();
 }
 
 template <bool IS_LOG>
@@ -90,8 +91,8 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::allocate_workspace()
         _impl->workspace_tensors.emplace_back(memory_info.type, std::make_unique<CLTensor>());
         auto tensor = _impl->workspace_tensors.back().second.get();
         ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-        _impl->memory_group.manage(tensor);
         tensor->allocator()->init(tensor_info);
+        _impl->memory_group.manage(tensor);
         tensor->allocator()->allocate();
     });
 }
@@ -99,8 +100,6 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::allocate_workspace()
 template <bool IS_LOG>
 void           CLSoftmaxLayerGeneric<IS_LOG>::run()
 {
-    allocate_workspace();
-
     // Acquire all the temporaries
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
 
