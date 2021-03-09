@@ -27,6 +27,7 @@
 #include "src/runtime/CPUUtils.h"
 
 #include <cstdlib>
+#include <malloc.h>
 
 namespace arm_compute
 {
@@ -51,14 +52,14 @@ void *default_aligned_allocate(void *user_data, size_t size, size_t alignment)
 #if defined(BARE_METAL) || defined(__APPLE__)
     size_t rem       = size % alignment;
     size_t real_size = (rem) ? (size + alignment - rem) : size;
-    ptr              = aligned_alloc(alignment, real_size);
+    ptr              = memalign(alignment, real_size);
 #else  /* defined(BARE_METAL) || defined(__APPLE__) */
     if(posix_memalign(&ptr, alignment, size) != 0)
     {
         // posix_memalign returns non-zero on failures, the return values will be
         // - EINVAL: wrong alignment
         // - ENOMEM: insufficient memory
-        ARM_COMPUTE_LOG_ERROR_ACL("posix_memalign failed, the returned pointer will be invalid");        
+        ARM_COMPUTE_LOG_ERROR_ACL("posix_memalign failed, the returned pointer will be invalid");
     }
 #endif /* defined(BARE_METAL) || defined(__APPLE__) */
     return ptr;
