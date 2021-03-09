@@ -187,7 +187,7 @@ void CpuElementwiseKernel::configure_common(const ITensorInfo *src0, const ITens
         return;
     }
 
-    auto shape_and_window = compute_output_shape_and_window(*src0, *src1);
+    auto shape_and_window = compute_output_shape_and_window(src0->tensor_shape(), src1->tensor_shape());
     auto_init_if_empty(*dst, shape_and_window.first, 1, src0->data_type());
     ICpuKernel::configure(shape_and_window.second);
 }

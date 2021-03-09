@@ -120,7 +120,7 @@ void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo
         return;
     }
 
-    auto shape_and_window = compute_output_shape_and_window(src);
+    auto shape_and_window = compute_output_shape_and_window(src.tensor_shape());
     auto_init_if_empty(dst, shape_and_window.first, 1, src.data_type());
     ICpuKernel::configure(shape_and_window.second);
 }

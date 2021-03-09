@@ -40,7 +40,7 @@ void CpuElementwiseBase::run(ITensorPack &tensors)
 
     auto src0_info        = tensors.get_const_tensor(TensorType::ACL_SRC_0)->info();
     auto src1_info        = tensors.get_const_tensor(TensorType::ACL_SRC_1)->info();
-    auto shape_and_window = compute_output_shape_and_window(*src0_info, *src1_info);
+    auto shape_and_window = compute_output_shape_and_window(src0_info->tensor_shape(), src1_info->tensor_shape());
     ICpuOperator::run(tensors, shape_and_window.second);
 }
 

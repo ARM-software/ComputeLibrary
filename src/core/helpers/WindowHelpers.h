@@ -184,14 +184,11 @@ inline Window calculate_max_enlarged_window(const ITensorInfo &info, const Steps
  *
  * @return A pair of the shape and window
  */
-template <typename... Infos>
-std::pair<TensorShape, Window> compute_output_shape_and_window(const Infos &... infos)
+template <typename... Shapes>
+std::pair<TensorShape, Window> compute_output_shape_and_window(const Shapes &... shapes)
 {
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(infos...);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
-
-    return std::make_pair(out_shape, calculate_max_window(valid_region));
+    const TensorShape out_shape = TensorShape::broadcast_shape(shapes...);
+    return std::make_pair(out_shape, calculate_max_window(out_shape));
 }
 #endif /* DOXYGEN_SKIP_THIS */
 } // namespace arm_compute

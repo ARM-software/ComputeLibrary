@@ -52,7 +52,7 @@ void CpuElementwiseUnary::run(ITensorPack &tensors)
     }
 
     auto src_info = tensors.get_const_tensor(TensorType::ACL_SRC)->info();
-    ICpuOperator::run(tensors, compute_output_shape_and_window(*src_info).second);
+    ICpuOperator::run(tensors, compute_output_shape_and_window(src_info->tensor_shape()).second);
 }
 } // namespace cpu
 } // namespace arm_compute
