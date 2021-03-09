@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEQuantizationLayerKernel.h"
+#include "src/core/cpu/kernels/CpuQuantizationKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -41,18 +41,22 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
 constexpr auto window_step = 16;
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape().total_size() == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QASYMM16);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(dst->tensor_shape().total_size() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QASYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
 
     return Status{};
 }
@@ -104,43 +108,40 @@ vector_type<int8_t> vquantize_qasymm8<int8_t>(const float32x4x4_t &qv, const Uni
 
 } // namespace
 
-NEQuantizationLayerKernel::NEQuantizationLayerKernel()
-    : _input(nullptr), _output(nullptr), _func(nullptr)
+CpuQuantizationKernel::CpuQuantizationKernel()
+    : _func(nullptr)
 {
 }
 
-void NEQuantizationLayerKernel::configure(const ITensor *input, ITensor *output)
+void CpuQuantizationKernel::configure(ITensorInfo *src, ITensorInfo *dst)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
-
-    _input  = input;
-    _output = output;
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
     static const std::map<std::string, QuantizationFunctionExecutorPtr> quant_map =
     {
-        { "op_QASYMM8_QASYMM8", &NEQuantizationLayerKernel::run_quantize_qasymm8<uint8_t, uint8_t> },
-        { "op_QASYMM8_QASYMM8_SIGNED", &NEQuantizationLayerKernel::run_quantize_qasymm8<uint8_t, int8_t> },
-        { "op_QASYMM8_QASYMM16", &NEQuantizationLayerKernel::run_quantize_qasymm16<uint8_t> },
+        { "op_QASYMM8_QASYMM8", &CpuQuantizationKernel::run_quantize_qasymm8<uint8_t, uint8_t> },
+        { "op_QASYMM8_QASYMM8_SIGNED", &CpuQuantizationKernel::run_quantize_qasymm8<uint8_t, int8_t> },
+        { "op_QASYMM8_QASYMM16", &CpuQuantizationKernel::run_quantize_qasymm16<uint8_t> },
 
-        { "op_QASYMM8_SIGNED_QASYMM8", &NEQuantizationLayerKernel::run_quantize_qasymm8<int8_t, uint8_t> },
-        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED", &NEQuantizationLayerKernel::run_quantize_qasymm8<int8_t, int8_t> },
-        { "op_QASYMM8_SIGNED_QASYMM16", &NEQuantizationLayerKernel::run_quantize_qasymm16<int8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM8", &CpuQuantizationKernel::run_quantize_qasymm8<int8_t, uint8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED", &CpuQuantizationKernel::run_quantize_qasymm8<int8_t, int8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM16", &CpuQuantizationKernel::run_quantize_qasymm16<int8_t> },
 
-        { "op_F32_QASYMM8", &NEQuantizationLayerKernel::run_quantize_qasymm8<float, uint8_t> },
-        { "op_F32_QASYMM8_SIGNED", &NEQuantizationLayerKernel::run_quantize_qasymm8<float, int8_t> },
-        { "op_F32_QASYMM16", &NEQuantizationLayerKernel::run_quantize_qasymm16<float> },
+        { "op_F32_QASYMM8", &CpuQuantizationKernel::run_quantize_qasymm8<float, uint8_t> },
+        { "op_F32_QASYMM8_SIGNED", &CpuQuantizationKernel::run_quantize_qasymm8<float, int8_t> },
+        { "op_F32_QASYMM16", &CpuQuantizationKernel::run_quantize_qasymm16<float> },
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        { "op_F16_QASYMM8", &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t, uint8_t> },
-        { "op_F16_QASYMM8_SIGNED", &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t, int8_t> },
-        { "op_F16_QASYMM16", &NEQuantizationLayerKernel::run_quantize_qasymm16<float16_t> },
+        { "op_F16_QASYMM8", &CpuQuantizationKernel::run_quantize_qasymm8<float16_t, uint8_t> },
+        { "op_F16_QASYMM8_SIGNED", &CpuQuantizationKernel::run_quantize_qasymm8<float16_t, int8_t> },
+        { "op_F16_QASYMM16", &CpuQuantizationKernel::run_quantize_qasymm16<float16_t> },
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
     };
 
     std::string function_to_call("op_");
-    function_to_call += string_from_data_type(_input->info()->data_type()) + "_";
-    function_to_call += string_from_data_type(_output->info()->data_type());
+    function_to_call += string_from_data_type(src->data_type()) + "_";
+    function_to_call += string_from_data_type(dst->data_type());
 
     auto it = quant_map.find(function_to_call);
 
@@ -151,26 +152,25 @@ void NEQuantizationLayerKernel::configure(const ITensor *input, ITensor *output)
     _func = it->second;
 
     // Configure kernel window
-    Window win_config = calculate_max_window(*input->info(), Steps());
-
-    INEKernel::configure(win_config);
+    Window win_config = calculate_max_window(*src, Steps());
+    ICpuKernel::configure(win_config);
 }
 
-Status NEQuantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status CpuQuantizationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
     return Status{};
 }
 
 template <typename TIn, typename TOut>
-void NEQuantizationLayerKernel::run_quantize_qasymm8(const Window &window)
+void CpuQuantizationKernel::run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    const UniformQuantizationInfo uqinfo_in = _input->info()->quantization_info().uniform();
-    UniformQuantizationInfo       uqinfo    = _output->info()->quantization_info().uniform();
-    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
+    const UniformQuantizationInfo uqinfo_in = src->info()->quantization_info().uniform();
+    UniformQuantizationInfo       uqinfo    = dst->info()->quantization_info().uniform();
+    if(is_data_type_quantized_asymmetric(src->info()->data_type()))
     {
         uqinfo = compute_requantization_scale_offset(uqinfo_in, uqinfo);
     }
@@ -184,8 +184,8 @@ void NEQuantizationLayerKernel::run_quantize_qasymm8(const Window &window)
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input(_input, win_collapsed);
-    Iterator output(_output, win_collapsed);
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
     execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
         auto input_ptr  = reinterpret_cast<const TIn *>(input.ptr());
@@ -206,14 +206,14 @@ void NEQuantizationLayerKernel::run_quantize_qasymm8(const Window &window)
 }
 
 template <typename T>
-void NEQuantizationLayerKernel::run_quantize_qasymm16(const Window &window)
+void CpuQuantizationKernel::run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window)
 {
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    const UniformQuantizationInfo uqinfo_in = _input->info()->quantization_info().uniform();
-    UniformQuantizationInfo       uqinfo    = _output->info()->quantization_info().uniform();
-    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
+    const UniformQuantizationInfo uqinfo_in = src->info()->quantization_info().uniform();
+    UniformQuantizationInfo       uqinfo    = dst->info()->quantization_info().uniform();
+    if(is_data_type_quantized_asymmetric(src->info()->data_type()))
     {
         uqinfo = compute_requantization_scale_offset(uqinfo_in, uqinfo);
     }
@@ -227,8 +227,8 @@ void NEQuantizationLayerKernel::run_quantize_qasymm16(const Window &window)
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input(_input, win_collapsed);
-    Iterator output(_output, win_collapsed);
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
     execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
         auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
@@ -250,13 +250,22 @@ void NEQuantizationLayerKernel::run_quantize_qasymm16(const Window &window)
     input, output);
 }
 
-void NEQuantizationLayerKernel::run(const Window &window, const ThreadInfo &info)
+void CpuQuantizationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (this->*_func)(window);
+    const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto       dst = tensors.get_tensor(TensorType::ACL_DST);
+    (this->*_func)(src, dst, window);
 }
+
+const char *CpuQuantizationKernel::name() const
+{
+    return "CpuQuantizationKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

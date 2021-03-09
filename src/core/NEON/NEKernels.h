@@ -76,7 +76,6 @@
 #include "src/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 #include "src/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
-#include "src/core/NEON/kernels/NEQuantizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEROIAlignLayerKernel.h"
 #include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NERangeKernel.h"

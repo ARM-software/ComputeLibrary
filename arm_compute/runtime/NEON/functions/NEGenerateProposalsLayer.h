@@ -44,14 +44,14 @@ class NEComputeAllAnchorsKernel;
 
 /** Basic function to generate proposals for a RPN (Region Proposal Network)
  *
- * This function calls the following Neon kernels:
+ * This function calls the following Arm(R) Neon(TM) layers/kernels:
  * -# @ref NEComputeAllAnchorsKernel
  * -# @ref NEPermute x 2
  * -# @ref NEReshapeLayer x 2
  * -# @ref NEBoundingBoxTransform
  * -# @ref NEPadLayerKernel
  * -# @ref NEDequantizationLayerKernel x 2
- * -# @ref NEQuantizationLayerKernel
+ * -# @ref NEQuantizationLayer
  * And the following CPP kernels:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit
  */
@@ -113,7 +113,7 @@ private:
     // Memory group manager
     MemoryGroup _memory_group;
 
-    // Neon kernels
+    // kernels/layers
     NEPermute                                  _permute_deltas;
     NEReshapeLayer                             _flatten_deltas;
     NEPermute                                  _permute_scores;

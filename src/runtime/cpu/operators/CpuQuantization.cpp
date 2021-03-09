@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,45 +22,37 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
-
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/Tensor.h"
 #include "src/runtime/cpu/operators/CpuQuantization.h"
+
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/cpu/kernels/CpuQuantizationKernel.h"
 
 namespace arm_compute
 {
-struct NEQuantizationLayer::Impl
+namespace cpu
 {
-    const ITensor                        *src{ nullptr };
-    ITensor                              *dst{ nullptr };
-    std::unique_ptr<cpu::CpuQuantization> op{ nullptr };
-};
-
-NEQuantizationLayer::NEQuantizationLayer()
-    : _impl(std::make_unique<Impl>())
+Status CpuQuantization::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-}
-NEQuantizationLayer::~NEQuantizationLayer() = default;
-
-Status NEQuantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return cpu::CpuQuantization::validate(input, output);
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuQuantizationKernel::validate(src, dst));
+    return Status{};
 }
 
-void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
+void CpuQuantization::configure(ITensorInfo *src, ITensorInfo *dst)
 {
-    _impl->src = input;
-    _impl->dst = output;
-    _impl->op  = std::make_unique<cpu::CpuQuantization>();
-    _impl->op->configure(input->info(), output->info());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+
+    // Configure quantize kernel
+    auto k = std::make_unique<kernels::CpuQuantizationKernel>();
+    k->configure(src, dst);
+    _kernel = std::move(k);
 }
 
-void NEQuantizationLayer::run()
+void CpuQuantization::run(ITensorPack &tensors)
 {
-    ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-    _impl->op->run(pack);
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
+    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }
+} // namespace cpu
 } // namespace arm_compute

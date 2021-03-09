@@ -1298,7 +1298,7 @@ v17.09 Public major release
     - @ref NEDequantizationLayerKernel / @ref NEDequantizationLayer
     - NEFloorKernel / @ref NEFloor
     - @ref NEL2NormalizeLayerKernel / @ref NEL2NormalizeLayer
-    - @ref NEQuantizationLayerKernel @ref NEMinMaxLayerKernel / @ref NEQuantizationLayer
+    - NEQuantizationLayerKernel @ref NEMinMaxLayerKernel / @ref NEQuantizationLayer
     - @ref NEROIPoolingLayerKernel / @ref NEROIPoolingLayer
     - @ref NEReductionOperationKernel / @ref NEReductionOperation
     - NEReshapeLayerKernel / @ref NEReshapeLayer
