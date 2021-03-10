@@ -66,7 +66,7 @@ typedef enum AclExecutionMode
 } AclExecutionMode;
 
 /** Available CPU capabilities */
-typedef enum AclCpuCapabalities
+typedef enum AclCpuCapabilities
 {
     AclCpuCapabilitiesAuto = 0, /**< Automatic discovery of capabilities */
 
@@ -84,7 +84,7 @@ typedef enum AclCpuCapabalities
     AclCpuCapabilitiesMmlaFp   = (1 << 15), /**< Enable paths that use the mmla float instructions */
 
     AclCpuCapabilitiesAll = ~0 /**< Enable all paths */
-} AclCpuCapabalities;
+} AclCpuCapabilities;
 
 /**< Allocator interface that can be passed to a context */
 typedef struct AclAllocator
