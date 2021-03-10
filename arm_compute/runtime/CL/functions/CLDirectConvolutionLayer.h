@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,8 +33,6 @@
 namespace arm_compute
 {
 class CLCompileContext;
-class CLDirectConvolutionLayerKernel;
-class CLFillBorderKernel;
 class ICLTensor;
 class ITensorInfo;
 
@@ -43,14 +41,18 @@ class ITensorInfo;
 class CLDirectConvolutionLayer : public IFunction
 {
 public:
-    /** Default constructor */
+    /** Constructor */
     CLDirectConvolutionLayer();
-    /** Prevent instances of this class from being copied */
-    CLDirectConvolutionLayer(const CLDirectConvolutionLayer &) = delete;
-    /** Prevent instances of this class from being copied */
-    CLDirectConvolutionLayer &operator=(const CLDirectConvolutionLayer &) = delete;
-    /** Default destructor */
+    /** Destructor */
     ~CLDirectConvolutionLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDirectConvolutionLayer(const CLDirectConvolutionLayer &) = delete;
+    /** Default move constructor */
+    CLDirectConvolutionLayer(CLDirectConvolutionLayer &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDirectConvolutionLayer &operator=(const CLDirectConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    CLDirectConvolutionLayer &operator=(CLDirectConvolutionLayer &&);
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -103,11 +105,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<CLDirectConvolutionLayerKernel> _direct_conv_kernel;
-    std::unique_ptr<CLFillBorderKernel>             _input_border_handler;
-    CLActivationLayer                               _activationlayer_function;
-
-    bool _is_activationlayer_enabled;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 }
 #endif /* ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYER_H */

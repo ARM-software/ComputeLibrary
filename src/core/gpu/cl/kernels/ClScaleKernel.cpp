@@ -146,28 +146,26 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     auto padding_info = get_padding_info({ src, dst });
 
     // Info required for the static tuning
-    _info        = info;
-    _data_type   = src->data_type();
-    _data_layout = _info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : _info.data_layout;
+    _data_layout = info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : info.data_layout;
 
     float wr = 0.f;
     float hr = 0.f;
-    std::tie(wr, hr) = calculate_scale_factors(src, dst, _data_layout, _info.align_corners);
-    const bool call_quantized_kernel = is_data_type_quantized_asymmetric(src->data_type()) && _info.interpolation_policy == InterpolationPolicy::BILINEAR;
+    std::tie(wr, hr) = calculate_scale_factors(src, dst, _data_layout, info.align_corners);
+    const bool call_quantized_kernel = is_data_type_quantized_asymmetric(src->data_type()) && info.interpolation_policy == InterpolationPolicy::BILINEAR;
 
     // Compute actual border size
     BorderSize border  = border_size();
     const bool is_nhwc = _data_layout == DataLayout::NHWC;
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
-    auto interpolation_policy_to_use = _info.interpolation_policy;
-    if(_info.interpolation_policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
+    auto interpolation_policy_to_use = info.interpolation_policy;
+    if(info.interpolation_policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
     {
         interpolation_policy_to_use = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(src, dst, _info, border);
+    auto win_config = validate_and_configure_window(src, dst, info, border);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
@@ -178,7 +176,7 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     build_opts.add_option("-DBORDER_SIZE=" + support::cpp11::to_string(border.right));
     build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
     build_opts.add_option_if(is_nhwc, "-DDEPTH_OUT=" + support::cpp11::to_string(dst->dimension(2)));
-    build_opts.add_option_if_else(_info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+    build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
     build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
     if(call_quantized_kernel)
     {
@@ -209,13 +207,10 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     _kernel.setArg<float>(idx++, wr);
     _kernel.setArg<float>(idx++, hr);
 
-    // Set to enable static tuning
-    _output_x_dim = dst->dimension(0);
-
     // Set config_id for enabling LWS tuning
     _config_id = "scale_";
-    _config_id += (_info.border_mode == BorderMode::REPLICATE ? "Bord_rep" : "");
-    _config_id += (_info.sampling_policy == SamplingPolicy::CENTER ? "center" : "topleft");
+    _config_id += (info.border_mode == BorderMode::REPLICATE ? "Bord_rep" : "");
+    _config_id += (info.sampling_policy == SamplingPolicy::CENTER ? "center" : "topleft");
     _config_id += (is_nhwc ? "nhwc" : "nchw");
     _config_id += "_";
     _config_id += support::cpp11::to_string(dst->dimension(0));

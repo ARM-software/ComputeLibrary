@@ -70,29 +70,8 @@ public:
     BorderSize border_size() const override;
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
-    // Getter for interpolation policy
-    InterpolationPolicy get_interpolation_policy() const
-    {
-        return _info.interpolation_policy;
-    }
-
-    // Getter for data type
-    DataType get_data_type() const
-    {
-        return _data_type;
-    }
-
-    // Getter for output x dimension
-    unsigned int get_output_x_dim() const
-    {
-        return _output_x_dim;
-    }
-
 private:
-    ScaleKernelInfo _info         = ScaleKernelInfo(InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED);
-    DataType        _data_type    = DataType::UNKNOWN;
-    DataLayout      _data_layout  = DataLayout::UNKNOWN;
-    unsigned int    _output_x_dim = 0;
+    DataLayout _data_layout = DataLayout::UNKNOWN;
 };
 } // namespace kernels
 } // namespace opencl

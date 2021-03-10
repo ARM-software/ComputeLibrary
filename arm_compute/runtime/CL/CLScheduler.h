@@ -165,13 +165,12 @@ private:
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 
-    cl::Context               _context;
-    cl::CommandQueue          _queue;
-    GPUTarget                 _target;
-    bool                      _is_initialised;
-    ICLTuner                 *_cl_tuner;
-    std::unique_ptr<ICLTuner> _cl_default_static_tuner;
-    CLGEMMHeuristicsHandle   *_gemm_heuristics;
+    cl::Context             _context;
+    cl::CommandQueue        _queue;
+    GPUTarget               _target;
+    bool                    _is_initialised;
+    ICLTuner               *_cl_tuner;
+    CLGEMMHeuristicsHandle *_gemm_heuristics;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLSCHEDULER_H */

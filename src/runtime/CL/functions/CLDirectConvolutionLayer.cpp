@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,18 +28,27 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/runtime/gpu/cl/operators/ClActivation.h"
+#include "src/runtime/gpu/cl/operators/ClDirectConvolution.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+struct CLDirectConvolutionLayer::Impl
+{
+    const ICLTensor                             *src{ nullptr };
+    const ICLTensor                             *weights{ nullptr };
+    const ICLTensor                             *biases{ nullptr };
+    ICLTensor                                   *dst{ nullptr };
+    std::unique_ptr<opencl::ClDirectConvolution> op{ nullptr };
+};
 
 CLDirectConvolutionLayer::CLDirectConvolutionLayer()
-    : _direct_conv_kernel(std::make_unique<CLDirectConvolutionLayerKernel>()), _input_border_handler(std::make_unique<CLFillBorderKernel>()), _activationlayer_function(),
-      _is_activationlayer_enabled(false)
+    : _impl(std::make_unique<Impl>())
 {
 }
-
-CLDirectConvolutionLayer::~CLDirectConvolutionLayer() = default;
+CLDirectConvolutionLayer::CLDirectConvolutionLayer(CLDirectConvolutionLayer &&) = default;
+CLDirectConvolutionLayer &CLDirectConvolutionLayer::operator=(CLDirectConvolutionLayer &&) = default;
+CLDirectConvolutionLayer::~CLDirectConvolutionLayer()                                      = default;
 
 void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
@@ -47,57 +56,32 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
 }
 
 void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
-                                         const PadStrideInfo       &conv_info,
-                                         const ActivationLayerInfo &act_info)
+                                         const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
-    // Set GPU target
-    _direct_conv_kernel->set_target(CLScheduler::get().target());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    // Configure direct convolution
-    _direct_conv_kernel->configure(compile_context, input, weights, biases, output, conv_info);
+    _impl->src     = input;
+    _impl->weights = weights;
+    _impl->biases  = biases;
+    _impl->dst     = output;
 
-    // Configure border handler
-    PixelValue &&zero_value(0.f);
-    if(is_data_type_quantized_asymmetric(input->info()->data_type()))
-    {
-        zero_value = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
-    }
-    _input_border_handler->configure(compile_context, input, _direct_conv_kernel->border_size(), BorderMode::CONSTANT, zero_value);
-
-    // Tune kernels
-    CLScheduler::get().tune_kernel_static(*_direct_conv_kernel);
-
-    _is_activationlayer_enabled = act_info.enabled();
-
-    //Configure Activation Layer
-    if(_is_activationlayer_enabled)
-    {
-        _activationlayer_function.configure(compile_context, output, nullptr, act_info);
-    }
+    _impl->op = std::make_unique<opencl::ClDirectConvolution>();
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->weights->info(), _impl->biases->info(), _impl->dst->info(), conv_info, act_info);
 }
 
 Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                           const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(CLDirectConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, CLScheduler::get().target()));
-    if(act_info.enabled())
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output, nullptr, act_info));
-    }
-    return Status{};
+    return opencl::ClDirectConvolution::validate(input, weights, biases, output, conv_info, act_info);
 }
 
 void CLDirectConvolutionLayer::run()
 {
-    // Run border handler
-    CLScheduler::get().enqueue(*_input_border_handler, false);
-
-    // Run direct convolution
-    CLScheduler::get().enqueue(*_direct_conv_kernel);
-
-    //Run Activation Layer
-    if(_is_activationlayer_enabled)
-    {
-        _activationlayer_function.run();
-    }
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->weights);
+    pack.add_tensor(TensorType::ACL_SRC_2, _impl->biases);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
+}
 }

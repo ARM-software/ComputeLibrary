@@ -26,7 +26,6 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
-#include "arm_compute/runtime/CL/tuners/Tuners.h"
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -97,7 +96,7 @@ bool CLScheduler::is_initialised() const
 std::once_flag CLScheduler::_initialize_symbols;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _cl_default_static_tuner(nullptr), _gemm_heuristics(nullptr)
+    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _gemm_heuristics(nullptr)
 {
 }
 
@@ -116,8 +115,7 @@ void CLScheduler::default_init_with_context(cl::Device &device, cl::Context &ctx
         cl::CommandQueue  queue = cl::CommandQueue(ctx, device);
         CLKernelLibrary::get().init(cl_kernels_folder, ctx, device);
         init(ctx, queue, device, cl_tuner, gemm_h);
-        _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
-        _cl_tuner                = (cl_tuner == nullptr) ? _cl_default_static_tuner.get() : cl_tuner;
+        _cl_tuner = cl_tuner;
     }
 }
 
@@ -133,12 +131,10 @@ void CLScheduler::default_init(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_
         cl::CommandQueue queue = cl::CommandQueue(ctx, dev);
         CLKernelLibrary::get().init("./cl_kernels/", ctx, dev);
         init(ctx, queue, dev, cl_tuner, gemm_h);
-        // Create a default static tuner and set if none was provided
-        _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
     }
 
     // Set CL tuner
-    _cl_tuner = (cl_tuner == nullptr) ? _cl_default_static_tuner.get() : cl_tuner;
+    _cl_tuner = cl_tuner;
 }
 
 void CLScheduler::set_context(cl::Context context)
