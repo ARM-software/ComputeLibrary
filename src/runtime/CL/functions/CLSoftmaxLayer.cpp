@@ -93,6 +93,11 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::allocate_workspace()
         ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
         tensor->allocator()->init(tensor_info);
         _impl->memory_group.manage(tensor);
+    });
+
+    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [](std::pair<TensorType, std::unique_ptr<CLTensor>> &wt)
+    {
+        auto tensor = wt.second.get();
         tensor->allocator()->allocate();
     });
 }
