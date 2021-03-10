@@ -50,7 +50,7 @@ class NEComputeAllAnchorsKernel;
  * -# @ref NEReshapeLayer x 2
  * -# @ref NEBoundingBoxTransform
  * -# @ref NEPadLayerKernel
- * -# @ref NEDequantizationLayerKernel x 2
+ * -# @ref NEDequantizationLayer x 2
  * -# @ref NEQuantizationLayer
  * And the following CPP kernels:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit

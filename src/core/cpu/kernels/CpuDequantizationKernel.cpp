@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEDequantizationLayerKernel.h"
+#include "src/core/cpu/kernels/CpuDequantizationKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -40,34 +40,25 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8, DataType::QSYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8, DataType::QSYMM16);
 
-    if(output->tensor_shape().total_size() > 0)
+    if(dst->tensor_shape().total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
     }
 
     return Status{};
-}
-
-std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    // Configure kernel window
-    Window win = calculate_max_window(*input, Steps());
-
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->tensor_shape(), 1, DataType::F32);
-
-    // NEDequantizationLayerKernel doesn't need padding so update_window_and_padding() can be skipped
-
-    return std::make_tuple(Status{}, win);
 }
 
 template <typename T>
@@ -359,52 +350,52 @@ void run_dequantization_core(const ITensor *input, ITensor *output, const Window
 }
 } // namespace
 
-NEDequantizationLayerKernel::NEDequantizationLayerKernel()
-    : _input(nullptr), _output(nullptr)
+void CpuDequantizationKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
-}
-
-void NEDequantizationLayerKernel::configure(const ITensor *input, ITensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
-
-    _input  = input;
-    _output = output;
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
+    Window win = calculate_max_window(*src, Steps());
 
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*dst, src->tensor_shape(), 1, DataType::F32);
 
-    INEKernel::configure(std::get<1>(win_config));
+    ICpuKernel::configure(win);
 }
 
-Status NEDequantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status CpuDequantizationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get())));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
     return Status{};
 }
 
-void NEDequantizationLayerKernel::run(const Window &window, const ThreadInfo &info)
+void CpuDequantizationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    switch(_output->info()->data_type())
+    const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto       dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    switch(dst->info()->data_type())
     {
         case DataType::F32:
-            run_dequantization_core<float>(_input, _output, window);
+            run_dequantization_core<float>(src, dst, window);
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            run_dequantization_core<float16_t>(_input, _output, window);
+            run_dequantization_core<float16_t>(src, dst, window);
             break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
 }
+const char *CpuDequantizationKernel::name() const
+{
+    return "CpuDequantizationKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

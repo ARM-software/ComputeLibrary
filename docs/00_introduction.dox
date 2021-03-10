@@ -1296,7 +1296,7 @@ v17.09 Public major release
  - Most machine learning functions support both fixed point 8 and 16 bit (QS8, QS16) for both Neon and OpenCL.
  - New Neon kernels / functions:
     - arm_compute::NEGEMMAssemblyBaseKernel arm_compute::NEGEMMAArch64Kernel
-    - @ref NEDequantizationLayerKernel / @ref NEDequantizationLayer
+    - NEDequantizationLayerKernel / @ref NEDequantizationLayer
     - NEFloorKernel / @ref NEFloor
     - @ref NEL2NormalizeLayerKernel / @ref NEL2NormalizeLayer
     - NEQuantizationLayerKernel @ref NEMinMaxLayerKernel / @ref NEQuantizationLayer
