@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,12 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/SoftmaxLayerFixture.h"
 
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
+#include "arm_compute/runtime/PoolManager.h"
+#include "arm_compute/runtime/BlobLifetimeManager.h"
+#include "arm_compute/runtime/CL/CLBufferAllocator.h"
+#include "arm_compute/runtime/BlobMemoryPool.h"
+
 namespace arm_compute
 {
 namespace test
@@ -61,6 +67,47 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 
 TEST_SUITE(CL)
 TEST_SUITE(SoftmaxLayer)
+
+TEST_CASE(SimpleMemoryManaged, framework::DatasetMode::ALL)
+{
+    // The purpose of this test is to test if the function can
+    // run correctly even with the given memory manager from its caller
+    // (Similar scenario when the library is integrated into other software)
+    // especially when working with workspace() method of
+    // @ref arm_compute::opencl::ClSoftmax.
+    const auto shape = TensorShape{4,2};    // Random shape, not important
+    constexpr auto dt = DataType::F32;      // Random data type, not important
+
+    // Create a memory manager
+    auto lm = std::make_shared<BlobLifetimeManager>();
+    auto pm = std::make_shared<arm_compute::PoolManager>();
+    auto alloc = std::make_unique<CLBufferAllocator>();
+    auto mm = std::make_shared<MemoryManagerOnDemand>(lm, pm);
+
+    auto src = create_tensor<CLTensor>(shape, dt);
+    auto dst = create_tensor<CLTensor>(shape, dt);
+    src.allocator()->allocate();
+    dst.allocator()->allocate();
+
+    // Create the function with the memory manager
+    CLSoftmaxLayer smx(mm);
+    smx.configure(&src, &dst);
+
+    // Populate the memory, acquire() will happen in run()
+    mm->populate(*alloc.get(), 1);
+
+    std::vector<float> input_vals{0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f,};
+    library->fill_static_values(CLAccessor(src), input_vals);
+
+    smx.run();
+
+    // Compute reference to compare
+    SimpleTensor<float> ref_src{shape, dt};
+    library->fill_static_values(ref_src, input_vals);
+    auto ref_dst = reference::softmax_layer<float>(ref_src, 1., 0, false);
+
+    validate(CLAccessor(dst), ref_dst);
+}
 
 // *INDENT-OFF*
 // clang-format off
