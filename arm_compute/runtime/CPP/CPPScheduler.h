@@ -31,7 +31,14 @@
 
 namespace arm_compute
 {
-/** C++11 implementation of a pool of threads to automatically split a kernel's execution among several threads. */
+/** C++11 implementation of a pool of threads to automatically split a kernel's execution among several threads.
+ *
+ * It has 2 scheduling modes: Linear or Fanout (please refer to the implementation for details)
+ * The mode is selected automatically based on the runtime environment. However it can be forced via an environment
+ * variable ARM_COMPUTE_CPP_SCHEDULER_MODE. e.g.:
+ * ARM_COMPUTE_CPP_SCHEDULER_MODE=linear      # Force select the linear scheduling mode
+ * ARM_COMPUTE_CPP_SCHEDULER_MODE=fanout      # Force select the fanout scheduling mode
+*/
 class CPPScheduler final : public IScheduler
 {
 public:
