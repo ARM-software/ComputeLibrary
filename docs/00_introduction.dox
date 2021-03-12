@@ -1535,19 +1535,19 @@ To see the build options available simply run ```scons -h```:
             default: rdimon.specs
 
         benchmark_examples: Build benchmark examples programs (yes|no)
-            default: True
+            default: False
 
         validate_examples: Build validate examples programs (yes|no)
-            default: True
+            default: False
 
         reference_openmp: Build reference validation with openmp (yes|no)
             default: True
 
         validation_tests: Build validation test programs (yes|no)
-            default: True
+            default: False
 
         benchmark_tests: Build benchmark test programs (yes|no)
-            default: True
+            default: False
 
         test_filter: Pattern to specify the tests' filenames to be compiled
             default: *.cpp
