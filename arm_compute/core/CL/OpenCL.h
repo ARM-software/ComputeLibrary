@@ -63,12 +63,6 @@ class CLSymbols final
 public:
     /** Default Constructor */
     CLSymbols() noexcept(false);
-    /** Destructor */
-    ~CLSymbols();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLSymbols(const CLSymbols &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLSymbols &operator=(const CLSymbols &) = delete;
     /** Load OpenCL symbols from handle
      *
      * @param[in] handle Handle to load symbols from
@@ -150,7 +144,6 @@ public:
 
 private:
     std::pair<bool, bool> _loaded;
-    void *_handle;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_OPENCL_H */
