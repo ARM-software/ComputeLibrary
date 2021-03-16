@@ -874,7 +874,7 @@ v19.05 Public major release
     - @ref NEFFT2D
     - @ref NEFFTConvolutionLayer
  - New OpenCL kernels / functions:
-    - @ref CLComplexPixelWiseMultiplicationKernel / @ref CLComplexPixelWiseMultiplication
+    - CLComplexPixelWiseMultiplicationKernel / @ref CLComplexPixelWiseMultiplication
     - CLCropKernel / @ref CLCropResize
     - @ref CLDeconvolutionReshapeOutputKernel
     - @ref CLFFTDigitReverseKernel
@@ -1062,7 +1062,7 @@ v18.11 Public major release
  - Added QASYMM8 support to the following kernels:
     - CLScaleKernel
     - NEDepthwiseConvolutionLayer3x3Kernel
-    - @ref CLPixelWiseMultiplicationKernel
+    - CLPixelWiseMultiplicationKernel
  - Added FP16 support to the following kernels:
     - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
     - NEDepthwiseConvolutionLayer3x3Kernel

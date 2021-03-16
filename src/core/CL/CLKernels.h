@@ -75,7 +75,6 @@
 #include "src/core/CL/kernels/CLNormalizationLayerKernel.h"
 #include "src/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.h"
 #include "src/core/CL/kernels/CLPadLayerKernel.h"
-#include "src/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "src/core/CL/kernels/CLPriorBoxLayerKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "src/core/CL/kernels/CLROIAlignLayerKernel.h"
