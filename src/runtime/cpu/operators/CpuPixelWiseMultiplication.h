@@ -21,45 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEPIXELWISEMULTIPLICATION_H
-#define ARM_COMPUTE_NEPIXELWISEMULTIPLICATION_H
+#ifndef ARM_COMPUTE_CPU_PIXELWISEMULTIPLICATION_H
+#define ARM_COMPUTE_CPU_PIXELWISEMULTIPLICATION_H
 
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/core/ITensorInfo.h"
+#include "arm_compute/core/experimental/Types.h"
+#include "src/core/cpu/ICpuKernel.h"
+#include "src/runtime/cpu/ICpuOperator.h"
 
 #include <memory>
 
 namespace arm_compute
 {
-class ITensor;
-class ITensorInfo;
-
-/** Basic function to run @ref cpu::CpuPixelWiseMultiplication */
-class NEPixelWiseMultiplication : public IFunction
+namespace cpu
+{
+/** Basic function to run @ref kernels::CpuPixelWiseMultiplicationKernel */
+class CpuPixelWiseMultiplication : public ICpuOperator
 {
 public:
     /** Default Constructor */
-    NEPixelWiseMultiplication();
-    /** Default Destructor */
-    ~NEPixelWiseMultiplication();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEPixelWiseMultiplication(const NEPixelWiseMultiplication &) = delete;
-    /** Default move constructor */
-    NEPixelWiseMultiplication(NEPixelWiseMultiplication &&) = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEPixelWiseMultiplication &operator=(const NEPixelWiseMultiplication &) = delete;
-    /** Default move assignment operator */
-    NEPixelWiseMultiplication &operator=(NEPixelWiseMultiplication &&) = default;
+    CpuPixelWiseMultiplication() = default;
     /** Initialise the kernel's inputs, output and convertion policy.
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
+     * @param[in, out] input1          First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
      *                                 This input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          An input tensor. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, S32, QSYMM16 (only if @p input1 is QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     * @param[in, out] input2          Second input tensor info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, S32, QSYMM16 (only if @p input1 is QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
      *                                 This input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          Output tensor. Data types supported:
+     * @param[out]     output          Output tensor info. Data types supported:
      *                                 - U8, only if both inputs are U8.
      *                                 - QASYMM8, only if both inputs are QASYMM8.
      *                                 - QASYMM8_SIGNED, only if @p input1 is QASYMM8_SIGNED.
@@ -75,15 +66,15 @@ public:
      * @param[in]      rounding_policy Rounding policy.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+    void configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEPixelWiseMultiplication
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuPixelWiseMultiplication
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
-     * @param[in] input2          An input tensor info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, S32, QSYMM16 (only if both inputs are QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     * @param[in] input1          First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
+     * @param[in] input2          Second input tensor info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, S32, QSYMM16 (only if both inputs are QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
      * @param[in] output          Output tensor info. Data types supported:
      *                            - U8, only if both inputs are U8.
      *                            - QASYMM8, only if both inputs are QASYMM8.
@@ -106,54 +97,37 @@ public:
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run() override;
-
-private:
-    struct Impl;
-    std::unique_ptr<Impl> _impl;
+    void run(ITensorPack &tensors) override;
 };
 
-/** Basic function to run @ref cpu::CpuComplexPixelWiseMultiplication. */
-class NEComplexPixelWiseMultiplication : public IFunction
+/** Basic function to run @ref kernels::CpuComplexPixelWiseMultiplicationKernel. */
+class CpuComplexPixelWiseMultiplication : public ICpuOperator
 {
 public:
     /** Default Constructor */
-    NEComplexPixelWiseMultiplication();
-    /** Default Destructor */
-    ~NEComplexPixelWiseMultiplication();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEComplexPixelWiseMultiplication(const NEComplexPixelWiseMultiplication &) = delete;
-    /** Default move constructor */
-    NEComplexPixelWiseMultiplication(NEComplexPixelWiseMultiplication &&) = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEComplexPixelWiseMultiplication &operator=(const NEComplexPixelWiseMultiplication &) = delete;
-    /** Default move assignment operator */
-    NEComplexPixelWiseMultiplication &operator=(NEComplexPixelWiseMultiplication &&) = default;
+    CpuComplexPixelWiseMultiplication() = default;
     /** Initialise the kernel's inputs, output.
      *
-     * @param[in, out] input1   An input tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[in, out] input1   First input tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2   An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[in, out] input2   Second input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[out]     output   The output tensor. Data types supported: same as @p input1. Number of channels: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref NEComplexPixelWiseMultiplication
+    void configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuComplexPixelWiseMultiplication
      *
-     * @param[in] input1   An input tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
-     * @param[in] input2   An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[in] input1   First input tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[in] input2   Second input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in] output   The output tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run() override;
-
-private:
-    struct Impl;
-    std::unique_ptr<Impl> _impl;
+    void run(ITensorPack &tensors) override;
 };
+} // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEPIXELWISEMULTIPLICATION_H */
+#endif /* ARM_COMPUTE_CPU_PIXELWISEMULTIPLICATION_H */

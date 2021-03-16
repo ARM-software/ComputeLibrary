@@ -232,7 +232,7 @@ v20.11 Public major release
    - NEArithmeticSubtraction
    - NEArithmeticSubtractionKernel
    - @ref NEPixelWiseMultiplication
-   - @ref NEPixelWiseMultiplicationKernel
+   - NEPixelWiseMultiplicationKernel
    - NEElementwiseDivision
    - NEDivisionOperationKernel
  - Interface change
@@ -255,7 +255,7 @@ v20.11 Public major release
    - @ref NELogicalAnd
    - @ref NELogicalOr
  - Removed padding from Neon kernels:
-   - @ref NEComplexPixelWiseMultiplicationKernel
+   - NEComplexPixelWiseMultiplicationKernel
    - NENonMaximaSuppression3x3Kernel
    - @ref NERemapKernel
    - @ref NEGEMMInterleave4x4Kernel
@@ -548,7 +548,7 @@ v20.08 Public major release
    - Enabled tuning for export_to_cl_image_rhs option for RHS tensors
    - More robust script for running benchmarks
  - Removed padding from:
-   - @ref NEPixelWiseMultiplicationKernel
+   - NEPixelWiseMultiplicationKernel
    - NEHeightConcatenateLayerKernel
    - NEThresholdKernel
    - NEBatchConcatenateLayerKernel
@@ -861,7 +861,7 @@ v19.05 Public major release
  - Various optimisations.
  - New Neon kernels / functions:
     - @ref NEBatchToSpaceLayerKernel / @ref NEBatchToSpaceLayer
-    - @ref NEComplexPixelWiseMultiplicationKernel / @ref NEComplexPixelWiseMultiplication
+    - NEComplexPixelWiseMultiplicationKernel / @ref NEComplexPixelWiseMultiplication
     - @ref NECropKernel / @ref NECropResize
     - @ref NEDepthwiseConvolutionAssemblyDispatch
     - @ref NEFFTDigitReverseKernel
@@ -1128,7 +1128,7 @@ v18.05 Public major release
  - Created the validate method in @ref CLDepthwiseConvolutionLayer.
  - Beta and gamma are no longer mandatory arguments in @ref NEBatchNormalizationLayer and @ref CLBatchNormalizationLayer.
  - Added depth multiplier support in @ref NEDepthwiseConvolutionLayer and @ref CLDepthwiseConvolutionLayer.
- - Added broadcast multiply support in @ref NEPixelWiseMultiplication / @ref NEPixelWiseMultiplicationKernel.
+ - Added broadcast multiply support in @ref NEPixelWiseMultiplication / NEPixelWiseMultiplicationKernel.
  - Port mobilenet example to NHWC data layout.
  - Enabled Winograd method in @ref CLConvolutionLayer.
  - Renamed NEWinogradLayer to @ref NEWinogradConvolutionLayer.
