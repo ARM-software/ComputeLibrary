@@ -51,7 +51,7 @@ class NEConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayerReshapeWeights();
+    NEConvolutionLayerReshapeWeights() noexcept;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayerReshapeWeights(const NEConvolutionLayerReshapeWeights &) = delete;
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */

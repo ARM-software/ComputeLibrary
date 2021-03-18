@@ -191,14 +191,14 @@ struct ScaleKernelInfo
                     SamplingPolicy      sampling_policy       = SamplingPolicy::CENTER,
                     bool                use_padding           = true,
                     bool                align_corners         = false,
-                    DataLayout          data_layout           = DataLayout::UNKNOWN)
+                    DataLayout          data_layout           = DataLayout::UNKNOWN) noexcept
         : interpolation_policy{ interpolation_policy },
-          border_mode{ border_mode },
-          constant_border_value{ constant_border_value },
-          sampling_policy{ sampling_policy },
-          use_padding{ use_padding },
-          align_corners{ align_corners },
-          data_layout{ data_layout }
+    border_mode{ border_mode },
+    constant_border_value{ constant_border_value },
+    sampling_policy{ sampling_policy },
+    use_padding{ use_padding },
+    align_corners{ align_corners },
+    data_layout{ data_layout }
     {
     }
 

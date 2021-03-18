@@ -273,14 +273,20 @@ enum class BorderMode
 struct BorderSize
 {
     /** Empty border, i.e. no border */
-    constexpr BorderSize()
-        : top{ 0 }, right{ 0 }, bottom{ 0 }, left{ 0 }
+    constexpr BorderSize() noexcept
+        : top{ 0 },
+    right{ 0 },
+    bottom{ 0 },
+    left{ 0 }
     {
     }
 
     /** Border with equal size around the 2D plane */
-    explicit constexpr BorderSize(unsigned int size)
-        : top{ size }, right{ size }, bottom{ size }, left{ size }
+    explicit constexpr BorderSize(unsigned int size) noexcept
+        : top{ size },
+    right{ size },
+    bottom{ size },
+    left{ size }
     {
     }
 

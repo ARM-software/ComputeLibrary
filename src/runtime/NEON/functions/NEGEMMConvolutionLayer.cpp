@@ -52,7 +52,7 @@ namespace arm_compute
 using namespace arm_compute::misc::shape_calculator;
 
 NEConvolutionLayerReshapeWeights::~NEConvolutionLayerReshapeWeights() = default;
-NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights()
+NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights() noexcept
     : _weights_reshape_kernel()
 {
 }

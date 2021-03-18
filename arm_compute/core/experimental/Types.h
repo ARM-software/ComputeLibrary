@@ -60,8 +60,10 @@ namespace experimental
 {
 struct MemoryInfo
 {
-    MemoryInfo(TensorType type, size_t size, size_t alignment)
-        : type(type), size(size), alignment(alignment)
+    MemoryInfo(TensorType type, size_t size, size_t alignment) noexcept
+        : type(type),
+          size(size),
+          alignment(alignment)
     {
     }
     TensorType type;

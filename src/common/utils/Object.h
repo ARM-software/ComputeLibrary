@@ -52,8 +52,9 @@ struct Header
      * @param[in] type_ Object identification type
      * @param[in] ctx_  Context to reference
      */
-    Header(ObjectType type_, IContext *ctx_)
-        : type(type_), ctx(ctx_)
+    Header(ObjectType type_, IContext *ctx_) noexcept
+        : type(type_),
+          ctx(ctx_)
     {
     }
 

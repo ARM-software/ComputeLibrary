@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,11 @@ class PixelValue
 {
 public:
     /** Default constructor: value initialized to 0 */
-    PixelValue()
-        : value{ int64_t(0) }
+    PixelValue() noexcept
+        : value
+    {
+        int64_t(0)
+    }
     {
     }
     /** Initialize the union with a pixel value of chosen datatype
