@@ -39,7 +39,6 @@ class ITensor;
  * Lower two bits store the target:
  * 00 -> Neon
  * 01 -> CL
- * 10 -> GLES
  * 11 -> Unused
  *
  * Five bits store the id of the reshape function:

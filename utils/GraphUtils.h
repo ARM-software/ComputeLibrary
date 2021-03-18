@@ -679,14 +679,10 @@ inline TensorShape permute_shape(TensorShape tensor_shape, DataLayout in_data_la
  */
 inline graph::Target set_target_hint(int target)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(target > 3, "Invalid target. Target must be 0 (NEON), 1 (OpenCL), 2 (OpenCL + Tuner), 3 (GLES)");
+    ARM_COMPUTE_ERROR_ON_MSG(target > 2, "Invalid target. Target must be 0 (NEON), 1 (OpenCL), 2 (OpenCL + Tuner)");
     if((target == 1 || target == 2))
     {
         return graph::Target::CL;
-    }
-    else if(target == 3)
-    {
-        return graph::Target::GC;
     }
     else
     {

@@ -538,7 +538,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         fs << "P6\n"
            << width << " " << height << " 255\n";
 
-        // Map buffer if creating a CLTensor/GCTensor
+        // Map buffer if creating a CLTensor
         map(tensor, true);
 
         switch(tensor.info()->format())
@@ -581,7 +581,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
                 ARM_COMPUTE_ERROR("Unsupported format");
         }
 
-        // Unmap buffer if creating a CLTensor/GCTensor
+        // Unmap buffer if creating a CLTensor
         unmap(tensor);
     }
     catch(const std::ofstream::failure &e)
@@ -672,7 +672,7 @@ void load_trained_data(T &tensor, const std::string &filename)
             throw std::runtime_error("Could not load binary data: " + filename);
         }
 
-        // Map buffer if creating a CLTensor/GCTensor
+        // Map buffer if creating a CLTensor
         map(tensor, true);
 
         Window window;
@@ -692,7 +692,7 @@ void load_trained_data(T &tensor, const std::string &filename)
         },
         in);
 
-        // Unmap buffer if creating a CLTensor/GCTensor
+        // Unmap buffer if creating a CLTensor
         unmap(tensor);
     }
     catch(const std::ofstream::failure &e)

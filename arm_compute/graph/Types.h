@@ -98,7 +98,6 @@ enum class Target
     UNSPECIFIED, /**< Unspecified Target */
     NEON,        /**< Neon capable target device */
     CL,          /**< OpenCL capable target device */
-    GC,          /**< GLES compute capable target device */
 };
 
 /** Supported Element-wise operations */

@@ -18,7 +18,6 @@ def get_list_flags( filename, arch):
     flags = ["-std=c++14"]
     flags.append("-DARM_COMPUTE_CPP_SCHEDULER=1")
     flags.append("-DARM_COMPUTE_CL")
-    flags.append("-DARM_COMPUTE_GC")
     if arch == "aarch64":
         flags.append("-DARM_COMPUTE_AARCH64_V8_2")
     return flags
@@ -87,7 +86,6 @@ def filter_clang_tidy_lines( lines ):
                ("TensorAllocator.cpp" in line and "warning: do not declare C-style arrays" in line) or
                ("RawTensor.cpp" in line and "warning: pointer parameter 'ptr' can be pointer to const" in line) or
                ("RawTensor.cpp" in line and "warning: do not declare C-style arrays" in line) or
-               ("GCBufferAllocator.cpp" in line and "warning: initializing non-owner" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move assignment operators should be marked noexcept" in line) or
                ("CLMinMaxLocationKernel.cpp" in line and "Forming reference to null pointer" in line) or
@@ -118,7 +116,6 @@ def filter_clang_tidy_lines( lines ):
                ("CPUUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("CPUUtils.cpp" in line and "parameter 'cpusv' is unused" in line) or
                ("CPUUtils.cpp" in line and "warning: uninitialized record type" in line) or
-               ("GCKernelLibrary.cpp" in line and "warning: do not declare C-style arrays" in line) or
                ("Utils.h" in line and "warning: Use of zero-allocated memory" in line) or
                ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line) or # This is to prevent false positive, should be reassessed with the newer clang-tidy
                ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "cppcoreguidelines-pro-type-member-init" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
