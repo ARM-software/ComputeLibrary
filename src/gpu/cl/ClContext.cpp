@@ -23,7 +23,10 @@
  */
 #include "src/gpu/cl/ClContext.h"
 
+#include "src/gpu/cl/ClQueue.h"
 #include "src/gpu/cl/ClTensor.h"
+
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 
 namespace arm_compute
 {
@@ -49,12 +52,15 @@ mlgo::MLGOHeuristics populate_mlgo(const char *filename)
 ClContext::ClContext(const AclContextOptions *options)
     : IContext(Target::GpuOcl),
       _mlgo_heuristics(),
-      _cl_context()
+      _cl_ctx(),
+      _cl_dev()
 {
     if(options != nullptr)
     {
         _mlgo_heuristics = populate_mlgo(options->kernel_config_file);
     }
+    _cl_ctx = CLKernelLibrary::get().context();
+    _cl_dev = CLKernelLibrary::get().get_device();
 }
 
 const mlgo::MLGOHeuristics &ClContext::mlgo() const
@@ -64,14 +70,20 @@ const mlgo::MLGOHeuristics &ClContext::mlgo() const
 
 ::cl::Context ClContext::cl_ctx()
 {
-    return _cl_context;
+    return _cl_ctx;
+}
+
+::cl::Device ClContext::cl_dev()
+{
+    return _cl_dev;
 }
 
 bool ClContext::set_cl_ctx(::cl::Context ctx)
 {
     if(this->refcount() == 0)
     {
-        _cl_context = ctx;
+        _cl_ctx = ctx;
+        CLScheduler::get().set_context(ctx);
         return true;
     }
     return false;
@@ -85,6 +97,11 @@ ITensorV2 *ClContext::create_tensor(const AclTensorDescriptor &desc, bool alloca
         tensor->allocate();
     }
     return tensor;
+}
+
+IQueue *ClContext::create_queue(const AclQueueOptions *options)
+{
+    return new ClQueue(this, options);
 }
 } // namespace opencl
 } // namespace gpu

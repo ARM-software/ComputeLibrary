@@ -62,6 +62,49 @@ AclStatus AclCreateContext(AclContext              *ctx,
  */
 AclStatus AclDestroyContext(AclContext ctx);
 
+/** Create an operator queue
+ *
+ * Queue is responsible for any scheduling related activities
+ *
+ * @param[in, out] queue   A valid non-zero queue object is not failures occur
+ * @param[in]      ctx     Context to be used
+ * @param[in]      options Queue options to be used for the operators using the queue
+ *
+ * @return Status code
+ *
+ * Returns:
+ *  - @ref AclSuccess if function was completed successfully
+ *  - @ref AclOutOfMemory if there was a failure allocating memory resources
+ *  - @ref AclUnsupportedTarget if the requested target is unsupported
+ *  - @ref AclInvalidArgument if a given argument is invalid
+ */
+AclStatus AclCreateQueue(AclQueue *queue, AclContext ctx, const AclQueueOptions *options);
+
+/** Wait until all elements on the queue have been completed
+ *
+ * @param[in] queue Queue to wait on completion
+ *
+ * @return Status code
+ *
+ * Returns:
+ *  - @ref AclSuccess if functions was completed successfully
+ *  - @ref AclInvalidArgument if the provided queue is invalid
+ *  - @ref AclRuntimeError on any other runtime related error
+ */
+AclStatus AclQueueFinish(AclQueue queue);
+
+/** Destroy a given queue object
+ *
+ * @param[in] queue A valid context object to destroy
+ *
+ * @return Status code
+ *
+ * Returns:
+ *  - @ref AclSuccess if functions was completed successfully
+ *  - @ref AclInvalidArgument if the provided context is invalid
+ */
+AclStatus AclDestroyQueue(AclQueue queue);
+
 /** Create a Tensor object
  *
  * Tensor is a generalized matrix construct that can represent up to ND dimensionality (where N = 6 for Compute Library)

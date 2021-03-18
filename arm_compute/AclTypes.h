@@ -33,6 +33,8 @@ extern "C" {
 
 /**< Opaque Context object */
 typedef struct AclContext_ *AclContext;
+/**< Opaque Queue object */
+typedef struct AclQueue_ *AclQueue;
 /**< Opaque Tensor object */
 typedef struct AclTensor_ *AclTensor;
 /**< Opaque Tensor pack object */
@@ -137,6 +139,22 @@ typedef struct AclContextOptions
                                                    If <=0 the system will use the hw concurency insted */
     AclAllocator         *allocator;          /**< Allocator to be used by all the memory internally */
 } AclContextOptions;
+
+/**< Supported tuning modes */
+typedef enum
+{
+    AclTuningModeNone = 0, /**< No tuning */
+    AclRapid          = 1, /**< Fast tuning mode, testing a small portion of the tuning space */
+    AclNormal         = 2, /**< Normal tuning mode, gives a good balance between tuning mode and performance */
+    AclExhaustive     = 3, /**< Exhaustive tuning mode, increased tuning time but with best results */
+} AclTuningMode;
+
+/**< Queue options */
+typedef struct
+{
+    AclTuningMode mode;          /**< Tuning mode */
+    int32_t       compute_units; /**< Compute Units that the queue will deploy */
+} AclQueueOptions;
 
 /**< Supported data types */
 typedef enum AclDataType

@@ -224,6 +224,11 @@
 #define DISABLED_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
     FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED)
 
+#define EMPTY_BODY_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
+    FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE)                \
+    {                                                          \
+    }
+
 #define FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                                      \
     template <typename T>                                                                                                           \
     class TEST_NAME;                                                                                                                \

@@ -24,6 +24,7 @@
 #include "src/cpu/CpuContext.h"
 
 #include "arm_compute/core/CPP/CPPTypes.h"
+#include "src/cpu/CpuQueue.h"
 #include "src/cpu/CpuTensor.h"
 #include "src/runtime/CPUUtils.h"
 
@@ -195,6 +196,11 @@ ITensorV2 *CpuContext::create_tensor(const AclTensorDescriptor &desc, bool alloc
         tensor->allocate();
     }
     return tensor;
+}
+
+IQueue *CpuContext::create_queue(const AclQueueOptions *options)
+{
+    return new CpuQueue(this, options);
 }
 } // namespace cpu
 } // namespace arm_compute

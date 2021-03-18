@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/TensorPack.h"
+#include "tests/validation/fixtures/UNIT/TensorPackFixture.h"
 
 namespace arm_compute
 {
@@ -33,21 +33,11 @@ TEST_SUITE(CPU)
 TEST_SUITE(UNIT)
 TEST_SUITE(TensorPack)
 
-FIXTURE_TEST_CASE(CreateTensorPackWithInvalidContext, CreateTensorPackWithInvalidContextFixture, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(DestroyInvalidTensorPack, DestroyInvalidTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(AddInvalidObjectToTensorPack, AddInvalidObjectToTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(SimpleTensorPack, SimpleTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(MultipleTensorsInPack, MultipleTensorsInPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorPackWithInvalidContext, CreateTensorPackWithInvalidContextFixture, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidTensorPack, DestroyInvalidTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(AddInvalidObjectToTensorPack, AddInvalidObjectToTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(SimpleTensorPack, SimpleTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(MultipleTensorsInPack, MultipleTensorsInPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
 
 TEST_SUITE_END() // Tensor
 TEST_SUITE_END() // UNIT

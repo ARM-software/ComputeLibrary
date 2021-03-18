@@ -42,6 +42,7 @@ namespace acl
 {
 // Forward declarations
 class Context;
+class Queue;
 class Tensor;
 class TensorPack;
 
@@ -83,6 +84,7 @@ struct ObjectDeleter
     };
 
 OBJECT_DELETER(AclContext, AclDestroyContext)
+OBJECT_DELETER(AclQueue, AclDestroyQueue)
 OBJECT_DELETER(AclTensor, AclDestroyTensor)
 OBJECT_DELETER(AclTensorPack, AclDestroyTensorPack)
 
@@ -384,11 +386,97 @@ public:
         AclContext ctx;
         const auto st = detail::as_enum<StatusCode>(AclCreateContext(&ctx, detail::as_cenum<AclTarget>(target), &options.copts));
         reset(ctx);
-        report_status(st, "[Arm Compute Library] Failed to create context");
+        report_status(st, "[Compute Library] Failed to create context");
         if(status)
         {
             *status = st;
         }
+    }
+};
+
+/**< Available tuning modes */
+enum class TuningMode
+{
+    Rapid      = AclRapid,
+    Normal     = AclNormal,
+    Exhaustive = AclExhaustive
+};
+
+/** Queue class
+ *
+ * Queue is responsible for the execution related aspects, with main responsibilities those of
+ * scheduling and tuning operators.
+ *
+ * Multiple queues can be created from the same context, and the same operator can be scheduled on each concurrently.
+ *
+ * @note An operator might depend on the maximum possible compute units that are provided in the context,
+ *       thus in cases where the number of the scheduling units of the queue are greater might lead to errors.
+ */
+class Queue : public detail::ObjectBase<AclQueue_>
+{
+public:
+    /**< Queue options */
+    struct Options
+    {
+        /** Default Constructor
+         *
+         * As default options, no tuning will be performed, and the number of scheduling units will
+         * depends on internal device discovery functionality
+         */
+        Options()
+            : opts{ AclTuningModeNone, 0 } {};
+        /** Constructor
+         *
+         * @param[in] mode          Tuning mode to be used
+         * @param[in] compute_units Number of scheduling units to be used
+         */
+        Options(TuningMode mode, int32_t compute_units)
+            : opts{ detail::as_cenum<AclTuningMode>(mode), compute_units }
+        {
+        }
+
+        AclQueueOptions opts;
+    };
+
+public:
+    /** Constructor
+     *
+     * @note Serves as a simpler delegate constructor
+     * @note As queue options, default conservative options will be used
+     *
+     * @param[in]  ctx    Context to create queue for
+     * @param[out] status Status information if requested
+     */
+    explicit Queue(Context &ctx, StatusCode *status = nullptr)
+        : Queue(ctx, Options(), status)
+    {
+    }
+    /** Constructor
+     *
+     * @note As queue options, default conservative options will be used
+     *
+     * @param[in]  ctx     Context from where the queue will be created from
+     * @param[in]  options Queue options to be used
+     * @param[out] status  Status information if requested
+     */
+    explicit Queue(Context &ctx, const Options &options = Options(), StatusCode *status = nullptr)
+    {
+        AclQueue   queue;
+        const auto st = detail::as_enum<StatusCode>(AclCreateQueue(&queue, ctx.get(), &options.opts));
+        reset(queue);
+        report_status(st, "[Compute Library] Failed to create queue!");
+        if(status)
+        {
+            *status = st;
+        }
+    }
+    /** Block until all the tasks of the queue have been marked as finished
+     *
+     * @return Status code
+     */
+    StatusCode finish()
+    {
+        return detail::as_enum<StatusCode>(AclQueueFinish(_object.get()));
     }
 };
 
@@ -519,7 +607,7 @@ public:
         AclTensor  tensor;
         const auto st = detail::as_enum<StatusCode>(AclCreateTensor(&tensor, ctx.get(), desc.get(), allocate));
         reset(tensor);
-        report_status(st, "[Arm Compute Library] Failed to create tensor!");
+        report_status(st, "[Compute Library] Failed to create tensor!");
         if(status)
         {
             *status = st;
@@ -533,7 +621,7 @@ public:
     {
         void      *handle = nullptr;
         const auto st     = detail::as_enum<StatusCode>(AclMapTensor(_object.get(), &handle));
-        report_status(st, "[Arm Compute Library] Failed to map the tensor and extract the tensor's backing memory!");
+        report_status(st, "[Compute Library] Failed to map the tensor and extract the tensor's backing memory!");
         return handle;
     }
     /** Unmaps tensor's memory
@@ -545,7 +633,7 @@ public:
     StatusCode unmap(void *handle)
     {
         const auto st = detail::as_enum<StatusCode>(AclUnmapTensor(_object.get(), handle));
-        report_status(st, "[Arm Compute Library] Failed to unmap the tensor!");
+        report_status(st, "[Compute Library] Failed to unmap the tensor!");
         return st;
     }
     /** Import external memory to a given tensor object
@@ -558,7 +646,7 @@ public:
     StatusCode import(void *handle, ImportType type)
     {
         const auto st = detail::as_enum<StatusCode>(AclTensorImport(_object.get(), handle, detail::as_cenum<AclImportMemoryType>(type)));
-        report_status(st, "[Arm Compute Library] Failed to import external memory to tensor!");
+        report_status(st, "[Compute Library] Failed to import external memory to tensor!");
         return st;
     }
     /** Get the size of the tensor in byte
@@ -571,7 +659,7 @@ public:
     {
         uint64_t   size{ 0 };
         const auto st = detail::as_enum<StatusCode>(AclGetTensorSize(_object.get(), &size));
-        report_status(st, "[Arm Compute Library] Failed to get the size of the tensor");
+        report_status(st, "[Compute Library] Failed to get the size of the tensor");
         return size;
     }
     /** Get the descriptor of this tensor
@@ -582,7 +670,7 @@ public:
     {
         AclTensorDescriptor desc;
         const auto          st = detail::as_enum<StatusCode>(AclGetTensorDescriptor(_object.get(), &desc));
-        report_status(st, "[Arm Compute Library] Failed to get the descriptor of the tensor");
+        report_status(st, "[Compute Library] Failed to get the descriptor of the tensor");
         return TensorDescriptor(desc);
     }
 };
@@ -623,7 +711,7 @@ public:
         AclTensorPack pack;
         const auto    st = detail::as_enum<StatusCode>(AclCreateTensorPack(&pack, ctx.get()));
         reset(pack);
-        report_status(st, "[Arm Compute Library] Failure during tensor pack creation");
+        report_status(st, "[Compute Library] Failure during tensor pack creation");
         if(status)
         {
             *status = st;

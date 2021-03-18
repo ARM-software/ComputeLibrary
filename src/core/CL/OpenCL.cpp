@@ -91,6 +91,7 @@ bool CLSymbols::load(const std::string &library)
     LOAD_FUNCTION_PTR(clCreateContext, handle);
     LOAD_FUNCTION_PTR(clCreateContextFromType, handle);
     LOAD_FUNCTION_PTR(clCreateCommandQueue, handle);
+    LOAD_FUNCTION_PTR(clCreateCommandQueueWithProperties, handle);
     LOAD_FUNCTION_PTR(clGetContextInfo, handle);
     LOAD_FUNCTION_PTR(clBuildProgram, handle);
     LOAD_FUNCTION_PTR(clEnqueueNDRangeKernel, handle);
@@ -283,6 +284,23 @@ cl_command_queue clCreateCommandQueue(cl_context                  context,
 {
     arm_compute::CLSymbols::get().load_default();
     auto func = arm_compute::CLSymbols::get().clCreateCommandQueue_ptr;
+    if(func != nullptr)
+    {
+        return func(context, device, properties, errcode_ret);
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+cl_command_queue clCreateCommandQueueWithProperties(cl_context                 context,
+                                                    cl_device_id               device,
+                                                    const cl_queue_properties *properties,
+                                                    cl_int                    *errcode_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clCreateCommandQueueWithProperties_ptr;
     if(func != nullptr)
     {
         return func(context, device, properties, errcode_ret);

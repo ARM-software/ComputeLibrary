@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_CONTEXT
-#define ARM_COMPUTE_TEST_UNIT_CONTEXT
+#ifndef ARM_COMPUTE_TEST_UNIT_CONTEXT_FIXTURE
+#define ARM_COMPUTE_TEST_UNIT_CONTEXT_FIXTURE
 
 #include "arm_compute/Acl.hpp"
 #include "tests/framework/Asserts.h"
@@ -145,4 +145,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_CONTEXT */
+#endif /* ARM_COMPUTE_TEST_UNIT_CONTEXT_FIXTURE */

@@ -69,6 +69,7 @@ public:
 
     // Inherrited methods overridden
     ITensorV2 *create_tensor(const AclTensorDescriptor &desc, bool allocate) override;
+    IQueue *create_queue(const AclQueueOptions *options) override;
 
 private:
     AllocatorWrapper _allocator;

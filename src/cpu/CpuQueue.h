@@ -21,27 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/TensorPackFixture.h"
+#ifndef SRC_CPU_CPUQUEUE_H
+#define SRC_CPU_CPUQUEUE_H
+
+#include "src/common/IQueue.h"
+
+#include "arm_compute/runtime/IScheduler.h"
 
 namespace arm_compute
 {
-namespace test
+namespace cpu
 {
-namespace validation
+/** CPU queue implementation class */
+class CpuQueue final : public IQueue
 {
-TEST_SUITE(CL)
-TEST_SUITE(UNIT)
-TEST_SUITE(TensorPack)
+public:
+    /** Construct a new CpuQueue object
+     *
+     * @param[in] ctx     Context to be used
+     * @param[in] options Command queue options
+     */
+    CpuQueue(IContext *ctx, const AclQueueOptions *options);
+    /** Return legacy scheduler
+     *
+     * @return arm_compute::IScheduler&
+     */
+    arm_compute::IScheduler &scheduler();
 
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorPackWithInvalidContext, CreateTensorPackWithInvalidContextFixture, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidTensorPack, DestroyInvalidTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(AddInvalidObjectToTensorPack, AddInvalidObjectToTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(SimpleTensorPack, SimpleTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(MultipleTensorsInPack, MultipleTensorsInPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-
-TEST_SUITE_END() // Tensor
-TEST_SUITE_END() // UNIT
-TEST_SUITE_END() // CL
-} // namespace validation
-} // namespace test
+    // Inherited functions overridden
+    StatusCode finish() override;
+};
+} // namespace cpu
 } // namespace arm_compute
+#endif /* SRC_CPU_CPUQUEUE_H */

@@ -43,7 +43,6 @@ extern "C" {
 /** Extract the underlying OpenCL context used by a given Compute Library context object
  *
  * @note @ref AclContext should be of an OpenCL backend target
- * @note @ref AclContext refcount should be 0, meaning not used by other objects
  *
  * @param[in]  ctx            A valid non-zero context
  * @param[out] opencl_context Underlying OpenCL context used
@@ -52,7 +51,18 @@ extern "C" {
  */
 AclStatus AclGetClContext(AclContext ctx, cl_context *opencl_context);
 
-/** Set the underlying OpenCL context used by a given Compute Library context object
+/** Extract the underlying OpenCL device id used by a given Compute Library context object
+ *
+ * @note @ref AclContext should be of an OpenCL backend target
+ *
+ * @param[in]  ctx           A valid non-zero context
+ * @param[out] opencl_device Underlying OpenCL device used
+ *
+ * @return Status code
+ */
+AclStatus AclGetClDevice(AclContext ctx, cl_device_id *opencl_device);
+
+/** Set the underlying OpenCL context to be used by a given Compute Library context object
  *
  * @note @ref AclContext should be of an OpenCL backend target
  *
@@ -62,6 +72,30 @@ AclStatus AclGetClContext(AclContext ctx, cl_context *opencl_context);
  * @return Status code
  */
 AclStatus AclSetClContext(AclContext ctx, cl_context opencl_context);
+
+/** Extract the underlying OpenCL queue used by a given Compute Library queue object
+ *
+ * @note @ref AclQueue should be of an OpenCL backend target
+ * @note @ref AclQueue refcount should be 0, meaning not used by other objects
+ *
+ * @param[in]  queue        A valid non-zero queue
+ * @param[out] opencl_queue Underlying OpenCL queue used
+ *
+ * @return Status code
+ */
+AclStatus AclGetClQueue(AclQueue queue, cl_command_queue *opencl_queue);
+
+/** Set the underlying OpenCL queue to be used by a given Compute Library queue object
+ *
+ * @note @ref AclQueue should be of an OpenCL backend target
+ * @note opecl_queue needs to be created from the same context that the AclContext that the queue will use
+ *
+ * @param[in]  queue        A valid non-zero queue object
+ * @param[out] opencl_queue Underlying OpenCL queue to be used
+ *
+ * @return Status code
+ */
+AclStatus AclSetClQueue(AclQueue queue, cl_command_queue opencl_queue);
 
 /** Extract the underlying OpenCL memory object by a given Compute Library tensor object
  *

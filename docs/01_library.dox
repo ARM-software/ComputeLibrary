@@ -508,7 +508,27 @@ However this process takes quite a lot of time, which is why it cannot be enable
 
 But, when the @ref CLTuner is disabled ( Target = 1 for the graph examples), the @ref graph::Graph will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not.
 
-@section S4_10_weights_manager Weights Manager
+@section S4_10_cl_queue_prioritites OpenCL Queue Priorities
+
+OpenCL 2.1 exposes the `cl_khr_priority_hints` extensions that if supported by an underlying implementation allows the user to specify priority hints to the created command queues.
+Is important to note that this does not specify guarantees or the explicit scheduling behavior, this is something that each implementation needs to expose.
+
+In some cases, priority queues can be used when there is an implicit internal priority between graphics and compute queues and thus allow some level of priority control between them.
+At the moment three priority level can be specified:
+- CL_QUEUE_PRIORITY_HIGH_KHR
+- CL_QUEUE_PRIORITY_MED_KHR
+- CL_QUEUE_PRIORITY_LOW_KHR
+
+Compute Library allows extraction of the internal OpenCL queue or the ability to inject directly a user-defined queue to the @ref CLScheduler.
+This way the user can utilize this extension to define priorities between the queues and setup the OpenCL scheduler mechanism to utilize them.
+
+@code{.cpp}
+cl_queue_properties queue_properties[] = {CL_QUEUE_PRIORITY_KHR, CL_QUEUE_PRIORITY_HIGH_KHR, 0};
+cl_command_queue priority_queue = clCreateCommandQueueWithProperties(ctx, dev, queue_properties, &error);
+CLScheduler::get().set_queue(::cl::CommandQueue(priority_queue));
+@endcode
+
+@section S4_11_weights_manager Weights Manager
 
 @ref IWeightsManager is a weights managing interface that can be used to reduce the memory requirements of a given pipeline by reusing transformed weights across multiple function executions.
 @ref IWeightsManager is responsible for managing weight tensors alongside with their transformations.

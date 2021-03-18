@@ -21,69 +21,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_GPU_CLCONTEXT_H
-#define SRC_GPU_CLCONTEXT_H
+#ifndef SRC_GPU_CLQUEUE_H
+#define SRC_GPU_CLQUEUE_H
 
-#include "src/common/IContext.h"
-#include "src/runtime/CL/mlgo/MLGOHeuristics.h"
+#include "src/common/IQueue.h"
 
-#include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include <memory>
 
 namespace arm_compute
 {
+// Forward declarations
+class CLTuner;
+
 namespace gpu
 {
 namespace opencl
 {
-/** OpenCL context implementation class */
-class ClContext final : public IContext
+/** OpenCL queue implementation class */
+class ClQueue final : public IQueue
 {
 public:
-    /** Default Constructor
+    /** Construct a new CpuQueue object
      *
-     * @param[in] options Creational options
+     * @param[in] ctx     Context to be used
+     * @param[in] options Command queue options
      */
-    explicit ClContext(const AclContextOptions *options);
+    ClQueue(IContext *ctx, const AclQueueOptions *options);
 
-    /** Extract MLGO heuristics
+    /** Return legacy scheduler
      *
-     * @return Heuristics tree
+     * @return arm_compute::IScheduler&
      */
-    const mlgo::MLGOHeuristics &mlgo() const;
+    arm_compute::CLScheduler &scheduler();
 
-    /** Underlying cl context accessor
+    /** Underlying cl command queue accessor
      *
-     * @return the cl context used
+     * @return the cl command queue used
      */
-    ::cl::Context cl_ctx();
+    ::cl::CommandQueue cl_queue();
 
-    /** Underlying cl device accessor
+    /** Update/inject an underlying cl command queue object
      *
-     * @return the cl device used
+     * @warning Command queue needs to come from the same context as the AclQueue
+     *
+     * @param[in] queue Underlying cl command queue to be used
+     *
+     * @return true if the queue was set successfully else falseS
      */
-    ::cl::Device cl_dev();
+    bool set_cl_queue(::cl::CommandQueue queue);
 
-    /** Update/inject an underlying cl context object
-     *
-     * @warning Context will be able to set if the object doesn't have any pending reference to other objects
-     *
-     * @param[in] ctx Underlying cl context to be used
-     *
-     * @return true if the context was set successfully else falseS
-     */
-    bool set_cl_ctx(::cl::Context ctx);
-
-    // Inherrited methods overridden
-    ITensorV2 *create_tensor(const AclTensorDescriptor &desc, bool allocate) override;
-    IQueue *create_queue(const AclQueueOptions *options) override;
+    // Inherited functions overridden
+    StatusCode finish() override;
 
 private:
-    mlgo::MLGOHeuristics _mlgo_heuristics;
-    ::cl::Context        _cl_ctx;
-    ::cl::Device         _cl_dev;
+    std::unique_ptr<CLTuner> _tuner;
 };
 } // namespace opencl
 } // namespace gpu
 } // namespace arm_compute
-
-#endif /* SRC_GPU_CLCONTEXT_H */
+#endif /* SRC_GPU_CLQUEUE_H */

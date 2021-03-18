@@ -26,6 +26,7 @@
 #include "src/common/ITensorV2.h"
 #include "src/common/Types.h"
 #include "src/gpu/cl/ClContext.h"
+#include "src/gpu/cl/ClQueue.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
 
@@ -78,6 +79,80 @@ extern "C" AclStatus AclSetClContext(AclContext external_ctx, cl_context opencl_
 
     auto cl_ctx = utils::cast::polymorphic_downcast<arm_compute::gpu::opencl::ClContext *>(ctx);
     if(!cl_ctx->set_cl_ctx(::cl::Context(opencl_context)))
+    {
+        return AclStatus::AclRuntimeError;
+    }
+
+    return AclStatus::AclSuccess;
+}
+
+extern "C" AclStatus AclGetClDevice(AclContext external_ctx, cl_device_id *opencl_device)
+{
+    using namespace arm_compute;
+    IContext *ctx = get_internal(external_ctx);
+
+    if(detail::validate_internal_context(ctx) != StatusCode::Success)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    if(ctx->type() != Target::GpuOcl)
+    {
+        return AclStatus::AclInvalidTarget;
+    }
+
+    if(opencl_device == nullptr)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    *opencl_device = utils::cast::polymorphic_downcast<arm_compute::gpu::opencl::ClContext *>(ctx)->cl_dev().get();
+
+    return AclStatus::AclSuccess;
+}
+
+extern "C" AclStatus AclGetClQueue(AclQueue external_queue, cl_command_queue *opencl_queue)
+{
+    using namespace arm_compute;
+    IQueue *queue = get_internal(external_queue);
+
+    if(detail::validate_internal_queue(queue) != StatusCode::Success)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    if(queue->header.ctx->type() != Target::GpuOcl)
+    {
+        return AclStatus::AclInvalidTarget;
+    }
+
+    if(opencl_queue == nullptr)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    *opencl_queue = utils::cast::polymorphic_downcast<arm_compute::gpu::opencl::ClQueue *>(queue)->cl_queue().get();
+
+    return AclStatus::AclSuccess;
+}
+
+extern "C" AclStatus AclSetClQueue(AclQueue external_queue, cl_command_queue opencl_queue)
+{
+    using namespace arm_compute;
+    IQueue *queue = get_internal(external_queue);
+
+    if(detail::validate_internal_queue(queue) != StatusCode::Success)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    if(queue->header.ctx->type() != Target::GpuOcl)
+    {
+        return AclStatus::AclInvalidTarget;
+    }
+
+    auto cl_queue = utils::cast::polymorphic_downcast<arm_compute::gpu::opencl::ClQueue *>(queue);
+    if(!cl_queue->set_cl_queue(::cl::CommandQueue(opencl_queue)))
     {
         return AclStatus::AclRuntimeError;
     }

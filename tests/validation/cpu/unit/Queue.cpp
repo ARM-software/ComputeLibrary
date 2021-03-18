@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/TensorPackFixture.h"
+#include "tests/validation/fixtures/UNIT/QueueFixture.h"
+
+#include "src/cpu/CpuQueue.h"
 
 namespace arm_compute
 {
@@ -29,19 +31,18 @@ namespace test
 {
 namespace validation
 {
-TEST_SUITE(CL)
+TEST_SUITE(CPU)
 TEST_SUITE(UNIT)
-TEST_SUITE(TensorPack)
+TEST_SUITE(Queue)
 
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorPackWithInvalidContext, CreateTensorPackWithInvalidContextFixture, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidTensorPack, DestroyInvalidTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(AddInvalidObjectToTensorPack, AddInvalidObjectToTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(SimpleTensorPack, SimpleTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(MultipleTensorsInPack, MultipleTensorsInPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueueWithInvalidContext, CreateQueueWithInvalidContextFixture, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueuerWithInvalidOptions, CreateQueuerWithInvalidOptionsFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidQueue, DestroyInvalidQueueFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(SimpleQueue, SimpleQueueFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
 
-TEST_SUITE_END() // Tensor
+TEST_SUITE_END() // Queue
 TEST_SUITE_END() // UNIT
-TEST_SUITE_END() // CL
+TEST_SUITE_END() // CPU
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

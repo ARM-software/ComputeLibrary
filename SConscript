@@ -188,11 +188,25 @@ runtime_files = Glob('src/runtime/*.cpp')
 runtime_files += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
 runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
 
-runtime_files += Glob('src/c/*.cpp')
-runtime_files += Glob('src/common/*.cpp')
-runtime_files += Glob('src/common/utils/*.cpp')
-runtime_files += Glob('src/cpu/*.cpp')
+# C API files
+c_api_files = ['src/c/AclContext.cpp',
+               'src/c/AclQueue.cpp',
+               'src/c/AclTensor.cpp',
+               'src/c/AclTensorPack.cpp',
+               'src/c/AclVersion.cpp',
+               ]
+if env['opencl']:
+    c_api_files += ['src/c/cl/AclOpenClExt.cpp']
 
+# Common backend files
+common_backend_files = ['src/common/utils/LegacySupport.cpp',
+                        'src/common/AllocatorWrapper.cpp',
+                        'src/common/ITensorV2.cpp',
+                        'src/common/TensorPack.cpp',
+                        ]
+
+core_files += common_backend_files
+runtime_files += c_api_files
 # CLHarrisCorners uses the Scheduler to run CPP kernels
 runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 
@@ -225,7 +239,6 @@ if env['opencl']:
     runtime_files += Glob('src/runtime/CL/gemm_auto_heuristics/*.cpp')
 
     runtime_files += Glob('src/gpu/cl/*.cpp')
-    runtime_files += Glob('src/c/cl/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
@@ -278,8 +291,36 @@ if env['neon']:
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/assembly/*.cpp')
 
-    core_files += Glob('src/core/cpu/*.cpp')
-    core_files += Glob('src/core/cpu/kernels/*.cpp')
+    cpu_kernel_hp_files = ['src/core/cpu/kernels/CpuActivationKernel.cpp',
+                           'src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.cpp',
+                           'src/core/cpu/kernels/CpuDirectConvolutionKernel.cpp',
+                           'src/core/cpu/kernels/CpuDirectConvolutionOutputStageKernel.cpp',
+                           'src/core/cpu/kernels/CpuPermuteKernel.cpp',
+                           'src/core/cpu/kernels/CpuPoolingAssemblyWrapperKernel.cpp',
+                           'src/core/cpu/kernels/CpuPoolingKernel.cpp',
+                           'src/core/cpu/kernels/CpuReshapeKernel.cpp',
+                          ]
+    cpu_kernel_files = ['src/core/cpu/kernels/CpuAddKernel.cpp',
+                        'src/core/cpu/kernels/CpuConcatenateBatchKernel.cpp',
+                        'src/core/cpu/kernels/CpuConcatenateDepthKernel.cpp',
+                        'src/core/cpu/kernels/CpuConcatenateHeightKernel.cpp',
+                        'src/core/cpu/kernels/CpuConcatenateWidthKernel.cpp',
+                        'src/core/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.cpp',
+                        'src/core/cpu/kernels/CpuCopyKernel.cpp',
+                        'src/core/cpu/kernels/CpuDequantizationKernel.cpp',
+                        'src/core/cpu/kernels/CpuElementwiseKernel.cpp',
+                        'src/core/cpu/kernels/CpuElementwiseUnaryKernel.cpp',
+                        'src/core/cpu/kernels/CpuFillKernel.cpp',
+                        'src/core/cpu/kernels/CpuFloorKernel.cpp',
+                        'src/core/cpu/kernels/CpuPixelWiseMultiplicationKernel.cpp',
+                        'src/core/cpu/kernels/CpuQuantizationKernel.cpp',
+                        'src/core/cpu/kernels/CpuScaleKernel.cpp',
+                        'src/core/cpu/kernels/CpuSoftmaxKernel.cpp',
+                        'src/core/cpu/kernels/CpuSubKernel.cpp',
+                        'src/core/cpu/kernels/CpuTransposeKernel.cpp',
+                       ]
+    core_files += [cpu_kernel_hp_files, cpu_kernel_files]
+
     core_files += Glob('src/core/cpu/kernels/*/*.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):
         core_files += Glob('src/core/cpu/kernels/*/*/fp16.cpp')
@@ -293,12 +334,40 @@ if env['neon']:
         core_files += Glob('src/core/cpu/kernels/*/*/qsymm16.cpp')
     if any(i in env['data_type_support'] for i in ['all', 'integer']):
         core_files += Glob('src/core/cpu/kernels/*/*/integer.cpp')
-   
+
     if any(i in env['data_layout_support'] for i in ['all', 'nchw']):
         core_files += Glob('src/core/cpu/kernels/*/*/nchw/all.cpp')
 
-    runtime_files += Glob('src/runtime/cpu/*.cpp')
-    runtime_files += Glob('src/runtime/cpu/operators/*.cpp')
+    cpu_rt_files = ['src/cpu/CpuContext.cpp',
+                    'src/cpu/CpuQueue.cpp',
+                    'src/cpu/CpuTensor.cpp'
+                   ]
+    cpu_operator_hp_files = ['src/runtime/cpu/operators/CpuActivation.cpp',
+                             'src/runtime/cpu/operators/CpuDepthwiseConvolution.cpp',
+                             'src/runtime/cpu/operators/CpuDepthwiseConvolutionAssemblyDispatch.cpp',
+                             'src/runtime/cpu/operators/CpuDirectConvolution.cpp',
+                             'src/runtime/cpu/operators/CpuPermute.cpp',
+                             'src/runtime/cpu/operators/CpuPooling.cpp',
+                             'src/runtime/cpu/operators/CpuPoolingAssemblyDispatch.cpp',
+                            ]
+    cpu_operator_files = ['src/runtime/cpu/operators/CpuAdd.cpp',
+                          'src/runtime/cpu/operators/CpuConcatenate.cpp',
+                          'src/runtime/cpu/operators/CpuConvertFullyConnectedWeights.cpp',
+                          'src/runtime/cpu/operators/CpuCopy.cpp',
+                          'src/runtime/cpu/operators/CpuDequantization.cpp',
+                          'src/runtime/cpu/operators/CpuElementwise.cpp',
+                          'src/runtime/cpu/operators/CpuElementwiseUnary.cpp',
+                          'src/runtime/cpu/operators/CpuFill.cpp',
+                          'src/runtime/cpu/operators/CpuFloor.cpp',
+                          'src/runtime/cpu/operators/CpuPixelWiseMultiplication.cpp',
+                          'src/runtime/cpu/operators/CpuQuantization.cpp',
+                          'src/runtime/cpu/operators/CpuReshape.cpp',
+                          'src/runtime/cpu/operators/CpuScale.cpp',
+                          'src/runtime/cpu/operators/CpuSoftmax.cpp',
+                          'src/runtime/cpu/operators/CpuSub.cpp',
+                          'src/runtime/cpu/operators/CpuTranspose.cpp',
+                         ]
+    runtime_files += [ cpu_rt_files, cpu_operator_hp_files, cpu_operator_files ]
 
 bootcode_o = []
 if env['os'] == 'bare_metal':

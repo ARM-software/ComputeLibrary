@@ -21,27 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/TensorPackFixture.h"
+#include "src/cpu/CpuQueue.h"
+
+#include "arm_compute/runtime/Scheduler.h"
 
 namespace arm_compute
 {
-namespace test
+namespace cpu
 {
-namespace validation
+CpuQueue::CpuQueue(IContext *ctx, const AclQueueOptions *options)
+    : IQueue(ctx)
 {
-TEST_SUITE(CL)
-TEST_SUITE(UNIT)
-TEST_SUITE(TensorPack)
+    ARM_COMPUTE_UNUSED(options);
+}
 
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorPackWithInvalidContext, CreateTensorPackWithInvalidContextFixture, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidTensorPack, DestroyInvalidTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(AddInvalidObjectToTensorPack, AddInvalidObjectToTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(SimpleTensorPack, SimpleTensorPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(MultipleTensorsInPack, MultipleTensorsInPackFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+arm_compute::IScheduler &CpuQueue::scheduler()
+{
+    return arm_compute::Scheduler::get();
+}
 
-TEST_SUITE_END() // Tensor
-TEST_SUITE_END() // UNIT
-TEST_SUITE_END() // CL
-} // namespace validation
-} // namespace test
+StatusCode CpuQueue::finish()
+{
+    return StatusCode::Success;
+}
+} // namespace cpu
 } // namespace arm_compute

@@ -43,6 +43,7 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensorV2;
+class IQueue;
 
 /**< Context interface */
 class IContext : public AclContext_
@@ -52,11 +53,13 @@ public:
         : AclContext_(), _target(target), _refcount(0)
     {
     }
+
     /** Virtual Destructor */
     virtual ~IContext()
     {
         header.type = detail::ObjectType::Invalid;
     };
+
     /** Target type accessor
      *
      * @return Target that the context is associated with
@@ -65,16 +68,19 @@ public:
     {
         return _target;
     }
+
     /** Increment context refcount */
     void inc_ref() const
     {
         ++_refcount;
     }
+
     /** Decrement context refcount */
     void dec_ref() const
     {
         --_refcount;
     }
+
     /** Reference counter accessor
      *
      * @return The number of references pointing to this object
@@ -83,6 +89,7 @@ public:
     {
         return _refcount;
     }
+
     /** Checks if an object is valid
      *
      * @return True if sucessful otherwise false
@@ -91,6 +98,7 @@ public:
     {
         return header.type == detail::ObjectType::Context;
     }
+
     /** Create a tensor object
      *
      * @param[in] desc     Descriptor to use
@@ -99,6 +107,14 @@ public:
      * @return A pointer to the created tensor object
      */
     virtual ITensorV2 *create_tensor(const AclTensorDescriptor &desc, bool allocate) = 0;
+
+    /** Create a queue object
+     *
+     * @param[in] options Queue options to be used
+     *
+     * @return A pointer to the created queue object
+     */
+    virtual IQueue *create_queue(const AclQueueOptions *options) = 0;
 
 private:
     Target                   _target;   /**< Target type of context */

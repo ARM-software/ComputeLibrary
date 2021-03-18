@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/Context.h"
+#include "tests/validation/fixtures/UNIT/ContextFixture.h"
 
 #include "src/gpu/cl/ClContext.h"
 
@@ -37,15 +37,9 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(Context)
 
-FIXTURE_TEST_CASE(SimpleContextCApi, SimpleContextCApiFixture<AclTarget::AclGpuOcl>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(SimpleContextCppApi, SimpleContextCppApiFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(MultipleContexts, MultipleContextsFixture<AclTarget::AclGpuOcl>, framework::DatasetMode::ALL)
-{
-}
+EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCApi, SimpleContextCApiFixture<AclTarget::AclGpuOcl>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCppApi, SimpleContextCppApiFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(MultipleContexts, MultipleContextsFixture<AclTarget::AclGpuOcl>, framework::DatasetMode::ALL)
 
 /** Test-case for MLGO kernel configuration file
  *

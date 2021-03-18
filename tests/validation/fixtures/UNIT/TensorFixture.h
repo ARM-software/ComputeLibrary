@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_TENSOR
-#define ARM_COMPUTE_TEST_UNIT_TENSOR
+#ifndef ARM_COMPUTE_TEST_UNIT_TENSOR_FIXTURE
+#define ARM_COMPUTE_TEST_UNIT_TENSOR_FIXTURE
 
 #include "arm_compute/Acl.hpp"
 #include "tests/framework/Asserts.h"
@@ -149,7 +149,7 @@ public:
 /** Test case for AclTensor
  *
  * Validate that multiple tensors can be created successfully
- * Possibly stress the possibility of memory leaks
+ * Stress the possibility of memory leaks
  *
  * Test Steps:
  *  - Create a valid context
@@ -421,4 +421,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_TENSOR */
+#endif /* ARM_COMPUTE_TEST_UNIT_TENSOR_FIXTURE */

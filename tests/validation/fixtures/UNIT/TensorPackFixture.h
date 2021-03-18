@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_TENSORPACK
-#define ARM_COMPUTE_TEST_UNIT_TENSORPACK
+#ifndef ARM_COMPUTE_TEST_UNIT_TENSORPACK_FIXTURE
+#define ARM_COMPUTE_TEST_UNIT_TENSORPACK_FIXTURE
 
 #include "arm_compute/Acl.hpp"
 #include "tests/framework/Asserts.h"
@@ -181,4 +181,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_TENSORPACK */
+#endif /* ARM_COMPUTE_TEST_UNIT_TENSORPACK_FIXTURE */
