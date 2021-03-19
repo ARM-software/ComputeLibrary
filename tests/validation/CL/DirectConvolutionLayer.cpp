@@ -183,7 +183,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<half>, framewor
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
                framework::dataset::make("PadY", { 1, 3, 0, 4 })),
                framework::dataset::make("KernelSize", { 3, 8, 1, 9 })),
-               framework::dataset::make("NumKernels", { 7, 3, 1, 3 })),
+               framework::dataset::make("NumKernels", { 17, 3, 1, 19 })),
                framework::dataset::make("DataType",  DataType::F16)),
                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
                framework::dataset::make("DataLayout", DataLayout::NHWC)))
@@ -221,7 +221,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framewo
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
                framework::dataset::make("PadY", { 1, 3, 0, 4 })),
                framework::dataset::make("KernelSize", { 3, 8, 1, 9 })),
-               framework::dataset::make("NumKernels", { 7, 3, 1, 3 })),
+               framework::dataset::make("NumKernels", { 17, 3, 1, 19 })),
                framework::dataset::make("DataType",  DataType::F32)),
                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
                framework::dataset::make("DataLayout", DataLayout::NHWC)))

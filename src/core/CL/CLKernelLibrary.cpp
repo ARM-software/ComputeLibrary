@@ -547,7 +547,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "convert_fc_weights.cl",
 #include "./cl_kernels/convert_fc_weights.clembed"
-    },    
+    },
     {
         "convolution_layer.cl",
 #include "./cl_kernels/convolution_layer.clembed"

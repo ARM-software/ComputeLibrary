@@ -276,10 +276,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
     if(data_layout == DataLayout::NHWC)
     {
         const unsigned int vec_size = std::min(static_cast<unsigned int>(dst->tensor_shape()[0]), 4u);
+        const unsigned int num_rows = dst->tensor_shape()[0] > 16 ? 2u : 1U;
 
         // Create window and update padding
-        Window win = calculate_max_window(*dst, Steps(vec_size, 1U));
+        Window win = calculate_max_window(*dst, Steps(vec_size, num_rows));
         dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
+
         Status err = Status{};
         return std::make_pair(err, win);
     }
@@ -368,9 +370,9 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
 
         const unsigned int n0               = win_config.second.x().step();
         const unsigned int m0               = win_config.second.y().step();
-        const unsigned int k0               = adjust_vec_size(16u, src->dimension(channel_idx));
+
+        const unsigned int k0               = adjust_vec_size(8u, src->dimension(channel_idx));
         const unsigned int partial_store_n0 = dst->dimension(channel_idx) % n0;
-        const unsigned int partial_store_m0 = (dst->dimension(width_idx) * dst->dimension(height_idx)) % m0;
         const unsigned int pad_left         = conv_info.pad_left();
         const unsigned int pad_top          = conv_info.pad_top();
 
@@ -379,14 +381,19 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
             build_options.add_option(std::string("-DHAS_BIAS"));
             build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(biases->data_type())));
         }
+
+        build_options.add_option("-cl-fast-relaxed-math");
+        build_options.add_option("-DSRC_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(width_idx)));
         build_options.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(height_idx)));
         build_options.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src->dimension(channel_idx)));
         build_options.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_options.add_option("-DDST_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(width_idx)));
         build_options.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(height_idx)));
         build_options.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(channel_idx)));
         build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
+        build_options.add_option("-DWEI_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(weights->dimension(width_idx)));
         build_options.add_option("-DWEI_HEIGHT=" + support::cpp11::to_string(weights->dimension(height_idx)));
         build_options.add_option("-DWEI_DATA_TYPE=" + get_cl_type_from_data_type(weights->data_type()));
@@ -397,8 +404,7 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
         build_options.add_option("-DN0=" + support::cpp11::to_string(n0));
         build_options.add_option("-DM0=" + support::cpp11::to_string(m0));
         build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
-        build_options.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
-        build_options.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
+        build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
 
         if(is_data_type_quantized(data_type))
         {
@@ -426,6 +432,7 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
         else
         {
             build_options.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(data_type));
+            build_options.add_option("-DZERO_VALUE=" + support::cpp11::to_string(0));
             build_options.add_option("-DSRC_OFFSET=" + support::cpp11::to_string(0));
             build_options.add_option("-DWEI_OFFSET=" + support::cpp11::to_string(0));
             build_options.add_option("-DDST_OFFSET=" + support::cpp11::to_string(0));
@@ -529,18 +536,18 @@ void ClDirectConvolutionKernel::run_op(ITensorPack &tensors, const Window &windo
 
     if(_data_layout == DataLayout::NHWC)
     {
-        slice.set(Window::DimY, Window::Dimension(0, dst->info()->dimension(1) * dst->info()->dimension(2), 1));
+        const size_t dim_y_collapsed = ceil_to_multiple(dst->info()->dimension(1) * dst->info()->dimension(2), slice.y().step());
+        slice.set(Window::DimY, Window::Dimension(0, dim_y_collapsed, slice.y().step()));
         slice.set(Window::DimZ, Window::Dimension(0, dst->info()->dimension(3), 1));
 
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, src, slice);
-        add_3D_tensor_argument(idx, dst, slice);
-        add_3D_tensor_argument(idx, weights, slice);
+        add_4D_tensor_argument(idx, src, slice);
+        add_4D_tensor_argument(idx, dst, slice);
+        add_4D_tensor_argument(idx, weights, slice);
         if(biases != nullptr)
         {
             add_1D_tensor_argument(idx, biases, slice);
         }
-        _kernel.setArg(idx++, static_cast<unsigned int>(weights->info()->strides_in_bytes()[3]));
         enqueue(queue, *this, slice, lws_hint());
     }
     else
