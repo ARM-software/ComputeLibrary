@@ -190,8 +190,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
                          update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
     }
 
-    output_access.set_valid_region(win_out, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
-
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS
     Window             collapsed             = win;

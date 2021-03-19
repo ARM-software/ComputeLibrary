@@ -95,9 +95,7 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
 {
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*src1, *src2);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
 
     // Auto initialize dst if not initialized
     {
@@ -125,7 +123,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src1, ITens
         }
     }
 
-    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration));
+    Window win        = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration));
     Window win_input1 = win.broadcast_if_dimension_le_one(*src1);
     Window win_input2 = win.broadcast_if_dimension_le_one(*src2);
 
@@ -136,8 +134,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src1, ITens
     bool window_changed = update_window_and_padding(win_input1, input1_access)
                           || update_window_and_padding(win_input2, input2_access)
                           || update_window_and_padding(win, output_access);
-
-    output_access.set_valid_region(win, valid_region);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
@@ -349,15 +345,13 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
 
 std::pair<Status, Window> validate_and_configure_window_complex(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
 {
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*src1, *src2);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
 
     // Auto initialize dst if not initialized
     const TensorInfo out_info(out_shape, src1->num_channels(), src1->data_type());
     auto_init_if_empty(*dst, out_info);
 
-    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration_complex));
+    Window win        = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration_complex));
     Window win_input1 = win.broadcast_if_dimension_le_one(*src1);
     Window win_input2 = win.broadcast_if_dimension_le_one(*src2);
 
@@ -368,8 +362,6 @@ std::pair<Status, Window> validate_and_configure_window_complex(ITensorInfo *src
     bool window_changed = update_window_and_padding(win_input1, input1_access)
                           || update_window_and_padding(win_input2, input2_access)
                           || update_window_and_padding(win, output_access);
-
-    output_access.set_valid_region(win, valid_region);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);

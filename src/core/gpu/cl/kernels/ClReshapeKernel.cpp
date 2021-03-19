@@ -93,9 +93,6 @@ void ClReshapeKernel::configure(const CLCompileContext &compile_context, const I
 
     // Configure kernel window
     Window win = calculate_max_window(*src);
-
-    // Set the dst valid region
-    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
     ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));

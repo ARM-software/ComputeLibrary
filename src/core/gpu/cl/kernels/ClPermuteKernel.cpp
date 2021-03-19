@@ -109,11 +109,6 @@ void ClPermuteKernel::configure(const CLCompileContext &compile_context, const I
     // Configure  kernel window
     Window win = calculate_max_window(*src, Steps());
 
-    // The CLPermute doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
-
     ICLKernel::configure_internal(win);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }

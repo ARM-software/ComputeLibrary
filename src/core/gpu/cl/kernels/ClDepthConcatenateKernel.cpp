@@ -98,9 +98,6 @@ void ClDepthConcatenateKernel::configure(const CLCompileContext &compile_context
     win.set(Window::DimZ, Window::Dimension(0, src->tensor_shape().z(), 1));
     ICLKernel::configure_internal(win);
 
-    // Set dst valid region
-    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
-
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 

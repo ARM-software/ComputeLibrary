@@ -111,7 +111,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
         AccessWindowStatic    output_access(output, 0, 0, output_static_window_end_x, output_static_window_end_y);
         window_changed = update_window_and_padding(win, input_access, output_access);
-        output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};

@@ -144,8 +144,6 @@ void ClQuantizationKernel::configure(const CLCompileContext &compile_context, IT
     }
     ICLKernel::configure_internal(win);
 
-    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
-
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 

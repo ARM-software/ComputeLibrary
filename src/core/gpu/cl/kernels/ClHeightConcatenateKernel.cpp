@@ -110,9 +110,6 @@ void ClHeightConcatenateKernel::configure(const CLCompileContext &compile_contex
     Window win = calculate_max_window(*src, Steps(num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win.collapse(win, Window::DimZ));
 
-    // Set dst valid region
-    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
-
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 

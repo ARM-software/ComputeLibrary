@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,11 +68,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     // This kernel doesn't need padding
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    if(output != nullptr)
-    {
-        output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
-    }
-
     return std::make_pair(Status{}, win);
 }
 } // namespace

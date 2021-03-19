@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,9 +60,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal input_access(input, input->valid_region().start(0), num_elems_processed_per_iteration);
 
-    bool window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    bool   window_changed = update_window_and_padding(win, input_access, output_access);
+    Status err            = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace

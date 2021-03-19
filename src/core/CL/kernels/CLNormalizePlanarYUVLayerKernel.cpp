@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,7 +77,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
 
     bool window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, input->valid_region());
 
     if(input->data_layout() == DataLayout::NHWC)
     {

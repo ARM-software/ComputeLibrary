@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,7 +94,6 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
                 AccessWindowStatic     input_access(input, 0, 0, input->dimension(0) + border_width, 1);
                 AccessWindowHorizontal output_access(output, 0, 1);
                 window_changed = update_window_and_padding(win, input_access, output_access);
-                output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
             }
         }
         break;
@@ -105,7 +104,6 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
             AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
             window_changed = update_window_and_padding(win, input_access, output_access);
-            output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
         }
         break;
         default:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -147,7 +147,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
             win = calculate_max_window(*input, Steps());
         }
     }
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+
     // set the Z dimension's step same size as the whole dimension so that one can't split across the Z dimension
     win.set_dimension_step(Window::DimZ, win[Window::DimZ].end() - win[Window::DimZ].start());
 

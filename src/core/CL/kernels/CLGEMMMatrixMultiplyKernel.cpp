@@ -249,10 +249,6 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
             window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
                              update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
         }
-
-        Coordinates coord;
-        coord.set_num_dimensions(output->num_dimensions());
-        output_access.set_valid_region(win_out, ValidRegion(coord, output->tensor_shape()));
     }
 
     // Collapse along the Z direction

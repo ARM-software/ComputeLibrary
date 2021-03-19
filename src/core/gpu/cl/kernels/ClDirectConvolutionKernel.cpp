@@ -279,11 +279,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
         const unsigned int num_rows = dst->tensor_shape()[0] > 16 ? 2u : 1U;
 
         // Create window and update padding
-        Window win = calculate_max_window(*dst, Steps(vec_size, num_rows));
-        dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
-
-        Status err = Status{};
-        return std::make_pair(err, win);
+        Window win = calculate_max_window(output_shape, Steps(vec_size, num_rows));
+        return std::make_pair(Status{}, win);
     }
     else if(data_layout == DataLayout::NCHW)
     {
@@ -368,8 +365,8 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
 
         kernel_name << "direct_convolution_nhwc";
 
-        const unsigned int n0               = win_config.second.x().step();
-        const unsigned int m0               = win_config.second.y().step();
+        const unsigned int n0 = win_config.second.x().step();
+        const unsigned int m0 = win_config.second.y().step();
 
         const unsigned int k0               = adjust_vec_size(8u, src->dimension(channel_idx));
         const unsigned int partial_store_n0 = dst->dimension(channel_idx) % n0;

@@ -99,9 +99,6 @@ void ClBatchConcatenateKernel::configure(const CLCompileContext &compile_context
     win.set(3, Window::Dimension(0, src->tensor_shape()[3], 1));
     ICLKernel::configure_internal(win);
 
-    // Set dst valid region
-    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
-
     // Set config_id for enabling LWS tuning
     _config_id = "concatenate_";
     _config_id += support::cpp11::to_string(3);

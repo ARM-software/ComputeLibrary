@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,8 +85,6 @@ void CLRemapKernel::configure(const CLCompileContext &compile_context, const ICL
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
 

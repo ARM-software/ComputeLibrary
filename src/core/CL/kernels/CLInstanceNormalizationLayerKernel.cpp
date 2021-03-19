@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,21 +54,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
     return Status{};
 }
-
-std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    // We handle the planes manually
-    Window win = calculate_max_window(*input, Steps(1));
-
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type());
-
-    // CLInstanceNormalizationLayerKernel doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(output->num_dimensions());
-    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
-    return std::make_pair(Status{}, win);
-}
 } // namespace
 
 CLInstanceNormalizationLayerKernel::CLInstanceNormalizationLayerKernel()
@@ -110,16 +95,19 @@ void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compi
     _kernel = create_kernel(compile_context, "instance_normalization", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(_input->info(), _output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-    ICLKernel::configure_internal(std::get<1>(win_config));
+    Window win = calculate_max_window(*input->info(), Steps(1));
+    if(output != nullptr)
+    {
+        auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type());
+    }
+
+    ICLKernel::configure_internal(win);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLInstanceNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, info));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), (output == nullptr ? input->clone().get() : output->clone().get()))));
     return Status{};
 }
 
