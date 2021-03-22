@@ -32,24 +32,26 @@
 
 namespace arm_compute
 {
-inline svfloat32_t svtaylor_poly_f32_z(svbool_t pg, svfloat32_t x, const std::array<svfloat32_t, 8> &coeffs)
+inline svfloat32_t svtaylor_poly_f32_z(svbool_t pg, svfloat32_t x, svfloat32_t coeff_1, svfloat32_t coeff_2, svfloat32_t coeff_3,
+                                       svfloat32_t coeff_4, svfloat32_t coeff_5, svfloat32_t coeff_6, svfloat32_t coeff_7, svfloat32_t coeff_8)
 {
-    const auto A   = svmla_f32_z(pg, coeffs[0], coeffs[4], x);
-    const auto B   = svmla_f32_z(pg, coeffs[2], coeffs[6], x);
-    const auto C   = svmla_f32_z(pg, coeffs[1], coeffs[5], x);
-    const auto D   = svmla_f32_z(pg, coeffs[3], coeffs[7], x);
+    const auto A   = svmla_f32_z(pg, coeff_1, coeff_5, x);
+    const auto B   = svmla_f32_z(pg, coeff_3, coeff_7, x);
+    const auto C   = svmla_f32_z(pg, coeff_2, coeff_6, x);
+    const auto D   = svmla_f32_z(pg, coeff_4, coeff_8, x);
     const auto x2  = svmul_f32_z(pg, x, x);
     const auto x4  = svmul_f32_z(pg, x2, x2);
     const auto res = svmla_f32_z(pg, svmla_f32_z(pg, A, B, x2), svmla_f32_z(pg, C, D, x2), x4);
     return res;
 }
 
-inline svfloat16_t svtaylor_poly_f16_z(svbool_t pg, svfloat16_t x, const std::array<svfloat16_t, 8> &coeffs)
+inline svfloat16_t svtaylor_poly_f16_z(svbool_t pg, svfloat16_t x, svfloat16_t coeff_1, svfloat16_t coeff_2, svfloat16_t coeff_3,
+                                       svfloat16_t coeff_4, svfloat16_t coeff_5, svfloat16_t coeff_6, svfloat16_t coeff_7, svfloat16_t coeff_8)
 {
-    const auto A   = svmla_f16_z(pg, coeffs[0], coeffs[4], x);
-    const auto B   = svmla_f16_z(pg, coeffs[2], coeffs[6], x);
-    const auto C   = svmla_f16_z(pg, coeffs[1], coeffs[5], x);
-    const auto D   = svmla_f16_z(pg, coeffs[3], coeffs[7], x);
+    const auto A   = svmla_f16_z(pg, coeff_1, coeff_5, x);
+    const auto B   = svmla_f16_z(pg, coeff_3, coeff_7, x);
+    const auto C   = svmla_f16_z(pg, coeff_2, coeff_6, x);
+    const auto D   = svmla_f16_z(pg, coeff_4, coeff_8, x);
     const auto x2  = svmul_f16_z(pg, x, x);
     const auto x4  = svmul_f16_z(pg, x2, x2);
     const auto res = svmla_f16_z(pg, svmla_f16_z(pg, A, B, x2), svmla_f16_z(pg, C, D, x2), x4);
@@ -82,26 +84,21 @@ inline svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t x)
     const auto CONST_NEGATIVE_126 = svdup_n_s32(-126);
 
     /** Exponent polynomial coefficients */
-    const std::array<svfloat32_t, 8> exp_tab =
-    {
-        {
-            svdup_n_f32(1.f),
-            svdup_n_f32(0.0416598916054f),
-            svdup_n_f32(0.500000596046f),
-            svdup_n_f32(0.0014122662833f),
-            svdup_n_f32(1.00000011921f),
-            svdup_n_f32(0.00833693705499f),
-            svdup_n_f32(0.166665703058f),
-            svdup_n_f32(0.000195780929062f),
-        }
-    };
+    const svfloat32_t exp_tab_1 = svdup_n_f32(1.f);
+    const svfloat32_t exp_tab_2 = svdup_n_f32(0.0416598916054f);
+    const svfloat32_t exp_tab_3 = svdup_n_f32(0.500000596046f);
+    const svfloat32_t exp_tab_4 = svdup_n_f32(0.0014122662833f);
+    const svfloat32_t exp_tab_5 = svdup_n_f32(1.00000011921f);
+    const svfloat32_t exp_tab_6 = svdup_n_f32(0.00833693705499f);
+    const svfloat32_t exp_tab_7 = svdup_n_f32(0.166665703058f);
+    const svfloat32_t exp_tab_8 = svdup_n_f32(0.000195780929062f);
 
     // Perform range reduction [-log(2),log(2)]
     auto m   = svcvt_s32_f32_z(pg, svmul_f32_z(pg, x, CONST_INV_LN2));
     auto val = svmls_f32_z(pg, x, svcvt_f32_s32_z(pg, m), CONST_LN2);
 
     // Polynomial Approximation
-    auto poly = svtaylor_poly_f32_z(pg, val, exp_tab);
+    auto poly = svtaylor_poly_f32_z(pg, val, exp_tab_1, exp_tab_2, exp_tab_3, exp_tab_4, exp_tab_5, exp_tab_6, exp_tab_7, exp_tab_8);
 
     // Reconstruct
     poly = svreinterpret_f32_s32(svqadd_s32(svreinterpret_s32_f32(poly), svlsl_n_s32_z(pg, m, 23)));
@@ -171,19 +168,14 @@ inline svfloat16_t svtanh_f16_z(svbool_t pg, svfloat16_t val)
 inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
 {
     /** Logarithm polynomial coefficients */
-    const std::array<svfloat32_t, 8> log_tab =
-    {
-        {
-            svdup_n_f32(-2.29561495781f),
-            svdup_n_f32(-2.47071170807f),
-            svdup_n_f32(-5.68692588806f),
-            svdup_n_f32(-0.165253549814f),
-            svdup_n_f32(5.17591238022f),
-            svdup_n_f32(0.844007015228f),
-            svdup_n_f32(4.58445882797f),
-            svdup_n_f32(0.0141278216615f),
-        }
-    };
+    const svfloat32_t log_tab_1 = svdup_n_f32(-2.29561495781f);
+    const svfloat32_t log_tab_2 = svdup_n_f32(-2.47071170807f);
+    const svfloat32_t log_tab_3 = svdup_n_f32(-5.68692588806f);
+    const svfloat32_t log_tab_4 = svdup_n_f32(-0.165253549814f);
+    const svfloat32_t log_tab_5 = svdup_n_f32(5.17591238022f);
+    const svfloat32_t log_tab_6 = svdup_n_f32(0.844007015228f);
+    const svfloat32_t log_tab_7 = svdup_n_f32(4.58445882797f);
+    const svfloat32_t log_tab_8 = svdup_n_f32(0.0141278216615f);
 
     const auto CONST_127 = svdup_n_s32(127);           // 127
     const auto CONST_LN2 = svdup_n_f32(0.6931471805f); // ln(2)
@@ -193,7 +185,7 @@ inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
     auto val = svreinterpret_f32_s32(svsub_s32_z(pg, svreinterpret_s32_f32(x), svlsl_n_s32_z(pg, m, 23)));
 
     // Polynomial Approximation
-    auto poly = svtaylor_poly_f32_z(pg, val, log_tab);
+    auto poly = svtaylor_poly_f32_z(pg, val, log_tab_1, log_tab_2, log_tab_3, log_tab_4, log_tab_5, log_tab_6, log_tab_7, log_tab_8);
 
     // Reconstruct
     poly = svmla_f32_z(pg, poly, svcvt_f32_s32_z(pg, m), CONST_LN2);
