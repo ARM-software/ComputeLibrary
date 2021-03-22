@@ -36,6 +36,7 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
+#include <float.h>
 #include <cmath>
 #include <set>
 #include <string>
@@ -44,13 +45,13 @@ namespace arm_compute
 {
 namespace
 {
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto initialization if not yet initialized
     TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->dimension(2), rois->dimension(1));
-    auto_init_if_empty((*output), output_shape, 1, input->data_type());
+    auto_init_if_empty((*output), output_shape, 1, input->data_type(), output->quantization_info());
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 1;
@@ -70,31 +71,38 @@ CLROIPoolingLayerKernel::CLROIPoolingLayerKernel()
 {
 }
 
+Status CLROIPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
+
+    //Validate arguments
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(rois, 1, DataType::U16);
+    ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(0) != 5);
+    ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) != pool_info.pooled_width()) || (output->dimension(1) != pool_info.pooled_height()));
+        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != output->dimension(2));
+        ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(1) != output->dimension(3));
+    }
+
+    return Status{};
+}
+
 void CLROIPoolingLayerKernel::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
 }
 
-void CLROIPoolingLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIPoolingLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, const ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, rois, output);
-
-    //Validate arguments
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), rois->info(), output->info());
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(rois, 1, DataType::U16);
-    ARM_COMPUTE_ERROR_ON(rois->info()->dimension(0) != 5);
-    ARM_COMPUTE_ERROR_ON(rois->info()->num_dimensions() > 2);
-    ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
-    ARM_COMPUTE_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
-
-    if(output->info()->total_size() != 0)
-    {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pool_info.pooled_width()) || (output->info()->dimension(1) != pool_info.pooled_height()));
-        ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != output->info()->dimension(2));
-        ARM_COMPUTE_ERROR_ON(rois->info()->dimension(1) != output->info()->dimension(3));
-    }
+    ARM_COMPUTE_ERROR_THROW_ON(CLROIPoolingLayerKernel::validate(input->info(), rois->info(), output->info(), pool_info));
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), rois->info(), output->info(), pool_info);
@@ -106,20 +114,39 @@ void CLROIPoolingLayerKernel::configure(const CLCompileContext &compile_context,
     _output    = output;
     _pool_info = pool_info;
 
+    const DataType data_type = input->info()->data_type();
+    const bool     is_qasymm = is_data_type_quantized_asymmetric(data_type);
+
     // Set build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.emplace(("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type())));
-    build_opts.emplace(("-DMAX_DIM_X=" + support::cpp11::to_string(_input->info()->dimension(Window::DimX))));
-    build_opts.emplace(("-DMAX_DIM_Y=" + support::cpp11::to_string(_input->info()->dimension(Window::DimY))));
-    build_opts.emplace(("-DMAX_DIM_Z=" + support::cpp11::to_string(_input->info()->dimension(Window::DimZ))));
-    build_opts.emplace(("-DPOOLED_DIM_X=" + support::cpp11::to_string(pool_info.pooled_width())));
-    build_opts.emplace(("-DPOOLED_DIM_Y=" + support::cpp11::to_string(pool_info.pooled_height())));
-    build_opts.emplace(("-DSPATIAL_SCALE=" + support::cpp11::to_string(pool_info.spatial_scale())));
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DDATA_SIZE=" + get_data_size_from_data_type(data_type));
+    build_opts.add_option("-DMAX_DIM_X=" + support::cpp11::to_string(_input->info()->dimension(Window::DimX)));
+    build_opts.add_option("-DMAX_DIM_Y=" + support::cpp11::to_string(_input->info()->dimension(Window::DimY)));
+    build_opts.add_option("-DMAX_DIM_Z=" + support::cpp11::to_string(_input->info()->dimension(Window::DimZ)));
+    build_opts.add_option("-DPOOLED_DIM_X=" + support::cpp11::to_string(pool_info.pooled_width()));
+    build_opts.add_option("-DPOOLED_DIM_Y=" + support::cpp11::to_string(pool_info.pooled_height()));
+    build_opts.add_option("-DSPATIAL_SCALE=" + support::cpp11::to_string(pool_info.spatial_scale()));
+
+    if(is_qasymm)
+    {
+        // Determine quantization info scale, offset
+        UniformQuantizationInfo uqinfo = UniformQuantizationInfo();
+        uqinfo                         = compute_requantization_scale_offset(_input->info()->quantization_info().uniform(), _output->info()->quantization_info().uniform());
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(uqinfo.offset));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(uqinfo.scale));
+
+        // Specify minimum possible value of datatype
+        build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(0));
+    }
+    else{
+        // Specify min value of F32 datatype
+        build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(-FLT_MAX));
+    }
 
     // Create kernel
     std::string kernel_name = "roi_pooling_layer";
-    _kernel                 = create_kernel(compile_context, kernel_name, build_opts);
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_3D_tensor() + num_arguments_per_1D_array();
