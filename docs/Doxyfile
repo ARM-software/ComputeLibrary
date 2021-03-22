@@ -776,6 +776,7 @@ INPUT                  = ./docs/00_introduction.dox \
                          ./docs/05_contribution_guidelines.dox \
                          ./docs/06_functions_list.dox \
                          ./docs/07_errata.dox \
+                         ./docs/08_api.dox \
                          ./docs/ComputeLibrary.dir \
                          ./arm_compute/ \
                          ./src/ \
