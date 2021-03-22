@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -831,29 +831,29 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
     comm_fact0 = 0.0f;
 
 #if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-    comm_fact0 += in_row2 + in_row6 - (DATA_TYPE)4.25 * in_row4;
-    tmp0 += -in_row6 + (DATA_TYPE)5.25 * in_row4 - (DATA_TYPE)5.25 * in_row2;
+    comm_fact0 += in_row2 + in_row6 - (DATA_TYPE)4.25f * in_row4;
+    tmp0 += -in_row6 + (DATA_TYPE)5.25f * in_row4 - (DATA_TYPE)5.25f * in_row2;
 
     VEC_DATA_TYPE(DATA_TYPE, 8)
-    comm_fact1 = in_row1 + in_row5 - (DATA_TYPE)4.25 * in_row3;
+    comm_fact1 = in_row1 + in_row5 - (DATA_TYPE)4.25f * in_row3;
     VEC_DATA_TYPE(DATA_TYPE, 8)
-    comm_fact2 = (DATA_TYPE)0.25 * in_row2 - (DATA_TYPE)1.25 * in_row4 + in_row6;
+    comm_fact2 = (DATA_TYPE)0.25f * in_row2 - (DATA_TYPE)1.25f * in_row4 + in_row6;
 
     const VEC_DATA_TYPE(DATA_TYPE, 8) tmp1 = comm_fact0 + comm_fact1;
     const VEC_DATA_TYPE(DATA_TYPE, 8) tmp2 = comm_fact0 - comm_fact1;
 
-    comm_fact0 = (DATA_TYPE)2.5 * in_row3;
-    comm_fact1 = (DATA_TYPE)0.5 * in_row1 - comm_fact0 + (DATA_TYPE)2.0 * in_row5;
+    comm_fact0 = (DATA_TYPE)2.5f * in_row3;
+    comm_fact1 = (DATA_TYPE)0.5f * in_row1 - comm_fact0 + (DATA_TYPE)2.0f * in_row5;
 
     const VEC_DATA_TYPE(DATA_TYPE, 8) tmp3 = comm_fact1 + comm_fact2;
     const VEC_DATA_TYPE(DATA_TYPE, 8) tmp4 = comm_fact2 - comm_fact1;
 
-    comm_fact1 = (DATA_TYPE)2.0 * in_row1 - comm_fact0 + (DATA_TYPE)0.5 * in_row5;
-    comm_fact2 = (DATA_TYPE)4.0 * in_row2 - (DATA_TYPE)5.0 * in_row4 + in_row6;
+    comm_fact1 = (DATA_TYPE)2.0f * in_row1 - comm_fact0 + (DATA_TYPE)0.5f * in_row5;
+    comm_fact2 = (DATA_TYPE)4.0f * in_row2 - (DATA_TYPE)5.0f * in_row4 + in_row6;
 
     const VEC_DATA_TYPE(DATA_TYPE, 8) tmp5 = comm_fact1 + comm_fact2;
     const VEC_DATA_TYPE(DATA_TYPE, 8) tmp6 = comm_fact2 - comm_fact1;
-    const VEC_DATA_TYPE(DATA_TYPE, 8) tmp7 = in_row7 - in_row1 + (DATA_TYPE)5.25 * in_row3 - (DATA_TYPE)5.25 * in_row5;
+    const VEC_DATA_TYPE(DATA_TYPE, 8) tmp7 = in_row7 - in_row1 + (DATA_TYPE)5.25f * in_row3 - (DATA_TYPE)5.25f * in_row5;
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     // Calculate output rows (reuse comm_fact0 vector)
@@ -1027,32 +1027,6 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     int4 z_cond0 = z_coord_valid0 == z_coord0;
     int2 z_cond1 = z_coord_valid1 == z_coord1;
 
-#if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-
-    DATA_TYPE d40 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
-    DATA_TYPE d41 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
-    DATA_TYPE d42 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
-    DATA_TYPE d43 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s3 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
-    DATA_TYPE d44 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
-    DATA_TYPE d45 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
-
-    FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d4, y_cond, z_cond1.s0);
-
-    DATA_TYPE k0 = d44;
-    DATA_TYPE k1 = d44;
-    DATA_TYPE k2 = d44;
-    DATA_TYPE k3 = d44;
-    DATA_TYPE k4 = d44;
-    DATA_TYPE k5 = (DATA_TYPE)0.0f;
-
-    k0 += 4.0f * d40 - 5.0f * d42;
-    k1 += -4.0f * d41 - 4.0f * d42 + d43;
-    k2 += 4.0f * d41 - 4.0f * d42 - d43;
-    k3 += -2.0f * d41 + 2.0f * d43 - d42;
-    k4 += 2.0f * d41 - 2.0f * d43 - d42;
-    k5 += 4.0f * d41 - 5.0f * d43 + d45;
-#endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-
 #if !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
     DATA_TYPE d00 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid0.s0 * src_stride_z);
     DATA_TYPE d01 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid0.s0 * src_stride_z);
@@ -1062,7 +1036,6 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     DATA_TYPE d05 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid0.s0 * src_stride_z);
 
     FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d0, y_cond, z_cond0.s0);
-
 #else  // !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
     DATA_TYPE d00            = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid0.s0 * src_stride_z);
     DATA_TYPE d01            = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
@@ -1074,14 +1047,14 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     FILL_ZERO_OUT_OF_BOUND_6_NHWC_V(DATA_TYPE, d0, y_cond0.s0, z_cond);
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
-    DATA_TYPE out0 = 16.0f * d00 - 20.0f * d02 + 4.0f * d04;
-    DATA_TYPE out1 = -16.0f * d01 - 16.0f * d02 + 4.0f * d03 + 4.0f * d04;
-    DATA_TYPE out2 = 16.0f * d01 - 16.0f * d02 - 4.0f * d03 + 4.0f * d04;
-    DATA_TYPE out3 = -8.0f * d01 - 4.0f * d02 + 8.0f * d03 + 4.0f * d04;
-    DATA_TYPE out4 = 8.0f * d01 - 4.0f * d02 - 8.0f * d03 + 4.0f * d04;
-    DATA_TYPE out5 = 16.0f * d01 - 20.0f * d03 + 4.0f * d05;
-
 #if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
+    DATA_TYPE d10 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
+    DATA_TYPE d11 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
+    DATA_TYPE d12 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
+    DATA_TYPE d13 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s3 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
+    DATA_TYPE d14 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
+    DATA_TYPE d15 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
+
     DATA_TYPE d20 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid0.s2 * src_stride_z);
     DATA_TYPE d21 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid0.s2 * src_stride_z);
     DATA_TYPE d22 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid0.s2 * src_stride_z);
@@ -1089,46 +1062,116 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     DATA_TYPE d24 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid0.s2 * src_stride_z);
     DATA_TYPE d25 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid0.s2 * src_stride_z);
 
+    DATA_TYPE d30 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
+    DATA_TYPE d31 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
+    DATA_TYPE d32 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
+    DATA_TYPE d33 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s3 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
+    DATA_TYPE d34 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
+    DATA_TYPE d35 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
+
+    DATA_TYPE d40 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
+    DATA_TYPE d41 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
+    DATA_TYPE d42 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
+    DATA_TYPE d43 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s3 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
+    DATA_TYPE d44 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
+    DATA_TYPE d45 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid1.s0 * src_stride_z);
+
+    DATA_TYPE d50 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
+    DATA_TYPE d51 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
+    DATA_TYPE d52 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
+    DATA_TYPE d53 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s3 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
+    DATA_TYPE d54 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
+    DATA_TYPE d55 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
+
+    FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d1, y_cond, z_cond0.s1);
     FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d2, y_cond, z_cond0.s2);
+    FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d3, y_cond, z_cond0.s3);
+    FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d4, y_cond, z_cond1.s0);
+    FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d5, y_cond, z_cond1.s1);
 
-    out0 += k0;
-    out1 += k1;
-    out2 += k2;
-    out3 += k3;
-    out4 += k4;
-    out5 += k5;
-    DATA_TYPE out6  = k0;
-    DATA_TYPE out7  = k1;
-    DATA_TYPE out8  = k2;
-    DATA_TYPE out9  = k3;
-    DATA_TYPE out10 = k4;
-    DATA_TYPE out11 = k5;
-    DATA_TYPE out12 = k0;
-    DATA_TYPE out13 = k1;
-    DATA_TYPE out14 = k2;
-    DATA_TYPE out15 = k3;
-    DATA_TYPE out16 = k4;
-    DATA_TYPE out17 = k5;
-    DATA_TYPE out18 = k0;
-    DATA_TYPE out19 = k1;
-    DATA_TYPE out20 = k2;
-    DATA_TYPE out21 = k3;
-    DATA_TYPE out22 = k4;
-    DATA_TYPE out23 = k5;
-    DATA_TYPE out24 = k0;
-    DATA_TYPE out25 = k1;
-    DATA_TYPE out26 = k2;
-    DATA_TYPE out27 = k3;
-    DATA_TYPE out28 = k4;
-    DATA_TYPE out29 = k5;
+    DATA_TYPE k0, k1, k2, k3, k4, k5;
 
-    // Channels [0, 5]: [out00, out01, out02, out03, out04, out05]
-    out0 += -20.0f * d20 + 25.0f * d22 - 5.0f * d24;
-    out1 += 20.0f * d21 + 20.0f * d22 - 5.0f * d23 - 5.0f * d24;
-    out2 += -20.0f * d21 + 20.0f * d22 + 5.0f * d23 - 5.0f * d24;
-    out3 += 10.0f * d21 + 5.0f * d22 - 10.0f * d23 - 5.0f * d24;
-    out4 += -10.0f * d21 + 5.0f * d22 + 10.0f * d23 - 5.0f * d24;
-    out5 += -20.0f * d21 + 25.0f * d23 - 5.0f * d25;
+    DATA_TYPE part00, part01, part02, part03, part04, part05;
+    DATA_TYPE part10, part11, part12, part13, part14, part15;
+    DATA_TYPE part20, part21, part22, part23, part24, part25;
+    DATA_TYPE part30, part31, part32, part33, part34, part35;
+    DATA_TYPE part40, part41, part42, part43, part44, part45;
+    DATA_TYPE part50, part51, part52, part53, part54, part55;
+
+#define COMMON_OPS_0(i)             \
+    k0       = d2##i - 4.f * d0##i; \
+    k1       = d3##i - 4.f * d1##i; \
+    k2       = d4##i - 4.f * d2##i; \
+    k3       = d5##i - 4.f * d3##i; \
+    k4       = d3##i - d1##i;       \
+    k4       = k4 + k4;             \
+    k5       = d4##i - d2##i;       \
+    part0##i = k2 - k0;             \
+    part1##i = k2 + k1;             \
+    part2##i = k2 - k1;             \
+    part3##i = k5 + k4;             \
+    part4##i = k5 - k4;             \
+    part5##i = k3 - k1;
+
+#define COMMON_OPS_1(i)                                  \
+    k0                  = part##i##2 - 4.f * part##i##0; \
+    k1                  = part##i##3 - 4.f * part##i##1; \
+    k2                  = part##i##4 - 4.f * part##i##2; \
+    k3                  = part##i##5 - 4.f * part##i##3; \
+    k4                  = part##i##3 - part##i##1;       \
+    k4                  = k4 + k4;                       \
+    k5                  = part##i##4 - part##i##2;       \
+    DATA_TYPE out##i##0 = k2 - k0;                       \
+    DATA_TYPE out##i##1 = k2 + k1;                       \
+    DATA_TYPE out##i##2 = k2 - k1;                       \
+    DATA_TYPE out##i##3 = k5 + k4;                       \
+    DATA_TYPE out##i##4 = k5 - k4;                       \
+    DATA_TYPE out##i##5 = k3 - k1;
+
+    COMMON_OPS_0(0);
+    COMMON_OPS_0(1);
+    COMMON_OPS_0(2);
+    COMMON_OPS_0(3);
+    COMMON_OPS_0(4);
+    COMMON_OPS_0(5);
+
+    COMMON_OPS_1(0);
+    COMMON_OPS_1(1);
+    COMMON_OPS_1(2);
+    COMMON_OPS_1(3);
+    COMMON_OPS_1(4);
+    COMMON_OPS_1(5);
+
+#undef COMMON_OPS_0
+#undef COMMON_OPS_1
+
+#else // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
+
+    DATA_TYPE k0, k1, k2, k3, k4, k5;
+    DATA_TYPE part0, part1, part2, part3, part4, part5;
+
+    part0 = 4.f * d00;
+    part1 = 4.f * d01;
+    part2 = 4.f * d02;
+    part3 = 4.f * d03;
+    part4 = 4.f * d04;
+    part5 = 4.f * d05;
+
+    k0 = part2 - 4.f * part0;
+    k1 = part3 - 4.f * part1;
+    k2 = part4 - 4.f * part2;
+    k3 = part5 - 4.f * part3;
+    k4 = part3 - part1;
+    k4 = k4 + k4;
+    k5 = part4 - part2;
+
+    DATA_TYPE out00                            = k2 - k0;
+    DATA_TYPE out01                            = k2 + k1;
+    DATA_TYPE out02                            = k2 - k1;
+    DATA_TYPE out03                            = k5 + k4;
+    DATA_TYPE out04                            = k5 - k4;
+    DATA_TYPE out05                            = k3 - k1;
+
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     // Compute destination address
@@ -1140,102 +1183,20 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
 
     uint dst_plane_stride = dst_stride_z / sizeof(DATA_TYPE);
 
-    *((__global DATA_TYPE *)dst_addr) = out0;
+    *((__global DATA_TYPE *)dst_addr) = out00;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out1;
+    *((__global DATA_TYPE *)dst_addr) = out01;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out2;
+    *((__global DATA_TYPE *)dst_addr) = out02;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out3;
+    *((__global DATA_TYPE *)dst_addr) = out03;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out4;
+    *((__global DATA_TYPE *)dst_addr) = out04;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out5;
+    *((__global DATA_TYPE *)dst_addr) = out05;
     dst_addr += dst_plane_stride;
 
 #if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-    DATA_TYPE d10 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
-    DATA_TYPE d11 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
-    DATA_TYPE d12 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
-    DATA_TYPE d13 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s3 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
-    DATA_TYPE d14 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
-    DATA_TYPE d15 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid0.s1 * src_stride_z);
-
-    DATA_TYPE d30 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
-    DATA_TYPE d31 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
-    DATA_TYPE d32 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
-    DATA_TYPE d33 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s3 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
-    DATA_TYPE d34 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
-    DATA_TYPE d35 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid0.s3 * src_stride_z);
-
-    FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d1, y_cond, z_cond0.s1);
-    FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d3, y_cond, z_cond0.s3);
-
-    // Compute common parts for the channels between [6, 29]
-    // Channels [6, 11]:  [out10, out11, out12, out13, out14, out15]
-    // Channels [12, 17]: [out20, out21, out22, out23, out24, out25]
-    DATA_TYPE part0  = -16.0f * d20 + 20.0f * d22 - 4.0f * d24;
-    DATA_TYPE part1  = 16.0f * d10 - 20.0f * d12 + 4.0f * d14 - 4.0f * d30 + 5.0f * d32 - d34;
-    DATA_TYPE part2  = 16.0f * d22 - 4.0f * d24;
-    DATA_TYPE part3  = 16.0f * d21 - 4.0f * d23;
-    DATA_TYPE part4  = 16.0f * d12 - 4.0f * d14 - 4.0f * d32 + d34;
-    DATA_TYPE part5  = 16.0f * d11 - 4.0f * d13 - 4.0f * d31 + d33;
-    DATA_TYPE part6  = 4.0f * d22 - 4.0f * d24;
-    DATA_TYPE part7  = 8.0f * d11 - 8.0f * d13 - 2.0f * d31 + 2.0f * d33;
-    DATA_TYPE part8  = 4.0f * d12 - 4.0f * d14 - d32 + d34;
-    DATA_TYPE part9  = 8.0f * d21 - 8.0f * d23;
-    DATA_TYPE part10 = -16.0f * d21 + 20.0f * d23 - 4.0f * d25;
-    DATA_TYPE part11 = -16.0f * d11 + 20.0f * d13 - 4.0f * d15 + 4.0f * d31 - 5.0f * d33 + d35;
-
-    // Channels [18, 23]: [out30, out31, out32, out33, out34, out35]
-    // Channels [24, 29]: [out40, out41, out42, out43, out44, out45]
-    DATA_TYPE part12 = 8.0f * d10 - 10.0f * d12 + 2.0f * d14 - 8.0f * d30 + 10.0f * d32 - 2.0f * d34;
-    DATA_TYPE part13 = part0 * 0.25f; // -4.0f * d20 + 5.0f * d22 - d24
-    DATA_TYPE part14 = part2 * 0.25f; // 4.0f * d22 - d24
-    DATA_TYPE part15 = 8.0f * d11 - 2.0f * d13 - 8.0f * d31 + 2.0f * d33;
-    DATA_TYPE part16 = 8.0f * d12 - 2.0f * d14 - 8.0f * d32 + 2.0f * d34;
-    DATA_TYPE part17 = part3 * 0.25f; // 4.0f * d21 - d23
-    DATA_TYPE part18 = part6 * 0.25f; // d22 - d24
-    DATA_TYPE part19 = 4.0f * d11 - 4.0f * d13 - 4.0f * d31 + 4.0f * d33;
-    DATA_TYPE part20 = 2.0f * d12 - 2.0f * d14 - 2.0f * d32 + 2.0f * d34;
-    DATA_TYPE part21 = part9 * 0.25f;                                        // 2.0f * (d21 - d23)
-    DATA_TYPE part22 = part10 * 0.25f;                                       // - 4.0f * d21 + 5.0f * d23 - d25
-    DATA_TYPE part23 = part11 * 0.5f + 6.0f * d31 - 7.5f * d33 + 1.5f * d35; // - 8.0f * d11 + 10.0f * d13 - 2.0f * d15 + 8.0f * d31 - 10.0f * d33 + 2.0f * d35;
-
-    out6 += part0 - part1;
-    out12 += part0 + part1;
-    out7 += part2 + part3 + part4 + part5;
-    out8 += part2 - part3 + part4 - part5;
-    out13 += part2 + part3 - part4 - part5;
-    out14 += part2 - part3 - part4 + part5;
-    out9 += part6 + part7 + part8 + part9;
-    out10 += part6 - part7 + part8 - part9;
-    out15 += part6 - part7 - part8 + part9;
-    out16 += part6 + part7 - part8 - part9;
-    out11 += part10 + part11;
-    out17 += part10 - part11;
-
-    out18 += part13 - part12;
-    out24 += part13 + part12;
-    out19 += part14 + part15 + part16 + part17;
-    out20 += part14 - part15 + part16 - part17;
-    out25 += part14 - part15 - part16 + part17;
-    out26 += part14 + part15 - part16 - part17;
-    out21 += part18 + part19 + part20 + part21;
-    out22 += part18 - part19 + part20 - part21;
-    out27 += part18 - part19 - part20 + part21;
-    out28 += part18 + part19 - part20 - part21;
-    out23 += part22 + part23;
-    out29 += part22 - part23;
-
-    *((__global DATA_TYPE *)dst_addr) = out6;
-    dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out7;
-    dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out8;
-    dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out9;
-    dst_addr += dst_plane_stride;
     *((__global DATA_TYPE *)dst_addr) = out10;
     dst_addr += dst_plane_stride;
     *((__global DATA_TYPE *)dst_addr) = out11;
@@ -1248,15 +1209,7 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     dst_addr += dst_plane_stride;
     *((__global DATA_TYPE *)dst_addr) = out15;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out16;
-    dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out17;
-    dst_addr += dst_plane_stride;
 
-    *((__global DATA_TYPE *)dst_addr) = out18;
-    dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out19;
-    dst_addr += dst_plane_stride;
     *((__global DATA_TYPE *)dst_addr) = out20;
     dst_addr += dst_plane_stride;
     *((__global DATA_TYPE *)dst_addr) = out21;
@@ -1269,44 +1222,44 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     dst_addr += dst_plane_stride;
     *((__global DATA_TYPE *)dst_addr) = out25;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out26;
+
+    *((__global DATA_TYPE *)dst_addr) = out30;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out27;
+    *((__global DATA_TYPE *)dst_addr) = out31;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out28;
+    *((__global DATA_TYPE *)dst_addr) = out32;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out29;
+    *((__global DATA_TYPE *)dst_addr) = out33;
+    dst_addr += dst_plane_stride;
+    *((__global DATA_TYPE *)dst_addr) = out34;
+    dst_addr += dst_plane_stride;
+    *((__global DATA_TYPE *)dst_addr) = out35;
     dst_addr += dst_plane_stride;
 
-    // Row5
-    DATA_TYPE d50 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s0 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
-    DATA_TYPE d51 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s1 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
-    DATA_TYPE d52 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s2 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
-    DATA_TYPE d53 = *(__global DATA_TYPE *)(src_addr + y_coord_valid0.s3 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
-    DATA_TYPE d54 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s0 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
-    DATA_TYPE d55 = *(__global DATA_TYPE *)(src_addr + y_coord_valid1.s1 * (int)src_stride_y + z_coord_valid1.s1 * src_stride_z);
+    *((__global DATA_TYPE *)dst_addr) = out40;
+    dst_addr += dst_plane_stride;
+    *((__global DATA_TYPE *)dst_addr) = out41;
+    dst_addr += dst_plane_stride;
+    *((__global DATA_TYPE *)dst_addr) = out42;
+    dst_addr += dst_plane_stride;
+    *((__global DATA_TYPE *)dst_addr) = out43;
+    dst_addr += dst_plane_stride;
+    *((__global DATA_TYPE *)dst_addr) = out44;
+    dst_addr += dst_plane_stride;
+    *((__global DATA_TYPE *)dst_addr) = out45;
+    dst_addr += dst_plane_stride;
 
-    FILL_ZERO_OUT_OF_BOUND_6_NHWC_H(DATA_TYPE, d5, y_cond, z_cond1.s1);
-
-    // Channels [30, 35]
-    out0 = 16.0f * d10 - 20.0f * d12 - 20.0f * d30 + 25.0f * d32 + 4.0f * d50 - 5.0f * d52 + d54 + 4.0f * d14 - 5.0f * d34;
-    out1 = -16.0f * d11 - 16.0f * d12 + 4.0f * d13 + 20.0f * d31 + 20.0f * d32 - 5.0f * d33 - 4.0f * d51 - 4.0f * d52 + d53 + d54 + 4.0f * d14 - 5.0f * d34;
-    out2 = 16.0f * d11 - 16.0f * d12 - 4.0f * d13 - 20.0f * d31 + 20.0f * d32 + 5.0f * d33 + 4.0f * d51 - 4.0f * d52 - d53 + d54 + 4.0f * d14 - 5.0f * d34;
-    out3 = -8.0f * d11 - 4.0f * d12 + 8.0f * d13 + 10.0f * d31 - 10.0f * d33 + 5.0f * d32 - 2.0f * d51 + 2.0f * d53 - d52 + d54 + 4.0f * d14 - 5.0f * d34;
-    out4 = 8.0f * d11 - 4.0f * d12 - 8.0f * d13 - 10.0f * d31 + 5.0f * d32 + 10.0f * d33 + 2.0f * d51 - 2.0f * d53 - d52 + d54 + 4.0f * d14 - 5.0f * d34;
-    out5 = 16.0f * d11 - 20.0f * d13 + 4.0f * d15 - 20.0f * d31 + 25.0f * d33 - 5.0f * d35 + 4.0f * d51 - 5.0f * d53 + d55;
-
-    *((__global DATA_TYPE *)dst_addr) = out0;
+    *((__global DATA_TYPE *)dst_addr) = out50;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out1;
+    *((__global DATA_TYPE *)dst_addr) = out51;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out2;
+    *((__global DATA_TYPE *)dst_addr) = out52;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out3;
+    *((__global DATA_TYPE *)dst_addr) = out53;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out4;
+    *((__global DATA_TYPE *)dst_addr) = out54;
     dst_addr += dst_plane_stride;
-    *((__global DATA_TYPE *)dst_addr) = out5;
+    *((__global DATA_TYPE *)dst_addr) = out55;
     dst_addr += dst_plane_stride;
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
