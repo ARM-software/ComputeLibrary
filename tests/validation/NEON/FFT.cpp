@@ -158,6 +158,8 @@ TEST_SUITE(FFTConvolutionLayer)
 
 template <typename T>
 using NEFFTConvolutionLayerFixture = FFTConvolutionValidationFixture<Tensor, Accessor, NEFFTConvolutionLayer, T>;
+template <typename T>
+using NEFFTConvolutionLayerMixedDataLayoutFixture = FFTConvolutionValidationFixture<Tensor, Accessor, NEFFTConvolutionLayer, T, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
@@ -169,10 +171,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFFTConvolutionLayerFixture<float>, framework:
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, tolerance_num);
 }
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEFFTConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFFTConvolutionLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                 ActivationFunctionsSmallDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32, tolerance_num);
+}
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // FFTConvolutionLayer
-
 TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test

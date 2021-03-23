@@ -150,6 +150,8 @@ TEST_SUITE_END() // ConvolutionLayer
 TEST_SUITE(WinogradLayer)
 template <typename T>
 using NEWinogradConvolutionLayerFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T>;
+template <typename T>
+using NEWinogradConvolutionLayerMixedDataLayoutFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, T, true, true>;
 
 template <typename T>
 using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, T, false>;
@@ -159,6 +161,21 @@ TEST_SUITE(FP32)
 TEST_SUITE(Conv1x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEWinogradConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT,
+                                    combine(combine(combine(combine(combine(combine(combine(combine(
+                                                framework::dataset::make("Input", TensorShape(8U, 8U, 32U)),
+                                                framework::dataset::make("Weight", TensorShape(1U, 3U, 32U, 1U))),
+                                                framework::dataset::make("Bias", TensorShape(1U))),
+                                                framework::dataset::make("Output", TensorShape(8U, 6U, 1U))),
+                                                framework::dataset::make("PadStrideInfo", PadStrideInfo(1, 1, 0, 0))),
+                                                framework::dataset::make("Dilation", Size2D(1U, 1U))),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                        ActivationFunctionsDataset),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -384,6 +401,8 @@ TEST_SUITE_END() // WinogradLayer
 TEST_SUITE(GEMMConvolutionLayer)
 template <typename T>
 using NEGEMMConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+template <typename T>
+using NEGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
 
 TEST_SUITE(Float)
 #if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
@@ -424,11 +443,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::ALL,
+                            combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                        framework::dataset::make("Bias", TensorShape(2U))),
+                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                        framework::dataset::make("ReshapeWeights", { true })),
+                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                        ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+template <typename T>
+using NEGEMMConvolutionLayerQuantizedMixedDataLayoutFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
 
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedPerChannelFixture = ConvolutionValidationQuantizedPerChannelFixture<Tensor, Accessor, NEConvolutionLayer, T, int8_t>;
@@ -451,6 +488,23 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+                                            combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                        framework::dataset::make("Bias", TensorShape(2U))),
+                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                        framework::dataset::make("ReshapeWeights", { true })),
+                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                        QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
@@ -460,6 +514,23 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<int8_t>,
                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.01f, -10) })),
                                                                                                                       QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
+                                            combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                        framework::dataset::make("Bias", TensorShape(2U))),
+                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                        framework::dataset::make("ReshapeWeights", { true })),
+                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                        QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);

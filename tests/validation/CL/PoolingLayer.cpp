@@ -131,6 +131,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 template <typename T>
 using CLPoolingLayerFixture = PoolingLayerValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
+template <typename T>
+using CLPoolingLayerMixedDataLayoutFixture = PoolingLayerValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, T, true>;
 
 template <typename T>
 using CLSpecialPoolingLayerFixture = SpecialPoolingLayerValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
@@ -152,6 +154,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<float>, framework::Datase
                                                                                                                   framework::dataset::make("DataType",
                                                                                                                           DataType::F32))),
                                                                                                           pool_data_layout_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
+                                                                                                        combine(combine(combine(combine(datasets::PoolingTypes(),
+                                                                                                        framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+                                                                                                        framework::dataset::make("PadStride", { PadStrideInfo(2, 1, 0, 0) })),
+                                                                                                        framework::dataset::make("ExcludePadding", { false })),
+                                                                                                        framework::dataset::make("DataType", DataType::F32))),
+                                                                                                        pool_data_layout_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -210,6 +223,8 @@ TEST_SUITE(Quantized)
 
 template <typename T>
 using CLPoolingLayerQuantizedFixture = PoolingLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
+template <typename T>
+using CLPoolingLayerQuantizedMixedDataLayoutFixture = PoolingLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLPoolingLayer, T, true>;
 
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
@@ -218,6 +233,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framew
                                                                                                                      pool_data_layout_dataset),
                                                                                                                      framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(1.f / 255.f, 10) })),
                                                                                                                      framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 255.f, 5), QuantizationInfo(1.f / 255.f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                    combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
+                                                                                                                    framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+                                                                                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
+                                                                                                                    framework::dataset::make("ExcludePadding", { true })),
+                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
+                                                                                                                    framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 255.f, 10) })),
+                                                                                                                    framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 255.f, 5) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -231,6 +259,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<int8_t>, framewo
                                                                                                                     pool_data_layout_dataset),
                                                                                                                     framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10), QuantizationInfo(1.f / 127.f, -10) })),
                                                                                                                     framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -5), QuantizationInfo(1.f / 127.f, -10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                    combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
+                                                                                                                    framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+                                                                                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
+                                                                                                                    framework::dataset::make("ExcludePadding", { true })),
+                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
+                                                                                                                    framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10) })),
+                                                                                                                    framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);

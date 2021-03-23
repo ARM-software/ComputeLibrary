@@ -103,6 +103,7 @@ private:
     unsigned int   _num_weight_elems_read_per_row;
     unsigned int   _num_elems_read_per_iteration;
     unsigned int   _num_elems_written_per_iteration;
+    DataLayout     _data_layout;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERKERNEL_H */

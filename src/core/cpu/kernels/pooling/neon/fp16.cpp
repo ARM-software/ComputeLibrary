@@ -93,7 +93,7 @@ void pooling2_f16_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *ds
             // Store result
             vst1q_f16(reinterpret_cast<float16_t *>(out.ptr()) + x_off, vres);
 
-            const uint32_t   offset_base    = offset_no_padding<float16_t>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y);
+            const uint32_t   offset_base    = offset_no_padding<float16_t>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y, DataLayout::NHWC);
             const uint32_t   offset_x0      = (uint32_t)offset_base / sizeof(float16_t) + x_off;
             const uint32_t   offset_x1      = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_right;
             const uint32_t   offset_x2      = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_right * src->info()->tensor_shape()[1];
@@ -132,7 +132,7 @@ void pooling2_f16_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *ds
             // Store result
             *(reinterpret_cast<float16_t *>(out.ptr()) + x_off) = res;
 
-            const uint32_t offset_base = offset_no_padding<float16_t>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y);
+            const uint32_t offset_base = offset_no_padding<float16_t>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y, DataLayout::NHWC);
             const uint32_t offset_x0   = (uint32_t)offset_base / sizeof(float16_t) + x_off;
             const uint32_t offset_x1   = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_right;
             const uint32_t offset_x2   = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_right * src->info()->tensor_shape()[1];

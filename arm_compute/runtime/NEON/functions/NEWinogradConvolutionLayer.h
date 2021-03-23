@@ -135,6 +135,7 @@ private:
     ITensor       *_output;
     bool           _is_prepared;
     bool           _is_activationlayer_enabled;
+    DataLayout     _data_layout;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H */

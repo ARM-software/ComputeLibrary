@@ -303,7 +303,7 @@ arm_gemm::Activation arm_gemm_activation_from_acl_activation(const ActivationLay
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _memory_group(memory_manager), _gemm_function(memory_manager), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _activationlayer_function(),
       _permute_input(), _permute_weights(), _permute_output(), _input_transformed(), _output_transformed(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(),
-      _weights_hwio(), _input(), _weights(), _output(), _is_prepared(false), _is_activationlayer_enabled(false)
+      _weights_hwio(), _input(), _weights(), _output(), _is_prepared(false), _is_activationlayer_enabled(false), _data_layout()
 {
 }
 
@@ -314,10 +314,10 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info));
 
     // Get indices for the width and height
-    const DataLayout   data_layout = input->info()->data_layout();
-    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    _data_layout                   = input->info()->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
 
     const Size2D   input_dims  = Size2D(input->info()->dimension(width_idx), input->info()->dimension(height_idx));
     const Size2D   kernel_size = Size2D(weights->info()->dimension(width_idx), weights->info()->dimension(height_idx));
@@ -537,7 +537,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const unsigned int max_num_threads = NEScheduler::get().num_threads();
 
     // Configure the kernel to transform the input tensor from NCHW -> NHWC
-    if(data_layout == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         _memory_group.manage(&_input_nhwc);
         _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
@@ -554,7 +554,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     TensorInfo   input_workspace_info(TensorShape(input_workspace_size), 1, _input->info()->data_type());
     _input_workspace.allocator()->init(input_workspace_info);
     _input_workspace.allocator()->allocate();
-    if(data_layout == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         _input_nhwc.allocator()->allocate();
     }
@@ -570,7 +570,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
 
     // Configure output transform function
     // The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
-    if(data_layout == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         _memory_group.manage(&_output_nhwc);
         output_to_use = &_output_nhwc;
@@ -595,7 +595,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     _output_transformed.allocator()->allocate();
 
     // Reorder the convoluted output to ACL's ordering NCHW
-    if(data_layout == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         _permute_output.configure(&_output_nhwc, _output, PermutationVector(1U, 2U, 0U));
         _output_nhwc.allocator()->allocate();
@@ -615,13 +615,11 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
 
 void NEWinogradConvolutionLayer::run()
 {
-    const DataLayout data_layout = _input->info()->data_layout();
-
     prepare();
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    if(data_layout == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
         _permute_input.run();
@@ -636,7 +634,7 @@ void NEWinogradConvolutionLayer::run()
     // Transform output tensor to the spatial domain
     NEScheduler::get().schedule(_transform_output_kernel.get(), Window::DimX);
 
-    if(data_layout == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         // Reorder the convoluted output to ACL's ordering NCHW
         _permute_output.run();

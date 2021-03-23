@@ -89,10 +89,9 @@ void qasymm8_signed_sve_scale_bilinear(const ITensor *src, ITensor *dst, const I
                                        BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
                                        bool align_corners, const Window &window)
 {
-    // Get data layout and width/height indices
-    const DataLayout data_layout = src->info()->data_layout();
-    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    // Data layout is NHWC
+    const int        idx_width   = 1;
+    const int        idx_height  = 2;
 
     // Compute the ratio between source height and destination height
     const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(idx_height), dst->info()->dimension(idx_height), align_corners);

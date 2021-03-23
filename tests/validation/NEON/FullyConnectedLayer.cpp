@@ -143,6 +143,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
 
 template <typename T>
 using NEFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<Tensor, Accessor, NEFullyConnectedLayer, T>;
+template <typename T>
+using NEFullyConnectedLayerMixedDataLayoutFixture = FullyConnectedLayerValidationFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -183,6 +185,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<float>, framework:
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEFullyConnectedLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(
+                                                                                                                framework::dataset::make("Input", TensorShape(9U, 5U, 7U)),
+                                                                                                                framework::dataset::make("Weights", TensorShape(315U, 271U))),
+                                                                                                                framework::dataset::make("Biases", TensorShape(271U))),
+                                                                                                                framework::dataset::make("Output", TensorShape(271U))),
+                                                                                                                FullyConnectedParameters),
+                                                                                                                framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
+}
 FIXTURE_DATA_TEST_CASE(RunWithActivation, NEFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(
                            combine(datasets::FullyConnectedLayerWithActivationDataset(),
                                    FullyConnectedParameters),
@@ -204,6 +218,8 @@ TEST_SUITE_END()
 
 template <typename T>
 using NEFullyConnectedLayerQuantizedFixture = FullyConnectedLayerValidationQuantizedFixture<Tensor, Accessor, NEFullyConnectedLayer, T>;
+template <typename T>
+using NEFullyConnectedLayerQuantizedMixedDataLayoutFixture = FullyConnectedLayerValidationQuantizedFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -217,7 +233,20 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<uint8_t>,
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEFullyConnectedLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(
+                                                framework::dataset::make("Input", TensorShape(9U, 5U, 7U)),
+                                                framework::dataset::make("Weights", TensorShape(315U, 271U))),
+                                                framework::dataset::make("Biases", TensorShape(271U))),
+                                                framework::dataset::make("Output", TensorShape(271U))),
+                                                FullyConnectedParameters),
+                                                framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                QuantizationData),
+                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
 FIXTURE_DATA_TEST_CASE(RunWithActivation, NEFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
                            combine(datasets::FullyConnectedLayerWithActivationDataset(),
                                    FullyConnectedParameters),
@@ -251,7 +280,20 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<int8_t>, 
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
-
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEFullyConnectedLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(
+                                                framework::dataset::make("Input", TensorShape(9U, 5U, 7U)),
+                                                framework::dataset::make("Weights", TensorShape(315U, 271U))),
+                                                framework::dataset::make("Biases", TensorShape(271U))),
+                                                framework::dataset::make("Output", TensorShape(271U))),
+                                                FullyConnectedParameters),
+                                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                QuantizationData),
+                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
 FIXTURE_DATA_TEST_CASE(RunWithActivation, NEFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
                            combine(datasets::FullyConnectedLayerWithActivationDataset(),
                                    FullyConnectedParameters),
@@ -262,11 +304,10 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, NEFullyConnectedLayerQuantizedFixture<
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
-
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
+TEST_SUITE_END() // FullyConnectedLayer
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

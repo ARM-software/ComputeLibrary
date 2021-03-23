@@ -210,11 +210,22 @@ TEST_SUITE_END() // Validate
 
 template <typename T>
 using CLScaleFixture = ScaleValidationFixture<CLTensor, CLAccessor, CLScale, T>;
+template <typename T>
+using CLScaleMixedDataLayoutFixture = ScaleValidationFixture<CLTensor, CLAccessor, CLScale, T, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 const auto f32_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<float>())), framework::dataset::make("DataType", DataType::F32));
 FIXTURE_DATA_TEST_CASE(Run, CLScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, ScaleSamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32, tolerance_f32_absolute);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLScaleMixedDataLayoutFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);

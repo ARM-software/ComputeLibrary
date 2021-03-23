@@ -154,6 +154,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
 
 template <typename T>
 using CLDepthwiseConvolutionLayerFixture = DepthwiseConvolutionLayerValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer, T>;
+template <typename T>
+using CLDepthwiseConvolutionLayerMixedDataLayoutFixture = DepthwiseConvolutionLayerValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer, T, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -347,6 +349,16 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerFixture<float>, 
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+FIXTURE_DATA_TEST_CASE_NEW(RunMixedDataLayout, CLDepthwiseConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT,
+                           combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                                           framework::dataset::make("DepthMultiplier", { 2 })),
+                                                   framework::dataset::make("DataType",
+                                                                            DataType::F32)),
+                                           framework::dataset::make("DataLayout", DataLayout::NHWC)),
+                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo())))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
                            large_depth_multipliers),
                            framework::dataset::make("DataType",
@@ -429,6 +441,8 @@ TEST_SUITE_END() // Float
 
 template <typename T>
 using CLDepthwiseConvolutionLayerQuantizedFixture = DepthwiseConvolutionLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer, T>;
+template <typename T>
+using CLDepthwiseConvolutionLayerQuantizedMixedDataLayoutFixture = DepthwiseConvolutionLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer, T, true>;
 template <typename T>
 using CLDepthwiseConvolutionLayerQuantizedPerChannelFixture = DepthwiseConvolutionLayerValidationQuantizedPerChannelFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer, T, int8_t>;
 
@@ -517,6 +531,17 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
+FIXTURE_DATA_TEST_CASE_NEW(RunMixedDataLayout, CLDepthwiseConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                           combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(),
+                                                                           framework::dataset::make("DepthMultiplier", { 2 })),
+                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                           framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10), QuantizationInfo(2.2f, 10) })),
+                                                   framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo())))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
                            combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
                                                                            large_depth_multipliers),
@@ -542,6 +567,17 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture
                                                    framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
                                            framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                    ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE_NEW(RunMixedDataLayout, CLDepthwiseConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                           combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
+                                                                           framework::dataset::make("DepthMultiplier", { 2 })),
+                                                                   framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                           framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10), QuantizationInfo(2.2f, 10) })),
+                                                   framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
+                                           framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo())))
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }

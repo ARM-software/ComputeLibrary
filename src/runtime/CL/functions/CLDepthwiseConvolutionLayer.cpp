@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -324,7 +324,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
         {
             _output_multipliers.map();
             _output_shifts.map();
-            const unsigned int idx_ofms = get_data_layout_dimension_index(_output->info()->data_layout(), DataLayoutDimension::CHANNEL);
+            const unsigned int idx_ofms = _needs_permute ? 2 : 0;
             quantization::compute_quantized_multipliers_and_shifts(_input->info(),
                                                                    _original_weights->info(),
                                                                    _output->info(),
@@ -529,7 +529,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::prepar
         {
             _output_multipliers.map();
             _output_shifts.map();
-            const unsigned int idx_ofms = get_data_layout_dimension_index(_output->info()->data_layout(), DataLayoutDimension::CHANNEL);
+            const unsigned int idx_ofms = _needs_permute ? 2 : 0;
             quantization::compute_quantized_multipliers_and_shifts(_input->info(),
                                                                    _original_weights->info(),
                                                                    _output->info(),

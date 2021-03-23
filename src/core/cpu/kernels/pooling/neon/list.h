@@ -59,7 +59,7 @@ DECLARE_POOLING_KERNEL(poolingMxN_fp32_neon_nchw);
 #undef DECLARE_POOLING_KERNEL
 
 template <typename T>
-inline uint32_t offset_no_padding(uint32_t padded_offset, const Coordinates &id, const ITensorInfo &info, int pool_stride_x, int pool_stride_y)
+inline uint32_t offset_no_padding(uint32_t padded_offset, const Coordinates &id, const ITensorInfo &info, int pool_stride_x, int pool_stride_y, DataLayout data_layout)
 {
     const int pad_left    = info.padding().left;
     const int pad_right   = info.padding().right;
@@ -70,7 +70,7 @@ inline uint32_t offset_no_padding(uint32_t padded_offset, const Coordinates &id,
     const int pad_horiz   = pad_left + pad_right;
     const int pad_vert    = pad_top + pad_bottom;
 
-    if(info.data_layout() == DataLayout::NCHW)
+    if(data_layout == DataLayout::NCHW)
     {
         const uint32_t offset_base = padded_offset
                                      - sizeof(T) * pad_horiz * id.y() * pool_stride_y                                            /* subtract padding elems per row */
