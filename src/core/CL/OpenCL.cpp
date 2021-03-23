@@ -152,6 +152,23 @@ bool CLSymbols::load(const std::string &library)
 bool opencl_is_available()
 {
     CLSymbols::get().load_default();
+
+    // Using static objects that rely on OpenCL in their constructor or
+    // destructor is implementation defined according to the OpenCL API
+    // Specification. These objects include CLScheduler.
+    //
+    // For compatibility with OpenCL runtimes that also use static objects to
+    // hold their state, we call a harmless OpenCL function (clGetPlatformIDs
+    // with invalid parameters must result in CL_INVALID_VALUE) to ensure the
+    // runtimes have a chance to initialize their static objects first. Thanks
+    // to C++11 rules about normal program termination (cf [basic.start]), this
+    // ensures their static objects are destroyed last, i.e. after the
+    // singleton CLScheduler is destroyed.
+    //
+    // When OpenCL is not available, this call results in CL_OUT_OF_RESOURCES,
+    // which is equally harmless.
+    (void)clGetPlatformIDs(0, nullptr, nullptr);
+
     return CLSymbols::get().clBuildProgram_ptr != nullptr;
 }
 } // namespace arm_compute
