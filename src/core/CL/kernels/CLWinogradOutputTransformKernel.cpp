@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -139,6 +139,11 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info, act_info));
 
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info.output_tile_size);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure_internal(win_config.second);
+
     auto padding_info = get_padding_info({ input, bias, output });
 
     _input   = input;
@@ -177,10 +182,13 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
     }
 
     build_opts.add_option_if(_bias != nullptr, std::string("-DHAS_BIAS"));
+    build_opts.add_option("-cl-fast-relaxed-math");
+    build_opts.add_option("-DN0=" + support::cpp11::to_string(win_config.second.x().step()));
     build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
     build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
     build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(_input->info()->dimension(1)));
     build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(_output->info()->dimension(idx_width)));
     build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(_output->info()->dimension(idx_height)));
     build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
@@ -190,11 +198,6 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
     // Create kernel
     std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
     _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
-
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info.output_tile_size);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;

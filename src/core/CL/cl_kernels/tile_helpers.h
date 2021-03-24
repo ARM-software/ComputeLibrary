@@ -160,7 +160,7 @@
 #define V_LOAD_STR(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, Y, STRIDE_Y) V_LOAD_##TENSOR_TYPE(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y)
 #define V_LOAD_BUFFER(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y) \
     VLOAD(WIDTH)                                                \
-    (0, (__global DATA_TYPE *)(TENSOR##_ptr + (X) * sizeof(DATA_TYPE) + (Y)*STRIDE_Y))
+    (0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (Y)*STRIDE_Y))
 #define V_LOAD_IMAGE(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y) READ_IMAGE2D(DATA_TYPE, CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(WIDTH), TENSOR##_img, (X) / 4, (Y))
 
 /** Load a tile from global memory (tensor)
@@ -223,24 +223,24 @@
  * @param[in] src              Input tile
  * @param[in] indirect_y       Indirect Y index tile
  */
-#define T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, HEIGHT, WIDTH0, WIDTH1, TENSOR_TYPE, TENSOR, X, STRIDE_Y, WIDTH1_CONDITION, src, indirect_y)             \
-    ({                                                                                                                                                    \
-        if(WIDTH1_CONDITION)                                                                                                                              \
-        {                                                                                                                                                 \
-            LOOP_UNROLLING(int, _i, 0, HEIGHT, 1)                                                                                                         \
-            {                                                                                                                                             \
-                VSTORE_PARTIAL(WIDTH0, WIDTH1)                                                                                                            \
-                (src[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
-            }                                                                                                                                             \
-        }                                                                                                                                                 \
-        else                                                                                                                                              \
-        {                                                                                                                                                 \
-            LOOP_UNROLLING(int, _i, 0, HEIGHT, 1)                                                                                                         \
-            {                                                                                                                                             \
-                VSTORE(WIDTH0)                                                                                                                            \
-                (src[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
-            }                                                                                                                                             \
-        }                                                                                                                                                 \
+#define T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, HEIGHT, WIDTH0, WIDTH1, TENSOR_TYPE, TENSOR, X, STRIDE_Y, WIDTH1_CONDITION, src, indirect_y)                                                      \
+    ({                                                                                                                                                                                             \
+        if(WIDTH1_CONDITION)                                                                                                                                                                       \
+        {                                                                                                                                                                                          \
+            LOOP_UNROLLING(int, _i, 0, HEIGHT, 1)                                                                                                                                                  \
+            {                                                                                                                                                                                      \
+                VSTORE_PARTIAL(WIDTH0, WIDTH1)                                                                                                                                                     \
+                (src[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
+            }                                                                                                                                                                                      \
+        }                                                                                                                                                                                          \
+        else                                                                                                                                                                                       \
+        {                                                                                                                                                                                          \
+            LOOP_UNROLLING(int, _i, 0, HEIGHT, 1)                                                                                                                                                  \
+            {                                                                                                                                                                                      \
+                VSTORE(WIDTH0)                                                                                                                                                                     \
+                (src[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
+            }                                                                                                                                                                                      \
+        }                                                                                                                                                                                          \
     })
 
 /** Offset correction for the QASYMM8 computation
@@ -328,6 +328,27 @@
                 a[_m0].s[_n0] = select((DATA_TYPE)(a[_m0].s[_n0]), (DATA_TYPE)(VALUE_TO_SET), (SELECT_DATA_TYPE(DATA_TYPE))(mask[_m0].v == (DATA_TYPE)0)); \
             }                                                                                                                                                      \
         }                                                                                                                                                      \
+    })
+
+/** Element-wise activation
+ *
+ * @note Performs: activation(LHS) = DST
+ *
+ * @param[in]  DATA_TYPE       SRC/DST data type
+ * @param[in]  M0              Number of SRC/DST rows
+ * @param[in]  N0              Number of SRC/DST columns
+ * @param[in]  ACTIVATION_TYPE Activation type
+ * @param[in]  A_VAL           A value used for the activation (e.g. tanh_op, brelu,..)
+ * @param[in]  B_VAL           B value used for the activation (e.g. tanh_op, brelu,..)
+ * @param[out] src             SRC tile
+ * @param[out] dst             DST tile
+ */
+#define T_ACTIVATION(DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, src, dst)               \
+    ({ \
+        LOOP_UNROLLING(int, _m0, 0, M0, 1) \
+        { \
+            dst[_m0].v = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, N0, src[_m0].v, A_VAL, B_VAL); \
+        }                                                                                          \
     })
 
 /** Element-wise addition with a constant value

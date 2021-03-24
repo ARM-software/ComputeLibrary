@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "helpers.h"
-
 #include "activation_float_helpers.h"
+#include "helpers.h"
+#include "tile_helpers.h"
 
 #if defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
 #if defined(VEC_SIZE) && VEC_SIZE == 2
@@ -279,7 +279,7 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     int2 offset_z = min((int2)z_out + (int2)(0, 1), (int2)((int)DST_HEIGHT - 1)) * (int2)dst_stride_z;
 
     VEC_DATA_TYPE(DATA_TYPE, 2)
-    out0_dt                                      = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 2))(out00, out01), VEC_DATA_TYPE(DATA_TYPE, 2)), A_VAL, B_VAL);
+    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 2))(out00, out01), VEC_DATA_TYPE(DATA_TYPE, 2)), A_VAL, B_VAL);
 
     // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
     // is overwritten with the valid one
@@ -407,10 +407,10 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
 
     // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
     // is overwritten with the valid one
-    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s1) = out_col1_dt.s1;
-    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s0) = out_col1_dt.s0;
-    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s1) = out_col0_dt.s1;
-    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s0) = out_col0_dt.s0;
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s1)     = out_col1_dt.s1;
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s0)     = out_col1_dt.s0;
+    *(__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s1)     = out_col0_dt.s1;
+    *(__global     DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s0) = out_col0_dt.s0;
 
 #endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
@@ -461,8 +461,8 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     Tensor4D       src             = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
     const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
 #else  /* defined(SRC_DEPTH) */
-    Tensor3D       src                                                                   = CONVERT_TO_TENSOR3D_STRUCT(src);
-    const __global uchar *src_addr                                                       = tensor3D_offset(&src, 0, 0, 0);
+    Tensor3D       src                                                    = CONVERT_TO_TENSOR3D_STRUCT(src);
+    const __global uchar *src_addr                                        = tensor3D_offset(&src, 0, 0, 0);
 #endif /* defined(SRC_DEPTH) */
 
     // Load the values across the channels to compose the 6x6 or 6x1 tile
@@ -646,11 +646,13 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
+ * @note The height of the input tensor must be passed at compile time using -DSRC_HEIGHT: e.g. -DSRC_HEIGHT=32
  * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
  * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note If this kernel is used to perform Winograd output transform 3x1, -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd output transform 1x3, -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
+ * @note The number of output elements processed along the X direction must be passed at compile time using -DN0 e.g. -DN0=1
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32/F16
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -675,244 +677,150 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
  * @param[in]  dst_size                          Size of the destination tensor, minus the last padding
  */
 __kernel void winograd_output_transform_4x4_3x3_nhwc(
-    TENSOR4D_DECLARATION(src),
-    TENSOR4D_DECLARATION(dst),
+    TENSOR4D(src, BUFFER),
+    TENSOR4D(dst, BUFFER),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
     int dst_size)
 {
-    // Each thread stores a 4x4/4x1 or 1x4 tile
-#if defined(SRC_DEPTH)
-    Tensor4D       src             = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
-    const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
-#else  /* defined(SRC_DEPTH) */
-    Tensor3D       src             = CONVERT_TO_TENSOR3D_STRUCT(src);
-    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
-#endif /* defined(SRC_DEPTH) */
-
-    // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
-    DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
-    DATA_TYPE d01 = *((__global DATA_TYPE *)(src_addr + 1 * src_stride_z));
-    DATA_TYPE d02 = *((__global DATA_TYPE *)(src_addr + 2 * src_stride_z));
-    DATA_TYPE d03 = *((__global DATA_TYPE *)(src_addr + 3 * src_stride_z));
-    DATA_TYPE d04 = *((__global DATA_TYPE *)(src_addr + 4 * src_stride_z));
-    DATA_TYPE d05 = *((__global DATA_TYPE *)(src_addr + 5 * src_stride_z));
+    const int cout = GET_SPATIAL_IDX(0, N0, 0); // OFM
+    const int mout = GET_SPATIAL_IDX(1, 1, 0);  // WINOGRAD OUTPUT TILES
+    const int bout = GET_SPATIAL_IDX(2, 1, 0);  // BATCH SIZE IDX
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    // Compute out00, out01, out02 and out03
-    float out00 = d00 + d01 + d02 + d03 + d04;
-    float out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04;
-    float out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04;
-    float out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05;
-#else  // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
-    DATA_TYPE d10 = *((__global DATA_TYPE *)(src_addr + 6 * src_stride_z));
-    DATA_TYPE d11 = *((__global DATA_TYPE *)(src_addr + 7 * src_stride_z));
-    DATA_TYPE d12 = *((__global DATA_TYPE *)(src_addr + 8 * src_stride_z));
-    DATA_TYPE d13 = *((__global DATA_TYPE *)(src_addr + 9 * src_stride_z));
-    DATA_TYPE d14 = *((__global DATA_TYPE *)(src_addr + 10 * src_stride_z));
-    DATA_TYPE d15 = *((__global DATA_TYPE *)(src_addr + 11 * src_stride_z));
+    TILE(DATA_TYPE, 6, N0, in)       = { { 0 } };
+    TILE(DATA_TYPE, 4, N0, out)      = { { 0 } };
+    TILE(uint, 6, 1, src_indirect_y) = { { 0 } };
 
-    DATA_TYPE d20 = *((__global DATA_TYPE *)(src_addr + 12 * src_stride_z));
-    DATA_TYPE d21 = *((__global DATA_TYPE *)(src_addr + 13 * src_stride_z));
-    DATA_TYPE d22 = *((__global DATA_TYPE *)(src_addr + 14 * src_stride_z));
-    DATA_TYPE d23 = *((__global DATA_TYPE *)(src_addr + 15 * src_stride_z));
-    DATA_TYPE d24 = *((__global DATA_TYPE *)(src_addr + 16 * src_stride_z));
-    DATA_TYPE d25 = *((__global DATA_TYPE *)(src_addr + 17 * src_stride_z));
+    LOOP_UNROLLING(int, i, 0, 6, 1)
+    {
+        src_indirect_y[i].v = mout + i * SRC_HEIGHT;
+        src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 6);
+    }
 
-    DATA_TYPE d30 = *((__global DATA_TYPE *)(src_addr + 18 * src_stride_z));
-    DATA_TYPE d31 = *((__global DATA_TYPE *)(src_addr + 19 * src_stride_z));
-    DATA_TYPE d32 = *((__global DATA_TYPE *)(src_addr + 20 * src_stride_z));
-    DATA_TYPE d33 = *((__global DATA_TYPE *)(src_addr + 21 * src_stride_z));
-    DATA_TYPE d34 = *((__global DATA_TYPE *)(src_addr + 22 * src_stride_z));
-    DATA_TYPE d35 = *((__global DATA_TYPE *)(src_addr + 23 * src_stride_z));
-
-    DATA_TYPE d40 = *((__global DATA_TYPE *)(src_addr + 24 * src_stride_z));
-    DATA_TYPE d41 = *((__global DATA_TYPE *)(src_addr + 25 * src_stride_z));
-    DATA_TYPE d42 = *((__global DATA_TYPE *)(src_addr + 26 * src_stride_z));
-    DATA_TYPE d43 = *((__global DATA_TYPE *)(src_addr + 27 * src_stride_z));
-    DATA_TYPE d44 = *((__global DATA_TYPE *)(src_addr + 28 * src_stride_z));
-    DATA_TYPE d45 = *((__global DATA_TYPE *)(src_addr + 29 * src_stride_z));
-
-    DATA_TYPE d50 = *((__global DATA_TYPE *)(src_addr + 30 * src_stride_z));
-    DATA_TYPE d51 = *((__global DATA_TYPE *)(src_addr + 31 * src_stride_z));
-    DATA_TYPE d52 = *((__global DATA_TYPE *)(src_addr + 32 * src_stride_z));
-    DATA_TYPE d53 = *((__global DATA_TYPE *)(src_addr + 33 * src_stride_z));
-    DATA_TYPE d54 = *((__global DATA_TYPE *)(src_addr + 34 * src_stride_z));
-    DATA_TYPE d55 = *((__global DATA_TYPE *)(src_addr + 35 * src_stride_z));
+    // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
+    T_LOAD_INDIRECT(DATA_TYPE, 6, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
 
     // Compute out00, out01, out02 and out03
-    float out00 = d01 + d21 + d41 + d11 + d31;
-    float out01 = d01 + d21 + d41 + d11 + d31;
-    float out02 = d01 + d21 + d41 + d11 + d31;
-    float out03 = d01 + d21 + d41 + d11 + d31;
-
-    float k0 = d03 + d04 + d13 + d14 + d23 + d24 + d33 + d34 + d43 + d44;
-    float k1 = 2.0f * d03 - 2.0f * d04 + 2.0f * d13 - 2.0f * d14 + 2.0f * d23 - 2.0f * d24 + 2.0f * d33 - 2.0f * d34 + 2.0f * d43 - 2.0f * d44;
-
-    out00 += k0 + d00 + d02 + d10 + d12 + d20 + d22 + d30 + d32 + d40 + d42;
-    out01 += k1 - d02 - d12 - d22 - d32 - d42;
-    out02 += 4.0f * k0 + d02 + d12 + d22 + d32 + d42;
-    out03 += 4.0f * k1 - d02 - d12 - d22 - d32 - d42 + d05 + d15 + d25 + d35 + d45;
-
-    // Compute out10, out11, out12 and out13
-    float out10 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    float out11 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    float out12 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    float out13 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-
-    k0 = d13 + d14 - d23 - d24 + 2.0f * d33 + 2.0f * d34 - 2.0f * d43 - 2.0f * d44;
-    k1 = 2.0f * d13 - 2.0f * d14 - 2.0f * d23 + 2.0f * d24 + 4.0f * d33 - 4.0f * d34 - 4.0f * d43 + 4.0f * d44;
-
-    out10 += k0 + d10 + d12 - d20 - d22 + 2.0f * d30 + 2.0f * d32 - 2.0f * d40 - 2.0f * d42;
-    out11 += k1 - d12 + d22 - 2.0f * d32 + 2.0f * d42;
-    out12 += 4.0f * k0 + d12 - d22 + 2.0f * d32 - 2.0f * d42;
-    out13 += 4.0f * k1 - d12 + d15 + d22 - d25 - 2.0f * d32 + 2.0f * d35 + 2.0f * d42 - 2.0f * d45;
-
-    // Compute out20, out21, out22 and out23
-    float out20 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    float out21 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    float out22 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    float out23 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-
-    k0 = d13 + d14 + d23 + d24 + 4.0f * d33 + 4.0f * d34 + 4.0f * d43 + 4.0f * d44;
-    k1 = 2.0f * d13 - 2.0f * d14 + 2.0f * d23 - 2.0f * d24 + 8.0f * d33 - 8.0f * d34 + 8.0f * d43 - 8.0f * d44;
-
-    out20 += k0 + d10 + d12 + d20 + d22 + 4.0f * d30 + 4.0f * d32 + 4.0f * d40 + 4.0f * d42;
-    out21 += k1 - d12 - d22 - 4.0f * d32 - 4.0f * d42;
-    out22 += 4.0f * k0 + d12 + d22 + 4.0f * d32 + 4.0f * d42;
-    out23 += 4.0f * k1 - d12 + d15 - d22 + d25 - 4.0f * d32 + 4.0f * d35 - 4.0f * d42 + 4.0f * d45;
-
-    // Compute out30, out31, out32 and out33
-    float out30 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    float out31 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    float out32 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    float out33 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-
-    k0 = d13 + d14 - d23 - d24 + 8.0f * d33 + 8.0f * d34 - 8.0f * d43 - 8.0f * d44 + d53 + d54;
-    k1 = 2.0f * d13 - 2.0f * d14 - 2.0f * d23 + 2.0f * d24 + 16.0f * d33 - 16.0f * d34 - 16.0f * d43 + 16.0f * d44 + 2.0f * d53 - 2.0f * d54;
-
-    out30 += k0 + d10 + d12 - d20 - d22 + 8.0f * d30 + 8.0f * d32 - 8.0f * d40 - 8.0f * d42 + d50 + d52;
-    out31 += k1 - d12 + d22 - 8.0f * d32 + 8.0f * d42 - d52;
-    out32 += 4.0f * k0 + d12 - d22 + 8.0f * d32 - 8.0f * d42 + d52;
-    out33 += 4.0f * k1 - d12 + d15 + d22 - d25 - 8.0f * d32 + 8.0f * d35 + 8.0f * d42 - 8.0f * d45 - d52 + d55;
-#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-
-    int y_in  = get_global_id(1);
-    int x_out = get_global_id(0);
-    int y_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
-    int z_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
-#if defined(SRC_DEPTH)
-    int batch = get_global_id(2) / SRC_DEPTH;
-#endif /* defined(SRC_DEPTH) */
+    out[0].v = in[0].v + in[1].v + in[2].v + in[3].v + in[4].v;
+    out[1].v = in[1].v - in[2].v + 2.0f * in[3].v - 2.0f * in[4].v;
+    out[2].v = in[1].v + in[2].v + 4.0f * in[3].v + 4.0f * in[4].v;
+    out[3].v = in[1].v - in[2].v + 8.0f * in[3].v - 8.0f * in[4].v + in[5].v;
 
 #if defined(HAS_BIAS)
-    // Add bias
-    Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
+    TILE(DATA_TYPE, 1, N0, b);
 
-    DATA_TYPE b = (DATA_TYPE) * ((__global DATA_TYPE *)(vector_offset(&bias, x_out)));
+    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 0, b);
 
-    out00 += (DATA_TYPE)b;
-    out01 += (DATA_TYPE)b;
-    out02 += (DATA_TYPE)b;
-    out03 += (DATA_TYPE)b;
-#if !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) & !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    out10 += (DATA_TYPE)b;
-    out11 += (DATA_TYPE)b;
-    out12 += (DATA_TYPE)b;
-    out13 += (DATA_TYPE)b;
+    // c = c + bias[broadcasted]
+    T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
+#endif // HAS_BIAS
 
-    out20 += (DATA_TYPE)b;
-    out21 += (DATA_TYPE)b;
-    out22 += (DATA_TYPE)b;
-    out23 += (DATA_TYPE)b;
+    int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
+    int y_out = (mout / NUM_TILES_X) * OUTPUT_TILE_H;
 
-    out30 += (DATA_TYPE)b;
-    out31 += (DATA_TYPE)b;
-    out32 += (DATA_TYPE)b;
-    out33 += (DATA_TYPE)b;
-#endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) & !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
+    T_ACTIVATION(DATA_TYPE, 4, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
 
-#endif // defined(HAS_BIAS)
+    TILE(uint, 4, 1, dst_indirect_y) = { { 0 } };
 
-    __global unsigned char *dst_base_ptr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE);
-
-#if defined(SRC_DEPTH)
-    dst_base_ptr += batch * dst_stride_w;
-#endif // defined(SRC_DEPTH)
-
+    // Calculate the destination indirect Y
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
+    LOOP_UNROLLING(int, yk, 0, 4, 1)
+    {
+        int y_c              = min(y_out + yk, ((int)DST_HEIGHT - 1));
+        dst_indirect_y[yk].v = x_out + y_c * DST_WIDTH;
+        dst_indirect_y[yk].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
+    }
+#else // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
+    LOOP_UNROLLING(int, xk, 0, 4, 1)
+    {
+        int x_c              = min(x_out + xk, ((int)DST_WIDTH - 1));
+        dst_indirect_y[xk].v = x_c + y_out * DST_WIDTH;
+        dst_indirect_y[xk].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
+    }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
-    dst_base_ptr += y_out * dst_stride_y;
+    // Store the tile in reverse order so the invalid values are overwritten with the valid ones
+    T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 4, N0, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 
-    int4 offset_z = min((int4)z_out + (int4)(0, 1, 2, 3), (int4)((int)DST_HEIGHT - 1)) * (int4)dst_stride_z;
+#else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
-    // Store the 1x4 output tile
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL,
-                         B_VAL);
+    // Calculate the indirect Y for the source tensor
+    TILE(DATA_TYPE, 36, N0, in)       = { { 0 } };
+    TILE(DATA_TYPE, 4, N0, tmp)       = { { 0 } };
+    TILE(uint, 36, 1, src_indirect_y) = { { 0 } };
 
-    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
-    // is overwritten with the valid one
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s3)) = out0_dt.s3;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s2)) = out0_dt.s2;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s1)) = out0_dt.s1;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_z.s0)) = out0_dt.s0;
+    LOOP_UNROLLING(int, i, 0, 36, 1)
+    {
+        src_indirect_y[i].v = mout + i * SRC_HEIGHT;
+        src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 36);
+    }
 
-#elif defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
+    // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
+    T_LOAD_INDIRECT(DATA_TYPE, 36, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
 
-    dst_base_ptr += z_out * dst_stride_z;
+    LOOP_UNROLLING(int, i, 0, 6, 1)
+    {
+        tmp[0].v     = in[6 + i].v + in[12 + i].v;
+        tmp[1].v     = in[6 + i].v - in[12 + i].v;
+        tmp[2].v     = in[18 + i].v + in[24 + i].v;
+        tmp[3].v     = in[18 + i].v - in[24 + i].v;
+        tmp[3].v     = tmp[3].v + tmp[3].v;
+        in[i].v      = in[i].v + tmp[0].v + tmp[2].v;
+        in[6 + i].v  = tmp[3].v + tmp[1].v;
+        in[12 + i].v = fma(tmp[2].v, (VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[0].v);
+        in[18 + i].v = fma(tmp[3].v, (VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[1].v) + in[30 + i].v;
+    }
 
-    int4 offset_y = min((int4)y_out + (int4)(0, 1, 2, 3), (int4)((int)DST_WIDTH - 1)) * (int4)dst_stride_y;
+    // Compute the output tile
+    TILE(DATA_TYPE, 16, N0, out) = { { 0 } };
 
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)),
-                         A_VAL, B_VAL);
+    LOOP_UNROLLING(int, i, 0, 4, 1)
+    {
+        tmp[0].v         = in[6 * i + 1].v + in[6 * i + 2].v;
+        tmp[1].v         = in[6 * i + 1].v - in[6 * i + 2].v;
+        tmp[2].v         = in[6 * i + 3].v + in[6 * i + 4].v;
+        tmp[3].v         = in[6 * i + 3].v - in[6 * i + 4].v;
+        tmp[3].v         = tmp[3].v + tmp[3].v;
+        out[4 * i + 0].v = in[6 * i + 0].v + tmp[0].v + tmp[2].v;
+        out[4 * i + 1].v = tmp[3].v + tmp[1].v;
+        out[4 * i + 2].v = fma(tmp[2].v, (VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[0].v);
+        out[4 * i + 3].v = fma(tmp[3].v, (VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[1].v) + in[6 * i + 5].v;
+    }
 
-    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
-    // is overwritten with the valid one
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3)) = out0_dt.s3;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2)) = out0_dt.s2;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1)) = out0_dt.s1;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0)) = out0_dt.s0;
+#if defined(HAS_BIAS)
+    TILE(DATA_TYPE, 1, N0, b);
 
-#else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
+    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 0, b);
 
-    int4 offset_y = min((int4)y_out + (int4)(0, 1, 2, 3), (int4)((int)DST_WIDTH - 1)) * (int4)dst_stride_y;
-    int4 offset_z = min((int4)z_out + (int4)(0, 1, 2, 3), (int4)((int)DST_HEIGHT - 1)) * (int4)dst_stride_z;
+    // c = c + bias[broadcasted]
+    T_ADD_BROADCAST_X(DATA_TYPE, 16, N0, out, b, out);
+#endif // HAS_BIAS
 
-    // Store the 4x4 output tile
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out1_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out10, out11, out12, out13), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out2_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out20, out21, out22, out23), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL);
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out3_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out30, out31, out32, out33),
-                                                                       VEC_DATA_TYPE(DATA_TYPE, 4)),
-                         A_VAL, B_VAL);
+    int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
+    int y_out = (mout / NUM_TILES_X) * OUTPUT_TILE_H;
 
-    // To avoid the out-of-bound write, we store the elements in reverse order so the invalid element
-    // is overwritten with the valid one
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s3)) = out3_dt.s3;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s3)) = out3_dt.s2;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s3)) = out3_dt.s1;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s3)) = out3_dt.s0;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s2)) = out2_dt.s3;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s2)) = out2_dt.s2;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s2)) = out2_dt.s1;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s2)) = out2_dt.s0;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s1)) = out1_dt.s3;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s1)) = out1_dt.s2;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s1)) = out1_dt.s1;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s1)) = out1_dt.s0;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s3 + offset_z.s0)) = out0_dt.s3;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s2 + offset_z.s0)) = out0_dt.s2;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s1 + offset_z.s0)) = out0_dt.s1;
-    *((__global DATA_TYPE *)(dst_base_ptr + offset_y.s0 + offset_z.s0)) = out0_dt.s0;
-#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
+    T_ACTIVATION(DATA_TYPE, 16, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
+
+    TILE(uint, 16, 1, dst_indirect_y) = { { 0 } };
+
+    // Calculate the destination indirect Y
+    LOOP_UNROLLING(int, yk, 0, 4, 1)
+    {
+        LOOP_UNROLLING(int, xk, 0, 4, 1)
+        {
+            int x_c                       = min(x_out + xk, ((int)DST_WIDTH - 1));
+            int y_c                       = min(y_out + yk, ((int)DST_HEIGHT - 1));
+            dst_indirect_y[xk + yk * 4].v = x_c + y_c * DST_WIDTH;
+            dst_indirect_y[xk + yk * 4].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
+        }
+    }
+
+    // Store the tile in reverse order so the invalid values are overwritten with the valid ones
+    T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 16, N0, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
 
 #define COMPUTE_TMP_COL(col, d0, d1, d2, d3, d4, d5, d6, d7, comm_fact)  \
