@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_BFLOAT16_H
 
 #include <cstdint>
+#include <cstring>
 
 namespace arm_compute
 {
@@ -70,9 +71,9 @@ inline uint16_t float_to_bf16(const float v)
 inline float bf16_to_float(const uint16_t &v)
 {
     const uint32_t lv = (v << 16);
-    const float   *fp = reinterpret_cast<const float *>(&lv);
-
-    return *fp;
+    float          fp;
+    memcpy(&fp, &lv, sizeof(lv));
+    return fp;
 }
 }
 
