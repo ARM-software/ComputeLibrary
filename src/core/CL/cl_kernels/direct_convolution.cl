@@ -105,8 +105,9 @@
 __kernel void direct_convolution_nhwc(
     TENSOR4D(src, SRC_TENSOR_TYPE),
     TENSOR4D(dst, DST_TENSOR_TYPE),
-    TENSOR4D(wei, WEI_TENSOR_TYPE),
+    TENSOR4D(wei, WEI_TENSOR_TYPE)
 #if defined(HAS_BIAS)
+    ,
     VECTOR_DECLARATION(bia)
 #endif // defined(HAS_BIAS)
 )

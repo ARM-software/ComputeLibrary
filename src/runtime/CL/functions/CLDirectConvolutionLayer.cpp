@@ -58,7 +58,7 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
 void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                          const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     _impl->src     = input;
     _impl->weights = weights;
@@ -66,7 +66,7 @@ void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context
     _impl->dst     = output;
 
     _impl->op = std::make_unique<opencl::ClDirectConvolution>();
-    _impl->op->configure(compile_context, _impl->src->info(), _impl->weights->info(), _impl->biases->info(), _impl->dst->info(), conv_info, act_info);
+    _impl->op->configure(compile_context, input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, act_info);
 }
 
 Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,

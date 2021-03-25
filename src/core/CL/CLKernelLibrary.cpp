@@ -901,12 +901,13 @@ std::string CLKernelLibrary::get_program_name(const std::string &kernel_name) co
 void CLKernelLibrary::init(std::string kernel_path, cl::Context context, cl::Device device)
 {
     _compile_context = CLCompileContext(context, device);
-    _kernel_path     = kernel_path;
+    _kernel_path     = kernel_path + "/";
 }
 
 void CLKernelLibrary::set_kernel_path(const std::string &kernel_path)
 {
     _kernel_path = std::move(kernel_path);
+    _kernel_path += "/";
 }
 
 cl::Context &CLKernelLibrary::context()

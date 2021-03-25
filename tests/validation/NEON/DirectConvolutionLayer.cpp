@@ -129,6 +129,49 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 TEST_SUITE(NEON)
 TEST_SUITE(DirectConvolutionLayer)
 
+/** Check whether the configuration of a Direct Convolution layer with no
+ * bias leads to a successful execution.
+ */
+TEST_CASE(NoBias, framework::DatasetMode::PRECOMMIT)
+{
+    const auto     src_shape     = TensorShape(27U, 13U, 2U);
+    const auto     weights_shape = TensorShape(3U, 3U, 2U, 4U);
+    const auto     bias_shape    = TensorShape(4U);
+    const auto     dst_shape     = TensorShape(25U, 11U, 4U);
+    constexpr auto dt            = DataType::F32;
+
+    auto src     = create_tensor<Tensor>(src_shape, dt);
+    auto weights = create_tensor<Tensor>(weights_shape, dt);
+    auto dst     = create_tensor<Tensor>(dst_shape, dt);
+
+    const auto conv_info = PadStrideInfo(1, 1, 0, 0);
+
+    // Create Direct Convolution function
+    NEDirectConvolutionLayer conv{};
+    conv.configure(&src, &weights, nullptr, &dst, conv_info);
+
+    src.allocator()->allocate();
+    weights.allocator()->allocate();
+    dst.allocator()->allocate();
+
+    library->fill_tensor_value(Accessor(src), 1.f);
+    library->fill_tensor_value(Accessor(weights), 1.f);
+
+    conv.run();
+
+    // Compute reference to compare
+    SimpleTensor<float> ref_src{ src_shape, dt };
+    SimpleTensor<float> ref_weights{ weights_shape, dt };
+    SimpleTensor<float> ref_bias{ bias_shape, dt };
+    library->fill_tensor_value(ref_src, 1.f);
+    library->fill_tensor_value(ref_weights, 1.f);
+    // No bias
+    library->fill_tensor_value(ref_bias, 0.f);
+    auto ref_dst = reference::convolution_layer<float>(ref_src, ref_weights, ref_bias, dst_shape, conv_info);
+
+    validate(Accessor(dst), ref_dst);
+}
+
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
