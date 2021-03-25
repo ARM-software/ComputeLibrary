@@ -68,7 +68,6 @@ public:
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         const DataLayout data_layout = src.info()->data_layout();
@@ -162,6 +161,8 @@ protected:
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        add_padding_x({ &src, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();

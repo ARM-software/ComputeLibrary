@@ -229,6 +229,15 @@ std::pair<int, int> get_quantized_qasymm8_signed_bounds(const QuantizationInfo &
  * @param[in] channel_id Channel id for per channel quantization info.
  */
 std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id = 0);
+
+/** Add random padding along the X axis (between 1 and 16 columns per side) to all the input tensors
+ *
+ * @param[in] tensors     List of tensors to add padding to
+ * @param[in] data_layout (Optional) Data layout of the operator
+ *
+ * @note This function adds padding to the input tensors only if data_layout == DataLayout::NHWC
+ */
+void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

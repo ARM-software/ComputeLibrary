@@ -62,12 +62,11 @@ public:
     {
         ARM_COMPUTE_UNUSED(dilation);
         _mixed_layout = mixed_layout;
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, info, data_type, act_info);
+        _target       = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
+        _reference    = compute_reference(input_shape, weights_shape, bias_shape, info, data_type, act_info);
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         const DataLayout data_layout = src.info()->data_layout();
@@ -133,6 +132,8 @@ protected:
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        add_padding_x({ &src, &weights, &bias, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -235,7 +236,7 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    bool            _mixed_layout{false};
+    bool            _mixed_layout{ false };
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
@@ -246,13 +247,12 @@ public:
     void setup(TensorShape input_shape, WinogradInfo winograd_info, DataLayout data_layout, DataType data_type)
     {
         TensorShape output_shape = compute_winograd_input_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
-        _mixed_layout = mixed_layout;
-        _target    = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
-        _reference = compute_reference(input_shape, output_shape, winograd_info, data_type);
+        _mixed_layout            = mixed_layout;
+        _target                  = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
+        _reference               = compute_reference(input_shape, output_shape, winograd_info, data_type);
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         const DataLayout data_layout_src = src.info()->data_layout();
@@ -311,6 +311,8 @@ protected:
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &src, &dst }, data_layout);
+
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
@@ -344,7 +346,7 @@ protected:
         return reference::winograd_input_transform<T>(src, output_shape, winograd_info);
     }
 
-    bool _mixed_layout {false};
+    bool            _mixed_layout{ false };
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
@@ -360,12 +362,11 @@ public:
         TensorShape  output_shape = compute_winograd_filter_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
 
         _mixed_layout = mixed_layout;
-        _target    = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
-        _reference = compute_reference(input_shape, output_shape, winograd_info, data_type);
+        _target       = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
+        _reference    = compute_reference(input_shape, output_shape, winograd_info, data_type);
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         const DataLayout data_layout_src = src.info()->data_layout();
@@ -425,6 +426,8 @@ protected:
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &src, &dst }, data_layout);
+
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
@@ -458,7 +461,7 @@ protected:
         return reference::winograd_filter_transform<T>(src, output_shape, winograd_info);
     }
 
-    bool    _mixed_layout {false};
+    bool            _mixed_layout{ false };
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
@@ -475,7 +478,6 @@ public:
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         const DataLayout data_layout_src = src.info()->data_layout();
@@ -534,6 +536,8 @@ protected:
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &src, &bias, &dst }, winograd_info.output_data_layout);
+
         // Allocate tensors
         src.allocator()->allocate();
         bias.allocator()->allocate();
@@ -577,7 +581,7 @@ protected:
         return (act_info.enabled()) ? reference::activation_layer<T>(winograd_output, act_info) : winograd_output;
     }
 
-    bool    _mixed_layout {false};
+    bool            _mixed_layout{ false };
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };

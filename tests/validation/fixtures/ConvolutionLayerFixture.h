@@ -69,7 +69,8 @@ public:
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
-               DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info, bool mixed_layout = false)
+               DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info,
+               bool mixed_layout = false)
     {
         _mixed_layout             = mixed_layout;
         _data_type                = data_type;
@@ -87,7 +88,6 @@ public:
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         // Test Multi DataLayout graph cases, when the data layout changes after configure
@@ -213,6 +213,8 @@ protected:
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        add_padding_x({ &src, &weights, &bias, &dst }, _data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();

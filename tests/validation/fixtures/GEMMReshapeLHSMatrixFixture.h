@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,6 +90,8 @@ protected:
         gemm_lhs_reshape.configure(&src, &dst, lhs_info, reinterpret_input_as_3d);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        add_padding_x({ &src, &dst });
 
         // Allocate tensors
         src.allocator()->allocate();

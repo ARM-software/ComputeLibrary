@@ -325,6 +325,30 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
     return std::pair<int, int> { min_bound, max_bound };
 }
 
+void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout)
+{
+    if(data_layout == DataLayout::NHWC)
+    {
+        constexpr unsigned int lower = 1U;
+        constexpr unsigned int upper = 16U;
+
+        std::uniform_int_distribution<unsigned int> distribution(lower, upper);
+        size_t                                      seed_offset = 0;
+
+        for(ITensor *tensor : tensors)
+        {
+            ARM_COMPUTE_ERROR_ON(!tensor->info()->is_resizable());
+
+            std::mt19937 gen(library->seed() + seed_offset++);
+
+            const unsigned int right = distribution(gen);
+            const unsigned int left  = distribution(gen);
+
+            tensor->info()->extend_padding(PaddingSize(0U, right, 0U, left));
+        }
+    }
+}
+
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);
 template void get_tile(const SimpleTensor<half> &in, SimpleTensor<half> &roi, const Coordinates &coord);
 template void get_tile(const SimpleTensor<int> &in, SimpleTensor<int> &roi, const Coordinates &coord);

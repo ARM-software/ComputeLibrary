@@ -72,7 +72,6 @@ public:
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         const DataLayout data_layout = src.info()->data_layout();
@@ -165,6 +164,8 @@ protected:
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &src, &weights, &bias, &dst });
+
         // Allocate tensors
         src.allocator()->allocate();
         weights.allocator()->allocate();
@@ -238,7 +239,7 @@ protected:
     SimpleTensor<T>     _reference{};
     DataType            _data_type{};
     DataType            _bias_data_type{};
-    bool                _mixed_layout{false};
+    bool                _mixed_layout{ false };
     QuantizationInfo    _quantization_info{};
     ActivationLayerInfo _activation_info{};
 };

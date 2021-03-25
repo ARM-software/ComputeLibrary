@@ -90,7 +90,6 @@ public:
     }
 
 protected:
-    
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         DataLayout data_layout = src.info()->data_layout();
@@ -172,6 +171,9 @@ protected:
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        // TODO: uncomment after COMPMID-4341
+        // add_padding_x({ &src, &weights, &bias, &dst }, data_layout);
+
         // Allocate tensors
         src.allocator()->allocate();
         weights.allocator()->allocate();
@@ -221,7 +223,7 @@ protected:
     SimpleTensor<T>  _reference{};
     QuantizationInfo _quantization_info{};
     DataType         _data_type{};
-    bool             _mixed_layout {false};
+    bool             _mixed_layout{ false };
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>

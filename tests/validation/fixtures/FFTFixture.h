@@ -91,6 +91,9 @@ protected:
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        // TODO: uncomment after COMPMID-4362
+        // add_padding_x({ &src, &dst });
+
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
@@ -137,15 +140,14 @@ public:
                DataType data_type, DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false)
     {
         _mixed_layout = mixed_layout;
-        _data_type   = data_type;
-        _data_layout = data_layout;
+        _data_type    = data_type;
+        _data_layout  = data_layout;
 
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info);
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info);
     }
 
 protected:
-    
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         // Test Multi DataLayout graph cases, when the data layout changes after configure
@@ -210,6 +212,8 @@ protected:
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &src, &weights, &bias, &dst }, _data_layout);
+
         // Allocate tensors
         src.allocator()->allocate();
         weights.allocator()->allocate();
@@ -225,7 +229,7 @@ protected:
         fill(AccessorType(src), 0);
         fill(AccessorType(weights), 1);
         fill(AccessorType(bias), 2);
-        
+
         if(_mixed_layout)
         {
             mix_layout(conv, src, dst);
@@ -261,7 +265,7 @@ protected:
     SimpleTensor<T> _reference{};
     DataType        _data_type{};
     DataLayout      _data_layout{};
-    bool            _mixed_layout{false};
+    bool            _mixed_layout{ false };
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>

@@ -116,6 +116,9 @@ public:
 
     void allocate_and_run_target()
     {
+        // TODO: uncomment after COMPMID-4361
+        // add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
+
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();
@@ -131,7 +134,7 @@ public:
         fill(AccessorType(_src), 0);
         fill(AccessorType(_weights), 1);
         fill(AccessorType(_biases), 2);
-        
+
         if(_mixed_layout)
         {
             mix_layout(_dwc, _src, _target);
@@ -158,7 +161,6 @@ public:
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         // Test Multi DataLayout graph cases, when the data layout changes after configure
@@ -237,7 +239,7 @@ protected:
     ActivationLayerInfo _act_info{};
     unsigned int        _depth_multiplier{};
     Size2D              _dilation{};
-    bool                _mixed_layout{false};
+    bool                _mixed_layout{ false };
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
@@ -309,6 +311,8 @@ public:
 
     void allocate_and_run_target()
     {
+        add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
+
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();
@@ -442,6 +446,8 @@ public:
 
     void allocate_and_run_target()
     {
+        add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
+
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();

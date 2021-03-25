@@ -50,13 +50,12 @@ public:
                QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo(), bool mixed_layout = false)
     {
         _mixed_layout = mixed_layout;
-        _pool_info = pool_info;
-        _target    = compute_target(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
-        _reference = compute_reference(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
+        _pool_info    = pool_info;
+        _target       = compute_target(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
+        _reference    = compute_reference(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
     }
 
 protected:
-
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
         const DataLayout data_layout = src.info()->data_layout();
@@ -115,6 +114,9 @@ protected:
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(_target_indices.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        // TODO: uncomment after COMPMID-4363
+        // add_padding_x({ &src, &dst, &_target_indices }, data_layout);
+
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
@@ -152,7 +154,7 @@ protected:
     TensorType             _target{};
     SimpleTensor<T>        _reference{};
     PoolingLayerInfo       _pool_info{};
-    bool                   _mixed_layout{false};
+    bool                   _mixed_layout{ false };
     TensorType             _target_indices{};
     SimpleTensor<uint32_t> _ref_indices{};
 };

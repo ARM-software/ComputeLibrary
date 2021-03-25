@@ -105,6 +105,8 @@ protected:
         ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &a, &b, &c, &dst });
+
         // Allocate tensors
         a.allocator()->allocate();
         b.allocator()->allocate();
@@ -231,6 +233,8 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &lhs, &rhs, &bias, &dst });
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -346,6 +350,8 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        add_padding_x({ &lhs, &rhs, &bias, &dst });
 
         // Allocate tensors
         lhs.allocator()->allocate();
@@ -482,6 +488,12 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // TODO: remove if statement after COMPMID-4368
+        if(!rhs_info.export_to_cl_image)
+        {
+            add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &bias, &dst });
+        }
 
         // Allocate tensors
         lhs.allocator()->allocate();
@@ -624,6 +636,12 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // TODO: remove if statement after COMPMID-4368
+        if(!rhs_info.export_to_cl_image)
+        {
+            add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &bias, &dst });
+        }
 
         // Allocate tensors
         lhs.allocator()->allocate();
@@ -786,6 +804,12 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // TODO: remove if statement after COMPMID-4368
+        if(!rhs_info.export_to_cl_image)
+        {
+            add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &bias, &dst });
+        }
 
         // Allocate tensors
         lhs.allocator()->allocate();
@@ -955,6 +979,12 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        // TODO: remove if statement after COMPMID-4368
+        if(!rhs_info.export_to_cl_image)
+        {
+            add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &bias, &dst });
+        }
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1118,6 +1148,12 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        // TODO: remove if statement after COMPMID-4368
+        if(!rhs_info.export_to_cl_image)
+        {
+            add_padding_x({ &lhs, &rhs, &rhs_reshaped, &bias, &dst });
+        }
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1277,6 +1313,12 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        // TODO: remove if statement after COMPMID-4368
+        if(!rhs_info.export_to_cl_image)
+        {
+            add_padding_x({ &lhs, &rhs, &rhs_reshaped, &bias, &dst });
+        }
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1410,6 +1452,8 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &lhs, &rhs, &bias, &dst });
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1538,6 +1582,8 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        add_padding_x({ &lhs, &rhs, &bias, &dst });
 
         // Allocate tensors
         lhs.allocator()->allocate();

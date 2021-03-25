@@ -133,6 +133,8 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(output.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+    add_padding_x({ &a, &b, &output });
+
     // Allocate tensors
     a.allocator()->allocate();
     b.allocator()->allocate();
@@ -948,6 +950,8 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &dst });
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1098,6 +1102,8 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &dst });
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1247,6 +1253,8 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &lhs, &rhs, &rhs_reshaped, &dst });
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1390,6 +1398,8 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &lhs, &rhs, &rhs_reshaped, &dst });
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1502,6 +1512,8 @@ protected:
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+        add_padding_x({ &lhs, &rhs, &dst });
+
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
@@ -1596,6 +1608,8 @@ protected:
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        add_padding_x({ &lhs, &rhs, &dst });
 
         // Allocate tensors
         lhs.allocator()->allocate();
