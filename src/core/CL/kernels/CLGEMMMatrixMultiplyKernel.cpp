@@ -352,6 +352,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
     build_opts.add_option_if(activation_info.enabled(), "-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(activation_info.activation())));
     build_opts.add_option_if(activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(activation_info.a()));
     build_opts.add_option_if(activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(activation_info.b()));
+    build_opts.add_option("-DIN1_DIM_X=" + support::cpp11::to_string(input1->info()->dimension(0)));
 
     const bool is_bifrost = get_arch_from_target(gpu_target) == GPUTarget::BIFROST;
 
@@ -424,7 +425,6 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
             kernel_name = "gemm_mm_floating_point";
         }
     }
-
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
