@@ -28,7 +28,6 @@
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
-#include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
@@ -84,89 +83,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimen
     }
 
     return os;
-}
-
-/** Formatted output of the NonLinearFilterFunction type.
- *
- * @param[out] os       Output stream.
- * @param[in]  function Type to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const NonLinearFilterFunction &function)
-{
-    switch(function)
-    {
-        case NonLinearFilterFunction::MAX:
-            os << "MAX";
-            break;
-        case NonLinearFilterFunction::MEDIAN:
-            os << "MEDIAN";
-            break;
-        case NonLinearFilterFunction::MIN:
-            os << "MIN";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the NonLinearFilterFunction type.
- *
- * @param[in] function Type to output.
- *
- * @return Formatted string.
- */
-inline std::string to_string(const NonLinearFilterFunction &function)
-{
-    std::stringstream str;
-    str << function;
-    return str.str();
-}
-
-/** Formatted output of the MatrixPattern type.
- *
- * @param[out] os      Output stream.
- * @param[in]  pattern Type to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const MatrixPattern &pattern)
-{
-    switch(pattern)
-    {
-        case MatrixPattern::BOX:
-            os << "BOX";
-            break;
-        case MatrixPattern::CROSS:
-            os << "CROSS";
-            break;
-        case MatrixPattern::DISK:
-            os << "DISK";
-            break;
-        case MatrixPattern::OTHER:
-            os << "OTHER";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the MatrixPattern type.
- *
- * @param[in] pattern Type to output.
- *
- * @return Formatted string.
- */
-inline std::string to_string(const MatrixPattern &pattern)
-{
-    std::stringstream str;
-    str << pattern;
-    return str.str();
 }
 
 /** Formatted output of the RoundingPolicy type.
@@ -1083,8 +999,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &poli
  */
 inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
 {
-    const DataType    data_type   = info->data_type();
-    const DataLayout  data_layout = info->data_layout();
+    const DataType   data_type   = info->data_type();
+    const DataLayout data_layout = info->data_layout();
 
     os << "Shape=" << info->tensor_shape() << ","
        << "DataLayout=" << string_from_data_layout(data_layout) << ","
@@ -1109,7 +1025,7 @@ inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
         else
         {
             os << "(" << qinfo.uniform().scale << ", "
-              << qinfo.uniform().offset << ")";
+               << qinfo.uniform().offset << ")";
         }
     }
     return os;
@@ -1125,7 +1041,7 @@ inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
 inline ::std::ostream &operator<<(::std::ostream &os, const TensorInfo &info)
 {
     os << &info;
-	return os;
+    return os;
 }
 
 /** Formatted output of the TensorInfo type.
@@ -1803,140 +1719,6 @@ inline std::string to_string(const PriorBoxLayerInfo &info)
     return str.str();
 }
 
-/** Formatted output of the KeyPoint type.
- *
- * @param[out] os    Output stream
- * @param[in]  point Type to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const KeyPoint &point)
-{
-    os << "{x=" << point.x << ","
-       << "y=" << point.y << ","
-       << "strength=" << point.strength << ","
-       << "scale=" << point.scale << ","
-       << "orientation=" << point.orientation << ","
-       << "tracking_status=" << point.tracking_status << ","
-       << "error=" << point.error << "}";
-
-    return os;
-}
-
-/** Formatted output of the PhaseType type.
- *
- * @param[out] os         Output stream
- * @param[in]  phase_type Type to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const PhaseType &phase_type)
-{
-    switch(phase_type)
-    {
-        case PhaseType::SIGNED:
-            os << "SIGNED";
-            break;
-        case PhaseType::UNSIGNED:
-            os << "UNSIGNED";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the PhaseType type.
- *
- * @param[in] type Type to output.
- *
- * @return Formatted string.
- */
-inline std::string to_string(const arm_compute::PhaseType &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
-/** Formatted output of the MagnitudeType type.
- *
- * @param[out] os             Output stream
- * @param[in]  magnitude_type Type to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const MagnitudeType &magnitude_type)
-{
-    switch(magnitude_type)
-    {
-        case MagnitudeType::L1NORM:
-            os << "L1NORM";
-            break;
-        case MagnitudeType::L2NORM:
-            os << "L2NORM";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the MagnitudeType type.
- *
- * @param[in] type Type to output.
- *
- * @return Formatted string.
- */
-inline std::string to_string(const arm_compute::MagnitudeType &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
-/** Formatted output of the HOGNormType type.
- *
- * @param[out] os        Output stream
- * @param[in]  norm_type Type to output
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const HOGNormType &norm_type)
-{
-    switch(norm_type)
-    {
-        case HOGNormType::L1_NORM:
-            os << "L1_NORM";
-            break;
-        case HOGNormType::L2_NORM:
-            os << "L2_NORM";
-            break;
-        case HOGNormType::L2HYS_NORM:
-            os << "L2HYS_NORM";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the HOGNormType type.
- *
- * @param[in] type Type to output
- *
- * @return Formatted string.
- */
-inline std::string to_string(const HOGNormType &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
 /** Formatted output of the Size2D type.
  *
  * @param[out] os   Output stream
@@ -1958,40 +1740,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Size2D &size)
  * @return Formatted string.
  */
 inline std::string to_string(const Size2D &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
-/** Formatted output of the HOGInfo type.
- *
- * @param[out] os       Output stream
- * @param[in]  hog_info Type to output
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const HOGInfo &hog_info)
-{
-    os << "{CellSize=" << hog_info.cell_size() << ","
-       << "BlockSize=" << hog_info.block_size() << ","
-       << "DetectionWindowSize=" << hog_info.detection_window_size() << ","
-       << "BlockStride=" << hog_info.block_stride() << ","
-       << "NumBins=" << hog_info.num_bins() << ","
-       << "NormType=" << hog_info.normalization_type() << ","
-       << "L2HystThreshold=" << hog_info.l2_hyst_threshold() << ","
-       << "PhaseType=" << hog_info.phase_type() << "}";
-
-    return os;
-}
-
-/** Formatted output of the HOGInfo type.
- *
- * @param[in] type Type to output
- *
- * @return Formatted string.
- */
-inline std::string to_string(const HOGInfo &type)
 {
     std::stringstream str;
     str << type;
@@ -2252,6 +2000,7 @@ inline std::string to_string(const DetectionPostProcessLayerInfo &detection_info
     str << detection_info;
     return str.str();
 }
+
 /** Formatted output of the DetectionWindow type.
  *
  * @param[in] detection_window Type to output
@@ -2262,46 +2011,6 @@ inline std::string to_string(const DetectionWindow &detection_window)
 {
     std::stringstream str;
     str << detection_window;
-    return str.str();
-}
-
-/** Formatted output of the Termination type.
- *
- * @param[out] os          Output stream
- * @param[in]  termination Type to output
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const Termination &termination)
-{
-    switch(termination)
-    {
-        case Termination::TERM_CRITERIA_EPSILON:
-            os << "TERM_CRITERIA_EPSILON";
-            break;
-        case Termination::TERM_CRITERIA_ITERATIONS:
-            os << "TERM_CRITERIA_ITERATIONS";
-            break;
-        case Termination::TERM_CRITERIA_BOTH:
-            os << "TERM_CRITERIA_BOTH";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the Termination type.
- *
- * @param[in] termination Type to output
- *
- * @return Formatted string.
- */
-inline std::string to_string(const Termination &termination)
-{
-    std::stringstream str;
-    str << termination;
     return str.str();
 }
 

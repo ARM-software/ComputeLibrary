@@ -67,7 +67,6 @@
 #include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "src/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
-#include "src/core/CL/kernels/CLLKTrackerKernel.h"
 #include "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
 #include "src/core/CL/kernels/CLMeanStdDevNormalizationKernel.h"
 #include "src/core/CL/kernels/CLMinMaxLayerKernel.h"

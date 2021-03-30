@@ -26,8 +26,6 @@
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/HOGInfo.h"
-#include "arm_compute/core/PyramidInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
@@ -236,101 +234,6 @@ inline ValidRegion shape_to_valid_region(const TensorShape &a_shape, bool border
 
         shape.set(0, valid_shape_x);
         shape.set(1, valid_shape_y);
-    }
-
-    return valid_region;
-}
-
-/** Create a valid region for Gaussian Pyramid Half based on tensor shape and valid region at level "i - 1" and border mode
- *
- * @note The border size is 2 in case of Gaussian Pyramid Half
- *
- * @param[in] a_shape          Shape used at level "i - 1" of Gaussian Pyramid Half
- * @param[in] a_valid_region   Valid region used at level "i - 1" of Gaussian Pyramid Half
- * @param[in] border_undefined (Optional) Boolean indicating if the border mode is undefined.
- *
- *  return The valid region for the level "i" of Gaussian Pyramid Half
- */
-inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape &a_shape, const ValidRegion &a_valid_region, bool border_undefined = false)
-{
-    constexpr int border_size = 2;
-
-    ValidRegion valid_region{ Coordinates(), a_shape };
-
-    Coordinates &anchor = valid_region.anchor;
-    TensorShape &shape  = valid_region.shape;
-
-    // Compute tensor shape for level "i" of Gaussian Pyramid Half
-    // dst_width  = (src_width + 1) * 0.5f
-    // dst_height = (src_height + 1) * 0.5f
-    shape.set(0, (a_shape[0] + 1) * 0.5f);
-    shape.set(1, (a_shape[1] + 1) * 0.5f);
-
-    if(border_undefined)
-    {
-        ARM_COMPUTE_ERROR_ON(shape.num_dimensions() < 2);
-
-        // Compute the left and top invalid borders
-        float invalid_border_left = static_cast<float>(a_valid_region.anchor.x() + border_size) / 2.0f;
-        float invalid_border_top  = static_cast<float>(a_valid_region.anchor.y() + border_size) / 2.0f;
-
-        // For the new anchor point we can have 2 cases:
-        // 1) If the width/height of the tensor shape is odd, we have to take the ceil value of (a_valid_region.anchor.x() + border_size) / 2.0f or (a_valid_region.anchor.y() + border_size / 2.0f
-        // 2) If the width/height of the tensor shape is even, we have to take the floor value of (a_valid_region.anchor.x() + border_size) / 2.0f or (a_valid_region.anchor.y() + border_size) / 2.0f
-        // In this manner we should be able to propagate correctly the valid region along all levels of the pyramid
-        invalid_border_left = (a_shape[0] % 2) ? std::ceil(invalid_border_left) : std::floor(invalid_border_left);
-        invalid_border_top  = (a_shape[1] % 2) ? std::ceil(invalid_border_top) : std::floor(invalid_border_top);
-
-        // Set the anchor point
-        anchor.set(0, static_cast<int>(invalid_border_left));
-        anchor.set(1, static_cast<int>(invalid_border_top));
-
-        // Compute shape
-        // Calculate the right and bottom invalid borders at the previous level of the pyramid
-        const float prev_invalid_border_right  = static_cast<float>(a_shape[0] - (a_valid_region.anchor.x() + a_valid_region.shape[0]));
-        const float prev_invalid_border_bottom = static_cast<float>(a_shape[1] - (a_valid_region.anchor.y() + a_valid_region.shape[1]));
-
-        // Calculate the right and bottom invalid borders at the current level of the pyramid
-        const float invalid_border_right  = std::ceil((prev_invalid_border_right + static_cast<float>(border_size)) / 2.0f);
-        const float invalid_border_bottom = std::ceil((prev_invalid_border_bottom + static_cast<float>(border_size)) / 2.0f);
-
-        const int valid_shape_x = std::max(0, static_cast<int>(shape.x()) - static_cast<int>(invalid_border_left) - static_cast<int>(invalid_border_right));
-        const int valid_shape_y = std::max(0, static_cast<int>(shape.y()) - static_cast<int>(invalid_border_top) - static_cast<int>(invalid_border_bottom));
-
-        shape.set(0, valid_shape_x);
-        shape.set(1, valid_shape_y);
-    }
-
-    return valid_region;
-}
-
-/** Create a valid region for Laplacian Pyramid based on tensor shape and valid region at level "i - 1" and border mode
- *
- * @note The border size is 2 in case of Laplacian Pyramid
- *
- * @param[in] a_shape          Shape used at level "i - 1" of Laplacian Pyramid
- * @param[in] a_valid_region   Valid region used at level "i - 1" of Laplacian Pyramid
- * @param[in] border_undefined (Optional) Boolean indicating if the border mode is undefined.
- *
- *  return The valid region for the level "i" of Laplacian Pyramid
- */
-inline ValidRegion shape_to_valid_region_laplacian_pyramid(const TensorShape &a_shape, const ValidRegion &a_valid_region, bool border_undefined = false)
-{
-    ValidRegion valid_region = shape_to_valid_region_gaussian_pyramid_half(a_shape, a_valid_region, border_undefined);
-
-    if(border_undefined)
-    {
-        const BorderSize gaussian5x5_border(2);
-
-        auto border_left   = static_cast<int>(gaussian5x5_border.left);
-        auto border_right  = static_cast<int>(gaussian5x5_border.right);
-        auto border_top    = static_cast<int>(gaussian5x5_border.top);
-        auto border_bottom = static_cast<int>(gaussian5x5_border.bottom);
-
-        valid_region.anchor.set(0, valid_region.anchor[0] + border_left);
-        valid_region.anchor.set(1, valid_region.anchor[1] + border_top);
-        valid_region.shape.set(0, std::max(0, static_cast<int>(valid_region.shape[0]) - border_right - border_left));
-        valid_region.shape.set(1, std::max(0, static_cast<int>(valid_region.shape[1]) - border_top - border_bottom));
     }
 
     return valid_region;
@@ -566,110 +469,6 @@ inline T create_tensor(const TensorShape &shape, Format format, IRuntimeContext 
     return create_tensor<T>(info, ctx);
 }
 
-/** Create and initialize a multi-image of the given type.
- *
- * @param[in] shape  Tensor shape.
- * @param[in] format Format type.
- *
- * @return Initialized tensor of given type.
- */
-template <typename T>
-inline T create_multi_image(const TensorShape &shape, Format format)
-{
-    T multi_image;
-    multi_image.init(shape.x(), shape.y(), format);
-
-    return multi_image;
-}
-
-/** Create and initialize a HOG (Histogram of Oriented Gradients) of the given type.
- *
- * @param[in] hog_info HOGInfo object
- *
- * @return Initialized HOG of given type.
- */
-template <typename T>
-inline T create_HOG(const HOGInfo &hog_info)
-{
-    T hog;
-    hog.init(hog_info);
-
-    return hog;
-}
-
-/** Create and initialize a Pyramid of the given type.
- *
- * @param[in] pyramid_info The PyramidInfo object.
- *
- * @return Initialized Pyramid of given type.
- */
-template <typename T>
-inline T create_pyramid(const PyramidInfo &pyramid_info)
-{
-    T pyramid;
-    pyramid.init_auto_padding(pyramid_info);
-
-    return pyramid;
-}
-
-/** Initialize a convolution matrix.
- *
- * @param[in, out] conv   The input convolution matrix.
- * @param[in]      width  The width of the convolution matrix.
- * @param[in]      height The height of the convolution matrix.
- * @param[in]      seed   The random seed to be used.
- */
-inline void init_conv(int16_t *conv, unsigned int width, unsigned int height, std::random_device::result_type seed)
-{
-    std::mt19937                           gen(seed);
-    std::uniform_int_distribution<int16_t> distribution_int16(-32768, 32767);
-
-    for(unsigned int i = 0; i < width * height; ++i)
-    {
-        conv[i] = distribution_int16(gen);
-    }
-}
-
-/** Initialize a separable convolution matrix.
- *
- * @param[in, out] conv   The input convolution matrix.
- * @param[in]      width  The width of the convolution matrix.
- * @param[in]      height The height of the convolution matrix.
- * @param[in]      seed   The random seed to be used.
- */
-inline void init_separable_conv(int16_t *conv, unsigned int width, unsigned int height, std::random_device::result_type seed)
-{
-    std::mt19937 gen(seed);
-    // Set it between -128 and 127 to ensure the matrix does not overflow
-    std::uniform_int_distribution<int16_t> distribution_int16(-128, 127);
-
-    int16_t *conv_row = new int16_t[width];
-    int16_t *conv_col = new int16_t[height];
-
-    conv_row[0] = conv_col[0] = 1;
-    for(unsigned int i = 1; i < width; ++i)
-    {
-        conv_row[i] = distribution_int16(gen);
-    }
-
-    for(unsigned int i = 1; i < height; ++i)
-    {
-        conv_col[i] = distribution_int16(gen);
-    }
-
-    // Multiply two matrices
-    for(unsigned int i = 0; i < width; ++i)
-    {
-        for(unsigned int j = 0; j < height; ++j)
-        {
-            conv[i * width + j] = conv_col[i] * conv_row[j];
-        }
-    }
-
-    delete[] conv_row;
-    delete[] conv_col;
-}
-
 /** Create a vector with a uniform distribution of floating point values across the specified range.
  *
  * @param[in] num_values The number of values to be created.
@@ -692,44 +491,6 @@ inline std::vector<T> generate_random_real(unsigned int num_values, T min, T max
     }
 
     return v;
-}
-
-/** Create a vector of random keypoints for pyramid representation.
- *
- * @param[in] shape         The shape of the input tensor.
- * @param[in] num_keypoints The number of keypoints to be created.
- * @param[in] seed          The random seed to be used.
- * @param[in] num_levels    The number of pyramid levels.
- *
- * @return A vector that contains the requested number of random keypoints
- */
-inline std::vector<KeyPoint> generate_random_keypoints(const TensorShape &shape, size_t num_keypoints, std::random_device::result_type seed, size_t num_levels = 1)
-{
-    std::vector<KeyPoint> keypoints;
-    std::mt19937          gen(seed);
-
-    // Calculate distribution bounds
-    const auto min        = static_cast<int>(std::pow(2, num_levels));
-    const auto max_width  = static_cast<int>(shape.x());
-    const auto max_height = static_cast<int>(shape.y());
-
-    ARM_COMPUTE_ERROR_ON(min > max_width || min > max_height);
-
-    // Create distributions
-    std::uniform_int_distribution<> dist_w(min, max_width);
-    std::uniform_int_distribution<> dist_h(min, max_height);
-
-    for(unsigned int i = 0; i < num_keypoints; i++)
-    {
-        KeyPoint keypoint;
-        keypoint.x               = dist_w(gen);
-        keypoint.y               = dist_h(gen);
-        keypoint.tracking_status = 1;
-
-        keypoints.push_back(keypoint);
-    }
-
-    return keypoints;
 }
 
 template <typename T, typename ArrayAccessor_T>

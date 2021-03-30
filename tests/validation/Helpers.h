@@ -111,15 +111,6 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
     return bounds;
 }
 
-/** Fill mask with the corresponding given pattern.
- *
- * @param[in,out] mask    Mask to be filled according to pattern
- * @param[in]     cols    Columns (width) of mask
- * @param[in]     rows    Rows (height) of mask
- * @param[in]     pattern Pattern to fill the mask according to
- */
-void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPattern pattern);
-
 /** Calculate output tensor shape give a vector of input tensor to concatenate
  *
  * @param[in] input_shapes Shapes of the tensors to concatenate across depth.
@@ -136,46 +127,6 @@ TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &in
  * @return The shape of output concatenated tensor.
  */
 TensorShape calculate_concatenate_shape(const std::vector<TensorShape> &input_shapes, size_t axis);
-
-/** Parameters of Harris Corners algorithm. */
-struct HarrisCornersParameters
-{
-    float   threshold{ 0.f };           /**< Threshold */
-    float   sensitivity{ 0.f };         /**< Sensitivity */
-    float   min_dist{ 0.f };            /**< Minimum distance */
-    uint8_t constant_border_value{ 0 }; /**< Border value */
-};
-
-/** Generate parameters for Harris Corners algorithm. */
-HarrisCornersParameters harris_corners_parameters();
-
-/** Parameters of Canny edge algorithm. */
-struct CannyEdgeParameters
-{
-    int32_t upper_thresh{ 255 };
-    int32_t lower_thresh{ 0 };
-    uint8_t constant_border_value{ 0 };
-};
-
-/** Generate parameters for Canny edge algorithm. */
-CannyEdgeParameters canny_edge_parameters();
-
-/** Helper function to fill the Lut random by a ILutAccessor.
- *
- * @param[in,out] table Accessor at the Lut.
- *
- */
-template <typename T>
-void fill_lookuptable(T &&table)
-{
-    std::mt19937                                          generator(library->seed());
-    std::uniform_int_distribution<typename T::value_type> distribution(std::numeric_limits<typename T::value_type>::min(), std::numeric_limits<typename T::value_type>::max());
-
-    for(int i = std::numeric_limits<typename T::value_type>::min(); i <= std::numeric_limits<typename T::value_type>::max(); i++)
-    {
-        table[i] = distribution(generator);
-    }
-}
 
 /** Convert an asymmetric quantized simple tensor into float using tensor quantization information.
  *

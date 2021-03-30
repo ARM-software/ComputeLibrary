@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_LSTMPARAMS_H
 #define ARM_COMPUTE_LSTMPARAMS_H
 
-#include "arm_compute/core/IPyramid.h"
-#include "arm_compute/core/PyramidInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
 

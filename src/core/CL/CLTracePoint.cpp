@@ -23,13 +23,6 @@
  */
 #include "arm_compute/core/TracePoint.h"
 
-#include "arm_compute/core/CL/CLTypes.h"
-#include "arm_compute/core/CL/ICLArray.h"
-#include "arm_compute/core/CL/ICLDistribution1D.h"
-#include "arm_compute/core/CL/ICLHOG.h"
-#include "arm_compute/core/CL/ICLLut.h"
-#include "arm_compute/core/CL/ICLMultiHOG.h"
-#include "arm_compute/core/CL/ICLMultiImage.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "utils/TypePrinter.h"
 
@@ -52,34 +45,16 @@ TracePoint::Args &&operator<<(TracePoint::Args &&tp, const ICLTensor *arg)
 }
 
 ARM_COMPUTE_TRACE_TO_STRING(std::vector<ICLTensor *>)
-ARM_COMPUTE_TRACE_TO_STRING(ICLMultiImage)
-ARM_COMPUTE_TRACE_TO_STRING(ICLDetectionWindowArray)
-ARM_COMPUTE_TRACE_TO_STRING(ICLKeyPointArray)
 ARM_COMPUTE_TRACE_TO_STRING(ICLLKInternalKeypointArray)
 ARM_COMPUTE_TRACE_TO_STRING(ICLCoefficientTableArray)
-ARM_COMPUTE_TRACE_TO_STRING(ICLCoordinates2DArray)
 ARM_COMPUTE_TRACE_TO_STRING(ICLOldValArray)
 ARM_COMPUTE_TRACE_TO_STRING(cl::Buffer)
-ARM_COMPUTE_TRACE_TO_STRING(ICLDistribution1D)
-ARM_COMPUTE_TRACE_TO_STRING(ICLMultiHOG)
-ARM_COMPUTE_TRACE_TO_STRING(ICLHOG)
-ARM_COMPUTE_TRACE_TO_STRING(ICLLut)
-ARM_COMPUTE_TRACE_TO_STRING(ICLSize2DArray)
 ARM_COMPUTE_TRACE_TO_STRING(std::vector<const ICLTensor *>)
 
 ARM_COMPUTE_CONST_PTR_CLASS(std::vector<ICLTensor *>)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLMultiImage)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLDetectionWindowArray)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLKeyPointArray)
 ARM_COMPUTE_CONST_PTR_CLASS(ICLLKInternalKeypointArray)
 ARM_COMPUTE_CONST_PTR_CLASS(ICLCoefficientTableArray)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLCoordinates2DArray)
 ARM_COMPUTE_CONST_PTR_CLASS(ICLOldValArray)
 ARM_COMPUTE_CONST_PTR_CLASS(cl::Buffer)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLDistribution1D)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLMultiHOG)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLHOG)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLLut)
-ARM_COMPUTE_CONST_PTR_CLASS(ICLSize2DArray)
 ARM_COMPUTE_CONST_PTR_CLASS(std::vector<const ICLTensor *>)
 } // namespace arm_compute

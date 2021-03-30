@@ -39,8 +39,6 @@
 
 namespace arm_compute
 {
-class HOGInfo;
-
 /** Store the tensor's metadata */
 class TensorInfo final : public ITensorInfo
 {
@@ -117,14 +115,6 @@ public:
      */
     TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, QuantizationInfo quantization_info);
 
-    /** Constructor
-     *
-     * @param[in] hog_info HOG's metadata used to allocate normalized HOG space
-     * @param[in] width    Width of the 2D tensor where the HOG descriptor will be computed on
-     * @param[in] height   Height of the 2D tensor where the HOG descriptor will be computed on
-     */
-    TensorInfo(const HOGInfo &hog_info, unsigned int width, unsigned int height);
-
     /** Initialize the tensor info with just a format.
      *
      * Can be used for automatic derivation of the shape by the function.
@@ -177,13 +167,6 @@ public:
      */
     void init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, const Strides &strides_in_bytes, size_t offset_first_element_in_bytes,
               size_t total_size_in_bytes);
-    /** Initialize the metadata structure for the given HOG's metadata
-     *
-     * @param[in] hog_info HOG's metadata used to allocate normalized HOG space
-     * @param[in] width    Width of the 2D tensor where the HOG descriptor will be computed on
-     * @param[in] height   Height of the 2D tensor where the HOG descriptor will be computed on
-     */
-    void init(const HOGInfo &hog_info, unsigned int width, unsigned int height);
     /** Initialize the metadata structure for the given tensor shape and single-plane format, (Padding is automatically calculated)
      *
      * @note The padding used by this method is really conservative so that the tensor can be used for most functions.
@@ -206,17 +189,6 @@ public:
      * @return Total allocation size including padding in bytes.
      */
     size_t init_auto_padding(const TensorShape &tensor_shape, size_t num_channels, DataType data_type);
-    /** Initialize the metadata structure for the given HOG's metadata
-     *
-     * @note init_auto_padding will be used for the tensor initialization.
-     *
-     * @param[in] hog_info HOG's metadata used to allocate normalized HOG space
-     * @param[in] width    Width of the 2D tensor where the HOG descriptor will be computed on
-     * @param[in] height   Height of the 2D tensor where the HOG descriptor will be computed on
-     *
-     * @return Total allocation size including padding in bytes.
-     */
-    size_t init_auto_padding(const HOGInfo &hog_info, unsigned int width, unsigned int height);
 
     // Inherited methods overridden:
     std::unique_ptr<ITensorInfo> clone() const override;

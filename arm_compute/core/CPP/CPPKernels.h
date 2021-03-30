@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,8 @@
 
 /* Header regrouping all the CPP kernels */
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPNonMaximumSuppressionKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPTopKVKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPUpsampleKernel.h"
 

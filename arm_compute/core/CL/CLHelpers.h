@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/Types.h"
 
 #include <set>
 #include <string>

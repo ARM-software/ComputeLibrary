@@ -23,14 +23,6 @@
  */
 #include "arm_compute/core/TracePoint.h"
 
-#include "arm_compute/core/HOGInfo.h"
-#include "arm_compute/core/IArray.h"
-#include "arm_compute/core/IDistribution1D.h"
-#include "arm_compute/core/IHOG.h"
-#include "arm_compute/core/ILut.h"
-#include "arm_compute/core/IMultiHOG.h"
-#include "arm_compute/core/IMultiImage.h"
-#include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/PixelValue.h"
@@ -124,18 +116,8 @@ std::string to_ptr_string(const void *arg)
 }
 
 ARM_COMPUTE_TRACE_TO_STRING(ThresholdType)
-ARM_COMPUTE_TRACE_TO_STRING(IDetectionWindowArray)
-ARM_COMPUTE_TRACE_TO_STRING(ICoordinates2DArray)
-ARM_COMPUTE_TRACE_TO_STRING(IMultiImage)
 using pair_uint = std::pair<unsigned int, unsigned int>;
 ARM_COMPUTE_TRACE_TO_STRING(pair_uint)
-ARM_COMPUTE_TRACE_TO_STRING(IKeyPointArray)
-ARM_COMPUTE_TRACE_TO_STRING(IDistribution1D)
-ARM_COMPUTE_TRACE_TO_STRING(IHOG)
-ARM_COMPUTE_TRACE_TO_STRING(ILut)
-ARM_COMPUTE_TRACE_TO_STRING(IPyramid)
-ARM_COMPUTE_TRACE_TO_STRING(IMultiHOG)
-ARM_COMPUTE_TRACE_TO_STRING(ISize2DArray)
 ARM_COMPUTE_TRACE_TO_STRING(MemoryGroup)
 ARM_COMPUTE_TRACE_TO_STRING(BoxNMSLimitInfo)
 ARM_COMPUTE_TRACE_TO_STRING(DepthwiseConvolutionReshapeInfo)
@@ -236,18 +218,8 @@ ARM_COMPUTE_CONST_PTR_CLASS(ITensor)
 ARM_COMPUTE_CONST_PTR_CLASS(ITensorInfo)
 ARM_COMPUTE_CONST_PTR_CLASS(IWeightsManager)
 ARM_COMPUTE_CONST_PTR_CLASS(InternalKeypoint)
-ARM_COMPUTE_CONST_PTR_CLASS(IDetectionWindowArray)
-ARM_COMPUTE_CONST_PTR_CLASS(ICoordinates2DArray)
-ARM_COMPUTE_CONST_PTR_CLASS(IMultiImage)
 ARM_COMPUTE_CONST_PTR_CLASS(Window)
-ARM_COMPUTE_CONST_PTR_CLASS(IKeyPointArray)
 ARM_COMPUTE_CONST_PTR_CLASS(HOGInfo)
-ARM_COMPUTE_CONST_PTR_CLASS(IDistribution1D)
-ARM_COMPUTE_CONST_PTR_CLASS(IHOG)
-ARM_COMPUTE_CONST_PTR_CLASS(ILut)
-ARM_COMPUTE_CONST_PTR_CLASS(IPyramid)
-ARM_COMPUTE_CONST_PTR_CLASS(IMultiHOG)
-ARM_COMPUTE_CONST_PTR_CLASS(ISize2DArray)
 ARM_COMPUTE_CONST_PTR_CLASS(std::allocator<ITensor const *>)
 ARM_COMPUTE_CONST_PTR_CLASS(std::vector<unsigned int>)
 

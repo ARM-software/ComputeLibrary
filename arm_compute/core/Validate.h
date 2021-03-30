@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,12 +25,8 @@
 #define ARM_COMPUTE_VALIDATE_H
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/IKernel.h"
-#include "arm_compute/core/IMultiHOG.h"
-#include "arm_compute/core/IMultiImage.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/MultiImageInfo.h"
 #include "arm_compute/core/Window.h"
 
 #include <algorithm>
@@ -904,28 +900,6 @@ arm_compute::Status error_on_channel_not_in_known_format(const char *function, c
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_channel_not_in_known_format(__func__, __FILE__, __LINE__, f, c))
 #define ARM_COMPUTE_RETURN_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(f, c) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_channel_not_in_known_format(__func__, __FILE__, __LINE__, f, c))
-
-/** Return an error if the @ref IMultiHOG container is invalid
- *
- * An @ref IMultiHOG container is invalid if:
- *
- * -# it is a nullptr
- * -# it doesn't contain models
- * -# it doesn't have the HOG data objects with the same phase_type, normalization_type and l2_hyst_threshold (if normalization_type == L2HYS_NORM)
- *
- * @param[in] function  Function in which the error occurred.
- * @param[in] file      Name of the file where the error occurred.
- * @param[in] line      Line on which the error occurred.
- * @param[in] multi_hog IMultiHOG container to validate
- *
- * @return Status
- */
-arm_compute::Status error_on_invalid_multi_hog(const char *function, const char *file, const int line,
-                                               const IMultiHOG *multi_hog);
-#define ARM_COMPUTE_ERROR_ON_INVALID_MULTI_HOG(m) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_multi_hog(__func__, __FILE__, __LINE__, m))
-#define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_MULTI_HOG(m) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_invalid_multi_hog(__func__, __FILE__, __LINE__, m))
 
 /** Return an error if the kernel is not configured.
  *

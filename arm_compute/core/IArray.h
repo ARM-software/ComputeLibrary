@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,11 +30,6 @@
 
 namespace arm_compute
 {
-struct KeyPoint;
-struct Coordinates2D;
-struct DetectionWindow;
-class Size2D;
-
 /** Array of type T */
 template <class T>
 class IArray
@@ -135,14 +130,6 @@ private:
     size_t _num_values;
     size_t _max_size;
 };
-/** Interface for Array of Key Points. */
-using IKeyPointArray = IArray<KeyPoint>;
-/** Interface for Array of 2D Coordinates. */
-using ICoordinates2DArray = IArray<Coordinates2D>;
-/** Interface for Array of Detection Windows. */
-using IDetectionWindowArray = IArray<DetectionWindow>;
-/** Interface for Array of 2D Sizes. */
-using ISize2DArray = IArray<Size2D>;
 /** Interface for Array of uint8s. */
 using IUInt8Array = IArray<uint8_t>;
 /** Interface for Array of uint16s. */

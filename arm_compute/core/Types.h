@@ -108,12 +108,6 @@ enum class SamplingPolicy
 /** Constant value of the border pixels when using BorderMode::CONSTANT */
 constexpr uint8_t CONSTANT_BORDER_VALUE = 199;
 
-/** Constant value used to indicate a half-scale pyramid */
-constexpr float SCALE_PYRAMID_HALF = 0.5f;
-
-/** Constant value used to indicate a ORB scaled pyramid */
-constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
-
 /** [DataLayout enum definition] **/
 
 /** Supported tensor data layouts */
@@ -409,53 +403,6 @@ enum class BilinearInterpolation
     BILINEAR_SCHARR   /**< Scharr method */
 };
 
-/** Threshold mode */
-enum class ThresholdType
-{
-    BINARY, /**< Threshold with one value */
-    RANGE   /**< Threshold with two values*/
-};
-
-/** Termination criteria */
-enum class Termination
-{
-    TERM_CRITERIA_EPSILON,    /**< Terminate when within epsilon of a threshold */
-    TERM_CRITERIA_ITERATIONS, /**< Terminate after a maximum number of iterations */
-    TERM_CRITERIA_BOTH        /**< Terminate on whichever of the other conditions occurs first */
-};
-
-/** Magnitude calculation type. */
-enum class MagnitudeType
-{
-    L1NORM, /**< L1 normalization type */
-    L2NORM  /**< L2 normalization type */
-};
-
-/** Phase calculation type.
- *
- * @note When PhaseType == SIGNED, each angle is mapped to the range 0 to 255 inclusive otherwise angles between 0 and 180
- */
-enum class PhaseType
-{
-    SIGNED,  /**< Angle range: [0, 360] */
-    UNSIGNED /**< Angle range: [0, 180] */
-};
-
-/** Keypoint type */
-struct KeyPoint
-{
-    int32_t x{ 0 };               /**< X coordinates */
-    int32_t y{ 0 };               /**< Y coordinates */
-    float   strength{ 0.f };      /**< Strength of the point */
-    float   scale{ 0.f };         /**< Scale initialized to 0 by the corner detector */
-    float   orientation{ 0.f };   /**< Orientation initialized to 0 by the corner detector */
-    int32_t tracking_status{ 0 }; /**< Status initialized to 1 by the corner detector, set to 0 when the point is lost */
-    float   error{ 0.f };         /**< Tracking error initialized to 0 by the corner detector */
-};
-
-/** Internal key point */
-using InternalKeypoint = std::tuple<float, float, float>; /* x,y,strength */
-
 /** Rectangle type */
 struct Rectangle
 {
@@ -504,23 +451,6 @@ enum class Channel
     Y,       /**< Luma channel. */
     U,       /**< Cb/U channel. */
     V        /**< Cr/V/Value channel. */
-};
-
-/** Available matrix patterns */
-enum class MatrixPattern
-{
-    BOX,   /**< Box pattern matrix. */
-    CROSS, /**< Cross pattern matrix. */
-    DISK,  /**< Disk pattern matrix. */
-    OTHER  /**< Any other matrix pattern. */
-};
-
-/** Available non linear functions. */
-enum class NonLinearFilterFunction : unsigned
-{
-    MEDIAN = 0, /**< Non linear median filter. */
-    MIN    = 1, /**< Non linear erode. */
-    MAX    = 2, /**< Non linear dilate. */
 };
 
 /** Available reduction operations */
@@ -577,14 +507,6 @@ enum class NormType
     IN_MAP_1D, /**< Normalization applied within the same map in 1D region */
     IN_MAP_2D, /**< Normalization applied within the same map in 2D region */
     CROSS_MAP  /**< Normalization applied cross maps */
-};
-
-/** Normalization type for Histogram of Oriented Gradients (HOG) */
-enum class HOGNormType
-{
-    L2_NORM    = 1, /**< L2-norm */
-    L2HYS_NORM = 2, /**< L2-norm followed by clipping */
-    L1_NORM    = 3  /**< L1 norm */
 };
 
 /** Detection window used for the object detection. The detection window keeps the following information:
@@ -2263,14 +2185,5 @@ struct IOFormatInfo
     /** Align columns */
     bool align_columns;
 };
-
-/** Internal keypoint class for Lucas-Kanade Optical Flow */
-struct NELKInternalKeypoint
-{
-    float x{ 0.f };                 /**< x coordinate of the keypoint */
-    float y{ 0.f };                 /**< y coordinate of the keypoint */
-    bool  tracking_status{ false }; /**< the tracking status of the keypoint */
-};
-
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TYPES_H */

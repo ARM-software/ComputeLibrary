@@ -25,9 +25,6 @@
 #define ARM_COMPUTE_NEROIPOOLINGLAYERKERNEL_H
 
 #include "src/core/NEON/INEKernel.h"
-
-#include "arm_compute/core/IArray.h"
-
 namespace arm_compute
 {
 class ITensor;
@@ -90,7 +87,7 @@ public:
 private:
     const ITensor      *_input;
     const ITensor      *_rois;
-    const ITensor            *_output;
+    const ITensor      *_output;
     ROIPoolingLayerInfo _pool_info;
 };
 } // namespace arm_compute

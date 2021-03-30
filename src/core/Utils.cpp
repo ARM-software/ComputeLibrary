@@ -184,31 +184,6 @@ const std::string &string_from_activation_func(ActivationLayerInfo::ActivationFu
     return act_map[act];
 }
 
-const std::string &string_from_matrix_pattern(MatrixPattern pattern)
-{
-    static std::map<MatrixPattern, const std::string> pattern_map =
-    {
-        { MatrixPattern::BOX, "BOX" },
-        { MatrixPattern::CROSS, "CROSS" },
-        { MatrixPattern::DISK, "DISK" },
-        { MatrixPattern::OTHER, "OTHER" },
-    };
-
-    return pattern_map[pattern];
-}
-
-const std::string &string_from_non_linear_filter_function(NonLinearFilterFunction function)
-{
-    static std::map<NonLinearFilterFunction, const std::string> func_map =
-    {
-        { NonLinearFilterFunction::MAX, "MAX" },
-        { NonLinearFilterFunction::MEDIAN, "MEDIAN" },
-        { NonLinearFilterFunction::MIN, "MIN" },
-    };
-
-    return func_map[function];
-}
-
 const std::string &string_from_interpolation_policy(InterpolationPolicy policy)
 {
     static std::map<InterpolationPolicy, const std::string> interpolation_policy_map =

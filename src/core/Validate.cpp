@@ -141,28 +141,6 @@ arm_compute::Status arm_compute::error_on_channel_not_in_known_format(const char
     return arm_compute::Status{};
 }
 
-arm_compute::Status arm_compute::error_on_invalid_multi_hog(const char *function, const char *file, const int line,
-                                                            const arm_compute::IMultiHOG *multi_hog)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC(nullptr == multi_hog, function, file, line);
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC(0 == multi_hog->num_models(), function, file, line);
-
-    for(size_t i = 1; i < multi_hog->num_models(); ++i)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(multi_hog->model(0)->info()->phase_type() != multi_hog->model(i)->info()->phase_type(),
-                                            function, file, line,
-                                            "All HOG parameters must have the same phase type");
-        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(multi_hog->model(0)->info()->normalization_type() != multi_hog->model(i)->info()->normalization_type(),
-                                            function, file, line,
-                                            "All HOG parameters must have the same normalization type");
-        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((multi_hog->model(0)->info()->l2_hyst_threshold() != multi_hog->model(i)->info()->l2_hyst_threshold())
-                                            && (multi_hog->model(0)->info()->normalization_type() == arm_compute::HOGNormType::L2HYS_NORM),
-                                            function, file, line,
-                                            "All HOG parameters must have the same l2 hysteresis threshold if you use L2 hysteresis normalization type");
-    }
-    return arm_compute::Status{};
-}
-
 arm_compute::Status arm_compute::error_on_unconfigured_kernel(const char *function, const char *file, const int line,
                                                               const arm_compute::IKernel *kernel)
 {

@@ -567,7 +567,7 @@ v20.08 Public major release
    - NEDepthConcatenateLayerKernel
    - @ref NENormalizationLayerKernel
    - @ref NEL2NormalizeLayerKernel
-   - @ref NEFillArrayKernel
+   - NEFillArrayKernel
    - @ref NEDepthConvertLayerKernel
    - @ref NERangeKernel
    - @ref NEPriorBoxLayer
@@ -1334,7 +1334,7 @@ v17.06 Public major release
     - CLLocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedLayer
     - @ref CLWeightsReshapeKernel / @ref CLConvolutionLayerReshapeWeights
  - New C++ kernels:
-    - @ref CPPDetectionWindowNonMaximaSuppressionKernel
+    - CPPDetectionWindowNonMaximaSuppressionKernel
  - New Neon kernels / functions:
     - @ref NEBatchNormalizationLayerKernel / @ref NEBatchNormalizationLayer
     - NEDepthConcatenateLayerKernel / NEDepthConcatenateLayer
@@ -1359,7 +1359,7 @@ v17.04 Public bug fixes release
  -  CLGaussianPyramidVertKernel
  -  CLGradientKernel
  -  NEChannelCombineKernel
- -  @ref NEFillArrayKernel
+ -  NEFillArrayKernel
  -  NEGaussianPyramidHorKernel
  -  NEGaussianPyramidVertKernel
  -  NEHarrisScoreFP16Kernel
@@ -1391,7 +1391,7 @@ v17.03 Sources preview
    - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, CLGEMMMatrixAdditionKernel / @ref CLGEMM
    - CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
    - CLTransposeKernel / @ref CLTranspose
-   - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / CLOpticalFlow
+   - CLLKTrackerInitKernel, CLLKTrackerStage0Kernel, CLLKTrackerStage1Kernel, CLLKTrackerFinalizeKernel / CLOpticalFlow
    - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
    - CLLaplacianPyramid, CLLaplacianReconstruct
  - New Neon kernels / functions:
