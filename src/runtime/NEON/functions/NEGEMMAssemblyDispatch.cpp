@@ -182,7 +182,7 @@ public:
 
     void configure(size_t B_pretranspose_size, unsigned int alignment)
     {
-        _output.allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
+        _output.allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment) }, 1, DataType::S8), alignment);
         _B_pretranspose_size = B_pretranspose_size;
     }
 
@@ -525,7 +525,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensor *a, c
         else
         {
             _pretranspose = new Tensor();
-            static_cast<Tensor *>(_pretranspose)->allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
+            static_cast<Tensor *>(_pretranspose)->allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment) }, 1, DataType::S8), alignment);
         }
     }
 
@@ -587,7 +587,7 @@ template <typename TypeInput, typename TypeOutput, class OutputStage>
 void Fallback<TypeInput, TypeOutput, OutputStage>::allocate_workspace(size_t workspace_size, MemoryGroup &memory_group, size_t alignment)
 {
     ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "size cannot be 0");
-    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
+    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment) }, 1, DataType::S8), alignment);
     memory_group.manage(&_workspace);
     _workspace.allocator()->allocate();
 }
