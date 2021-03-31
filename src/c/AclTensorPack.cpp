@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/AclEntrypoints.h"
-#include "src/common/ITensor.h"
+#include "src/common/ITensorV2.h"
 #include "src/common/TensorPack.h"
 #include "src/common/utils/Macros.h"
 

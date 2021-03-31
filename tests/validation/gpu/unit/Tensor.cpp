@@ -33,27 +33,24 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(Tensor)
 
-FIXTURE_TEST_CASE(CreateTensorWithInvalidContext, CreateTensorWithInvalidContextFixture, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(CreateTensorWithInvalidDescriptor, CreateTensorWithInvalidDescriptorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(DestroyInvalidTensor, DestroyInvalidTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(SimpleTensor, SimpleTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(TensorStress, TensorStressFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(MapInvalidTensor, MapInvalidTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(MapAllocatedTensor, MapAllocatedTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-{
-}
+#define TENSOR_TESE_CASE(name, fixture)                           \
+    FIXTURE_TEST_CASE(name, fixture, framework::DatasetMode::ALL) \
+    {                                                             \
+    }
+
+TENSOR_TESE_CASE(CreateTensorWithInvalidContext, CreateTensorWithInvalidContextFixture)
+TENSOR_TESE_CASE(CreateTensorWithInvalidDescriptor, CreateTensorWithInvalidDescriptorFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(DestroyInvalidTensor, DestroyInvalidTensorFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(SimpleTensor, SimpleTensorFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(TensorStress, TensorStressFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(MapInvalidTensor, MapInvalidTensorFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(MapAllocatedTensor, MapAllocatedTensorFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(GetSize, TensorSizeFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(GetInvalidSize, InvalidTensorSizeFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(GetDescriptor, DescriptorConversionFixture<acl::Target::GpuOcl>)
+TENSOR_TESE_CASE(GetInvalidDescriptor, InvalidDescriptorConversionFixture<acl::Target::GpuOcl>)
+
+#undef TENSOR_TEST_CASE
 
 TEST_SUITE_END() // Tensor
 TEST_SUITE_END() // UNIT

@@ -23,7 +23,7 @@
  */
 #include "arm_compute/AclOpenClExt.h"
 
-#include "src/common/ITensor.h"
+#include "src/common/ITensorV2.h"
 #include "src/common/Types.h"
 #include "src/gpu/cl/ClContext.h"
 

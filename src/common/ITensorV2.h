@@ -92,7 +92,19 @@ public:
      *
      * @return The legacy underlying tensor object
      */
-    virtual arm_compute::ITensor *tensor() = 0;
+    virtual arm_compute::ITensor *tensor() const = 0;
+    /** Get the size of the tensor in byte
+     *
+     * @note The size isn't based on allocated memory, but based on information in its descriptor (dimensions, data type, etc.).
+     *
+     * @return The size of the tensor in byte
+     */
+    size_t get_size() const;
+    /** Get the descriptor of this tensor
+     *
+     * @return The descriptor describing the characteristics of this tensor
+     */
+    AclTensorDescriptor get_descriptor() const;
 };
 
 /** Extract internal representation of a Tensor

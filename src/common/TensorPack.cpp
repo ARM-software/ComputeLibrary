@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "src/common/TensorPack.h"
-#include "src/common/ITensor.h"
+#include "src/common/ITensorV2.h"
 #include "src/common/utils/Validate.h"
 
 namespace arm_compute

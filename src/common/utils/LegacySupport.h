@@ -38,6 +38,13 @@ namespace detail
  * @return Legacy tensor meta-data
  */
 TensorInfo convert_to_legacy_tensor_info(const AclTensorDescriptor &desc);
+/** Convert a legacy tensor meta-data to a descriptor
+ *
+ * @param[in] info Legacy tensor meta-data
+ *
+ * @return A converted descriptor
+ */
+AclTensorDescriptor convert_to_descriptor(const TensorInfo &info);
 } // namespace detail
 } // namespace arm_compute
 

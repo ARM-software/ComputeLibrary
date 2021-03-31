@@ -40,7 +40,7 @@ namespace utils
  * @return A corresponding plain old C enumeration
  */
 template <typename E, typename SE>
-constexpr E as_cenum(SE v) noexcept
+constexpr E as_cenum(const SE v) noexcept
 {
     return static_cast<E>(static_cast<std::underlying_type_t<SE>>(v));
 }
@@ -55,7 +55,7 @@ constexpr E as_cenum(SE v) noexcept
  * @return A corresponding strongly typed enumeration
  */
 template <typename SE, typename E>
-constexpr SE as_enum(E val) noexcept
+constexpr SE as_enum(const E val) noexcept
 {
     return static_cast<SE>(val);
 }

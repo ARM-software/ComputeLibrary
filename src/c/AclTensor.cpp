@@ -22,11 +22,13 @@
  * SOFTWARE.
  */
 #include "arm_compute/AclEntrypoints.h"
-#include "src/common/ITensor.h"
+#include "arm_compute/AclUtils.h"
+#include "src/common/ITensorV2.h"
 #include "src/common/utils/Macros.h"
 
 namespace
 {
+using namespace arm_compute;
 /**< Maximum allowed dimensions by Compute Library */
 constexpr int32_t max_allowed_dims = 6;
 
@@ -54,6 +56,12 @@ bool is_desc_valid(const AclTensorDescriptor &desc)
         return false;
     }
     return true;
+}
+
+StatusCode convert_and_validate_tensor(AclTensor tensor, ITensorV2 **internal_tensor)
+{
+    *internal_tensor = get_internal(tensor);
+    return detail::validate_internal_tensor(*internal_tensor);
 }
 } // namespace
 
@@ -145,4 +153,38 @@ extern "C" AclStatus AclDestroyTensor(AclTensor external_tensor)
     delete tensor;
 
     return AclSuccess;
+}
+
+extern "C" AclStatus AclGetTensorSize(AclTensor tensor, uint64_t *size)
+{
+    using namespace arm_compute;
+
+    if(size == nullptr)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    ITensorV2 *internal_tensor{ nullptr };
+    auto       status = convert_and_validate_tensor(tensor, &internal_tensor);
+    ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
+
+    *size = internal_tensor->get_size();
+    return utils::as_cenum<AclStatus>(status);
+}
+
+extern "C" AclStatus AclGetTensorDescriptor(AclTensor tensor, AclTensorDescriptor *desc)
+{
+    using namespace arm_compute;
+
+    if(desc == nullptr)
+    {
+        return AclStatus::AclInvalidArgument;
+    }
+
+    ITensorV2 *internal_tensor{ nullptr };
+    const auto status = convert_and_validate_tensor(tensor, &internal_tensor);
+    ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
+
+    *desc = internal_tensor->get_descriptor();
+    return utils::as_cenum<AclStatus>(status);
 }

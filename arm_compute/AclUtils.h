@@ -21,20 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_H_
-#define ARM_COMPUTE_ACL_H_
+#ifndef ARM_COMPUTE_ACLUTILS_H_
+#define ARM_COMPUTE_ACLUTILS_H_
+
+#include "arm_compute/AclTypes.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif /** __cplusplus */
 
-/* Core headers */
-#include "arm_compute/AclEntrypoints.h"
-#include "arm_compute/AclTypes.h"
-#include "arm_compute/AclUtils.h"
-#include "arm_compute/AclVersion.h"
+/** Get the size of the existing tensor in byte
+ *
+ * @note The size isn't based on allocated memory, but based on information in its descriptor (dimensions, data type, etc.).
+ *
+ * @param[in]  tensor A tensor in interest
+ * @param[out] size   The size of the tensor
+ *
+ * @return Status code
+ *
+ *  - @ref AclSuccess if function was completed successfully
+ *  - @ref AclInvalidArgument if a given argument is invalid
+ */
+AclStatus AclGetTensorSize(AclTensor tensor, uint64_t *size);
+
+/** Get the descriptor of this tensor
+ *
+ * @param[in]  tensor A tensor in interest
+ * @param[out] desc   The descriptor of the tensor
+ *
+ * @return Status code
+ *
+ *  - @ref AclSuccess if function was completed successfully
+ *  - @ref AclInvalidArgument if a given argument is invalid
+ */
+AclStatus AclGetTensorDescriptor(AclTensor tensor, AclTensorDescriptor *desc);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACL_H_ */
+
+#endif /* ARM_COMPUTE_ACLUTILS_H_ */

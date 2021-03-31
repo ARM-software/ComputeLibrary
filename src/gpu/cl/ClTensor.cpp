@@ -83,7 +83,7 @@ StatusCode ClTensor::import(void *handle, ImportMemoryType type)
     return StatusCode::Success;
 }
 
-arm_compute::ITensor *ClTensor::tensor()
+arm_compute::ITensor *ClTensor::tensor() const
 {
     return _legacy_tensor.get();
 }

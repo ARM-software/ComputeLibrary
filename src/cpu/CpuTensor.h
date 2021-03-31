@@ -24,7 +24,7 @@
 #ifndef SRC_CPU_CPUTENSOR_H
 #define SRC_CPU_CPUTENSOR_H
 
-#include "src/common/ITensor.h"
+#include "src/common/ITensorV2.h"
 
 #include "arm_compute/runtime/Tensor.h"
 
@@ -51,7 +51,7 @@ public:
     // Inherrited functions overriden
     void                 *map() override;
     StatusCode            unmap() override;
-    arm_compute::ITensor *tensor() override;
+    arm_compute::ITensor *tensor() const override;
     StatusCode import(void *handle, ImportMemoryType type) override;
 
 private:

@@ -21,20 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_H_
-#define ARM_COMPUTE_ACL_H_
+#include "src/common/ITensorV2.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "src/common/utils/LegacySupport.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-/* Core headers */
-#include "arm_compute/AclEntrypoints.h"
-#include "arm_compute/AclTypes.h"
-#include "arm_compute/AclUtils.h"
-#include "arm_compute/AclVersion.h"
-
-#ifdef __cplusplus
+namespace arm_compute
+{
+size_t ITensorV2::get_size() const
+{
+    return tensor()->info()->total_size();
 }
-#endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACL_H_ */
+
+AclTensorDescriptor ITensorV2::get_descriptor() const
+{
+    return detail::convert_to_descriptor(*tensor()->info());
+}
+} // namespace arm_compute

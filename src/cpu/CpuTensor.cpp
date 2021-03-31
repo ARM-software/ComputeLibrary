@@ -72,7 +72,7 @@ StatusCode CpuTensor::import(void *handle, ImportMemoryType type)
     return bool(st) ? StatusCode::Success : StatusCode::RuntimeError;
 }
 
-arm_compute::ITensor *CpuTensor::tensor()
+arm_compute::ITensor *CpuTensor::tensor() const
 {
     return _legacy_tensor.get();
 }

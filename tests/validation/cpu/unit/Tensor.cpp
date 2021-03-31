@@ -33,33 +33,26 @@ TEST_SUITE(CPU)
 TEST_SUITE(UNIT)
 TEST_SUITE(Tensor)
 
-FIXTURE_TEST_CASE(CreateTensorWithInvalidContext, CreateTensorWithInvalidContextFixture, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(CreateTensorWithInvalidDescriptor, CreateTensorWithInvalidDescriptorFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(DestroyInvalidTensor, DestroyInvalidTensorFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(SimpleTensor, SimpleTensorFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(TensorStress, TensorStressFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(MapInvalidTensor, MapInvalidTensorFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(MapNotAllocatedTensor, MapNotAllocatedTensorFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(MapAllocatedTensor, MapAllocatedTensorFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
-FIXTURE_TEST_CASE(ImportMemory, ImportMemoryFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-{
-}
+#define TENSOR_TESE_CASE(name, fixture)                           \
+    FIXTURE_TEST_CASE(name, fixture, framework::DatasetMode::ALL) \
+    {                                                             \
+    }
+
+TENSOR_TESE_CASE(CreateTensorWithInvalidContext, CreateTensorWithInvalidContextFixture)
+TENSOR_TESE_CASE(CreateTensorWithInvalidDescriptor, CreateTensorWithInvalidDescriptorFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(DestroyInvalidTensor, DestroyInvalidTensorFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(SimpleTensor, SimpleTensorFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(TensorStress, TensorStressFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(MapInvalidTensor, MapInvalidTensorFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(MapNotAllocatedTensor, MapNotAllocatedTensorFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(MapAllocatedTensor, MapAllocatedTensorFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(ImportMemory, ImportMemoryFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(GetSize, TensorSizeFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(GetInvalidSize, InvalidTensorSizeFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(GetDescriptor, DescriptorConversionFixture<acl::Target::Cpu>)
+TENSOR_TESE_CASE(GetInvalidDescriptor, InvalidDescriptorConversionFixture<acl::Target::Cpu>)
+
+#undef TENSOR_TEST_CASE
 
 TEST_SUITE_END() // Tensor
 TEST_SUITE_END() // UNIT
