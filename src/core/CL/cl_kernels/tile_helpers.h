@@ -205,6 +205,41 @@
         }                                                                                                   \
     })
 
+/** Load a tile from global memory (tensor) when the tensor is stored using a NHWC layout
+ *
+ * @param[in]  DATA_TYPE     Data type
+ * @param[in]  TILE_HEIGHT   Number of elements to load from Y (height) dimension
+ * @param[in]  TILE_WIDTH    Number of elements to load from X (width) dimension
+ * @param[in]  TILE_CHANNELS Number of elements to load from C (channel) dimension
+ * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image). Currently BUFFER only is supported
+ *                           In case of cl_image, only TILE_CHANNELS multiples of 4 are supported (4, 8, 16)
+ * @param[in]  TENSOR        Tensor basename
+ * @param[in]  B             Starting batch index
+ * @param[in]  Y             Starting Y index
+ * @param[in]  X             Starting X index
+ * @param[in]  C             Starting C index
+ * @param[in]  TENSOR_HEIGHT Number of elements to load from Y (height) dimension
+ * @param[in]  TENSOR_WIDTH  Number of elements to load from X (width) dimension
+ * @param[in]  STRIDE_Y      Stride Y (in bytes)
+ * @param[out] dst           Output tile
+ */
+#define T_LOAD_NHWC(DATA_TYPE, TILE_HEIGHT, TILE_WIDTH, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, dst) \
+    ({ \
+        LOOP_UNROLLING(int, _yk, 0, (TILE_HEIGHT), 1) \
+        { \
+            LOOP_UNROLLING(int, _xk, 0, (TILE_WIDTH), 1) \
+            { \
+                int _src_y = (X) + _xk + ((Y) + _yk) * (TENSOR_WIDTH); \
+                _src_y    += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT); \
+                int _src_valid_y = (((X) + _xk) >= 0 && ((X) + _xk) < (int)(TENSOR_WIDTH) && ((Y) + _yk) >= 0 && ((Y) + _yk) < (int)(TENSOR_HEIGHT)); \
+                if(_src_valid_y != 0) \
+                { \
+                    dst[_xk + _yk * (TILE_WIDTH)].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y); \
+                }                                                                                                                                       \
+            }                                                                                                                                               \
+        }                                                                                                                                               \
+    })
+
 /** Store a tile to global memory (tensor) using an indirect Y index tile and conditionally use a different length for the store
  *
  * @note If WIDTH1_CONDITION is true, the store will use the WIDTH1 length for the store
