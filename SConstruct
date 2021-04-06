@@ -43,7 +43,7 @@ vars.AddVariables(
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a",
-                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
+                  allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal")),
@@ -207,7 +207,7 @@ if 'v7a' in env['estate'] and env['estate'] == '64':
 prefix = ""
 if 'v7a' in env['arch']:
     env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
-    if env['os'] == 'android' or env['os'] == 'tizen':
+    if (env['os'] == 'android' or env['os'] == 'tizen') and not 'hf' in env['arch']:
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
     else:
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
