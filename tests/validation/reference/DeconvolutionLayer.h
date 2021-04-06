@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,16 +39,16 @@ namespace reference
  *
  * src              Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
  *                  Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
- * weights          The 4d weights with dimensions [width, height, OFM, IFM]. Data type supported: Same as @p input.
+ * weights          The 4d weights with dimensions [width, height, OFM, IFM]. Data type supported: Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
  * bias             Optional, ignored if NULL. The biases have one dimension.
- *                  Data type supported: Same as @p input, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type
+ *                  Data type supported: Same as @p input, except for input of QASYMM8/QASYMM8_SIGNED types where biases should be of S32 type
  * output_shape     Output tensor shape. The output has the same number of dimensions as the @p input.
  * info             Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
  * a                The number of zeros added to right and top edges of the input.
  *
  */
-template <typename T, typename TB>
-SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
+template <typename T, typename TW, typename TB>
+SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
                                     QuantizationInfo out_qinfo = QuantizationInfo());
 } // namespace reference
 } // namespace validation
