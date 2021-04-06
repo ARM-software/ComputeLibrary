@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CLROIPOOLINGLAYER_H
 #define ARM_COMPUTE_CLROIPOOLINGLAYER_H
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
@@ -31,6 +32,7 @@ namespace arm_compute
 class CLCompileContext;
 class ICLTensor;
 class ROIPoolingLayerInfo;
+class ITensorInfo;
 
 /** Basic function to run @ref CLROIPoolingLayerKernel.
  *
@@ -87,5 +89,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLROIPOOLINGLAYER_H */
