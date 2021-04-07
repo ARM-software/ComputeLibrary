@@ -142,41 +142,6 @@ Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const I
 }
 } // namespace
 
-struct NEFullyConnectedLayerReshapeWeights::Impl
-{
-    const ITensor                                    *src{ nullptr };
-    ITensor                                          *dst{ nullptr };
-    std::unique_ptr<cpu::kernels::CpuTransposeKernel> op{ nullptr };
-};
-
-NEFullyConnectedLayerReshapeWeights::NEFullyConnectedLayerReshapeWeights()
-    : _impl(std::make_unique<Impl>())
-{
-}
-
-NEFullyConnectedLayerReshapeWeights::~NEFullyConnectedLayerReshapeWeights() = default;
-
-void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITensor *output)
-{
-    _impl->op = std::make_unique<cpu::kernels::CpuTransposeKernel>();
-    _impl->op->configure(input->info(), output->info());
-    _impl->src = input;
-    _impl->dst = output;
-}
-
-Status NEFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return cpu::kernels::CpuTransposeKernel::validate(input, output);
-}
-
-void NEFullyConnectedLayerReshapeWeights::run()
-{
-    ITensorPack pack{};
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-    NEScheduler::get().schedule_op(_impl->op.get(), Window::DimY, _impl->op->window(), pack);
-}
-
 NEFullyConnectedLayer::~NEFullyConnectedLayer() = default;
 
 NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
@@ -392,7 +357,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     if(!weights_reshaped)
     {
         // Validate reshape weights kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayerReshapeWeights::validate(weights, &reshaped_weights));
+        ARM_COMPUTE_RETURN_ON_ERROR(NETranspose::validate(weights, &reshaped_weights));
         weights_to_use = &reshaped_weights;
     }
 

@@ -67,7 +67,6 @@ namespace arm_compute
         - @ref NEDepthConvertLayer
         - @ref NEFlattenLayer
         - @ref NEFloor
-        - @ref NEFullyConnectedLayerReshapeWeights
         - @ref NEGather
         - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
