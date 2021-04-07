@@ -205,7 +205,6 @@ namespace arm_compute
         - @ref CLFillBorder
         - @ref CLFlattenLayer
         - @ref CLFloor
-        - @ref CLFullyConnectedLayerReshapeWeights
         - @ref CLGather
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint

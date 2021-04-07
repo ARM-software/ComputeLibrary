@@ -141,46 +141,6 @@ Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const I
 }
 } // namespace
 
-struct CLFullyConnectedLayerReshapeWeights::Impl
-{
-    const ITensor                                      *src{ nullptr };
-    ITensor                                            *dst{ nullptr };
-    std::unique_ptr<opencl::kernels::ClTransposeKernel> op{ nullptr };
-};
-
-CLFullyConnectedLayerReshapeWeights::CLFullyConnectedLayerReshapeWeights()
-    : _impl(std::make_unique<Impl>())
-{
-}
-
-CLFullyConnectedLayerReshapeWeights::~CLFullyConnectedLayerReshapeWeights() = default;
-
-void CLFullyConnectedLayerReshapeWeights::configure(const ICLTensor *input, ICLTensor *output)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output);
-}
-
-void CLFullyConnectedLayerReshapeWeights::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
-{
-    _impl->src = input;
-    _impl->dst = output;
-    _impl->op  = std::make_unique<opencl::kernels::ClTransposeKernel>();
-    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info());
-}
-
-Status CLFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return opencl::kernels::ClTransposeKernel::validate(input, output);
-}
-
-void CLFullyConnectedLayerReshapeWeights::run()
-{
-    ITensorPack pack{};
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-    CLScheduler::get().enqueue_op(*_impl->op.get(), pack, false);
-}
-
 CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _convert_weights(), _convert_weights_managed(), _reshape_weights_managed_function(), _flatten_layer(), _reshape_weights_function(),
       _mm_gemm(memory_manager, weights_manager), _mm_gemmlowp(memory_manager), _flatten_output(), _converted_weights_output(), _reshape_weights_output(), _are_weights_converted(true),
@@ -404,7 +364,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     if(!weights_reshaped)
     {
         // Validate reshape weights kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayerReshapeWeights::validate(weights, &reshaped_weights));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLTranspose::validate(weights, &reshaped_weights));
         weights_to_use = &reshaped_weights;
     }
 
