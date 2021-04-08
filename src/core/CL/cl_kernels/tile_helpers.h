@@ -165,23 +165,26 @@
 
 /** Load a tile from global memory (tensor)
  *
- * @param[in]  DATA_TYPE   Data type
- * @param[in]  HEIGHT      Number of dst rows
- * @param[in]  WIDTH       Number of dst columns
- * @param[in]  TENSOR_TYPE Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
- *                         In case of cl_image, only WIDTH multiples of 4 are supported (4, 8, 16)
- * @param[in]  TENSOR      Tensor basename
- * @param[in]  X           Starting X position
- * @param[in]  Y           Starting Y position
- * @param[in]  STRIDE_Y    Stride Y (in bytes)
- * @param[out] dst         Output tile
+ * @param[in]  DATA_TYPE     Data type
+ * @param[in]  HEIGHT        Number of dst rows
+ * @param[in]  WIDTH         Number of dst columns
+ * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
+ *                           In case of cl_image, only WIDTH multiples of 4 are supported (4, 8, 16)
+ * @param[in]  TENSOR        Tensor basename
+ * @param[in]  X             Starting X position
+ * @param[in]  Y             Starting Y position
+ * @param[in]  YI_MULTIPLIER Parameter used to multiply the internal row increment (_i).
+ *                           In common cases should be 1 but it becomes useful when we want to load rows which are multiple of STRIDE_Y. (e.g. loading the weights of convolution layer).
+ *                           In this case the address calculation is performed as: (Y + _i * Y_MULTIPLIER) * STRIDE_Y
+ * @param[in]  STRIDE_Y      Stride Y (in bytes) used to load each row.
+ * @param[out] dst           Output tile
  */
-#define T_LOAD(DATA_TYPE, HEIGHT, WIDTH, TENSOR_TYPE, TENSOR, X, Y, STRIDE_Y, dst)              \
+#define T_LOAD(DATA_TYPE, HEIGHT, WIDTH, TENSOR_TYPE, TENSOR, X, Y, YI_MULTIPLIER, STRIDE_Y, dst)                      \
     ({ \
         LOOP_UNROLLING(int, _i, 0, HEIGHT, 1) \
         { \
-            dst[_i].v = V_LOAD(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, ((Y) + _i), STRIDE_Y); \
-        }                                                                                           \
+            dst[_i].v = V_LOAD(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, ((Y) + _i * (int)(YI_MULTIPLIER)), STRIDE_Y); \
+        }                                                                                                                 \
     })
 
 /** Load a tile from global memory (tensor) using an indirect Y index tile
@@ -223,7 +226,7 @@
  * @param[in]  STRIDE_Y      Stride Y (in bytes)
  * @param[out] dst           Output tile
  */
-#define T_LOAD_NHWC(DATA_TYPE, TILE_HEIGHT, TILE_WIDTH, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, dst) \
+#define T_LOAD_NHWC(DATA_TYPE, TILE_HEIGHT, TILE_WIDTH, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, dst)   \
     ({ \
         LOOP_UNROLLING(int, _yk, 0, (TILE_HEIGHT), 1) \
         { \
@@ -235,9 +238,43 @@
                 if(_src_valid_y != 0) \
                 { \
                     dst[_xk + _yk * (TILE_WIDTH)].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y); \
-                }                                                                                                                                       \
-            }                                                                                                                                               \
-        }                                                                                                                                               \
+                }                                                                                                                                     \
+            }                                                                                                                                                 \
+        }                                                                                                                                                 \
+    })
+
+/** Load a tile from global memory (tensor) when the tensor is stored using a NHWC layout using indirect X and Y coordinates
+ *
+ * @param[in]  DATA_TYPE     Data type
+ * @param[in]  TILE_HEIGHT   Number of elements to load from Y (height) dimension
+ * @param[in]  TILE_WIDTH    Number of elements to load from X (width) dimension
+ * @param[in]  TILE_CHANNELS Number of elements to load from C (channel) dimension
+ * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image). Currently BUFFER only is supported
+ *                           In case of cl_image, only TILE_CHANNELS multiples of 4 are supported (4, 8, 16)
+ * @param[in]  TENSOR        Tensor basename
+ * @param[in]  B             Starting batch index
+ * @param[in]  Y             Starting Y index
+ * @param[in]  X             Starting X index
+ * @param[in]  C             Starting C index
+ * @param[in]  TENSOR_HEIGHT Number of elements to load from Y (height) dimension
+ * @param[in]  TENSOR_WIDTH  Number of elements to load from X (width) dimension
+ * @param[in]  STRIDE_Y      Stride Y (in bytes)
+ * @param[out] xi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect X coordinate
+ * @param[out] yi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect Y coordinate
+ * @param[out] dst           Output tile
+ */
+#define T_LOAD_NHWC_INDIRECT(DATA_TYPE, TILE_HEIGHT, TILE_WIDTH, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, xi, yi, dst)  \
+    ({ \
+        LOOP_UNROLLING(int, _i, 0, (TILE_WIDTH * TILE_HEIGHT), 1) \
+        { \
+            int _src_y = (X) + xi[_i].v + ((Y) + yi[_i].v) * (TENSOR_WIDTH); \
+            _src_y    += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT); \
+            int _src_valid_y = (((X) + xi[_i].v) >= 0 && ((X) + xi[_i].v) < (int)(TENSOR_WIDTH) && ((Y) + yi[_i].v) >= 0 && ((Y) + yi[_i].v) < (int)(TENSOR_HEIGHT)); \
+            if(_src_valid_y != 0) \
+            { \
+                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y); \
+            }                                                                                                                                                         \
+        }                                                                                                                                                                 \
     })
 
 /** Store a tile to global memory (tensor) using an indirect Y index tile and conditionally use a different length for the store

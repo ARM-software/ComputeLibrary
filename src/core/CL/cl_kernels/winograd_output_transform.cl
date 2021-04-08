@@ -637,7 +637,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 #if defined(HAS_BIAS)
     TILE(DATA_TYPE, 1, N0, b);
 
-    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 0, b);
+    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
     T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
@@ -718,7 +718,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 #if defined(HAS_BIAS)
     TILE(DATA_TYPE, 1, N0, b);
 
-    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 0, b);
+    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
     T_ADD_BROADCAST_X(DATA_TYPE, 16, N0, out, b, out);
@@ -1070,7 +1070,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 #if defined(HAS_BIAS)
     TILE(DATA_TYPE, 1, N0, b);
 
-    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 0, b);
+    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
     T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
@@ -1162,7 +1162,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 #if defined(HAS_BIAS)
     TILE(DATA_TYPE, 1, N0, b);
 
-    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 0, b);
+    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
     T_ADD_BROADCAST_X(DATA_TYPE, 16, N0, out, b, out);

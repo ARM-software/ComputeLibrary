@@ -33,12 +33,13 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "src/core/AccessWindowStatic.h"
+#include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CL/gemm/CLGEMMHelpers.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
-
 namespace arm_compute
 {
 namespace opencl
@@ -276,7 +277,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
     if(data_layout == DataLayout::NHWC)
     {
         const unsigned int vec_size = std::min(static_cast<unsigned int>(dst->tensor_shape()[0]), 4u);
-        const unsigned int num_rows = dst->tensor_shape()[0] > 16 ? 2u : 1U;
+        unsigned int       num_rows = 1U;
+        if(dst->tensor_shape()[0] > 16)
+        {
+            num_rows = src->data_type() == DataType::F32 ? 2U : 4U;
+        }
 
         // Create window and update padding
         Window win = calculate_max_window(output_shape, Steps(vec_size, num_rows));
@@ -318,6 +323,50 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
         ARM_COMPUTE_ERROR("Not supported");
     }
 }
+
+bool export_to_cl_image_support(ITensorInfo *tensor, GPUTarget gpu_target, DataLayout data_layout)
+{
+    if(tensor->tensor_shape()[0] % 4 || (data_layout != DataLayout::NHWC))
+    {
+        return false;
+    }
+
+    // If not floating point
+    if(!is_data_type_float(tensor->data_type()))
+    {
+        return false;
+    }
+
+    if(gpu_target == GPUTarget::G71 || get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
+    {
+        return false;
+    }
+
+    // Check if the cl_khr_image2d_from_buffer extension is supported on the target platform
+    if(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        return false;
+    }
+
+    // Check cl image pitch alignment
+    if(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0)
+    {
+        return false;
+    }
+
+    const size_t image_w     = tensor->tensor_shape()[0] / 4;
+    const size_t image_h     = tensor->tensor_shape()[1] * tensor->tensor_shape()[2] * tensor->tensor_shape()[3];
+    const size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
+    const size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
+
+    if(image_w > max_image_w || image_h > max_image_h)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 } // namespace
 
 BorderSize ClDirectConvolutionKernel::border_size() const
@@ -365,13 +414,19 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
 
         kernel_name << "direct_convolution_nhwc";
 
-        const unsigned int n0 = win_config.second.x().step();
-        const unsigned int m0 = win_config.second.y().step();
+        const unsigned int n0                 = win_config.second.x().step();
+        const unsigned int m0                 = win_config.second.y().step();
+        const unsigned int k0                 = adjust_vec_size(8u, src->dimension(channel_idx));
+        const unsigned int partial_store_n0   = dst->dimension(channel_idx) % n0;
+        const unsigned int pad_left           = conv_info.pad_left();
+        const unsigned int pad_top            = conv_info.pad_top();
+        const bool         export_to_cl_image = export_to_cl_image_support(weights, gpu_target, _data_layout);
 
-        const unsigned int k0               = adjust_vec_size(8u, src->dimension(channel_idx));
-        const unsigned int partial_store_n0 = dst->dimension(channel_idx) % n0;
-        const unsigned int pad_left         = conv_info.pad_left();
-        const unsigned int pad_top          = conv_info.pad_top();
+        // Update the padding for the weights tensor if we can export to cl_image
+        if(export_to_cl_image)
+        {
+            arm_compute::cl_gemm::update_padding_for_cl_image(weights);
+        }
 
         if(biases != nullptr)
         {
@@ -390,7 +445,7 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
         build_options.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(height_idx)));
         build_options.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(channel_idx)));
         build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
-        build_options.add_option("-DWEI_TENSOR_TYPE=BUFFER");
+        build_options.add_option_if_else(export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(weights->dimension(width_idx)));
         build_options.add_option("-DWEI_HEIGHT=" + support::cpp11::to_string(weights->dimension(height_idx)));
         build_options.add_option("-DWEI_DATA_TYPE=" + get_cl_type_from_data_type(weights->data_type()));
@@ -533,13 +588,32 @@ void ClDirectConvolutionKernel::run_op(ITensorPack &tensors, const Window &windo
 
     if(_data_layout == DataLayout::NHWC)
     {
-        const size_t dim_y_collapsed = ceil_to_multiple(dst->info()->dimension(1) * dst->info()->dimension(2), slice.y().step());
+        cl::Image2D weights_cl_image;
+
+        const size_t dim_y_collapsed    = ceil_to_multiple(dst->info()->dimension(1) * dst->info()->dimension(2), slice.y().step());
+        const bool   export_to_cl_image = export_to_cl_image_support(weights->info(), get_target(), _data_layout);
+
         slice.set(Window::DimY, Window::Dimension(0, dim_y_collapsed, slice.y().step()));
         slice.set(Window::DimZ, Window::Dimension(0, dst->info()->dimension(3), 1));
+
+        if(export_to_cl_image)
+        {
+            const size_t      image_w = weights->info()->dimension(0) / 4;
+            const size_t      image_h = weights->info()->dimension(1) * weights->info()->dimension(2) * weights->info()->dimension(3);
+            const TensorShape shape2d(image_w, image_h);
+            const size_t      image_row_pitch = weights->info()->strides_in_bytes()[1];
+
+            // Export cl_buffer to cl_image
+            weights_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), weights->cl_buffer(), shape2d, weights->info()->data_type(), image_row_pitch);
+        }
 
         unsigned int idx = 0;
         add_4D_tensor_argument(idx, src, slice);
         add_4D_tensor_argument(idx, dst, slice);
+        if(export_to_cl_image)
+        {
+            _kernel.setArg(idx++, weights_cl_image);
+        }
         add_4D_tensor_argument(idx, weights, slice);
         if(biases != nullptr)
         {

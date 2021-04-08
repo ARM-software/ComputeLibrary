@@ -122,6 +122,7 @@ __kernel void direct_convolution_nhwc(
 #define _IDST_WIDTH DST_WIDTH
 #define _IDST_HEIGHT DST_HEIGHT
 #define _IDST_CHANNELS DST_CHANNELS
+#define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
     // If quantized, the output tile has to be quantized first before being stored to global memory
 #if defined(IS_QUANTIZED)
@@ -136,8 +137,8 @@ __kernel void direct_convolution_nhwc(
 
     // .v    = access the whole vector (OpenCL vector)
     // .s[x] = access the vector element at position x (scalar access)
-    TILE(int, M0, 1, xi) = {{ { 0 } }};
-    TILE(int, M0, 1, yi) = {{ { 0 } }};
+    TILE(int, M0, 1, xi);
+    TILE(int, M0, 1, yi);
 
     // Convert the linear index to coordinate
     LOOP_UNROLLING(int, i, 0, M0, 1)
@@ -148,29 +149,14 @@ __kernel void direct_convolution_nhwc(
         yi[i].v -= PAD_TOP;
     }
 
-    uint wei_x = 0;
-
     // Initialize the accumulators
-    TILE(ACC_DATA_TYPE, M0, N0, c) = {{ { 0 } }};
+    TILE(ACC_DATA_TYPE, M0, N0, c) = { { { 0 } } };
 
     for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
     {
-        uint src_x = 0;
-        int  xk    = i % _IWEI_WIDTH;
-        int  yk    = i / _IWEI_WIDTH;
-
-        TILE(int, M0, 1, src_indirect_y)    = {{ { 0 } }};
-        TILE(int, M0, 1, src_indirect_mask) = {{ { 0 } }};
-
-        // Calculate the source indirect Y and the source indirect mask
-        // Since the indirect Y is clamped when out-of-bound, the mask is used to
-        // force to zero the out-of-bound values
-        LOOP_UNROLLING(int, i, 0, M0, 1)
-        {
-            src_indirect_y[i].v = (CLAMP(xi[i].v + xk, 0, (int)_ISRC_WIDTH - 1) + CLAMP(yi[i].v + yk, 0, (int)_ISRC_HEIGHT - 1) * _ISRC_WIDTH);
-            src_indirect_y[i].v += bout * (int)_ISRC_WIDTH * (int)_ISRC_HEIGHT;
-            src_indirect_mask[i].v = ((xi[i].v + xk) >= 0 && (xi[i].v + xk) < (int)_ISRC_WIDTH && (yi[i].v + yk) >= 0 && (yi[i].v + yk) < (int)_ISRC_HEIGHT);
-        }
+        int ck = 0;
+        int xk = i % _IWEI_WIDTH;
+        int yk = i / _IWEI_WIDTH;
 
         int k = 0;
         for(; k <= (_ISRC_CHANNELS - K0); k += K0)
@@ -178,14 +164,16 @@ __kernel void direct_convolution_nhwc(
             TILE(SRC_DATA_TYPE, M0, K0, a);
             TILE(WEI_DATA_TYPE, N0, K0, b);
 
+            LOOP_UNROLLING(int, i, 0, M0, 1)
+            {
+                a[i].v = ZERO_VALUE;
+            }
+
             // Load tile from the src tensor
-            T_LOAD_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, src_x, src_stride_y, src_indirect_y, a);
+            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, 1, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
 
             // Load tile from the weights tensor
-            T_LOAD(WEI_DATA_TYPE, N0, K0, WEI_TENSOR_TYPE, wei, wei_x, cout, wei_stride_w, b);
-
-            // Fill with zero the out-of-bound rows
-            T_ROWSET_MASK(SRC_DATA_TYPE, M0, K0, ZERO_VALUE, a, src_indirect_mask);
+            T_LOAD(WEI_DATA_TYPE, N0, K0, WEI_TENSOR_TYPE, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
 
             // Compute the matrix multiplication between two tiles
             T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, K0, NT, T, a, b, c);
@@ -194,8 +182,7 @@ __kernel void direct_convolution_nhwc(
             // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
             T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, a, b, c);
 
-            src_x += K0;
-            wei_x += K0;
+            ck += K0;
         }
 
         // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
@@ -207,14 +194,17 @@ __kernel void direct_convolution_nhwc(
             TILE(SRC_DATA_TYPE, M0, 1, a);
             TILE(WEI_DATA_TYPE, N0, 1, b);
 
+            LOOP_UNROLLING(int, i, 0, M0, 1)
+            {
+                a[i].v = ZERO_VALUE;
+            }
+
             // Load tile from the src tensor
-            T_LOAD_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, src_x, src_stride_y, src_indirect_y, a);
+            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, 1, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
 
             // Load tile from the weights tensor
-            T_LOAD(WEI_DATA_TYPE, N0, 1, WEI_TENSOR_TYPE, wei, wei_x, cout, wei_stride_w, b);
-
-            // Fill with zero the out-of-bound rows
-            T_ROWSET_MASK(SRC_DATA_TYPE, M0, 1, ZERO_VALUE, a, src_indirect_mask);
+            // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
+            T_LOAD(WEI_DATA_TYPE, N0, 1, BUFFER, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
 
             // Compute the matrix multiplication between two tiles
             T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
@@ -223,8 +213,7 @@ __kernel void direct_convolution_nhwc(
             // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
             T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
 
-            ++src_x;
-            ++wei_x;
+            ++ck;
         }
 #endif // ((SRC_CHANNELS % K0) != 0)
     }
@@ -236,7 +225,7 @@ __kernel void direct_convolution_nhwc(
 #if defined(HAS_BIAS)
     TILE(BIA_DATA_TYPE, 1, N0, bias0);
 
-    T_LOAD(BIA_DATA_TYPE, 1, N0, BUFFER, bia, cout, 0, 0, bias0);
+    T_LOAD(BIA_DATA_TYPE, 1, N0, BUFFER, bia, cout, 0, 1, 0, bias0);
 
     // c = c + bias[broadcasted]
     T_ADD_BROADCAST_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
@@ -274,4 +263,5 @@ __kernel void direct_convolution_nhwc(
 #undef _IDST_WIDTH
 #undef _IDST_HEIGHT
 #undef _IDST_CHANNELS
+#undef _IY_MULTIPLIER
 }
