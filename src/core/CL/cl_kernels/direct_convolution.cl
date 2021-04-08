@@ -136,8 +136,8 @@ __kernel void direct_convolution_nhwc(
 
     // .v    = access the whole vector (OpenCL vector)
     // .s[x] = access the vector element at position x (scalar access)
-    TILE(int, M0, 1, xi) = { { 0 } };
-    TILE(int, M0, 1, yi) = { { 0 } };
+    TILE(int, M0, 1, xi) = {{ { 0 } }};
+    TILE(int, M0, 1, yi) = {{ { 0 } }};
 
     // Convert the linear index to coordinate
     LOOP_UNROLLING(int, i, 0, M0, 1)
@@ -151,7 +151,7 @@ __kernel void direct_convolution_nhwc(
     uint wei_x = 0;
 
     // Initialize the accumulators
-    TILE(ACC_DATA_TYPE, M0, N0, c) = { { 0 } };
+    TILE(ACC_DATA_TYPE, M0, N0, c) = {{ { 0 } }};
 
     for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
     {
@@ -159,8 +159,8 @@ __kernel void direct_convolution_nhwc(
         int  xk    = i % _IWEI_WIDTH;
         int  yk    = i / _IWEI_WIDTH;
 
-        TILE(int, M0, 1, src_indirect_y)    = { { 0 } };
-        TILE(int, M0, 1, src_indirect_mask) = { { 0 } };
+        TILE(int, M0, 1, src_indirect_y)    = {{ { 0 } }};
+        TILE(int, M0, 1, src_indirect_mask) = {{ { 0 } }};
 
         // Calculate the source indirect Y and the source indirect mask
         // Since the indirect Y is clamped when out-of-bound, the mask is used to
