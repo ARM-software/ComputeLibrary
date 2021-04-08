@@ -65,8 +65,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     const size_t weights_width  = 3;
     const size_t weights_height = 3;
 
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(
-                                         *input, TensorInfo(TensorShape(weights_width, weights_height), 1, weights->data_type()).set_data_layout(DataLayout::NCHW), conv_info, depth_multiplier, dilation);
+    const ConvolutionInfo info{ conv_info, depth_multiplier, ActivationLayerInfo(), dilation };
+    const TensorShape     output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(
+                                             *input, TensorInfo(TensorShape(weights_width, weights_height), 1, weights->data_type()).set_data_layout(DataLayout::NCHW), info);
     if(is_qasymm)
     {
         DepthwiseConvolutionReshapeInfo info;

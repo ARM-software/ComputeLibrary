@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/runtime/NEON/functions/assembly/NEDepthwiseConvolutionAssemblyDispatch.h"
+#include "src/runtime/cpu/operators/CpuDepthwiseConvolutionAssemblyDispatch.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Utils.h"
@@ -40,6 +40,8 @@
 #include <set>
 
 namespace arm_compute
+{
+namespace cpu
 {
 namespace
 {
@@ -209,40 +211,37 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_fp32_convolver(int kernel_
     }
 }
 
-std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor      *input,
-                                                                   const ITensor      *weights,
-                                                                   ITensor            *output,
-                                                                   PadStrideInfo       conv_info,
-                                                                   ActivationLayerInfo act_info,
-                                                                   const Size2D       &dilation)
+std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensorInfo     *input,
+                                                                   const ITensorInfo     *weights,
+                                                                   ITensorInfo           *output,
+                                                                   const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_UNUSED(dilation);
-    const DataType    data_type = input->info()->data_type();
-    const TensorShape shape     = input->info()->tensor_shape();
+    const DataType    data_type = input->data_type();
+    const TensorShape shape     = input->tensor_shape();
 
     const int n_batches       = shape[3];
     const int in_rows         = shape.z();
     const int in_cols         = shape.y();
     const int n_channels      = shape.x();
-    const int dilation_factor = dilation.x();
-    const int padding_top     = conv_info.pad_top();
-    const int padding_left    = conv_info.pad_left();
-    const int padding_bottom  = conv_info.pad_bottom();
-    const int padding_right   = conv_info.pad_right();
+    const int dilation_factor = info.dilation.x();
+    const int padding_top     = info.pad_stride_info.pad_top();
+    const int padding_left    = info.pad_stride_info.pad_left();
+    const int padding_bottom  = info.pad_stride_info.pad_bottom();
+    const int padding_right   = info.pad_stride_info.pad_right();
 
-    const bool is_uniform_quantized    = (data_type == DataType::QASYMM8) && (weights->info()->data_type() == DataType::QASYMM8);
-    const bool is_perchannel_quantized = (data_type == DataType::QASYMM8) && (weights->info()->data_type() == DataType::QSYMM8_PER_CHANNEL);
+    const bool is_uniform_quantized    = (data_type == DataType::QASYMM8) && (weights->data_type() == DataType::QASYMM8);
+    const bool is_perchannel_quantized = (data_type == DataType::QASYMM8) && (weights->data_type() == DataType::QSYMM8_PER_CHANNEL);
 
-    const unsigned int stride_x    = conv_info.stride().first;
-    const unsigned int kernel_size = weights->info()->tensor_shape().y();
+    const unsigned int stride_x    = info.pad_stride_info.stride().first;
+    const unsigned int kernel_size = weights->tensor_shape().y();
 
     // Map activation function
     neon_convolution_kernels::ActivationFunction activation = neon_convolution_kernels::ActivationFunction::None;
-    if(arm_compute::utils::info_helpers::is_relu(act_info))
+    if(arm_compute::utils::info_helpers::is_relu(info.act_info))
     {
         activation = neon_convolution_kernels::ActivationFunction::ReLU;
     }
-    else if(arm_compute::utils::info_helpers::is_relu6(act_info))
+    else if(arm_compute::utils::info_helpers::is_relu6(info.act_info))
     {
         activation = neon_convolution_kernels::ActivationFunction::ReLU6;
     }
@@ -250,9 +249,9 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
     // Create quantized convolver
     if(is_uniform_quantized)
     {
-        const UniformQuantizationInfo input_qinfo   = input->info()->quantization_info().uniform();
-        const UniformQuantizationInfo weights_qinfo = weights->info()->quantization_info().uniform();
-        const UniformQuantizationInfo output_qinfo  = output->info()->quantization_info().uniform();
+        const UniformQuantizationInfo input_qinfo   = input->quantization_info().uniform();
+        const UniformQuantizationInfo weights_qinfo = weights->quantization_info().uniform();
+        const UniformQuantizationInfo output_qinfo  = output->quantization_info().uniform();
 
         // Check that quantization info are in the range [0, 255]
         ARM_COMPUTE_ERROR_ON(input_qinfo.offset < 0 || input_qinfo.offset > 255);
@@ -274,9 +273,9 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
     }
     else if(is_perchannel_quantized)
     {
-        const UniformQuantizationInfo input_qinfo   = input->info()->quantization_info().uniform();
-        const QuantizationInfo        weights_qinfo = weights->info()->quantization_info();
-        const UniformQuantizationInfo output_qinfo  = output->info()->quantization_info().uniform();
+        const UniformQuantizationInfo input_qinfo   = input->quantization_info().uniform();
+        const QuantizationInfo        weights_qinfo = weights->quantization_info();
+        const UniformQuantizationInfo output_qinfo  = output->quantization_info().uniform();
 
         // Check that quantization info are in the range [0, 255]
         ARM_COMPUTE_ERROR_ON(input_qinfo.offset < 0 || input_qinfo.offset > 255);
@@ -328,83 +327,75 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
 }
 } // namespace
 
-struct NEDepthwiseConvolutionAssemblyDispatch::LocalImpl
+struct CpuDepthwiseConvolutionAssemblyDispatch::LocalImpl
 {
-    std::unique_ptr<depthwise::IDepthwiseConvolution> _dwc_assembly_kernel{ nullptr };
-    NEDepthwiseConvolutionAssemblyKernelWrapper       _dwc_acl_kernel{};
+    std::unique_ptr<depthwise::IDepthwiseConvolution> dwc_assembly_kernel{ nullptr };
+    NEDepthwiseConvolutionAssemblyKernelWrapper       dwc_acl_kernel{};
+    bool                                              is_prepared{ false };
+    experimental::MemoryRequirements                  mem_req{};
 };
 
 #ifndef DOXYGEN_SKIP_THIS
-NEDepthwiseConvolutionAssemblyDispatch::NEDepthwiseConvolutionAssemblyDispatch(std::shared_ptr<arm_compute::IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _input(nullptr), _weights(nullptr), _bias(nullptr), _output(nullptr), _packed_weights(), _workspace(), _is_prepared(false),
-      _pImpl(std::make_unique<LocalImpl>())
+CpuDepthwiseConvolutionAssemblyDispatch::CpuDepthwiseConvolutionAssemblyDispatch()
+    : _pImpl(std::make_unique<LocalImpl>())
 {
 }
 #endif /* DOXYGEN_SKIP_THIS */
 
-NEDepthwiseConvolutionAssemblyDispatch::~NEDepthwiseConvolutionAssemblyDispatch() = default;
+CpuDepthwiseConvolutionAssemblyDispatch::~CpuDepthwiseConvolutionAssemblyDispatch() = default;
 
-void NEDepthwiseConvolutionAssemblyDispatch::configure(const ITensor             *input,
-                                                       const ITensor             *weights,
-                                                       const ITensor             *bias,
-                                                       ITensor                   *output,
-                                                       const PadStrideInfo       &conv_info,
-                                                       unsigned int               depth_multiplier,
-                                                       const ActivationLayerInfo &act_info,
-                                                       const Size2D              &dilation)
+void CpuDepthwiseConvolutionAssemblyDispatch::configure(const ITensorInfo     *input,
+                                                        const ITensorInfo     *weights,
+                                                        const ITensorInfo     *bias,
+                                                        ITensorInfo           *output,
+                                                        const ConvolutionInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_UNUSED(depth_multiplier);
-    ARM_COMPUTE_ERROR_THROW_ON(NEDepthwiseConvolutionAssemblyDispatch::validate(input->info(),
-                                                                                weights->info(),
-                                                                                bias != nullptr ? bias->info() : nullptr,
-                                                                                output->info(),
-                                                                                conv_info,
-                                                                                depth_multiplier,
-                                                                                act_info,
-                                                                                dilation));
+    ARM_COMPUTE_UNUSED(bias);
+    ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConvolutionAssemblyDispatch::validate(input,
+                                                                                 weights,
+                                                                                 bias != nullptr ? bias : nullptr,
+                                                                                 output,
+                                                                                 info));
 
     // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier, dilation);
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(output->info()->quantization_info()));
+    const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
+    auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
 
-    _input       = input;
-    _weights     = weights;
-    _bias        = bias;
-    _output      = output;
-    _is_prepared = false;
+    _pImpl->is_prepared = false;
 
     // Create convolver
-    _pImpl->_dwc_assembly_kernel = create_convolver(input, weights, output, conv_info, act_info, dilation);
-    ARM_COMPUTE_ERROR_ON(_pImpl->_dwc_assembly_kernel == nullptr);
+    _pImpl->dwc_assembly_kernel = create_convolver(input, weights, output, info);
+    ARM_COMPUTE_ERROR_ON(_pImpl->dwc_assembly_kernel == nullptr);
 
     // Create assembly kernel wrapper
-    _pImpl->_dwc_acl_kernel.configure(_pImpl->_dwc_assembly_kernel.get());
+    _pImpl->dwc_acl_kernel.configure(_pImpl->dwc_assembly_kernel.get());
 
     constexpr size_t alignment = 128;
 
     // Create workspace
     const unsigned int num_threads    = NEScheduler::get().num_threads();
-    const size_t       workspace_size = _pImpl->_dwc_assembly_kernel->get_working_space_size(num_threads);
+    const size_t       workspace_size = _pImpl->dwc_assembly_kernel->get_working_space_size(num_threads);
     ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "Workspace size cannot be 0 !");
-    _workspace.allocator()->init(TensorInfo(TensorShape{ workspace_size }, 1, DataType::S8), alignment);
-    _memory_group.manage(&_workspace);
-    _workspace.allocator()->allocate();
+    _pImpl->mem_req.push_back({ TensorType::ACL_INT_0, workspace_size, alignment });
 
     // Create packing tensor
-    const size_t pack_tensor_size = _pImpl->_dwc_assembly_kernel->get_packed_params_size();
+    const size_t pack_tensor_size = _pImpl->dwc_assembly_kernel->get_packed_params_size();
     ARM_COMPUTE_ERROR_ON_MSG(pack_tensor_size == 0, "Pack tensor size cannot be 0 !");
-    _packed_weights.allocator()->init(TensorInfo(TensorShape{ pack_tensor_size }, 1, DataType::S8), alignment);
+
+    _pImpl->mem_req.push_back({ TensorType::ACL_INT_1, pack_tensor_size, alignment });
 }
 
-Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo         *input,
-                                                        const ITensorInfo         *weights,
-                                                        const ITensorInfo         *bias,
-                                                        const ITensorInfo         *output,
-                                                        const PadStrideInfo       &conv_info,
-                                                        unsigned int               depth_multiplier,
-                                                        const ActivationLayerInfo &act_info,
-                                                        const Size2D              &dilation)
+experimental::MemoryRequirements CpuDepthwiseConvolutionAssemblyDispatch::workspace() const
+{
+    return _pImpl->mem_req;
+}
+
+Status CpuDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo     *input,
+                                                         const ITensorInfo     *weights,
+                                                         const ITensorInfo     *bias,
+                                                         const ITensorInfo     *output,
+                                                         const ConvolutionInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
@@ -415,12 +406,12 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
 
     // Validate convolver
-    ARM_COMPUTE_RETURN_ERROR_ON(!is_optimized_supported(input, weights, conv_info, depth_multiplier, dilation));
+    ARM_COMPUTE_RETURN_ERROR_ON(!is_optimized_supported(input, weights, info));
 
     // Validate activation
-    const bool is_relu  = arm_compute::utils::info_helpers::is_relu(act_info);
-    const bool is_relu6 = arm_compute::utils::info_helpers::is_relu6(act_info);
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled() && !(is_relu || is_relu6));
+    const bool is_relu  = arm_compute::utils::info_helpers::is_relu(info.act_info);
+    const bool is_relu6 = arm_compute::utils::info_helpers::is_relu6(info.act_info);
+    ARM_COMPUTE_RETURN_ERROR_ON(info.act_info.enabled() && !(is_relu || is_relu6));
 
     // Check bias
     if(bias != nullptr)
@@ -433,7 +424,7 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
     // Check output
     if(output->total_size() != 0)
     {
-        const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
+        const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
@@ -451,11 +442,9 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
     return Status{};
 }
 
-bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITensorInfo *input,
-                                                                    const ITensorInfo *weights,
-                                                                    PadStrideInfo      conv_info,
-                                                                    unsigned int       depth_multiplier,
-                                                                    const Size2D      &dilation)
+bool CpuDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITensorInfo     *input,
+                                                                     const ITensorInfo     *weights,
+                                                                     const ConvolutionInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
 
@@ -486,84 +475,90 @@ bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITenso
     bool                   weights_supported      = (kernel_w == kernel_h) && (supported_kernel_sizes.count(kernel_w) != 0);
 
     // Check for supported strides
-    const auto &strides           = conv_info.stride();
+    const auto &strides           = info.pad_stride_info.stride();
     bool        supported_strides = (strides.first == strides.second) && ((strides.first == 1) || (strides.first == 2));
 
     // Check for supported padding
-    const auto    pad_top           = conv_info.pad_top();
-    const auto    pad_right         = conv_info.pad_right();
-    const auto    pad_bottom        = conv_info.pad_bottom();
-    const auto    pad_left          = conv_info.pad_left();
-    PadStrideInfo same_pad          = calculate_same_pad(in_shape, TensorShape(kernel_w, kernel_h), conv_info, DataLayout::NCHW, dilation);
+    const auto    pad_top           = info.pad_stride_info.pad_top();
+    const auto    pad_right         = info.pad_stride_info.pad_right();
+    const auto    pad_bottom        = info.pad_stride_info.pad_bottom();
+    const auto    pad_left          = info.pad_stride_info.pad_left();
+    PadStrideInfo same_pad          = calculate_same_pad(in_shape, TensorShape(kernel_w, kernel_h), info.pad_stride_info, DataLayout::NCHW, info.dilation);
     bool          is_same_padding   = (pad_top == same_pad.pad_top()) && (pad_right == same_pad.pad_right()) && (pad_bottom == same_pad.pad_bottom()) && (pad_left == same_pad.pad_left());
     bool          is_valid_padding  = (pad_top == 0) && (pad_right == 0) && (pad_bottom == 0) && (pad_left == 0);
     bool          supported_padding = is_same_padding || is_valid_padding;
     // TODO(COMPMID-2464): Enable once dilated conv with stride 2 is supported
-    bool is_dilation_supported = ((dilation == Size2D(1U, 1U)) || ((dilation.x() == dilation.y()) && strides.first == 1));
+    bool is_dilation_supported = ((info.dilation == Size2D(1U, 1U)) || ((info.dilation.x() == info.dilation.y()) && strides.first == 1));
 
     if(weights_type == DataType::QSYMM8_PER_CHANNEL)
     {
-        is_dilation_supported = is_dilation_supported && (dilation == Size2D(1U, 1U));
+        is_dilation_supported = is_dilation_supported && (info.dilation == Size2D(1U, 1U));
     }
 
-    return is_input_type_valid && is_weights_type_valid && weights_supported && supported_strides && supported_padding && (depth_multiplier == 1) && is_dilation_supported;
+    return is_input_type_valid && is_weights_type_valid && weights_supported && supported_strides && supported_padding && (info.depth_multiplier == 1) && is_dilation_supported;
 }
 
-void NEDepthwiseConvolutionAssemblyDispatch::run()
+void CpuDepthwiseConvolutionAssemblyDispatch::run(ITensorPack &tensors)
 {
     // Prepare assembly kernel
-    prepare();
+    prepare(tensors);
 
-    MemoryGroupResourceScope scope_mg(_memory_group);
+    auto src       = tensors.get_tensor(TensorType::ACL_SRC_0);
+    auto workspace = tensors.get_tensor(TensorType::ACL_INT_0);
+    auto dst       = tensors.get_tensor(TensorType::ACL_DST);
 
     // Setup inputs/outputs
-    ARM_COMPUTE_ERROR_ON(_workspace.buffer() == nullptr);
-    _pImpl->_dwc_assembly_kernel->set_working_space(static_cast<void *>(_workspace.buffer()));
+    ARM_COMPUTE_ERROR_ON(workspace == nullptr && workspace->buffer() == nullptr);
+    _pImpl->dwc_assembly_kernel->set_working_space(static_cast<void *>(workspace->buffer()));
 
-    ARM_COMPUTE_ERROR_ON(_input->buffer() == nullptr);
-    const int   input_element_size = _input->info()->element_size();
-    const int   input_batch_stride = _input->info()->strides_in_bytes()[3] / input_element_size;
-    const int   input_row_stride   = _input->info()->strides_in_bytes().z() / input_element_size;
-    const int   input_col_stride   = _input->info()->strides_in_bytes().y() / input_element_size;
-    const void *input_ptr          = _input->buffer() + _input->info()->offset_first_element_in_bytes();
-    _pImpl->_dwc_assembly_kernel->set_input(input_ptr, input_batch_stride, input_row_stride, input_col_stride);
+    ARM_COMPUTE_ERROR_ON(workspace->buffer() == nullptr);
+    const int   input_element_size = src->info()->element_size();
+    const int   input_batch_stride = src->info()->strides_in_bytes()[3] / input_element_size;
+    const int   input_row_stride   = src->info()->strides_in_bytes().z() / input_element_size;
+    const int   input_col_stride   = src->info()->strides_in_bytes().y() / input_element_size;
+    const void *input_ptr          = src->buffer() + src->info()->offset_first_element_in_bytes();
+    _pImpl->dwc_assembly_kernel->set_input(input_ptr, input_batch_stride, input_row_stride, input_col_stride);
 
-    ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
-    const int output_element_size = _output->info()->element_size();
-    const int output_batch_stride = _output->info()->strides_in_bytes()[3] / output_element_size;
-    const int output_row_stride   = _output->info()->strides_in_bytes().z() / output_element_size;
-    const int output_col_stride   = _output->info()->strides_in_bytes().y() / output_element_size;
-    void     *output_ptr          = _output->buffer() + _output->info()->offset_first_element_in_bytes();
-    _pImpl->_dwc_assembly_kernel->set_output(output_ptr, output_batch_stride, output_row_stride, output_col_stride);
+    ARM_COMPUTE_ERROR_ON(dst->buffer() == nullptr);
+    const int output_element_size = dst->info()->element_size();
+    const int output_batch_stride = dst->info()->strides_in_bytes()[3] / output_element_size;
+    const int output_row_stride   = dst->info()->strides_in_bytes().z() / output_element_size;
+    const int output_col_stride   = dst->info()->strides_in_bytes().y() / output_element_size;
+    void     *output_ptr          = dst->buffer() + dst->info()->offset_first_element_in_bytes();
+    _pImpl->dwc_assembly_kernel->set_output(output_ptr, output_batch_stride, output_row_stride, output_col_stride);
 
     // Schedule assembly kernel
-    NEScheduler::get().schedule(&_pImpl->_dwc_acl_kernel, Window::DimX);
+    NEScheduler::get().schedule(&_pImpl->dwc_acl_kernel, Window::DimX);
 }
 
-void NEDepthwiseConvolutionAssemblyDispatch::prepare()
+void CpuDepthwiseConvolutionAssemblyDispatch::prepare(ITensorPack &tensors)
 {
-    if(!_is_prepared)
+    if(!_pImpl->is_prepared)
     {
-        _packed_weights.allocator()->allocate();
-        ARM_COMPUTE_ERROR_ON(_packed_weights.buffer() == nullptr);
+        auto weights        = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+        auto bias           = tensors.get_const_tensor(TensorType::ACL_SRC_2);
+        auto packed_weights = tensors.get_tensor(TensorType::ACL_INT_1);
+
+        ARM_COMPUTE_ERROR_ON(packed_weights->buffer() == nullptr);
 
         // Pack weights and bias
-        const int weights_element_size = _weights->info()->element_size();
-        const int weights_row_stride   = _weights->info()->strides_in_bytes().z() / weights_element_size;
-        const int weights_col_stride   = _weights->info()->strides_in_bytes().y() / weights_element_size;
-        _pImpl->_dwc_assembly_kernel->pack_params(_packed_weights.buffer(),
-                                                  _weights->buffer() + _weights->info()->offset_first_element_in_bytes(),
-                                                  weights_row_stride,
-                                                  weights_col_stride,
-                                                  (_bias != nullptr) ? _bias->buffer() : nullptr);
-        _pImpl->_dwc_assembly_kernel->set_packed_params_buffer(_packed_weights.buffer());
+        const int weights_element_size = weights->info()->element_size();
+        const int weights_row_stride   = weights->info()->strides_in_bytes().z() / weights_element_size;
+        const int weights_col_stride   = weights->info()->strides_in_bytes().y() / weights_element_size;
+        _pImpl->dwc_assembly_kernel->pack_params(packed_weights->buffer(),
+                                                 weights->buffer() + weights->info()->offset_first_element_in_bytes(),
+                                                 weights_row_stride,
+                                                 weights_col_stride,
+                                                 (bias != nullptr) ? bias->buffer() : nullptr);
+        _pImpl->dwc_assembly_kernel->set_packed_params_buffer(packed_weights->buffer());
 
-        _weights->mark_as_unused();
-        if(_bias != nullptr)
+        weights->mark_as_unused();
+        if(bias != nullptr)
         {
-            _bias->mark_as_unused();
+            bias->mark_as_unused();
         }
-        _is_prepared = true;
+        _pImpl->is_prepared = true;
     }
 }
+} // namespace cpu
 } // namespace arm_compute

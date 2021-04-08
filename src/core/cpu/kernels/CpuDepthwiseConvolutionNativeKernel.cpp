@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
+#include "src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.h"
 
+#include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "src/core/CPP/Validate.h"
@@ -34,6 +36,10 @@
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
+{
+namespace cpu
+{
+namespace kernels
 {
 namespace
 {
@@ -716,19 +722,18 @@ void depthwise_loop_pow2_quantized_per_tensor(const ITensor *input, const ITenso
     input_it, weights_it, biases_it, output_it);
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
-                          const Size2D &dilation)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ConvolutionInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(1) + (weights->dimension(1) - 1) * (dilation.x() - 1) > input->dimension(1) + conv_info.pad_left() + conv_info.pad_right());
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(2) + (weights->dimension(2) - 1) * (dilation.y() - 1) > input->dimension(2) + conv_info.pad_top() + conv_info.pad_bottom());
-    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(0) * depth_multiplier) != weights->dimension(0));
-    ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
-    ARM_COMPUTE_RETURN_ERROR_ON((conv_info.stride().first < 1) || (conv_info.stride().second < 1));
+    ARM_COMPUTE_RETURN_ERROR_ON(info.depth_multiplier == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(1) + (weights->dimension(1) - 1) * (info.dilation.x() - 1) > input->dimension(1) + info.pad_stride_info.pad_left() + info.pad_stride_info.pad_right());
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(2) + (weights->dimension(2) - 1) * (info.dilation.y() - 1) > input->dimension(2) + info.pad_stride_info.pad_top() + info.pad_stride_info.pad_bottom());
+    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(0) * info.depth_multiplier) != weights->dimension(0));
+    ARM_COMPUTE_RETURN_ERROR_ON((info.dilation.x() < 1) || (info.dilation.y() < 1));
+    ARM_COMPUTE_RETURN_ERROR_ON((info.pad_stride_info.stride().first < 1) || (info.pad_stride_info.stride().second < 1));
 
     if(is_data_type_quantized_per_channel(weights->data_type()))
     {
@@ -757,7 +762,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 
     if(output->total_size() != 0)
     {
-        const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
+        const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
@@ -766,35 +771,30 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 }
 } // namespace
 
-NEDepthwiseConvolutionLayerNativeKernel::NEDepthwiseConvolutionLayerNativeKernel()
-    : _func(), _input(), _weights(), _biases(), _output(), _conv_info(), _depth_multiplier(1), _dilation(), _output_multiplier(), _output_shift(), _has_biases()
+CpuDepthwiseConvolutionNativeKernel::CpuDepthwiseConvolutionNativeKernel()
+    : _func(), _conv_info(), _depth_multiplier(1), _dilation(), _output_multiplier(), _output_shift(), _has_biases()
 {
 }
 
-void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
-                                                        const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation)
+void CpuDepthwiseConvolutionNativeKernel::configure(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *output, const ConvolutionInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, dilation));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, weights, (biases != nullptr) ? biases : nullptr, output, info));
 
-    _input            = input;
-    _weights          = weights;
-    _biases           = biases;
-    _output           = output;
-    _conv_info        = conv_info;
-    _depth_multiplier = depth_multiplier;
-    _dilation         = dilation;
+    _conv_info        = info.pad_stride_info;
+    _depth_multiplier = info.depth_multiplier;
+    _dilation         = info.dilation;
     _has_biases       = (biases != nullptr);
 
-    if(is_data_type_quantized(_input->info()->data_type()))
+    if(is_data_type_quantized(input->data_type()))
     {
-        const auto input_scale  = input->info()->quantization_info().uniform().scale;
-        const auto output_scale = output->info()->quantization_info().uniform().scale;
+        const auto input_scale  = input->quantization_info().uniform().scale;
+        const auto output_scale = output->quantization_info().uniform().scale;
 
-        auto weights_scale = weights->info()->quantization_info().scale();
-        if(!is_data_type_quantized_per_channel(_weights->info()->data_type()))
+        auto weights_scale = weights->quantization_info().scale();
+        if(!is_data_type_quantized_per_channel(weights->data_type()))
         {
-            for(size_t i = 1; i < _weights->info()->dimension(channel_idx); ++i)
+            for(size_t i = 1; i < weights->dimension(channel_idx); ++i)
             {
                 weights_scale.push_back(weights_scale.front());
             }
@@ -812,100 +812,107 @@ void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, co
         }
     }
 
-    switch(_weights->info()->data_type())
+    switch(weights->data_type())
     {
         case DataType::QASYMM8:
-            _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, uint8_t>;
+            _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<uint8_t, uint8_t>;
             break;
         case DataType::QASYMM8_SIGNED:
-            _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t>;
+            _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<int8_t, int8_t>;
             break;
         case DataType::QSYMM8_PER_CHANNEL:
-            if(_input->info()->data_type() == DataType::QASYMM8)
+            if(input->data_type() == DataType::QASYMM8)
             {
-                _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, int8_t>;
+                _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<uint8_t, int8_t>;
             }
             else
             {
-                _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t>;
+                _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<int8_t, int8_t>;
             }
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float16_t, float16_t>;
+            _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<float16_t, float16_t>;
             break;
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F32:
-            _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float, float>;
+            _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<float, float>;
             break;
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
             break;
     }
 
-    const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier, dilation);
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(output->info()->quantization_info()));
+    const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
+    auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
 
-    Window win = calculate_max_window(*output->info(), Steps());
-    INEKernel::configure(win);
+    Window win = calculate_max_window(*output, Steps());
+    ICpuKernel::configure(win);
 }
 
-Status NEDepthwiseConvolutionLayerNativeKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                         unsigned int  depth_multiplier,
-                                                         const Size2D &dilation)
+Status CpuDepthwiseConvolutionNativeKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, dilation));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, info));
     return Status{};
 }
 
-void NEDepthwiseConvolutionLayerNativeKernel::run(const Window &window, const ThreadInfo &info)
-{
-    ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-
-    (this->*_func)(window, _has_biases);
-}
-
-template <typename T, typename TW, NEDepthwiseConvolutionLayerNativeKernel::FloatEnalber<T>>
-void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window, bool has_biases)
+template <typename T, typename TW, CpuDepthwiseConvolutionNativeKernel::FloatEnalber<T>>
+void CpuDepthwiseConvolutionNativeKernel::run_depthwise(const ITensor *src, const ITensor *weights, const ITensor *biases,
+                                                        ITensor *dst, const Window &window, bool has_biases)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
     if(_depth_multiplier == 1)
     {
-        depthwise_loop_multiplier1_fp<T>(_input, _weights, _biases, _output, _conv_info, _dilation, window, has_biases);
+        depthwise_loop_multiplier1_fp<T>(src, weights, biases, dst, _conv_info, _dilation, window, has_biases);
     }
     else
     {
-        depthwise_loop_generic_fp<T>(_input, _weights, _biases, _output, _conv_info, _dilation, _depth_multiplier, window, has_biases);
+        depthwise_loop_generic_fp<T>(src, weights, biases, dst, _conv_info, _dilation, _depth_multiplier, window, has_biases);
     }
 }
 
-template <typename T, typename TW, NEDepthwiseConvolutionLayerNativeKernel::Quantized8bitEnalber<T>>
-void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window, bool has_biases)
+template <typename T, typename TW, CpuDepthwiseConvolutionNativeKernel::Quantized8bitEnalber<T>>
+void CpuDepthwiseConvolutionNativeKernel::run_depthwise(const ITensor *src, const ITensor *weights, const ITensor *biases,
+                                                        ITensor *dst, const Window &window, bool has_biases)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
     if(_depth_multiplier == 1)
     {
-        depthwise_loop_multiplier1_quantized<T, TW>(_input, _weights, _biases, _output, _conv_info, _dilation, _output_multiplier, _output_shift, window, has_biases);
+        depthwise_loop_multiplier1_quantized<T, TW>(src, weights, biases, dst, _conv_info, _dilation, _output_multiplier, _output_shift, window, has_biases);
     }
     else
     {
         const bool is_pow2                 = ((_depth_multiplier & (_depth_multiplier - 1)) == 0);
-        const bool is_quantized_per_tensor = !(is_data_type_quantized_per_channel(_weights->info()->data_type()));
+        const bool is_quantized_per_tensor = !(is_data_type_quantized_per_channel(weights->info()->data_type()));
 
         if(is_pow2 && is_quantized_per_tensor && _depth_multiplier >= 8)
         {
-            depthwise_loop_pow2_quantized_per_tensor<T, TW>(_input, _weights, _biases, _output, _conv_info, _dilation, _depth_multiplier, _output_multiplier, _output_shift, window, has_biases);
+            depthwise_loop_pow2_quantized_per_tensor<T, TW>(src, weights, biases, dst, _conv_info, _dilation, _depth_multiplier, _output_multiplier, _output_shift, window, has_biases);
         }
         else
         {
-            depthwise_loop_generic_quantized<T, TW>(_input, _weights, _biases, _output, _conv_info, _dilation, _depth_multiplier, _output_multiplier, _output_shift, window, has_biases);
+            depthwise_loop_generic_quantized<T, TW>(src, weights, biases, dst, _conv_info, _dilation, _depth_multiplier, _output_multiplier, _output_shift, window, has_biases);
         }
     }
 }
+
+void CpuDepthwiseConvolutionNativeKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON(_func == nullptr);
+
+    const auto src     = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    const auto weights = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    const auto biases  = tensors.get_const_tensor(TensorType::ACL_SRC_2);
+    auto       dst     = tensors.get_tensor(TensorType::ACL_DST);
+    (this->*_func)(src, weights, biases, dst, window, _has_biases);
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

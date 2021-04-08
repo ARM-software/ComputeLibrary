@@ -205,7 +205,7 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, 
 
 void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src);
 
     _act_info = activation_info;
 

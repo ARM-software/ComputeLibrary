@@ -111,14 +111,15 @@ def filter_clang_tidy_lines( lines ):
                ("NEWinogradLayerKernel.cpp" in line and "use '= default' to define a trivial destructor" in line) or
                ("NEGEMMLowpMatrixMultiplyCore.cpp" in line and "constructor does not initialize these fields" in line) or
                ("NEGEMMLowpAssemblyMatrixMultiplyCore" in line and "constructor does not initialize these fields" in line) or
-               ("NEDepthwiseConvolutionLayerNativeKernel" in line and re.search(r"parameter '[^']+' is unused", line)) or
-               ("NEDepthwiseConvolutionAssemblyDispatch" in line and re.search(r"parameter '[^']+' is unused", line)) or
+               ("CpuDepthwiseConvolutionNativeKernel" in line and re.search(r"parameter '[^']+' is unused", line)) or
+               ("CpuDepthwiseConvolutionAssemblyDispatch" in line and re.search(r"parameter '[^']+' is unused", line)) or
+               ("CpuDepthwiseConvolutionAssemblyDispatch" in line and "modernize-use-equals-default" in line) or
                ("CPUUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("CPUUtils.cpp" in line and "parameter 'cpusv' is unused" in line) or
                ("CPUUtils.cpp" in line and "warning: uninitialized record type" in line) or
                ("Utils.h" in line and "warning: Use of zero-allocated memory" in line) or
-               ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line) or # This is to prevent false positive, should be reassessed with the newer clang-tidy
-               ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "cppcoreguidelines-pro-type-member-init" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
+               ("CpuDepthwiseConvolutionNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line) or # This is to prevent false positive, should be reassessed with the newer clang-tidy
+               ("CpuDepthwiseConvolutionNativeKernel.cpp" in line and "cppcoreguidelines-pro-type-member-init" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
                 print_context=False
                 continue
 

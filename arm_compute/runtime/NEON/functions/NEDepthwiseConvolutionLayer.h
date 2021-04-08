@@ -24,9 +24,10 @@
 #ifndef ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H
 #define ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H
 
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
-#include "arm_compute/runtime/NEON/functions/assembly/NEDepthwiseConvolutionAssemblyDispatch.h"
 #include <memory>
 
 namespace arm_compute
@@ -91,25 +92,6 @@ public:
     void prepare() override;
 
 private:
-    /** Static function to choose the best depthwise convolution function for @ref NEDepthwiseConvolutionLayer
-     *
-     * @param[in] input            Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
-     * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-     *                             Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
-     * @param[in] biases           Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                             Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
-     * @param[in] output           Destination tensor. Data type supported: same as @p input.
-     * @param[in] conv_info        Padding and stride information to use for the convolution.
-     * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
-     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for 3x3 quantized are supported.
-     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     *
-     * @return a Depthwise Convolution Function
-     */
-    static DepthwiseConvolutionFunction get_depthwiseconvolution_function(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                                                                          const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1,
-                                                                          ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
-
     /** Basic function to execute optimized depthwise convolution routines. This function calls the following kernels:
     *
     * @note At the moment 3x3 and 5x5 convolution of stride 1, 2 are supported
@@ -173,23 +155,9 @@ private:
         void prepare() override;
 
     private:
-        MemoryGroup                            _memory_group;
-        NEDepthwiseConvolutionAssemblyDispatch _dwc_optimized_func;
-        NEPermute                              _permute_input;
-        NEPermute                              _permute_weights;
-        NEPermute                              _permute_output;
-        NEActivationLayer                      _activationlayer_function;
-        Tensor                                 _accumulator;
-        Tensor                                 _permuted_input;
-        Tensor                                 _permuted_weights;
-        Tensor                                 _permuted_output;
-        const ITensor                         *_original_weights;
-        bool                                   _has_bias;
-        bool                                   _is_quantized;
-        bool                                   _is_nchw;
-        bool                                   _permute;
-        bool                                   _is_activationlayer_enabled;
-        bool                                   _is_prepared;
+        MemoryGroup _memory_group;
+        struct Impl;
+        std::unique_ptr<Impl> _impl;
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following kernel:
@@ -248,26 +216,14 @@ private:
 
         // Inherited methods overriden:
         void run() override;
-        void prepare() override;
 
     private:
-        std::unique_ptr<NEDepthwiseConvolutionLayerNativeKernel> _depthwise_conv_kernel;
-        NEPermute                                                _permute_input;
-        NEPermute                                                _permute_weights;
-        NEPermute                                                _permute_output;
-        NEActivationLayer                                        _activationlayer_function;
-        Tensor                                                   _permuted_input;
-        Tensor                                                   _permuted_weights;
-        Tensor                                                   _permuted_output;
-        bool                                                     _is_prepared;
-        bool                                                     _is_nchw;
-        bool                                                     _is_activationlayer_enabled;
-        const ITensor                                           *_original_weights;
+        struct Impl;
+        std::unique_ptr<Impl> _impl;
     };
-
-    DepthwiseConvolutionFunction                 _depth_conv_func;
-    NEDepthwiseConvolutionLayerOptimizedInternal _func_optimized;
-    NEDepthwiseConvolutionLayerGeneric           _func_generic;
+    MemoryGroup _memory_group;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H */

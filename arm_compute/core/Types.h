@@ -1861,6 +1861,19 @@ private:
     bool _broadcast_bias;
 };
 
+struct ConvolutionInfo
+{
+    ConvolutionInfo() = default;
+    ConvolutionInfo(const PadStrideInfo &pad_stride_info, unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
+        : pad_stride_info(pad_stride_info), depth_multiplier(depth_multiplier), act_info(act_info), dilation(dilation)
+    {
+    }
+    PadStrideInfo       pad_stride_info{};        /**< Convolution info (Pads, strides,...) */
+    unsigned int        depth_multiplier{ 1 };    /**< Multiplier to apply to input's depth to retrieve the output depth. Defaults to 1 */
+    ActivationLayerInfo act_info{};               /**< Fused activation to apply after convolution. */
+    Size2D              dilation{ Size2D(1, 1) }; /**< Dilation, in elements, across x and y. Defaults to (1, 1). */
+};
+
 struct DepthwiseConvolutionReshapeInfo
 {
     unsigned int c0{ 1 };            /**< Number of channels processed by the depth-wise convolution */

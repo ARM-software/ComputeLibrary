@@ -78,9 +78,10 @@ public:
 
         _weights_shape = TensorShape(kernel_size.width, kernel_size.height);
 
-        const TensorInfo in_info(_input_shape, 1, _input_data_type);
-        const TensorInfo we_info(_weights_shape, 1, _weights_data_type);
-        _output_shape = compute_depthwise_convolution_shape(in_info, we_info, _pad_stride_info, _depth_multiplier, _dilation);
+        const TensorInfo      in_info(_input_shape, 1, _input_data_type);
+        const TensorInfo      we_info(_weights_shape, 1, _weights_data_type);
+        const ConvolutionInfo info{ _pad_stride_info, _depth_multiplier, _act_info, _dilation };
+        _output_shape = compute_depthwise_convolution_shape(in_info, we_info, info);
 
         _weights_shape.set(2, _output_shape.z());
         _biases_shape = TensorShape(_weights_shape[2]);
@@ -301,7 +302,11 @@ public:
         _target  = create_tensor<TensorType>(TensorShape(), _data_type, 1, QuantizationInfo(), _data_layout);
 
         // Create Depthwise Convolution configure function
-        _dwc.configure(&_src, &_weights, &_biases, &_target, _conv_info, _depth_multiplier, _dilation);
+        const ConvolutionInfo info
+        {
+            _conv_info, _depth_multiplier, ActivationLayerInfo(), _dilation
+        };
+        _dwc.configure(_src.info(), _weights.info(), _biases.info(), _target.info(), info);
 
         ARM_COMPUTE_EXPECT(_src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -329,8 +334,14 @@ public:
         fill(AccessorType(_weights), 1);
         fill(AccessorType(_biases), 2);
 
+        arm_compute::ITensorPack pack;
+        pack.add_const_tensor(arm_compute::TensorType::ACL_SRC_0, &_src);
+        pack.add_const_tensor(arm_compute::TensorType::ACL_SRC_1, &_weights);
+        pack.add_const_tensor(arm_compute::TensorType::ACL_SRC_2, &_biases);
+        pack.add_tensor(arm_compute::TensorType::ACL_DST, &_target);
+
         // Compute function
-        _dwc.run();
+        _dwc.run(pack);
     }
 
     void compute_reference()
@@ -343,9 +354,9 @@ public:
         fill(weights, 1);
         fill(biases, 2);
 
-        const TensorShape dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), _conv_info,
-                                                                          _depth_multiplier, _dilation);
-        _reference = reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation);
+        const ConvolutionInfo info{ _conv_info, _depth_multiplier, ActivationLayerInfo(), _dilation };
+        const TensorShape     dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), info);
+        _reference                      = reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation);
     }
 
 protected:
@@ -485,9 +496,9 @@ public:
         fill(weights, 1);
         fill(biases, 2);
 
-        const TensorShape dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), _conv_info,
-                                                                          _depth_multiplier, _dilation);
-        _reference = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
+        const ConvolutionInfo info{ _conv_info, _depth_multiplier, _act_info, _dilation };
+        const TensorShape     dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), info);
+        _reference                      = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
     }
 
 protected:

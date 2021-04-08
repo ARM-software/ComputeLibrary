@@ -435,16 +435,13 @@ inline TensorShape compute_transposed_shape(const ITensorInfo &input)
 
 /** Calculate the depthwise convolution output shape of a tensor
  *
- * @param[in] input            Input tensor info
- * @param[in] weights          Weights tensor info
- * @param[in] conv_info        Padding and stride information to use for the convolution.
- * @param[in] depth_multiplier Multiplier to apply to the input's depth in order to retrieve the output's depth.
- * @param[in] dilation         Dilation, in elements, across x and y. Defaults to (1, 1).
+ * @param[in] input   Input tensor info
+ * @param[in] weights Weights tensor info
+ * @param[in] info    Convolution info
  *
  * @return the calculated shape
  */
-inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info, unsigned int depth_multiplier, const Size2D &dilation = Size2D(1U,
-                                                       1U))
+inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, const ConvolutionInfo &info)
 {
     const TensorShape input_shape{ input.tensor_shape() };
     const TensorShape weights_shape{ weights.tensor_shape() };
@@ -462,12 +459,12 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     unsigned int output_height = 0;
     std::tie(output_width, output_height) = scaled_dimensions(input_shape[width_idx], input_shape[height_idx],
                                                               weights_shape[weights_width_idx], weights_shape[weights_height_idx],
-                                                              conv_info, dilation);
+                                                              info.pad_stride_info, info.dilation);
 
     TensorShape output_shape{ input_shape };
     output_shape.set(width_idx, output_width);
     output_shape.set(height_idx, output_height);
-    output_shape.set(channel_idx, input_shape[channel_idx] * depth_multiplier);
+    output_shape.set(channel_idx, input_shape[channel_idx] * info.depth_multiplier);
 
     return output_shape;
 }

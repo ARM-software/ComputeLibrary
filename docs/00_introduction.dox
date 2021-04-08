@@ -266,7 +266,7 @@ v20.11 Public major release
    - @ref NEGEMMTranspose1xWKernel
    - NEPoolingLayerKernel
    - NEConvolutionKernel
-   - @ref NEDepthwiseConvolutionLayerNativeKernel
+   - NEDepthwiseConvolutionLayerNativeKernel
    - @ref NEGEMMLowpMatrixMultiplyKernel
    - @ref NEGEMMMatrixMultiplyKernel
    - NEDirectConvolutionLayerOutputStageKernel
@@ -818,7 +818,7 @@ v19.08 Public major release
     - @ref NESinLayer
     - NEBatchConcatenateLayerKernel
     - @ref NEDepthToSpaceLayerKernel / @ref NEDepthToSpaceLayer
-    - @ref NEDepthwiseConvolutionLayerNativeKernel
+    - NEDepthwiseConvolutionLayerNativeKernel
     - @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
     - @ref NEMeanStdDevNormalizationKernel / @ref NEMeanStdDevNormalizationLayer
     - @ref NESpaceToDepthLayerKernel / @ref NESpaceToDepthLayer
@@ -863,7 +863,7 @@ v19.05 Public major release
     - @ref NEBatchToSpaceLayerKernel / @ref NEBatchToSpaceLayer
     - NEComplexPixelWiseMultiplicationKernel / @ref NEComplexPixelWiseMultiplication
     - @ref NECropKernel / @ref NECropResize
-    - @ref NEDepthwiseConvolutionAssemblyDispatch
+    - NEDepthwiseConvolutionAssemblyDispatch
     - @ref NEFFTDigitReverseKernel
     - @ref NEFFTRadixStageKernel
     - @ref NEFFTScaleKernel

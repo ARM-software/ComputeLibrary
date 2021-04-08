@@ -105,7 +105,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 
     if(output->total_size() != 0)
     {
-        const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
+        const ConvolutionInfo info{ conv_info, depth_multiplier, ActivationLayerInfo(), dilation };
+        const TensorShape     output_shape = compute_depthwise_convolution_shape(*input, *weights, info);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
     }
 
@@ -116,7 +117,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                                                         unsigned int depth_multiplier, GPUTarget gpu_target, std::string &kernel_name, const Size2D dilation)
 {
     // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
+    const ConvolutionInfo info
+    {
+        conv_info, depth_multiplier, ActivationLayerInfo(), dilation
+    };
+    const TensorShape     output_shape = compute_depthwise_convolution_shape(*input, *weights, info);
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
 
     const unsigned int conv_stride_x = conv_info.stride().first;
