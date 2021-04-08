@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,13 +70,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching data type input/output
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Even normalization
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Non implemented IN_MAP_2D
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Windows shrinking for NCHW
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
@@ -85,10 +83,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                                        NormalizationLayerInfo(NormType::IN_MAP_1D, 4),
                                                        NormalizationLayerInfo(NormType::IN_MAP_2D, 5),
-                                                       NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                                        NormalizationLayerInfo(NormType::CROSS_MAP, 5),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, false, false, true })),
+               framework::dataset::make("Expected", { false, false, false, false, true })),
                input_info, output_info, norm_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), norm_info)) == expected, framework::LogLevel::ERRORS);

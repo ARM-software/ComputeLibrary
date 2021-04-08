@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,5 +99,5 @@ private:
     std::unique_ptr<CLNormalizationLayerKernel> _norm_kernel;    /**< Normalization layer kernel to run */
     std::unique_ptr<CLFillBorderKernel>         _border_handler; /**< Kernel to handle  borders */
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLNORMALIZATIONLAYER_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,8 +33,8 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLNormalizationLayerKernel.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLNormalizationLayer::CLNormalizationLayer()
     : _norm_kernel(std::make_unique<CLNormalizationLayerKernel>()),
       _border_handler(std::make_unique<CLFillBorderKernel>())
@@ -55,8 +55,11 @@ void CLNormalizationLayer::configure(const CLCompileContext &compile_context, IC
     // Configure normalization kernel
     _norm_kernel->configure(compile_context, input, output, norm_info);
 
-    // Fill the border by 3 elements since we need vload4 in the IN_MAP normalization kernel
-    _border_handler->configure(compile_context, input, _norm_kernel->border_size(), BorderMode::CONSTANT, PixelValue());
+    if(!_norm_kernel->border_size().empty())
+    {
+        // Fill the border by 3 elements since we need vload4 in the IN_MAP normalization kernel
+        _border_handler->configure(compile_context, input, _norm_kernel->border_size(), BorderMode::CONSTANT, PixelValue());
+    }
 }
 
 Status CLNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
@@ -66,9 +69,13 @@ Status CLNormalizationLayer::validate(const ITensorInfo *input, const ITensorInf
 
 void CLNormalizationLayer::run()
 {
-    // Run border handler
-    CLScheduler::get().enqueue(*_border_handler, false);
+    if(!_norm_kernel->border_size().empty())
+    {
+        // Run border handler
+        CLScheduler::get().enqueue(*_border_handler, false);
+    }
 
     // Run normalization kernel
     CLScheduler::get().enqueue(*_norm_kernel);
 }
+} // namespace arm_compute
