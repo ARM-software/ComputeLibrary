@@ -51,7 +51,7 @@ static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_u8u32_mmla_8x3VL",
-    [](const GemmArgs &args) {  args._ci->has_sve() && return (args._Ksize>8); },
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>8); },
     [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_u8u32_mmla_8x3VL, uint8_t, uint32_t>(args); }
 },
