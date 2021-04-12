@@ -1043,10 +1043,10 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     const int bout = GET_SPATIAL_IDX(2, 1, 0);  // BATCH SIZE IDX
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    TILE(DATA_TYPE, 8, N0, in)       = { { 0 } };
-    TILE(DATA_TYPE, 4, N0, out)      = { { 0 } };
-    TILE(DATA_TYPE, 4, N0, tmp)      = { { 0 } };
-    TILE(uint, 8, 1, src_indirect_y) = { { 0 } };
+    TILE(DATA_TYPE, 8, N0, in)       = { { { 0 } } };
+    TILE(DATA_TYPE, 4, N0, out)      = { { { 0 } } };
+    TILE(DATA_TYPE, 4, N0, tmp)      = { { { 0 } } };
+    TILE(uint, 8, 1, src_indirect_y) = { { { 0 } } };
 
     LOOP_UNROLLING(int, i, 0, 8, 1)
     {
@@ -1081,7 +1081,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
     T_ACTIVATION(DATA_TYPE, 4, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
 
-    TILE(uint, 4, 1, dst_indirect_y) = { { 0 } };
+    TILE(uint, 4, 1, dst_indirect_y) = { { { 0 } } };
 
     // Calculate the destination indirect Y
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -1105,9 +1105,9 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Calculate the indirect Y for the source tensor
-    TILE(DATA_TYPE, 64, N0, in)       = { { 0 } };
-    TILE(DATA_TYPE, 6, N0, tmp)       = { { 0 } };
-    TILE(uint, 64, 1, src_indirect_y) = { { 0 } };
+    TILE(DATA_TYPE, 64, N0, in)       = { { { 0 } } };
+    TILE(DATA_TYPE, 6, N0, tmp)       = { { { 0 } } };
+    TILE(uint, 64, 1, src_indirect_y) = { { { 0 } } };
 
     LOOP_UNROLLING(int, i, 0, 64, 1)
     {
@@ -1138,7 +1138,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     }
 
     // Compute the output tile
-    TILE(DATA_TYPE, 16, N0, out) = { { 0 } };
+    TILE(DATA_TYPE, 16, N0, out) = { { { 0 } } };
 
     // in * A, with in = A^T * in as above
     LOOP_UNROLLING(int, i, 0, 4, 1)
@@ -1173,7 +1173,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
     T_ACTIVATION(DATA_TYPE, 16, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
 
-    TILE(uint, 16, 1, dst_indirect_y) = { { 0 } };
+    TILE(uint, 16, 1, dst_indirect_y) = { { { 0 } } };
 
     // Calculate the destination indirect Y
     LOOP_UNROLLING(int, yk, 0, 4, 1)
