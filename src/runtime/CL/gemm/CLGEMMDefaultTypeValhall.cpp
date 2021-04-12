@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,10 +68,27 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::select_kernel(const CLGEMMKernelSelec
         { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
     };
 
+    // Mali-G78 configurations
+    static std::map<DataType, FunctionExecutorPtr> gemm_g78_configs =
+    {
+        { DataType::F32, &CLGEMMDefaultTypeValhall::g78_f32 },
+        { DataType::F16, &CLGEMMDefaultTypeValhall::g78_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
+    };
+
     const DataType data_type = params.data_type;
 
     switch(_target)
     {
+        case GPUTarget::G78:
+            if(gemm_g78_configs.find(data_type) != gemm_g78_configs.end())
+            {
+                return (this->*gemm_g78_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
+            }
+            ARM_COMPUTE_ERROR("Not supported data type");
         case GPUTarget::G77:
             if(gemm_g77_configs.find(data_type) != gemm_g77_configs.end())
             {
@@ -217,6 +234,77 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::default_q8(unsigned int m, unsigned i
     {
         return CLGEMMKernelType::NATIVE;
     }
+}
+
+CLGEMMKernelType CLGEMMDefaultTypeValhall::g78_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+{
+    ARM_COMPUTE_UNUSED(b);
+
+    if(!is_rhs_constant)
+    {
+        return CLGEMMKernelType::NATIVE_V1;
+    }
+
+    if(m == 1)
+    {
+        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+    }
+
+    if(n <= 272.0000f)
+    {
+        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+    }
+    else
+    {
+        if(k <= 471.0000f)
+        {
+            return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+        }
+        else
+        {
+            if(m <= 72.5000f)
+            {
+                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+            }
+            else
+            {
+                if(m <= 90.5000f)
+                {
+                    return CLGEMMKernelType::RESHAPED;
+                }
+                else
+                {
+                    if(k <= 2448.0000f)
+                    {
+                        if(n <= 756.0000f)
+                        {
+                            return CLGEMMKernelType::RESHAPED_ONLY_RHS;
+                        }
+                        else
+                        {
+                            return CLGEMMKernelType::RESHAPED;
+                        }
+                    }
+                    else
+                    {
+                        return CLGEMMKernelType::RESHAPED;
+                    }
+                }
+            }
+        }
+    }
+}
+
+CLGEMMKernelType CLGEMMDefaultTypeValhall::g78_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+{
+    ARM_COMPUTE_UNUSED(m, n, k, b);
+
+    if(!is_rhs_constant)
+    {
+        return CLGEMMKernelType::NATIVE_V1;
+    }
+
+    return CLGEMMKernelType::RESHAPED_ONLY_RHS;
 }
 } // namespace cl_gemm
 } // namespace arm_compute

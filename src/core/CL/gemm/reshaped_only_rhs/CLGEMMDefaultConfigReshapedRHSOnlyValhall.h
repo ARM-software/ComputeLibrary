@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,8 @@ public:
 private:
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G78_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G78_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 };
 } // namespace cl_gemm

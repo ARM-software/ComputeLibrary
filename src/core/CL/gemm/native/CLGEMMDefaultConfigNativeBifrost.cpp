@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/core/GPUTarget.h"
 #include "src/core/CL/gemm/CLGEMMHelpers.h"
 
-#include <map>
 #include <utility>
 
 namespace arm_compute
@@ -45,66 +44,35 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeBifrost
     using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMDefaultConfigNativeBifrost::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
-    // Configurations for Mali-G71
-    static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G71 =
-    {
-        { DataType::F32, &CLGEMMDefaultConfigNativeBifrost::configure_G71_f32 },
-        { DataType::QASYMM8, &CLGEMMDefaultConfigNativeBifrost::configure_G71_u8 },
-        { DataType::QSYMM8, &CLGEMMDefaultConfigNativeBifrost::configure_G71_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigNativeBifrost::configure_G71_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigNativeBifrost::configure_G71_u8 }
-    };
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G71(&CLGEMMDefaultConfigNativeBifrost::configure_G71_f32,
+                                                                    &CLGEMMDefaultConfigNativeBifrost::configure_G71_f32, // We use the F32 heuristic
+                                                                    &CLGEMMDefaultConfigNativeBifrost::configure_G71_u8);
 
-    // Configurations for Mali-G76
-    static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G76 =
-    {
-        { DataType::F32, &CLGEMMDefaultConfigNativeBifrost::configure_G76_f32 },
-        { DataType::QASYMM8, &CLGEMMDefaultConfigNativeBifrost::configure_G76_u8 },
-        { DataType::QSYMM8, &CLGEMMDefaultConfigNativeBifrost::configure_G76_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigNativeBifrost::configure_G76_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigNativeBifrost::configure_G76_u8 }
-    };
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G76(&CLGEMMDefaultConfigNativeBifrost::configure_G76_f32,
+                                                                    &CLGEMMDefaultConfigNativeBifrost::configure_G76_f32, // We use the F32 heuristic
+                                                                    &CLGEMMDefaultConfigNativeBifrost::configure_G76_u8);
 
-    // Default configurations
-    static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_default =
-    {
-        { DataType::F32, &CLGEMMDefaultConfigNativeBifrost::configure_default_f32 },
-        { DataType::QASYMM8, &CLGEMMDefaultConfigNativeBifrost::configure_default_u8 },
-        { DataType::QSYMM8, &CLGEMMDefaultConfigNativeBifrost::configure_default_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigNativeBifrost::configure_default_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigNativeBifrost::configure_default_u8 }
-    };
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G7x(&CLGEMMDefaultConfigNativeBifrost::configure_default_f32,
+                                                                    &CLGEMMDefaultConfigNativeBifrost::configure_default_f32, // We use the F32 heuristic
+                                                                    &CLGEMMDefaultConfigNativeBifrost::configure_default_u8);
+
+    ConfigurationFunctionExecutorPtr func = nullptr;
 
     switch(_target)
     {
-        case GPUTarget::G71:
-            if(gemm_configs_G71.find(data_type) != gemm_configs_G71.end())
-            {
-                return (this->*gemm_configs_G71[data_type])(m, n, k, b);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Not supported data type");
-            }
         case GPUTarget::G76:
-            if(gemm_configs_G76.find(data_type) != gemm_configs_G76.end())
-            {
-                return (this->*gemm_configs_G76[data_type])(m, n, k, b);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Not supported data type");
-            }
+            func = configs_G76.get_function(data_type);
+            break;
+        case GPUTarget::G71:
+            func = configs_G71.get_function(data_type);
+            break;
         default:
-            if(gemm_configs_default.find(data_type) != gemm_configs_default.end())
-            {
-                return (this->*gemm_configs_default[data_type])(m, n, k, b);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Not supported data type");
-            }
+            func = configs_G7x.get_function(data_type);
+            break;
     }
+
+    ARM_COMPUTE_ERROR_ON_MSG(func == nullptr, "Data type not support for GEMM");
+    return (this->*func)(m, n, k, b);
 }
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeBifrost::configure_G71_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)

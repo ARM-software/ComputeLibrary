@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/core/GPUTarget.h"
 #include "src/core/CL/gemm/CLGEMMHelpers.h"
 
-#include <map>
 #include <utility>
 
 namespace arm_compute
@@ -45,30 +44,13 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeValhall
     using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMDefaultConfigNativeValhall::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
-    // Configurations for Mali-G77
-    static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G77 =
-    {
-        { DataType::F32, &CLGEMMDefaultConfigNativeValhall::configure_G77_f32 },
-        { DataType::F16, &CLGEMMDefaultConfigNativeValhall::configure_G77_f16 },
-        { DataType::QASYMM8, &CLGEMMDefaultConfigNativeValhall::configure_G77_u8 },
-        { DataType::QSYMM8, &CLGEMMDefaultConfigNativeValhall::configure_G77_u8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigNativeValhall::configure_G77_u8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigNativeValhall::configure_G77_u8 }
-    };
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_default(&CLGEMMDefaultConfigNativeValhall::configure_G77_f32,
+                                                                        &CLGEMMDefaultConfigNativeValhall::configure_G77_f16,
+                                                                        &CLGEMMDefaultConfigNativeValhall::configure_G77_u8);
 
-    switch(_target)
-    {
-        case GPUTarget::G77:
-        default:
-            if(gemm_configs_G77.find(data_type) != gemm_configs_G77.end())
-            {
-                return (this->*gemm_configs_G77[data_type])(m, n, k, b);
-            }
-            else
-            {
-                ARM_COMPUTE_ERROR("Not supported data type");
-            }
-    }
+    auto func = configs_default.get_function(data_type);
+    ARM_COMPUTE_ERROR_ON_MSG(func == nullptr, "Data type not support for GEMM");
+    return (this->*func)(m, n, k, b);
 }
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeValhall::configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
