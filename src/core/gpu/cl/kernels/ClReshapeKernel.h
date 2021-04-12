@@ -35,7 +35,7 @@ namespace opencl
 namespace kernels
 {
 /** Interface for the kernel to perform tensor reshaping */
-class ClReshapeKernel : public ICLKernel
+class ClReshapeKernel : public IClKernel
 {
 public:
     ClReshapeKernel() = default;

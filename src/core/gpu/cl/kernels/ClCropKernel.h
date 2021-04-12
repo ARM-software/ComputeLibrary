@@ -35,7 +35,7 @@ namespace opencl
 namespace kernels
 {
 /** OpenCL kernel to perform a copy between two tensors */
-class ClCropKernel : public ICLKernel
+class ClCropKernel : public IClKernel
 {
 public:
     ClCropKernel() = default;

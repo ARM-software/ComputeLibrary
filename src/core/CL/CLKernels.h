@@ -33,7 +33,6 @@
 #include "src/core/CL/kernels/CLChannelShuffleLayerKernel.h"
 #include "src/core/CL/kernels/CLCol2ImKernel.h"
 #include "src/core/CL/kernels/CLComparisonKernel.h"
-#include "src/core/CL/kernels/CLConvertFullyConnectedWeightsKernel.h"
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
 #include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"

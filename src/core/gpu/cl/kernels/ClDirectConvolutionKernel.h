@@ -36,7 +36,7 @@ namespace kernels
 {
 /** Interface for the  direct convolution kernel.
  */
-class ClDirectConvolutionKernel : public ICLKernel
+class ClDirectConvolutionKernel : public IClKernel
 {
 public:
     ClDirectConvolutionKernel() = default;

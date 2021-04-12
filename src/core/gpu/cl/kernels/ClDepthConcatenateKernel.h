@@ -37,7 +37,7 @@ namespace kernels
 /** Interface for the depth concatenate kernel.
  *  The src tensor will be concatenated into the dst tensor.
  */
-class ClDepthConcatenateKernel : public ICLKernel
+class ClDepthConcatenateKernel : public IClKernel
 {
 public:
     /** Default constructor */

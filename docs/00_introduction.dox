@@ -1116,7 +1116,7 @@ v18.05 Public major release
  - Added support for dilated convolutions in @ref NEConvolutionLayer and @ref CLConvolutionLayer.
  - New OpenCL kernels / functions:
     - @ref CLChannelShuffleLayer / @ref CLChannelShuffleLayerKernel
-    - @ref CLConvertFullyConnectedWeightsKernel / @ref CLConvertFullyConnectedWeights
+    - CLConvertFullyConnectedWeightsKernel / @ref CLConvertFullyConnectedWeights
     - @ref CLCopy / CLCopyKernel
     - @ref CLLSTMLayer
     - @ref CLRNNLayer

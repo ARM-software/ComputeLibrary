@@ -35,7 +35,7 @@ namespace opencl
 namespace kernels
 {
 /** Interface for the pixelwise multiplication kernel. */
-class ClPixelWiseMultiplicationKernel : public ICLKernel
+class ClPixelWiseMultiplicationKernel : public IClKernel
 {
 public:
     /** Default constructor */
