@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -231,6 +231,7 @@ private:
         bool                                                             _needs_weights_reshape;
         bool                                                             _is_prepared;
         bool                                                             _is_quantized;
+        bool                                                             _is_nhwc;
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:

@@ -366,7 +366,8 @@ CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::CLDepthwise
       _needs_permute(false),
       _needs_weights_reshape(false),
       _is_prepared(false),
-      _is_quantized(false)
+      _is_quantized(false),
+      _is_nhwc(false)
 {
 }
 
@@ -394,10 +395,10 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
                                                                                 gpu_target,
                                                                                 dilation));
 
-    const bool is_nhwc     = input->info()->data_layout() == DataLayout::NHWC;
+    _is_nhwc               = input->info()->data_layout() == DataLayout::NHWC;
     _is_quantized          = is_data_type_quantized_asymmetric(input->info()->data_type());
-    _needs_permute         = is_nhwc && (depth_multiplier > 1);
-    _needs_weights_reshape = is_nhwc && (depth_multiplier == 1) && _is_quantized;
+    _needs_permute         = _is_nhwc && (depth_multiplier > 1);
+    _needs_weights_reshape = _is_nhwc && (depth_multiplier == 1) && _is_quantized;
 
     _is_prepared      = false;
     _original_weights = weights;
@@ -437,7 +438,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
 
         _kernel = std::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
     }
-    else if(is_nhwc)
+    else if(_is_nhwc)
     {
         if(_needs_weights_reshape)
         {
@@ -529,7 +530,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::prepar
         {
             _output_multipliers.map();
             _output_shifts.map();
-            const unsigned int idx_ofms = _needs_permute ? 2 : 0;
+            const unsigned int idx_ofms = _is_nhwc ? 0 : 2;
             quantization::compute_quantized_multipliers_and_shifts(_input->info(),
                                                                    _original_weights->info(),
                                                                    _output->info(),
