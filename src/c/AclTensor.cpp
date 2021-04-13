@@ -38,7 +38,7 @@ constexpr int32_t max_allowed_dims = 6;
  */
 bool is_desc_valid(const AclTensorDescriptor &desc)
 {
-    if(desc.data_type > AclFloat32)
+    if(desc.data_type > AclFloat32 || desc.data_type <= AclDataTypeUnknown)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[AclCreateTensor]: Unknown data type!");
         return false;
