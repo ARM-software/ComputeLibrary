@@ -254,7 +254,7 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     // Add bias
     TILE(DATA_TYPE, 1, N0, b);
 
-    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 0, b);
+    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     T_ADD_BROADCAST_X(DATA_TYPE, 2, N0, out, b, out);
 #endif // defined(HAS_BIAS)
@@ -314,7 +314,7 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     // Add bias
     TILE(DATA_TYPE, 1, N0, b);
 
-    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 0, b);
+    T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
 #endif // defined(HAS_BIAS)
