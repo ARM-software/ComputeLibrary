@@ -489,7 +489,7 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: remove if statement after COMPMID-4368
+        // We do not pad when using image as it needs to comply to strict pitch alignment restrictions
         if(!rhs_info.export_to_cl_image)
         {
             add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &bias, &dst });
@@ -637,7 +637,7 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: remove if statement after COMPMID-4368
+        // We do not pad when using image as it needs to comply to strict pitch alignment restrictions
         if(!rhs_info.export_to_cl_image)
         {
             add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &bias, &dst });
@@ -805,7 +805,7 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: remove if statement after COMPMID-4368
+        // We do not pad when using image as it needs to comply to strict pitch alignment restrictions
         if(!rhs_info.export_to_cl_image)
         {
             add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &bias, &dst });
@@ -979,7 +979,7 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: remove if statement after COMPMID-4368
+        // We do not pad when using image as it needs to comply to strict pitch alignment restrictions
         if(!rhs_info.export_to_cl_image)
         {
             add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &bias, &dst });
@@ -1148,7 +1148,7 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: remove if statement after COMPMID-4368
+        // We do not pad when using image as it needs to comply to strict pitch alignment restrictions
         if(!rhs_info.export_to_cl_image)
         {
             add_padding_x({ &lhs, &rhs, &rhs_reshaped, &bias, &dst });
@@ -1313,7 +1313,7 @@ protected:
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: remove if statement after COMPMID-4368
+        // We do not pad when using image as it needs to comply to strict pitch alignment restrictions
         if(!rhs_info.export_to_cl_image)
         {
             add_padding_x({ &lhs, &rhs, &rhs_reshaped, &bias, &dst });
