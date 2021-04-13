@@ -28,7 +28,6 @@
 
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
-#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
+#include "src/core/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.h"
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
@@ -30,23 +30,25 @@
 
 namespace arm_compute
 {
-NEConvertFullyConnectedWeightsKernel::NEConvertFullyConnectedWeightsKernel()
-    : _input(nullptr), _output(nullptr), _factor1(0), _factor2(0)
+namespace cpu
+{
+namespace kernels
+{
+CpuConvertFullyConnectedWeightsKernel::CpuConvertFullyConnectedWeightsKernel()
+    : _factor1(0), _factor2(0)
 {
 }
 
-void NEConvertFullyConnectedWeightsKernel::configure(const ITensor *input, ITensor *output, const TensorShape &original_input_shape,
-                                                     DataLayout data_layout)
+void CpuConvertFullyConnectedWeightsKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_input_shape,
+                                                      DataLayout data_layout)
+
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // Output tensor auto initialisation if not yet initialized
-    auto_init_if_empty(*output->info(), *input->info()->clone());
+    auto_init_if_empty(*dst, *src->clone());
 
-    ARM_COMPUTE_ERROR_THROW_ON(NEConvertFullyConnectedWeightsKernel::validate(input->info(), output->info(), original_input_shape, data_layout));
-
-    _input  = input;
-    _output = output;
+    ARM_COMPUTE_ERROR_THROW_ON(CpuConvertFullyConnectedWeightsKernel::validate(src, dst, original_input_shape, data_layout));
 
     const DataLayout input_data_layout = (data_layout == DataLayout::NCHW) ? DataLayout::NHWC : DataLayout::NCHW;
 
@@ -61,38 +63,37 @@ void NEConvertFullyConnectedWeightsKernel::configure(const ITensor *input, ITens
     _factor2 = (data_layout == DataLayout::NCHW) ? num_channels : num_elems_per_input_plane;
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
-    INEKernel::configure(win);
+    Window win = calculate_max_window(*src, Steps());
+    ICpuKernel::configure(win);
 }
 
-Status NEConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape,
-                                                      DataLayout data_layout)
+Status CpuConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const TensorShape &original_input_shape,
+                                                       DataLayout data_layout)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() != 2);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != original_input_shape.total_size_lower(3));
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->num_dimensions() != 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(1) != original_input_shape.total_size_lower(3));
     ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::UNKNOWN);
 
-    // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    // Checks performed when dst is configured
+    if((dst != nullptr) && (dst->total_size() != 0))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
     }
 
     return Status{};
 }
 
 template <typename T>
-void NEConvertFullyConnectedWeightsKernel::run_convert_fc_weights(const Window &window)
+void CpuConvertFullyConnectedWeightsKernel::run_convert_fc_weights(const ITensor *in, ITensor *out, const Window &window)
 {
-    const unsigned int dst_stride_x = _output->info()->strides_in_bytes().x();
-    const unsigned int dst_stride_y = _output->info()->strides_in_bytes().y();
+    const unsigned int dst_stride_x = out->info()->strides_in_bytes().x();
+    const unsigned int dst_stride_y = out->info()->strides_in_bytes().y();
 
-    Iterator input(_input, window);
-    Iterator output(_output, window);
+    Iterator input(in, window);
+    Iterator output(out, window);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -101,26 +102,36 @@ void NEConvertFullyConnectedWeightsKernel::run_convert_fc_weights(const Window &
     input);
 }
 
-void NEConvertFullyConnectedWeightsKernel::run(const Window &window, const ThreadInfo &info)
+void CpuConvertFullyConnectedWeightsKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    switch(_input->info()->element_size())
+    const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto       dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    switch(src->info()->element_size())
     {
         case 1:
-            run_convert_fc_weights<uint8_t>(window);
+            run_convert_fc_weights<uint8_t>(src, dst, window);
             break;
         case 2:
-            run_convert_fc_weights<uint16_t>(window);
+            run_convert_fc_weights<uint16_t>(src, dst, window);
             break;
         case 4:
-            run_convert_fc_weights<uint32_t>(window);
+            run_convert_fc_weights<uint32_t>(src, dst, window);
             break;
         default:
             ARM_COMPUTE_ERROR("Data type not supported.");
             break;
     }
 }
+
+const char *CpuConvertFullyConnectedWeightsKernel::name() const
+{
+    return "CpuConvertFullyConnectedWeightsKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

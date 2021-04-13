@@ -1124,7 +1124,7 @@ v18.05 Public major release
     - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
     - @ref CLWinogradInputTransformKernel / @ref CLWinogradInputTransform
  - New Arm® Neon™ kernels / functions:
-    - @ref NEConvertFullyConnectedWeightsKernel / @ref NEConvertFullyConnectedWeights.
+    - NEConvertFullyConnectedWeightsKernel / @ref NEConvertFullyConnectedWeights.
  - Created the validate method in @ref CLDepthwiseConvolutionLayer.
  - Beta and gamma are no longer mandatory arguments in @ref NEBatchNormalizationLayer and @ref CLBatchNormalizationLayer.
  - Added depth multiplier support in @ref NEDepthwiseConvolutionLayer and @ref CLDepthwiseConvolutionLayer.

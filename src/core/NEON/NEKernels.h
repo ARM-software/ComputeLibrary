@@ -33,7 +33,6 @@
 #include "src/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 #include "src/core/NEON/kernels/NEChannelShuffleLayerKernel.h"
 #include "src/core/NEON/kernels/NECol2ImKernel.h"
-#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "src/core/NEON/kernels/NECropKernel.h"
 #include "src/core/NEON/kernels/NEDepthConvertLayerKernel.h"
