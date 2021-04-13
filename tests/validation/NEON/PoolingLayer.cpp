@@ -168,12 +168,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixture<float>, framework::Datase
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEPoolingLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                                                                                                        combine(combine(combine(combine(datasets::PoolingTypes(),
-                                                                                                        framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
-                                                                                                        framework::dataset::make("PadStride", { PadStrideInfo(2, 1, 0, 0) })),
-                                                                                                        framework::dataset::make("ExcludePadding", { false })),
-                                                                                                        framework::dataset::make("DataType", DataType::F32))),
-                                                                                                        pool_data_layout_dataset))
+                       combine(combine(combine(combine(datasets::PoolingTypes(),
+                                                       framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+                                               framework::dataset::make("PadStride", { PadStrideInfo(2, 1, 0, 0) })),
+                                       framework::dataset::make("ExcludePadding", { false })),
+                               framework::dataset::make("DataType", DataType::F32))),
+                       pool_data_layout_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -190,6 +190,17 @@ TEST_SUITE_END() // FP32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunIndices, NEPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
+                                                                                                                  framework::dataset::make("DataType",
+                                                                                                                          DataType::F16))),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
+
+                                                                                                                 ))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target_indices), _ref_indices);
+}
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPSmall,
                                                                                                                  framework::dataset::make("DataType", DataType::F16))),
                                                                                                          pool_data_layout_dataset))
@@ -237,14 +248,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<uint8_t>, framew
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEPoolingLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                    combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
-                                                                                                                    framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
-                                                                                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
-                                                                                                                    framework::dataset::make("ExcludePadding", { true })),
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8))),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
-                                                                                                                    framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 255.f, 10) })),
-                                                                                                                    framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+                       combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
+                                                       framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+                                               framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
+                                       framework::dataset::make("ExcludePadding", { true })),
+                               framework::dataset::make("DataType", DataType::QASYMM8))),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
+                       framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 255.f, 10) })),
+                       framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 255.f, 5) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -254,7 +265,7 @@ TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                     combine(PoolingLayerDatasetQASYMM8Small,
                                                                                                                             framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
-                                                                                                                    framework::dataset::make("DataLayout", {  DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                     qasymm8_signed_in_qinfo_dataset),
                                                                                                                     qasymm8_signed_in_qinfo_dataset))
 {
@@ -262,14 +273,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<int8_t>, framewo
     validate(Accessor(_target), _reference, tolerance_qasymm8_s);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEPoolingLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                    combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
-                                                                                                                    framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
-                                                                                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
-                                                                                                                    framework::dataset::make("ExcludePadding", { true })),
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
-                                                                                                                    framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10) })),
-                                                                                                                    framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -10) })))
+                       combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
+                                                       framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+                                               framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
+                                       framework::dataset::make("ExcludePadding", { true })),
+                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
+                       framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10) })),
+                       framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_s);

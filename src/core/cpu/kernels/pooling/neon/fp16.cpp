@@ -57,9 +57,11 @@ void pooling2_f16_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *ds
     int pool_stride_y = 0;
     std::tie(pool_stride_x, pool_stride_y) = pool_info.pad_stride_info.stride();
 
-    const int pad_right   = src->info()->padding().right;
-    const int in_stride_y = static_cast<int>(src->info()->strides_in_bytes().y());
-    const int in_stride_z = static_cast<int>(src->info()->strides_in_bytes().z());
+    const int pad_right      = src->info()->padding().right;
+    const int pad_left       = src->info()->padding().left;
+    const int pad_horizontal = pad_right + pad_left;
+    const int in_stride_y    = static_cast<int>(src->info()->strides_in_bytes().y());
+    const int in_stride_z    = static_cast<int>(src->info()->strides_in_bytes().z());
 
     execute_window_loop(window_out, [&](const Coordinates & id)
     {
@@ -95,9 +97,9 @@ void pooling2_f16_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *ds
 
             const uint32_t   offset_base    = offset_no_padding<float16_t>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y, DataLayout::NHWC);
             const uint32_t   offset_x0      = (uint32_t)offset_base / sizeof(float16_t) + x_off;
-            const uint32_t   offset_x1      = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_right;
-            const uint32_t   offset_x2      = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_right * src->info()->tensor_shape()[1];
-            const uint32_t   offset_x3      = (uint32_t)offset_x2 + in_stride_y / sizeof(float16_t) - pad_right;
+            const uint32_t   offset_x1      = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_horizontal;
+            const uint32_t   offset_x2      = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_horizontal * src->info()->tensor_shape()[1];
+            const uint32_t   offset_x3      = (uint32_t)offset_x2 + in_stride_y / sizeof(float16_t) - pad_horizontal;
             const uint32x4_t voffset_x0_0   = { offset_x0, offset_x0 + 1, offset_x0 + 2, offset_x0 + 3 };
             const uint32x4_t voffset_x0_1   = { offset_x0 + 4, offset_x0 + 5, offset_x0 + 6, offset_x0 + 7 };
             const uint16x8_t voffset_x0     = vcombine_u16(vmovn_u32(voffset_x0_0), vmovn_u32(voffset_x0_1));
@@ -134,9 +136,9 @@ void pooling2_f16_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *ds
 
             const uint32_t offset_base = offset_no_padding<float16_t>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y, DataLayout::NHWC);
             const uint32_t offset_x0   = (uint32_t)offset_base / sizeof(float16_t) + x_off;
-            const uint32_t offset_x1   = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_right;
-            const uint32_t offset_x2   = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_right * src->info()->tensor_shape()[1];
-            const uint32_t offset_x3   = (uint32_t)offset_x2 + in_stride_y / sizeof(float16_t) - pad_right;
+            const uint32_t offset_x1   = (uint32_t)offset_x0 + in_stride_y / sizeof(float16_t) - pad_horizontal;
+            const uint32_t offset_x2   = (uint32_t)offset_x0 + in_stride_z / sizeof(float16_t) - pad_horizontal * src->info()->tensor_shape()[1];
+            const uint32_t offset_x3   = (uint32_t)offset_x2 + in_stride_y / sizeof(float16_t) - pad_horizontal;
             const uint32_t tmp_idx0    = (x0 >= x1) ? offset_x0 : offset_x1;
             const uint32_t tmp_idx1    = (x2 >= x3) ? offset_x2 : offset_x3;
             const uint32_t tmp_idx2    = (std::max(x0, x1) >= std::max(x2, x3)) ? tmp_idx0 : tmp_idx1;

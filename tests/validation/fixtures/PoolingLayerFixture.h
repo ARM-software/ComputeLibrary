@@ -114,8 +114,7 @@ protected:
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(_target_indices.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: uncomment after COMPMID-4363
-        // add_padding_x({ &src, &dst, &_target_indices }, data_layout);
+        add_padding_x({ &src, &dst, &_target_indices }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
