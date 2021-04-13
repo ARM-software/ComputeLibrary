@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,41 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H
-#define ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H
+#ifndef ARM_COMPUTE_CPU_DIRECTCONVOLUTION_H
+#define ARM_COMPUTE_CPU_DIRECTCONVOLUTION_H
 
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/cpu/ICpuKernel.h"
+#include "src/core/cpu/kernels/CpuDirectConvolutionKernel.h"
+#include "src/core/cpu/kernels/CpuDirectConvolutionOutputStageKernel.h"
+#include "src/runtime/cpu/ICpuOperator.h"
+#include "src/runtime/cpu/operators/CpuActivation.h"
 
 #include <memory>
 
 namespace arm_compute
 {
-class ITensor;
-class ITensorInfo;
+namespace cpu
+{
 /** Function to run the direct convolution.
  *
- *  This function calls the following:
+ *  This function calls the following kernels:
  *
- * -# @ref cpu::CpuDirectConvolution
+ * -# @ref NEFillBorderKernel for the input
+ * -# @ref kernels::CpuDirectConvolutionOutputStageKernel
+ * -# @ref kernels::CpuDirectConvolutionKernel
  */
-class NEDirectConvolutionLayer : public IFunction
+class CpuDirectConvolution : public ICpuOperator
 {
 public:
     /** Constructor */
-    NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDirectConvolutionLayer(const NEDirectConvolutionLayer &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDirectConvolutionLayer &operator=(const NEDirectConvolutionLayer &) = delete;
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    NEDirectConvolutionLayer(NEDirectConvolutionLayer &&) = delete;
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    NEDirectConvolutionLayer &operator=(NEDirectConvolutionLayer &&) = delete;
-    /** Default destructor */
-    ~NEDirectConvolutionLayer();
+    CpuDirectConvolution(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Destructor */
+    ~CpuDirectConvolution();
     /** Set the input, weights, biases and output tensors.
      *
      * @note: DirectConvolution only works in the following configurations:
@@ -63,18 +66,18 @@ public:
      *    3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32
      *    5x5 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F32
      *
-     * @param[in, out] input     Input tensor. Data types supported: F16/F32.
+     * @param[in, out] src       Input tensor info. Data types supported: F16/F32.
      * @param[in]      weights   Set of kernels to convolve the input volume.
      *                           Supported sizes: 1x1, 3x3 and 5x5.
      *                           The 3rd dimension must be the same as the input's volume 3rd dimension.
-     *                           Data type supported: Same as @p input.
-     * @param[in]      bias      Set of biases. Can be nullptr. Data type supported: Same as @p input.
-     * @param[out]     output    Output tensor.
+     *                           Data type supported: Same as @p src.
+     * @param[in]      bias      Set of biases. Can be nullptr. Data type supported: Same as @p src.
+     * @param[out]     dst       Output tensor info.
      *                           The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in]      conv_info Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]      act_info  (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensorInfo *src, ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *dst, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayer
      *
      * @note: DirectConvolution only works in the following configurations:
@@ -82,29 +85,37 @@ public:
      *    3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32
      *    5x5 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F32
      *
-     * @param[in] input     Input tensor. Data types supported: F16/F32.
+     * @param[in] src       Input tensor info. Data types supported: F16/F32.
      * @param[in] weights   Set of kernels to convolve the input volume.
      *                      Supported sizes: 1x1, 3x3 and 5x5.
      *                      The 3rd dimension must be the same as the input's volume 3rd dimension.
-     *                      Data type supported: Same as @p input.
-     * @param[in] bias      Set of biases. Can be nullptr. Data type supported: Same as @p input.
-     * @param[in] output    Output tensor.
+     *                      Data type supported: Same as @p src.
+     * @param[in] bias      Set of biases. Can be nullptr. Data type supported: Same as @p src.
+     * @param[in] dst       Output tensor info.
      *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] act_info  (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const PadStrideInfo &conv_info,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run() override;
+    void run(ITensorPack &tensors) override;
 
 private:
-    struct Impl;
-    std::shared_ptr<IMemoryManager> _memory_manager;
-    std::unique_ptr<Impl>           _impl;
+    MemoryGroup                                                     _memory_group;
+    std::unique_ptr<kernels::CpuDirectConvolutionOutputStageKernel> _output_stage_kernel;
+    std::unique_ptr<kernels::CpuDirectConvolutionKernel>            _conv_kernel;
+    std::unique_ptr<NEFillBorderKernel>                             _input_border_handler;
+    std::unique_ptr<CpuActivation>                                  _activationlayer_function;
+    Tensor                                                          _accumulator;
+    bool                                                            _has_bias{ false };
+    bool                                                            _is_activationlayer_enabled{ false };
+    unsigned int                                                    _dim_split{ 0 };
+    bool                                                            _is_padding_required{ false };
 };
+} // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H */
+#endif /* ARM_COMPUTE_CPU_DIRECTCONVOLUTION_H */

@@ -39,8 +39,6 @@
 #include "src/core/NEON/kernels/NEDepthConvertLayerKernel.h"
 #include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 #include "src/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
-#include "src/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
-#include "src/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
 #include "src/core/NEON/kernels/NEFFTScaleKernel.h"

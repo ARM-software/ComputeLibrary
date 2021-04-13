@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
+#include "src/core/cpu/kernels/CpuDirectConvolutionKernel.h"
 
 #include "src/core/NEON/kernels/detail/NEDirectConvolutionDetail.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -45,6 +45,10 @@
 using namespace arm_compute::detail;
 
 namespace arm_compute
+{
+namespace cpu
+{
+namespace kernels
 {
 namespace
 {
@@ -154,19 +158,19 @@ template <unsigned int stridex>
 class convolver_w1x1_i8x8_f32
 {
 public:
-    static void convolve(const Window &window, const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+    static void convolve(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
     {
-        ARM_COMPUTE_ERROR_ON(input->info()->dimension(Window::DimX) > small_tensor_size_optim);
-        ARM_COMPUTE_ERROR_ON(input->info()->dimension(Window::DimY) > small_tensor_size_optim);
+        ARM_COMPUTE_ERROR_ON(src->info()->dimension(Window::DimX) > small_tensor_size_optim);
+        ARM_COMPUTE_ERROR_ON(src->info()->dimension(Window::DimY) > small_tensor_size_optim);
 
-        const int          input_stride_x  = input->info()->strides_in_bytes().x();
-        const int          input_stride_y  = input->info()->strides_in_bytes().y();
-        const int          input_stride_z  = input->info()->strides_in_bytes().z();
-        const int          output_stride_y = output->info()->strides_in_bytes().y();
-        const int          output_stride_z = output->info()->strides_in_bytes().z();
+        const int          input_stride_x  = src->info()->strides_in_bytes().x();
+        const int          input_stride_y  = src->info()->strides_in_bytes().y();
+        const int          input_stride_z  = src->info()->strides_in_bytes().z();
+        const int          output_stride_y = dst->info()->strides_in_bytes().y();
+        const int          output_stride_z = dst->info()->strides_in_bytes().z();
         const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
         const int          kernel_stride_w = weights->info()->strides_in_bytes()[3];
-        const int          output_h        = output->info()->dimension(1);
+        const int          output_h        = dst->info()->dimension(1);
         const int          range_z         = window.z().end() - window.z().start();
         const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
         const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
@@ -175,8 +179,8 @@ public:
 
         // setup output window for the iterator
         Window window_out = window;
-        window_out.set(Window::DimX, Window::Dimension(0, output->info()->dimension(Window::DimX), output->info()->dimension(Window::DimX)));
-        window_out.set(Window::DimY, Window::Dimension(0, output->info()->dimension(Window::DimY), output->info()->dimension(Window::DimY)));
+        window_out.set(Window::DimX, Window::Dimension(0, dst->info()->dimension(Window::DimX), dst->info()->dimension(Window::DimX)));
+        window_out.set(Window::DimY, Window::Dimension(0, dst->info()->dimension(Window::DimY), dst->info()->dimension(Window::DimY)));
         window_out.set(Window::DimZ, Window::Dimension(window.z().start(), window.z().end(), range_z));
 
         // setup input window for the iterator
@@ -187,8 +191,8 @@ public:
         window_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
         Window   window_k = calculate_max_window(*weights->info(), Steps(1u));
-        Iterator out(output, window_out);
-        Iterator in(input, window_in);
+        Iterator out(dst, window_out);
+        Iterator in(src, window_in);
         Iterator k(weights, window_k);
 
         const uint8_t *k_ptr = k.ptr();
@@ -237,17 +241,17 @@ class convolver_1x1
 {
 public:
     static void convolve(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
-                         const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+                         const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
     {
-        const int          input_stride_x  = input->info()->strides_in_bytes().x();
-        const int          input_stride_y  = input->info()->strides_in_bytes().y();
-        const int          input_stride_z  = input->info()->strides_in_bytes().z();
-        const int          output_stride_y = output->info()->strides_in_bytes().y();
-        const int          output_stride_z = output->info()->strides_in_bytes().z();
+        const int          input_stride_x  = src->info()->strides_in_bytes().x();
+        const int          input_stride_y  = src->info()->strides_in_bytes().y();
+        const int          input_stride_z  = src->info()->strides_in_bytes().z();
+        const int          output_stride_y = dst->info()->strides_in_bytes().y();
+        const int          output_stride_z = dst->info()->strides_in_bytes().z();
         const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
         const int          kernel_stride_w = weights->info()->strides_in_bytes()[3];
-        const int          output_w        = output->info()->dimension(0);
-        const int          output_h        = output->info()->dimension(1);
+        const int          output_w        = dst->info()->dimension(0);
+        const int          output_h        = dst->info()->dimension(1);
         const int          range_z         = window.z().end() - window.z().start();
         const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
         const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
@@ -256,8 +260,8 @@ public:
 
         // setup output window for the iterator
         Window window_out = window;
-        window_out.set(Window::DimX, Window::Dimension(0, output->info()->dimension(Window::DimX), output->info()->dimension(Window::DimX)));
-        window_out.set(Window::DimY, Window::Dimension(0, output->info()->dimension(Window::DimY), output->info()->dimension(Window::DimY)));
+        window_out.set(Window::DimX, Window::Dimension(0, dst->info()->dimension(Window::DimX), dst->info()->dimension(Window::DimX)));
+        window_out.set(Window::DimY, Window::Dimension(0, dst->info()->dimension(Window::DimY), dst->info()->dimension(Window::DimY)));
         window_out.set(Window::DimZ, Window::Dimension(window.z().start(), window.z().end(), range_z));
 
         // setup input window for the iterator
@@ -268,8 +272,8 @@ public:
         window_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
         Window   window_k = calculate_max_window(*weights->info(), Steps(1u));
-        Iterator out(output, window_out);
-        Iterator in(input, window_in);
+        Iterator out(dst, window_out);
+        Iterator in(src, window_in);
         Iterator k(weights, window_k);
 
         const uint8_t *k_ptr = k.ptr();
@@ -480,20 +484,20 @@ class convolver_3x3
 {
 public:
     static void convolve(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
-                         const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+                         const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
     {
         ARM_COMPUTE_UNUSED(num_elems_read_per_iteration);
-        const int          input_stride_x  = input->info()->strides_in_bytes().x();
-        const int          input_stride_y  = input->info()->strides_in_bytes().y();
-        const int          input_stride_z  = input->info()->strides_in_bytes().z();
-        const int          output_stride_y = output->info()->strides_in_bytes().y();
-        const int          output_stride_z = output->info()->strides_in_bytes().z();
+        const int          input_stride_x  = src->info()->strides_in_bytes().x();
+        const int          input_stride_y  = src->info()->strides_in_bytes().y();
+        const int          input_stride_z  = src->info()->strides_in_bytes().z();
+        const int          output_stride_y = dst->info()->strides_in_bytes().y();
+        const int          output_stride_z = dst->info()->strides_in_bytes().z();
         const int          kernel_stride_x = weights->info()->strides_in_bytes().x();
         const int          kernel_stride_y = weights->info()->strides_in_bytes().y();
         const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
         const int          kernel_stride_w = weights->info()->strides_in_bytes()[3];
-        const int          output_w        = output->info()->dimension(0);
-        const int          output_h        = output->info()->dimension(1);
+        const int          output_w        = dst->info()->dimension(0);
+        const int          output_h        = dst->info()->dimension(1);
         const int          num_planes_z    = window.z().end() - window.z().start();
         const int          delta_input     = get_input_num_elems_processed(num_elems_written_per_iteration, stridex);
         const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
@@ -503,8 +507,8 @@ public:
 
         // setup output window for the iterator
         Window window_out = window;
-        window_out.set(Window::DimX, Window::Dimension(0, output->info()->dimension(Window::DimX), output->info()->dimension(Window::DimX)));
-        window_out.set(Window::DimY, Window::Dimension(0, output->info()->dimension(Window::DimY), output->info()->dimension(Window::DimY)));
+        window_out.set(Window::DimX, Window::Dimension(0, dst->info()->dimension(Window::DimX), dst->info()->dimension(Window::DimX)));
+        window_out.set(Window::DimY, Window::Dimension(0, dst->info()->dimension(Window::DimY), dst->info()->dimension(Window::DimY)));
         window_out.set(Window::DimZ, Window::Dimension(window.z().start(), window.z().end(), num_planes_z));
 
         // setup input window for the iterator
@@ -516,8 +520,8 @@ public:
 
         Window window_k = calculate_max_window(*weights->info(), Steps(1u));
 
-        Iterator out(output, window_out);
-        Iterator in(input, window_in);
+        Iterator out(dst, window_out);
+        Iterator in(src, window_in);
         Iterator k(weights, window_k);
 
         const uint8_t *k_ptr = k.ptr();
@@ -601,20 +605,20 @@ class convolver_5x5
 {
 public:
     static void convolve(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
-                         const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+                         const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
     {
         ARM_COMPUTE_UNUSED(num_elems_read_per_iteration);
-        const int          input_stride_x  = input->info()->strides_in_bytes().x();
-        const int          input_stride_y  = input->info()->strides_in_bytes().y();
-        const int          input_stride_z  = input->info()->strides_in_bytes().z();
-        const int          output_stride_y = output->info()->strides_in_bytes().y();
-        const int          output_stride_z = output->info()->strides_in_bytes().z();
+        const int          input_stride_x  = src->info()->strides_in_bytes().x();
+        const int          input_stride_y  = src->info()->strides_in_bytes().y();
+        const int          input_stride_z  = src->info()->strides_in_bytes().z();
+        const int          output_stride_y = dst->info()->strides_in_bytes().y();
+        const int          output_stride_z = dst->info()->strides_in_bytes().z();
         const int          kernel_stride_x = weights->info()->strides_in_bytes().x();
         const int          kernel_stride_y = weights->info()->strides_in_bytes().y();
         const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
         const int          kernel_stride_w = weights->info()->strides_in_bytes()[3];
-        const int          output_w        = output->info()->dimension(0);
-        const int          output_h        = output->info()->dimension(1);
+        const int          output_w        = dst->info()->dimension(0);
+        const int          output_h        = dst->info()->dimension(1);
         const int          num_planes_z    = window.z().end() - window.z().start();
         const int          delta_input     = get_input_num_elems_processed(num_elems_written_per_iteration, stridex);
         const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
@@ -624,8 +628,8 @@ public:
 
         // setup output window for the iterator
         Window window_out = window;
-        window_out.set(Window::DimX, Window::Dimension(0, output->info()->dimension(Window::DimX), output->info()->dimension(Window::DimX)));
-        window_out.set(Window::DimY, Window::Dimension(0, output->info()->dimension(Window::DimY), output->info()->dimension(Window::DimY)));
+        window_out.set(Window::DimX, Window::Dimension(0, dst->info()->dimension(Window::DimX), dst->info()->dimension(Window::DimX)));
+        window_out.set(Window::DimY, Window::Dimension(0, dst->info()->dimension(Window::DimY), dst->info()->dimension(Window::DimY)));
         window_out.set(Window::DimZ, Window::Dimension(window.z().start(), window.z().end(), num_planes_z));
 
         // setup input window for the iterator
@@ -637,8 +641,8 @@ public:
 
         Window window_k = calculate_max_window(*weights->info(), Steps(1u));
 
-        Iterator out(output, window_out);
-        Iterator in(input, window_in);
+        Iterator out(dst, window_out);
+        Iterator in(src, window_in);
         Iterator k(weights, window_k);
 
         const uint8_t *k_ptr = k.ptr();
@@ -720,19 +724,19 @@ float vreduce(const float32x4_t &v)
 
 template <typename T1, typename T2>
 inline void convolve_1x1(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
-                         const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+                         const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
 {
     const unsigned int conv_stride_x = std::get<0>(conv_info.stride());
     switch(conv_stride_x)
     {
         case 1:
-            convolver_1x1<T1, T2, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_1x1<T1, T2, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         case 2:
-            convolver_1x1<T1, T2, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_1x1<T1, T2, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         case 3:
-            convolver_1x1<T1, T2, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_1x1<T1, T2, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
@@ -741,21 +745,21 @@ inline void convolve_1x1(const Window &window, unsigned int num_elems_read_per_i
 
 template <>
 inline void convolve_1x1<float, float>(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
-                                       const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+                                       const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
 {
     const unsigned int conv_stride_x = std::get<0>(conv_info.stride());
-    if(run_optim_small_tensor(input))
+    if(run_optim_small_tensor(src))
     {
         switch(conv_stride_x)
         {
             case 1:
-                convolver_w1x1_i8x8_f32<1>::convolve(window, input, weights, output, conv_info);
+                convolver_w1x1_i8x8_f32<1>::convolve(window, src, weights, dst, conv_info);
                 break;
             case 2:
-                convolver_w1x1_i8x8_f32<2>::convolve(window, input, weights, output, conv_info);
+                convolver_w1x1_i8x8_f32<2>::convolve(window, src, weights, dst, conv_info);
                 break;
             case 3:
-                convolver_w1x1_i8x8_f32<3>::convolve(window, input, weights, output, conv_info);
+                convolver_w1x1_i8x8_f32<3>::convolve(window, src, weights, dst, conv_info);
                 break;
             default:
                 ARM_COMPUTE_ERROR("Not implemented");
@@ -766,13 +770,13 @@ inline void convolve_1x1<float, float>(const Window &window, unsigned int num_el
         switch(conv_stride_x)
         {
             case 1:
-                convolver_1x1<float, float, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+                convolver_1x1<float, float, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
                 break;
             case 2:
-                convolver_1x1<float, float, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+                convolver_1x1<float, float, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
                 break;
             case 3:
-                convolver_1x1<float, float, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+                convolver_1x1<float, float, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
                 break;
             default:
                 ARM_COMPUTE_ERROR("Not implemented");
@@ -782,19 +786,19 @@ inline void convolve_1x1<float, float>(const Window &window, unsigned int num_el
 
 template <typename T1, typename T2>
 inline void convolve_3x3(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
-                         const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+                         const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
 {
     const unsigned int conv_stride_x = std::get<0>(conv_info.stride());
     switch(conv_stride_x)
     {
         case 1:
-            convolver_3x3<T1, T2, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_3x3<T1, T2, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         case 2:
-            convolver_3x3<T1, T2, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_3x3<T1, T2, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         case 3:
-            convolver_3x3<T1, T2, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_3x3<T1, T2, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
@@ -803,72 +807,72 @@ inline void convolve_3x3(const Window &window, unsigned int num_elems_read_per_i
 
 template <typename T1, typename T2>
 inline void convolve_5x5(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
-                         const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+                         const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
 {
     const unsigned int conv_stride_x = std::get<0>(conv_info.stride());
     switch(conv_stride_x)
     {
         case 1:
-            convolver_5x5<T1, T2, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_5x5<T1, T2, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         case 2:
-            convolver_5x5<T1, T2, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_5x5<T1, T2, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         case 3:
-            convolver_5x5<T1, T2, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+            convolver_5x5<T1, T2, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, src, weights, dst, conv_info);
             break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
     }
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights);
 
-    const DataLayout data_layout = input->data_layout();
+    const DataLayout data_layout = src->data_layout();
     const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported.");
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(channel_idx) != input->dimension(channel_idx));
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(channel_idx) != src->dimension(channel_idx));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) != weights->dimension(height_idx));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
-    ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::NHWC && input->data_type() != DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(width_idx) > 3) && (input->data_type() == DataType::F16));
+    ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::NHWC && src->data_type() != DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(width_idx) > 3) && (src->data_type() == DataType::F16));
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if(dst->total_size() != 0)
     {
-        TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
+        TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
 
-        DataType data_type = input->data_type();
+        DataType data_type = src->data_type();
 
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
-        ARM_COMPUTE_RETURN_ERROR_ON(output->data_type() != data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON(dst->data_type() != data_type);
     }
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int &num_weight_elems_read_per_row,
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITensorInfo *weights, ITensorInfo *dst, const PadStrideInfo &conv_info, unsigned int &num_weight_elems_read_per_row,
                                                         unsigned int &num_elems_read_per_iteration, unsigned int &num_elems_written_per_iteration, BorderSize &border_size)
 {
-    ARM_COMPUTE_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
 
-    const DataLayout data_layout = input->data_layout();
+    const DataLayout data_layout = src->data_layout();
     const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
 
     // Calculate right and bottom border
     unsigned int kernel_size   = weights->dimension(width_idx);
     const int    conv_stride_x = std::get<0>(conv_info.stride());
     const int    conv_stride_y = std::get<1>(conv_info.stride());
-    const int    input_width   = input->dimension(width_idx);
+    const int    input_width   = src->dimension(width_idx);
 
     Window win{};
     bool   window_changed = false;
@@ -879,7 +883,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         {
             case 1:
             {
-                switch(input->data_type())
+                switch(src->data_type())
                 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                     case DataType::F16:
@@ -887,7 +891,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                         break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
                     case DataType::F32:
-                        if(run_optim_small_tensor_info(input))
+                        if(run_optim_small_tensor_info(src))
                         {
                             num_elems_written_per_iteration = 8;
                         }
@@ -905,7 +909,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                 break;
             }
             case 3:
-                switch(input->data_type())
+                switch(src->data_type())
                 {
                     case DataType::F32:
                         num_weight_elems_read_per_row   = 4 + kernel_size - 1;
@@ -926,7 +930,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                 break;
             case 5:
             {
-                switch(input->data_type())
+                switch(src->data_type())
                 {
                     case DataType::F32:
                         num_weight_elems_read_per_row   = 4 + kernel_size - 1;
@@ -948,7 +952,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
         // Calculate right pad
         int start_x       = kernel_size / 2 - static_cast<int>(conv_info.pad_left());
-        int end_x         = ceil_to_multiple(static_cast<int>(output->dimension(0)), num_elems_written_per_iteration) * conv_stride_x;
+        int end_x         = ceil_to_multiple(static_cast<int>(dst->dimension(0)), num_elems_written_per_iteration) * conv_stride_x;
         int upper_bound_w = ceil_to_multiple(start_x + end_x, num_elems_read_per_iteration) - input_width;
 
         // Calculate border
@@ -963,35 +967,35 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         border_size.bottom = conv_pad_bottom;
 
         // Configure window
-        win = calculate_max_window(*output, Steps(num_elems_written_per_iteration));
+        win = calculate_max_window(*dst, Steps(num_elems_written_per_iteration));
 
-        AccessWindowRectangle input_access(input, -conv_pad_left, -conv_pad_top,
+        AccessWindowRectangle input_access(src, -conv_pad_left, -conv_pad_top,
                                            num_elems_read_per_iteration, kernel_size,
                                            conv_stride_x, conv_stride_y);
         AccessWindowStatic     weights_access(weights, 0, 0, num_weight_elems_read_per_row, kernel_size);
-        AccessWindowHorizontal output_access(output, 0, num_elems_written_per_iteration);
+        AccessWindowHorizontal output_access(dst, 0, num_elems_written_per_iteration);
         window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), dst->tensor_shape()));
     }
     else
     {
         // Configure window NHWC without any padding
-        win = calculate_max_window(*output, Steps());
+        win = calculate_max_window(*dst, Steps());
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
-bool have_zero_x_internal_padding(ITensorInfo *input, ITensorInfo *weights)
+bool have_zero_x_internal_padding(ITensorInfo *src, ITensorInfo *weights)
 {
-    return (input->padding().left == 0 && weights->padding().left == 0 && input->padding().right == 0 && weights->padding().right == 0);
+    return (src->padding().left == 0 && weights->padding().left == 0 && src->padding().right == 0 && weights->padding().right == 0);
 }
 
 } // namespace
 
 template <typename T>
-void NEDirectConvolutionLayerKernel::convolve_nhwc_optimized(const Window &window)
+void CpuDirectConvolutionKernel::convolve_nhwc_optimized(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst)
 {
     // This function assumes that input and weights have not padding in channel
 
@@ -1001,19 +1005,19 @@ void NEDirectConvolutionLayerKernel::convolve_nhwc_optimized(const Window &windo
     using tag_type    = typename vtype::tag_type;
 
     // Scalar quantities
-    const int element_size   = _input->info()->element_size();
-    const int input_stride_w = _input->info()->strides_in_bytes().y() / element_size;
-    const int input_stride_h = _input->info()->strides_in_bytes().z() / element_size;
-    const int input_stride_n = _input->info()->strides_in_bytes()[3] / element_size;
-    const int input_dim_w    = _input->info()->dimension(1);
-    const int input_dim_h    = _input->info()->dimension(2);
+    const int element_size   = src->info()->element_size();
+    const int input_stride_w = src->info()->strides_in_bytes().y() / element_size;
+    const int input_stride_h = src->info()->strides_in_bytes().z() / element_size;
+    const int input_stride_n = src->info()->strides_in_bytes()[3] / element_size;
+    const int input_dim_w    = src->info()->dimension(1);
+    const int input_dim_h    = src->info()->dimension(2);
 
-    const int output_stride_c = _output->info()->strides_in_bytes().x();
+    const int output_stride_c = dst->info()->strides_in_bytes().x();
 
-    const unsigned int kernel_stride_w = _weights->info()->strides_in_bytes().y() / element_size;
-    const unsigned int kernel_stride_h = _weights->info()->strides_in_bytes().z() / element_size;
-    const int          kernel_dim_w    = _weights->info()->dimension(1);
-    const int          kernel_dim_h    = _weights->info()->dimension(2);
+    const unsigned int kernel_stride_w = weights->info()->strides_in_bytes().y() / element_size;
+    const unsigned int kernel_stride_h = weights->info()->strides_in_bytes().z() / element_size;
+    const int          kernel_dim_w    = weights->info()->dimension(1);
+    const int          kernel_dim_h    = weights->info()->dimension(2);
 
     const int conv_pad_top  = _conv_info.pad_top();
     const int conv_pad_left = _conv_info.pad_left();
@@ -1025,13 +1029,13 @@ void NEDirectConvolutionLayerKernel::convolve_nhwc_optimized(const Window &windo
     window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     // Setup input window for the weights iterator
-    Window window_w = calculate_max_window(*_weights->info(), Steps());
+    Window window_w = calculate_max_window(*weights->info(), Steps());
     window_w.set(Window::DimX, Window::Dimension(0, 1, 1));
     window_w.set(Window::DimY, Window::Dimension(0, 1, 1));
     window_w.set(Window::DimZ, Window::Dimension(0, 1, 1));
 
-    Iterator out(_output, window_out);
-    Iterator wei(_weights, window_w);
+    Iterator out(dst, window_out);
+    Iterator wei(weights, window_w);
 
     constexpr int num_elems_read_per_iteration = 16 / sizeof(T);
     /*
@@ -1079,7 +1083,7 @@ void NEDirectConvolutionLayerKernel::convolve_nhwc_optimized(const Window &windo
              * As a reminder, the batches of the weights are translated into the
              * channels of the output
              */
-            const T *in_ptr_row = reinterpret_cast<const T *>(_input->buffer() + _input->info()->offset_first_element_in_bytes())
+            const T *in_ptr_row = reinterpret_cast<const T *>(src->buffer() + src->info()->offset_first_element_in_bytes())
                                   + id[3] * input_stride_n + in_w_start * input_stride_w + in_h_start * input_stride_h;
             const T *weights_ptr_row = reinterpret_cast<const T *>(wei.ptr()) + index_h_start * kernel_stride_h;
             uint8_t *out_ptr         = out.ptr() + id_w[3] * output_stride_c;
@@ -1112,7 +1116,7 @@ void NEDirectConvolutionLayerKernel::convolve_nhwc_optimized(const Window &windo
 }
 
 template <typename T>
-void NEDirectConvolutionLayerKernel::convolve_nhwc(const Window &window)
+void CpuDirectConvolutionKernel::convolve_nhwc(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst)
 {
     // Declare useful types
     using vtype       = wrapper::traits::neon_bitvector<T, wrapper::traits::BitWidth::W128>;
@@ -1120,19 +1124,19 @@ void NEDirectConvolutionLayerKernel::convolve_nhwc(const Window &window)
     using tag_type    = typename vtype::tag_type;
 
     // Scalar quantities
-    const int element_size   = _input->info()->element_size();
-    const int input_stride_w = _input->info()->strides_in_bytes().y() / element_size;
-    const int input_stride_h = _input->info()->strides_in_bytes().z() / element_size;
-    const int input_stride_n = _input->info()->strides_in_bytes()[3] / element_size;
-    const int input_dim_w    = _input->info()->dimension(1);
-    const int input_dim_h    = _input->info()->dimension(2);
+    const int element_size   = src->info()->element_size();
+    const int input_stride_w = src->info()->strides_in_bytes().y() / element_size;
+    const int input_stride_h = src->info()->strides_in_bytes().z() / element_size;
+    const int input_stride_n = src->info()->strides_in_bytes()[3] / element_size;
+    const int input_dim_w    = src->info()->dimension(1);
+    const int input_dim_h    = src->info()->dimension(2);
 
-    const int output_stride_c = _output->info()->strides_in_bytes().x();
+    const int output_stride_c = dst->info()->strides_in_bytes().x();
 
-    const unsigned int kernel_stride_w = _weights->info()->strides_in_bytes().y() / element_size;
-    const unsigned int kernel_stride_h = _weights->info()->strides_in_bytes().z() / element_size;
-    const int          kernel_dim_w    = _weights->info()->dimension(1);
-    const int          kernel_dim_h    = _weights->info()->dimension(2);
+    const unsigned int kernel_stride_w = weights->info()->strides_in_bytes().y() / element_size;
+    const unsigned int kernel_stride_h = weights->info()->strides_in_bytes().z() / element_size;
+    const int          kernel_dim_w    = weights->info()->dimension(1);
+    const int          kernel_dim_h    = weights->info()->dimension(2);
 
     const int conv_pad_top  = _conv_info.pad_top();
     const int conv_pad_left = _conv_info.pad_left();
@@ -1144,13 +1148,13 @@ void NEDirectConvolutionLayerKernel::convolve_nhwc(const Window &window)
     window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     // Setup input window for the weights iterator
-    Window window_w = calculate_max_window(*_weights->info(), Steps());
+    Window window_w = calculate_max_window(*weights->info(), Steps());
     window_w.set(Window::DimX, Window::Dimension(0, 1, 1));
     window_w.set(Window::DimY, Window::Dimension(0, 1, 1));
     window_w.set(Window::DimZ, Window::Dimension(0, 1, 1));
 
-    Iterator out(_output, window_out);
-    Iterator wei(_weights, window_w);
+    Iterator out(dst, window_out);
+    Iterator wei(weights, window_w);
 
     constexpr int num_elems_read_per_iteration = 16 / sizeof(T);
 
@@ -1174,8 +1178,8 @@ void NEDirectConvolutionLayerKernel::convolve_nhwc(const Window &window)
         const int wei_w_end   = kernel_dim_w - (in_w_end_t - in_w_end);
         const int wei_h_end   = kernel_dim_h - (in_h_end_t - in_h_end);
 
-        const int      index_c_end  = _weights->info()->dimension(0);
-        const T *const in_ptr_start = reinterpret_cast<const T *>(_input->buffer() + _input->info()->offset_first_element_in_bytes()) + id[3] * input_stride_n;
+        const int      index_c_end  = weights->info()->dimension(0);
+        const T *const in_ptr_start = reinterpret_cast<const T *>(src->buffer() + src->info()->offset_first_element_in_bytes()) + id[3] * input_stride_n;
 
         execute_window_loop(window_w, [&](const Coordinates & id_w)
         {
@@ -1215,27 +1219,18 @@ void NEDirectConvolutionLayerKernel::convolve_nhwc(const Window &window)
     out);
 }
 
-NEDirectConvolutionLayerKernel::NEDirectConvolutionLayerKernel()
-    : _input(nullptr), _weights(nullptr), _output(nullptr), _conv_info(), _border_size(0), _kernel_size(0), _num_weight_elems_read_per_row(0), _num_elems_read_per_iteration(0),
-      _num_elems_written_per_iteration(0), _data_layout()
-{
-}
-
-BorderSize NEDirectConvolutionLayerKernel::border_size() const
+BorderSize CpuDirectConvolutionKernel::border_size() const
 {
     return _border_size;
 }
 
-void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+void CpuDirectConvolutionKernel::configure(ITensorInfo *src, ITensorInfo *weights, ITensorInfo *dst, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
 
-    _input       = input;
-    _weights     = weights;
-    _output      = output;
     _conv_info   = conv_info;
-    _data_layout = _input->info()->data_layout();
-    _kernel_size = weights->info()->dimension(get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH));
+    _data_layout = src->data_layout();
+    _kernel_size = weights->dimension(get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH));
 
     const unsigned int conv_pad_left   = conv_info.pad_left();
     const unsigned int conv_pad_top    = conv_info.pad_top();
@@ -1251,33 +1246,33 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
     }
 
     // Get convolved dimensions
-    TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input->info(), *weights->info(), conv_info);
+    TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
 
-    DataType data_type = input->info()->data_type();
+    DataType data_type = src->data_type();
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, data_type);
+    auto_init_if_empty(*dst, output_shape, 1, data_type);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), output->info(), conv_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, dst, conv_info));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, _num_weight_elems_read_per_row,
+    auto win_config = validate_and_configure_window(src, weights, dst, conv_info, _num_weight_elems_read_per_row,
                                                     _num_elems_read_per_iteration, _num_elems_written_per_iteration, _border_size);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    ICpuKernel::configure(win_config.second);
 }
 
-Status NEDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Status CpuDirectConvolutionKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const PadStrideInfo &conv_info)
 {
     unsigned int num_weight_elems_read_per_row   = 0;
     unsigned int num_elems_read_per_iteration    = 0;
     unsigned int num_elems_written_per_iteration = 0;
     BorderSize   border_size                     = {};
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, output, conv_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, dst, conv_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(),
                                                               weights->clone().get(),
-                                                              output->clone().get(),
+                                                              dst->clone().get(),
                                                               conv_info,
                                                               num_weight_elems_read_per_row,
                                                               num_elems_read_per_iteration,
@@ -1288,14 +1283,16 @@ Status NEDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const 
     return Status{};
 }
 
-void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo &info)
+void CpuDirectConvolutionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_input->buffer() == nullptr);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    const int kernel_size = _weights->info()->dimension(get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH));
+    auto      src         = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    auto      weights     = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    auto      dst         = tensors.get_tensor(TensorType::ACL_DST);
+    const int kernel_size = weights->info()->dimension(get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH));
 
     if(_data_layout == DataLayout::NCHW)
     {
@@ -1303,14 +1300,14 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
         {
             case 1:
             {
-                switch(_input->info()->data_type())
+                switch(src->info()->data_type())
                 {
                     case DataType::F32:
-                        convolve_1x1<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
+                        convolve_1x1<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, src, weights, dst, _conv_info);
                         break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                     case DataType::F16:
-                        convolve_1x1<float16_t, float16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
+                        convolve_1x1<float16_t, float16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, src, weights, dst, _conv_info);
                         break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
                     default:
@@ -1321,14 +1318,14 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
             }
             case 3:
             {
-                switch(_input->info()->data_type())
+                switch(src->info()->data_type())
                 {
                     case DataType::F32:
-                        convolve_3x3<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
+                        convolve_3x3<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, src, weights, dst, _conv_info);
                         break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                     case DataType::F16:
-                        convolve_3x3<float16_t, float16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
+                        convolve_3x3<float16_t, float16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, src, weights, dst, _conv_info);
                         break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
                     default:
@@ -1339,10 +1336,10 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
             }
             case 5:
             {
-                switch(_input->info()->data_type())
+                switch(src->info()->data_type())
                 {
                     case DataType::F32:
-                        convolve_5x5<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
+                        convolve_5x5<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, src, weights, dst, _conv_info);
                         break;
                     default:
                         ARM_COMPUTE_ERROR("Data type not supported");
@@ -1359,17 +1356,17 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
     }
     else
     {
-        switch(_input->info()->data_type())
+        switch(src->info()->data_type())
         {
             case DataType::F32:
             {
-                if(have_zero_x_internal_padding(_input->info(), _weights->info()))
+                if(have_zero_x_internal_padding(src->info(), weights->info()))
                 {
-                    convolve_nhwc_optimized<float>(window);
+                    convolve_nhwc_optimized<float>(window, src, weights, dst);
                 }
                 else
                 {
-                    convolve_nhwc<float>(window);
+                    convolve_nhwc<float>(window, src, weights, dst);
                 }
                 break;
             }
@@ -1379,4 +1376,10 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
         }
     }
 }
+const char *CpuDirectConvolutionKernel::name() const
+{
+    return "CpuDirectConvolutionLayerKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

@@ -259,7 +259,7 @@ v20.11 Public major release
    - NENonMaximaSuppression3x3Kernel
    - @ref NERemapKernel
    - @ref NEGEMMInterleave4x4Kernel
-   - @ref NEDirectConvolutionLayerKernel
+   - NEDirectConvolutionLayerKernel
    - NEScaleKernel
    - NELocallyConnectedMatrixMultiplyKernel
    - @ref NEGEMMLowpOffsetContributionKernel
@@ -269,7 +269,7 @@ v20.11 Public major release
    - @ref NEDepthwiseConvolutionLayerNativeKernel
    - @ref NEGEMMLowpMatrixMultiplyKernel
    - @ref NEGEMMMatrixMultiplyKernel
-   - @ref NEDirectConvolutionLayerOutputStageKernel
+   - NEDirectConvolutionLayerOutputStageKernel
    - @ref NEReductionOperationKernel
    - @ref NEGEMMLowpMatrixAReductionKernel
    - @ref NEGEMMLowpMatrixBReductionKernel
@@ -682,7 +682,7 @@ v20.02 Public major release
      - @ref NEConvolutionLayer
      - @ref NEDepthwiseConvolutionLayer
      - NEDepthwiseConvolutionLayer3x3Kernel
-     - @ref NEDirectConvolutionLayerOutputStageKernel
+     - NEDirectConvolutionLayerOutputStageKernel
      - @ref NEElementwiseComparison
      - @ref NEElementwiseMax
      - @ref NEElementwiseMin
@@ -1214,7 +1214,7 @@ v18.01 Public maintenance release
     - GCGEMMTranspose1xWKernel
     - GCIm2ColKernel
  - Refactored Arm® Neon™ Winograd (NEWinogradLayerKernel)
- - Added @ref NEDirectConvolutionLayerOutputStageKernel
+ - Added NEDirectConvolutionLayerOutputStageKernel
  - Added QASYMM8 support to the following Arm® Neon™ kernels:
     - NEDepthwiseConvolutionLayer3x3Kernel
     - @ref NEFillBorderKernel
@@ -1338,7 +1338,7 @@ v17.06 Public major release
  - New Arm® Neon™ kernels / functions:
     - @ref NEBatchNormalizationLayerKernel / @ref NEBatchNormalizationLayer
     - NEDepthConcatenateLayerKernel / NEDepthConcatenateLayer
-    - @ref NEDirectConvolutionLayerKernel / @ref NEDirectConvolutionLayer
+    - NEDirectConvolutionLayerKernel / @ref NEDirectConvolutionLayer
     - NELocallyConnectedMatrixMultiplyKernel / NELocallyConnectedLayer
     - @ref NEWeightsReshapeKernel / @ref NEConvolutionLayerReshapeWeights
 

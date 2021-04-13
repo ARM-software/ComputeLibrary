@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
+#include "src/core/cpu/kernels/CpuDirectConvolutionOutputStageKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -44,42 +44,46 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst,
                           const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::S32, DataType::F32);
 
     if(bias != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
-        ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL)));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, bias);
+        ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != src->dimension(get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::CHANNEL)));
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
     }
 
-    if(input->data_type() == DataType::S32)
+    if(src->data_type() == DataType::S32)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output == nullptr, "In-place computation not allowed for quantized output");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst == nullptr, "In-place computation not allowed for quantized output");
     }
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if((dst != nullptr) && (dst->total_size() != 0))
     {
-        if(is_data_type_float(input->data_type()))
+        if(is_data_type_float(src->data_type()))
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
     }
-    else if(input->data_type() == DataType::S32)
+    else if(src->data_type() == DataType::S32)
     {
         // In case of quantized computation and unconfigured output, the output data type must be provided through DirectConvolutionLayerOutputStageKernelInfo
         ARM_COMPUTE_RETURN_ERROR_ON((info.output_data_type != DataType::QASYMM8) && (info.output_data_type != DataType::QASYMM8_SIGNED));
@@ -90,25 +94,26 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
 template <typename T>
 typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
-                  int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift, bool has_bias)
+output_stage_nchw(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
+                  int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
 {
+    const bool has_bias = bias != nullptr;
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
-    ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_ERROR_ON(src->info()->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_UNUSED(result_fixedpoint_multiplier);
     ARM_COMPUTE_UNUSED(result_shift);
     ARM_COMPUTE_UNUSED(result_offset_after_shift);
 
     const int window_start_x = window.x().start();
     const int window_end_x   = window.x().end();
-    const int window_step_x  = 16 / input->info()->element_size();
+    const int window_step_x  = 16 / src->info()->element_size();
     Window    win            = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator in(input, win);
-    Iterator out(output, win);
+    Iterator in(src, win);
+    Iterator out(dst, win);
     execute_window_loop(win, [&](const Coordinates & id)
     {
         int x = window_start_x;
@@ -151,9 +156,10 @@ output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window, ITe
 
 template <typename T>
 typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
-                  int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift, bool has_bias)
+output_stage_nhwc(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
+                  int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
 {
+    const bool has_bias = bias != nullptr;
     ARM_COMPUTE_UNUSED(result_fixedpoint_multiplier);
     ARM_COMPUTE_UNUSED(result_shift);
     ARM_COMPUTE_UNUSED(result_offset_after_shift);
@@ -166,13 +172,13 @@ output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window, ITe
 
     const int window_start_x = window.x().start();
     const int window_end_x   = window.x().end();
-    const int window_step_x  = 16 / input->info()->element_size();
+    const int window_step_x  = 16 / src->info()->element_size();
     Window    win            = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator in(input, win);
+    Iterator in(src, win);
     Iterator bi(bias, window_bias);
-    Iterator out(output, win);
+    Iterator out(dst, win);
 
     execute_window_loop(win, [&](const Coordinates &)
     {
@@ -216,11 +222,12 @@ output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window, ITe
 
 // Quantized case
 template < typename TOut, typename std::enable_if < std::is_same<TOut, uint8_t>::value || std::is_same<TOut, int8_t>::value, int >::type = 0 >
-void output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
-                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift, bool has_bias)
+void output_stage_nchw(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
+                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
 {
-    using VectorType = typename wrapper::traits::neon_bitvector_t<TOut, wrapper::traits::BitWidth::W128>;
-    using TagType    = typename wrapper::traits::neon_bitvector_tag_t<TOut, wrapper::traits::BitWidth::W128>;
+    const bool has_bias = bias != nullptr;
+    using VectorType    = typename wrapper::traits::neon_bitvector_t<TOut, wrapper::traits::BitWidth::W128>;
+    using TagType       = typename wrapper::traits::neon_bitvector_tag_t<TOut, wrapper::traits::BitWidth::W128>;
 
     const int32x4_t result_offset_after_shift_s32 = vdupq_n_s32(result_offset_after_shift);
 
@@ -229,12 +236,12 @@ void output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window
 
     const int window_start_x = window.x().start();
     const int window_end_x   = window.x().end();
-    const int window_step_x  = 16 / input->info()->element_size();
+    const int window_step_x  = 16 / src->info()->element_size();
     Window    win            = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator in(input, win);
-    Iterator out(output, win);
+    Iterator in(src, win);
+    Iterator out(dst, win);
 
     execute_window_loop(win, [&](const Coordinates & id)
     {
@@ -295,11 +302,12 @@ void output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window
     in, out);
 }
 template < typename TOut, typename std::enable_if < std::is_same<TOut, uint8_t>::value || std::is_same<TOut, int8_t>::value, int >::type = 0 >
-void output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
-                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift, bool has_bias)
+void output_stage_nhwc(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
+                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
 {
-    using VectorType = typename wrapper::traits::neon_bitvector_t<TOut, wrapper::traits::BitWidth::W128>;
-    using TagType    = typename wrapper::traits::neon_bitvector_tag_t<TOut, wrapper::traits::BitWidth::W128>;
+    const bool has_bias = bias != nullptr;
+    using VectorType    = typename wrapper::traits::neon_bitvector_t<TOut, wrapper::traits::BitWidth::W128>;
+    using TagType       = typename wrapper::traits::neon_bitvector_tag_t<TOut, wrapper::traits::BitWidth::W128>;
 
     const int32x4_t result_offset_after_shift_s32 = vdupq_n_s32(result_offset_after_shift);
 
@@ -314,13 +322,13 @@ void output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window
 
     const int window_start_x = window.x().start();
     const int window_end_x   = window.x().end();
-    const int window_step_x  = 16 / input->info()->element_size();
+    const int window_step_x  = 16 / src->info()->element_size();
     Window    win            = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator in(input, win);
+    Iterator in(src, win);
     Iterator bi(bias, window_bias);
-    Iterator out(output, win);
+    Iterator out(dst, win);
 
     execute_window_loop(win, [&](const Coordinates &)
     {
@@ -377,45 +385,38 @@ void output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window
 }
 } // namespace
 
-NEDirectConvolutionLayerOutputStageKernel::NEDirectConvolutionLayerOutputStageKernel()
-    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_fixedpoint_multiplier(0), _result_shift(0), _result_offset_after_shift(0)
+void CpuDirectConvolutionOutputStageKernel::configure(ITensorInfo *src, const ITensorInfo *bias, ITensorInfo *dst,
+                                                      const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
-}
-
-void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const ITensor *bias, ITensor *output,
-                                                          const DirectConvolutionLayerOutputStageKernelInfo &info)
-{
+    ARM_COMPUTE_UNUSED(bias);
     // Perform validation step
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias == nullptr) ? nullptr : bias->info(), (output == nullptr) ? nullptr : output->info(), info));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, bias, dst, info));
 
     _func                         = nullptr;
-    _bias                         = bias;
-    _input                        = input;
-    _output                       = (output != nullptr) ? output : input;
     _result_fixedpoint_multiplier = info.result_fixedpoint_multiplier;
     _result_shift                 = info.result_shift;
     _result_offset_after_shift    = info.result_offset_after_shift;
 
     // Auto-initialize output output if required
-    if(output != nullptr && output->info() != nullptr)
+    if(dst != nullptr)
     {
         // Work out expected output data type
-        const DataType output_dt = (input->info()->data_type() == DataType::S32) ? info.output_data_type : DataType::S32;
+        const DataType output_dt = (src->data_type() == DataType::S32) ? info.output_data_type : DataType::S32;
         // Output tensor auto initialization if not yet initialized
-        auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(output_dt));
+        auto_init_if_empty(*dst, src->clone()->set_data_type(output_dt));
     }
 
-    Window win = calculate_max_window(*input->info(), Steps());
+    Window win = calculate_max_window(*src, Steps());
 
-    INEKernel::configure(win);
+    ICpuKernel::configure(win);
 
-    const bool is_qasymm8_signed = (output != nullptr) ? is_data_type_quantized_asymmetric_signed(output->info()->data_type()) : false;
+    const bool is_qasymm8_signed = (dst != nullptr) ? is_data_type_quantized_asymmetric_signed(dst->data_type()) : false;
 
     // Set appropriate function
-    if(input->info()->data_layout() == DataLayout::NCHW)
+    if(src->data_layout() == DataLayout::NCHW)
     {
-        switch(input->info()->data_type())
+        switch(src->data_type())
         {
             case DataType::S32:
             {
@@ -449,7 +450,7 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
     }
     else
     {
-        switch(input->info()->data_type())
+        switch(src->data_type())
         {
             case DataType::S32:
             {
@@ -483,22 +484,31 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
     }
 }
 
-Status NEDirectConvolutionLayerOutputStageKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
-                                                           const DirectConvolutionLayerOutputStageKernelInfo &info)
+Status CpuDirectConvolutionOutputStageKernel::validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst,
+                                                       const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, info));
-
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, bias, dst, info));
     return Status{};
 }
 
-void NEDirectConvolutionLayerOutputStageKernel::run(const Window &window, const ThreadInfo &info)
+void CpuDirectConvolutionOutputStageKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    const bool has_bias = _bias != nullptr;
-    (*_func)(_input, _bias, window, _output, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift, has_bias);
+    auto src  = tensors.get_tensor(TensorType::ACL_SRC_0);
+    auto bias = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    auto dst  = tensors.get_tensor(TensorType::ACL_DST);
+
+    (*_func)(src, bias, window, dst, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift);
 }
+
+const char *CpuDirectConvolutionOutputStageKernel::name() const
+{
+    return "CpuDirectConvolutionOutputStageKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute
