@@ -243,6 +243,12 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
         src_indirect_y[i].v += bout * (int)(_ISRC_HEIGHT * 8);
     }
 
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 8, 1)
+    {
+        in[i].v = 0;
+    }
+
     // Load the values across the 8 channels to compose the 8x1 tile
     T_LOAD_INDIRECT(DATA_TYPE, 8, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
 
@@ -292,6 +298,12 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     {
         src_indirect_y[i].v = mout + i * _ISRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(_ISRC_HEIGHT * 64);
+    }
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 64, 1)
+    {
+        in[i].v = 0;
     }
 
     // Load the values across the 64 channels to compose the 8x8 tile
@@ -615,14 +627,20 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
-    TILE(DATA_TYPE, 6, N0, in)       = { { { 0 } } };
-    TILE(DATA_TYPE, 4, N0, out)      = { { { 0 } } };
-    TILE(uint, 6, 1, src_indirect_y) = { { { 0 } } };
+    TILE(DATA_TYPE, 6, N0, in);
+    TILE(DATA_TYPE, 4, N0, out);
+    TILE(uint, 6, 1, src_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 6, 1)
     {
         src_indirect_y[i].v = mout + i * SRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 6);
+    }
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 6, 1)
+    {
+        in[i].v = 0;
     }
 
     // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
@@ -648,7 +666,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 
     T_ACTIVATION(DATA_TYPE, 4, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
 
-    TILE(uint, 4, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 4, 1, dst_indirect_y);
 
     // Calculate the destination indirect Y
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -673,14 +691,20 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
     // Calculate the indirect Y for the source tensor
-    TILE(DATA_TYPE, 36, N0, in)       = { { { 0 } } };
-    TILE(DATA_TYPE, 4, N0, tmp)       = { { { 0 } } };
-    TILE(uint, 36, 1, src_indirect_y) = { { { 0 } } };
+    TILE(DATA_TYPE, 36, N0, in);
+    TILE(DATA_TYPE, 4, N0, tmp);
+    TILE(uint, 36, 1, src_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 36, 1)
     {
         src_indirect_y[i].v = mout + i * SRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 36);
+    }
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 36, 1)
+    {
+        in[i].v = 0;
     }
 
     // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
@@ -700,7 +724,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     }
 
     // Compute the output tile
-    TILE(DATA_TYPE, 16, N0, out) = { { { 0 } } };
+    TILE(DATA_TYPE, 16, N0, out);
 
     LOOP_UNROLLING(int, i, 0, 4, 1)
     {
@@ -729,7 +753,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 
     T_ACTIVATION(DATA_TYPE, 16, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
 
-    TILE(uint, 16, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 16, 1, dst_indirect_y);
 
     // Calculate the destination indirect Y
     LOOP_UNROLLING(int, yk, 0, 4, 1)
@@ -1043,15 +1067,21 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     const int bout = GET_SPATIAL_IDX(2, 1, 0);  // BATCH SIZE IDX
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    TILE(DATA_TYPE, 8, N0, in)       = { { { 0 } } };
-    TILE(DATA_TYPE, 4, N0, out)      = { { { 0 } } };
-    TILE(DATA_TYPE, 4, N0, tmp)      = { { { 0 } } };
-    TILE(uint, 8, 1, src_indirect_y) = { { { 0 } } };
+    TILE(DATA_TYPE, 8, N0, in);
+    TILE(DATA_TYPE, 4, N0, out);
+    TILE(DATA_TYPE, 4, N0, tmp);
+    TILE(uint, 8, 1, src_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 8, 1)
     {
         src_indirect_y[i].v = mout + i * SRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 8);
+    }
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 8, 1)
+    {
+        in[i].v = 0;
     }
 
     // "in" contains 1x8 or 8x1 tile here
@@ -1081,7 +1111,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
     T_ACTIVATION(DATA_TYPE, 4, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
 
-    TILE(uint, 4, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 4, 1, dst_indirect_y);
 
     // Calculate the destination indirect Y
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -1105,14 +1135,20 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Calculate the indirect Y for the source tensor
-    TILE(DATA_TYPE, 64, N0, in)       = { { { 0 } } };
-    TILE(DATA_TYPE, 6, N0, tmp)       = { { { 0 } } };
-    TILE(uint, 64, 1, src_indirect_y) = { { { 0 } } };
+    TILE(DATA_TYPE, 64, N0, in);
+    TILE(DATA_TYPE, 6, N0, tmp);
+    TILE(uint, 64, 1, src_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 64, 1)
     {
         src_indirect_y[i].v = mout + i * SRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 64);
+    }
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 64, 1)
+    {
+        in[i].v = 0;
     }
 
     // "in" here is 8x8 tile
@@ -1138,7 +1174,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     }
 
     // Compute the output tile
-    TILE(DATA_TYPE, 16, N0, out) = { { { 0 } } };
+    TILE(DATA_TYPE, 16, N0, out);
 
     // in * A, with in = A^T * in as above
     LOOP_UNROLLING(int, i, 0, 4, 1)
@@ -1173,7 +1209,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
     T_ACTIVATION(DATA_TYPE, 16, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
 
-    TILE(uint, 16, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 16, 1, dst_indirect_y);
 
     // Calculate the destination indirect Y
     LOOP_UNROLLING(int, yk, 0, 4, 1)

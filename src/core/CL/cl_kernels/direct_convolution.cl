@@ -150,7 +150,12 @@ __kernel void direct_convolution_nhwc(
     }
 
     // Initialize the accumulators
-    TILE(ACC_DATA_TYPE, M0, N0, c) = { { { 0 } } };
+    TILE(ACC_DATA_TYPE, M0, N0, c);
+
+    LOOP_UNROLLING(int, i, 0, M0, 1)
+    {
+        c[i].v = 0;
+    }
 
     for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
     {

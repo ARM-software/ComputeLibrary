@@ -944,7 +944,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
@@ -967,10 +967,14 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
-    TILE(DATA_TYPE, 6, 1, in)          = { { { 0 } } };
-    TILE(DATA_TYPE, 6, 1, out)         = { { { 0 } } };
-    TILE(int, 6, 1, src_indirect_y)    = { { { 0 } } };
-    TILE(int, 6, 1, src_indirect_mask) = { { { 0 } } };
+    TILE(DATA_TYPE, 6, 1, in);
+    TILE(DATA_TYPE, 6, 1, out);
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 6, 1)
+    {
+        in[i].v = 0;
+    }
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
     T_LOAD_NHWC(DATA_TYPE, 1, 6, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
@@ -978,7 +982,7 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     T_LOAD_NHWC(DATA_TYPE, 6, 1, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
 
-    TILE(DATA_TYPE, 6, 1, com) = { { { 0 } } };
+    TILE(DATA_TYPE, 6, 1, com);
 
     LOOP_UNROLLING(int, i, 0, 6, 1)
     {
@@ -1000,7 +1004,7 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     out[4].v = com[5].v - com[4].v;
     out[5].v = com[3].v - com[1].v;
 
-    TILE(uint, 6, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 6, 1, dst_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 6, 1)
     {
@@ -1012,13 +1016,19 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
 
 #else  // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
-    TILE(DATA_TYPE, 36, 1, in) = { { { 0 } } };
+    TILE(DATA_TYPE, 36, 1, in);
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 36, 1)
+    {
+        in[i].v = 0;
+    }
 
     // Load the tile from a NHWC tensor
     T_LOAD_NHWC(DATA_TYPE, 6, 6, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
 
-    TILE(DATA_TYPE, 6, 1, com)  = { { { 0 } } };
-    TILE(DATA_TYPE, 36, 1, tmp) = { { { 0 } } };
+    TILE(DATA_TYPE, 6, 1, com);
+    TILE(DATA_TYPE, 36, 1, tmp);
 
     LOOP_UNROLLING(int, i, 0, 6, 1)
     {
@@ -1037,7 +1047,7 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
         tmp[i + 5 * 6].v = com[3].v - com[1].v;
     }
 
-    TILE(DATA_TYPE, 36, 1, out) = { { { 0 } } };
+    TILE(DATA_TYPE, 36, 1, out);
 
     LOOP_UNROLLING(int, i, 0, 6, 1)
     {
@@ -1057,7 +1067,7 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     }
 
     // Compute destination address
-    TILE(uint, 36, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 36, 1, dst_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 36, 1)
     {
@@ -1104,7 +1114,7 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
@@ -1127,10 +1137,14 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
-    TILE(DATA_TYPE, 8, 1, in)          = { { { 0 } } };
-    TILE(DATA_TYPE, 8, 1, out)         = { { { 0 } } };
-    TILE(int, 8, 1, src_indirect_y)    = { { { 0 } } };
-    TILE(int, 8, 1, src_indirect_mask) = { { { 0 } } };
+    TILE(DATA_TYPE, 8, 1, in);
+    TILE(DATA_TYPE, 8, 1, out);
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 8, 1)
+    {
+        in[i].v = 0;
+    }
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
     T_LOAD_NHWC(DATA_TYPE, 1, 8, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
@@ -1138,7 +1152,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     T_LOAD_NHWC(DATA_TYPE, 8, 1, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
 
-    TILE(DATA_TYPE, 1, 8, com) = { { { 0 } } };
+    TILE(DATA_TYPE, 1, 8, com);
 
     com[0].s[0] = in[2].v - 4.25f * in[4].v + in[6].v;
     com[0].s[1] = in[1].v - 4.25f * in[3].v + in[5].v;
@@ -1155,7 +1169,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     out[6].s[0] = com[0].s[4] - com[0].s[5];
     out[7].s[0] = -in[1].v + 5.25f * in[3].v - 5.25f * in[5].v + in[7].v;
 
-    TILE(uint, 8, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 8, 1, dst_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 8, 1)
     {
@@ -1167,13 +1181,19 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
 
 #else // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
-    TILE(DATA_TYPE, 64, 1, in)  = { { { 0 } } };
-    TILE(DATA_TYPE, 64, 1, out) = { { { 0 } } };
+    TILE(DATA_TYPE, 64, 1, in);
+    TILE(DATA_TYPE, 64, 1, out);
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 64, 1)
+    {
+        in[i].v = 0;
+    }
 
     // Load the tile from a NHWC tensor
     T_LOAD_NHWC(DATA_TYPE, 8, 8, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
 
-    TILE(DATA_TYPE, 8, 8, com) = { { { 0 } } };
+    TILE(DATA_TYPE, 8, 8, com);
 
     LOOP_UNROLLING(int, i, 0, 8, 1)
     {
@@ -1187,7 +1207,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
         com[7].s[i] = -in[1 * 8 + i].s[0] + (DATA_TYPE)5.25f * in[3 * 8 + i].s[0] - (DATA_TYPE)5.25f * in[5 * 8 + i].s[0] + in[7 * 8 + i].s[0];
     }
 
-    TILE(DATA_TYPE, 8, 8, tmp) = { { { 0 } } };
+    TILE(DATA_TYPE, 8, 8, tmp);
     tmp[0].v = com[6].v;
     tmp[1].v = com[0].v + com[1].v;
     tmp[2].v = com[0].v - com[1].v;
@@ -1215,7 +1235,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
         out[i * 8 + 7].s[0] = -tmp[i].s[1] + 5.25f * tmp[i].s[3] - 5.25f * tmp[i].s[5] + tmp[i].s[7];
     }
 
-    TILE(uint, 64, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 64, 1, dst_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 64, 1)
     {
@@ -1263,7 +1283,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
@@ -1286,10 +1306,14 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
-    TILE(DATA_TYPE, 8, 1, in)          = { { { 0 } } };
-    TILE(DATA_TYPE, 8, 1, out)         = { { { 0 } } };
-    TILE(int, 8, 1, src_indirect_y)    = { { { 0 } } };
-    TILE(int, 8, 1, src_indirect_mask) = { { { 0 } } };
+    TILE(DATA_TYPE, 8, 1, in);
+    TILE(DATA_TYPE, 8, 1, out);
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 8, 1)
+    {
+        in[i].v = 0;
+    }
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
     T_LOAD_NHWC(DATA_TYPE, 1, 8, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
@@ -1319,7 +1343,7 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
     out[6].s[0] = com[0].s[4] + com[0].s[5];
     out[7].s[0] = -36.0f * in[1].v + 0.0f * in[2].v + 49.0f * in[3].v - 14.0f * in[5].v + in[7].v;
 
-    TILE(uint, 8, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 8, 1, dst_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 8, 1)
     {
@@ -1331,13 +1355,19 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
 
 #else // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
-    TILE(DATA_TYPE, 64, 1, in)  = { { { 0 } } };
-    TILE(DATA_TYPE, 64, 1, out) = { { { 0 } } };
+    TILE(DATA_TYPE, 64, 1, in);
+    TILE(DATA_TYPE, 64, 1, out);
+
+    // Initialize the input tile
+    LOOP_UNROLLING(int, i, 0, 64, 1)
+    {
+        in[i].v = 0;
+    }
 
     // Load the tile from a NHWC tensor
     T_LOAD_NHWC(DATA_TYPE, 8, 8, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
 
-    TILE(DATA_TYPE, 8, 8, com) = { { { 0 } } };
+    TILE(DATA_TYPE, 8, 8, com);
 
     LOOP_UNROLLING(int, i, 0, 8, 1)
     {
@@ -1351,7 +1381,7 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
         com[7].s[i] = (DATA_TYPE)49.0f * in[3 * 8 + i].s[0] - (DATA_TYPE)36.0f * in[1 * 8 + i].s[0] + in[7 * 8 + i].s[0] - (DATA_TYPE)14.0f * in[5 * 8 + i].s[0];
     }
 
-    TILE(DATA_TYPE, 8, 8, tmp) = { { { 0 } } };
+    TILE(DATA_TYPE, 8, 8, tmp);
     tmp[0].v = com[6].v;
     tmp[1].v = com[0].v - com[1].v;
     tmp[2].v = com[0].v + com[1].v;
@@ -1379,7 +1409,7 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
         out[i * 8 + 7].s[0] = -36.0f * tmp[i].s[1] + 0.0f * tmp[i].s[2] + 49.0f * tmp[i].s[3] - 14.0f * tmp[i].s[5] + tmp[i].s[7];
     }
 
-    TILE(uint, 64, 1, dst_indirect_y) = { { { 0 } } };
+    TILE(uint, 64, 1, dst_indirect_y);
 
     LOOP_UNROLLING(int, i, 0, 64, 1)
     {
@@ -1427,7 +1457,7 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_4x1_3x1_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
@@ -1489,7 +1519,7 @@ __kernel void winograd_input_transform_4x1_3x1_stepz1_nhwc(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_4x1_5x1_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
@@ -1551,7 +1581,7 @@ __kernel void winograd_input_transform_4x1_5x1_stepz1_nhwc(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_2x1_7x1_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
@@ -1613,7 +1643,7 @@ __kernel void winograd_input_transform_2x1_7x1_stepz1_nhwc(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_1x4_1x3_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
@@ -1675,7 +1705,7 @@ __kernel void winograd_input_transform_1x4_1x3_stepz1_nhwc(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_1x4_1x5_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
@@ -1737,7 +1767,7 @@ __kernel void winograd_input_transform_1x4_1x5_stepz1_nhwc(
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
- //! @endcond
+//! @endcond
 __kernel void winograd_input_transform_1x2_1x7_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
     TENSOR4D(dst, BUFFER))
