@@ -171,8 +171,7 @@ protected:
         ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: uncomment after COMPMID-4341
-        // add_padding_x({ &src, &weights, &bias, &dst }, data_layout);
+        add_padding_x({ &src, &weights, &bias, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
