@@ -84,7 +84,7 @@ public:
     {
         // Needs to be implemented as is the one that is used internally by the CLTensorAllocator
         ++_n_calls;
-        return std::move(_backend_allocator.make_region(size, alignment));
+        return _backend_allocator.make_region(size, alignment);
     }
     int get_n_calls() const
     {
