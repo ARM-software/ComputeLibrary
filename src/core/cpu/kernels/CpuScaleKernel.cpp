@@ -26,7 +26,6 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Utility.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/common/Registrars.h"

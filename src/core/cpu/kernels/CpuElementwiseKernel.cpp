@@ -24,7 +24,6 @@
 #include "src/core/cpu/kernels/CpuElementwiseKernel.h"
 
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/cpu/kernels/elementwise/neon/elementwise_list.h"

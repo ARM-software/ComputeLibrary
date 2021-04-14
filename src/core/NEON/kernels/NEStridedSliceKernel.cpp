@@ -23,7 +23,6 @@
  */
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"

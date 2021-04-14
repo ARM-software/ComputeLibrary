@@ -31,7 +31,6 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -44,8 +43,6 @@
 
 namespace arm_compute
 {
-class Coordinates;
-
 namespace
 {
 inline int32x4x4_t load_results_input(const Iterator &mm_result_it, int32_t x)

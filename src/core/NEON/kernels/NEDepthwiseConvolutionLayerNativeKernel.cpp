@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/convolution/depthwise/impl_qa8_qa8.hpp"
 #include "src/core/NEON/wrapper/traits.h"
