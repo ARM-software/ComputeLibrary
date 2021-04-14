@@ -297,6 +297,19 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ArithmeticDivisionValidationIntegerFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info)
+    {
+        ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape, shape,
+                                                                                                    data_type0, data_type1, output_data_type,
+                                                                                                    QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), act_info);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ArithmeticDivisionValidationQuantizedFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
