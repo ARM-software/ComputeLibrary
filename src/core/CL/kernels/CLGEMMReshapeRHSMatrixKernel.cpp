@@ -87,7 +87,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
     AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-    AccessWindowStatic    output_access(output, 0, 0, output->dimension(0), output->dimension(1));
 
     window_changed = update_window_and_padding(win, input_access);
 

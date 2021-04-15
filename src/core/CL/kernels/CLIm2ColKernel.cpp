@@ -111,20 +111,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     if(data_layout == DataLayout::NHWC)
     {
         win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-
-        const int xin_start = 0;
-        const int xin_end   = input->dimension(0);
-        const int yin_start = 0;
-        const int yin_end   = input->dimension(1);
-
-        const int xout_start = 0;
-        const int xout_end   = output->dimension(0);
-        const int yout_start = 0;
-        const int yout_end   = output->dimension(1);
-
-        AccessWindowStatic input_access(input, xin_start, yin_start, xin_end, yin_end);
-        AccessWindowStatic output_access(output, xout_start, yout_start, xout_end, yout_end);
-        window_changed = window_changed || update_window_and_padding(win, input_access, output_access);
     }
     else
     {
