@@ -502,6 +502,11 @@
 
 #define convert_char1_sat convert_char_sat
 #define convert_uchar1_sat convert_uchar_sat
+#define convert_uchar2_sat convert_uchar2_sat
+#define convert_uchar3_sat convert_uchar3_sat
+#define convert_uchar4_sat convert_uchar4_sat
+#define convert_uchar8_sat convert_uchar8_sat
+#define convert_uchar16_sat convert_uchar16_sat
 #define convert_short1_sat convert_short_sat
 #define convert_ushort1_sat convert_ushort_sat
 #define convert_int1_sat convert_int_sat

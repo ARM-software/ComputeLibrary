@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,6 +84,7 @@ __kernel void normalize_planar_yuv_layer_nchw(TENSOR3D_DECLARATION(src),
  *
  * @note Data type should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE e.g. -DVEC_SIZE=8
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                       Stride of the first source tensor in X dimension (in bytes)
@@ -115,20 +116,19 @@ __kernel void normalize_planar_yuv_layer_nhwc(TENSOR3D_DECLARATION(src),
                                               VECTOR_DECLARATION(mean),
                                               VECTOR_DECLARATION(std))
 {
-    Tensor3D src  = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D dst  = CONVERT_TO_TENSOR3D_STRUCT(dst);
-    Vector   mean = CONVERT_TO_VECTOR_STRUCT(mean);
-    Vector   std  = CONVERT_TO_VECTOR_STRUCT(std);
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE * sizeof(DATA_TYPE) - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE * sizeof(DATA_TYPE)), 0);
 
-    const uint current_slice = get_global_id(0);
+    __global uchar *src_addr  = src_ptr + src_offset_first_element_in_bytes + x_offs + get_global_id(1) * src_stride_y + get_global_id(2) * src_stride_z;
+    __global uchar *dst_addr  = dst_ptr + dst_offset_first_element_in_bytes + x_offs + get_global_id(1) * dst_stride_y + get_global_id(2) * dst_stride_z;
+    __global uchar *mean_addr = mean_ptr + mean_offset_first_element_in_bytes + x_offs;
+    __global uchar *std_addr  = std_ptr + std_offset_first_element_in_bytes + x_offs;
 
-    const TYPE curr_mean = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(mean.ptr + current_slice * VEC_SIZE * sizeof(DATA_TYPE)));
-    const TYPE curr_std  = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(std.ptr + current_slice * VEC_SIZE * sizeof(DATA_TYPE)));
+    const TYPE curr_mean = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)mean_addr);
+    const TYPE curr_std  = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)std_addr);
 
-    TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
-    TYPE res  = (data - curr_mean) / curr_std;
+    TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr);
+    TYPE res0 = (data - curr_mean) / curr_std;
 
-    VSTORE(VEC_SIZE)
-    (res, 0, (__global DATA_TYPE *)dst.ptr);
+    STORE_VECTOR_SELECT(res, DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif // defined(DATA_TYPE) && defined(VEC_SIZE)
