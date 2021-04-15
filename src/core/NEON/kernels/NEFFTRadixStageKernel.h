@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,7 +85,6 @@ public:
 private:
     ITensor     *_input;
     ITensor     *_output;
-    bool         _run_in_place;
     unsigned int _Nx;
     unsigned int _axis;
     unsigned int _radix;
@@ -94,7 +93,7 @@ private:
     void set_radix_stage_axis1(const FFTRadixStageKernelInfo &config);
 
     using FFTFunctionPointerAxis0 = std::function<void(float *, float *, unsigned int, unsigned int, const float32x2_t &, unsigned int)>;
-    using FFTFunctionPointerAxis1 = std::function<void(float *, float *, unsigned int, unsigned int, const float32x2_t &, unsigned int, unsigned int)>;
+    using FFTFunctionPointerAxis1 = std::function<void(float *, float *, unsigned int, unsigned int, const float32x2_t &, unsigned int, unsigned int, unsigned int, unsigned int)>;
 
     FFTFunctionPointerAxis0 _func_0;
     FFTFunctionPointerAxis1 _func_1;

@@ -91,8 +91,7 @@ protected:
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // TODO: uncomment after COMPMID-4362
-        // add_padding_x({ &src, &dst });
+        add_padding_x({ &src, &dst });
 
         // Allocate tensors
         src.allocator()->allocate();
