@@ -114,20 +114,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                        unsigned int depth_multiplier, GPUTarget gpu_target, std::string &kernel_name, const Size2D dilation)
+                                                        unsigned int depth_multiplier, std::string &kernel_name, const Size2D dilation)
 {
     // Output auto inizialitation if not yet initialized
     const ConvolutionInfo info
     {
         conv_info, depth_multiplier, ActivationLayerInfo(), dilation
     };
-    const TensorShape     output_shape = compute_depthwise_convolution_shape(*input, *weights, info);
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, info);
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
 
     const unsigned int conv_stride_x = conv_info.stride().first;
     const unsigned int conv_stride_y = conv_info.stride().second;
     const bool         is_qasymm     = is_data_type_quantized_asymmetric(input->data_type());
-    const bool         is_bifrost    = get_arch_from_target(gpu_target) == GPUTarget::BIFROST;
 
     // Configure kernel window
     unsigned int num_elems_read_per_iteration_x    = 0;
@@ -156,31 +155,28 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                 num_elems_read_per_iteration_x = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x;
                 break;
         }
-        if(is_bifrost)
+        if(conv_stride_x == 1 && conv_stride_y == 1)
         {
-            if(conv_stride_x == 1 && conv_stride_y == 1)
-            {
-                kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16";
-                num_elems_read_per_iteration_x    = 8;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_read_per_iteration_y    = 6;
-                num_elems_written_per_iteration_y = 4;
-            }
-            else if(conv_stride_x == 2 && conv_stride_y == 2)
-            {
-                kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16";
-                num_elems_read_per_iteration_x    = 10;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_read_per_iteration_y    = 5;
-                num_elems_written_per_iteration_y = 2;
-            }
+            kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_f16";
+            num_elems_read_per_iteration_x    = 8;
+            num_elems_written_per_iteration_x = 4;
+            num_elems_read_per_iteration_y    = 6;
+            num_elems_written_per_iteration_y = 4;
+        }
+        else if(conv_stride_x == 2 && conv_stride_y == 2)
+        {
+            kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_f16";
+            num_elems_read_per_iteration_x    = 10;
+            num_elems_written_per_iteration_x = 4;
+            num_elems_read_per_iteration_y    = 5;
+            num_elems_written_per_iteration_y = 2;
         }
     }
-    else if(input->data_type() == DataType::F32 && is_bifrost)
+    else if(input->data_type() == DataType::F32)
     {
         if(conv_stride_x == 1 && conv_stride_y == 1)
         {
-            kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32";
+            kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_f32";
             num_elems_read_per_iteration_x    = 4;
             num_elems_read_per_iteration_y    = 6;
             num_elems_written_per_iteration_x = 2;
@@ -188,7 +184,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         }
         else if(conv_stride_x == 2 && conv_stride_y == 2)
         {
-            kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32";
+            kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_f32";
             num_elems_read_per_iteration_x    = 6;
             num_elems_read_per_iteration_y    = 5;
             num_elems_written_per_iteration_x = 2;
@@ -239,7 +235,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLDepthwiseConvolutionLayer3x3NCHWKernel::CLDepthwiseConvolutionLayer3x3NCHWKernel()
-    : _conv_stride_x(0), _conv_pad_top(0), _conv_pad_left(0)
+    : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_y(1), _output_multipliers(), _output_shifts(), _is_quantized(false), _conv_stride_x(0), _conv_pad_top(0), _conv_pad_left(0)
 {
 }
 
@@ -278,10 +274,9 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const CLCompileContext 
     _is_quantized       = is_data_type_quantized_asymmetric(input->info()->data_type());
 
     // Configure kernel window
-    std::string     kernel_name;
-    const GPUTarget gpu_target = get_target();
+    std::string kernel_name;
 
-    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name, dilation);
+    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, kernel_name, dilation);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
@@ -372,13 +367,13 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const CLCompileContext 
 }
 
 Status CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                                                          const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, GPUTarget gpu_target,
+                                                          const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info,
                                                           const Size2D &dilation, const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
     std::string kernel_name;
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation, output_multipliers, output_shifts));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(),
-                                                              conv_info, depth_multiplier, gpu_target, kernel_name, dilation)
+                                                              conv_info, depth_multiplier, kernel_name, dilation)
                                 .first);
 
     return Status{};

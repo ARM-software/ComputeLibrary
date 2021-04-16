@@ -36,8 +36,6 @@
 
 #include "support/StringSupport.h"
 
-#include "utils/TypePrinter.h"
-
 namespace arm_compute
 {
 namespace

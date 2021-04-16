@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H
 #define ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H
 
-#include "src/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
+#include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
@@ -32,11 +32,19 @@ class ICLTensor;
 
 /** Interface for the kernel to run a 3x3 depthwise convolution on a tensor when the data layout is NCHW.
  */
-class CLDepthwiseConvolutionLayer3x3NCHWKernel : public ICLDepthwiseConvolutionLayer3x3Kernel
+class CLDepthwiseConvolutionLayer3x3NCHWKernel : public ICLKernel
 {
 public:
     /** Default constructor */
     CLDepthwiseConvolutionLayer3x3NCHWKernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthwiseConvolutionLayer3x3NCHWKernel(const CLDepthwiseConvolutionLayer3x3NCHWKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthwiseConvolutionLayer3x3NCHWKernel &operator=(const CLDepthwiseConvolutionLayer3x3NCHWKernel &) = delete;
+    /** Default Move Constructor. */
+    CLDepthwiseConvolutionLayer3x3NCHWKernel(CLDepthwiseConvolutionLayer3x3NCHWKernel &&) = default;
+    /** Default move assignment operator */
+    CLDepthwiseConvolutionLayer3x3NCHWKernel &operator=(CLDepthwiseConvolutionLayer3x3NCHWKernel &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in]  input              Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -56,7 +64,7 @@ public:
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
                    unsigned int depth_multiplier = 1, ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U),
-                   const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr) override;
+                   const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in]  compile_context    The compile context to be used.
@@ -77,7 +85,7 @@ public:
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
                    unsigned int depth_multiplier = 1, ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U),
-                   const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr) override;
+                   const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NCHWKernel
      *
      * @param[in] input              Source tensor info. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -89,7 +97,6 @@ public:
      * @param[in] conv_info          Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier   (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in] act_info           (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU are supported.
-     * @param[in] gpu_target         (Optional) GPU target to validate the kernel for. Defaults to midgard.
      * @param[in] dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in] output_multipliers (Optional) Output multipliers tensor info for quantized computations. In case of per-channel quantization,
      *                               the number of multipliers must be equal to the number of filters (IFM). Supported data types: S32
@@ -99,13 +106,23 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           unsigned int depth_multiplier = 1, ActivationLayerInfo act_info = ActivationLayerInfo(), GPUTarget gpu_target = GPUTarget::MIDGARD,
+                           unsigned int depth_multiplier = 1, ActivationLayerInfo act_info = ActivationLayerInfo(),
                            const Size2D &dilation = Size2D(1U, 1U), const ITensorInfo *output_multipliers = nullptr, const ITensorInfo *output_shifts = nullptr);
 
     void run(const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
 private:
+    BorderSize       _border_size;
+    const ICLTensor *_input;
+    ICLTensor       *_output;
+    const ICLTensor *_weights;
+    const ICLTensor *_biases;
+    unsigned int     _conv_stride_y;
+    const ICLTensor *_output_multipliers;
+    const ICLTensor *_output_shifts;
+    bool             _is_quantized;
+
     unsigned int _conv_stride_x;
     unsigned int _conv_pad_top;
     unsigned int _conv_pad_left;

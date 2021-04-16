@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,110 +42,110 @@ inline __global uchar *ptr_offset(__global uchar *ptr, const int x, const int y,
 
 #if(DILATION_X == 1 && DILATION_Y == 1)
 
-#define CONVOLUTION1x3_BIFROST2X1_STRIDE1(acc, src0, weights_row0) \
-    ({                                                             \
-        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);            \
-        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);            \
-        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);            \
-        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);            \
-        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);            \
-        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);            \
+#define CONVOLUTION1x3_2X1_STRIDE1(acc, src0, weights_row0) \
+    ({                                                      \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);     \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);     \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);     \
+        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);     \
+        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);     \
+        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);     \
     })
 
-#define CONVOLUTION1x3_BIFROST4X1_STRIDE1(acc, src0, weights_row0) \
-    ({                                                             \
-        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);            \
-        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);            \
-        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);            \
-        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);            \
-        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);            \
-        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);            \
-        acc.s2 = fma(src0.s2, weights_row0.s0, acc.s2);            \
-        acc.s2 = fma(src0.s3, weights_row0.s1, acc.s2);            \
-        acc.s2 = fma(src0.s4, weights_row0.s2, acc.s2);            \
-        acc.s3 = fma(src0.s3, weights_row0.s0, acc.s3);            \
-        acc.s3 = fma(src0.s4, weights_row0.s1, acc.s3);            \
-        acc.s3 = fma(src0.s5, weights_row0.s2, acc.s3);            \
+#define CONVOLUTION1x3_4X1_STRIDE1(acc, src0, weights_row0) \
+    ({                                                      \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);     \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);     \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);     \
+        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);     \
+        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);     \
+        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);     \
+        acc.s2 = fma(src0.s2, weights_row0.s0, acc.s2);     \
+        acc.s2 = fma(src0.s3, weights_row0.s1, acc.s2);     \
+        acc.s2 = fma(src0.s4, weights_row0.s2, acc.s2);     \
+        acc.s3 = fma(src0.s3, weights_row0.s0, acc.s3);     \
+        acc.s3 = fma(src0.s4, weights_row0.s1, acc.s3);     \
+        acc.s3 = fma(src0.s5, weights_row0.s2, acc.s3);     \
     })
 
-#define CONVOLUTION1x3_BIFROST2X1_STRIDE2(acc, src0, src1, weights_row0) \
-    ({                                                                   \
-        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);                  \
-        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);                  \
-        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);                  \
-        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);                  \
-        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);                  \
-        acc.s1 = fma(src1.s0, weights_row0.s2, acc.s1);                  \
+#define CONVOLUTION1x3_2X1_STRIDE2(acc, src0, src1, weights_row0) \
+    ({                                                            \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);           \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);           \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);           \
+        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);           \
+        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);           \
+        acc.s1 = fma(src1.s0, weights_row0.s2, acc.s1);           \
     })
 
-#define CONVOLUTION1x3_BIFROST4X1_STRIDE2(acc, src0, src1, weights_row0) \
-    ({                                                                   \
-        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);                  \
-        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);                  \
-        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);                  \
-        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);                  \
-        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);                  \
-        acc.s1 = fma(src0.s4, weights_row0.s2, acc.s1);                  \
-        acc.s2 = fma(src0.s4, weights_row0.s0, acc.s2);                  \
-        acc.s2 = fma(src0.s5, weights_row0.s1, acc.s2);                  \
-        acc.s2 = fma(src0.s6, weights_row0.s2, acc.s2);                  \
-        acc.s3 = fma(src0.s6, weights_row0.s0, acc.s3);                  \
-        acc.s3 = fma(src0.s7, weights_row0.s1, acc.s3);                  \
-        acc.s3 = fma(src1.s0, weights_row0.s2, acc.s3);                  \
+#define CONVOLUTION1x3_4X1_STRIDE2(acc, src0, src1, weights_row0) \
+    ({                                                            \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);           \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);           \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);           \
+        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);           \
+        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);           \
+        acc.s1 = fma(src0.s4, weights_row0.s2, acc.s1);           \
+        acc.s2 = fma(src0.s4, weights_row0.s0, acc.s2);           \
+        acc.s2 = fma(src0.s5, weights_row0.s1, acc.s2);           \
+        acc.s2 = fma(src0.s6, weights_row0.s2, acc.s2);           \
+        acc.s3 = fma(src0.s6, weights_row0.s0, acc.s3);           \
+        acc.s3 = fma(src0.s7, weights_row0.s1, acc.s3);           \
+        acc.s3 = fma(src1.s0, weights_row0.s2, acc.s3);           \
     })
 
 #else /* DILATION_X==1 && DILATION_Y==1 */
 
-#define CONVOLUTION1x3_BIFROST2X1_STRIDE1(acc, src0_left, src0_mid, src0_right, weights_row0) \
-    ({                                                                                        \
-        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
-        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
-        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
-        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \
-        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \
-        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \
+#define CONVOLUTION1x3_2X1_STRIDE1(acc, src0_left, src0_mid, src0_right, weights_row0) \
+    ({                                                                                 \
+        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                           \
+        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                            \
+        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                          \
+        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                           \
+        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                            \
+        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                          \
     })
 
-#define CONVOLUTION1x3_BIFROST2X1_STRIDE2(acc, src0_left, src0_mid, src0_right, weights_row0) \
-    ({                                                                                        \
-        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
-        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
-        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
-        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \
-        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \
-        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \
+#define CONVOLUTION1x3_2X1_STRIDE2(acc, src0_left, src0_mid, src0_right, weights_row0) \
+    ({                                                                                 \
+        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                           \
+        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                            \
+        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                          \
+        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                           \
+        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                            \
+        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                          \
     })
 
-#define CONVOLUTION1x3_BIFROST4X1_STRIDE1(acc, src0_left, src0_mid, src0_right, weights_row0) \
-    ({                                                                                        \
-        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
-        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
-        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
-        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \
-        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \
-        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \
-        acc.s2 = fma(src0_left.s2, weights_row0.s0, acc.s2);                                  \
-        acc.s2 = fma(src0_mid.s2, weights_row0.s1, acc.s2);                                   \
-        acc.s2 = fma(src0_right.s2, weights_row0.s2, acc.s2);                                 \
-        acc.s3 = fma(src0_left.s3, weights_row0.s0, acc.s3);                                  \
-        acc.s3 = fma(src0_mid.s3, weights_row0.s1, acc.s3);                                   \
-        acc.s3 = fma(src0_right.s3, weights_row0.s2, acc.s3);                                 \
+#define CONVOLUTION1x3_4X1_STRIDE1(acc, src0_left, src0_mid, src0_right, weights_row0) \
+    ({                                                                                 \
+        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                           \
+        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                            \
+        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                          \
+        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                           \
+        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                            \
+        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                          \
+        acc.s2 = fma(src0_left.s2, weights_row0.s0, acc.s2);                           \
+        acc.s2 = fma(src0_mid.s2, weights_row0.s1, acc.s2);                            \
+        acc.s2 = fma(src0_right.s2, weights_row0.s2, acc.s2);                          \
+        acc.s3 = fma(src0_left.s3, weights_row0.s0, acc.s3);                           \
+        acc.s3 = fma(src0_mid.s3, weights_row0.s1, acc.s3);                            \
+        acc.s3 = fma(src0_right.s3, weights_row0.s2, acc.s3);                          \
     })
 
-#define CONVOLUTION1x3_BIFROST4X1_STRIDE2(acc, src0_left, src0_mid, src0_right, weights_row0) \
-    ({                                                                                        \
-        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
-        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
-        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
-        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \
-        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \
-        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \
-        acc.s2 = fma(src0_left.s4, weights_row0.s0, acc.s2);                                  \
-        acc.s2 = fma(src0_mid.s4, weights_row0.s1, acc.s2);                                   \
-        acc.s2 = fma(src0_right.s4, weights_row0.s2, acc.s2);                                 \
-        acc.s3 = fma(src0_left.s6, weights_row0.s0, acc.s3);                                  \
-        acc.s3 = fma(src0_mid.s6, weights_row0.s1, acc.s3);                                   \
-        acc.s3 = fma(src0_right.s6, weights_row0.s2, acc.s3);                                 \
+#define CONVOLUTION1x3_4X1_STRIDE2(acc, src0_left, src0_mid, src0_right, weights_row0) \
+    ({                                                                                 \
+        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                           \
+        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                            \
+        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                          \
+        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                           \
+        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                            \
+        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                          \
+        acc.s2 = fma(src0_left.s4, weights_row0.s0, acc.s2);                           \
+        acc.s2 = fma(src0_mid.s4, weights_row0.s1, acc.s2);                            \
+        acc.s2 = fma(src0_right.s4, weights_row0.s2, acc.s2);                          \
+        acc.s3 = fma(src0_left.s6, weights_row0.s0, acc.s3);                           \
+        acc.s3 = fma(src0_mid.s6, weights_row0.s1, acc.s3);                            \
+        acc.s3 = fma(src0_right.s6, weights_row0.s2, acc.s3);                          \
     })
 
 #endif /* DILATION_X==1 && DILATION_Y==1 */
@@ -385,8 +385,8 @@ __kernel void depthwise_convolution_3x3(
  * @param[in] weights_addr     Pointer from where to get weights
  * @param[in] weights_stride_y Stride of weights tesnsor in Y dimension
  */
-inline float2 convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
-                                                                     const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
+inline float2 convolution_3x3_dilation_stridex1_stridey1_f32(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
+                                                             const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
 {
     // Load the weights
     float3 weights_row0 = vload3(0, (__global float *)(weights_addr + 0 * weights_stride_y));
@@ -407,9 +407,9 @@ inline float2 convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(__global uc
     float2 src20_mid   = vload2(0, (__global float *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
     float2 src20_right = vload2(0, (__global float *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
 
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels0, src00_left, src00_mid, src00_right, weights_row0);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels0, src10_left, src10_mid, src10_right, weights_row1);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels0, src20_left, src20_mid, src20_right, weights_row2);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels0, src00_left, src00_mid, src00_right, weights_row0);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels0, src10_left, src10_mid, src10_right, weights_row1);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels0, src20_left, src20_mid, src20_right, weights_row2);
 
     return pixels0;
 }
@@ -423,8 +423,8 @@ inline float2 convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(__global uc
  * @param[in] weights_addr     Pointer from where to get weights
  * @param[in] weights_stride_y Stride of weights tesnsor in Y dimension
  */
-inline float2 convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
-                                                                     const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
+inline float2 convolution_3x3_dilation_stridex2_stridey2_f32(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
+                                                             const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
 {
     // Load the weights
     float3 weights_row0 = vload3(0, (__global float *)(weights_addr + 0 * weights_stride_y));
@@ -445,9 +445,9 @@ inline float2 convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(__global uc
     float3 src20_mid   = vload3(0, (__global float *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
     float3 src20_right = vload3(0, (__global float *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
 
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels0, src00_left, src00_mid, src00_right, weights_row0);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels0, src10_left, src10_mid, src10_right, weights_row1);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels0, src20_left, src20_mid, src20_right, weights_row2);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels0, src00_left, src00_mid, src00_right, weights_row0);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels0, src10_left, src10_mid, src10_right, weights_row1);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels0, src20_left, src20_mid, src20_right, weights_row2);
 
     return pixels0;
 }
@@ -491,7 +491,7 @@ inline float2 convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(__global uc
  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
-__kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
+__kernel void depthwise_convolution_3x3_stridex1_stridey1_f32(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights)
@@ -531,29 +531,29 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
     float4 src40 = vload4(0, (__global float *)(src_addr + 4 * src_stride_y)); // Row4
     float4 src50 = vload4(0, (__global float *)(src_addr + 5 * src_stride_y)); // Row5
 
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels0, src00, weights_row0);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels0, src10, weights_row1);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels0, src20, weights_row2);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels1, src10, weights_row0);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels1, src20, weights_row1);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels1, src30, weights_row2);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels2, src20, weights_row0);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels2, src30, weights_row1);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels2, src40, weights_row2);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels3, src30, weights_row0);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels3, src40, weights_row1);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels3, src50, weights_row2);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels0, src00, weights_row0);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels0, src10, weights_row1);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels0, src20, weights_row2);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels1, src10, weights_row0);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels1, src20, weights_row1);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels1, src30, weights_row2);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels2, src20, weights_row0);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels2, src30, weights_row1);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels2, src40, weights_row2);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels3, src30, weights_row0);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels3, src40, weights_row1);
+    CONVOLUTION1x3_2X1_STRIDE1(pixels3, src50, weights_row2);
 
 #else /* DILATION_X==1 && DILATION_Y==1 */
 
     //3x3 Convolution of elements starting in 0th row
-    pixels0 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
+    pixels0 = convolution_3x3_dilation_stridex1_stridey1_f32(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 1st row
-    pixels1 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src_stride_x, src_stride_y, 1, weights_addr, weights_stride_y);
+    pixels1 = convolution_3x3_dilation_stridex1_stridey1_f32(src_addr, src_stride_x, src_stride_y, 1, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels2 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
+    pixels2 = convolution_3x3_dilation_stridex1_stridey1_f32(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 3rd row
-    pixels3 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(src_addr, src_stride_x, src_stride_y, 3, weights_addr, weights_stride_y);
+    pixels3 = convolution_3x3_dilation_stridex1_stridey1_f32(src_addr, src_stride_x, src_stride_y, 3, weights_addr, weights_stride_y);
 
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
@@ -611,7 +611,7 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
-__kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
+__kernel void depthwise_convolution_3x3_stridex2_stridey2_f32(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights)
@@ -654,19 +654,19 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     float4 src40 = vload4(0, (__global float *)(src_addr + 4 * src_stride_y)); // Row4
     float2 src41 = vload2(2, (__global float *)(src_addr + 4 * src_stride_y)); // Row4
 
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels0, src00, src01, weights_row0);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels0, src10, src11, weights_row1);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels0, src20, src21, weights_row2);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels1, src20, src21, weights_row0);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels1, src30, src31, weights_row1);
-    CONVOLUTION1x3_BIFROST2X1_STRIDE2(pixels1, src40, src41, weights_row2);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels0, src00, src01, weights_row0);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels0, src10, src11, weights_row1);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels0, src20, src21, weights_row2);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels1, src20, src21, weights_row0);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels1, src30, src31, weights_row1);
+    CONVOLUTION1x3_2X1_STRIDE2(pixels1, src40, src41, weights_row2);
 
 #else  /* DILATION_X==1 && DILATION_Y==1 */
 
     //3x3 Convolution of elements starting in 0th row
-    pixels0 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
+    pixels0 = convolution_3x3_dilation_stridex2_stridey2_f32(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels1 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
+    pixels1 = convolution_3x3_dilation_stridex2_stridey2_f32(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
 #ifdef HAS_BIAS
@@ -683,104 +683,6 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
 }
 
 #endif // defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F32)
-
-#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DST_WIDTH)
-/** Reshape the weights for quantized depthwise convolution
- *
- * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type, e.g. -DDATA_TYPE=uint8
- * @note Output width should be given as a preprocessor argument using -DDST_WIDTH=width, e.g. -DDST_WIDTH=128
- * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=vec_size, e.g., -DVEC_SIZE=4
- * @attention Input's height and width should be 3
- *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: All
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- */
-__kernel void depthwise_convolution_reshape_weights(
-    TENSOR3D_DECLARATION(src),
-    IMAGE_DECLARATION(dst))
-{
-    Vector    src = CONVERT_TO_VECTOR_STRUCT(src);
-    const int x   = get_global_id(0);
-
-    // Load 3x3xVEC_SIZE weights
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w0 = VLOAD(VEC_SIZE)(0, src.ptr + 0 * src_stride_y + 0 * src_stride_z);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w1 = VLOAD(VEC_SIZE)(0, src.ptr + 1 * src_stride_y + 0 * src_stride_z);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w2 = VLOAD(VEC_SIZE)(0, src.ptr + 2 * src_stride_y + 0 * src_stride_z);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w3 = VLOAD(VEC_SIZE)(0, src.ptr + 0 * src_stride_y + 1 * src_stride_z);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w4 = VLOAD(VEC_SIZE)(0, src.ptr + 1 * src_stride_y + 1 * src_stride_z);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w5 = VLOAD(VEC_SIZE)(0, src.ptr + 2 * src_stride_y + 1 * src_stride_z);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w6 = VLOAD(VEC_SIZE)(0, src.ptr + 0 * src_stride_y + 2 * src_stride_z);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w7 = VLOAD(VEC_SIZE)(0, src.ptr + 1 * src_stride_y + 2 * src_stride_z);
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    w8 = VLOAD(VEC_SIZE)(0, src.ptr + 2 * src_stride_y + 2 * src_stride_z);
-
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * DST_WIDTH * sizeof(DATA_TYPE);
-
-#if defined(TRANSPOSE)
-#if VEC_SIZE != 4
-#error "VEC_SIZE not supported"
-#else  // VEC_SIZE != 4
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w0.s0, w1.s0, w2.s0, w3.s0), 0, dst_addr + 0);
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w4.s0, w5.s0, w6.s0, w7.s0), 0, dst_addr + 1 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w8.s0, w0.s1, w1.s1, w2.s1), 0, dst_addr + 2 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w3.s1, w4.s1, w5.s1, w6.s1), 0, dst_addr + 3 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w7.s1, w8.s1, w0.s2, w1.s2), 0, dst_addr + 4 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w2.s2, w3.s2, w4.s2, w5.s2), 0, dst_addr + 5 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w6.s2, w7.s2, w8.s2, w0.s3), 0, dst_addr + 6 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w1.s3, w2.s3, w3.s3, w4.s3), 0, dst_addr + 7 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w5.s3, w6.s3, w7.s3, w8.s3), 0, dst_addr + 8 * sizeof(DATA_TYPE) * VEC_SIZE);
-#endif // VEC_SIZE != 4
-#else  // !defined(TRANSPOSE)
-    VSTORE(VEC_SIZE)
-    (w0, 0, dst_addr + 0);
-    VSTORE(VEC_SIZE)
-    (w1, 0, dst_addr + 1 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    (w2, 0, dst_addr + 2 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    (w3, 0, dst_addr + 3 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    (w4, 0, dst_addr + 4 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    (w5, 0, dst_addr + 5 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    (w6, 0, dst_addr + 6 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    (w7, 0, dst_addr + 7 * sizeof(DATA_TYPE) * VEC_SIZE);
-    VSTORE(VEC_SIZE)
-    (w8, 0, dst_addr + 8 * sizeof(DATA_TYPE) * VEC_SIZE);
-#endif // defined(TRANSPOSE)
-}
-#endif // defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DST_WIDTH)
 
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F16)
 #if defined(CONV_STRIDE_X)
@@ -805,8 +707,8 @@ __kernel void depthwise_convolution_reshape_weights(
  * @param[in] weights_addr     Pointer from where to get weights
  * @param[in] weights_stride_y Stride of weights tesnsor in Y dimension
  */
-inline half4 convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
-                                                                    const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
+inline half4 convolution_3x3_dilation_stridex1_stridey1_f16(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
+                                                            const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
 {
     // Load the weights
     half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
@@ -827,9 +729,9 @@ inline half4 convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(__global uch
     half4 src20_mid   = vload4(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
     half4 src20_right = vload4(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
 
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src00_left, src00_mid, src00_right, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src10_left, src10_mid, src10_right, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src20_left, src20_mid, src20_right, weights_row2);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels0, src00_left, src00_mid, src00_right, weights_row0);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels0, src10_left, src10_mid, src10_right, weights_row1);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels0, src20_left, src20_mid, src20_right, weights_row2);
 
     return pixels0;
 }
@@ -843,8 +745,8 @@ inline half4 convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(__global uch
  * @param[in] weights_addr     Pointer from where to get weights
  * @param[in] weights_stride_y Stride of weights tesnsor in Y dimension
  */
-inline half4 convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
-                                                                    const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
+inline half4 convolution_3x3_dilation_stridex2_stridey2_f16(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
+                                                            const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
 {
     // Load the weights
     half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
@@ -865,9 +767,9 @@ inline half4 convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(__global uch
     half8 src20_mid   = vload8(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
     half8 src20_right = vload8(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
 
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src00_left, src00_mid, src00_right, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src10_left, src10_mid, src10_right, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src20_left, src20_mid, src20_right, weights_row2);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels0, src00_left, src00_mid, src00_right, weights_row0);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels0, src10_left, src10_mid, src10_right, weights_row1);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels0, src20_left, src20_mid, src20_right, weights_row2);
 
     return pixels0;
 }
@@ -1127,7 +1029,7 @@ __kernel void depthwise_convolution_3x3_f16(
  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
-__kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
+__kernel void depthwise_convolution_3x3_stridex1_stridey1_f16(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights)
@@ -1174,29 +1076,29 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
     half8 src40 = vload8(0, (__global half *)(src_addr + 4 * src_stride_y)); // Row4
     half8 src50 = vload8(0, (__global half *)(src_addr + 5 * src_stride_y)); // Row5
 
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src00, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src10, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src20, weights_row2);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels1, src10, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels1, src20, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels1, src30, weights_row2);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels2, src20, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels2, src30, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels2, src40, weights_row2);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels3, src30, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels3, src40, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels3, src50, weights_row2);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels0, src00, weights_row0);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels0, src10, weights_row1);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels0, src20, weights_row2);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels1, src10, weights_row0);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels1, src20, weights_row1);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels1, src30, weights_row2);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels2, src20, weights_row0);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels2, src30, weights_row1);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels2, src40, weights_row2);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels3, src30, weights_row0);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels3, src40, weights_row1);
+    CONVOLUTION1x3_4X1_STRIDE1(pixels3, src50, weights_row2);
 
 #else /* DILATION_X==1 && DILATION_Y==1 */
 
     //3x3 Convolution of elements starting in 0th row
-    pixels0 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
+    pixels0 = convolution_3x3_dilation_stridex1_stridey1_f16(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 1st row
-    pixels1 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src_stride_x, src_stride_y, 1, weights_addr, weights_stride_y);
+    pixels1 = convolution_3x3_dilation_stridex1_stridey1_f16(src_addr, src_stride_x, src_stride_y, 1, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels2 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
+    pixels2 = convolution_3x3_dilation_stridex1_stridey1_f16(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 3rd row
-    pixels3 = convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(src_addr, src_stride_x, src_stride_y, 3, weights_addr, weights_stride_y);
+    pixels3 = convolution_3x3_dilation_stridex1_stridey1_f16(src_addr, src_stride_x, src_stride_y, 3, weights_addr, weights_stride_y);
 
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
@@ -1250,7 +1152,7 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
-__kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
+__kernel void depthwise_convolution_3x3_stridex2_stridey2_f16(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights)
@@ -1300,18 +1202,18 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     half8 src40 = vload8(0, (__global half *)(src_addr + 4 * src_stride_y)); // Row4
     half2 src41 = vload2(4, (__global half *)(src_addr + 4 * src_stride_y)); // Row4
 
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src00, src01, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src10, src11, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src20, src21, weights_row2);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels1, src20, src21, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels1, src30, src31, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels1, src40, src41, weights_row2);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels0, src00, src01, weights_row0);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels0, src10, src11, weights_row1);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels0, src20, src21, weights_row2);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels1, src20, src21, weights_row0);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels1, src30, src31, weights_row1);
+    CONVOLUTION1x3_4X1_STRIDE2(pixels1, src40, src41, weights_row2);
 
 #else  /* DILATION_X==1 && DILATION_Y==1 */
     //3x3 Convolution of elements starting in 0th row
-    pixels0 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
+    pixels0 = convolution_3x3_dilation_stridex2_stridey2_f16(src_addr, src_stride_x, src_stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels1                  = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
+    pixels1                  = convolution_3x3_dilation_stridex2_stridey2_f16(src_addr, src_stride_x, src_stride_y, 2, weights_addr, weights_stride_y);
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
 #ifdef HAS_BIAS

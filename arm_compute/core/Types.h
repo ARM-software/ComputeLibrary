@@ -1874,12 +1874,6 @@ struct ConvolutionInfo
     Size2D              dilation{ Size2D(1, 1) }; /**< Dilation, in elements, across x and y. Defaults to (1, 1). */
 };
 
-struct DepthwiseConvolutionReshapeInfo
-{
-    unsigned int c0{ 1 };            /**< Number of channels processed by the depth-wise convolution */
-    bool         transpose{ false }; /**< True if the block MxC0 (where M is the area of the filter i.e. KwxKh) has to be transposed */
-};
-
 /** GEMMLowp output stage type */
 enum class GEMMLowpOutputStageType
 {

@@ -40,7 +40,6 @@
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.h"
-#include "src/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsKernel.h"
 #include "src/core/CL/kernels/CLFFTDigitReverseKernel.h"
 #include "src/core/CL/kernels/CLFFTRadixStageKernel.h"
 #include "src/core/CL/kernels/CLFFTScaleKernel.h"
@@ -91,6 +90,5 @@
 #include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "src/core/CL/kernels/CLWinogradInputTransformKernel.h"
 #include "src/core/CL/kernels/CLWinogradOutputTransformKernel.h"
-#include "src/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 
 #endif /* ARM_COMPUTE_CLKERNELS_H */

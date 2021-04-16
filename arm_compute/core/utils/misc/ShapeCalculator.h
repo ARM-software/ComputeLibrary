@@ -287,30 +287,6 @@ inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_inte
     return shape_interleaved_a;
 }
 
-/** Calculate the reshaped shape of the weights to use in depthwise convolution
- *
- * @param[in] input Input tensor info
- * @param[in] info  Depthwise convolution information to be used for reshaping.
- *
- * @return the calculated shape
- */
-inline TensorShape compute_reshaped_depthwise_weights_shape(const ITensorInfo &input, const DepthwiseConvolutionReshapeInfo &info)
-{
-    const auto  data_layout = input.data_layout();
-    TensorShape weights_shape{};
-
-    const int    width_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int    height_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int    channel_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
-    const size_t num_channels = input.dimension(channel_idx);
-    const size_t num_rows     = input.dimension(height_idx);
-    const size_t num_cols     = input.dimension(width_idx);
-
-    weights_shape.set(0, num_rows * num_cols * info.c0);
-    weights_shape.set(1, DIV_CEIL(num_channels, info.c0));
-    return weights_shape;
-}
-
 /** Calculate the transposed 1xW shape
  *
  * @param[in] b Input tensor info
