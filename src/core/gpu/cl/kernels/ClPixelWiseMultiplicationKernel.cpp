@@ -42,8 +42,6 @@ namespace kernels
 {
 namespace
 {
-constexpr unsigned int num_elems_processed_per_iteration = 16;
-
 Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
@@ -92,60 +90,6 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
-{
-    const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
-
-    // Auto initialize dst if not initialized
-    {
-        set_shape_if_empty(*dst, out_shape);
-
-        if(src1->data_type() == DataType::S16 || src2->data_type() == DataType::S16)
-        {
-            set_format_if_unknown(*dst, Format::S16);
-        }
-        else if(src1->data_type() == DataType::F32 || src2->data_type() == DataType::F32)
-        {
-            set_format_if_unknown(*dst, Format::F32);
-        }
-        else if(src1->data_type() == DataType::QASYMM8)
-        {
-            set_data_type_if_unknown(*dst, DataType::QASYMM8);
-        }
-        else if(src1->data_type() == DataType::QASYMM8_SIGNED)
-        {
-            set_data_type_if_unknown(*dst, DataType::QASYMM8_SIGNED);
-        }
-        else if(src1->data_type() == DataType::QSYMM16)
-        {
-            set_data_type_if_unknown(*dst, DataType::QSYMM16);
-        }
-    }
-
-    Window win        = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration));
-    Window win_input1 = win.broadcast_if_dimension_le_one(*src1);
-    Window win_input2 = win.broadcast_if_dimension_le_one(*src2);
-
-    AccessWindowHorizontal input1_access(src1, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal input2_access(src2, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(dst, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win_input1, input1_access)
-                          || update_window_and_padding(win_input2, input2_access)
-                          || update_window_and_padding(win, output_access);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-
-BorderSize calc_border_size(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
-{
-    const unsigned int replicateSize = dst->dimension(0) - std::min(src1->dimension(0), src2->dimension(0));
-    const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
-
-    return BorderSize{ 0, border, 0, 0 };
-}
 } // namespace
 
 void ClPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
@@ -155,12 +99,10 @@ void ClPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src1, src2, dst,
                                                   scale, overflow_policy, rounding_policy, act_info));
 
-    // Calculate border size
-    _border_size = calc_border_size(src1, src2, dst);
+    auto padding_info = get_padding_info({ src1, src2, dst });
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(src1, src2, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
+    auto_init_if_empty(*dst, src1->clone()->set_tensor_shape(out_shape));
 
     int scale_int = -1;
     // Extract sign, exponent and mantissa
@@ -197,7 +139,9 @@ void ClPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
         }
     }
 
-    const bool is_quantized = is_data_type_quantized(src1->data_type());
+    const bool         is_quantized      = is_data_type_quantized(src1->data_type());
+    const unsigned int vec_size          = adjust_vec_size(16 / dst->element_size(), dst->dimension(0));
+    const unsigned int vec_size_leftover = dst->dimension(0) % vec_size;
 
     // Set kernel build options
     std::string    kernel_name = "pixelwise_mul";
@@ -205,7 +149,10 @@ void ClPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
     build_opts.add_option("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(src1->data_type()));
     build_opts.add_option("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(src2->data_type()));
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(dst->data_type()));
-    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_IN1=" + ((dst->dimension(0) != 1 && src1->dimension(0) == 1) ? "1" : support::cpp11::to_string(vec_size)));
+    build_opts.add_option("-DVEC_SIZE_IN2=" + ((dst->dimension(0) != 1 && src2->dimension(0) == 1) ? "1" : support::cpp11::to_string(vec_size)));
+    build_opts.add_option("-DVEC_SIZE_OUT=" + support::cpp11::to_string(vec_size));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_leftover));
     if(is_quantized && (dst->data_type() != DataType::S32))
     {
         const UniformQuantizationInfo iq1_info = src1->quantization_info().uniform();
@@ -252,7 +199,10 @@ void ClPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
         _kernel.setArg(idx++, scale);
     }
 
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*dst, Steps(vec_size));
+    ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status ClPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
@@ -260,7 +210,6 @@ Status ClPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const 
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src1->clone().get(), src2->clone().get(), dst->clone().get()).first);
 
     return Status{};
 }
@@ -312,14 +261,9 @@ void ClPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window 
     while(collapsed.slide_window_slice_3D(slice));
 }
 
-BorderSize ClPixelWiseMultiplicationKernel::border_size() const
-{
-    return _border_size;
-}
-
 namespace
 {
-constexpr unsigned int num_elems_processed_per_iteration_complex = 1;
+constexpr unsigned int vec_size_complex = 1;
 
 Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
@@ -342,30 +286,6 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window_complex(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
-{
-    const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
-
-    // Auto initialize dst if not initialized
-    const TensorInfo out_info(out_shape, src1->num_channels(), src1->data_type());
-    auto_init_if_empty(*dst, out_info);
-
-    Window win        = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration_complex));
-    Window win_input1 = win.broadcast_if_dimension_le_one(*src1);
-    Window win_input2 = win.broadcast_if_dimension_le_one(*src2);
-
-    AccessWindowHorizontal input1_access(src1, 0, num_elems_processed_per_iteration_complex);
-    AccessWindowHorizontal input2_access(src2, 0, num_elems_processed_per_iteration_complex);
-    AccessWindowHorizontal output_access(dst, 0, num_elems_processed_per_iteration_complex);
-
-    bool window_changed = update_window_and_padding(win_input1, input1_access)
-                          || update_window_and_padding(win_input2, input2_access)
-                          || update_window_and_padding(win, output_access);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 void ClComplexPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
@@ -373,12 +293,10 @@ void ClComplexPixelWiseMultiplicationKernel::configure(const CLCompileContext &c
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(src1, src2, dst, act_info));
 
-    // Calculate border size
-    _border_size = calc_border_size(src1, src2, dst);
+    auto padding_info = get_padding_info({ src1, src2, dst });
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window_complex(src1, src2, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
+    auto_init_if_empty(*dst, src1->clone()->set_tensor_shape(out_shape));
 
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
@@ -392,14 +310,16 @@ void ClComplexPixelWiseMultiplicationKernel::configure(const CLCompileContext &c
     // Create kernel
     _kernel = create_kernel(compile_context, "pixelwise_mul_complex", build_opts.options());
 
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*dst, Steps(vec_size_complex));
+    ICLKernel::configure_internal(win);
+
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status ClComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_complex(src1, src2, dst, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_complex(src1->clone().get(), src2->clone().get(), dst->clone().get()).first);
 
     return Status{};
 }
@@ -449,11 +369,6 @@ void ClComplexPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const 
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
     }
     while(collapsed.slide_window_slice_3D(slice));
-}
-
-BorderSize ClComplexPixelWiseMultiplicationKernel::border_size() const
-{
-    return _border_size;
 }
 } // namespace kernels
 } // namespace opencl

@@ -83,18 +83,6 @@
  */
 #define GET_SPATIAL_IDX(IDX, N0, PARTIAL_N0) (max((int)(get_global_id(IDX) * N0 - (N0 - PARTIAL_N0) % N0), 0))
 
-/** Offset (in bytes) calculation for a 1D BUFFER (cl_buffer) tensor */
-#define OFFSET1D(base, data_type, x) (base##_offset_first_element_in_bytes + x * sizeof(data_type))
-
-/** Offset (in bytes) calculation for a 2D BUFFER (cl_buffer) tensor */
-#define OFFSET2D(base, data_type, x, y) (base##_offset_first_element_in_bytes + x * sizeof(data_type) + y * base##_stride_y)
-
-/** Offset (in bytes) calculation for a 3D BUFFER (cl_buffer) tensor */
-#define OFFSET3D(base, data_type, x, y, z) (base##_offset_first_element_in_bytes + x * sizeof(data_type) + y * base##_stride_y + z * base##_stride_z)
-
-/** Offset (in bytes) calculation for a 4D BUFFER (cl_buffer) tensor */
-#define OFFSET4D(base, data_type, x, y, z, w) (base##_offset_first_element_in_bytes + x * sizeof(data_type) + y * base##_stride_y + z * base##_stride_z + w * base##_stride_w)
-
 /** Dot product integet 8bit function
  *
  *  @note Performs: c += dot(a, b)
@@ -184,7 +172,7 @@
         LOOP_UNROLLING(int, _i, 0, HEIGHT, 1) \
         { \
             dst[_i].v = V_LOAD(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, ((Y) + _i * (int)(YI_MULTIPLIER)), STRIDE_Y); \
-        }                                                                                                                 \
+        }                                                                                                                  \
     })
 
 /** Load a tile from global memory (tensor) using an indirect Y index tile

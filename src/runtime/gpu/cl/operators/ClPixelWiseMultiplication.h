@@ -99,12 +99,6 @@ public:
      */
     static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
                            ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-
-    // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-
-private:
-    std::unique_ptr<ICLKernel> _border_handler{ nullptr };
 };
 
 /** Basic function to run @ref opencl::ClComplexPixelWiseMultiplication. */
@@ -132,12 +126,6 @@ public:
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      */
     static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-
-    // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-
-private:
-    std::unique_ptr<ICLKernel> _border_handler{ nullptr };
 };
 } // namespace opencl
 } // namespace arm_compute

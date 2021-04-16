@@ -41,7 +41,7 @@ public:
     /** Default constructor */
     ClPixelWiseMultiplicationKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClPixelWiseMultiplicationKernel);
-    /** Initialise the kernel's src, dst and border mode.
+    /** Initialise the kernel's src and dst.
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
@@ -101,10 +101,6 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
-    BorderSize border_size() const override;
-
-public:
-    BorderSize _border_size{};
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */
@@ -114,7 +110,7 @@ public:
     /** Default constructor */
     ClComplexPixelWiseMultiplicationKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClComplexPixelWiseMultiplicationKernel);
-    /** Initialise the kernel's src, dst and border mode.
+    /** Initialise the kernel's src and dst.
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  src1            An src tensor info. Data types supported: F32. Number of channels supported: 2.
@@ -136,10 +132,6 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
-    BorderSize border_size() const override;
-
-public:
-    BorderSize _border_size{};
 };
 } // namespace kernels
 } // namespace opencl

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,10 @@
 #define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
 
 #if defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(ACC_DATA_TYPE) && defined(DATA_TYPE_OUT)
+
+#define VEC_ACC_TYPE VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE_OUT)
+#define VEC_OUT_TYPE VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)
+
 /** Performs a pixelwise multiplication with integer scale of integer inputs.
  *
  * @attention The inputs and output data types need to be passed at compile time using -DDATA_TYPE_IN1, -DDATA_TYPE_IN2 and -DDATA_TYPE_OUT:
@@ -75,27 +79,29 @@ __kernel void pixelwise_mul_int(
     TENSOR3D_DECLARATION(out),
     const uint scale)
 {
-    // Get pixels pointer
-    Tensor3D in1 = CONVERT_TO_TENSOR3D_STRUCT(in1);
-    Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+    size_t x = max((int)(get_global_id(0) * VEC_SIZE_OUT - (VEC_SIZE_OUT - VEC_SIZE_LEFTOVER) % VEC_SIZE_OUT), 0);
+    size_t y = get_global_id(1);
+    size_t z = get_global_id(2);
+
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x * in1_stride_x + y * in1_stride_y + z * in1_stride_z;
+    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + x * in2_stride_x + y * in2_stride_y + z * in2_stride_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x * out_stride_x + y * out_stride_y + z * out_stride_z;
 
     // Load data
-    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
-    in1_data = CONVERT(vload16(0, (__global DATA_TYPE_IN1 *)in1.ptr), VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
-    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
-    in2_data = CONVERT(vload16(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
+    VEC_ACC_TYPE in1_data = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN1, VEC_SIZE_OUT))VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_IN1 *)in1_addr), VEC_ACC_TYPE);
+    VEC_ACC_TYPE in2_data = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN2, VEC_SIZE_OUT))VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE_IN2 *)in2_addr), VEC_ACC_TYPE);
 
     // Perform multiplication and store result
-    vstore16(MUL_OP(in1_data, in2_data, scale, DATA_TYPE_OUT, 16), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VEC_OUT_TYPE out_data0 = MUL_OP(in1_data, in2_data, scale, DATA_TYPE_OUT, VEC_SIZE_OUT);
+    STORE_VECTOR_SELECT(out_data, DATA_TYPE_OUT, out_addr, VEC_SIZE_OUT, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(ACC_DATA_TYPE) && defined(DATA_TYPE_OUT) */
 
-#if defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE)
+#if defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE_OUT)
 
-#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
-#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
-#define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
+#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE_OUT)
+#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE_OUT)
+#define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)
 
 /** Performs a pixelwise multiplication with float scale of quantized inputs.
  *
@@ -141,14 +147,17 @@ __kernel void pixelwise_mul_quantized(
     TENSOR3D_DECLARATION(out),
     const float scale)
 {
-    // Get pixels pointer
-    Tensor3D in1 = CONVERT_TO_TENSOR3D_STRUCT(in1);
-    Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+    size_t x = max((int)(get_global_id(0) * VEC_SIZE_OUT - (VEC_SIZE_OUT - VEC_SIZE_LEFTOVER) % VEC_SIZE_OUT), 0);
+    size_t y = get_global_id(1);
+    size_t z = get_global_id(2);
+
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x * in1_stride_x + y * in1_stride_y + z * in1_stride_z;
+    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + x * in2_stride_x + y * in2_stride_y + z * in2_stride_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x * out_stride_x + y * out_stride_y + z * out_stride_z;
 
     // Load data
-    VEC_INT in_a = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_OUT *)in1.ptr), VEC_INT);
-    VEC_INT in_b = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_OUT *)in2.ptr), VEC_INT);
+    VEC_INT in_a = CONVERT((VEC_TYPE)(VLOAD(VEC_SIZE_OUT)(0, (__global DATA_TYPE_OUT *)in1_addr)), VEC_INT);
+    VEC_INT in_b = CONVERT((VEC_TYPE)(VLOAD(VEC_SIZE_OUT)(0, (__global DATA_TYPE_OUT *)in2_addr)), VEC_INT);
 
     // Dequantize
 #if defined(OFFSET_IN1)
@@ -165,10 +174,9 @@ __kernel void pixelwise_mul_quantized(
 #else  // defined(OFFSET_OUT)
     const VEC_FLOAT qresf32 = (in1f32 * in2f32 * scale) / ((VEC_FLOAT)(float)SCALE_OUT);
 #endif // defined(OFFSET_OUT)
-    const VEC_TYPE res = CONVERT_SAT(CONVERT_DOWN(qresf32, VEC_INT), VEC_TYPE);
+    const VEC_TYPE res0 = CONVERT_SAT(CONVERT_DOWN(qresf32, VEC_INT), VEC_TYPE);
 
     // Store result
-    VSTORE(VEC_SIZE)
-    (res, 0, (__global DATA_TYPE_OUT *)out.ptr);
+    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE_OUT, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
-#endif /* defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE) */
+#endif /* defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE_OUT) */

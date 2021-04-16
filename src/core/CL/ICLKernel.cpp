@@ -105,8 +105,8 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
 
     for(unsigned int d = 0; d < dimension_size; ++d)
     {
-        _kernel.setArg<cl_uint>(idx++, strides[d]);
-        _kernel.setArg<cl_uint>(idx++, strides[d] * window[d].step());
+        _kernel.setArg<cl_uint>(idx++, window.is_broadcasted(d) ? 0 : strides[d]);
+        _kernel.setArg<cl_uint>(idx++, window.is_broadcasted(d) ? 0 : (strides[d] * window[d].step()));
     }
 
     _kernel.setArg<cl_uint>(idx++, offset_first_element);
