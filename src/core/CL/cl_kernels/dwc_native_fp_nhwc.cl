@@ -27,14 +27,16 @@
 #include "helpers_asymm.h"
 #include "tile_helpers.h"
 
+#if defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_WIDTH) && defined(DST_HEIGHT) && defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)
 //! @cond Doxygen_Suppress
-/** OpenCL kernel to compute the direct convolution.
+/** OpenCL kernel to compute the depthwise convolution for floating-point data types (F32/F16)
  *
  * @note Data layout supported: NHWC
- * @note Data type supported: F32/F16/QASYMM8/QASYMM8_SIGNED
+ * @note Data type supported: F32/F16
  * @note The accumulation data type must be passed at compile time using -DACC_DATA_TYPE (e.g. -DDATA_TYPE_PROMOTED=half)
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The convolution strides must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y (e.g. -DSTRIDE_X=2, -DSTRIDE_Y=2)
+ * @note The convolution dilations must be passed at compile time using -DDILATION_X and -DDILATION_Y (e.g. -DDILATION_X=2, -DDILATION_Y=2)
  * @note The spatial dimensions of the weights must be passed at compile time using -DWEI_WIDTH and -DWEI_HEIGHT (e.g. -DWEI_WIDTH=9, -DWEI_HEIGHT=9)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The spatial dimensions of the destination tensor must be passed at compile time using -DDST_WIDTH and -DDST_HEIGHT (e.g. -DDST_WIDTH=96, -DDST_HEIGHT=64)
@@ -47,26 +49,15 @@
  * @note The data type of the weights tensor must be passed at compile time using -DWEI_DATA_TYPE (e.g. -DWEI_DATA_TYPE=float)
  * @note The data type of the destination tensor must be passed at compile time using -DDST_DATA_TYPE (e.g. -DDST_DATA_TYPE=float)
  * @note The data type of the accumulators must be passed at compile time using -DACC_DATA_TYPE (e.g. -DACC_DATA_TYPE=float)
- * @note The number of M0 rows (width*height) to process must be passed at compile time using -DM0 (e.g. -DM0=2)
+ * @note The number of M0 rows (width) to process must be passed at compile time using -DM0 (e.g. -DM0=2)
  * @note The number of N0 output channels to process must be passed at compile time using -DN0 (e.g. -DN0=2)
- * @note The number of K0 inner accumulations must be passed at compile time using -DK0 (e.g. -DK0=2)
- * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_N0 (e.g. -DPARTIAL_N0=1)
- * @note The zero value must be passed at compile time using -DZERO_VALUE (e.g. -DZERO_VALUE=0)
- * @note Only the following configurations of M0, N0 and K0 are currently supported:
- *  - M0 = 1, 2, 3, 4, 5, .... n
- *  - N0 = 2, 3, 4, 8, 16
- *  - K0 = 2, 3, 4, 8, 16 (only 4, 8 and 16 if WEI_TENSOR_TYPE=IMAGE)
+ * @note The size of the partial store block in the first dimension must be passed at compile time using -DPARTIAL_N0 (e.g. -DPARTIAL_N0=1)
+ * @note Only the following configurations of M0 and N0 are currently supported:
+ *  - M0 = 1, 2, 3, 4, 5, .... n (M0 != 1 with STRIDE_X == 1 && DILATION_X == 1 only)
+ *  - N0 = 2, 3, 4, 8, 16 (only 4, 8 and 16 if WEI_TENSOR_TYPE=IMAGE)
+ * @note The number of rows to read from the src tensor must be passed at compile time using -DM0_A (e.g., -DM0_A=3). M0_A must be equal to WEI_WIDTH + (M0 - 1)
  *
- *@note In case of QASYMM8/QASYMM8_SIGNED, the following extra information must be passed at compile time:
- * - -DIS_QUANTIZED
- * - The destination quantization multiplier e.g. -DDST_MULTIPLIER=1234
- * - The destination quantization shift e.g. -DDST_SHIFT=4
- * - The destination offset e.g. -DDST_OFFSET=4
- * - The source offset e.g. -DSRC_OFFSET=4
- * - The weights offset e.g. -DWEI_OFFSET=4
- * - The quantized zero value e.g. -DZERO_VALUE=4
- *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32/QASYMM8
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -102,7 +93,7 @@
  * @param[in]  bia_offset_first_element_in_bytes (Optional) The offset of the first element in the bias matrix
  */
 //! @endcond
-__kernel void direct_convolution_nhwc(
+__kernel void dwc_native_fp_nhwc(
     TENSOR4D(src, SRC_TENSOR_TYPE),
     TENSOR4D(dst, DST_TENSOR_TYPE),
     TENSOR4D(wei, WEI_TENSOR_TYPE)
@@ -118,158 +109,104 @@ __kernel void direct_convolution_nhwc(
 #define _IWEI_HEIGHT WEI_HEIGHT
 #define _ISRC_WIDTH SRC_WIDTH
 #define _ISRC_HEIGHT SRC_HEIGHT
-#define _ISRC_CHANNELS SRC_CHANNELS
 #define _IDST_WIDTH DST_WIDTH
 #define _IDST_HEIGHT DST_HEIGHT
 #define _IDST_CHANNELS DST_CHANNELS
-#define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
-
-    // If quantized, the output tile has to be quantized first before being stored to global memory
-#if defined(IS_QUANTIZED)
-#define _IOUTPUT_TILE cq
-#else // defined(IS_QUANTIZED)
-#define _IOUTPUT_TILE c
-#endif // defined(IS_QUANTIZED)
+#define _IM0_A M0_A        // _IWEI_WIDTH + (M0 - 1) Rows tile A (If M0 != 1, the tiles overlap of 1 element on the X dimension)
+#define _IN0_A N0          // Cols tile A
+#define _IM0_B _IWEI_WIDTH // Rows tile B
+#define _IN0_B N0          // Cols tile B
+#define _IBOUNDARY_CHECK (!((WEI_WIDTH == 1 && WEI_HEIGHT == 1 && PAD_LEFT == 0 && PAD_TOP == 0 && M0 == 1)))
 
     const int cout = GET_SPATIAL_IDX(0, N0, PARTIAL_N0); // OFM
-    const int mout = GET_SPATIAL_IDX(1, M0, 0);          // WIDTH x HEIGHT
-    const int bout = GET_SPATIAL_IDX(2, 1, 0);           // BATCH SIZE IDX
+    const int xo   = GET_SPATIAL_IDX(1, M0, 0);          // WIDTH
+#if defined(BATCHED_EXECUTION)
+    const int yo   = GET_SPATIAL_IDX(2, 1, 0) % _IDST_HEIGHT; // HEIGHT
+    const int bout = GET_SPATIAL_IDX(2, 1, 0) / _IDST_HEIGHT; // BATCH SIZE IDX
+#else                                                         // defined(BATCHED_EXECUTION)
+    const int yo   = GET_SPATIAL_IDX(2, 1, 0); // HEIGHT
+    const int bout = 0; // BATCH SIZE IDX
+#endif                                                        // defined(BATCHED_EXECUTION)
 
-    // .v    = access the whole vector (OpenCL vector)
-    // .s[x] = access the vector element at position x (scalar access)
-    TILE(int, M0, 1, xi);
-    TILE(int, M0, 1, yi);
+    int xi = xo * STRIDE_X;
+    int yi = yo * STRIDE_Y;
+    xi -= PAD_LEFT;
+    yi -= PAD_TOP;
 
-    // Convert the linear index to coordinate
-    LOOP_UNROLLING(int, i, 0, 1, M0,
+    int d = 0;
+#if DEPTH_MULTIPLIER != 1
+    for(; d < DEPTH_MULTIPLIER; d++)
+#endif // DEPTH_MULTIPLIER != 1
     {
-        xi[i].v = ((mout + i) % _IDST_WIDTH) * STRIDE_X;
-        yi[i].v = ((mout + i) / _IDST_WIDTH) * STRIDE_Y;
-        xi[i].v -= PAD_LEFT;
-        yi[i].v -= PAD_TOP;
-    })
+        TILE(ACC_DATA_TYPE, M0, N0, c);
 
-    // Initialize the accumulators
-    TILE(ACC_DATA_TYPE, M0, N0, c);
-
-    LOOP_UNROLLING(int, i, 0, 1, M0,
-    {
-        c[i].v = 0;
-    })
-
-    for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
-    {
-        int ck = 0;
-        int xk = i % _IWEI_WIDTH;
-        int yk = i / _IWEI_WIDTH;
-
-        int k = 0;
-        for(; k <= (_ISRC_CHANNELS - K0); k += K0)
+        // Reset accumulators
+        LOOP_UNROLLING(int, i, 0, 1, M0,
         {
-            TILE(SRC_DATA_TYPE, M0, K0, a);
-            TILE(WEI_DATA_TYPE, N0, K0, b);
+            c[i].v = 0;
+        })
 
-            LOOP_UNROLLING(int, i, 0, 1, M0,
+        LOOP_UNROLLING(int, yk, 0, 1, _IWEI_HEIGHT,
+        {
+            TILE(SRC_DATA_TYPE, _IM0_A, _IN0_A, a);
+
+            LOOP_UNROLLING(int, i, 0, 1, _IM0_A,
             {
-                a[i].v = ZERO_VALUE;
+                a[i].v = 0;
             })
 
-            // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
+            // Load tile from the src tensor (TILE A)
+            T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, cout, _ISRC_WIDTH, _ISRC_HEIGHT, DILATION_X, 1, _IBOUNDARY_CHECK, a);
 
-            // Load tile from the weights tensor
-            T_LOAD(WEI_DATA_TYPE, N0, K0, WEI_TENSOR_TYPE, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
+            TILE(WEI_DATA_TYPE, _IM0_B, _IN0_B, b);
 
-            // Compute the matrix multiplication between two tiles
-            T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, K0, NT, T, a, b, c);
+            // Load tile from the weights tensor (TILE B)
+            T_LOAD(WEI_DATA_TYPE, _IM0_B, _IN0_B, WEI_TENSOR_TYPE, wei, (cout * DEPTH_MULTIPLIER) + d, yk * _IM0_B, 1, wei_stride_y, b);
 
-            // Apply the offset correction (correction usually needed for asymmetric quantized computation)
-            // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
-            T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, a, b, c);
-
-            ck += K0;
-        }
-
-        // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
-        // This #if directive should be removed in case of dynamic tensor support
-#if((SRC_CHANNELS % K0) != 0)
-        // Left-over accumulations
-        for(; k < _ISRC_CHANNELS; ++k)
-        {
-            TILE(SRC_DATA_TYPE, M0, 1, a);
-            TILE(WEI_DATA_TYPE, N0, 1, b);
-
-            LOOP_UNROLLING(int, i, 0, 1, M0,
+            // Optimized path for STRIDE_X == 1
+            // If M0 != 1, we can skip the common loads between the two applied kernels on the X (WIDTH) dimension
+            LOOP_UNROLLING(int, m0, 0, 1, M0,
             {
-                a[i].v = ZERO_VALUE;
+                LOOP_UNROLLING(int, xk, 0, 1, _IWEI_WIDTH,
+                {
+                    c[m0].v += a[xk + m0].v *b[xk].v;
+                })
             })
-
-            // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
-
-            // Load tile from the weights tensor
-            // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
-            T_LOAD(WEI_DATA_TYPE, N0, 1, BUFFER, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
-
-            // Compute the matrix multiplication between two tiles
-            T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
-
-            // Apply the offset correction (operation usually needed for asymmetric quantized computation)
-            // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
-            T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
-
-            ++ck;
-        }
-#endif // ((SRC_CHANNELS % K0) != 0)
-    }
-
-    // Offset correction required for the quantized asymmetric computation
-    // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
-    T_ADD_CONSTANT(ACC_DATA_TYPE, M0, N0, c, (_IWEI_WIDTH * _IWEI_HEIGHT * _ISRC_CHANNELS * SRC_OFFSET * WEI_OFFSET), c);
+        })
 
 #if defined(HAS_BIAS)
-    TILE(BIA_DATA_TYPE, 1, N0, bias0);
+        TILE(BIA_DATA_TYPE, 1, N0, bias0);
 
-    T_LOAD(BIA_DATA_TYPE, 1, N0, BUFFER, bia, cout, 0, 1, 0, bias0);
+        T_LOAD(BIA_DATA_TYPE, 1, N0, BUFFER, bia, (cout * DEPTH_MULTIPLIER) + d, 0, 0, 0, bias0);
 
-    // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
-
+        // c = c + bias[broadcasted]
+        T_ADD_BROADCAST_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
 #endif // HAS_BIAS
 
-    TILE(uint, M0, 1, dst_indirect_y);
+        T_ACTIVATION(ACC_DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, c, c);
 
-    // Calculate the destination indirect Y
-    LOOP_UNROLLING(int, i, 0, 1, M0,
-    {
-        dst_indirect_y[i].v = (uint)min(mout + i, (int)(_IDST_WIDTH * _IDST_HEIGHT) - 1);
-        dst_indirect_y[i].v += bout * (int)(_IDST_WIDTH * _IDST_HEIGHT);
-    })
+        TILE(uint, M0, 1, dst_indirect_y);
 
-    bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
+        bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
 
-#if defined(IS_QUANTIZED)
-
-    TILE(DST_DATA_TYPE, M0, N0, cq);
-
-    // Quantize the tile
-    T_QUANTIZE8_ASYMMETRIC(ACC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, c, cq);
-#endif // defined(IS_QUANTIZED)
-
-    // Apply activation
-    T_ACTIVATION(DST_DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, _IOUTPUT_TILE, _IOUTPUT_TILE);
-
-    // _IOUTPUT_TILE: c = fp32/fp16, cq=qasymm8
-    // Store the tile in reverse order so the invalid values are overwritten with the valid ones
-    T_STORE_INDIRECT_WIDTH_SELECT(DST_DATA_TYPE, M0, N0, PARTIAL_N0, DST_TENSOR_TYPE, dst, cout, dst_stride_y, x_cond, _IOUTPUT_TILE, dst_indirect_y);
-
-#undef _IWEI_WIDTH
-#undef _IWEI_HEIGHT
-#undef _ISRC_WIDTH
-#undef _ISRC_HEIGHT
-#undef _ISRC_CHANNELS
-#undef _IDST_WIDTH
-#undef _IDST_HEIGHT
-#undef _IDST_CHANNELS
-#undef _IY_MULTIPLIER
+        if(x_cond)
+        {
+            LOOP_UNROLLING(int, m0, 0, 1, M0,
+            {
+                int xi_out = min(xo + M0 - 1 - m0, (int)(_IDST_WIDTH) - 1);
+                VSTORE_PARTIAL(N0, PARTIAL_N0)
+                (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + ((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + xi_out * dst_stride_y + yo * dst_stride_z + bout * dst_stride_w));
+            })
+        }
+        else
+        {
+            LOOP_UNROLLING(int, m0, 0, 1, M0,
+            {
+                int xi_out = min(xo + M0 - 1 - m0, (int)(_IDST_WIDTH) - 1);
+                VSTORE(N0)
+                (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + ((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + xi_out * dst_stride_y + yo * dst_stride_z + bout * dst_stride_w));
+            })
+        }
+    }
 }
+#endif // defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_WIDTH) && defined(DST_HEIGHT) && defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)

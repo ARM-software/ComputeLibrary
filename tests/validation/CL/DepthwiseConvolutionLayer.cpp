@@ -48,14 +48,13 @@ constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                  /**<
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
 constexpr float                      tolerance_num = 0.05f;                 /**< Tolerance number */
 
-const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 2, 5 });
+const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 5 });
 const auto large_depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5, 8 });
 
 //Activation Functions
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f, 0.f)
 });
 } // namespace
@@ -481,8 +480,8 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture
                            combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
                                                                            depth_multipliers),
                                                                    framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                           framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10), QuantizationInfo(2.2f, 10) })),
-                                                   framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
+                                                           framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 128), QuantizationInfo(2.2f, 10) })),
+                                                   framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(1.f, 128) })),
                                            framework::dataset::make("DataLayout", { DataLayout::NHWC })), // NCHW is tested with int8
                                    ActivationFunctionsDataset))
 {

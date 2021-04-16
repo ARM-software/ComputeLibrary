@@ -121,7 +121,7 @@ public:
     SmallDepthwiseConvolutionLayerDataset()
     {
         add_config(TensorShape(7U, 7U, 1U), Size2D(1U, 1U), PadStrideInfo(1, 1, 0, 0));
-        add_config(TensorShape(23U, 27U, 5U), Size2D(3U, 5U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(3U, 3U, 2U), Size2D(2U, 2U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U), Size2D(7U, 3U), PadStrideInfo(3, 2, 1, 0));
         // Asymmetric padding
         add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));

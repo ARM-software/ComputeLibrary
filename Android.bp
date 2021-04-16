@@ -90,8 +90,6 @@ cc_library_static {
         "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.cpp",
         "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.cpp",
         "src/core/CL/kernels/CLDepthToSpaceLayerKernel.cpp",
-        "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.cpp",
-        "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.cpp",
         "src/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.cpp",
         "src/core/CL/kernels/CLFFTDigitReverseKernel.cpp",
         "src/core/CL/kernels/CLFFTRadixStageKernel.cpp",
