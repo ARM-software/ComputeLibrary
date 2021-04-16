@@ -371,20 +371,6 @@
           ]
         }
       },
-      "DepthwiseConvolutionLayer3x3NCHW": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.cpp"
-          ]
-        }
-      },
-      "DepthwiseConvolutionLayer3x3NHWC": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.cpp"
-          ]
-        }
-      },
       "DepthwiseConvolutionLayerNative": {
         "files": {
           "kernel": [
