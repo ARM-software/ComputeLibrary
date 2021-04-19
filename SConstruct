@@ -59,7 +59,6 @@ vars.AddVariables(
     BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", True),
     BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled", False),
     BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
-    BoolVariable("tracing", "Enable runtime tracing", False),
     BoolVariable("openmp", "Enable OpenMP backend", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),

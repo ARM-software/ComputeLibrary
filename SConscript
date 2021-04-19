@@ -300,13 +300,6 @@ if env['neon']:
     runtime_files += Glob('src/runtime/cpu/*.cpp')
     runtime_files += Glob('src/runtime/cpu/operators/*.cpp')
 
-if env['tracing']:
-    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_TRACING_ENABLED'])
-else:
-    # Remove TracePoint files if tracing is disabled:
-    core_files = [ f for f in core_files if not "TracePoint" in str(f)]
-    runtime_files = [ f for f in runtime_files if not "TracePoint" in str(f)]
-
 bootcode_o = []
 if env['os'] == 'bare_metal':
     bootcode_files = Glob('bootcode/*.s')

@@ -1485,9 +1485,6 @@ To see the build options available simply run ```scons -h```:
         set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
             default: False
 
-        tracing: Enable runtime tracing (yes|no)
-            default: False
-
         openmp: Enable OpenMP backend (yes|no)
             default: False
 
