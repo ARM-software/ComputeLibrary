@@ -538,17 +538,16 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
 #endif /* defined(SRC_DEPTH) */
 
     // Store the output tile
+    const VEC_DATA_TYPE(DATA_TYPE, 4)
+    out0_dt = CONVERT( ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), A_VAL, B_VAL), VEC_DATA_TYPE(DATA_TYPE, 4));
+
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL,
-                         B_VAL);
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = out0_dt.s0;
     *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = out0_dt.s1;
     *((__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y)) = out0_dt.s2;
     *((__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y)) = out0_dt.s3;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL), 0,
-            (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
+    vstore4(out0_dt, 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
 #if !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -569,11 +568,11 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     out32 += (float)b;
     out33 += (float)b;
 #endif // defined(HAS_BIAS)
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out10, out11, out12, out13), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL), 0,
+    vstore4(CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out10, out11, out12, out13), A_VAL, B_VAL), VEC_DATA_TYPE(DATA_TYPE, 4)), 0,
             (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out20, out21, out22, out23), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL), 0,
+    vstore4(CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out20, out21, out22, out23), A_VAL, B_VAL), VEC_DATA_TYPE(DATA_TYPE, 4)), 0,
             (__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out30, out31, out32, out33), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL), 0,
+    vstore4(CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out30, out31, out32, out33), A_VAL, B_VAL), VEC_DATA_TYPE(DATA_TYPE, 4)), 0,
             (__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y));
 #endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
