@@ -491,8 +491,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "winograd_output_transform_2x2_7x7_nhwc", "winograd_output_transform.cl" },
     { "winograd_output_transform_2x1_7x1_nhwc", "winograd_output_transform.cl" },
     { "winograd_output_transform_1x2_1x7_nhwc", "winograd_output_transform.cl" },
-    { "yolo_layer_nchw", "yolo_layer.cl" },
-    { "yolo_layer_nhwc", "yolo_layer.cl" },
 };
 
 const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
@@ -853,10 +851,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "winograd_output_transform.cl",
 #include "./cl_kernels/winograd_output_transform.clembed"
-    },
-    {
-        "yolo_layer.cl",
-#include "./cl_kernels/yolo_layer.clembed"
     },
 #endif /* EMBEDDED_KERNELS */
 };
