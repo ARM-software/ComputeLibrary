@@ -183,7 +183,7 @@ int main(int argc, char **argv)
         CLGEMMHeuristicsHandle gemm_heuristics;
         if(opencl_is_available())
         {
-            auto ctx_dev_err = create_opencl_context_and_device();
+            auto ctx_dev_err = create_opencl_context_and_device(CLBackendType::Native);
             ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
             gemm_heuristics.reload_from_file(mlgo_file->value());
             CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner, &gemm_heuristics);

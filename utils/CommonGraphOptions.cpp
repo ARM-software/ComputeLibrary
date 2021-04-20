@@ -137,6 +137,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     {
         Target::NEON,
         Target::CL,
+        Target::CLVK,
     };
 
     std::set<arm_compute::DataType> supported_data_types
@@ -203,7 +204,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
         common_params.data_layout = options.data_layout->value();
     }
     common_params.enable_tuner           = options.enable_tuner->is_set() ? options.enable_tuner->value() : false;
-    common_params.enable_cl_cache        = common_params.target == arm_compute::graph::Target::CL ? (options.enable_cl_cache->is_set() ? options.enable_cl_cache->value() : true) : false;
+    common_params.enable_cl_cache        = common_params.target == arm_compute::graph::Target::NEON ? false : (options.enable_cl_cache->is_set() ? options.enable_cl_cache->value() : true);
     common_params.tuner_mode             = options.tuner_mode->value();
     common_params.fast_math_hint         = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::Disabled;
     common_params.data_path              = options.data_path->value();

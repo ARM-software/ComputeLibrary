@@ -58,5 +58,12 @@ struct CLGEMMKernelSelectionParams
     bool         is_rhs_constant{ false };       /**< True if the content of the rhs matrix is constant */
     DataType     data_type{ DataType::UNKNOWN }; /**< Data type */
 };
+
+/** List the possible OpenCL backends */
+enum class CLBackendType
+{
+    Native, /**< OpenCL native backend */
+    Clvk,   /**< CLVK backend */
+};
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_RUNTIME_CLTYPES_H */

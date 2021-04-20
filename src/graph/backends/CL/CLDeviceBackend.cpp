@@ -65,7 +65,7 @@ bool file_exists(const std::string &filename)
 static detail::BackendRegistrar<CLDeviceBackend> CLDeviceBackend_registrar(Target::CL);
 
 CLDeviceBackend::CLDeviceBackend()
-    : _context_count(0), _tuner(), _gemm_heuristics(), _allocator(nullptr), _tuner_file()
+    : _context_count(0), _tuner(), _gemm_heuristics(), _allocator(nullptr), _tuner_file(), _backend_type(CLBackendType::Native)
 {
 }
 
@@ -87,7 +87,7 @@ void CLDeviceBackend::set_kernel_tuning_mode(CLTunerMode tuning_mode)
 void CLDeviceBackend::initialize_backend()
 {
     // Setup Scheduler
-    CLScheduler::get().default_init(&_tuner, &_gemm_heuristics);
+    CLScheduler::get().default_init(&_tuner, &_gemm_heuristics, _backend_type);
     // Create allocator with new context
     _allocator = std::make_unique<CLBufferAllocator>(nullptr /* legacy path for CLCoreRuntimeContext */);
 }
@@ -108,6 +108,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
     _context_count++;
     if(_context_count == 1)
     {
+        _backend_type = ctx.config().backend_type;
         initialize_backend();
     }
 

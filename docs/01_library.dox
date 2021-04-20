@@ -542,5 +542,10 @@ This feature introduces some changes to our API.
 All the kernels/functions will now accept a Runtime Context object which will allow the function to use the mentioned services.
 
 Finally, we will try to adapt our code-base progressively to use the new mechanism but will continue supporting the legacy mechanism to allow a smooth transition. Changes will apply to all our three backends: Neon, OpenCL and OpenGL ES.
+
+@subsection S5_2_clvk CLVK
+
+Compute Library offers experimental support for [CLVK](https://github.com/kpet/clvk). If CLVK is installed in the system, users can select the backend when running a graph example with --target=clvk.
+If no target is specified and more that one OpenCL implementations are present, Compute Library will pick the first available.
 */
 } // namespace arm_compute

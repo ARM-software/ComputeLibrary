@@ -122,6 +122,7 @@ bool CLSymbols::load(const std::string &library)
     LOAD_FUNCTION_PTR(clGetDeviceIDs, handle);
     LOAD_FUNCTION_PTR(clGetMemObjectInfo, handle);
     LOAD_FUNCTION_PTR(clRetainEvent, handle);
+    LOAD_FUNCTION_PTR(clGetPlatformInfo, handle);
     LOAD_FUNCTION_PTR(clGetPlatformIDs, handle);
     LOAD_FUNCTION_PTR(clGetKernelWorkGroupInfo, handle);
     LOAD_FUNCTION_PTR(clGetCommandQueueInfo, handle);
@@ -858,6 +859,24 @@ cl_int clRetainEvent(cl_event event)
     if(func != nullptr)
     {
         return func(event);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clGetPlatformInfo(cl_platform_id   platform,
+                         cl_platform_info param_name,
+                         size_t           param_value_size,
+                         void            *param_value,
+                         size_t          *param_value_size_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clGetPlatformInfo_ptr;
+    if(func != nullptr)
+    {
+        return func(platform, param_name, param_value_size, param_value, param_value_size_ret);
     }
     else
     {

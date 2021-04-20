@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_HELPERS_H
 
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/IScheduler.h"
 
 namespace arm_compute
@@ -37,11 +38,13 @@ class ICLKernel;
  *
  * @note In debug builds, the function will automatically enable cl_arm_printf if the driver/device supports it.
  *
+ * @param[in] cl_backend_type The OpenCL backend type to use.
+ *
  * @return A std::tuple where the first element is the opencl context, the second element is the opencl device
  *         and the third one an error code. The error code will be CL_SUCCESS upon successful creation, otherwise
  *         a value telling why the function failed.
  */
-std::tuple<cl::Context, cl::Device, cl_int> create_opencl_context_and_device();
+std::tuple<cl::Context, cl::Device, cl_int> create_opencl_context_and_device(CLBackendType cl_backend_type);
 /** Schedules a kernel using the context if not nullptr else uses the legacy scheduling flow.
  *
  * @param[in] ctx    Context to use.
@@ -49,5 +52,13 @@ std::tuple<cl::Context, cl::Device, cl_int> create_opencl_context_and_device();
  * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
  */
 void schedule_kernel_on_ctx(CLRuntimeContext *ctx, ICLKernel *kernel, bool flush = true);
+
+/** This function selects the OpenCL platform based on the backend type.
+ *
+ * @param[in] cl_backend_type The OpenCL backend type to use.
+ *
+ * @return A cl::Platform object.
+ */
+cl::Platform select_preferable_platform(CLBackendType cl_backend_type);
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CL_HELPERS_H */

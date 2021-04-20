@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,10 +29,10 @@
 namespace arm_compute
 {
 CLRuntimeContext::CLRuntimeContext()
-    : _gpu_owned_scheduler(std::make_unique<CLScheduler>()), _gpu_scheduler(_gpu_owned_scheduler.get()), _symbols(), _core_context()
+    : _gpu_owned_scheduler(std::make_unique<CLScheduler>()), _gpu_scheduler(_gpu_owned_scheduler.get()), _symbols(), _core_context(), _backend_type()
 {
     _symbols.load_default();
-    auto ctx_dev_err = create_opencl_context_and_device();
+    auto ctx_dev_err = create_opencl_context_and_device(_backend_type);
     ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
     auto             ctx   = std::get<0>(ctx_dev_err);
     auto             dev   = std::get<1>(ctx_dev_err);

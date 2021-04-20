@@ -48,6 +48,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Target &target)
         case Target::CL:
             os << "CL";
             break;
+        case Target::CLVK:
+            os << "CLVK";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

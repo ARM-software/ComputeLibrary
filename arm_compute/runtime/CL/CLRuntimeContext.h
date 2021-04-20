@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+#include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/IScheduler.h"
 #include "arm_compute/runtime/RuntimeContext.h"
 
@@ -60,6 +61,7 @@ private:
     CLTuner                      _tuner{ false };
     CLSymbols                    _symbols{};
     CLCoreRuntimeContext         _core_context{};
+    CLBackendType                _backend_type{ CLBackendType::Native };
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLRUNTIME_CONTEXT_H */

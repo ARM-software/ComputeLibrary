@@ -28,6 +28,7 @@
 
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
 #include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
+#include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
 
 namespace arm_compute
@@ -76,6 +77,7 @@ private:
     CLGEMMHeuristicsHandle             _gemm_heuristics; /**< GEMM heuristics */
     std::unique_ptr<CLBufferAllocator> _allocator;       /**< CL buffer affinity allocator */
     std::string                        _tuner_file;      /**< Filename to load/store the tuner's values from */
+    CLBackendType                      _backend_type;    /**< OpenCL backend type to use */
 };
 } // namespace backends
 } // namespace graph

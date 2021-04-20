@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,18 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Force target to all graph construct
     // TODO (COMPMID-2014) : Support heterogeneous execution
     Target forced_target = target;
+
+    // In case CLVK is selected, use the CL backend and
+    // update config
+    if(target == Target::CLVK)
+    {
+        forced_target       = Target::CL;
+        GraphConfig config  = ctx.config();
+        config.backend_type = CLBackendType::Clvk;
+
+        ctx.set_config(config);
+    }
+
     if(!is_target_supported(target))
     {
         forced_target = get_default_target();

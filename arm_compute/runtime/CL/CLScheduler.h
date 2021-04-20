@@ -31,6 +31,8 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
+#include "arm_compute/runtime/CL/CLHelpers.h"
+#include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
 
 namespace arm_compute
@@ -57,10 +59,11 @@ public:
     /** Initialises the context and command queue used by the scheduler to default values
      *  and sets a default device and kernel path for the @ref CLKernelLibrary.
      *
-     * @param[in] cl_tuner (Optional) Pointer to ICLTuner (default=nullptr)
-     * @param[in] gemm_h   (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
+     * @param[in] cl_tuner        (Optional) Pointer to ICLTuner (default=nullptr)
+     * @param[in] gemm_h          (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
+     * @param[in] cl_backend_type (Optional) Type of backend to use (default = CLBackendType::Native)
      */
-    void default_init(ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr);
+    void default_init(ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr, CLBackendType cl_backend_type = CLBackendType::Native);
     /** Initialises the scheduler with context and device provided by the user
      *
      * @param[in] device   OpenCL device to be used
@@ -86,14 +89,16 @@ public:
 
     /** Initialises the context and command queue to be used by the scheduler.
      *
-     * @param[in] context  A CL context.
-     * @param[in] queue    A CL command queue.
-     * @param[in] device   A CL device.
-     * @param[in] cl_tuner (Optional) Pointer to OpenCL tuner (default=nullptr)
-     *                     Note: It is caller's responsibility to release the allocated memory for CLTuner
-     * @param[in] gemm_h   (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
+     * @param[in] context         A CL context.
+     * @param[in] queue           A CL command queue.
+     * @param[in] device          A CL device.
+     * @param[in] cl_tuner        (Optional) Pointer to OpenCL tuner (default=nullptr)
+     *                            Note: It is caller's responsibility to release the allocated memory for CLTuner
+     * @param[in] gemm_h          (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
+     * @param[in] cl_backend_type (Optional) Type of backend to use (default = CLBackendType::Native)
      */
-    void init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr);
+    void init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr,
+              CLBackendType cl_backend_type = CLBackendType::Native);
 
     /** Accessor for the associated CL context.
      *
@@ -171,6 +176,7 @@ private:
     bool                    _is_initialised;
     ICLTuner               *_cl_tuner;
     CLGEMMHeuristicsHandle *_gemm_heuristics;
+    CLBackendType           _backend_type;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLSCHEDULER_H */

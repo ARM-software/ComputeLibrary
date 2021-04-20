@@ -123,6 +123,7 @@ public:
     DECLARE_FUNCTION_PTR(clGetDeviceIDs);
     DECLARE_FUNCTION_PTR(clGetMemObjectInfo);
     DECLARE_FUNCTION_PTR(clRetainEvent);
+    DECLARE_FUNCTION_PTR(clGetPlatformInfo);
     DECLARE_FUNCTION_PTR(clGetPlatformIDs);
     DECLARE_FUNCTION_PTR(clGetKernelWorkGroupInfo);
     DECLARE_FUNCTION_PTR(clGetCommandQueueInfo);

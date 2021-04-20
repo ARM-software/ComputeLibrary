@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,14 +85,48 @@ void initialise_context_properties(const cl::Platform &platform, const cl::Devic
 
 namespace arm_compute
 {
-std::tuple<cl::Context, cl::Device, cl_int>
-create_opencl_context_and_device()
+cl::Platform select_preferable_platform(CLBackendType cl_backend_type)
 {
-    ARM_COMPUTE_ERROR_ON(!opencl_is_available());
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
     ARM_COMPUTE_ERROR_ON_MSG(platforms.size() == 0, "Couldn't find any OpenCL platform");
-    cl::Platform            p = platforms[0];
+
+    cl::Platform selected_platform{ nullptr };
+
+    // If the user has selected the Native platform, return the first available.
+    switch(cl_backend_type)
+    {
+        case CLBackendType::Native:
+            selected_platform = platforms[0];
+            break;
+        case CLBackendType::Clvk:
+            for(auto p : platforms)
+            {
+                std::string res = p.getInfo<CL_PLATFORM_NAME>();
+                if(res.find("clvk") != std::string::npos)
+                {
+                    selected_platform = p;
+                    break;
+                }
+            }
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported backend type");
+    }
+
+    if(!selected_platform())
+    {
+        ARM_COMPUTE_ERROR("No valid platform found");
+    }
+
+    return selected_platform;
+}
+
+std::tuple<cl::Context, cl::Device, cl_int>
+create_opencl_context_and_device(CLBackendType cl_backend_type)
+{
+    ARM_COMPUTE_ERROR_ON(!opencl_is_available());
+    cl::Platform            p = select_preferable_platform(cl_backend_type);
     cl::Device              device;
     std::vector<cl::Device> platform_devices;
     p.getDevices(CL_DEVICE_TYPE_DEFAULT, &platform_devices);

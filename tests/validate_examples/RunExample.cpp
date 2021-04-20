@@ -150,7 +150,12 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
 #ifdef ARM_COMPUTE_CL
     if(opencl_is_available())
     {
-        auto ctx_dev_err = create_opencl_context_and_device();
+        CLBackendType backend_type = CLBackendType::Native;
+        if(options.target->value() == Target::CLVK)
+        {
+            backend_type = CLBackendType::Clvk;
+        }
+        auto ctx_dev_err = create_opencl_context_and_device(backend_type);
         ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
         CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), nullptr);
     }
