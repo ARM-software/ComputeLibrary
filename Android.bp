@@ -762,6 +762,7 @@ cc_library_static {
                 "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x12/a55r1.cpp",
                 "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x12/generic.cpp",
                 "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x12/x1.cpp",
+                "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x6/generic.cpp",
                 "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemv_pretransposed/generic.cpp",
                 "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_fp32_mla_6x4/generic.cpp",
                 "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_fp32_mla_8x4/generic.cpp",

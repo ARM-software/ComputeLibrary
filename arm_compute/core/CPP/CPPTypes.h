@@ -42,6 +42,7 @@ enum class CPUModel
     GENERIC,
     GENERIC_FP16,
     GENERIC_FP16_DOT,
+    A35,
     A53,
     A55r0,
     A55r1,

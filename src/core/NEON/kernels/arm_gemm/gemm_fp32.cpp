@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,7 @@
 #include "kernels/a64_hybrid_fp32_mla_6x16.hpp"
 #include "kernels/a64_hybrid_fp32_mla_8x4.hpp"
 #include "kernels/a64_sgemm_8x12.hpp"
+#include "kernels/a64_sgemm_8x6.hpp"
 #include "kernels/a64_smallK_hybrid_fp32_mla_6x4.hpp"
 #include "kernels/a64_smallK_hybrid_fp32_mla_8x4.hpp"
 
@@ -110,7 +111,14 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_fp32_mla_6x4VL, float, float>(args); }
 },
 #endif // __ARM_FEATURE_SVE
-
+// Cortex-A35 specific kernel - use for any problem on A35, and never in any other cases.
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "a64_sgemm_8x6",
+    nullptr,
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() == CPUModel::A35; },
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_sgemm_8x6, float, float>(args); }
+},
 // Arm® Neon™ hybrid methods
 {
     GemmMethod::GEMM_HYBRID,

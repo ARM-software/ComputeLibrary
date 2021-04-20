@@ -32,6 +32,7 @@
 
 // "Correct" version
 #define ASM_PREFETCH(address)    "PRFM PLDL1KEEP, " address "\n"
+#define ASM_PREFETCHU(address)   "PRFUM PLDL1KEEP, " address "\n"
 #define ASM_PREFETCHL2(address)  "PRFM PLDL2KEEP, " address "\n"
 #define ASM_PREFETCHW(address)   "PRFM PSTL1KEEP, " address "\n"
 #define ASM_PREFETCHWL2(address) "PRFM PSTL2KEEP, " address "\n"
