@@ -255,7 +255,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::configure(
     }
 
     auto depthwise_conv_kernel = std::make_unique<cpu::kernels::CpuDepthwiseConvolutionNativeKernel>();
-    depthwise_conv_kernel->configure(input_to_use->info(), weights_to_use->info(), biases->info(), output_to_use->info(), info);
+    depthwise_conv_kernel->configure(input_to_use->info(), weights_to_use->info(), biases == nullptr ? nullptr : biases->info(), output_to_use->info(), info);
 
     if(_impl->is_nchw)
     {
