@@ -34,8 +34,8 @@
 #include "src/core/helpers/WindowHelpers.h"
 
 #include "src/core/common/Registrars.h"
-#include "src/core/cpu/kernels/softmax/impl/NEON/list.h"
-#include "src/core/cpu/kernels/softmax/impl/SVE/list.h"
+#include "src/core/cpu/kernels/softmax/impl/neon/list.h"
+#include "src/core/cpu/kernels/softmax/impl/sve/list.h"
 
 namespace arm_compute
 {
@@ -69,7 +69,7 @@ struct SoftmaxLogits1DMaxKernel
 
 static const SoftmaxLogits1DKernel available_logits_1d_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
     {
         "sve_softmax_logits_1d_float",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32); },
@@ -80,7 +80,9 @@ static const SoftmaxLogits1DKernel available_logits_1d_kernels[] =
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F16); },
         REGISTER_FP16_SVE(arm_compute::cpu::sve_softmax_logits_1d_float<float16_t>)
     },
-#else /* !defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_SVE) */
+
+#if defined(ENABLE_NEON)
     {
         "neon_softmax_logits_1d_float",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32); },
@@ -93,7 +95,7 @@ static const SoftmaxLogits1DKernel available_logits_1d_kernels[] =
         REGISTER_FP16_NEON(arm_compute::cpu::neon_softmax_logits_1d_float<float16_t>)
     },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* !defined(ENABLE_NEON) */
 
 #if defined(__ARM_FEATURE_SVE2)
     {
@@ -123,7 +125,7 @@ static const SoftmaxLogits1DKernel available_logits_1d_kernels[] =
 
 static const SoftmaxLogits1DMaxKernel available_logits_1d_max_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
     {
         "sve_logits_1d_max",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32); },
@@ -144,7 +146,8 @@ static const SoftmaxLogits1DMaxKernel available_logits_1d_max_kernels[] =
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
         REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::sve_logits_1d_max<qasymm8_signed_t>)
     },
-#else /* !defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_SVE) */
+#if defined(ENABLE_NEON)
     {
         "neon_logits_1d_max",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32); },
@@ -167,7 +170,7 @@ static const SoftmaxLogits1DMaxKernel available_logits_1d_max_kernels[] =
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_logits_1d_max<qasymm8_signed_t>)
     },
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_NEON) */
 };
 
 const SoftmaxLogits1DKernel *get_implementation_logits(const SoftmaxSelectorData &data)

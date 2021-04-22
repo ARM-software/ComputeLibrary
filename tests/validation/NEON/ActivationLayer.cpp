@@ -68,11 +68,11 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
                     return RelativeTolerance<float>(0.25f);
-#else  // !defined(__ARM_FEATURE_SVE)
+#else  // !defined(ENABLE_SVE)
                     return RelativeTolerance<float>(0.1f);
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
                 default:
                     return RelativeTolerance<float>(0.05f);
             }
@@ -80,11 +80,11 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
                     return RelativeTolerance<float>(0.9f);
-#else  // !defined(__ARM_FEATURE_SVE)
+#else  // !defined(ENABLE_SVE)
                     return RelativeTolerance<float>(0.01f);
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
                 default:
                     return RelativeTolerance<float>(0.00001f);
             }
@@ -111,11 +111,11 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
                     return AbsoluteTolerance<float>(0.25f);
-#else  // !defined(__ARM_FEATURE_SVE)
+#else  // !defined(ENABLE_SVE)
                     return AbsoluteTolerance<float>(0.01f);
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
                 default:
                     return AbsoluteTolerance<float>(0.00001f);
             }
@@ -123,11 +123,11 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
                     return AbsoluteTolerance<float>(0.9f);
-#else  // !defined(__ARM_FEATURE_SVE)
+#else  // !defined(ENABLE_SVE)
                     return AbsoluteTolerance<float>(0.01f);
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
                 default:
                     return AbsoluteTolerance<float>(0.00001f);
             }

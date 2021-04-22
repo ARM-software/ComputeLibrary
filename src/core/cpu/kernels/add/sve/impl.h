@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,35 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_WRAPPER_INTRINSICS_SVPOW_H
-#define SRC_CORE_NEON_WRAPPER_INTRINSICS_SVPOW_H
-#if defined(__ARM_FEATURE_SVE)
-#include "src/core/NEON/SVEMath.h"
+#ifndef SRC_CORE_SVE_KERNELS_ADD_IMPL_H
+#define SRC_CORE_SVE_KERNELS_ADD_IMPL_H
+
+#if defined(ENABLE_SVE)
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/Traits.h"
+
 namespace arm_compute
 {
-namespace wrapper
+namespace cpu
 {
-#define SVPOW_Z_IMPL(type, postfix)                                \
-    inline type svpow_z(svbool_t pg, const type &a, const type &b) \
-    {                                                              \
-        return svpow_##postfix##_z(pg, a, b);                      \
-    }
-
-#define SVPOW_Z_IMPL_INT(type, postfix)                            \
-    inline type svpow_z(svbool_t pg, const type &a, const type &b) \
-    {                                                              \
-        ARM_COMPUTE_UNUSED(pg, a, b);                              \
-        ARM_COMPUTE_ERROR("Not supported");                        \
-    }
-
-SVPOW_Z_IMPL(svfloat32_t, f32)
-SVPOW_Z_IMPL(svfloat16_t, f16)
-SVPOW_Z_IMPL_INT(svint16_t, s16)
-
-#undef SVPOW_Z_IMPL
-
-} // namespace wrapper
+template <typename ScalarType>
+void add_same_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
+} // namespace cpu
 } // namespace arm_compute
-
-#endif /* defined(__ARM_FEATURE_SVE) */
-#endif /* SRC_CORE_NEON_WRAPPER_INTRINSICS_SVPOW_H */
+#endif // defined(ENABLE_SVE)
+#endif // SRC_CORE_SVE_KERNELS_ADD_IMPL_H

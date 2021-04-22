@@ -60,7 +60,7 @@ struct ActivationKernel
 
 static const ActivationKernel available_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
     {
         "fp16_sve_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
@@ -71,7 +71,8 @@ static const ActivationKernel available_kernels[] =
         [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_activation)
     },
-#else  /* !defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_SVE)  */
+#if defined(ENABLE_NEON)
     {
         "fp16_neon_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
@@ -82,9 +83,8 @@ static const ActivationKernel available_kernels[] =
         [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_activation)
     },
-#endif /* defined(__ARM_FEATURE_SVE)  */
-
-#if defined(__ARM_FEATURE_SVE2) /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ENABLE_NEON)  */
+#if defined(__ARM_FEATURE_SVE2)
     {
         "qasymm8_sve_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
@@ -116,7 +116,7 @@ static const ActivationKernel available_kernels[] =
         [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::qsymm16_neon_activation)
     },
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(__ARM_FEATURE_SVE2)  */
 };
 
 const ActivationKernel *get_implementation(const ActivationSelectorData &data)

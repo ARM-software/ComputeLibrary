@@ -28,7 +28,6 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(__ARM_FEATURE_SVE)
 #include "src/core/NEON/SVEMath.h"
 #include <arm_sve.h>
 
@@ -127,4 +126,3 @@ void fp16_sve_activation(const ITensor *src, ITensor *dst, const ActivationLayer
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif // __ARM_FEATURE_SVE

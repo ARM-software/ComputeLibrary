@@ -61,7 +61,7 @@ struct AddKernel
 
 static const AddKernel available_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
     {
         "add_same_sve",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == DataType::F32)); },
@@ -102,7 +102,8 @@ static const AddKernel available_kernels[] =
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt3 == DataType::S16)); },
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_u8_u8_s16_sve)
     },
-#else /* !defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_SVE) */
+#if defined(ENABLE_NEON)
     {
         "add_same_neon",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == DataType::F32)); },
@@ -145,8 +146,7 @@ static const AddKernel available_kernels[] =
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt3 == DataType::S16)); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_u8_u8_s16_neon)
     },
-#endif /* defined(__ARM_FEATURE_SVE) */
-
+#endif /* defined(ENABLE_NEON) */
 #if defined(__ARM_FEATURE_SVE2)
     {
         "add_qasymm8_sve",
@@ -179,7 +179,7 @@ static const AddKernel available_kernels[] =
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == DataType::QSYMM16)); },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::add_qsymm16_neon)
     },
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ENABLE_NEON) */
 
 };
 

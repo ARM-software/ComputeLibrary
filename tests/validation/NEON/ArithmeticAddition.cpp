@@ -43,11 +43,11 @@ namespace validation
 {
 namespace
 {
-#if !defined(__aarch64__) || defined(__ARM_FEATURE_SVE)
+#if !defined(__aarch64__) || defined(ENABLE_SVE)
 constexpr AbsoluteTolerance<float> tolerance_quant(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-#else                                                  // !defined(__aarch64__) || defined(__ARM_FEATURE_SVE)
+#else                                                  // !defined(__aarch64__) || defined(ENABLE_SVE)
 constexpr AbsoluteTolerance<float> tolerance_quant(0);
-#endif                                                 // !defined(__aarch64__) || defined(__ARM_FEATURE_SVE)
+#endif                                                 // !defined(__aarch64__) || defined(ENABLE_SVE)
 
 /** Input data sets **/
 const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",

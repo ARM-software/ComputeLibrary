@@ -54,7 +54,7 @@ struct ElementwiseUnaryKernel
 
 static const ElementwiseUnaryKernel available_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
     {
         "fp32_sve_elementwise_unary",
         [](DataType dt) { return dt == DataType::F32; },
@@ -70,7 +70,8 @@ static const ElementwiseUnaryKernel available_kernels[] =
         [](DataType dt) { return dt == DataType::S32; },
         REGISTER_INTEGER_SVE(arm_compute::cpu::elementwise_sve_op<int32_t>),
     },
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
+#if defined(ENABLE_NEON)
     {
         "fp32_neon_elementwise_unary",
         [](DataType dt) { return dt == DataType::F32; },
@@ -88,6 +89,7 @@ static const ElementwiseUnaryKernel available_kernels[] =
         [](DataType dt) { return dt == DataType::S32; },
         REGISTER_INTEGER_NEON(arm_compute::cpu::elementwise_op<int32_t>),
     },
+#endif // defined(ENABLE_NEON)
 };
 
 const ElementwiseUnaryKernel *get_implementation(DataType dt)

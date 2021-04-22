@@ -24,7 +24,7 @@
 #include <cmath>
 #include <limits>
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(__ARM_FEATURE_SVE) && defined(ENABLE_SVE)
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
@@ -388,4 +388,4 @@ inline svint8_t convert_float_to_int<svint8_t>(const svfloat32_t &in_0, const sv
 #endif /* defined(__ARM_FEATURE_SVE2) */
 
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_SVE) */

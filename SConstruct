@@ -53,6 +53,7 @@ vars.AddVariables(
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
+    BoolVariable("fat_binary", "Build fat binary version of library. Note works only for armv8.2-a", False),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
@@ -255,6 +256,11 @@ if 'x86' not in env['arch']:
         elif env['os'] == 'tizen':
             prefix = "aarch64-tizen-linux-gnu-"
 
+if 'sve' in env['arch']:
+    env.Append(CXXFLAGS = ['-DENABLE_SVE'])
+else:
+    env.Append(CXXFLAGS = ['-DENABLE_NEON'])
+
 if env['build'] == 'native':
     prefix = ""
 
@@ -297,6 +303,13 @@ if not GetOption("help"):
 
         if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
             env.Append(LINKFLAGS = ['-fstack-protector-strong'])
+
+if env['fat_binary']:
+    if env['arch'] != 'armv8.2-a':
+        print("Currently fat binary is only supported with armv8.2-a")
+        Exit(1)
+    env.Append(CXXFLAGS = ['-DENABLE_SVE'])
+    env.Append(CXXFLAGS = ['-DENABLE_NEON'])
 
 if env['data_type_support']:
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):

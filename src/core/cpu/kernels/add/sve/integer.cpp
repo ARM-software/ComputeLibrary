@@ -25,9 +25,8 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
-#include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
-#if defined(__ARM_FEATURE_SVE)
 #include "src/core/NEON/SVEMath.h"
+#include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include <arm_sve.h>
 
 namespace arm_compute
@@ -198,4 +197,3 @@ void add_u8_s16_s16_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, 
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_SVE) */

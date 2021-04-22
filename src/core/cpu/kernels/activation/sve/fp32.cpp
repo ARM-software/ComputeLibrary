@@ -29,7 +29,6 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(__ARM_FEATURE_SVE)
 #include <arm_sve.h>
 
 namespace arm_compute
@@ -128,4 +127,3 @@ void fp32_sve_activation(const ITensor *src, ITensor *dst, const ActivationLayer
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif // __ARM_FEATURE_SVE

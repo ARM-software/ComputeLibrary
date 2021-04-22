@@ -64,38 +64,39 @@ struct ScaleKernel
 
 static const ScaleKernel available_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
     {
         "fp16_sve_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::F16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::fp16_sve_scale)
+        REGISTER_FP16_SVE(arm_compute::cpu::fp16_sve_scale)
     },
     {
         "f32_sve_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::F32; },
-        REGISTER_FP32_NEON(arm_compute::cpu::fp32_sve_scale)
+        REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_scale)
     },
     {
         "qasymm8_sve_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::QASYMM8; },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::qasymm8_sve_scale)
+        REGISTER_QASYMM8_SVE(arm_compute::cpu::qasymm8_sve_scale)
     },
     {
         "qasymm8_signed_sve_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::qasymm8_signed_sve_scale)
+        REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::qasymm8_signed_sve_scale)
     },
     {
         "u8_sve_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::U8; },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::u8_sve_scale)
+        REGISTER_INTEGER_SVE(arm_compute::cpu::u8_sve_scale)
     },
     {
         "s16_sve_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::S16; },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::s16_sve_scale)
+        REGISTER_INTEGER_SVE(arm_compute::cpu::s16_sve_scale)
     },
-#else /* !defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_SVE) */
+#if defined(ENABLE_NEON)
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "common_neon_scale",
@@ -128,7 +129,7 @@ static const ScaleKernel available_kernels[] =
         [](const ScaleSelectorData & data) { return data.dt == DataType::S16; },
         REGISTER_INTEGER_NEON(arm_compute::cpu::common_neon_scale<int16_t>)
     },
-#endif /* !defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_NEON) */
 };
 
 /** Micro-kernel selector

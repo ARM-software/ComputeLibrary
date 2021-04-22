@@ -63,6 +63,7 @@ def filter_clang_tidy_lines( lines ):
                 ("Utils.h" in line and "no member named 'map' in 'arm_compute::Tensor'" in line) or
                 ("CPUUtils.cpp" in line and "'asm/hwcap.h' file not found" in line) or
                 ("CPUUtils.cpp" in line and "use of undeclared identifier 'HWCAP_SVE'" in line) or
+               ("sve" in line) or
                 ("'arm_compute_version.embed' file not found" in line) ):
                 print_context=False
                 continue
@@ -115,6 +116,7 @@ def filter_clang_tidy_lines( lines ):
                ("CPUUtils.cpp" in line and "parameter 'cpusv' is unused" in line) or
                ("CPUUtils.cpp" in line and "warning: uninitialized record type" in line) or
                ("Utils.h" in line and "warning: Use of zero-allocated memory" in line) or
+               ("sve" in line) or
                ("CpuDepthwiseConv2dNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
                 print_context=False
                 continue

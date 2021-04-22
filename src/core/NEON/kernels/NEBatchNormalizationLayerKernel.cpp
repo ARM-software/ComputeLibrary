@@ -63,7 +63,7 @@ struct BatchNormalizationKernel
 
 static const BatchNormalizationKernel available_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
     {
         "fp16_sve_batch_normalization",
         [](const BatchNormalizationSelectorData & data) { return data.dt == DataType::F16; },
@@ -74,7 +74,8 @@ static const BatchNormalizationKernel available_kernels[] =
         [](const BatchNormalizationSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_batch_normalization)
     },
-#else /* !defined(__ARM_FEATURE_SVE) */
+#endif /* !defined(ENABLE_SVE) */
+#if defined(ENABLE_NEON)
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "fp16_neon_batch_normalization",
@@ -87,7 +88,7 @@ static const BatchNormalizationKernel available_kernels[] =
         [](const BatchNormalizationSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_batch_normalization)
     },
-#endif /* !defined(__ARM_FEATURE_SVE) */
+#endif /* !defined(ENABLE_NEON) */
 };
 
 const BatchNormalizationKernel *get_implementation(const BatchNormalizationSelectorData &data)

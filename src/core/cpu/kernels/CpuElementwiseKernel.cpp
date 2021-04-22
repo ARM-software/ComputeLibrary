@@ -76,28 +76,31 @@ configure_arithm_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorI
     ARM_COMPUTE_UNUSED(src1, dst);
     static ElementwiseKernel kernels[] =
     {
-#if defined(__ARM_FEATURE_SVE)
-        generate_kernel<DataType::F32>(REGISTER_FP32_SVE((arm_compute::cpu::sve::elementwise_arithmetic_op<op, float32_t>))),
-        generate_kernel<DataType::S32>(REGISTER_INTEGER_SVE((arm_compute::cpu::sve::elementwise_arithmetic_op<op, int32_t>))),
-#else  /* defined(__ARM_FEATURE_SVE) */
+#if defined(ENABLE_SVE)
+        generate_kernel<DataType::F32>(REGISTER_FP32_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, float32_t>))),
+        generate_kernel<DataType::S32>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, int32_t>))),
+        generate_kernel<DataType::S16>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, int16_t>))),
+#endif /* defined(ENABLE_SVE) */
+#if defined(ENABLE_NEON)
         generate_kernel<DataType::F32>(REGISTER_FP32_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float, 4>>))),
         generate_kernel<DataType::S32>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int32_t, 4>>))),
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_NEON) */
 #if defined(__ARM_FEATURE_SVE2)
-        generate_kernel<DataType::QASYMM8>(REGISTER_QASYMM8_SVE((arm_compute::cpu::sve::elementwise_arithmetic_quantized_op<op, uint8_t>))),
-        generate_kernel<DataType::QASYMM8_SIGNED>(REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::sve::elementwise_arithmetic_quantized_op<op, int8_t>))),
-#else  /* defined(__ARM_FEATURE_SVE2) */
+        generate_kernel<DataType::QASYMM8>(REGISTER_QASYMM8_SVE((arm_compute::cpu::elementwise_arithmetic_quantized_op<op, uint8_t>))),
+        generate_kernel<DataType::QASYMM8_SIGNED>(REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::elementwise_arithmetic_quantized_op<op, int8_t>))),
+#else  /* !defined(__ARM_FEATURE_SVE2) */
         generate_kernel<DataType::QASYMM8>(REGISTER_QASYMM8_NEON((arm_compute::cpu::elementwise_arithm_op_quantized<op>))),
         generate_kernel<DataType::QASYMM8_SIGNED>(REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::elementwise_arithm_op_quantized_signed<op>))),
 #endif /* defined(__ARM_FEATURE_SVE2) */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-#if defined(__ARM_FEATURE_SVE)
-        generate_kernel<DataType::F16>(REGISTER_FP16_SVE((arm_compute::cpu::sve::elementwise_arithmetic_op<op, float16_t>))),
-#else  /* defined(__ARM_FEATURE_SVE) */
+#if defined(ENABLE_SVE)
+        generate_kernel<DataType::F16>(REGISTER_FP16_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, float16_t>))),
+#endif /* defined(ENABLE_SVE) */
+#if defined(ENABLE_NEON)
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
         generate_kernel<DataType::F16>(REGISTER_FP16_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float16_t, 8>>))),
-#endif /* defined(__ARM_FEATURE_SVE) */
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
         generate_kernel<DataType::S16>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>>))),
+#endif /* defined(ENABLE_NEON) */
     };
 
     for(const auto &uk : kernels)
@@ -118,31 +121,31 @@ configure_comp_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInf
     ARM_COMPUTE_UNUSED(src1, dst);
     static ElementwiseKernel kernels[] =
     {
-#if defined(__ARM_FEATURE_SVE)
-        generate_kernel<DataType::U8, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::sve::elementwise_comparison_op<op, uint8_t>))),
-        generate_kernel<DataType::F32, DataType::U8>(REGISTER_FP32_SVE((arm_compute::cpu::sve::elementwise_comparison_op<op, float>))),
-        generate_kernel<DataType::S16, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::sve::elementwise_comparison_op<op, int16_t>))),
-        generate_kernel<DataType::S32, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::sve::elementwise_comparison_op<op, int32_t>))),
-#else  /* defined(__ARM_FEATURE_SVE) */
+#if defined(ENABLE_SVE)
+        generate_kernel<DataType::U8, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, uint8_t>))),
+        generate_kernel<DataType::F32, DataType::U8>(REGISTER_FP32_SVE((arm_compute::cpu::elementwise_comparison_op<op, float>))),
+        generate_kernel<DataType::S16, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, int16_t>))),
+        generate_kernel<DataType::S32, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, int32_t>))),
+#endif /* defined(ENABLE_SVE) */
+#if defined(ENABLE_NEON)
         generate_kernel<DataType::U8, DataType::U8>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_8<op, uint8_t, uint8x16_t>))),
         generate_kernel<DataType::F32, DataType::U8>(REGISTER_FP32_NEON((arm_compute::cpu::elementwise_comp_op_32<op, float, float32x4_t>))),
         generate_kernel<DataType::S16, DataType::U8>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_16<op, int16_t, int16x8_t>))),
         generate_kernel<DataType::S32, DataType::U8>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_32<op, int32_t, int32x4_t>))),
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ENABLE_NEON) */
 #if defined(__ARM_FEATURE_SVE2)
-        generate_kernel<DataType::QASYMM8_SIGNED, DataType::U8>(REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::sve::elementwise_comparison_quantized_op<op, int8_t>))),
-        generate_kernel<DataType::QASYMM8, DataType::U8>(REGISTER_QASYMM8_SVE((arm_compute::cpu::sve::elementwise_comparison_quantized_op<op, uint8_t>))),
-#else  /* defined(__ARM_FEATURE_SVE2) */
+        generate_kernel<DataType::QASYMM8_SIGNED, DataType::U8>(REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::elementwise_comparison_quantized_op<op, int8_t>))),
+        generate_kernel<DataType::QASYMM8, DataType::U8>(REGISTER_QASYMM8_SVE((arm_compute::cpu::elementwise_comparison_quantized_op<op, uint8_t>))),
+#else  /* !defined(__ARM_FEATURE_SVE2) */
         generate_kernel<DataType::QASYMM8_SIGNED, DataType::U8>(REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::elementwise_comp_op_quantized_signed<op>))),
         generate_kernel<DataType::QASYMM8, DataType::U8>(REGISTER_QASYMM8_NEON((arm_compute::cpu::elementwise_comp_op_quantized<op>))),
 #endif /* defined(__ARM_FEATURE_SVE2) */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-#if defined(__ARM_FEATURE_SVE)
-        generate_kernel<DataType::F16, DataType::U8>(REGISTER_FP16_SVE((arm_compute::cpu::sve::elementwise_comparison_op<op, float16_t>))),
-#else  /* defined(__ARM_FEATURE_SVE) */
+#if defined(ENABLE_SVE)
+        generate_kernel<DataType::F16, DataType::U8>(REGISTER_FP16_SVE((arm_compute::cpu::elementwise_comparison_op<op, float16_t>))),
+#endif /* defined(ENABLE_SVE)  */
+#if defined(ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
         generate_kernel<DataType::F16, DataType::U8>(REGISTER_FP16_NEON((arm_compute::cpu::elementwise_comp_op_16<op, float16_t, float16x8_t>))),
-#endif /* defined(__ARM_FEATURE_SVE) */
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* defined(ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     };
 
     for(const auto &uk : kernels)
