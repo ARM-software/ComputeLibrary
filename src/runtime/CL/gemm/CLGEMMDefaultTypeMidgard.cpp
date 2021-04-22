@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/GPUTarget.h"
-#include "src/core/CL/gemm/CLGEMMHelpers.h"
+#include "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 
 #include <map>
 #include <utility>

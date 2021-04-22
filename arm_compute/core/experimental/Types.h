@@ -47,6 +47,7 @@ enum TensorType : int32_t
     ACL_DST_0   = 30,
     ACL_DST_1   = 31,
     ACL_DST_2   = 32,
+    ACL_BIAS    = ACL_SRC_2,
     ACL_INT     = 50,
     ACL_INT_0   = 50,
     ACL_INT_1   = 51,
@@ -54,21 +55,40 @@ enum TensorType : int32_t
     ACL_INT_3   = 53,
     ACL_INT_4   = 54,
     ACL_SRC_VEC = 256,
+    ACL_DST_VEC = 512,
+    ACL_INT_VEC = 1024
 };
 
 namespace experimental
 {
+enum class MemoryLifetime
+{
+    Temporary  = 0,
+    Persistent = 1,
+    Prepare    = 2,
+};
 struct MemoryInfo
 {
-    MemoryInfo(TensorType type, size_t size, size_t alignment) noexcept
-        : type(type),
+    MemoryInfo() = default;
+
+    MemoryInfo(int slot, size_t size, size_t alignment = 0) noexcept
+        : slot(slot),
           size(size),
           alignment(alignment)
     {
     }
-    TensorType type;
-    size_t     size;
-    size_t     alignment;
+
+    MemoryInfo(int slot, MemoryLifetime lifetime, size_t size, size_t alignment = 0) noexcept
+        : slot(slot),
+          lifetime(lifetime),
+          size(size),
+          alignment(alignment)
+    {
+    }
+    int            slot{ ACL_UNKNOWN };
+    MemoryLifetime lifetime{ MemoryLifetime::Temporary };
+    size_t         size{ 0 };
+    size_t         alignment{ 64 };
 };
 
 using MemoryRequirements = std::vector<MemoryInfo>;

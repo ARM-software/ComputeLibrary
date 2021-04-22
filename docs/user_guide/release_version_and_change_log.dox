@@ -280,7 +280,7 @@ v20.11 Public major release
    - CLLogits1DMaxShiftExpSumKernel
    - CLLogits1DNormKernel
    - CLHeightConcatenateLayerKernel
-   - @ref CLGEMMMatrixMultiplyKernel
+   - CLGEMMMatrixMultiplyKernel
    - @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
    - @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
    - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
@@ -567,14 +567,14 @@ v20.08 Public major release
       The default "axis" value for @ref NESoftmaxLayer, @ref NELogSoftmaxLayer is changed from 1 to 0.
       Only axis 0 is supported.
  - The support for quantized data types has been removed from @ref CLLogSoftmaxLayer due to implementation complexity.
- - Removed padding requirement for the input (e.g. LHS of GEMM) and output in @ref CLGEMMMatrixMultiplyNativeKernel, @ref CLGEMMMatrixMultiplyReshapedKernel, @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel and @ref CLIm2ColKernel (NHWC only)
+ - Removed padding requirement for the input (e.g. LHS of GEMM) and output in CLGEMMMatrixMultiplyNativeKernel, CLGEMMMatrixMultiplyReshapedKernel, CLGEMMMatrixMultiplyReshapedOnlyRHSKernel and @ref CLIm2ColKernel (NHWC only)
    - This change allows to use @ref CLGEMMConvolutionLayer without extra padding for the input and output.
    - Only the weights/bias of @ref CLGEMMConvolutionLayer could require padding for the computation.
-   - Only on Arm® Mali™ Midgard GPUs, @ref CLGEMMConvolutionLayer could require padding since @ref CLGEMMMatrixMultiplyKernel is called and currently requires padding.
- - Added support for exporting the OpenCL buffer object to the OpenCL image object in @ref CLGEMMMatrixMultiplyReshapedKernel and @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.
+   - Only on Arm® Mali™ Midgard GPUs, @ref CLGEMMConvolutionLayer could require padding since CLGEMMMatrixMultiplyKernel is called and currently requires padding.
+ - Added support for exporting the OpenCL buffer object to the OpenCL image object in CLGEMMMatrixMultiplyReshapedKernel and CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.
    - This support allows to export the OpenCL buffer used for the reshaped RHS matrix to the OpenCL image object.
-   - The padding requirement for the OpenCL image object is considered into the @ref CLGEMMReshapeRHSMatrixKernel.
-   - The reshaped RHS matrix stores the weights when GEMM is used to accelerate @ref CLGEMMConvolutionLayer.
+   - The padding requirement for the OpenCL image object is considered into the CLGEMMReshapeRHSMatrixKernel.
+   - The reshaped RHS matrix stores the weights when GEMM is used to accelerate CLGEMMConvolutionLayer.
 
 v20.05 Public major release
  - Various bug fixes.
@@ -739,7 +739,7 @@ v19.11 Public major release
  - Added QASYMM16 support for:
     - @ref CLBoundingBoxTransform
  - Added FP16 support for:
-    - @ref CLGEMMMatrixMultiplyReshapedKernel
+    - CLGEMMMatrixMultiplyReshapedKernel
  - Added new data type QASYMM8_PER_CHANNEL support for:
     - CLDequantizationLayer
     - @ref NEDequantizationLayer
@@ -749,7 +749,7 @@ v19.11 Public major release
     - @ref CLDepthwiseConvolutionLayer
     - @ref NEDepthwiseConvolutionLayer
  - Added FP16 mixed-precision support for:
-    - @ref CLGEMMMatrixMultiplyReshapedKernel
+    - CLGEMMMatrixMultiplyReshapedKernel
     - CLPoolingLayerKernel
  - Added FP32 and FP16 ELU activation for:
     - @ref CLActivationLayer
@@ -813,9 +813,9 @@ v19.08 Public major release
     - @ref CLSinLayer
     - CLBatchConcatenateLayerKernel
     - @ref CLDepthToSpaceLayerKernel / @ref CLDepthToSpaceLayer
-    - @ref CLGEMMLowpMatrixMultiplyNativeKernel
+    - CLGEMMLowpMatrixMultiplyNativeKernel
     - CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
-    - @ref CLGEMMMatrixMultiplyNativeKernel
+    - CLGEMMMatrixMultiplyNativeKernel
     - CLMeanStdDevNormalizationKernel /CLMeanStdDevNormalizationLayer
     - @ref CLSpaceToDepthLayerKernel / @ref CLSpaceToDepthLayer
  - New examples:
@@ -862,7 +862,7 @@ v19.05 Public major release
     - @ref CLFFTRadixStageKernel
     - @ref CLFFTScaleKernel
     - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
-    - @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+    - CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
     - CLHeightConcatenateLayerKernel
     - @ref CLDirectDeconvolutionLayer
     - @ref CLFFT1D
@@ -947,9 +947,9 @@ v19.02 Public major release
     - @ref CLRsqrtLayer
     - @ref CLExpLayer
     - CLElementWiseUnaryLayerKernel
-    - @ref CLGEMMReshapeLHSMatrixKernel
-    - @ref CLGEMMReshapeRHSMatrixKernel
-    - @ref CLGEMMMatrixMultiplyReshapedKernel
+    - CLGEMMReshapeLHSMatrixKernel
+    - CLGEMMReshapeRHSMatrixKernel
+    - CLGEMMMatrixMultiplyReshapedKernel
     - @ref CLRangeKernel / @ref CLRange
     - @ref CLUnstack
     - @ref CLGatherKernel / @ref CLGather
@@ -1369,7 +1369,7 @@ v17.03.1 First Major public release of the sources
 v17.03 Sources preview
  - New OpenCL kernels / functions:
    - CLGradientKernel, CLEdgeNonMaxSuppressionKernel, CLEdgeTraceKernel / CLCannyEdge
-   - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, CLGEMMMatrixAdditionKernel / @ref CLGEMM
+   - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, CLGEMMMatrixMultiplyKernel, CLGEMMMatrixAdditionKernel / @ref CLGEMM
    - CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
    - CLTransposeKernel / @ref CLTranspose
    - CLLKTrackerInitKernel, CLLKTrackerStage0Kernel, CLLKTrackerStage1Kernel, CLLKTrackerFinalizeKernel / CLOpticalFlow

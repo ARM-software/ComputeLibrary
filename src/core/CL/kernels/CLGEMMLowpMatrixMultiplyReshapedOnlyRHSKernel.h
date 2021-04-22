@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@ class ICLTensor;
 
 /** OpenCL kernel to multiply matrices with QASYMM8 data type when only the input matrix RHS (input1) has been reshaped
  *
- * @note The input matrix input1 must be reshaped through @ref CLGEMMReshapeRHSMatrixKernel
+ * @note The input matrix input1 must be reshaped through @ref opencl::kernels::ClGemmReshapeRhsMatrixKernel
  * @note For fused output stage, only GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT type is supported
  */
 class CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel : public ICLKernel

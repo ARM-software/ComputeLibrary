@@ -35,7 +35,7 @@
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
-#include "src/core/CL/gemm/CLGEMMHelpers.h"
+#include "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -416,7 +416,7 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
 
         const unsigned int n0                 = win_config.second.x().step();
         const unsigned int m0                 = win_config.second.y().step();
-        const unsigned int k0                 = adjust_vec_size(is_data_type_quantized(data_type)? 16u : 8u, src->dimension(channel_idx));
+        const unsigned int k0                 = adjust_vec_size(is_data_type_quantized(data_type) ? 16u : 8u, src->dimension(channel_idx));
         const unsigned int partial_store_n0   = dst->dimension(channel_idx) % n0;
         const unsigned int pad_left           = conv_info.pad_left();
         const unsigned int pad_top            = conv_info.pad_top();
@@ -425,7 +425,7 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
         // Update the padding for the weights tensor if we can export to cl_image
         if(export_to_cl_image)
         {
-            arm_compute::cl_gemm::update_padding_for_cl_image(weights);
+            gemm::update_padding_for_cl_image(weights);
         }
 
         if(biases != nullptr)

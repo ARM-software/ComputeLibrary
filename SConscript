@@ -220,12 +220,18 @@ if env['openmp']:
      runtime_files += Glob('src/runtime/OMP/OMPScheduler.cpp')
 
 if env['opencl']:
+    cl_kernel_hp_files = ['src/core/gpu/cl/kernels/gemm/ClGemmHelpers.cpp',
+                          'src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeBifrost.cpp',
+                          'src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeMidgard.cpp',
+                          'src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeValhall.cpp',
+                          'src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedBifrost.cpp',
+                          'src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedValhall.cpp',
+                          'src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyBifrost.cpp',
+                          'src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyValhall.cpp',
+                          ]
+    core_files += cl_kernel_hp_files
     core_files += Glob('src/core/CL/*.cpp')
     core_files += Glob('src/core/CL/kernels/*.cpp')
-    core_files += Glob('src/core/CL/gemm/*.cpp')
-    core_files += Glob('src/core/CL/gemm/native/*.cpp')
-    core_files += Glob('src/core/CL/gemm/reshaped/*.cpp')
-    core_files += Glob('src/core/CL/gemm/reshaped_only_rhs/*.cpp')
     core_files += Glob('src/core/gpu/cl/*.cpp')
     core_files += Glob('src/core/gpu/cl/kernels/*.cpp')
 

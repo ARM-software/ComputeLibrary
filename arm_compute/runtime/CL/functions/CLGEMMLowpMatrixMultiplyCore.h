@@ -41,7 +41,13 @@ class CLGEMMLowpOffsetContributionKernel;
 class CLGEMMLowpOffsetContributionOutputStageKernel;
 class CLGEMMLowpMatrixAReductionKernel;
 class CLGEMMLowpMatrixBReductionKernel;
-class CLGEMMReshapeRHSMatrixKernel;
+namespace opencl
+{
+namespace kernels
+{
+class ClGemmReshapeRhsMatrixKernel;
+} // namespace kernels
+} // namespace opencl
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. */
 class CLGEMMLowpMatrixMultiplyCore : public IFunction
@@ -140,7 +146,7 @@ private:
     std::unique_ptr<CLDepthConvertLayerKernel>                     _weights_to_qasymm8;
     std::unique_ptr<CLGEMMLowpMatrixMultiplyNativeKernel>          _mm_native_kernel;
     std::unique_ptr<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel> _mm_reshaped_only_rhs_kernel;
-    std::unique_ptr<CLGEMMReshapeRHSMatrixKernel>                  _mtx_b_reshape_kernel;
+    std::unique_ptr<opencl::kernels::ClGemmReshapeRhsMatrixKernel> _mtx_b_reshape_kernel;
     std::unique_ptr<CLGEMMLowpMatrixAReductionKernel>              _mtx_a_reduction_kernel;
     std::unique_ptr<CLGEMMLowpMatrixBReductionKernel>              _mtx_b_reduction_kernel;
     std::unique_ptr<CLGEMMLowpOffsetContributionKernel>            _offset_contribution_kernel;

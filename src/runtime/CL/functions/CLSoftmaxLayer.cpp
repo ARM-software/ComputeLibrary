@@ -43,7 +43,7 @@ struct CLSoftmaxLayerGeneric<IS_LOG>::Impl
     ICLTensor                    *dst{ nullptr };
     std::unique_ptr<OperatorType> op{ nullptr };
     MemoryGroup                   memory_group{};
-    std::vector<std::pair<TensorType, std::unique_ptr<CLTensor>>> workspace_tensors{};
+    std::vector<std::pair<int, std::unique_ptr<CLTensor>>> workspace_tensors{};
 };
 
 template <bool IS_LOG>
@@ -88,14 +88,14 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::allocate_workspace()
     std::for_each(memory_requirements.begin(), memory_requirements.end(), [this](const experimental::MemoryInfo & memory_info)
     {
         auto tensor_info = TensorInfo{ TensorShape(memory_info.size), 1, DataType::U8 };
-        _impl->workspace_tensors.emplace_back(memory_info.type, std::make_unique<CLTensor>());
+        _impl->workspace_tensors.emplace_back(memory_info.slot, std::make_unique<CLTensor>());
         auto tensor = _impl->workspace_tensors.back().second.get();
         ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
         tensor->allocator()->init(tensor_info);
         _impl->memory_group.manage(tensor);
     });
 
-    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [](std::pair<TensorType, std::unique_ptr<CLTensor>> &wt)
+    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [](std::pair<int, std::unique_ptr<CLTensor>> &wt)
     {
         auto tensor = wt.second.get();
         tensor->allocator()->allocate();
@@ -114,7 +114,7 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::run()
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
 
-    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [&pack](std::pair<TensorType, std::unique_ptr<CLTensor>> &wt)
+    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [&pack](std::pair<int, std::unique_ptr<CLTensor>> &wt)
     {
         auto tensor = wt.second.get();
         ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);

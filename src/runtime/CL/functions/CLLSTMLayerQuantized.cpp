@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,6 @@
 #include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 #include <memory>

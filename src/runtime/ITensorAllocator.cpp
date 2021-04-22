@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,25 +30,27 @@
 
 using namespace arm_compute;
 
-ITensorAllocator::ITensorAllocator()
-    : _info(), _alignment(0)
-{
-}
-
 void ITensorAllocator::init(const TensorInfo &input, size_t alignment)
 {
-    _info      = input;
-    _alignment = alignment;
+    _info_owned    = input;
+    _info_external = nullptr;
+    _alignment     = alignment;
+}
+
+void ITensorAllocator::soft_init(TensorInfo &input, size_t alignment)
+{
+    _info_external = &input;
+    _alignment     = alignment;
 }
 
 TensorInfo &ITensorAllocator::info()
 {
-    return _info;
+    return (_info_external != nullptr) ? *_info_external : _info_owned;
 }
 
 const TensorInfo &ITensorAllocator::info() const
 {
-    return _info;
+    return (_info_external != nullptr) ? *_info_external : _info_owned;
 }
 
 size_t ITensorAllocator::alignment() const

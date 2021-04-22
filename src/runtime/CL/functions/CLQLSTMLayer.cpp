@@ -37,7 +37,6 @@
 #include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
 

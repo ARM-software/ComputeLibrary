@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,9 @@ class ICLTensor;
 
 /** OpenCL kernel to multiply matrices when both the input matrices LHS (input0) and RHS (input1) have been reshaped
  *
- * @note The input matrices @p input0 and @p input1 must be reshaped through @ref CLGEMMReshapeLHSMatrixKernel and  @ref CLGEMMReshapeRHSMatrixKernel
+ * @note The input matrices @p input0 and @p input1 must be reshaped through:
+ *  - @ref opencl::kernels::ClGemmReshapeLhsMatrixKernel
+ *  - @ref opencl::kernels::ClGemmReshapeRhsMatrixKernel
  */
 class CLGEMMLowpMatrixMultiplyReshapedKernel : public ICLKernel
 {

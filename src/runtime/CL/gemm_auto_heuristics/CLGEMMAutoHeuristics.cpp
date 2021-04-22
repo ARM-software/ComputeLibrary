@@ -27,11 +27,11 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
-#include "src/core/CL/ICLGEMMKernelConfiguration.h"
-#include "src/core/CL/gemm/CLGEMMHelpers.h"
-#include "src/core/CL/gemm/native/CLGEMMNativeKernelConfiguration.h"
-#include "src/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfiguration.h"
-#include "src/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h"
+#include "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.h"
+#include "src/core/gpu/cl/kernels/gemm/IClGemmKernelConfig.h"
+#include "src/core/gpu/cl/kernels/gemm/native/ClGemmNativeKernelConfig.h"
+#include "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmReshapedKernelConfig.h"
+#include "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmReshapedOnlyRhsKernelConfig.h"
 #include "src/runtime/CL/gemm/CLGEMMKernelSelection.h"
 #include "src/runtime/CL/mlgo/MLGOHeuristics.h"
 #include "src/runtime/CL/mlgo/Utils.h"
@@ -43,6 +43,8 @@ namespace cl_gemm
 {
 namespace auto_heuristics
 {
+using namespace arm_compute::opencl::kernels::gemm;
+
 GEMMTypeResult select_mlgo_gemm_kernel(const CommonQuery &query, bool reshape_b_only_on_first_run)
 {
     ARM_COMPUTE_UNUSED(reshape_b_only_on_first_run);
@@ -83,9 +85,9 @@ GEMMTypeResult select_default_gemm_kernel(const CommonQuery &query, bool reshape
 
 GEMMConfigResult select_default_gemm_config_reshaped_only_rhs(const CommonQuery &query)
 {
-    GEMMLHSMatrixInfo                           lhs_info;
-    GEMMRHSMatrixInfo                           rhs_info;
-    std::unique_ptr<ICLGEMMKernelConfiguration> gemm_config = CLGEMMReshapedOnlyRHSKernelConfigurationFactory::create(query.gpu_target);
+    GEMMLHSMatrixInfo                    lhs_info;
+    GEMMRHSMatrixInfo                    rhs_info;
+    std::unique_ptr<IClGemmKernelConfig> gemm_config = ClGemmReshapedOnlyRhsKernelConfigurationFactory::create(query.gpu_target);
     ARM_COMPUTE_ERROR_ON_NULLPTR(gemm_config.get());
     std::tie(lhs_info, rhs_info) = gemm_config->configure(query.m, query.n, query.k, query.b, query.data_type);
     return GEMMConfigResult{ true, lhs_info, rhs_info };
@@ -118,9 +120,9 @@ GEMMConfigResult select_mlgo_gemm_config_reshaped_only_rhs(const CommonQuery &qu
 
 GEMMConfigResult select_default_gemm_config_reshaped(const CommonQuery &query)
 {
-    GEMMLHSMatrixInfo                           lhs_info;
-    GEMMRHSMatrixInfo                           rhs_info;
-    std::unique_ptr<ICLGEMMKernelConfiguration> gemm_config = CLGEMMReshapedKernelConfigurationFactory::create(query.gpu_target);
+    GEMMLHSMatrixInfo                    lhs_info;
+    GEMMRHSMatrixInfo                    rhs_info;
+    std::unique_ptr<IClGemmKernelConfig> gemm_config = ClGemmReshapedKernelConfigurationFactory::create(query.gpu_target);
     ARM_COMPUTE_ERROR_ON_NULLPTR(gemm_config.get());
     std::tie(lhs_info, rhs_info) = gemm_config->configure(query.m, query.n, query.k, query.b, query.data_type);
     return GEMMConfigResult{ true, lhs_info, rhs_info };
@@ -152,9 +154,9 @@ GEMMConfigResult select_mlgo_gemm_config_reshaped(const CommonQuery &query)
 
 GEMMConfigResult select_default_gemm_config_native(const CommonQuery &query)
 {
-    GEMMLHSMatrixInfo                           lhs_info;
-    GEMMRHSMatrixInfo                           rhs_info;
-    std::unique_ptr<ICLGEMMKernelConfiguration> gemm_config = CLGEMMNativeKernelConfigurationFactory::create(query.gpu_target);
+    GEMMLHSMatrixInfo                    lhs_info;
+    GEMMRHSMatrixInfo                    rhs_info;
+    std::unique_ptr<IClGemmKernelConfig> gemm_config = ClGemmNativeKernelConfigurationFactory::create(query.gpu_target);
     ARM_COMPUTE_ERROR_ON_NULLPTR(gemm_config.get());
     std::tie(lhs_info, rhs_info) = gemm_config->configure(query.m, query.n, query.k, query.b, query.data_type);
     return GEMMConfigResult{ true, lhs_info, rhs_info };
@@ -175,7 +177,7 @@ GEMMConfigResult select_mlgo_gemm_config_native(const CommonQuery &query)
     {
         ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.", to_string(config).c_str());
         // Setting irrelevant unsigned int parameters to 1 and bool parameters to false as they do no matter
-        std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, 1, 1, false, false, false, false, false);
+        std::tie(lhs_info, rhs_info) = opencl::kernels::gemm::configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, 1, 1, false, false, false, false, false);
     }
     else
     {

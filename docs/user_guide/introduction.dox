@@ -99,7 +99,7 @@ This archive contains:
  - The latest Khronos EGL 1.5 C headers from the <a href="https://www.khronos.org/registry/gles/">Khronos EGL registry</a>
  - The sources for a stub version of libOpenCL.so, libGLESv1_CM.so, libGLESv2.so and libEGL.so to help you build your application.
  - An examples folder containing a few examples to compile and link against the library.
- - A @ref utils folder containing headers with some boiler plate code used by the examples.
+ - A utils folder containing headers with some boiler plate code used by the examples.
  - This documentation.
 
  For detailed information about file organization, please refer to Files -> File List section of this documentation.

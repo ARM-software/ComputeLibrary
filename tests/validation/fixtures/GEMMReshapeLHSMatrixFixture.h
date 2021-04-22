@@ -46,7 +46,7 @@ namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool reinterpret_input_as_3d = false>
+template <typename TensorType, typename AccessorType, typename OperatorType, typename T, bool reinterpret_input_as_3d = false>
 class GEMMReshapeLHSMatrixValidationFixture : public framework::Fixture
 {
 public:
@@ -86,8 +86,8 @@ protected:
         // The output tensor will be auto-initialized within the function
 
         // Create and configure function
-        FunctionType gemm_lhs_reshape;
-        gemm_lhs_reshape.configure(&src, &dst, lhs_info, reinterpret_input_as_3d);
+        OperatorType gemm_lhs_reshape;
+        gemm_lhs_reshape.configure(src.info(), dst.info(), lhs_info, reinterpret_input_as_3d);
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
 
@@ -104,7 +104,8 @@ protected:
         fill(AccessorType(src));
 
         // Compute GEMM LHS matrix reshape function
-        gemm_lhs_reshape.run();
+        ITensorPack tensors = { { ACL_SRC, &src }, { ACL_DST, &dst } };
+        gemm_lhs_reshape.run(tensors);
 
         return dst;
     }

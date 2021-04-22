@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -73,9 +73,10 @@ const auto i_values = framework::dataset::make("interleave", { true, false });
 } // namespace
 
 using namespace arm_compute::misc::shape_calculator;
+using namespace arm_compute::opencl::kernels;
 
 // Initialize the output tensor with zero and fill the border with zero
-using CLGEMMReshapeRHSMatrix = CLSynthetizeFunctionInitOutputWithZeroAndWithZeroConstantBorder<CLGEMMReshapeRHSMatrixKernel, 16>;
+using CLGEMMReshapeRHSMatrix = CLSynthetizeOperatorInitOutputWithZeroAndWithZeroConstantBorder<ClGemmReshapeRhsMatrixKernel, 16>;
 
 template <typename T>
 using CLGEMMReshapeRHSMatrixFixture = GEMMReshapeRHSMatrixValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeRHSMatrix, T>;
@@ -117,7 +118,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     rhs_info.transpose = true;
     rhs_info.interleave = true;
 
-    bool has_error = bool(CLGEMMReshapeRHSMatrixKernel::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), rhs_info));
+    bool has_error = bool(ClGemmReshapeRhsMatrixKernel::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), rhs_info));
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
 
@@ -158,9 +159,9 @@ DATA_TEST_CASE(ValidatePadding, framework::DatasetMode::ALL, combine(combine(com
         padding = round_up_width - output_shape[0];
     }
 
-    CLGEMMReshapeRHSMatrixKernel kernel;
+    ClGemmReshapeRhsMatrixKernel kernel;
 
-    kernel.configure(&input, &output, rhs_info);
+    kernel.configure(CLKernelLibrary::get().get_compile_context(), input.info(), output.info(), rhs_info);
 
     ARM_COMPUTE_EXPECT((output.info()->padding().right == padding), framework::LogLevel::ERRORS);
 }

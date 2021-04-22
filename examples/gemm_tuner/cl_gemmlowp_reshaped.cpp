@@ -34,7 +34,7 @@
 #include "examples/gemm_tuner/CommonGemmExampleOptions.h"
 #include "examples/gemm_tuner/GemmTunerHelpers.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "tests/CL/Helper.h"
 #include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"
@@ -43,6 +43,7 @@
 #include <cstdlib>
 
 using namespace arm_compute;
+using namespace arm_compute::opencl::kernels;
 using namespace utils;
 using namespace arm_compute::misc::shape_calculator;
 using namespace gemm_tuner;
@@ -167,7 +168,7 @@ GemmConfigs consume_gemm_configs(const GemmConfigOptions &options)
 
 } // namespace
 
-using CLGEMMReshapeLHSMatrix           = test::CLSynthetizeFunction<CLGEMMReshapeLHSMatrixKernel>;
+using CLGEMMReshapeLHSMatrix           = test::CLSynthetizeOperator<ClGemmReshapeLhsMatrixKernel>;
 using CLGEMMLowpMatrixMultiplyReshaped = test::CLSynthetizeFunction<CLGEMMLowpMatrixMultiplyReshapedKernel>;
 
 class CLGEMMLowpMatrixMultiplyReshapedExample : public Example
@@ -279,7 +280,7 @@ public:
         }
 
         // Configure functions
-        reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
+        reshape_lhs.configure(lhs.info(), lhs_reshaped.info(), lhs_info);
 
         gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, lhs_info, rhs_info, gemm_info);
 
@@ -294,7 +295,9 @@ public:
     }
     void do_run() override
     {
-        reshape_lhs.run();
+        ITensorPack reshape_lsh_pack({ { ACL_SRC, &lhs }, { ACL_DST, &lhs_reshaped } });
+        reshape_lhs.run(reshape_lsh_pack);
+
         gemm.run();
 
         // Make sure all the OpenCL jobs are done executing:

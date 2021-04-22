@@ -32,7 +32,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyNativeKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.h"
 #include "tests/CL/Helper.h"
 #include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"
@@ -41,6 +41,7 @@
 #include <cstdlib>
 
 using namespace arm_compute;
+using namespace arm_compute::opencl::kernels;
 using namespace utils;
 using namespace arm_compute::misc::shape_calculator;
 using namespace gemm_tuner;
@@ -122,8 +123,8 @@ GemmConfigs consume_gemm_configs(const GemmConfigOptions &options)
 }
 
 } // namespace
-// Create function for CLGEMMMatrixMultiplyNativeKernel
-using CLGEMMMatrixMultiplyNative = test::CLSynthetizeFunction<CLGEMMMatrixMultiplyNativeKernel>;
+// Create function for ClGemmMatrixMultiplyNativeKernel
+using CLGEMMMatrixMultiplyNative = test::CLSynthetizeOperator<ClGemmMatrixMultiplyNativeKernel>;
 
 class CLGEMMMatrixMultiplyNativeExample : public Example
 {
@@ -197,7 +198,7 @@ public:
 
         // Validate argments
         Status status{};
-        status = gemm.validate((&lhs)->info(), (&rhs)->info(), (&bias)->info(), (&dst)->info(), alpha, beta, lhs_info, rhs_info, kernel_info);
+        status = gemm.validate(lhs.info(), rhs.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info);
         if(!status)
         {
             // Unsupported arguments
@@ -207,7 +208,7 @@ public:
         }
 
         // Configure function
-        gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
+        gemm.configure(lhs.info(), rhs.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info);
 
         // Allocate tensors
         lhs.allocator()->allocate();
@@ -220,7 +221,12 @@ public:
     void do_run() override
     {
         // Execute the function
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs },
+            { ACL_SRC_1, &rhs },
+            { ACL_SRC_2, &bias },
+            { ACL_DST, &dst }
+        });
+        gemm.run(gemm_pack);
 
         // Make sure all the OpenCL jobs are done executing:
         CLScheduler::get().sync();
