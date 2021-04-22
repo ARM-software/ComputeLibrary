@@ -63,6 +63,14 @@ public:
     ~NEFFT1D();
     /** Initialise the function's source and destinations.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |F32    |F32    |
+     *
      * @param[in]  input  Source tensor. Data types supported: F32. Number of channels supported: 1 (real tensor) or 2 (complex tensor).
      * @param[out] output Destination tensor.  Data types and data layouts supported: Same as @p input.
      *                    Number of channels supported: 1 (real tensor) or 2 (complex tensor).If @p input is real, @p output must be complex.

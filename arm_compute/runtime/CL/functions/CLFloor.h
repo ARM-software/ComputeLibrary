@@ -54,6 +54,15 @@ public:
     CLFloor &operator=(CLFloor &&);
     /** Set the source, destination of the kernel
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |F32    |F32    |
+     * |F16    |F16    |
+     *
      * @param[in]  input  Source tensor. Data type supported: F16/F32.
      * @param[out] output Destination tensor. Same as @p input
      */

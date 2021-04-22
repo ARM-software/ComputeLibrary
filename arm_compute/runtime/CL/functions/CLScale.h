@@ -55,6 +55,20 @@ public:
 
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
+     * |U8             |U8             |
+     * |S16            |S16            |
+     *
      * @param[in,out] input  Source tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
      * @param[out]    output Destination tensor. Data types supported: Same as @p input
      *                       All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.

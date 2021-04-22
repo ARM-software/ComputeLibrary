@@ -53,6 +53,15 @@ public:
     CLPermute &operator=(CLPermute &&) = default;
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4
      *
      * @param[in] input  The input tensor to permute. Data types supported: All.

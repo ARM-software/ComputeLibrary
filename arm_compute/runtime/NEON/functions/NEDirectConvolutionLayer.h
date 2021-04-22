@@ -58,6 +58,16 @@ public:
     ~NEDirectConvolutionLayer();
     /** Set the input, weights, biases and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0   |src1   |src2   |dst    |
+     * |:------|:------|:------|:------|
+     * |F16    |F16    |F16    |F16    |
+     * |F32    |F32    |F32    |F32    |
+     *
      * @note: DirectConvolution only works in the following configurations:
      *    1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32
      *    3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32

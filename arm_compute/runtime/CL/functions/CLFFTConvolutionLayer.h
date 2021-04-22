@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,6 +70,15 @@ public:
     /** Default move assignment operator */
     CLFFTConvolutionLayer &operator=(CLFFTConvolutionLayer &&) = default;
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |F32    |F32    |
+     * |F16    |F16    |
      *
      * @note: This function only works with any square kernel size and unit strides for both NCHW and NHWC data layout
      *

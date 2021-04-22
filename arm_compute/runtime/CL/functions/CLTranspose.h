@@ -53,6 +53,14 @@ public:
     CLTranspose &operator=(CLTranspose &&) = default;
     /** Initialise the kernel's inputs and output
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
      * @param[in]  input  Input tensor. Data types supported: All.
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */

@@ -52,6 +52,14 @@ public:
     CLReshapeLayer &operator=(CLReshapeLayer &&);
     /** Initialise the kernel's inputs and outputs
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
      * @param[in]  input  First tensor input. Data type supported: All
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */

@@ -53,6 +53,17 @@ public:
     CLPReluLayer &operator=(CLPReluLayer &&);
     /** Set the input and output tensor.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
      * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
      *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.

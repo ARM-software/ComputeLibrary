@@ -58,6 +58,14 @@ public:
     ~NEFFT2D();
     /** Initialise the function's source and destinations
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |F32    |F32    |
+     *
      * @param[in]  input  Source tensor. Data types supported: F32.
      * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  config FFT related configuration

@@ -55,6 +55,17 @@ public:
     NEPReluLayer &operator=(NEPReluLayer &&);
     /** Set the input and output tensor.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  alpha  Source alpha tensor. Data types supported: same of @p input.
      * @param[out] output Destination tensor. Data type supported: same as @p input

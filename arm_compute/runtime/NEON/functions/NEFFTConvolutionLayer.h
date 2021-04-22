@@ -73,6 +73,14 @@ public:
     ~NEFFTConvolutionLayer();
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |F32    |F32    |
+     *
      * @note: This function only works with any square kernel size and unit strides for both NCHW and NHWC data layout
      *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],

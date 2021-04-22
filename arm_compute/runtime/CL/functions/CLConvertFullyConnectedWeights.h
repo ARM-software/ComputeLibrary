@@ -55,6 +55,15 @@ public:
     CLConvertFullyConnectedWeights &operator=(CLConvertFullyConnectedWeights &&) = default;
     /** Initialize the function.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
      * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: All.
      * @param[out] output               The converted weights tensor. Shape and Data Type: Same as @p input.
      * @param[in]  original_input_shape Shape of the original input tensor (the one entering fully connected layer).

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,6 +90,14 @@ public:
     /** Default move assignment operator */
     CLSlice &operator=(CLSlice &&);
     /** Configure kernel
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
      *
      * @note Supported tensor rank: up to 4
      * @note Start indices must be non-negative. 0 <= starts[i]

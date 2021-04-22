@@ -52,6 +52,24 @@ public:
     NEPixelWiseMultiplication &operator=(NEPixelWiseMultiplication &&) = default;
     /** Initialise the kernel's inputs, output and convertion policy.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |QASYMM16       |
+     * |QSYMM16        |QSYMM16        |S32            |
+     * |U8             |U8             |U8             |
+     * |U8             |U8             |S16            |
+     * |U8             |S16            |S16            |
+     * |S16            |U8             |S16            |
+     * |S16            |S16            |S16            |
+     * |F16            |F16            |F16            |
+     * |F32            |S32            |F32            |
+     *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *

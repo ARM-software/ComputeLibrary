@@ -51,19 +51,25 @@ public:
     NEArithmeticAddition &operator=(NEArithmeticAddition &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * Valid configurations (Input1,Input2) -> Output :
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
      *
-     *   - (U8,U8)           -> U8
-     *   - (U8,U8)           -> S16
-     *   - (S16,U8)          -> S16
-     *   - (U8,S16)          -> S16
-     *   - (S16,S16)         -> S16
-     *   - (S32,S32)         -> S32
-     *   - (F16,F16)         -> F16
-     *   - (F32,F32)         -> F32
-     *   - (QASYMM8,QASYMM8) -> QASYMM8
-     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |QASYMM16       |
+     * |QSYMM16        |QSYMM16        |S32            |
+     * |U8             |U8             |U8             |
+     * |U8             |U8             |S16            |
+     * |U8             |S16            |S16            |
+     * |S16            |U8             |S16            |
+     * |S16            |S16            |S16            |
+     * |S32            |S32            |S32            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
      *
      * @param[in]  input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
      * @param[in]  input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32

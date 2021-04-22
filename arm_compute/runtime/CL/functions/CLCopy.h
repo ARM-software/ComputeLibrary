@@ -53,6 +53,14 @@ public:
     CLCopy &operator=(CLCopy &&);
     /** Initialise the function's source and destination.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
      * @param[in]  input      Source tensor. Data types supported: All.
      * @param[out] output     Output tensor. Data types supported: Same as @p input.
      * @param[in]  dst_window (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.

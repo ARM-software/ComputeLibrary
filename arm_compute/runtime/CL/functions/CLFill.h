@@ -52,6 +52,14 @@ public:
     CLFill &operator=(CLFill &&);
     /** Initialize the kernel's tensor and filling value
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
      * @param[in,out] tensor         Input tensor to fill. Supported data types: All.
      * @param[in]     constant_value The value used to fill the planes of the tensor
      * @param[in]     window         Window to be used in case setting only part of a tensor. Default is nullptr.

@@ -53,6 +53,14 @@ public:
     NEFill &operator=(NEFill &&);
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |All    |All    |
+     *
      * @param[in,out] tensor         Source tensor. Data types supported: All
      * @param[in]     constant_value Constant value to use to fill tensor.
      */
