@@ -136,8 +136,7 @@ protected:
         {
             case DataType::S32:
             {
-                const int32_t value = static_cast<int32_t>(tensor.quantization_info().uniform().offset);
-                library->fill_tensor_value(tensor, value);
+                library->fill_tensor_value(tensor, 0);
                 break;
             }
             case DataType::F16:

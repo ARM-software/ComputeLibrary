@@ -24,6 +24,7 @@
 #include "ConvolutionLayer.h"
 
 #include "tests/validation/Helpers.h"
+
 namespace arm_compute
 {
 namespace test

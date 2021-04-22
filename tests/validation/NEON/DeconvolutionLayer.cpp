@@ -395,14 +395,19 @@ TEST_SUITE_END() // W1x1
 
 TEST_SUITE_END() // QASYMM8_SIGNED
 
+const auto input_qinfo_per_channel_dataset         = framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10) });
+const auto output_qinfo_per_channel_dataset        = framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0) });
+const auto input_signed_qinfo_per_channel_dataset  = framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, -10) });
+const auto output_signed_qinfo_per_channel_dataset = framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 10) });
+
 TEST_SUITE(QSYMM8_PER_CHANNEL)
 
 TEST_SUITE(W4x4)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedPerChannelFixture4x4<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(data4x4,
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        data_layouts_dataset),
-                       input_qinfo_dataset),
-                       output_qinfo_dataset),
+                       input_qinfo_per_channel_dataset),
+                       output_qinfo_per_channel_dataset),
                        add_bias_dataset),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
@@ -412,8 +417,8 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedPerChannelFixture4x4<ui
 FIXTURE_DATA_TEST_CASE(RunSigned, NEDeconvolutionLayerQuantizedPerChannelFixture4x4<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(data4x4,
                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        data_layouts_dataset),
-                       input_qinfo_dataset),
-                       output_qinfo_dataset),
+                       input_signed_qinfo_per_channel_dataset),
+                       output_signed_qinfo_per_channel_dataset),
                        add_bias_dataset),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
@@ -426,8 +431,8 @@ TEST_SUITE(W3x3)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedPerChannelFixture3x3<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(data3x3,
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        data_layouts_dataset),
-                       input_qinfo_dataset),
-                       output_qinfo_dataset),
+                       input_qinfo_per_channel_dataset),
+                       output_qinfo_per_channel_dataset),
                        add_bias_dataset),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
@@ -437,8 +442,8 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedPerChannelFixture3x3<ui
 FIXTURE_DATA_TEST_CASE(RunSigned, NEDeconvolutionLayerQuantizedPerChannelFixture3x3<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(data3x3,
                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        data_layouts_dataset),
-                       input_qinfo_dataset),
-                       output_qinfo_dataset),
+                       input_signed_qinfo_per_channel_dataset),
+                       output_signed_qinfo_per_channel_dataset),
                        add_bias_dataset),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
@@ -451,8 +456,8 @@ TEST_SUITE(W1x1)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedPerChannelFixture1x1<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(data1x1,
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        data_layouts_dataset),
-                       input_qinfo_dataset),
-                       output_qinfo_dataset),
+                       input_qinfo_per_channel_dataset),
+                       output_qinfo_per_channel_dataset),
                        add_bias_dataset),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
@@ -462,8 +467,8 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedPerChannelFixture1x1<ui
 FIXTURE_DATA_TEST_CASE(RunSigned, NEDeconvolutionLayerQuantizedPerChannelFixture1x1<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(data1x1,
                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        data_layouts_dataset),
-                       input_qinfo_dataset),
-                       output_qinfo_dataset),
+                       input_signed_qinfo_per_channel_dataset),
+                       output_signed_qinfo_per_channel_dataset),
                        add_bias_dataset),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
