@@ -539,7 +539,7 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
 
     // Store the output tile
     const VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = CONVERT( ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), A_VAL, B_VAL), VEC_DATA_TYPE(DATA_TYPE, 4));
+    out0_dt = CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), A_VAL, B_VAL), VEC_DATA_TYPE(DATA_TYPE, 4));
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = out0_dt.s0;
@@ -885,15 +885,16 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     VEC_DATA_TYPE(DATA_TYPE, 4)
-    out0_dt = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL,
-                         B_VAL);
+    out0_dt = CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), A_VAL,
+                                 B_VAL),
+                      VEC_DATA_TYPE(DATA_TYPE, 4));
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = out0_dt.s0;
     *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = out0_dt.s1;
     *((__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y)) = out0_dt.s2;
     *((__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y)) = out0_dt.s3;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, CONVERT((VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), VEC_DATA_TYPE(DATA_TYPE, 4)), A_VAL, B_VAL), 0,
-            (__global DATA_TYPE *)(dst_addr));
+    vstore4(CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out00, out01, out02, out03), A_VAL, B_VAL), VEC_DATA_TYPE(DATA_TYPE, 4)),
+            0, (__global DATA_TYPE *)(dst_addr));
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -1008,14 +1009,18 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
 #endif // defined(HAS_BIAS)
 
     // Store the output tile
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, (VEC_DATA_TYPE(DATA_TYPE, 4))(out_col0.s0, out_col1.s0, out_col2.s0, out_col3.s0), A_VAL, B_VAL), 0,
-            (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, (VEC_DATA_TYPE(DATA_TYPE, 4))(out_col0.s1, out_col1.s1, out_col2.s1, out_col3.s1), A_VAL, B_VAL), 0,
-            (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, (VEC_DATA_TYPE(DATA_TYPE, 4))(out_col0.s2, out_col1.s2, out_col2.s2, out_col3.s2), A_VAL, B_VAL), 0,
-            (__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y));
-    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, (VEC_DATA_TYPE(DATA_TYPE, 4))(out_col0.s3, out_col1.s3, out_col2.s3, out_col3.s3), A_VAL, B_VAL), 0,
-            (__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y));
+    vstore4(CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out_col0.s0, out_col1.s0, out_col2.s0, out_col3.s0), A_VAL, B_VAL),
+                    VEC_DATA_TYPE(DATA_TYPE, 4)),
+            0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
+    vstore4(CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out_col0.s1, out_col1.s1, out_col2.s1, out_col3.s1), A_VAL, B_VAL),
+                    VEC_DATA_TYPE(DATA_TYPE, 4)),
+            0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
+    vstore4(CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out_col0.s2, out_col1.s2, out_col2.s2, out_col3.s2), A_VAL, B_VAL),
+                    VEC_DATA_TYPE(DATA_TYPE, 4)),
+            0, (__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y));
+    vstore4(CONVERT(ACTIVATION(ACTIVATION_TYPE, float, VEC_SIZE, (VEC_DATA_TYPE(float, 4))(out_col0.s3, out_col1.s3, out_col2.s3, out_col3.s3), A_VAL, B_VAL),
+                    VEC_DATA_TYPE(DATA_TYPE, 4)),
+            0, (__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y));
 #endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
 
