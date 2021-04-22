@@ -42,18 +42,19 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class RemapValidationFixture : public framework::Fixture
+class RemapValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode)
+    void setup(TensorShape shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode, DataLayout data_layout = DataLayout::NCHW)
     {
         std::mt19937                           gen(library->seed());
         std::uniform_int_distribution<uint8_t> distribution(0, 255);
         const T                                constant_border_value = static_cast<T>(distribution(gen));
 
-        _target    = compute_target(shape, policy, data_type, border_mode, constant_border_value);
-        _reference = compute_reference(shape, policy, data_type, border_mode, constant_border_value);
+        _data_layout = data_layout;
+        _target      = compute_target(shape, policy, data_type, border_mode, constant_border_value);
+        _reference   = compute_reference(shape, policy, data_type, border_mode, constant_border_value);
     }
 
 protected:
@@ -64,13 +65,18 @@ protected:
         library->fill(tensor, distribution, i);
     }
 
-    TensorType compute_target(const TensorShape &shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode, T constant_border_value)
+    TensorType compute_target(TensorShape shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode, T constant_border_value)
     {
+        if(_data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src   = create_tensor<TensorType>(shape, data_type);
-        TensorType map_x = create_tensor<TensorType>(shape, DataType::F32);
-        TensorType map_y = create_tensor<TensorType>(shape, DataType::F32);
-        TensorType dst   = create_tensor<TensorType>(shape, data_type);
+        TensorType src   = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(), _data_layout);
+        TensorType map_x = create_tensor<TensorType>(shape, DataType::F32, 1, QuantizationInfo(), _data_layout);
+        TensorType map_y = create_tensor<TensorType>(shape, DataType::F32, 1, QuantizationInfo(), _data_layout);
+        TensorType dst   = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(), _data_layout);
 
         // Create and configure function
         FunctionType remap;
@@ -93,9 +99,11 @@ protected:
         ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
+        int max_val = std::max({ shape.x(), shape.y(), shape.z() });
+
         fill(AccessorType(src), 0, 0, 255);
-        fill(AccessorType(map_x), 1, -5, shape.x() + 5);
-        fill(AccessorType(map_y), 2, -5, shape.y() + 5);
+        fill(AccessorType(map_x), 1, -5, max_val);
+        fill(AccessorType(map_y), 2, -5, max_val);
 
         // Compute function
         remap.run();
@@ -103,7 +111,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode, T constant_border_value)
+    SimpleTensor<T> compute_reference(const TensorShape shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode, T constant_border_value)
     {
         ARM_COMPUTE_ERROR_ON(data_type != DataType::U8);
 
@@ -116,9 +124,11 @@ protected:
         _valid_mask = SimpleTensor<T> { shape, data_type };
 
         // Fill reference
+        int max_val = std::max({ shape.x(), shape.y(), shape.z() });
+
         fill(src, 0, 0, 255);
-        fill(map_x, 1, -5, shape.x() + 5);
-        fill(map_y, 2, -5, shape.y() + 5);
+        fill(map_x, 1, -5, max_val);
+        fill(map_y, 2, -5, max_val);
 
         // Compute reference
         return reference::remap<T>(src, map_x, map_y, _valid_mask, policy, border_mode, constant_border_value);
@@ -127,7 +137,31 @@ protected:
     TensorType      _target{};
     SimpleTensor<T> _reference{};
     SimpleTensor<T> _valid_mask{};
+    DataLayout      _data_layout{};
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class RemapValidationFixture : public RemapValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode)
+    {
+        RemapValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, policy, data_type, border_mode);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class RemapValidationMixedLayoutFixture : public RemapValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode, DataLayout data_layout)
+    {
+        RemapValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, policy, data_type, border_mode, data_layout);
+    }
+};
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

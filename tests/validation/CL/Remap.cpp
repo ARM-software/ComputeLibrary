@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,30 +44,30 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<uint8_t> tolerance_value(1);
-constexpr float                      tolerance_number = 0.2f;
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(Remap)
 template <typename T>
 using CLRemapFixture = RemapValidationFixture<CLTensor, CLAccessor, CLRemap, T>;
+template <typename T>
+using CLRemapLayoutFixture = RemapValidationMixedLayoutFixture<CLTensor, CLAccessor, CLRemap, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRemapFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                           framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                   framework::dataset::make("BorderModes", { BorderMode::UNDEFINED, BorderMode::CONSTANT })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLRemapLayoutFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                     framework::dataset::make("DataType", DataType::U8)),
+                                                                                                             framework::dataset::make("BorderModes", { BorderMode::UNDEFINED, BorderMode::CONSTANT })),
+                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, _valid_mask, tolerance_value, tolerance_number);
+    validate(CLAccessor(_target), _reference, _valid_mask, tolerance_value);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLRemapFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                           framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
+                                                                                                           framework::dataset::make("DataType", DataType::U8)),
                                                                                                    framework::dataset::make("BorderModes", { BorderMode::UNDEFINED, BorderMode::CONSTANT })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, _valid_mask, tolerance_value, tolerance_number);
+    validate(CLAccessor(_target), _reference, _valid_mask, tolerance_value);
 }
 
 TEST_SUITE_END()

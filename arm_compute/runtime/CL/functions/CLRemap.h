@@ -58,7 +58,7 @@ public:
      * @param[in]     map_y                 Map for Y coords. Data types supported: F32.
      * @param[out]    output                Output tensor. Data types supported: U8.
      * @param[in]     policy                Interpolation policy to use. Only NEAREST and BILINEAR are supported.
-     * @param[in]     border_mode           Border mode to use on the input tensor.
+     * @param[in]     border_mode           Border mode to use on the input tensor. Only CONSTANT and UNDEFINED are supported.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      *
      */
@@ -72,7 +72,7 @@ public:
      * @param[in]     map_y                 Map for Y coords. Data types supported: F32.
      * @param[out]    output                Output tensor. Data types supported: U8.
      * @param[in]     policy                Interpolation policy to use. Only NEAREST and BILINEAR are supported.
-     * @param[in]     border_mode           Border mode to use on the input tensor.
+     * @param[in]     border_mode           Border mode to use on the input tensor. Only CONSTANT and UNDEFINED are supported.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      *
      */

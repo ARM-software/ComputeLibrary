@@ -105,9 +105,6 @@ enum class SamplingPolicy
     TOP_LEFT /**< Samples are taken at pixel top left corner */
 };
 
-/** Constant value of the border pixels when using BorderMode::CONSTANT */
-constexpr uint8_t CONSTANT_BORDER_VALUE = 199;
-
 /** [DataLayout enum definition] **/
 
 /** Supported tensor data layouts */
