@@ -81,7 +81,7 @@ using CLPixelWiseMultiplicationToF16Fixture = PixelWiseMultiplicationValidationF
 template <typename T>
 using CLPixelWiseMultiplicationToF32Fixture = PixelWiseMultiplicationValidationFloatFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
 template <typename T>
-using CLPixelWiseMultiplicationBroadcastFixture = PixelWiseMultiplicationBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
+using CLPixelWiseMultiplicationToF32BroadcastFixture = PixelWiseMultiplicationBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
 
 TEST_SUITE(CL)
 TEST_SUITE(PixelWiseMultiplication)
@@ -133,14 +133,19 @@ PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunWithActivation, ToF32Fixture
 TEST_SUITE_END() // Scale255
 TEST_SUITE_END() // F32toF32
 
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, BroadcastFixture<float>, PRECOMMIT, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, EmptyActivationFunctionsDataset,
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, ToF32BroadcastFixture<float>, PRECOMMIT, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP,
+                                                 EmptyActivationFunctionsDataset,
                                                  VALIDATE(float, 1.f))
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunWithActivationSmallBroadcast, BroadcastFixture<float>, ALL, TinyShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, ActivationFunctionsDataset,
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunWithActivationSmallBroadcast, ToF32BroadcastFixture<float>, ALL, TinyShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP,
+                                                 ActivationFunctionsDataset,
                                                  VALIDATE(float, 1.f))
 
 template <typename T>
 using CLPixelWiseMultiplicationQuantizedFixture   = PixelWiseMultiplicationValidationQuantizedFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, T>;
 using CLPixelWiseMultiplicationQSYMM16ToS32Fxture = PixelWiseMultiplicationValidationQuantizedFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, int16_t, int16_t, int32_t>;
+
+template <typename T>
+using CLPixelWiseMultiplicationQuantizedBroadcastFixture = PixelWiseMultiplicationBroadcastValidationQuantizedFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -160,6 +165,24 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<uint8
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLPixelWiseMultiplicationQuantizedBroadcastFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapesBroadcast(),
+                                                                                                       framework::dataset::make("DataTypeIn1", DataType::QASYMM8)),
+                                                                                               framework::dataset::make("DataTypeIn2", DataType::QASYMM8)),
+                                                                                       framework::dataset::make("DataTypeOut", DataType::QASYMM8)),
+                                                                               framework::dataset::make("Scale", { 1.f, 2.f })),
+                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                               framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
+                                                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                                               framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                       framework::dataset::make("OUtQInfo", { QuantizationInfo(1.f / 255.f, 5) })),
+                               InPlaceDataSet))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)

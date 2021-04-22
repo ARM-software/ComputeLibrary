@@ -156,8 +156,8 @@ __kernel void pixelwise_mul_quantized(
     __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x * out_stride_x + y * out_stride_y + z * out_stride_z;
 
     // Load data
-    VEC_INT in_a = CONVERT((VEC_TYPE)(VLOAD(VEC_SIZE_OUT)(0, (__global DATA_TYPE_OUT *)in1_addr)), VEC_INT);
-    VEC_INT in_b = CONVERT((VEC_TYPE)(VLOAD(VEC_SIZE_OUT)(0, (__global DATA_TYPE_OUT *)in2_addr)), VEC_INT);
+    VEC_INT in_a = CONVERT((VEC_TYPE)(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_OUT *)in1_addr)), VEC_INT);
+    VEC_INT in_b = CONVERT((VEC_TYPE)(VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE_OUT *)in2_addr)), VEC_INT);
 
     // Dequantize
 #if defined(OFFSET_IN1)
