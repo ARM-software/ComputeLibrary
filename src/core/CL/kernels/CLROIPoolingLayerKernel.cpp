@@ -30,42 +30,17 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
-#include <float.h>
+#include <cfloat>
 #include <cmath>
-#include <set>
 #include <string>
 
 namespace arm_compute
 {
-namespace
-{
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output auto initialization if not yet initialized
-    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->dimension(2), rois->dimension(1));
-    auto_init_if_empty((*output), output_shape, 1, input->data_type(), output->quantization_info());
-
-    // Configure kernel window
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
-    Window                 win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal input_access(input, input->valid_region().start(0), num_elems_processed_per_iteration);
-
-    bool   window_changed = update_window_and_padding(win, input_access, output_access);
-    Status err            = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-} // namespace
-
 CLROIPoolingLayerKernel::CLROIPoolingLayerKernel()
     : _input(nullptr), _rois(nullptr), _output(nullptr), _pool_info(0, 0, 0.f)
 {
@@ -104,9 +79,11 @@ void CLROIPoolingLayerKernel::configure(const CLCompileContext &compile_context,
 {
     ARM_COMPUTE_ERROR_THROW_ON(CLROIPoolingLayerKernel::validate(input->info(), rois->info(), output->info(), pool_info));
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), rois->info(), output->info(), pool_info);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    auto padding_info = get_padding_info({ input, rois, output });
+
+    // Output auto initialization if not yet initialized
+    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->info()->dimension(2), rois->info()->dimension(1));
+    auto_init_if_empty(*(output->info()), output_shape, 1, input->info()->data_type(), output->info()->quantization_info());
 
     // Set instance variables
     _input     = input;
@@ -139,21 +116,20 @@ void CLROIPoolingLayerKernel::configure(const CLCompileContext &compile_context,
         // Specify minimum possible value of datatype
         build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(0));
     }
-    else{
+    else
+    {
         // Specify min value of F32 datatype
         build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(-FLT_MAX));
     }
+
+    Window win = calculate_max_window(*(output->info()), Steps());
+    ICLKernel::configure_internal(win);
 
     // Create kernel
     std::string kernel_name = "roi_pooling_layer";
     _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
-    // Set static kernel arguments
-    unsigned int idx = 2 * num_arguments_per_3D_tensor() + num_arguments_per_1D_array();
-    add_argument<cl_uint>(idx, _input->info()->strides_in_bytes()[3]);
-    add_argument<cl_uint>(idx, _output->info()->strides_in_bytes()[3]);
-
-    ICLKernel::configure_internal(win_config.second);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 void CLROIPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
