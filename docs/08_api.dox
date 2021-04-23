@@ -101,6 +101,16 @@ to extract (@ref AclGetClMem) the internal OpenCL memory object.
 As Tensors can reside in different memory spaces, @ref AclMapTensor and @ref AclUnmapTensor entrypoints
 are provided to map Tensors in and out of the host memory system, respectively.
 
+@subsection api_objects_queue AclQueue or Queue
+
+AclQueue acts as a runtime aggregate service. It provides facilities to schedule
+and execute operators using underlying hardware. It also contains services like
+tuning mechanisms (e.g., Local workgroup size tuning for OpenCL) that can be specified
+during operator execution.
+
+@note To enable interoperability with OpenCL, additional entrypoints are provided
+to extract (@ref AclGetClQueue) or set (@ref AclSetClQueue) the internal OpenCL queue.
+
 @section api_internal Internal
 @subsection api_internal_operator_vs_kernels Operators vs Kernels
 
