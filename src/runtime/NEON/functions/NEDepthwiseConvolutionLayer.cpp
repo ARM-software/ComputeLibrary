@@ -121,7 +121,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
         _impl->permuted_output.info()->set_quantization_info(output->info()->quantization_info());
 
         // Configure optimized depthwise
-        dwc_optimized_func->configure(_impl->permuted_input.info(), _impl->permuted_weights.info(), biases->info(), _impl->permuted_output.info(), info);
+        dwc_optimized_func->configure(_impl->permuted_input.info(), _impl->permuted_weights.info(), biases == nullptr ? nullptr : biases->info(), _impl->permuted_output.info(), info);
 
         // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
         _impl->permuted_output.info()->set_data_layout(DataLayout::NHWC);
@@ -132,7 +132,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
     }
     else
     {
-        dwc_optimized_func->configure(_impl->src->info(), _impl->weights->info(), biases->info(), _impl->dst->info(), info);
+        dwc_optimized_func->configure(_impl->src->info(), _impl->weights->info(), biases == nullptr ? nullptr : biases->info(), _impl->dst->info(), info);
     }
 
     // Allocate memory based on the internal memory requirements
@@ -184,7 +184,6 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
         if(_impl->permute)
         {
             _impl->permuted_weights.allocator()->allocate();
-            _impl->weights->mark_as_unused();
         }
 
         if(!_impl->permuted_weights.is_used())

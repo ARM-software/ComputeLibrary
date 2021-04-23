@@ -170,7 +170,7 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::run(ITen
     if(_permute)
     {
         ITensorPack pack;
-        auto        src      = tensors.get_tensor(TensorType::ACL_SRC_0);
+        auto        src      = tensors.get_const_tensor(TensorType::ACL_SRC_0);
         auto        src_perm = tensors.get_tensor(TensorType::ACL_INT_0);
         pack.add_tensor(TensorType::ACL_SRC, src);
         pack.add_tensor(TensorType::ACL_DST, src_perm);
@@ -246,6 +246,8 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::prepare(
             pack.add_tensor(TensorType::ACL_SRC, weights);
             pack.add_tensor(TensorType::ACL_DST, permuted_weights);
             _permute_weights->run(pack);
+
+            weights->mark_as_unused();
 
             ITensorPack pack_opt;
             pack_opt.add_const_tensor(TensorType::ACL_SRC_1, permuted_weights);
