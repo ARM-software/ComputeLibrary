@@ -82,6 +82,8 @@ template <typename T>
 using CLPixelWiseMultiplicationToF32Fixture = PixelWiseMultiplicationValidationFloatFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
 template <typename T>
 using CLPixelWiseMultiplicationToF32BroadcastFixture = PixelWiseMultiplicationBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
+template <typename T>
+using CLPixelWiseMultiplicationIntegerFixture = PixelWiseMultiplicationValidationIntegerFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, int>;
 
 TEST_SUITE(CL)
 TEST_SUITE(PixelWiseMultiplication)
@@ -116,6 +118,21 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+TEST_SUITE(INT32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationIntegerFixture<int>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(
+                                                                           datasets::SmallShapes(),
+                                                                           framework::dataset::make("DataType1", DataType::S32)),
+                                                                       framework::dataset::make("DataType2", DataType::S32)),
+                                                               framework::dataset::make("Scale", {1.f})),
+                                                       datasets::ConvertPolicies()),
+                                               framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_UP)),
+                                       EmptyActivationFunctionsDataset),
+                               InPlaceDataSet))
+{
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
 
 TEST_SUITE(F16toF16)
 TEST_SUITE(Scale255)

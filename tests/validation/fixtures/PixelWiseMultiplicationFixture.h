@@ -177,6 +177,18 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
+class PixelWiseMultiplicationValidationIntegerFixture : public PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType dt_in1, DataType dt_in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy, ActivationLayerInfo act_info, bool is_inplace)
+    {
+        PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, shape, dt_in1, dt_in2, dt_in2, scale, convert_policy, rounding_policy,
+                                                                                                               QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), act_info, is_inplace);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
 class PixelWiseMultiplicationBroadcastValidationFloatFixture : public PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>
 {
 public:

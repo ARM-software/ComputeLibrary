@@ -90,7 +90,6 @@ __kernel void pixelwise_mul_int(
     // Load data
     VEC_ACC_TYPE in1_data = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN1, VEC_SIZE_OUT))VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_IN1 *)in1_addr), VEC_ACC_TYPE);
     VEC_ACC_TYPE in2_data = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN2, VEC_SIZE_OUT))VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE_IN2 *)in2_addr), VEC_ACC_TYPE);
-
     // Perform multiplication and store result
     VEC_OUT_TYPE out_data0 = MUL_OP(in1_data, in2_data, scale, DATA_TYPE_OUT, VEC_SIZE_OUT);
     STORE_VECTOR_SELECT(out_data, DATA_TYPE_OUT, out_addr, VEC_SIZE_OUT, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
