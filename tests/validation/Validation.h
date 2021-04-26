@@ -159,25 +159,19 @@ bool compare_dimensions(const Dimensions<T> &dimensions1, const Dimensions<T> &d
     {
         // In case a 1D/2D shape becomes 3D after permutation, the permuted tensor will have two/one dimension(s) more and the first (two) value(s) will be 1
         // clang-format off
-        if((dimensions1.num_dimensions() != dimensions2.num_dimensions()) &&
-           ((dimensions1.num_dimensions() != (dimensions2.num_dimensions() + 1)) || (dimensions1.x() != 1)) &&
-           ((dimensions1.num_dimensions() != (dimensions2.num_dimensions() + 2)) || (dimensions1.x() != 1) || (dimensions1.y() != 1)))
+        const auto max_dims = std::max(dimensions1.num_dimensions(), dimensions2.num_dimensions());
+        for(unsigned int i = 3; i < max_dims; ++i)
         {
-            return false;
+            if(dimensions1[i] != dimensions2[i])
+            {
+                return false;
+            }
         }
         // clang-format on
 
         if((dimensions1[0] != dimensions2[2]) || (dimensions1[1] != dimensions2[0]) || (dimensions1[2] != dimensions2[1]))
         {
             return false;
-        }
-
-        for(unsigned int i = 3; i < dimensions1.num_dimensions(); ++i)
-        {
-            if(dimensions1[i] != dimensions2[i])
-            {
-                return false;
-            }
         }
     }
 

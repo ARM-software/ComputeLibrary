@@ -173,9 +173,11 @@ std::tuple<Status, Window, ClPoolingConfig> validate_and_configure_window(ITenso
         }
         case DataLayout::NHWC:
         {
+            const size_t vec_size = dst->data_type() == DataType::F32 ? 2 : 4;
+
             // Initialize border size
             border_size                       = BorderSize();
-            num_elems_processed_per_iteration = adjust_vec_size(4, dst->dimension(0));
+            num_elems_processed_per_iteration = adjust_vec_size(vec_size, dst->dimension(0));
             win                               = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration));
             break;
         }
