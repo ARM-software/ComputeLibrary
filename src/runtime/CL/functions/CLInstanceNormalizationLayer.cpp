@@ -52,7 +52,7 @@ void CLInstanceNormalizationLayer::configure(ICLTensor *input, ICLTensor *output
 void CLInstanceNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision)
 {
     auto w = std::make_unique<CLComputeMeanVariance>();
-    w->configure(compile_context, input, &_mean_var_tensor);
+    w->configure(compile_context, input, &_mean_var_tensor, use_mixed_precision);
     _mean_var_kernel = std::move(w);
     auto k           = std::make_unique<CLInstanceNormalizationLayerKernel>();
     k->configure(compile_context, input, &_mean_var_tensor, output, InstanceNormalizationLayerKernelInfo(gamma, beta, epsilon, use_mixed_precision));

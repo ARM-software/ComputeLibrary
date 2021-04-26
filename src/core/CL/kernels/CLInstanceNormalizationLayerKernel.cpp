@@ -74,7 +74,7 @@ CLComputeMeanVariance::CLComputeMeanVariance()
 {
 }
 
-void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output)
+void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, bool use_mixed_precision)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     auto padding_info = get_padding_info({ input, output });
@@ -86,6 +86,7 @@ void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, I
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
 
     CLBuildOptions build_opts;
+    build_opts.add_option("-DINTERNAL_DATA_TYPE=" + (use_mixed_precision ? "float" : get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DDIM_X=" + support::cpp11::to_string(input->info()->dimension(0)));
@@ -105,8 +106,14 @@ void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, I
     const TensorShape  out_shape(input_channel, 2u, input_batches);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), out_shape, 1, input->info()->data_type());
-
+    if(use_mixed_precision)
+    {
+        auto_init_if_empty(*output->info(), out_shape, 1, DataType::F32);
+    }
+    else
+    {
+        auto_init_if_empty(*output->info(), out_shape, 1, input->info()->data_type());
+    }
     ICLKernel::configure_internal(win);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
