@@ -83,7 +83,6 @@ struct CLFusedLayerTypes
     using FuseBatchNormalization    = CLFuseBatchNormalization;
 };
 
-// TODO (isagot01): Remove once we support heterogeneous scheduling at function level
 /** Wrapper for the CPP Function in the OpenCL backend **/
 class CPPWrapperFunction : public IFunction
 {

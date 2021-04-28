@@ -62,8 +62,6 @@ const auto NormalizationDatasetFP32 = combine(combine(combine(framework::dataset
 TEST_SUITE(CL)
 TEST_SUITE(NormalizationLayer)
 
-//TODO(COMPMID-415): Missing configuration?
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(

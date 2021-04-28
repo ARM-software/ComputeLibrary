@@ -495,7 +495,6 @@ inline float16x8_t vtaylor_polyq_f16(float16x8_t x, const std::array<float16x8_t
 
 inline float16x8_t vexpq_f16(float16x8_t x)
 {
-    // TODO (COMPMID-1535) : Revisit FP16 approximations
     const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
     const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
 
@@ -505,7 +504,6 @@ inline float16x8_t vexpq_f16(float16x8_t x)
 
 inline float16x8_t vlogq_f16(float16x8_t x)
 {
-    // TODO (COMPMID-1535) : Revisit FP16 approximations
     const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
     const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
 
@@ -515,7 +513,6 @@ inline float16x8_t vlogq_f16(float16x8_t x)
 
 inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
 {
-    // TODO (giaiod01) - COMPMID-1535
     float32x4_t n0_f32   = vcvt_f32_f16(vget_low_f16(n));
     float32x4_t n1_f32   = vcvt_f32_f16(vget_high_f16(n));
     float32x4_t val0_f32 = vcvt_f32_f16(vget_low_f16(val));

@@ -524,7 +524,6 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     {
         // Create tensor info for im2col reshaped inputs
         // For CPU, the batch size is on the fourth dimension
-        // TODO (giaiod01): Auto-initialize the output shape of im2col COMPMID-1482
         TensorShape shape_im2col = input->tensor_shape();
         shape_im2col.set(0, mat_weights_rows);
         shape_im2col.set(1, conv_w * conv_h);
@@ -532,7 +531,6 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
         im2col_reshaped_info = TensorInfo(shape_im2col, 1, data_type);
         im2col_reshaped_info.set_quantization_info(input->quantization_info());
-
         ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation));
         gemm_input_to_use = &im2col_reshaped_info;
     }

@@ -126,7 +126,6 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
     // Create and configure function
     // The GEMMinfo includes the values of the depth in case of reinterpreted 3d input/output
     FunctionType gemmlowp;
-    // TODO (COMPMID-1672) - Extending the test to validate add bias in offset contribution
     gemmlowp.configure(&a, &b, is_fused ? &bias : nullptr, &output, GEMMInfo(false, false, false, (reinterpret_output_as_3d ? shape_output[2] : 0), reinterpret_input_as_3d, false, output_stage));
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);

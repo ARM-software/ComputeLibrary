@@ -55,7 +55,6 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     pm.run_type(graph, IGraphMutator::MutationType::IR);
 
     // Force target to all graph construct
-    // TODO (COMPMID-2014) : Support heterogeneous execution
     Target forced_target = target;
 
     // In case CLVK is selected, use the CL backend and
@@ -77,7 +76,6 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     force_target_to_graph(graph, forced_target);
 
     // Setup backend context
-    // TODO (COMPMID-2014) : Setup all backends needed by the graph
     setup_requested_backend_context(ctx, forced_target);
 
     // Configure all tensors

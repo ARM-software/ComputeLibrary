@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -181,7 +181,6 @@ public:
     }
 };
 
-// TODO (COMPMID-1749)
 class SmallConvolutionLayerReducedDataset final : public ConvolutionLayerDataset
 {
 public:
