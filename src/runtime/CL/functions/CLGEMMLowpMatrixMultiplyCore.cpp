@@ -34,12 +34,12 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "src/core/gpu/cl/kernels/ClCastKernel.h"
 #include "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/runtime/CL/gemm_auto_heuristics/CLGEMMAutoHeuristics.h"
@@ -189,7 +189,7 @@ inline bool is_gemm_reshaped(CLGEMMKernelType kernel_type)
 
 CLGEMMLowpMatrixMultiplyCore::CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _weights_to_qasymm8(std::make_unique<CLDepthConvertLayerKernel>()),
+      _weights_to_qasymm8(std::make_unique<opencl::kernels::ClCastKernel>()),
       _mm_native_kernel(std::make_unique<CLGEMMLowpMatrixMultiplyNativeKernel>()),
       _mm_reshaped_only_rhs_kernel(std::make_unique<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel>()),
       _mtx_b_reshape_kernel(std::make_unique<opencl::kernels::ClGemmReshapeRhsMatrixKernel>()),
@@ -272,7 +272,7 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
         TensorInfo weights_info(*b->info());
         weights_info.set_data_type(DataType::QASYMM8);
         _qasymm8_weights.allocator()->init(weights_info);
-        _weights_to_qasymm8->configure(compile_context, b, &_qasymm8_weights, ConvertPolicy::WRAP, 0);
+        _weights_to_qasymm8->configure(compile_context, b->info(), _qasymm8_weights.info(), ConvertPolicy::WRAP);
     }
 
     const ICLTensor *matrix_b = _convert_to_qasymm8 ? &_qasymm8_weights : b;
@@ -480,7 +480,7 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     {
         b_offset = -128;
         weights_info.set_data_type(DataType::QASYMM8);
-        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthConvertLayerKernel::validate(b, &weights_info, ConvertPolicy::WRAP, 0));
+        ARM_COMPUTE_RETURN_ON_ERROR(opencl::kernels::ClCastKernel::validate(b, &weights_info, ConvertPolicy::WRAP));
     }
     const ITensorInfo *matrix_b_info = &weights_info;
     if(reshape_matrix_b)
@@ -681,7 +681,8 @@ void CLGEMMLowpMatrixMultiplyCore::prepare()
         if(_convert_to_qasymm8)
         {
             _qasymm8_weights.allocator()->allocate();
-            CLScheduler::get().enqueue(*_weights_to_qasymm8, false);
+            ITensorPack convert_to_qs8_pack = { { ACL_SRC, _original_b }, { ACL_DST, &_qasymm8_weights } };
+            CLScheduler::get().enqueue_op(*_weights_to_qasymm8, convert_to_qs8_pack, false);
         }
 
         if(_is_gemm_reshaped && _reshape_b_only_on_first_run)

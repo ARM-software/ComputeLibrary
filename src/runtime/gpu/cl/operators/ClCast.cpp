@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,46 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "tests/AssetsLibrary.h"
-#include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/UNIT/WeightsRetentionFixture.h"
+#include "src/runtime/gpu/cl/operators/ClCast.h"
+
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/core/gpu/cl/kernels/ClCastKernel.h"
 
 namespace arm_compute
 {
-namespace test
+namespace opencl
 {
-namespace validation
+void ClCast::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy)
 {
-namespace
-{
-RelativeTolerance<float> tolerance_f32(0.05f);
-} // namespace
-
-TEST_SUITE(CL)
-TEST_SUITE(UNIT)
-TEST_SUITE(WeightsRetention)
-
-using CLWeightsRetentionFixture = WeightsRetentionReconfigureTestCaseFixture<CLTensor,
-      CLAccessor,
-      CLFullyConnectedLayer>;
-FIXTURE_TEST_CASE(WeightsRetention,
-                  CLWeightsRetentionFixture,
-                  framework::DatasetMode::NIGHTLY)
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    auto k = std::make_unique<kernels::ClCastKernel>();
+    k->configure(compile_context, src, dst, policy);
+    _kernel = std::move(k);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
-TEST_SUITE_END()
-} // namespace validation
-} // namespace test
+Status ClCast::validate(const ITensorInfo *src, const ITensorInfo *dst, ConvertPolicy policy)
+{
+    return kernels::ClCastKernel::validate(src, dst, policy);
+}
+} // namespace opencl
 } // namespace arm_compute

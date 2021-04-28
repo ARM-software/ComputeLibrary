@@ -216,8 +216,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "concatenate_width_x2", "concatenate.cl" },
     { "concatenate_width_x4", "concatenate.cl" },
     { "col2im", "col2im.cl" },
-    { "convert_depth_down", "depth_convert.cl" },
-    { "convert_depth_up", "depth_convert.cl" },
+    { "cast_down", "cast.cl" },
+    { "cast_up", "cast.cl" },
     { "convert_fc_weights", "convert_fc_weights.cl" },
     { "copy_tensor", "copy_tensor.cl" },
     { "crop_tensor", "crop_tensor.cl" },
@@ -565,8 +565,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/deconvolution_layer.clembed"
     },
     {
-        "depth_convert.cl",
-#include "./cl_kernels/depth_convert.clembed"
+        "cast.cl",
+#include "./cl_kernels/cast.clembed"
     },
     {
         "depth_to_space.cl",

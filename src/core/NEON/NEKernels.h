@@ -35,7 +35,6 @@
 #include "src/core/NEON/kernels/NECol2ImKernel.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "src/core/NEON/kernels/NECropKernel.h"
-#include "src/core/NEON/kernels/NEDepthConvertLayerKernel.h"
 #include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"

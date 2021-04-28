@@ -31,7 +31,7 @@
 
 #define CONVERT_UP(x, type) CONVERT(x, type)
 
-/** This function performs a down-scaling depth conversion.
+/** This function performs a down-casting
  *
  * @attention For QSYMM8_PER_CHANNEL -> QASYMM8, it is user's responsibility to keep track of the quantization info.
  *
@@ -56,12 +56,10 @@
  * @param[in]  out_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  out_step_z                        out_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
- * @param[in]  shift                             The integer shift amount value. Supported data types: S32
  */
-__kernel void convert_depth_down(
+__kernel void cast_down(
     TENSOR3D_DECLARATION(in),
-    TENSOR3D_DECLARATION(out),
-    const int shift)
+    TENSOR3D_DECLARATION(out))
 {
     int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
@@ -82,12 +80,12 @@ __kernel void convert_depth_down(
     STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #else  /* defined(IS_DATA_TYPE_FLOAT) */
     VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
-    res0 = CONVERT_DOWN(in_data >> shift, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
+    res0 = CONVERT_DOWN(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
     STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif /* defined(IS_DATA_TYPE_FLOAT) */
 }
 
-/** This function performs a up-scaling depth conversion.
+/** This function performs a up-casting
  *
  * @note The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN=uchar -DDATA_TYPE_OUT=short
@@ -110,12 +108,10 @@ __kernel void convert_depth_down(
  * @param[in]  out_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  out_step_z                        out_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
- * @param[in]  shift                             The integer shift amount value. Supported data types: S32
  */
-__kernel void convert_depth_up(
+__kernel void cast_up(
     TENSOR3D_DECLARATION(in),
-    TENSOR3D_DECLARATION(out),
-    const int shift)
+    TENSOR3D_DECLARATION(out))
 {
     int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
 
@@ -132,7 +128,7 @@ __kernel void convert_depth_up(
     STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #else  /* defined(IS_DATA_TYPE_FLOAT) */
     VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
-    res0 = CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)) << shift;
+    res0 = CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
     STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif /* defined(IS_DATA_TYPE_FLOAT) */
 }

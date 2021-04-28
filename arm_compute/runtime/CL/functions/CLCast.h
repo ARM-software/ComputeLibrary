@@ -24,10 +24,11 @@
 #ifndef ARM_COMPUTE_CLCAST_H
 #define ARM_COMPUTE_CLCAST_H
 
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
 
-#include <cstdint>
+#include "arm_compute/core/Types.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -35,10 +36,22 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLDepthConvertLayerKernel. */
-class CLCast : public ICLSimpleFunction
+/** Basic function to run @ref opencl::kernels::ClCastKernel */
+class CLCast : public IFunction
 {
 public:
+    /** Constructor */
+    CLCast();
+    /** Destructor */
+    ~CLCast();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLCast(const CLCast &) = delete;
+    /** Default move constructor */
+    CLCast(CLCast &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLCast &operator=(const CLCast &) = delete;
+    /** Default move assignment operator */
+    CLCast &operator=(CLCast &&);
     /** Initialize the function's source, destination
      *
      * Valid data layouts:
@@ -91,6 +104,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLCAST_H*/

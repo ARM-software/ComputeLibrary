@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,12 +23,31 @@
  */
 #include "arm_compute/runtime/CL/functions/CLCast.h"
 
-#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Validate.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClCast.h"
 
 #include <utility>
 
 namespace arm_compute
 {
+struct CLCast::Impl
+{
+    const ICLTensor                *src{ nullptr };
+    ICLTensor                      *dst{ nullptr };
+    std::unique_ptr<opencl::ClCast> op{ nullptr };
+};
+
+CLCast::CLCast()
+    : _impl(std::make_unique<Impl>())
+{
+}
+CLCast::CLCast(CLCast &&) = default;
+CLCast &CLCast::operator=(CLCast &&) = default;
+CLCast::~CLCast()                    = default;
+
 void CLCast::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, policy);
@@ -36,13 +55,23 @@ void CLCast::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy 
 
 void CLCast::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy)
 {
-    auto k = std::make_unique<CLDepthConvertLayerKernel>();
-    k->configure(compile_context, input, output, policy, 0);
-    _kernel = std::move(k);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    _impl->src = input;
+    _impl->dst = output;
+
+    _impl->op = std::make_unique<opencl::ClCast>();
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), policy);
 }
 
 Status CLCast::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy)
 {
-    return CLDepthConvertLayerKernel::validate(input, output, policy, 0);
+    return opencl::ClCast::validate(input, output, policy);
+}
+
+void CLCast::run()
+{
+    ITensorPack pack = { { ACL_SRC, _impl->src }, { ACL_DST, _impl->dst } };
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

@@ -34,7 +34,6 @@ class CLCompileContext;
 class IMemoryManager;
 class ICLTensor;
 class ITensorInfo;
-class CLDepthConvertLayerKernel;
 class CLGEMMLowpMatrixMultiplyNativeKernel;
 class CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel;
 class CLGEMMLowpOffsetContributionKernel;
@@ -46,6 +45,14 @@ namespace opencl
 namespace kernels
 {
 class ClGemmReshapeRhsMatrixKernel;
+} // namespace kernels
+} // namespace opencl
+
+namespace opencl
+{
+namespace kernels
+{
+class ClCastKernel;
 } // namespace kernels
 } // namespace opencl
 
@@ -143,7 +150,7 @@ private:
     MemoryGroup _memory_group;
 
     // Kernels used
-    std::unique_ptr<CLDepthConvertLayerKernel>                     _weights_to_qasymm8;
+    std::unique_ptr<opencl::kernels::ClCastKernel>                 _weights_to_qasymm8;
     std::unique_ptr<CLGEMMLowpMatrixMultiplyNativeKernel>          _mm_native_kernel;
     std::unique_ptr<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel> _mm_reshaped_only_rhs_kernel;
     std::unique_ptr<opencl::kernels::ClGemmReshapeRhsMatrixKernel> _mtx_b_reshape_kernel;

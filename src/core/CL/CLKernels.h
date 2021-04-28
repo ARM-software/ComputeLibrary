@@ -35,7 +35,6 @@
 #include "src/core/CL/kernels/CLComparisonKernel.h"
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
-#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "src/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"

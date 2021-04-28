@@ -299,6 +299,7 @@ if env['neon']:
     runtime_files += Glob('src/runtime/NEON/functions/assembly/*.cpp')
 
     cpu_kernel_hp_files = ['src/core/cpu/kernels/CpuActivationKernel.cpp',
+                           'src/core/cpu/kernels/CpuCastKernel.cpp',
                            'src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.cpp',
                            'src/core/cpu/kernels/CpuDirectConvolutionKernel.cpp',
                            'src/core/cpu/kernels/CpuDirectConvolutionOutputStageKernel.cpp',
@@ -350,6 +351,7 @@ if env['neon']:
                     'src/cpu/CpuTensor.cpp'
                    ]
     cpu_operator_hp_files = ['src/runtime/cpu/operators/CpuActivation.cpp',
+                             'src/runtime/cpu/operators/CpuCast.cpp',
                              'src/runtime/cpu/operators/CpuDepthwiseConvolution.cpp',
                              'src/runtime/cpu/operators/CpuDepthwiseConvolutionAssemblyDispatch.cpp',
                              'src/runtime/cpu/operators/CpuDirectConvolution.cpp',

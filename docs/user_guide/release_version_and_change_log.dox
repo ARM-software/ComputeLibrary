@@ -269,7 +269,7 @@ v20.11 Public major release
    - @ref CLGEMMLowpMatrixMultiplyReshapedKernel
    - @ref CLFuseBatchNormalizationKernel
    - @ref CLDepthwiseConvolutionLayerNativeKernel
-   - @ref CLDepthConvertLayerKernel
+   - CLDepthConvertLayerKernel
    - CLCopyKernel
    - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
    - CLActivationLayerKernel
@@ -549,7 +549,7 @@ v20.08 Public major release
    - @ref NENormalizationLayerKernel
    - @ref NEL2NormalizeLayerKernel
    - NEFillArrayKernel
-   - @ref NEDepthConvertLayerKernel
+   - NEDepthConvertLayerKernel
    - @ref NERangeKernel
    - @ref NEPriorBoxLayer
  - Removed OpenCL kernels / functions:
@@ -587,7 +587,7 @@ v20.05 Public major release
      - @ref NEConvolutionLayerReshapeWeights
      - @ref NEIm2ColKernel
      - NEIm2Col
-     - @ref NEDepthConvertLayerKernel
+     - NEDepthConvertLayerKernel
      - @ref NEDepthConvertLayer
      - @ref NEGEMMConvolutionLayer
      - NEGEMMAssemblyDispatch
