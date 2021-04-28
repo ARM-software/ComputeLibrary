@@ -151,9 +151,13 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
     if(opencl_is_available())
     {
         CLBackendType backend_type = CLBackendType::Native;
-        if(options.target->value() == Target::CLVK)
+        for(auto &arg : example_args->value())
         {
-            backend_type = CLBackendType::Clvk;
+            if(arg.find("--target=clvk") != std::string::npos)
+            {
+                backend_type = CLBackendType::Clvk;
+                break;
+            }
         }
         auto ctx_dev_err = create_opencl_context_and_device(backend_type);
         ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
