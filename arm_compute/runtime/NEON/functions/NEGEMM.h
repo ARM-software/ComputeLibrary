@@ -76,6 +76,16 @@ public:
     ~NEGEMM();
     /** Initialise the kernel's inputs, output
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0         |src1        |src2      |dst            |
+     * |:------------|:-----------|:---------|:--------------|
+     * |F32          |F32         |F32       |F32            |
+     * |F16          |F16         |F16       |F16            |
+     * |BFLOAT16     |BFLOAT16    |BFLOAT16  |BFLOAT16       |
+     *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
      * @note GEMM: The tensors a, b, c, d must have the same data type. You should not mix data types when calling this function.
      *

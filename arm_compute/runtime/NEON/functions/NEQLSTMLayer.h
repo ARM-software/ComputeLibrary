@@ -76,6 +76,14 @@ public:
     ~NEQLSTMLayer();
     /** Initialize function's tensors.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0          |src1 - src6  |src7 -src9   |src10  |src11         |dst0   |dst1 - dst2       |
+     * |:-------------|:------------|:------------|:------|:-------------|:------|:-----------------|
+     * |QASYMM8_SIGNED|QASYMM8      |S32          |QSYMM16|QASYMM8_SIGNED|QSYMM16|QASYMM8_SIGNED    |
+     *
      * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: QASYMM8_SIGNED.
      * @param[in]  input_to_forget_weights     2D weights tensor with dimensions [input_size, num_units]. Data type supported: QSYMM8.
      * @param[in]  input_to_cell_weights       2D weights tensor with dimensions [input_size, num_units]. Data type supported: QSYMM8.

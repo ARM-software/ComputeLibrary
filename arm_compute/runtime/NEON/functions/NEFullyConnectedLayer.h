@@ -36,7 +36,6 @@
 
 namespace arm_compute
 {
-
 namespace weights_transformations
 {
 /** Basic function to manage the reshape weights generated from @ref NETranspose */
@@ -101,6 +100,18 @@ public:
     /** Default destructor */
     ~NEFullyConnectedLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2   |dst            |
+     * |:--------------|:------------------|:------|:--------------|
+     * |F16            |F16                |F16    |F16            |
+     * |F32            |F32                |F32    |F32            |
+     * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
      *
      * @param[in]  input   Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights Weights tensor. The weights must be 2 dimensional.

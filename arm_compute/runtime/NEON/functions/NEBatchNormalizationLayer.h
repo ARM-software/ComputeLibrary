@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,16 @@ public:
     /** Default destructor */
     ~NEBatchNormalizationLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F32            |F32            |
+     * |F16            |F16            |
      *
      * @note If the output tensor is a nullptr or is equal to the input, the batch normalization function will be performed in-place
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,14 @@ class CLGather : public ICLSimpleFunction
 {
 public:
     /** Initialise the kernel's inputs and outputs
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
      *
      * @param[in]  input   Source tensor. Supported tensor rank: up to 4. Data type supported: All.
      * @param[in]  indices Indices tensor. Supported tensor rank: up to 1. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis])

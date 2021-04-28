@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,16 @@ public:
     /** Default destructor */
     ~NEL2NormalizeLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |F16      |F16       |
+     * |F32      |F32       |
      *
      * @param[in, out] input   Source tensor. Data types supported: F16/F32. (Written to only for border_size != 0)
      * @param[out]     output  Destination tensor. Data types and data layouts supported: same as @p input.

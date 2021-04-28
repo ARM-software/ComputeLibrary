@@ -61,6 +61,16 @@ public:
     ~CLNormalizationLayer();
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |F32      |F32       |
+     * |F16      |F16       |
+     *
      * @param[in, out] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
      *                           and an optional 4th dimension for batch of inputs. Data types supported: F16/F32 (Written to by the border handler).
      *                           Data layouts supported: NCHW/NHWC.

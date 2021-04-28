@@ -62,6 +62,18 @@ public:
 
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
+     * |S32            |S32            |
+     *
      * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32/S32.
      * @param[out] output    Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  axis      Axis along which to reduce. Supported reduction axis : 0, 1, 2, 3

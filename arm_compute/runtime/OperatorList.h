@@ -40,7 +40,7 @@
  *
  */
 
-/** ArgMinMaxLayer (not ported)
+/** ArgMinMaxLayer
  *
  * Description:
  * Function to calculate the index of the minimum or maximum values in a tensor based on an axis.
@@ -71,27 +71,27 @@
  *
  */
 
-/** BatchNormalizationLayer (not ported)
+/** BatchNormalizationLayer
  *
  * Description:
- * @f[ out_i = \gamma * (\frac{in_i - \mu_{B}}{\sqrt{\sigma^2_{B} + \epsilon}}) + \beta \equiv BN_{\gamma,\beta}(in_i) @f]
+ * Function to perform batch normalization.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
-/** BatchToSpaceLayer (not ported)
+/** BatchToSpaceLayer
  *
  * Description:
- * Rearranges (permutes) data from batch into blocks of spatial data, followed by cropping. It is the reverse transformation of SpaceToBatch (from TF website)
+ * Batch to space transformation.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_BATCH_TO_SPACE_ND
  *
  */
 
-/** BitwiseAnd (not ported)
+/** BitwiseAnd
  *
  * Description:
  * Function to performe bitwise AND between 2 tensors.
@@ -101,7 +101,7 @@
  *
  */
 
-/** BitwiseNot (not ported)
+/** BitwiseNot
  *
  * Description:
  * Function to performe bitwise NOT.
@@ -111,7 +111,7 @@
  *
  */
 
-/** BitwiseOr (not ported)
+/** BitwiseOr
  *
  * Description:
  * Function to performe bitwise OR between 2 tensors.
@@ -121,27 +121,27 @@
  *
  */
 
-/** BitwiseXor (not ported)
+/** BitwiseXor
  *
  * Description:
  * Function to performe bitwise XOR between 2 tensors.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
-/** BoundingBoxTransform (not ported)
+/** BoundingBoxTransform
  *
  * Description:
- * Function to .
+ * Transform proposal bounding boxes to target bounding box using bounding box deltas.
  *
  * Equivalent Android NNAPI Op:
- * ?
+ * n/a
  *
  */
 
-/** Cast (not ported)
+/** Cast
  *
  * Description:
  * Function to cast a tensor.
@@ -151,20 +151,20 @@
  *
  */
 
-/** ChannelShuffelLayer (not ported)
+/** ChannelShuffleLayer
  *
  * Description:
- * Function to cast a tensor.
+ * Function to shuffle the channels of the input tensor.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_CHANNEL_SHUFFLE
  *
  */
 
-/** Comparison (not ported) (only CL)
+/** Comparison (only CL)
  *
  * Description:
- * Function to cast a tensor.
+ * Function to compare 2 tensors.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_EQUAL
@@ -192,11 +192,11 @@
  * Function to tranpose the wieghts for the fully connected layer.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
-/** ConvolutionLayer (not ported)
+/** ConvolutionLayer
  *
  * Description:
  * Function to compute a convolution layer.
@@ -212,74 +212,74 @@
  * Function to copy a tensor.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
 /** Crop (only CL)
  *
  * Description:
- * Function to .
+ * Performs a copy of input tensor to the output tensor.
  *
  * Equivalent Android NNAPI Op:
- * ?
+ * n/a
  *
  */
 
-/** CropResize (not ported)
+/** CropResize
  *
  * Description:
- * Function to .
+ * Function to perform cropping and resizing.
  *
  * Equivalent Android NNAPI Op:
- * ?
+ * n/a
  *
  */
 
-/** DeconvolutionLayer (not ported)
+/** DeconvolutionLayer
  *
  * Description:
- * Function to .
- *
- * Equivalent Android NNAPI Op:
- * ANEURALNETWORKS_TRANSPOSE_CONV_2D
- *
- */
-
-/** DeconvolutionLayerUpsample (only CL) (not ported)
- *
- * Description:
- * Function to .
+ * Function to compute a deconvolution or tranpose convolution.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_TRANSPOSE_CONV_2D
  *
  */
 
-/** DepthConverterLayer (not ported)
+/** DeconvolutionLayerUpsample (only CL)
  *
  * Description:
- * Function to .
+ * Function to execute deconvolution upsample on OpenCL.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * ANEURALNETWORKS_TRANSPOSE_CONV_2D
  *
  */
 
-/** DepthToSpaceLayer (not ported)
+/** DepthConvertLayer
  *
  * Description:
- * Function to .
+ * Performs a down-scaling depth conversion.
+ *
+ * Equivalent Android NNAPI Op:
+ * n/a
+ *
+ */
+
+/** DepthToSpaceLayer
+ *
+ * Description:
+ * Depth to Space transformation.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_DEPTH_TO_SPACE
  *
  */
 
-/** DepthwiseConvolutionLayer (not ported)
+/** DepthwiseConvolutionLayer
  *
  * Description:
- * Function to perform depthwise separable convolution
+ * Function to perform depthwise separable convolution.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_DEPTHWISE_CONV_2D
@@ -289,17 +289,17 @@
 /** DequantizationLayer
  *
  * Description:
- * Function to dequantize the values in a tensor
+ * Function to dequantize the values in a tensor.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_DEQUANTIZE
  *
  */
 
-/** DetectionPostProcessLayer (not ported) (no CL)
+/** DetectionPostProcessLayer (no CL)
  *
  * Description:
- * Function to generate the detection output based on center size encoded boxes, class prediction and anchors by doing non maximum suppression (NMS)
+ * Function to generate the detection output based on center size encoded boxes, class prediction and anchors by doing non maximum suppression (NMS).
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_DETECTION_POSTPROCESSING
@@ -309,7 +309,7 @@
 /** DirectConvolutionLayer
  *
  * Description:
- * Function to
+ * Function to compute direct convolution.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_CONV_2D
@@ -319,7 +319,7 @@
 /** DirectDeconvolutionLayer (only CL)
  *
  * Description:
- * Function to
+ * Function to run the deconvolution layer.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_TRANSPOSE_CONV_2D
@@ -387,27 +387,27 @@
 /** FFT1D
  *
  * Description:
- * Fast Fourier Transform 1D
+ * Fast Fourier Transform 1D.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
 /** FFT2D
  *
  * Description:
- * Fast Fourier Transform 2D
+ * Fast Fourier Transform 2D.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
 /** FFTConvolutionLayer
  *
  * Description:
- * Fast Fourier Transform Convolution
+ * Fast Fourier Transform Convolution.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_CONV_2D
@@ -417,24 +417,24 @@
 /** Fill
  *
  * Description:
- * Set the values of a tensor with a given value
+ * Set the values of a tensor with a given value.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_FILL
  *
  */
 
-/** FillBorder (not ported)
+/** FillBorder
  *
  * Description:
- *
+ * Function to .
  *
  * Equivalent Android NNAPI Op:
- * ?
+ * n/a
  *
  */
 
-/** FlattenLayer (not ported)
+/** FlattenLayer
  *
  * Description:
  * Reshape a tensor to be 1D
@@ -447,104 +447,104 @@
 /** Floor
  *
  * Description:
- * Round the value to the lowest number
+ * Round the value to the lowest number.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_FLOOR
  *
  */
 
-/** FullyConnectedLayer (not ported)
+/** FullyConnectedLayer
  *
  * Description:
- * Function to perform a fully connected / dense layer
+ * Function to perform a fully connected / dense layer.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_FULLY_CONNECTED
  *
  */
 
-/** FuseBatchNormalization (not ported)
+/** FuseBatchNormalization
  *
  * Description:
- * Function to .
+ * Function to fuse the batch normalization node to a preceding convolution node.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
-/** Gather (not ported)
+/** Gather
  *
  * Description:
- * Function to .
+ * Performs the Gather operation along the chosen axis.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_GATHER
  *
  */
 
-/** GEMM (not ported)
+/** GEMM
  *
  * Description:
  * General Matrix Multiplication.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
-/** GEMMConv2D (not ported) (no CL)
+/** GEMMConv2D (no CL)
  *
  * Description:
  * General Matrix Multiplication.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * ANEURALNETWORKS_CONV_2D
  *
  */
 
-/** GEMMConvolutionLayer (not ported)
+/** GEMMConvolutionLayer
  *
  * Description:
  * General Matrix Multiplication.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * ANEURALNETWORKS_CONV_2D
  *
  */
 
-/** GEMMDeconvolutionLayer (not ported) (only CL)
+/** GEMMDeconvolutionLayer (only CL)
  *
  * Description:
  * General Matrix Multiplication.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * ANEURALNETWORKS_TRANSPOSE_CONV_2D
  *
  */
 
-/** GEMMLowpMatrixMultiplyCore (not ported)
+/** GEMMLowpMatrixMultiplyCore
  *
  * Description:
  * General Matrix Multiplication.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
-/** GEMMLowpOutputStage (not ported)
+/** GEMMLowpOutputStage
  *
  * Description:
  * General Matrix Multiplication.
  *
  * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 
-/** GenerateProposalsLayer (not ported)
+/** GenerateProposalsLayer
  *
  * Description:
  * Function to generate proposals for a RPN (Region Proposal Network).
@@ -554,7 +554,7 @@
  *
  */
 
-/** InstanceNormalizationLayer (not ported)
+/** InstanceNormalizationLayer
  *
  * Description:
  * Function to perform a Instance normalization on a given axis.
@@ -564,7 +564,7 @@
  *
  */
 
-/** L2NormalizationLayer (not ported)
+/** L2NormalizeLayer
  *
  * Description:
  * Function to perform a L2 normalization on a given axis.
@@ -583,102 +583,92 @@
  * - Logical NOT
  *
  * Equivalent Android NNAPI Op:
- * None?
+ * n/a
  *
  */
 
 /** LogicalAnd (only CL)
  *
  * Description:
- * Function to perform Logical AND
+ * Function to perform Logical AND.
  *
  * Equivalent Android NNAPI Op:
- * None?
+ * n/a
  *
  */
 
 /** LogicalOr (only CL)
  *
  * Description:
- * Function to perform Logical OR
+ * Function to perform Logical OR.
  *
  * Equivalent Android NNAPI Op:
- * None?
+ * n/a
  *
  */
 
 /** LogicalNot (only CL)
  *
  * Description:
- * Function to perform Logical NOT
+ * Function to perform Logical NOT.
  *
  * Equivalent Android NNAPI Op:
- * None?
+ * n/a
  *
  */
 
-/** LSTMLayer (not ported)
+/** LSTMLayer
  *
  * Description:
- * Function to perform LSTM
+ * Function to perform a single time step in a Long Short-Term Memory (LSTM) layer.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_LSTM
  *
  */
 
-/** LSTMLayerQuantized (not ported)
+/** LSTMLayerQuantized
  *
  * Description:
- * Function to perform LSTM
+ * Function to perform quantized LSTM (Long Short-Term Memory)
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_QUANTIZED_LSTM
- * ANEURALNETWORKS_QUANTIZED_16BIT_LSTM ?
+ * ANEURALNETWORKS_QUANTIZED_16BIT_LSTM
  *
  */
 
-/** MaxUnpoolingLayer (not ported)
+/** MaxUnpoolingLayer
  *
  * Description:
- * Function to perform MaxUnpooling
+ * Function to perform MaxUnpooling.
  *
  * Equivalent Android NNAPI Op:
- *  ?
+ * n/a
  *
  */
 
-/** MeanStdDevNormalizationLayer (not ported)
- *
- * Description:
- * Function to execute mean and standard deviation normalization.
- *
- * Equivalent Android NNAPI Op:
- * None ?
- *
- */
-
-/** MeanStdDevNormalizationLayer (not ported)
+/** MeanStdDevNormalizationLayer
  *
  * Description:
  * Function to execute mean and standard deviation normalization.
  *
  * Equivalent Android NNAPI Op:
- * None ?
+ * n/a
  *
  */
 
-/** NormalizationLayer (not ported)
+/** NormalizationLayer
  *
  * Description:
  * Function to compute normalization layer.
  *
  * Equivalent Android NNAPI Op:
- * None ?
+ * ANEURALNETWORKS_LOCAL_RESPONSE_NORMALIZATION
  *
  */
 
-/** PadLayer (not ported)
+/** PadLayer
  *
  * Description:
  * Function to pad a tensor.
@@ -731,24 +721,24 @@
  *
  */
 
-/** PriorBoxLayer (not ported)
+/** PriorBoxLayer
  *
  * Description:
- * Function to compute the activation layer with the PRELU activation function.
+ * Function to .
  *
  * Equivalent Android NNAPI Op:
- * ?
+ * n/a
  *
  */
 
-/** QLSTMLayer (not ported)
+/** QLSTMLayer
  *
  * Description:
- * Function to perform LSTM
+ * Function to perform quantized LSTM (Long Short-Term Memory).
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_QUANTIZED_LSTM
- * ANEURALNETWORKS_QUANTIZED_16BIT_LSTM ?
+ * ANEURALNETWORKS_QUANTIZED_16BIT_LSTM
  *
  */
 
@@ -762,17 +752,17 @@
  *
  */
 
-/** Range (not ported)
+/** Range
  *
  * Description:
- * Function to .
+ * Function to generates a sequence of numbers starting from START and extends by increments of 'STEP' up to but not including 'END'.
  *
  * Equivalent Android NNAPI Op:
- * none?
+ * n/a
  *
  */
 
-/** RecudeMean (not ported)
+/** ReduceMean
  *
  * Description:
  * Function to performe reduce mean operation.
@@ -782,22 +772,7 @@
  *
  */
 
-/** RecudeOperation (not ported)
- *
- * Description:
- * Function to performe reduce mean operation.
- *
- * Equivalent Android NNAPI Op:
- * ANEURALNETWORKS_REDUCE_ALL
- * ANEURALNETWORKS_REDUCE_ANY
- * ANEURALNETWORKS_REDUCE_MAX
- * ANEURALNETWORKS_REDUCE_MIN
- * ANEURALNETWORKS_REDUCE_PROD
- * ANEURALNETWORKS_REDUCE_SUM
- *
- */
-
-/** RecudeOperation (not ported)
+/** ReductionOperation
  *
  * Description:
  * Function to performe reduce with the following operations
@@ -820,20 +795,20 @@
  *
  */
 
-/** ReorgLayer (not ported)
+/** ReorgLayer
  *
  * Description:
- * Function to performe reorg
+ * Performs a reorganization layer of input tensor to the output tensor.
  *
  * Equivalent Android NNAPI Op:
- * None?
+ * n/a
  *
  */
 
 /** ReshapeLayer
  *
  * Description:
- * Fucntion to reshape a tensor
+ * Function to reshape a tensor.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_RESHAPE
@@ -841,40 +816,40 @@
  *
  */
 
-/** ReverseLayer (not ported)
+/** Reverse
  *
  * Description:
- * Fucntion to .
+ * Function to reverse tensor according to axis.
  *
  * Equivalent Android NNAPI Op:
- * None?
+ * n/a
  *
  */
 
-/** RNNLayer (not ported)
+/** RNNLayer
  *
  * Description:
- * Fucntion to perform RNN .
+ * Function to perform recurrent neural network layer.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_RNN
  *
  */
 
-/** ROIAligmentLayer (not ported)
+/** ROIAlignLayer
  *
  * Description:
- * Fucntion to perform RNN .
+ * Function to perform ROI alignment.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_ROI_ALIGN
  *
  */
 
-/** ROIPoolingLayer (not ported)
+/** ROIPoolingLayer
  *
  * Description:
- * Fucntion to perform RNN .
+ * Function to perform ROI pooling.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_ROI_POOLING
@@ -884,8 +859,8 @@
 /** Scale
  *
  * Description:
- * Fucntion to perform resize a tensor using to interpolate:
- * - Bilenear
+ * Function to perform resize a tensor using to interpolate:
+ * - Bilinear
  * - Nearest neighbor
  *
  * Equivalent Android NNAPI Op:
@@ -894,10 +869,10 @@
  *
  */
 
-/** Select (not ported)
+/** Select
  *
  * Description:
- * Fucntion to select values from 2 tensors depending on an input tensor of booleans.
+ * Function to select values from 2 tensors depending on an input tensor of booleans.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_SELECT
@@ -925,7 +900,7 @@
  *
  */
 
-/** SpaceToBatchLayer (not ported)
+/** SpaceToBatchLayer
  *
  * Description:
  * Function to divide a tensor spatially.
@@ -935,7 +910,7 @@
  *
  */
 
-/** SpaceToDepthLayer (not ported)
+/** SpaceToDepthLayer
  *
  * Description:
  * Function to rearrange blocks of spatial data into depth.
@@ -945,7 +920,7 @@
  *
  */
 
-/** Split (not ported)
+/** Split
  *
  * Description:
  * Function to split a tensor along a given axis.
@@ -955,13 +930,13 @@
  *
  */
 
-/** StackLayer (not ported)
+/** StackLayer
  *
  * Description:
  * Function to stack tensors along an axis.
  *
  * Equivalent Android NNAPI Op:
- * none
+ * n/a
  *
  */
 
@@ -975,7 +950,7 @@
  *
  */
 
-/** Tile  (not ported)
+/** Tile
  *
  * Description:
  * Function to construct a tensor by tiling a given tensor.
@@ -988,40 +963,40 @@
 /** Transpose
  *
  * Description:
- * Function to transpose an 2D tensor.
+ * Function to transpose a 2D tensor.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_TRANSPOSE
  *
  */
 
-/** Unstack (not ported)
+/** Unstack
  *
  * Description:
  * Function to unpack a rank-R tensor into rank-(R-1) tensors.
  *
  * Equivalent Android NNAPI Op:
- * none
+ * n/a
  *
  */
 
-/** WinogradConvolutionLayer (not ported)
+/** WinogradConvolutionLayer
+ *
+ * Description:
+ * Function to do Winograd Convolution.
+ *
+ * Equivalent Android NNAPI Op:
+ * ANEURALNETWORKS_CONV_2D
+ *
+ */
+
+/** WinogradInputTransform (only CL)
  *
  * Description:
  * Function to.
  *
  * Equivalent Android NNAPI Op:
- * None
- *
- */
-
-/** WinogradInputTransform (not ported) (only CL)
- *
- * Description:
- * Function to.
- *
- * Equivalent Android NNAPI Op:
- * None
+ * n/a
  *
  */
 

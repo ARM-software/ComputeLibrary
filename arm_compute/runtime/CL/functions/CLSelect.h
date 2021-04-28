@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,14 @@ class CLSelect : public ICLSimpleFunction
 {
 public:
     /** Initialise the kernel's inputs and output.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |src2   |dst            |
+     * |:--------------|:--------------|:------|:--------------|
+     * |U8             |All            |All    |All            |
      *
      * @param[in]  c      Condition input tensor. Data types supported: U8.
      * @param[in]  x      First input tensor. Data types supported: All.

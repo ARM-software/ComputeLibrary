@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,16 @@ public:
     CLL2NormalizeLayer &operator=(CLL2NormalizeLayer &&) = default;
 
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |F16      |F16       |
+     * |F32      |F32       |
      *
      * @param[in]  input   Source tensor. Data types supported: F16/F32. Data layouts supported: NCHW/NHWC.
      * @param[out] output  Destination tensor. Data types and data layouts supported: Same as @p input.

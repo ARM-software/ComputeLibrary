@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #if defined(DATA_TYPE) // Compile time constants
 
-/** Performs a copy of input tensor to the output tensor.
+/** Performs a tensor cropping.
  *
  * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  in_stride_x                       Stride of the source tensor in X dimension (in bytes)

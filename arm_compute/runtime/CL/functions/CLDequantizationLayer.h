@@ -58,18 +58,13 @@ public:
      * - All
      *
      * Valid data type configurations:
-     * |src                |dst            |
-     * |:------------------|:--------------|
-     * |QASYMM8            |F16            |
-     * |QASYMM8            |F32            |
-     * |QASYMM8_SIGNED     |F16            |
-     * |QASYMM8_SIGNED     |F32            |
-     * |QSYMM8_PER_CHANNEL |F16            |
-     * |QSYMM8_PER_CHANNEL |F32            |
-     * |QSYMM8             |F16            |
-     * |QSYMM8             |F32            |
-     * |QSYMM16            |F16            |
-     * |QSYMM16            |F32            |
+     * |src                |dst       |
+     * |:------------------|:---------|
+     * |QASYMM8            |F16, F32  |
+     * |QASYMM8_SIGNED     |F16, F32  |
+     * |QSYMM8_PER_CHANNEL |F16, F32  |
+     * |QSYMM8             |F16, F32  |
+     * |QSYMM16            |F16, F32  |
      *
      * @param[in]  input  Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches.
      *                    Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.

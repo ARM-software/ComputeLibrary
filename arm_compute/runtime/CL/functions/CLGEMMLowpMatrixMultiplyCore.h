@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,6 +60,26 @@ public:
     /** Default destructor */
     ~CLGEMMLowpMatrixMultiplyCore();
     /** Initialise the kernel's inputs, output
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2     |dst            |
+     * |:--------------|:------------------|:--------|:--------------|
+     * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |QASYMM8        |
+     * |QASYMM8        |QSYMM8             |S32      |QASYMM8        |
+     * |QASYMM8        |QASYMM8            |S32      |S32            |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |S32            |
+     * |QASYMM8        |QSYMM8             |S32      |S32            |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8             |S32      |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |S32            |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |S32            |
+     * |QASYMM8_SIGNED |QSYMM8             |S32      |S32            |
      *
      * @note GEMMLowp:  low precision GEMM kernel. [A * B + C]
      *  This kernel performs the following computations:

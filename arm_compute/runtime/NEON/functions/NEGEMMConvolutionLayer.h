@@ -177,6 +177,21 @@ public:
     ~NEGEMMConvolutionLayer();
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2     |dst            |
+     * |:--------------|:------------------|:--------|:--------------|
+     * |F16            |F16                |F16      |F16            |
+     * |F32            |F32                |F32      |F32            |
+     * |BFLOAT16       |BFLOAT16           |BFLOAT16 |BFLOAT16       |
+     * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |QASYMM8_SIGNED |
+     *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
      *                          Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.

@@ -63,20 +63,12 @@ public:
      * - All
      *
      * Valid data type configurations:
-     * |src                |dst            |
-     * |:------------------|:--------------|
-     * |QASYMM8            |QASYMM8        |
-     * |QASYMM8            |QASYMM8_SIGNED |
-     * |QASYMM8            |QASYMM16       |
-     * |QASYMM8_SIGNED     |QASYMM8        |
-     * |QASYMM8_SIGNED     |QASYMM8_SIGNED |
-     * |QASYMM8_SIGNED     |QASYMM16       |
-     * |F16                |QASYMM8        |
-     * |F16                |QASYMM8_SIGNED |
-     * |F16                |QASYMM16       |
-     * |F32                |QASYMM8        |
-     * |F32                |QASYMM8_SIGNED |
-     * |F32                |QASYMM16       |
+     * |src                |dst                                |
+     * |:------------------|:----------------------------------|
+     * |QASYMM8            |QASYMM8, QASYMM8_SIGNED, QASYMM16  |
+     * |QASYMM8_SIGNED     |QASYMM8, QASYMM8_SIGNED, QASYMM16  |
+     * |F16                |QASYMM8, QASYMM8_SIGNED, QASYMM16  |
+     * |F32                |QASYMM8, QASYMM8_SIGNED, QASYMM16  |
      *
      * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/32.
      * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.

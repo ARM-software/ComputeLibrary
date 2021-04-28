@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #if defined(DATA_TYPE) && defined(WEIGHT_X) && defined(WEIGHT_Y) && defined(WEIGHT_W) && defined(WEIGHT_H) && defined(IMG_WIDTH) && defined(IMG_HEIGHT) && defined(BOX_FIELDS) && defined(SCALE_BEFORE) // Check for compile time constants
 
-/** Perform a padded copy of input tensor to the output tensor. Padding values are defined at compile time
+/** Transform proposal bounding boxes to target bounding box using bounding box deltas.
  *
  * @attention The following variables must be passed at compile time:
  * -# -DDATA_TYPE= Tensor data type. Supported data types: F16/F32

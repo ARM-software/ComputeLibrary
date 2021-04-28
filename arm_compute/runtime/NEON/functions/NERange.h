@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,21 @@ public:
     /** Default destructor */
     ~NERange();
     /** Initialize the kernel's start, end, step and output tensor.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |dst       |
+     * |:---------|
+     * |U8        |
+     * |S8        |
+     * |U16       |
+     * |S16       |
+     * |U32       |
+     * |S32       |
+     * |F16       |
+     * |F32       |
      *
      * @param[out] output Output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  start  The starting value of the sequence.

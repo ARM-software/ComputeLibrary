@@ -126,6 +126,15 @@ public:
     ~CLGEMM();
     /** Initialise the kernel's inputs and output
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0         |src1        |src2      |dst            |
+     * |:------------|:-----------|:---------|:--------------|
+     * |F32          |F32         |F32       |F32            |
+     * |F16          |F16         |F16       |F16            |
+     *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
      *
      * @note All tensors must have the same data type.

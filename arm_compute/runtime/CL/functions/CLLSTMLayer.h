@@ -75,6 +75,15 @@ public:
     ~CLLSTMLayer();
     /** Initialize function's tensors.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0 - src13 | dst0 - dst3 |
+     * |:------------|:------------|
+     * |F16          |F16          |
+     * |F32          |F32          |
+     *
      * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: F16/F32.
      * @param[in]  input_to_forget_weights     2D weights tensor with dimensions [input_size, num_units]. Data type supported: Same as @p input.
      * @param[in]  input_to_cell_weights       2D weights tensor with dimensions [input_size, num_units]. Data type supported: Same as @p input.

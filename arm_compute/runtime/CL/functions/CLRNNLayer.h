@@ -51,6 +51,16 @@ public:
     ~CLRNNLayer();
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0   |src1   |src2   |src3   |dst0   |dst1   |
+     * |:------|:------|:------|:------|:------|:------|
+     * |F16    |F16    |F16    |F16    |F16    |F16    |
+     * |F32    |F32    |F32    |F32    |F32    |F32    |
+     *
      * @param[in]     input             Input is a 2-D tensor of shape [input_size, batch_size]. Data types supported: F16/F32
      * @param[in]     weights           Weights tensor of shape [input_size, num_units] that multiplies the input. Data types supported: Same as @p input
      * @param[in]     recurrent_weights Weights tensor of shape [num_units, num_units] that multiplies the current 'state'. Data types supported: Same as @p input

@@ -66,6 +66,16 @@ public:
 
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |src2   |dst            |
+     * |:--------------|:--------------|:------|:--------------|
+     * |F16            |F16            |F16    |F16            |
+     * |F32            |F32            |F32    |F32            |
+     *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                              while every optional dimension from 4 and above represent a batch of inputs.
      *                              Data types supported: F16/F32.

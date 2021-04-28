@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,10 @@
 #include "helpers.h"
 
 #if defined(DATA_TYPE) && defined(BLOCK_SHAPE) && defined(CHANNEL_SIZE)
-/** Batch to space transformation. (NCHW)
+/** Depth to space transformation. (NCHW)
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
- * @note The input tensor batch size must be passed at compile time using -DCHANNEL_SIZE. e.g. -DCHANNEL_SIZE=2
+ * @note The input tensor depth size must be passed at compile time using -DCHANNEL_SIZE. e.g. -DCHANNEL_SIZE=2
  * @note The block shape must be passed at compile time using -DBLOCK_SHAPE. e.g. -DBLOCK_SHAPE=2
  *
  * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All.
@@ -66,10 +66,10 @@ __kernel void depth_to_space_nchw(
 
     *((__global DATA_TYPE *)tensor4D_offset(&out, out_x, out_y, z, batch_id)) = *((__global DATA_TYPE *)in.ptr);
 }
-/** Batch to space transformation. (NHWC)
+/** Depth to space transformation. (NHWC)
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
- * @note The input tensor batch size must be passed at compile time using -DCHANNEL_SIZE. e.g. -DCHANNEL_SIZE=2
+ * @note The input tensor depth size must be passed at compile time using -DCHANNEL_SIZE. e.g. -DCHANNEL_SIZE=2
  * @note The block shape must be passed at compile time using -DBLOCK_SHAPE. e.g. -DBLOCK_SHAPE=2
  *
  * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All.

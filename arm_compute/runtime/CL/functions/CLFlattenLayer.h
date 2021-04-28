@@ -44,6 +44,14 @@ class CLFlattenLayer : public IFunction
 public:
     /** Initialise the kernel's input and output.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
      *                    The dimensions above the third will be interpreted as batches. Data types supported: All.
      * @param[out] output Output tensor with shape [w*h*d, input_batches] where:

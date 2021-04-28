@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,14 @@ class CLRemap : public ICLSimpleFunction
 {
 public:
     /** Initialise the function's sources, destination, interpolation policy and border mode.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0   |src1   |src2   |dst    |
+     * |:------|:------|:------|:------|
+     * |U8     |F32    |F32    |U 8    |
      *
      * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
      * @param[in]     map_x                 Map for X coords. Data types supported: F32.

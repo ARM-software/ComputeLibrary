@@ -53,6 +53,15 @@ public:
     ~NEROIPoolingLayer();
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |F32            |U16            |F32            |
+     * |QASYMM8        |U16            |QASYMM8        |
+     *
      * @param[in]  input     Source tensor. Data types supported: QASYMM8/F32
      * @param[in]  rois      ROIs tensor, it is a 2D tensor of size [5, N] (where N is the number of ROIs) containing top left and bottom right corner
      *                       as coordinate of an image and batch_id of ROI [ batch_id, x1, y1, x2, y2 ]. Data types supported: U16

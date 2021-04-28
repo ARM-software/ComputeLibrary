@@ -65,6 +65,16 @@ public:
 
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |F16      |F16       |
+     * |F32      |F32       |
+     *
      * @param[in, out] input               Source tensor. In case of @p output tensor = nullptr this tensor will store the result of the normalization.
      *                                     Data types supported: F16/F32. Data layout supported: NHWC, NCHW
      * @param[out]     output              Destination tensor. Data types and data layouts supported: same as @p input.

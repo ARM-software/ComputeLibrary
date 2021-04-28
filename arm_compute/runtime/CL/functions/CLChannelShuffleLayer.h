@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,14 @@ class CLChannelShuffleLayer : public ICLSimpleFunction
 {
 public:
     /** Initialize the function
+     *
+     * Valid data layouts:
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
      *
      * @param[in]  input      Input tensor. Data types supported: All.
      * @param[out] output     Output tensor. Data type supported: Same as @p input

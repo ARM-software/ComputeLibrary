@@ -58,6 +58,15 @@ public:
     ~NESpaceToBatchLayer();
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0      |src1      |src2      |dst       |
+     * |:---------|:---------|:---------|:---------|
+     * |All       |S32       |S32       |All       |
+     *
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape 1-D tensor with shape [M]. Supported M: 2. Data types supported: S32
      * @param[in]  paddings    2-D tensor with shape [2, M] (First dimension is the fastest-changing dimension). Supported M: 2. Data types supported: S32

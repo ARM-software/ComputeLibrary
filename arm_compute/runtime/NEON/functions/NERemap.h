@@ -44,6 +44,14 @@ class NERemap : public INESimpleFunction
 public:
     /** Initialise the function's sources, destination, interpolation policy and border mode.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0   |src1   |src2   |dst    |
+     * |:------|:------|:------|:------|
+     * |U8     |F32    |F32    |U 8    |
+     *
      * @param[in, out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
      * @param[in]      map_x                 Map for X coordinates. Data type supported: F32.
      * @param[in]      map_y                 Map for Y coordinates. Data type supported: F32.
