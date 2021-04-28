@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,67 +32,18 @@
 #define ISGREATER(x, y) (x > y) ? 1 : 0
 #define ISLESS(x, y) (x < y) ? 1 : 0
 #else // !defined(WIDTH)
-#define ISGREATER(x, y) select((int16)0, (int16)-1, x > y)
-#define ISLESS(x, y) select((int16)0, (int16)-1, x < y)
+#define ISGREATER(x, y) select((VEC_DATA_TYPE(int, VEC_SIZE))0, (VEC_DATA_TYPE(int, VEC_SIZE)) - 1, x > y)
+#define ISLESS(x, y) select((VEC_DATA_TYPE(int, VEC_SIZE))0, (VEC_DATA_TYPE(int, VEC_SIZE)) - 1, x < y)
 #endif // defined(WIDTH)
 #endif // defined(FLOAT_DATA_TYPE)
 
-/** Calculate square sum of a vector
- *
- * @param[in] input Pointer to the first pixel.
- *
- * @return square sum of vector.
- */
-inline DATA_TYPE square_sum(__global const DATA_TYPE *input)
-{
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    in = vload16(0, input);
-
-    in *= in;
-
-    in.s01234567 += in.s89ABCDEF;
-    in.s0123 += in.s4567;
-    in.s01 += in.s23;
-
-    return (in.s0 + in.s1);
-}
-
-/** Calculate sum of a vector
- *
- * @param[in] input Pointer to the first pixel.
- *
- * @return sum of vector.
- */
-inline DATA_TYPE sum(__global const DATA_TYPE *input)
-{
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    in = vload16(0, input);
-
-    in.s01234567 += in.s89ABCDEF;
-    in.s0123 += in.s4567;
-    in.s01 += in.s23;
-
-    return (in.s0 + in.s1);
-}
-
-/** Calculate product of a vector
- *
- * @param[in] input Pointer to the first pixel.
- *
- * @return product of vector.
- */
-inline DATA_TYPE product(__global const DATA_TYPE *input)
-{
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    in = vload16(0, input);
-
-    in.s01234567 *= in.s89ABCDEF;
-    in.s0123 *= in.s4567;
-    in.s01 *= in.s23;
-
-    return (in.s0 * in.s1);
-}
+#if defined(WIDTH)
 #if defined(OPERATION)
+
+#define sum(in0, in1, size) (in0 + SUM_REDUCE(in1, size))
+#define square_sum(in0, in1, size) (in0 + SUM_REDUCE((in1 * in1), size))
+#define product(in0, in1, size) (in0 * PROD_REDUCE(in1, size))
+
 /** This kernel performs parallel reduction given an operation on x-axis.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
@@ -101,65 +52,57 @@ inline DATA_TYPE product(__global const DATA_TYPE *input)
  * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
  * @note The width size must be passed at compile time using -DWIDTH e.g. -DWIDTH=128 if we want to compute the mean value
  *
- * @param[in] src_ptr                                   Pointer to the source tensor. Supported data types: F16/F32
- * @param[in] src_stride_x                              Stride of the source tensor in X dimension (in bytes)
- * @param[in] src_step_x                                src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                              Stride of the source tensor in Y dimension (in bytes)
- * @param[in] src_step_y                                src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes         The offset of the first element in the source tensor
- * @param[in] partial_res_ptr                           The local buffer to hold partial result values. Supported data types: same as @p src_ptr
- * @param[in] partial_res_stride_x                      Stride of the output tensor in X dimension (in bytes)
- * @param[in] partial_res_step_x                        partial_res_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] partial_res_stride_y                      Stride of the output tensor in Y dimension (in bytes)
- * @param[in] partial_res_step_y                        partial_res_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] partial_res_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in] local_results                             Local buffer for storing the partial result
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[in] output_ptr                           Pointer to the destination tensor. Supported data types: same as @p input
+ * @param[in] output_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] output_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void reduction_operation_x(
-    IMAGE_DECLARATION(src),
-    IMAGE_DECLARATION(partial_res),
-    __local DATA_TYPE *local_results)
+    IMAGE_DECLARATION(input),
+    IMAGE_DECLARATION(output))
 {
-    Image src         = CONVERT_TO_IMAGE_STRUCT(src);
-    Image partial_res = CONVERT_TO_IMAGE_STRUCT(partial_res);
+    int y = get_global_id(1);
 
-    unsigned int lsize = get_local_size(0);
-    unsigned int lid   = get_local_id(0);
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + y * input_stride_y;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + y * output_stride_y;
 
-    for(unsigned int y = 0; y < get_local_size(1); ++y)
-    {
-        local_results[lid] = OPERATION((__global DATA_TYPE *)offset(&src, 0, y));
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        // Perform parallel reduction
-        for(unsigned int i = lsize >> 1; i > 0; i >>= 1)
-        {
-            if(lid < i)
-            {
 #if defined(PROD)
-                local_results[lid] *= local_results[lid + i];
-#else  // !defined(PROD)
-                local_results[lid] += local_results[lid + i];
+    DATA_TYPE res = (DATA_TYPE)1;
+#else  // defined(PROD)
+    DATA_TYPE res = (DATA_TYPE)0;
 #endif // defined(PROD)
-            }
-            barrier(CLK_LOCAL_MEM_FENCE);
-        }
 
-        if(lid == 0)
-        {
-#if defined(MEAN) && defined(WIDTH)
-            if(y == get_local_size(1) - 1)
-            {
-                local_results[0] /= WIDTH;
-            }
-#endif // defined(MEAN) && defined(WIDTH)
-            ((__global DATA_TYPE *)offset(&partial_res, get_group_id(0), y))[0] = local_results[0];
-        }
+    int x = 0;
+
+    for(; x <= (WIDTH - VEC_SIZE); x += VEC_SIZE)
+    {
+        VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        vals = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + x * sizeof(DATA_TYPE)));
+        res  = OPERATION(res, vals, VEC_SIZE);
     }
+
+#if(WIDTH % VEC_SIZE)
+    _Pragma("unroll") for(; x < WIDTH; ++x)
+    {
+        DATA_TYPE val = *((__global DATA_TYPE *)(input_addr + x * sizeof(DATA_TYPE)));
+        res           = OPERATION(res, val, 1);
+    }
+#endif // (WIDTH % VEC_SIZE)
+
+#if defined(MEAN)
+    res /= WIDTH;
+#endif // defined(MEAN)
+    *((__global DATA_TYPE *)output_addr) = res;
 }
 #endif // defined(OPERATION)
-
-#if defined(WIDTH)
 /** This kernel performs reduction on x-axis. (Non parallel)
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
@@ -167,23 +110,23 @@ __kernel void reduction_operation_x(
  * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
  * @note In case of MIN and MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
  *
- * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: S32/F16/F32 and QASYMM8/QASYMM8_SIGNED for operation MEAN
- * @param[in] src_stride_x                         Stride of the source tensor in X dimension (in bytes)
- * @param[in] src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes    The offset of the first element in the source tensor
- * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: same as @p src_ptr
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: S32/F16/F32 and QASYMM8/QASYMM8_SIGNED for operation MEAN
+ * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: same as @p input_ptr
  * @param[in] output_stride_x                      Stride of the output tensor in X dimension (in bytes)
  * @param[in] output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] output_offset_first_element_in_bytes The offset of the first element in the source tensor
  */
 __kernel void reduction_operation_non_parallel_x(
-    VECTOR_DECLARATION(src),
+    VECTOR_DECLARATION(input),
     VECTOR_DECLARATION(output))
 {
-    Vector src    = CONVERT_TO_VECTOR_STRUCT(src);
+    Vector input  = CONVERT_TO_VECTOR_STRUCT(input);
     Vector output = CONVERT_TO_VECTOR_STRUCT(output);
 
-    DATA_TYPE_PROMOTED res = CONVERT(*((__global DATA_TYPE *)vector_offset(&src, 0)), DATA_TYPE_PROMOTED);
+    DATA_TYPE_PROMOTED res = CONVERT(*((__global DATA_TYPE *)vector_offset(&input, 0)), DATA_TYPE_PROMOTED);
 
     // Convert input into F32 in order to perform quantized multiplication
 #if defined(PROD) && defined(OFFSET) && defined(SCALE)
@@ -192,7 +135,7 @@ __kernel void reduction_operation_non_parallel_x(
 
     for(unsigned int x = 1; x < WIDTH; ++x)
     {
-        DATA_TYPE_PROMOTED in = CONVERT(*((__global DATA_TYPE *)vector_offset(&src, x)), DATA_TYPE_PROMOTED);
+        DATA_TYPE_PROMOTED in = CONVERT(*((__global DATA_TYPE *)vector_offset(&input, x)), DATA_TYPE_PROMOTED);
 #if defined(MIN)
         res = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
 #elif defined(MAX)
@@ -233,13 +176,13 @@ __kernel void reduction_operation_non_parallel_x(
  * @note The input data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The height size must be passed at compile time using -DHEIGHT e.g. -DHEIGHT=128
  *
- * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
- * @param[in] src_stride_x                         Stride of the source tensor in X dimension (in bytes)
- * @param[in] src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                         Stride of the source tensor in Y dimension (in bytes)
- * @param[in] src_step_y                           src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes    The offset of the first element in the source tensor
- * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: same as @p src_ptr
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
+ * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: same as @p input_ptr
  * @param[in] output_stride_x                      Stride of the output tensor in X dimension (in bytes)
  * @param[in] output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] output_stride_y                      Stride of the output tensor in Y dimension (in bytes)
@@ -247,18 +190,22 @@ __kernel void reduction_operation_non_parallel_x(
  * @param[in] output_offset_first_element_in_bytes The offset of the first element in the source tensor
  */
 __kernel void reduction_operation_y(
-    IMAGE_DECLARATION(src),
+    IMAGE_DECLARATION(input),
     IMAGE_DECLARATION(output))
 {
-    Image src    = CONVERT_TO_IMAGE_STRUCT(src);
-    Image output = CONVERT_TO_IMAGE_STRUCT(output);
+    int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    int y = get_global_id(1);
 
-    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
-    res = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * input_stride_y;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * output_stride_y;
+
+    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
+    res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));
 
     // Convert input into F32 in order to perform quantized multiplication
 #if defined(PROD) && defined(OFFSET) && defined(SCALE)
-    float16 res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
 
 #if defined(SUM_SQUARE)
@@ -267,8 +214,8 @@ __kernel void reduction_operation_y(
 
     for(unsigned int y = 1; y < HEIGHT; ++y)
     {
-        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
-        in = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, y)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
+        in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + y * input_stride_y)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));
 #if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
@@ -280,7 +227,7 @@ __kernel void reduction_operation_y(
 #if defined(PROD)
 
 #if defined(OFFSET) && defined(SCALE)
-        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #else  // !(defined(OFFSET) && defined(SCALE))
         res *= in;
 #endif //  defined(OFFSET) && defined(SCALE)
@@ -302,11 +249,13 @@ __kernel void reduction_operation_y(
 
     // Re-quantize
 #if defined(PROD) && defined(OFFSET) && defined(SCALE)
-    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
 
     // Store result
-    vstore16(CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res0 = CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
+    STORE_VECTOR_SELECT(res, DATA_TYPE, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif // defined(HEIGHT)
 
@@ -337,34 +286,30 @@ __kernel void reduction_operation_z(
     TENSOR3D_DECLARATION(input),
     TENSOR3D_DECLARATION(output))
 {
-    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+    int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    int y = get_global_id(1);
+    int z = get_global_id(2);
 
-    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
-    res = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * input_stride_y + z * input_stride_z;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * output_stride_y + z * output_stride_z;
+
+    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
+    res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));
 
     // Convert input into F32 in order to perform quantized multiplication
 #if defined(PROD) && defined(OFFSET) && defined(SCALE)
-    float16 res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
 
-#if defined(COMPLEX)
-    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
-    res1 = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 8, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
-#endif // defined(COMPLEX)
 #if defined(SUM_SQUARE)
     res *= res;
 #endif // defined(SUM_SQUARE)
 
     for(unsigned int z = 1; z < DEPTH; ++z)
     {
-        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
-        in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
-
-#if defined(COMPLEX)
-        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
-        in1 = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 8, 0, z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
-#endif // defined(COMPLEX)
+        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
+        in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + z * input_stride_z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));
 
 #if defined(MIN)
         res = select(res, in, ISLESS(in, res));
@@ -377,16 +322,13 @@ __kernel void reduction_operation_z(
 #if defined(PROD)
 
 #if defined(OFFSET) && defined(SCALE)
-        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #else  // !(defined(OFFSET) && defined(SCALE))
         res *= in;
 #endif //  defined(OFFSET) && defined(SCALE)
 
-#else // !defined(PROD)
+#else  // !defined(PROD)
         res += in;
-#if defined(COMPLEX)
-        res1 += in1;
-#endif // defined(COMPLEX)
 #endif // defined(PROD)
 #endif // defined(MAX) || defined(MIN)
     }
@@ -402,14 +344,14 @@ __kernel void reduction_operation_z(
 
     // Re-quantize
 #if defined(PROD) && defined(OFFSET) && defined(SCALE)
-    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
 
     // Store result
-    vstore16(CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
-#if defined(COMPLEX)
-    vstore16(CONVERT(res1, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)tensor3D_offset(&output, 8, 0, 0));
-#endif // defined(COMPLEX)
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res0 = CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
+
+    STORE_VECTOR_SELECT(res, DATA_TYPE, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif /* defined(DEPTH) */
 
@@ -445,15 +387,20 @@ __kernel void reduction_operation_w(
     TENSOR4D_DECLARATION(input),
     TENSOR4D_DECLARATION(output))
 {
-    Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT(input, DEPTH);
-    Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT(output, DEPTH);
+    int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
+    int y = get_global_id(1);
+    int z = get_global_id(2);
 
-    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
-    res = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * input_stride_y + (z % DEPTH) * input_stride_z + (z / DEPTH) * input_stride_w;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * output_stride_y + (z % DEPTH) * output_stride_z + (z / DEPTH) * output_stride_z;
+
+    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
+    res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));
 
     // Convert input into F32 in order to perform quantized multiplication
 #if defined(PROD) && defined(OFFSET) && defined(SCALE)
-    float16 res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
 
 #if defined(SUM_SQUARE)
@@ -462,8 +409,8 @@ __kernel void reduction_operation_w(
 
     for(unsigned int w = 1; w < BATCH; ++w)
     {
-        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
-        in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, w)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
+        in = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_addr + w * input_stride_w)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));
 
 #if defined(MIN)
         res = select(res, in, ISLESS(in, res));
@@ -476,7 +423,7 @@ __kernel void reduction_operation_w(
 #if defined(PROD)
 
 #if defined(OFFSET) && defined(SCALE)
-        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #else  // !(defined(OFFSET) && defined(SCALE))
         res *= in;
 #endif //  defined(OFFSET) && defined(SCALE)
@@ -498,10 +445,12 @@ __kernel void reduction_operation_w(
 
     // Re-quantize
 #if defined(PROD) && defined(OFFSET) && defined(SCALE)
-    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, VEC_SIZE);
 #endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
 
     // Store result
-    vstore16(CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res0 = CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
+    STORE_VECTOR_SELECT(res, DATA_TYPE, output_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif /* defined(BATCH) && defined(DEPTH) */

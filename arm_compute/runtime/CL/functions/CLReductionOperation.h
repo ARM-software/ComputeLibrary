@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,6 @@ namespace arm_compute
 {
 // Forward declarations
 class CLCompileContext;
-class CLFillBorderKernel;
 class CLReductionOperationKernel;
 class ICLTensor;
 
@@ -99,15 +98,12 @@ public:
 private:
     ICLTensor *configure_intermediate_result_vector(ICLTensor *input, ICLTensor *output);
 
-    MemoryGroup                                              _memory_group;
-    std::vector<CLTensor>                                    _results_vector;
-    std::vector<std::unique_ptr<CLReductionOperationKernel>> _reduction_kernels_vector;
-    std::vector<std::unique_ptr<CLFillBorderKernel>>         _border_handlers_vector;
-    CLReshapeLayer                                           _reshape;
-    unsigned int                                             _num_of_stages;
-    unsigned int                                             _reduction_axis;
-    bool                                                     _is_serial;
-    bool                                                     _is_reshape_required;
+    MemoryGroup                                 _memory_group;
+    CLTensor                                    _unreshaped_output;
+    std::unique_ptr<CLReductionOperationKernel> _reduction_kernel;
+    CLReshapeLayer                              _reshape;
+    unsigned int                                _reduction_axis;
+    bool                                        _is_reshape_required;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLREDUCTIONOPERATION_H */

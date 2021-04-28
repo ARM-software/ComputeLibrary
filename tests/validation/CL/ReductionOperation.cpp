@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,10 +50,11 @@ RelativeTolerance<float> rel_tolerance_f16(0.2f);
 /** Tolerance for quantized operations */
 RelativeTolerance<float> tolerance_qasymm8(1);
 
-const auto ReductionOperationsSumProd = framework::dataset::make("ReductionOperationsSumProd",
+const auto ReductionOperationsSumProdMean = framework::dataset::make("ReductionOperationsSumProdMean",
 {
     ReductionOperation::SUM,
     ReductionOperation::PROD,
+    ReductionOperation::MEAN_SUM
 
 });
 const auto ReductionOperationsMinMax = framework::dataset::make("ReductionMinMax",
@@ -109,15 +110,16 @@ using CLReductionOperationFixture = ReductionOperationFixture<CLTensor, CLAccess
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall4D, CLReductionOperationFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), concat(ReductionOperationsSumProd,
-                                       ReductionOperationsMinMax)),
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                                       concat(ReductionOperationsSumProdMean,
+                                              ReductionOperationsMinMax)),
                                KeepDimensions))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), concat(ReductionOperationsSumProd,
+                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), concat(ReductionOperationsSumProdMean,
                                        ReductionOperationsMinMax)),
                                KeepDimensions))
 {
@@ -127,15 +129,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::D
 TEST_SUITE_END() // F16
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall4D, CLReductionOperationFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), concat(ReductionOperationsSumProd,
-                                       ReductionOperationsMinMax)),
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                                       concat(ReductionOperationsSumProdMean,
+                                              ReductionOperationsMinMax)),
                                KeepDimensions))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), concat(ReductionOperationsSumProd,
+                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), concat(ReductionOperationsSumProdMean,
                                        ReductionOperationsMinMax)),
                                KeepDimensions))
 {
@@ -152,7 +155,7 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                                               ReductionOperationsSumProd),
+                                               ReductionOperationsSumProdMean),
                                        framework::dataset::make("QuantizationInfo", QuantizationInfo(1.f / 64, 2))),
                                KeepDimensions))
 {
@@ -172,7 +175,7 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                                               ReductionOperationsSumProd),
+                                               ReductionOperationsSumProdMean),
                                        framework::dataset::make("QuantizationInfo", QuantizationInfo(1.f / 64, 2))),
                                KeepDimensions))
 {

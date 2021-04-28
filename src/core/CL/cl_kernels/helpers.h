@@ -567,6 +567,16 @@
 #define SUM_REDUCE_STR(x, size) sum_reduce_##size(x)
 #define SUM_REDUCE(x, size) SUM_REDUCE_STR(x, size)
 
+#define prod_reduce_1(x) (x)
+#define prod_reduce_2(x) ((x).s0) * ((x).s1)
+#define prod_reduce_3(x) prod_reduce_2((x).s01) * ((x).s2)
+#define prod_reduce_4(x) prod_reduce_2((x).s01) * prod_reduce_2((x).s23)
+#define prod_reduce_8(x) prod_reduce_4((x).s0123) * prod_reduce_4((x).s4567)
+#define prod_reduce_16(x) prod_reduce_8((x).s01234567) * prod_reduce_8((x).s89ABCDEF)
+
+#define PROD_REDUCE_STR(x, size) prod_reduce_##size(x)
+#define PROD_REDUCE(x, size) PROD_REDUCE_STR(x, size)
+
 #define max_reduce_1(x) (x)
 #define max_reduce_2(x) max(((x).s0), ((x).s1))
 #define max_reduce_3(x) max(max_reduce_2((x).s01), ((x).s2))

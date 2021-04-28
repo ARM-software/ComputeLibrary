@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,9 +56,8 @@ public:
      *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0,1,2,3
      * @param[in]  op     Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
-     * @param[in]  width  (Optional)  In case of x-axis we also need to provide the width of the input image.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width = 0);
+    void configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -67,9 +66,8 @@ public:
      *                             Output will have the same number of dimensions as input.
      * @param[in]  axis            Axis along which to reduce. Supported reduction axis : 0,1,2,3
      * @param[in]  op              Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
-     * @param[in]  width           (Optional)  In case of x-axis we also need to provide the width of the input image.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width = 0);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
      *
@@ -78,22 +76,19 @@ public:
      *                   Output will have the same number of dimensions as input.
      * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0,1,2,3
      * @param[in] op     Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
-     * @param[in] width  (Optional)  In case of x-axis we also need to provide the width of the input image.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, unsigned int width = 0);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
-    BorderSize border_size() const override;
 
 private:
     const ICLTensor   *_input;
     ICLTensor         *_output;
     unsigned int       _reduction_axis;
     ReductionOperation _op;
-    BorderSize         _border_size;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H */
