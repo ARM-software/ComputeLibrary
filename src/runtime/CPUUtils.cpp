@@ -184,6 +184,22 @@ CPUModel midr_to_model(const unsigned int midr)
                 break;
         }
     }
+    else if(implementer == 0x51)
+    {
+        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
+        switch(cpunum)
+        {
+            case 0x804: // A76
+                model = CPUModel::GENERIC_FP16_DOT;
+                break;
+            case 0x805: // A55
+                model = CPUModel::A55r1;
+                break;
+            default:
+                model = CPUModel::GENERIC;
+                break;
+        }
+    }
 
     return model;
 }
