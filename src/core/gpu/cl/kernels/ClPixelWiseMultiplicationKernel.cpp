@@ -203,6 +203,29 @@ void ClPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
     ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(dst->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src1->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src1->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src1->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src2->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src2->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src2->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(dst->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(dst->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(dst->dimension(2));
 }
 
 Status ClPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
