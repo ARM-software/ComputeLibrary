@@ -36,7 +36,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref opencl::ClDequantization that dequantizes an input tensor */
+/** Basic function to run @ref opencl::ClDequantize that dequantizes an input tensor */
 class CLDequantizationLayer : public IFunction
 {
 public:

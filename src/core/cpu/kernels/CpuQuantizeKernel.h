@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_QUANTIZATIONKERNEL_H
-#define ARM_COMPUTE_CPU_QUANTIZATIONKERNEL_H
+#ifndef ARM_COMPUTE_CPU_QUANTIZE_KERNEL_H
+#define ARM_COMPUTE_CPU_QUANTIZE_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -36,14 +36,13 @@ namespace kernels
 /** Interface for the quantization layer kernel.
  *
  * @note The implementation supports only 3D input tensors
- *
  */
-class CpuQuantizationKernel : public ICpuKernel
+class CpuQuantizeKernel : public ICpuKernel
 {
 public:
     /** Default constructor */
-    CpuQuantizationKernel();
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuQuantizationKernel);
+    CpuQuantizeKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuQuantizeKernel);
     /** Set the input, output.
      *
      * @param[in]  src Source tensor info. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
@@ -51,11 +50,10 @@ public:
      *
      * @note Output auto initialization is not supported by this kernel
      */
-    void configure(ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuQuantizationKernel
+    void configure(const ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
-     * @param[in] dst Output tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
+     * Similar to @ref CpuQuantizeKernel::configure()
      *
      * @return a status
      */
@@ -66,11 +64,11 @@ public:
     const char *name() const override;
 
 private:
-    /** Common signature for all the specialised @ref NEQuantizationLayerKernel functions
+    /** Common signature for all the specialised @ref CpuQuantizeKernel functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using QuantizationFunctionExecutorPtr = void (CpuQuantizationKernel::*)(const ITensor *src, ITensor *dst, const Window &window);
+    using QuantizeFunctionExecutorPtr = void (CpuQuantizeKernel::*)(const ITensor *src, ITensor *dst, const Window &window);
     /** Function to apply QASYMM8 or QASYMM8_SIGNED quantization on a tensor.
      *
      * @param[in] window Region on which to execute the kernel.
@@ -84,9 +82,9 @@ private:
     template <typename T>
     void run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window);
 
-    QuantizationFunctionExecutorPtr _func;
+    QuantizeFunctionExecutorPtr _func{ nullptr };
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_QUANTIZATIONKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_QUANTIZE_KERNEL_H */

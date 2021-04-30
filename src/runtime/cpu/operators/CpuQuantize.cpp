@@ -21,34 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/gpu/cl/operators/ClDequantization.h"
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/gpu/cl/ClCompileContext.h"
-#include "src/core/gpu/cl/kernels/ClDequantizationKernel.h"
+#include "src/runtime/cpu/operators/CpuQuantize.h"
+
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/cpu/kernels/CpuQuantizeKernel.h"
 
 namespace arm_compute
 {
-namespace opencl
+namespace cpu
 {
-void ClDequantization::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
+Status CpuQuantize::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    auto k = std::make_unique<kernels::ClDequantizationKernel>();
-    k->configure(compile_context, src, dst);
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuQuantizeKernel::validate(src, dst));
+    return Status{};
+}
+
+void CpuQuantize::configure(const ITensorInfo *src, ITensorInfo *dst)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+
+    // Configure quantize kernel
+    auto k = std::make_unique<kernels::CpuQuantizeKernel>();
+    k->configure(src, dst);
     _kernel = std::move(k);
 }
 
-Status ClDequantization::validate(const ITensorInfo *src, const ITensorInfo *dst)
-{
-    return kernels::ClDequantizationKernel::validate(src, dst);
-}
-
-void ClDequantization::run(ITensorPack &tensors)
+void CpuQuantize::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    CLScheduler::get().enqueue_op(*_kernel.get(), tensors);
+    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }
-} // namespace opencl
+} // namespace cpu
 } // namespace arm_compute

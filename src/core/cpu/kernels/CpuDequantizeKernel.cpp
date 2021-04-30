@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuDequantizationKernel.h"
+#include "src/core/cpu/kernels/CpuDequantizeKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -349,7 +349,7 @@ void run_dequantization_core(const ITensor *input, ITensor *output, const Window
 }
 } // namespace
 
-void CpuDequantizationKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
+void CpuDequantizeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
@@ -362,13 +362,13 @@ void CpuDequantizationKernel::configure(const ITensorInfo *src, ITensorInfo *dst
     ICpuKernel::configure(win);
 }
 
-Status CpuDequantizationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
+Status CpuDequantizeKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
     return Status{};
 }
 
-void CpuDequantizationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuDequantizeKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -391,9 +391,9 @@ void CpuDequantizationKernel::run_op(ITensorPack &tensors, const Window &window,
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
 }
-const char *CpuDequantizationKernel::name() const
+const char *CpuDequantizeKernel::name() const
 {
-    return "CpuDequantizationKernel";
+    return "CpuDequantizeKernel";
 }
 } // namespace kernels
 } // namespace cpu

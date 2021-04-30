@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,46 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/runtime/gpu/cl/operators/ClQuantize.h"
 
-#include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
-
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "src/runtime/cpu/operators/CpuDequantize.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/core/gpu/cl/kernels/ClQuantizeKernel.h"
 
 namespace arm_compute
 {
-struct NEDequantizationLayer::Impl
+namespace opencl
 {
-    const ITensor                      *src{ nullptr };
-    ITensor                            *dst{ nullptr };
-    std::unique_ptr<cpu::CpuDequantize> op{ nullptr };
-};
-
-NEDequantizationLayer::NEDequantizationLayer()
-    : _impl(std::make_unique<Impl>())
+void ClQuantize::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
 {
-}
-NEDequantizationLayer::~NEDequantizationLayer() = default;
-
-void NEDequantizationLayer::configure(const ITensor *input, ITensor *output)
-{
-    _impl->src = input;
-    _impl->dst = output;
-    _impl->op  = std::make_unique<cpu::CpuDequantize>();
-    _impl->op->configure(input->info(), output->info());
+    auto k = std::make_unique<kernels::ClQuantizeKernel>();
+    k->configure(compile_context, src, dst);
+    _kernel = std::move(k);
 }
 
-Status NEDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status ClQuantize::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    return cpu::CpuDequantize::validate(input, output);
+    return kernels::ClQuantizeKernel::validate(src, dst);
 }
 
-void NEDequantizationLayer::run()
+void ClQuantize::run(ITensorPack &tensors)
 {
-    ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-    _impl->op->run(pack);
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
+    CLScheduler::get().enqueue_op(*_kernel.get(), tensors);
 }
+} // namespace opencl
 } // namespace arm_compute

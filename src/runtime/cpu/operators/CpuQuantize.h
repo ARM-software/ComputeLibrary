@@ -21,34 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/cpu/operators/CpuDequantization.h"
+#ifndef ARM_COMPUTE_CPU_QUANTIZE_H
+#define ARM_COMPUTE_CPU_QUANTIZE_H
 
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/cpu/kernels/CpuDequantizationKernel.h"
+#include "src/runtime/cpu/ICpuOperator.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void CpuDequantization::configure(const ITensorInfo *src, ITensorInfo *dst)
+/** Basic function to run @ref kernels::CpuQuantizeKernel that dequantizes an input tensor */
+class CpuQuantize : public ICpuOperator
 {
-    auto k = std::make_unique<kernels::CpuDequantizationKernel>();
-    k->configure(src, dst);
-    _kernel = std::move(k);
-}
+public:
+    /** Default Constructor */
+    CpuQuantize() = default;
+    /** Set the input and output tensors.
+     *
+     * @param[in]  src Source tensor info. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
+     * @param[out] dst Destination tensor info with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16
+     */
+    void configure(const ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration
+     *
+     * Similar to @ref CpuQuantize::configure()
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
-Status CpuDequantization::validate(const ITensorInfo *src, const ITensorInfo *dst)
-{
-    return kernels::CpuDequantizationKernel::validate(src, dst);
-}
-
-void CpuDequantization::run(ITensorPack &tensors)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    prepare(tensors);
-    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
-}
+    // Inherited methods overridden:
+    void run(ITensorPack &tensors) override;
+};
 } // namespace cpu
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_CPU_QUANTIZE_H */

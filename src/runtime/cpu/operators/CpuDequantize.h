@@ -21,41 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_QUANTIZATION_H
-#define ARM_COMPUTE_CPU_QUANTIZATION_H
+#ifndef ARM_COMPUTE_CPU_DEQUANTIZE_H
+#define ARM_COMPUTE_CPU_DEQUANTIZE_H
 
-#include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/core/experimental/Types.h"
-#include "src/core/cpu/ICpuKernel.h"
 #include "src/runtime/cpu/ICpuOperator.h"
-
-#include <memory>
 
 namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to simulate a quantization layer. This function calls the following Arm(R) Neon(TM) kernels:
- *
- *
- * -# @ref kernels::CpuQuantizationKernel
- *
- */
-class CpuQuantization : public ICpuOperator
+/** Basic function to run @ref kernels::CpuDequantizeKernel that dequantizes an input tensor */
+class CpuDequantize : public ICpuOperator
 {
 public:
     /** Default Constructor */
-    CpuQuantization() = default;
-    /** Set the input and output tensors.
+    CpuDequantize() = default;
+    /** Configure the kernel.
      *
-     * @param[in]  src Source tensor info. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
-     * @param[out] dst Destination tensor info with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16
+     * @param[in]  src Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
+     * @param[out] dst Destination tensor info with the same dimensions of input. Data type supported: F16/F32.
      */
-    void configure(ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuQuantization
+    void configure(const ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
-     * @param[in] dst Output tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16
+     * Similar to @ref CpuDequantize::configure()
      *
      * @return a status
      */
@@ -66,4 +55,4 @@ public:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_QUANTIZATION_H */
+#endif /* ARM_COMPUTE_CPU_DEQUANTIZE_H */

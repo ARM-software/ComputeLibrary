@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,44 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DEQUANTIZATION_H
-#define ARM_COMPUTE_CPU_DEQUANTIZATION_H
+#ifndef ARM_COMPUTE_CL_DEQUANTIZE_KERNEL_H
+#define ARM_COMPUTE_CL_DEQUANTIZE_KERNEL_H
 
-#include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/core/experimental/Types.h"
-#include "src/core/cpu/ICpuKernel.h"
-#include "src/runtime/cpu/ICpuOperator.h"
-
-#include <memory>
+#include "src/core/common/Macros.h"
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/core/gpu/cl/IClKernel.h"
 
 namespace arm_compute
 {
-namespace cpu
+namespace opencl
 {
-/** Basic function to run @ref kernels::CpuDequantizationKernel that dequantizes an input tensor */
-class CpuDequantization : public ICpuOperator
+namespace kernels
+{
+/** Interface for the dequantization layer kernel. */
+class ClDequantizeKernel : public IClKernel
 {
 public:
-    /** Default Constructor */
-    CpuDequantization() = default;
-    /** Configure the kernel.
+    /** Default constructor */
+    ClDequantizeKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClDequantizeKernel);
+    /** Initialise the kernel's input and output
      *
-     * @param[in]  src Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
-     * @param[out] dst Destination tensor info with the same dimensions of input. Data type supported: F16/F32.
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  src             Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
+     * @param[out] dst             Destination tensor info. Data types supported: F16/F32.
      */
-    void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuDequantization
+    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
-     * @param[in] dst Destination tensor info. Data type supported: F16/F32.
+     * Similar to @ref ClDequantizeKernel::configure()
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
-} // namespace cpu
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_DEQUANTIZATION_H */
+#endif /* ARM_COMPUTE_CL_DEQUANTIZE_KERNEL_H */

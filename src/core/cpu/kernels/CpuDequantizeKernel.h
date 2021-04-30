@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DEQUANTIZATIONKERNEL_H
-#define ARM_COMPUTE_CPU_DEQUANTIZATIONKERNEL_H
+#ifndef ARM_COMPUTE_CPU_DEQUANTIZE_KERNEL_H
+#define ARM_COMPUTE_CPU_DEQUANTIZE_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -34,22 +34,21 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the dequantization layer kernel. */
-class CpuDequantizationKernel : public ICpuKernel
+class CpuDequantizeKernel : public ICpuKernel
 {
 public:
     /** Default constructor */
-    CpuDequantizationKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDequantizationKernel);
+    CpuDequantizeKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDequantizeKernel);
     /** Set input, output tensors.
      *
      * @param[in]  src Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
      * @param[out] dst Destination tensor info with the same dimensions of input. Data type supported: F16/F32.
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuDequantizationKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
-     * @param[in] dst Destination tensor info. Data types supported: F16/F32.
+     * Similar to @ref CpuDequantizeKernel::configure()
      *
      * @return a status
      */
@@ -62,4 +61,4 @@ public:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_DEQUANTIZATIONKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_DEQUANTIZE_KERNEL_H */

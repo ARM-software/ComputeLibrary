@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/gpu/cl/kernels/ClDequantizationKernel.h"
+#include "src/core/gpu/cl/kernels/ClDequantizeKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -29,9 +29,11 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+
 #include "support/Cast.h"
 #include "support/StringSupport.h"
 
@@ -59,11 +61,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 }
 } // namespace
 
-ClDequantizationKernel::ClDequantizationKernel()
-{
-}
-
-void ClDequantizationKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
+void ClDequantizeKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
@@ -115,13 +113,13 @@ void ClDequantizationKernel::configure(const CLCompileContext &compile_context, 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClDequantizationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
+Status ClDequantizeKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
     return Status{};
 }
 
-void ClDequantizationKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClDequantizeKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);

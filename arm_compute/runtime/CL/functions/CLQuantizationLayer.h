@@ -37,7 +37,7 @@ class ITensorInfo;
 
 /** Basic function to simulate a quantization layer. This function calls the following CL kernels:
  *
- * -# @ref opencl::ClQuantization
+ * -# @ref opencl::ClQuantize
  *
  * @note The implementation supports only 3D input tensors.
  *

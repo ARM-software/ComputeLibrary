@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuQuantizationKernel.h"
+#include "src/core/cpu/kernels/CpuQuantizeKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -108,34 +108,29 @@ vector_type<int8_t> vquantize_qasymm8<int8_t>(const float32x4x4_t &qv, const Uni
 
 } // namespace
 
-CpuQuantizationKernel::CpuQuantizationKernel()
-    : _func(nullptr)
-{
-}
-
-void CpuQuantizationKernel::configure(ITensorInfo *src, ITensorInfo *dst)
+void CpuQuantizeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
-    static const std::map<std::string, QuantizationFunctionExecutorPtr> quant_map =
+    static const std::map<std::string, QuantizeFunctionExecutorPtr> quant_map =
     {
-        { "op_QASYMM8_QASYMM8", &CpuQuantizationKernel::run_quantize_qasymm8<uint8_t, uint8_t> },
-        { "op_QASYMM8_QASYMM8_SIGNED", &CpuQuantizationKernel::run_quantize_qasymm8<uint8_t, int8_t> },
-        { "op_QASYMM8_QASYMM16", &CpuQuantizationKernel::run_quantize_qasymm16<uint8_t> },
+        { "op_QASYMM8_QASYMM8", &CpuQuantizeKernel::run_quantize_qasymm8<uint8_t, uint8_t> },
+        { "op_QASYMM8_QASYMM8_SIGNED", &CpuQuantizeKernel::run_quantize_qasymm8<uint8_t, int8_t> },
+        { "op_QASYMM8_QASYMM16", &CpuQuantizeKernel::run_quantize_qasymm16<uint8_t> },
 
-        { "op_QASYMM8_SIGNED_QASYMM8", &CpuQuantizationKernel::run_quantize_qasymm8<int8_t, uint8_t> },
-        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED", &CpuQuantizationKernel::run_quantize_qasymm8<int8_t, int8_t> },
-        { "op_QASYMM8_SIGNED_QASYMM16", &CpuQuantizationKernel::run_quantize_qasymm16<int8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM8", &CpuQuantizeKernel::run_quantize_qasymm8<int8_t, uint8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED", &CpuQuantizeKernel::run_quantize_qasymm8<int8_t, int8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM16", &CpuQuantizeKernel::run_quantize_qasymm16<int8_t> },
 
-        { "op_F32_QASYMM8", &CpuQuantizationKernel::run_quantize_qasymm8<float, uint8_t> },
-        { "op_F32_QASYMM8_SIGNED", &CpuQuantizationKernel::run_quantize_qasymm8<float, int8_t> },
-        { "op_F32_QASYMM16", &CpuQuantizationKernel::run_quantize_qasymm16<float> },
+        { "op_F32_QASYMM8", &CpuQuantizeKernel::run_quantize_qasymm8<float, uint8_t> },
+        { "op_F32_QASYMM8_SIGNED", &CpuQuantizeKernel::run_quantize_qasymm8<float, int8_t> },
+        { "op_F32_QASYMM16", &CpuQuantizeKernel::run_quantize_qasymm16<float> },
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        { "op_F16_QASYMM8", &CpuQuantizationKernel::run_quantize_qasymm8<float16_t, uint8_t> },
-        { "op_F16_QASYMM8_SIGNED", &CpuQuantizationKernel::run_quantize_qasymm8<float16_t, int8_t> },
-        { "op_F16_QASYMM16", &CpuQuantizationKernel::run_quantize_qasymm16<float16_t> },
+        { "op_F16_QASYMM8", &CpuQuantizeKernel::run_quantize_qasymm8<float16_t, uint8_t> },
+        { "op_F16_QASYMM8_SIGNED", &CpuQuantizeKernel::run_quantize_qasymm8<float16_t, int8_t> },
+        { "op_F16_QASYMM16", &CpuQuantizeKernel::run_quantize_qasymm16<float16_t> },
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
     };
 
@@ -156,14 +151,14 @@ void CpuQuantizationKernel::configure(ITensorInfo *src, ITensorInfo *dst)
     ICpuKernel::configure(win_config);
 }
 
-Status CpuQuantizationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
+Status CpuQuantizeKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
     return Status{};
 }
 
 template <typename TIn, typename TOut>
-void CpuQuantizationKernel::run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
+void CpuQuantizeKernel::run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
@@ -206,7 +201,7 @@ void CpuQuantizationKernel::run_quantize_qasymm8(const ITensor *src, ITensor *ds
 }
 
 template <typename T>
-void CpuQuantizationKernel::run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window)
+void CpuQuantizeKernel::run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window)
 {
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
@@ -250,7 +245,7 @@ void CpuQuantizationKernel::run_quantize_qasymm16(const ITensor *src, ITensor *d
     input, output);
 }
 
-void CpuQuantizationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuQuantizeKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -262,9 +257,9 @@ void CpuQuantizationKernel::run_op(ITensorPack &tensors, const Window &window, c
     (this->*_func)(src, dst, window);
 }
 
-const char *CpuQuantizationKernel::name() const
+const char *CpuQuantizeKernel::name() const
 {
-    return "CpuQuantizationKernel";
+    return "CpuQuantizeKernel";
 }
 } // namespace kernels
 } // namespace cpu

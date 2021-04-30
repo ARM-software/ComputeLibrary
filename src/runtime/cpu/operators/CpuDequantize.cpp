@@ -21,37 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/runtime/cpu/operators/CpuDequantize.h"
 
-#include "src/runtime/cpu/operators/CpuQuantization.h"
-
-#include "arm_compute/core/Types.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/cpu/kernels/CpuQuantizationKernel.h"
+#include "src/core/cpu/kernels/CpuDequantizeKernel.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-Status CpuQuantization::validate(const ITensorInfo *src, const ITensorInfo *dst)
+void CpuDequantize::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuQuantizationKernel::validate(src, dst));
-    return Status{};
-}
-
-void CpuQuantization::configure(ITensorInfo *src, ITensorInfo *dst)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-
-    // Configure quantize kernel
-    auto k = std::make_unique<kernels::CpuQuantizationKernel>();
+    auto k = std::make_unique<kernels::CpuDequantizeKernel>();
     k->configure(src, dst);
     _kernel = std::move(k);
 }
 
-void CpuQuantization::run(ITensorPack &tensors)
+Status CpuDequantize::validate(const ITensorInfo *src, const ITensorInfo *dst)
+{
+    return kernels::CpuDequantizeKernel::validate(src, dst);
+}
+
+void CpuDequantize::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
+    prepare(tensors);
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }
 } // namespace cpu

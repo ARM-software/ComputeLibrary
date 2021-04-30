@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,42 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_DEQUANTIZATION_H
-#define ARM_COMPUTE_CL_DEQUANTIZATION_H
+#ifndef ARM_COMPUTE_CL_QUANTIZE_KERNEL_H
+#define ARM_COMPUTE_CL_QUANTIZE_KERNEL_H
 
-#include "arm_compute/core/KernelDescriptors.h"
+#include "src/core/common/Macros.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
-#include "src/runtime/gpu/cl/IClOperator.h"
+#include "src/core/gpu/cl/IClKernel.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-/** Basic function to run @ref kernels::ClDequantizationKernel that dequantizes an input tensor */
-class ClDequantization : public IClOperator
+namespace kernels
+{
+/** Interface for the quantization layer kernel.
+ *
+ * @note The implementation supports only 3D input tensors.
+ */
+class ClQuantizeKernel : public IClKernel
 {
 public:
-    /** Constructor */
-    ClDequantization() = default;
-    /** Set the input and output tensors.
+    /** Default constructor */
+    ClQuantizeKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClQuantizeKernel);
+    /** Set the input, output.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src             Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
-     * @param[out] dst             Destination tensor info with the same dimensions of @p src. Data type supported: F16/F32.
-     */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLDequantizationLayer
+     * @param[in]  src             Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
+     * @param[out] dst             Destination tensor info with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
-     * @param[in] src Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
-     * @param[in] dst Output tensor info. Data type supported: F16/F32.
+     * @note Output auto initialization is not supported by this kernel
+     */
+    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration
+     *
+     * Similar to @ref ClQuantizeKernel::configure()
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
-    // Inherited method overridden
-    void run(ITensorPack &tensors) override;
+    // Inherited methods overridden:
+    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
+} // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_DEQUANTIZATION_H */
+#endif /* ARM_COMPUTE_CL_QUANTIZE_KERNEL_H */

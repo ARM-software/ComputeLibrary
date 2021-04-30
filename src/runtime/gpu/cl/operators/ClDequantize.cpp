@@ -21,30 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/gpu/cl/operators/ClQuantization.h"
+#include "src/runtime/gpu/cl/operators/ClDequantize.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
-#include "src/core/gpu/cl/kernels/ClQuantizationKernel.h"
+#include "src/core/gpu/cl/kernels/ClDequantizeKernel.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClQuantization::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
+void ClDequantize::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
 {
-    auto k = std::make_unique<kernels::ClQuantizationKernel>();
+    auto k = std::make_unique<kernels::ClDequantizeKernel>();
     k->configure(compile_context, src, dst);
     _kernel = std::move(k);
 }
 
-Status ClQuantization::validate(const ITensorInfo *src, const ITensorInfo *dst)
+Status ClDequantize::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    return kernels::ClQuantizationKernel::validate(src, dst);
+    return kernels::ClDequantizeKernel::validate(src, dst);
 }
 
-void ClQuantization::run(ITensorPack &tensors)
+void ClDequantize::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     CLScheduler::get().enqueue_op(*_kernel.get(), tensors);
