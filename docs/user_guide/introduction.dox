@@ -39,6 +39,35 @@ Several builds of the library are available using various configurations:
  - Technology: Arm® Neon™ / OpenCL / Arm® Neon™ and OpenCL.
  - Debug / Asserts / Release: Use a build with asserts enabled to debug your application and enable extra validation. Once you are sure your application works as expected you can switch to a release build of the library for maximum performance.
 
+@b Minimum toolchains requirements are shown below:
+
+<table>
+<tr>
+  <th>Operating System
+  <th>Architecture
+  <th>Minimum Toolchain
+<tr>
+  <td rowspan="4">Linux
+  <td>armv7a
+  <td>gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf
+  <tr>
+  <td>arm64-v8a
+  <td rowspan="2">gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu
+  <tr>
+  <td>armv8.2-a
+  <tr>
+  <td>armv8.2-a-sve
+  <td>gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
+<tr>
+  <td rowspan="3">Android
+  <td>armv7a
+  <td rowspan="3">NDK r18b
+  <tr>
+  <td>arm64-v8a
+  <tr>
+  <td>armv8.2-a
+</table>
+
 @section S0_1_contact Contact / Support
 
 Please create an issue on <a href="https://github.com/ARM-software/ComputeLibrary/issues">Github</a>.
@@ -50,11 +79,12 @@ In order to facilitate the work of the support team please provide the build inf
 
 @section S0_2_prebuilt_binaries Pre-built binaries
 
-For each release we provide some pre-built binaries of the library [here](https://github.com/ARM-software/ComputeLibrary/releases)
+For each release we provide some pre-built binaries of the library [here](https://github.com/ARM-software/ComputeLibrary/releases).
 
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf
             - Linux arm64-v8a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
+            - Linux armv8.2a-sve: gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
             - Android armv7a: clang++ / libc++ NDK r18b
             - Android am64-v8a: clang++ / libc++ NDK r20b
 
