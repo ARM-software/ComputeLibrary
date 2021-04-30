@@ -21,24 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_PIXELWISE_MULTIPLICATION_H
-#define ARM_COMPUTE_CL_PIXELWISE_MULTIPLICATION_H
+#ifndef ARM_COMPUTE_CL_MUL_H
+#define ARM_COMPUTE_CL_MUL_H
 
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/runtime/gpu/cl/IClOperator.h"
-
-#include <memory>
 
 namespace arm_compute
 {
 namespace opencl
 {
-/** Basic function to run @ref opencl::ClPixelWiseMultiplication. */
-class ClPixelWiseMultiplication : public IClOperator
+/** Basic function to run @ref opencl::kernels::ClMulKernel */
+class ClMul : public IClOperator
 {
 public:
     /** Default Constructor */
-    ClPixelWiseMultiplication() = default;
+    ClMul() = default;
     /** Initialise the kernel's sources, dst and convertion policy.
      *
      * Valid configurations (src1,src2) -> Output :
@@ -69,31 +67,9 @@ public:
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
                    ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref ClPixelWiseMultiplication
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * Valid configurations (src1,src2) -> Output :
-     *
-     *   - (U8,U8)                         -> U8
-     *   - (U8,U8)                         -> S16
-     *   - (U8,S16)                        -> S16
-     *   - (S16,U8)                        -> S16
-     *   - (S16,S16)                       -> S16
-     *   - (F16,F16)                       -> F16
-     *   - (F32,F32)                       -> F32
-     *   - (QASYMM8,QASYMM8)               -> QASYMM8
-     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16)               -> QSYMM16
-     *   - (QSYMM16,QSYMM16)               -> S32
-     *
-     *
-     * @param[in] src1            An src tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
-     * @param[in] src2            An src tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
-     * @param[in] dst             The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
-     * @param[in] scale           Scale to apply after multiplication.
-     *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
-     * @param[in] overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate
-     * @param[in] rounding_policy Rounding policy. Supported rounding modes: to zero, to nearest even.
-     * @param[in] act_info        (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClMul::configure()
      *
      * @return a status
      */
@@ -101,12 +77,12 @@ public:
                            ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
-/** Basic function to run @ref opencl::ClComplexPixelWiseMultiplication. */
-class ClComplexPixelWiseMultiplication : public IClOperator
+/** Basic function to run @ref opencl::kernels::ClComplexMulKernel */
+class ClComplexMul : public IClOperator
 {
 public:
     /** Default Constructor */
-    ClComplexPixelWiseMultiplication() = default;
+    ClComplexMul() = default;
     /** Initialise the kernel's sources, dst.
      *
      * @param[in]      compile_context The compile context to be used.
@@ -118,15 +94,14 @@ public:
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref ClComplexPixelWiseMultiplication
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src1     An src tensor info. Data types supported: F16/F32. Number of channels supported: 2.
-     * @param[in] src2     An src tensor info. Data types supported: same as @p src1. Number of channels supported: same as @p src1.
-     * @param[in] dst      The dst tensor info, Data types supported: same as @p src1. Number of channels supported: same as @p src1.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClComplexMul::configure()
+     *
+     * @return a status
      */
     static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_PIXELWISE_MULTIPLICATION_H */
+#endif /* ARM_COMPUTE_CL_MUL_H */

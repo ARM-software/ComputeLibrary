@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref cpu::CpuPixelWiseMultiplication */
+/** Basic function to run @ref cpu::CpuMul */
 class NEPixelWiseMultiplication : public IFunction
 {
 public:
@@ -131,7 +131,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref cpu::CpuComplexPixelWiseMultiplication. */
+/** Basic function to run @ref cpu::CpuComplexMul. */
 class NEComplexPixelWiseMultiplication : public IFunction
 {
 public:

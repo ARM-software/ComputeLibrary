@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/gpu/cl/kernels/ClPixelWiseMultiplicationKernel.h"
+#include "src/core/gpu/cl/kernels/ClMulKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -92,8 +92,8 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
 }
 } // namespace
 
-void ClPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
-                                                ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+void ClMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
+                            ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src1, src2, dst,
@@ -228,8 +228,8 @@ void ClPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_
     _config_id += support::cpp11::to_string(dst->dimension(2));
 }
 
-Status ClPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
-                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+Status ClMulKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
+                             ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info));
@@ -237,7 +237,7 @@ Status ClPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const 
     return Status{};
 }
 
-void ClPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClMulKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
@@ -311,7 +311,7 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
 }
 } // namespace
 
-void ClComplexPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void ClComplexMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(src1, src2, dst, act_info));
@@ -339,7 +339,7 @@ void ClComplexPixelWiseMultiplicationKernel::configure(const CLCompileContext &c
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status ClComplexMulKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_complex(src1, src2, dst, act_info));
@@ -347,7 +347,7 @@ Status ClComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1,
     return Status{};
 }
 
-void ClComplexPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClComplexMulKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);

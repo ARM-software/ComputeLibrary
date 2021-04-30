@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_PIXELWISE_MULTIPLICATION_KERNEL_H
-#define ARM_COMPUTE_CPU_PIXELWISE_MULTIPLICATION_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_MUL_KERNEL_H
+#define ARM_COMPUTE_CPU_MUL_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -33,13 +33,13 @@ namespace cpu
 {
 namespace kernels
 {
-/** Interface for the kernel to perform addition between two tensors */
-class CpuPixelWiseMultiplicationKernel : public ICpuKernel
+/** Interface for the kernel to perform multiplication between two tensors */
+class CpuMulKernel : public ICpuKernel
 {
 public:
     /** Default constructor */
-    CpuPixelWiseMultiplicationKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPixelWiseMultiplicationKernel);
+    CpuMulKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuMulKernel);
     /** Initialise the kernel's input, dst and border mode.
      *
      * Valid configurations (Src1,Src2) -> Dst :
@@ -69,32 +69,9 @@ public:
      * @param[in]  rounding_policy Rounding policy.
      */
     void configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuPixelWiseMultiplicationKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * Valid configurations (Src1,Src2) -> Dst :
-     *                                                       Support: Broadcast? Scale=1/255?
-     *   - (U8,U8)                         -> U8, S16                 N          Y
-     *   - (U8,S16)                        -> S16                     N          Y
-     *   - (S16,U8)                        -> S16                     N          Y
-     *   - (S16,S16)                       -> S16                     N          Y
-     *   - (S32,S32)                       -> S32                     Y          N
-     *   - (F16,F16)                       -> F16                     N          Y
-     *   - (F32,F32)                       -> F32                     Y          Y
-     *   - (QASYMM8,QASYMM8)               -> QASYMM8                 Y          Y
-     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED          Y          Y
-     *   - (QSYMM16,QSYMM16)               -> QSYMM16, S32            N          Y
-     *
-     * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
-     *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
-     *
-     * @param[in] src1            First src tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
-     * @param[in] src2            Second src tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
-     * @param[in] dst             Dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
-     * @param[in] scale           Scale to apply after multiplication.
-     *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
-     *                            If both @p src1, @p src2 and @p dst are of datatype S32, scale cannot be 1/255
-     * @param[in] overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if any of the srcs is of quantized datatype
-     * @param[in] rounding_policy Rounding policy.
+     * Similar to @ref CpuMulKernel::configure()
      *
      * @return a status
      */
@@ -142,12 +119,12 @@ private:
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */
-class CpuComplexPixelWiseMultiplicationKernel : public ICpuKernel
+class CpuComplexMulKernel : public ICpuKernel
 {
 public:
     /** Default constructor */
-    CpuComplexPixelWiseMultiplicationKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuComplexPixelWiseMultiplicationKernel);
+    CpuComplexMulKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuComplexMulKernel);
     /** Initialise the kernel's src, dst and border mode.
      *
      * @param[in]  src1 An src tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
@@ -155,11 +132,9 @@ public:
      * @param[out] dst  The dst tensor, Data types supported: same as @p src1.  Number of channels supported: same as @p src1.
      */
     void configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuComplexPixelWiseMultiplicationKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src1 An src tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
-     * @param[in] src2 An src tensor info. Data types supported: same as @p src1. Number of channels supported: same as @p src1.
-     * @param[in] dst  The dst tensor info. Data types supported: same as @p src1. Number of channels supported: same as @p src1.
+     * Similar to @ref CpuComplexMulKernel::configure()
      *
      * @return a status
      */
@@ -172,4 +147,4 @@ public:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_PIXELWISE_MULTIPLICATION_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_MUL_KERNEL_H */

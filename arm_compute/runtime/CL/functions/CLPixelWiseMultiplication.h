@@ -34,7 +34,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref opencl::ClPixelWiseMultiplication. */
+/** Basic function to run @ref opencl::ClMul. */
 class CLPixelWiseMultiplication : public IFunction
 {
 public:
@@ -123,7 +123,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref opencl::ClComplexPixelWiseMultiplication. */
+/** Basic function to run @ref opencl::ClComplexMul. */
 class CLComplexPixelWiseMultiplication : public IFunction
 {
 public:

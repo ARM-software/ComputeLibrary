@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuPixelWiseMultiplicationKernel.h"
+#include "src/core/cpu/kernels/CpuMulKernel.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -1475,7 +1475,7 @@ void mul_U8_S16_S16(const ITensor *src1, const ITensor *src2, ITensor *out, cons
 }
 } // namespace
 
-void CpuPixelWiseMultiplicationKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+void CpuMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_UNUSED(rounding_policy);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
@@ -1623,8 +1623,8 @@ void CpuPixelWiseMultiplicationKernel::configure(ITensorInfo *src1, ITensorInfo 
     ICpuKernel::configure(win);
 }
 
-Status CpuPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale, ConvertPolicy overflow_policy,
-                                                  RoundingPolicy rounding_policy)
+Status CpuMulKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale, ConvertPolicy overflow_policy,
+                              RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src1, src2, dst, scale, overflow_policy, rounding_policy));
@@ -1632,7 +1632,7 @@ Status CpuPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const
     return Status{};
 }
 
-void CpuPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuMulKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -1656,9 +1656,9 @@ void CpuPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window
         (*_func_float)(src1, src2, dst, window, _scale);
     }
 }
-const char *CpuPixelWiseMultiplicationKernel::name() const
+const char *CpuMulKernel::name() const
 {
-    return "CpuPixelWiseMultiplicationKernel";
+    return "CpuMulKernel";
 }
 namespace
 {
@@ -1682,7 +1682,7 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
 }
 } // namespace
 
-void CpuComplexPixelWiseMultiplicationKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
+void CpuComplexMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(src1, src2, dst));
@@ -1699,7 +1699,7 @@ void CpuComplexPixelWiseMultiplicationKernel::configure(ITensorInfo *src1, ITens
     ICpuKernel::configure(win);
 }
 
-Status CpuComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)
+Status CpuComplexMulKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_complex(src1, src2, dst));
@@ -1707,7 +1707,7 @@ Status CpuComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *src1
     return Status{};
 }
 
-void CpuComplexPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuComplexMulKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -1720,9 +1720,9 @@ void CpuComplexPixelWiseMultiplicationKernel::run_op(ITensorPack &tensors, const
     c_mul_F32_F32_F32_n(src1, src2, dst, window);
 }
 
-const char *CpuComplexPixelWiseMultiplicationKernel::name() const
+const char *CpuComplexMulKernel::name() const
 {
-    return "CpuComplexPixelWiseMultiplicationKernel";
+    return "CpuComplexMulKernel";
 }
 } // namespace kernels
 } // namespace cpu

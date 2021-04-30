@@ -21,40 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/gpu/cl/operators/ClPixelWiseMultiplication.h"
+#include "src/runtime/gpu/cl/operators/ClMul.h"
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
-#include "src/core/gpu/cl/kernels/ClPixelWiseMultiplicationKernel.h"
+#include "src/core/gpu/cl/kernels/ClMulKernel.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClPixelWiseMultiplication::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
-                                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+void ClMul::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
+                      ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
-    auto k = std::make_unique<kernels::ClPixelWiseMultiplicationKernel>();
+    auto k = std::make_unique<kernels::ClMulKernel>();
     k->configure(compile_context, src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
     _kernel = std::move(k);
 }
 
-Status ClPixelWiseMultiplication::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
-                                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+Status ClMul::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
+                       ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
-    return kernels::ClPixelWiseMultiplicationKernel::validate(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
+    return kernels::ClMulKernel::validate(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
 }
 
-void ClComplexPixelWiseMultiplication::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void ClComplexMul::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
-    auto k = std::make_unique<kernels::ClComplexPixelWiseMultiplicationKernel>();
+    auto k = std::make_unique<kernels::ClComplexMulKernel>();
     k->configure(compile_context, src1, src2, dst, act_info);
     _kernel = std::move(k);
 }
 
-Status ClComplexPixelWiseMultiplication::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status ClComplexMul::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
-    return kernels::ClComplexPixelWiseMultiplicationKernel::validate(src1, src2, dst, act_info);
+    return kernels::ClComplexMulKernel::validate(src1, src2, dst, act_info);
 }
 } // namespace opencl
 } // namespace arm_compute
