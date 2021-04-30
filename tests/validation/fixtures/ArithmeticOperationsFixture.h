@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,18 +77,18 @@ protected:
         FunctionType arith_op;
         arith_op.configure(&ref_src1, &ref_src2, dst_to_use, convert_policy, _act_info);
 
-        ARM_COMPUTE_EXPECT(ref_src1.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(ref_src2.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst_to_use->info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(ref_src1.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(ref_src2.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst_to_use->info()->is_resizable());
 
         // Allocate tensors
         ref_src1.allocator()->allocate();
         ref_src2.allocator()->allocate();
         dst_to_use->allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!ref_src1.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!ref_src2.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst_to_use->info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!ref_src1.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!ref_src2.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst_to_use->info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(ref_src1), 0);

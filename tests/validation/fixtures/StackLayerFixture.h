@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,7 @@ protected:
         {
             tensors[i] = create_tensor<TensorType>(shape_src, data_type);
             src[i]     = &(tensors[i]);
-            ARM_COMPUTE_EXPECT(tensors[i].info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(tensors[i].info()->is_resizable());
         }
 
         // Create tensors
@@ -91,9 +91,9 @@ protected:
         // Allocate and fill the input tensors
         for(int i = 0; i < num_tensors; ++i)
         {
-            ARM_COMPUTE_EXPECT(tensors[i].info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(tensors[i].info()->is_resizable());
             tensors[i].allocator()->allocate();
-            ARM_COMPUTE_EXPECT(!tensors[i].info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!tensors[i].info()->is_resizable());
 
             // Fill input tensor
             fill(AccessorType(tensors[i]), i);
@@ -102,7 +102,7 @@ protected:
         // Allocate output tensor
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Compute stack function
         stack.run();

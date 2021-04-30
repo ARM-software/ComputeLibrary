@@ -128,9 +128,9 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
     FunctionType gemmlowp;
     gemmlowp.configure(&a, &b, is_fused ? &bias : nullptr, &output, GEMMInfo(false, false, false, (reinterpret_output_as_3d ? shape_output[2] : 0), reinterpret_input_as_3d, false, output_stage));
 
-    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(output.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(a.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(b.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(output.info()->is_resizable());
 
     add_padding_x({ &a, &b, &output });
 
@@ -139,9 +139,9 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
     b.allocator()->allocate();
     output.allocator()->allocate();
 
-    ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!output.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(!output.info()->is_resizable());
 
     // Fill tensors
     fill(AccessorType(a), 0);
@@ -149,9 +149,9 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
 
     if(is_fused)
     {
-        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
         bias.allocator()->allocate();
-        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
         fill(AccessorType(bias), 2);
     }
     // Compute GEMM function
@@ -214,7 +214,7 @@ public:
     template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage, DataType data_type_b)
     {
-        ARM_COMPUTE_EXPECT(output_stage.type != GEMMLowpOutputStageType::NONE, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(output_stage.type != GEMMLowpOutputStageType::NONE);
         DataType data_type_a = data_type_b == DataType::QASYMM8_SIGNED ? DataType::QASYMM8_SIGNED : DataType::QASYMM8;
 
         if(data_type_b == DataType::QSYMM8_PER_CHANNEL)
@@ -317,27 +317,27 @@ protected:
         output_stage_info.output_data_type        = DataType::QASYMM8;
         output_stage.configure(&a, add_bias ? &b : nullptr, &c, output_stage_info);
 
-        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(c.info()->is_resizable());
 
         // Allocate tensors
         a.allocator()->allocate();
         c.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!c.info()->is_resizable());
 
         // Fill tensor
         fill(AccessorType(a), 0);
 
         if(add_bias)
         {
-            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(b.info()->is_resizable());
 
             // Allocate bias tensor
             b.allocator()->allocate();
 
-            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
 
             // Fill tensor
             fill(AccessorType(b), 1);
@@ -419,27 +419,27 @@ protected:
         output_stage_info.output_data_type        = DataType::QASYMM8_SIGNED;
         output_stage.configure(&a, add_bias ? &b : nullptr, &c, output_stage_info);
 
-        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(c.info()->is_resizable());
 
         // Allocate tensors
         a.allocator()->allocate();
         c.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!c.info()->is_resizable());
 
         // Fill tensor
         fill(AccessorType(a), 0);
 
         if(add_bias)
         {
-            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(b.info()->is_resizable());
 
             // Allocate bias tensor
             b.allocator()->allocate();
 
-            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
 
             // Fill tensor
             fill(AccessorType(b), 1);
@@ -513,27 +513,27 @@ protected:
         FunctionType output_stage;
         output_stage.configure(&a, add_bias ? &b : nullptr, &c, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
 
-        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(c.info()->is_resizable());
 
         // Allocate tensors
         a.allocator()->allocate();
         c.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!c.info()->is_resizable());
 
         // Fill tensor
         fill(AccessorType(a), 0);
 
         if(add_bias)
         {
-            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(b.info()->is_resizable());
 
             // Allocate bias tensor
             b.allocator()->allocate();
 
-            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
 
             // Fill tensor
             fill(AccessorType(b), 1);
@@ -608,27 +608,27 @@ protected:
         FunctionType output_stage;
         output_stage.configure(&a, add_bias ? &b : nullptr, &c, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
 
-        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(c.info()->is_resizable());
 
         // Allocate tensors
         a.allocator()->allocate();
         c.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!c.info()->is_resizable());
 
         // Fill tensor
         fill(AccessorType(a), 0);
 
         if(add_bias)
         {
-            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(b.info()->is_resizable());
 
             // Allocate bias tensor
             b.allocator()->allocate();
 
-            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
 
             // Fill tensor
             fill(AccessorType(b), 1);
@@ -713,27 +713,27 @@ protected:
         FunctionType output_stage;
         output_stage.configure(&a, add_bias ? &b : nullptr, &c, info);
 
-        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(c.info()->is_resizable());
 
         // Allocate tensors
         a.allocator()->allocate();
         c.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!c.info()->is_resizable());
 
         // Fill tensor
         fill(AccessorType(a), 0);
 
         if(add_bias)
         {
-            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(b.info()->is_resizable());
 
             // Allocate bias tensor
             b.allocator()->allocate();
 
-            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
 
             // Fill tensor
             fill(AccessorType(b), 1);
@@ -806,27 +806,27 @@ protected:
         FunctionType output_stage;
         output_stage.configure(&a, add_bias ? &b : nullptr, &c, result_fixedpoint_multiplier, result_shift, min, max);
 
-        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(c.info()->is_resizable());
 
         // Allocate tensors
         a.allocator()->allocate();
         c.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!c.info()->is_resizable());
 
         // Fill tensor
         fill(AccessorType(a), 0);
 
         if(add_bias)
         {
-            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(b.info()->is_resizable());
 
             // Allocate bias tensor
             b.allocator()->allocate();
 
-            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
 
             // Fill tensor
             fill(AccessorType(b), 1);
@@ -946,8 +946,8 @@ protected:
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
 
-        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
 
         add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &dst });
 
@@ -958,11 +958,11 @@ protected:
         rhs_reshaped.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!lhs_reshaped.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs_reshaped.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(lhs), 0);
@@ -1098,8 +1098,8 @@ protected:
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
 
-        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
 
         add_padding_x({ &lhs, &rhs, &lhs_reshaped, &rhs_reshaped, &dst });
 
@@ -1110,11 +1110,11 @@ protected:
         rhs_reshaped.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!lhs_reshaped.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs_reshaped.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(lhs), 0);
@@ -1249,8 +1249,8 @@ protected:
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs, &rhs_reshaped, &dst, gemm_info);
 
-        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
 
         add_padding_x({ &lhs, &rhs, &rhs_reshaped, &dst });
 
@@ -1260,10 +1260,10 @@ protected:
         rhs_reshaped.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs_reshaped.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(lhs), 0);
@@ -1394,8 +1394,8 @@ protected:
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
         gemm.configure(&lhs, &rhs_reshaped, &dst, gemm_info);
 
-        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
 
         add_padding_x({ &lhs, &rhs, &rhs_reshaped, &dst });
 
@@ -1405,10 +1405,10 @@ protected:
         rhs_reshaped.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs_reshaped.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(lhs), 0);
@@ -1508,8 +1508,8 @@ protected:
         GEMMFunctionType gemm;
         gemm.configure(&lhs, &rhs, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
 
-        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
 
         add_padding_x({ &lhs, &rhs, &dst });
 
@@ -1518,9 +1518,9 @@ protected:
         rhs.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(lhs), 0);
@@ -1605,8 +1605,8 @@ protected:
         GEMMFunctionType gemm;
         gemm.configure(&lhs, &rhs, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
 
-        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
 
         add_padding_x({ &lhs, &rhs, &dst });
 
@@ -1615,9 +1615,9 @@ protected:
         rhs.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(lhs), 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,13 +69,13 @@ protected:
         FunctionType compute_all_anchors;
         compute_all_anchors.configure(&anchors, &all_anchors, info);
 
-        ARM_COMPUTE_EXPECT(all_anchors.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(all_anchors.info()->is_resizable());
 
         // Allocate tensors
         all_anchors.allocator()->allocate();
         anchors.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!all_anchors.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!all_anchors.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(anchors));

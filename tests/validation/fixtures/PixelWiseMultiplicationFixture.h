@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,9 +82,9 @@ protected:
 
         auto allocate_tensor = [](TensorType & t)
         {
-            ARM_COMPUTE_EXPECT(t.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(t.info()->is_resizable());
             t.allocator()->allocate();
-            ARM_COMPUTE_EXPECT(!t.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!t.info()->is_resizable());
         };
 
         // Create and configure function

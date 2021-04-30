@@ -76,7 +76,7 @@ protected:
         FunctionType split;
         split.configure(&src, dsts_ptr, axis);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
         {
             return t.info()->is_resizable();
@@ -90,7 +90,7 @@ protected:
             dsts[i].allocator()->allocate();
         }
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
         ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
         {
             return !t.info()->is_resizable();
@@ -185,7 +185,7 @@ protected:
         FunctionType split;
         split.configure(&src, dsts_ptr, axis);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
         {
             return t.info()->is_resizable();
@@ -199,7 +199,7 @@ protected:
             dsts[i].allocator()->allocate();
         }
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
         ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
         {
             return !t.info()->is_resizable();

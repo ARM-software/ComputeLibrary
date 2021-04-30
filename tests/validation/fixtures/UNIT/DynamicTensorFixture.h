@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,14 +74,14 @@ public:
 
     void validate(bool validate_finalized) const
     {
-        ARM_COMPUTE_EXPECT(mm->pool_manager() != nullptr, framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(mm->lifetime_manager() != nullptr, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(mm->pool_manager() != nullptr);
+        ARM_COMPUTE_ASSERT(mm->lifetime_manager() != nullptr);
 
         if(validate_finalized)
         {
-            ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(mm->lifetime_manager()->are_all_finalized());
         }
-        ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == num_pools, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(mm->pool_manager()->num_pools() == num_pools);
     }
 
     AllocatorType                    allocator;
@@ -159,15 +159,15 @@ protected:
         SimpleFunctionWrapperType layer(serv_internal.mm);
         layer.configure(&src, &dst);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Populate and validate memory manager
         serv_cross.populate(num_pools);
@@ -313,8 +313,8 @@ protected:
         // Create and configure function
         _f_target->configure(&src, &_weights_target, &_bias_target, &dst, info, weights_info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -322,8 +322,8 @@ protected:
         _weights_target.allocator()->allocate();
         _bias_target.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,32 +61,32 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     // Negative case : Import nullptr
     Tensor t1;
     t1.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(!bool(t1.allocator()->import_memory(nullptr)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t1.allocator()->import_memory(nullptr)));
+    ARM_COMPUTE_ASSERT(t1.info()->is_resizable());
 
     // Negative case : Import misaligned pointer
     Tensor       t2;
     const size_t required_alignment = 339;
     t2.allocator()->init(info, required_alignment);
-    ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(data.get())), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t2.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t2.allocator()->import_memory(data.get())));
+    ARM_COMPUTE_ASSERT(t2.info()->is_resizable());
 
     // Negative case : Import memory to a tensor that is memory managed
     Tensor      t3;
     MemoryGroup mg;
     t3.allocator()->set_associated_memory_group(&mg);
-    ARM_COMPUTE_EXPECT(!bool(t3.allocator()->import_memory(data.get())), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t3.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t3.allocator()->import_memory(data.get())));
+    ARM_COMPUTE_ASSERT(t3.info()->is_resizable());
 
     // Positive case : Set raw pointer
     Tensor t4;
     t4.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(bool(t4.allocator()->import_memory(data.get())), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!t4.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t4.buffer() == reinterpret_cast<uint8_t *>(data.get()), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(bool(t4.allocator()->import_memory(data.get())));
+    ARM_COMPUTE_ASSERT(!t4.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(t4.buffer() == reinterpret_cast<uint8_t *>(data.get()));
     t4.allocator()->free();
-    ARM_COMPUTE_EXPECT(t4.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t4.buffer() == nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(t4.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(t4.buffer() == nullptr);
 }
 
 TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
@@ -114,8 +114,8 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
     void *aligned_ptr = raw_data.get();
     std::align(required_alignment, total_size_in_bytes, aligned_ptr, space);
 
-    ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(aligned_ptr)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(bool(tensor.allocator()->import_memory(aligned_ptr)));
+    ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
 
     // Fill tensor
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
@@ -137,7 +137,7 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
 
     // Release resources
     tensor.allocator()->free();
-    ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
 }
 
 TEST_CASE(ImportMemoryMallocPadded, framework::DatasetMode::ALL)
@@ -160,8 +160,8 @@ TEST_CASE(ImportMemoryMallocPadded, framework::DatasetMode::ALL)
     const size_t total_size_in_bytes = tensor.info()->total_size();
     auto         raw_data            = std::make_unique<uint8_t[]>(total_size_in_bytes);
 
-    ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(raw_data.get())), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(bool(tensor.allocator()->import_memory(raw_data.get())));
+    ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
 
     // Fill tensor while accounting padding
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
@@ -190,7 +190,7 @@ TEST_CASE(ImportMemoryMallocPadded, framework::DatasetMode::ALL)
 
     // Release resources
     tensor.allocator()->free();
-    ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
 }
 
 #if !defined(BARE_METAL)
@@ -221,12 +221,12 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 
     // Map file
     utils::mmap_io::MMappedFile mmapped_file("test_mmap_import.bin", 0 /** Whole file */, 0);
-    ARM_COMPUTE_EXPECT(mmapped_file.is_mapped(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(mmapped_file.is_mapped());
     unsigned char *data = mmapped_file.data();
 
     // Import memory mapped memory
-    ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(data)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(bool(tensor.allocator()->import_memory(data)));
+    ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
 
     // Fill tensor
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
@@ -248,7 +248,7 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 
     // Release resources
     tensor.allocator()->free();
-    ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
 }
 #endif // !defined(BARE_METAL)
 
@@ -262,7 +262,7 @@ TEST_CASE(AlignedAlloc, framework::DatasetMode::ALL)
     t.allocator()->init(info, requested_alignment);
     t.allocator()->allocate();
 
-    ARM_COMPUTE_EXPECT(t.buffer() != nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(t.buffer() != nullptr);
     ARM_COMPUTE_EXPECT(t.allocator()->alignment() == requested_alignment, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(arm_compute::utility::check_aligned(reinterpret_cast<void *>(t.buffer()), requested_alignment),
                        framework::LogLevel::ERRORS);

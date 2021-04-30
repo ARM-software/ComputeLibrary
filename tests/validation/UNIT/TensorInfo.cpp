@@ -93,7 +93,7 @@ TEST_CASE(Clone, framework::DatasetMode::ALL)
 
     // Get clone of current tensor info
     std::unique_ptr<ITensorInfo> info_clone = info.clone();
-    ARM_COMPUTE_EXPECT(info_clone != nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(info_clone != nullptr);
     ARM_COMPUTE_EXPECT(info_clone->total_size() == info.total_size(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(info_clone->num_channels() == info.num_channels(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(info_clone->data_type() == info.data_type(), framework::LogLevel::ERRORS);

@@ -90,15 +90,15 @@ protected:
         FunctionType f;
         f.configure(&a, &b);
 
-        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(b.info()->is_resizable());
 
         // Allocate tensors
         a.allocator()->allocate();
         b.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(a), 0);

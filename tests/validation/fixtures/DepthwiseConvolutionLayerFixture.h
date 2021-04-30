@@ -109,10 +109,10 @@ public:
         // Create Depthwise Convolution configure function
         _dwc.configure(&_src, &_weights, &_biases, &_target, _pad_stride_info, _depth_multiplier, _act_info, _dilation);
 
-        ARM_COMPUTE_EXPECT(_src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(_src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_biases.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_target.info()->is_resizable());
     }
 
     void allocate_and_run_target()
@@ -126,10 +126,10 @@ public:
         _biases.allocator()->allocate();
         _target.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!_src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!_src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_biases.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_target.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(_src), 0);
@@ -308,10 +308,10 @@ public:
         };
         _dwc.configure(_src.info(), _weights.info(), _biases.info(), _target.info(), info);
 
-        ARM_COMPUTE_EXPECT(_src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(_src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_biases.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_target.info()->is_resizable());
     }
 
     void allocate_and_run_target()
@@ -324,10 +324,10 @@ public:
         _biases.allocator()->allocate();
         _target.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!_src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!_src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_biases.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_target.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(_src), 0);
@@ -449,10 +449,10 @@ public:
         // Create Depthwise Convolution configure function
         _dwc.configure(&_src, &_weights, &_biases, &_target, dwc_weights_info, dwc_info, _conv_info, _depth_multiplier, _dilation);
 
-        ARM_COMPUTE_EXPECT(_src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(_src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_biases.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_target.info()->is_resizable());
     }
 
     void allocate_and_run_target()
@@ -465,10 +465,10 @@ public:
         _biases.allocator()->allocate();
         _target.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!_src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!_src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_biases.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_target.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(_src), 0);

@@ -180,31 +180,31 @@ TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
     // Negative case : Import nullptr
     CLTensor t1;
     t1.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(!bool(t1.allocator()->import_memory(cl::Buffer())), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t1.allocator()->import_memory(cl::Buffer())));
+    ARM_COMPUTE_ASSERT(t1.info()->is_resizable());
 
     // Negative case : Import memory to a tensor that is memory managed
     CLTensor    t2;
     MemoryGroup mg;
     t2.allocator()->set_associated_memory_group(&mg);
-    ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t2.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t2.allocator()->import_memory(buf)));
+    ARM_COMPUTE_ASSERT(t2.info()->is_resizable());
 
     // Negative case : Invalid buffer size
     CLTensor         t3;
     const TensorInfo info_neg(TensorShape(32U, 16U, 3U), 1, DataType::F32);
     t3.allocator()->init(info_neg);
-    ARM_COMPUTE_EXPECT(!bool(t3.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t3.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t3.allocator()->import_memory(buf)));
+    ARM_COMPUTE_ASSERT(t3.info()->is_resizable());
 
     // Positive case : Set raw pointer
     CLTensor t4;
     t4.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(bool(t4.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!t4.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(bool(t4.allocator()->import_memory(buf)));
+    ARM_COMPUTE_ASSERT(!t4.info()->is_resizable());
     ARM_COMPUTE_EXPECT(t4.cl_buffer().get() == buf.get(), framework::LogLevel::ERRORS);
     t4.allocator()->free();
-    ARM_COMPUTE_EXPECT(t4.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(t4.info()->is_resizable());
     ARM_COMPUTE_EXPECT(t4.cl_buffer().get() != buf.get(), framework::LogLevel::ERRORS);
 }
 
@@ -242,8 +242,8 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
         std::align(alignment, total_size_in_bytes, aligned_ptr, space);
 
         cl::Buffer wrapped_buffer(import_malloc_memory_helper(aligned_ptr, total_size_in_bytes));
-        ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(wrapped_buffer)), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(bool(tensor.allocator()->import_memory(wrapped_buffer)));
+        ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
 
         // Fill tensor
         std::uniform_real_distribution<float> distribution(-5.f, 5.f);
@@ -306,12 +306,12 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 
         // Map file
         utils::mmap_io::MMappedFile mmapped_file("test_mmap_import.bin", 0 /** Whole file */, 0);
-        ARM_COMPUTE_EXPECT(mmapped_file.is_mapped(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(mmapped_file.is_mapped());
         unsigned char *data = mmapped_file.data();
 
         cl::Buffer wrapped_buffer(import_malloc_memory_helper(data, total_size_in_bytes));
-        ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(wrapped_buffer)), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(bool(tensor.allocator()->import_memory(wrapped_buffer)));
+        ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
 
         // Fill tensor
         std::uniform_real_distribution<float> distribution(-5.f, 5.f);
@@ -334,7 +334,7 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 
         // Release resources
         tensor.allocator()->free();
-        ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
     }
 }
 #endif // !defined(BARE_METAL)

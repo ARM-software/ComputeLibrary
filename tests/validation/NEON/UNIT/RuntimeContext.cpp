@@ -57,14 +57,14 @@ TEST_CASE(Scheduler, framework::DatasetMode::ALL)
     RuntimeContext ctx;
 
     // Check if it's been initialised properly
-    ARM_COMPUTE_EXPECT(ctx.scheduler() != nullptr, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(ctx.asset_manager() == nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(ctx.scheduler() != nullptr);
+    ARM_COMPUTE_ASSERT(ctx.asset_manager() == nullptr);
 
     // Create a Scheduler
     auto scheduler = SchedulerFactory::create();
     ctx.set_scheduler(scheduler.get());
     // Check if the scheduler has been properly setup
-    ARM_COMPUTE_EXPECT(ctx.scheduler() != nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(ctx.scheduler() != nullptr);
 
     // Create a new activation function
     NEActivationLayer act_layer(&ctx);
@@ -74,14 +74,14 @@ TEST_CASE(Scheduler, framework::DatasetMode::ALL)
 
     act_layer.configure(&src, &dst, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR));
 
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
     // Allocate tensors
     src.allocator()->allocate();
     dst.allocator()->allocate();
 
-    ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
 
     float min_bound = 0;
     float max_bound = 0;
@@ -117,10 +117,10 @@ TEST_CASE(MultipleThreadedScheduller, framework::DatasetMode::ALL)
     act_layer_thread0.configure(&src_t0, &dst_t0, activation_info);
     act_layer_thread1.configure(&src_t1, &dst_t1, activation_info);
 
-    ARM_COMPUTE_EXPECT(src_t0.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst_t0.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(src_t1.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst_t1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(src_t0.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(dst_t0.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(src_t1.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(dst_t1.info()->is_resizable());
 
     // Allocate tensors
     src_t0.allocator()->allocate();
@@ -128,8 +128,8 @@ TEST_CASE(MultipleThreadedScheduller, framework::DatasetMode::ALL)
     src_t1.allocator()->allocate();
     dst_t1.allocator()->allocate();
 
-    ARM_COMPUTE_EXPECT(!src_t0.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!src_t1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!src_t0.info()->is_resizable());
+    ARM_COMPUTE_ASSERT(!src_t1.info()->is_resizable());
 
     float min_bound = 0;
     float max_bound = 0;
