@@ -1,0 +1,70 @@
+///
+/// Copyright (c) 2017-2021 Arm Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+namespace arm_compute
+{
+/**
+@page programming_model Programming Model
+
+@tableofcontents
+
+@section programming_model_functions Functions
+
+Functions will automatically allocate the temporary buffers mentioned above, and will automatically multi-thread kernels' executions using the very basic scheduler described in the previous section.
+
+Simple functions only call a single kernel (e.g NEConvolution3x3), while more complex ones consist of several kernels pipelined together (e.g @ref NEFullyConnectedLayer ). Check their documentation to find out which kernels are used by each function.
+
+@code{.cpp}
+//Create a function object:
+MyFunction function;
+// Initialize the function with the input/output and options you want to use:
+function.configure( input, output, option0, option1);
+// Execute the function:
+function.run();
+@endcode
+
+@warning The Compute Library requires Arm® Mali™ OpenCL DDK r8p0 or higher (OpenCL kernels are compiled using the -cl-arm-non-uniform-work-group-size flag)
+
+@note All OpenCL functions and objects in the runtime library use the command queue associated with CLScheduler for all operations, a real implementation would be expected to use different queues for mapping operations and kernels in order to reach a better GPU utilization.
+
+@section programming_model_scheduler OpenCL Scheduler
+
+The Compute Library runtime uses a single command queue and context for all the operations.
+
+The user can get / set this context and command queue through CLScheduler's interface.
+
+The user can get / set the target GPU device through the CLScheduler's interface.
+
+@attention Make sure the application is using the same context as the library as in OpenCL it is forbidden to share objects across contexts. This is done by calling @ref CLScheduler::init() or @ref CLScheduler::default_init() at the beginning of your application.
+
+@attention Make sure the scheduler's target is not changed after function classes are created.
+
+@section programming_model__events_sync OpenCL events and synchronization
+
+In order to block until all the jobs in the CLScheduler's command queue are done executing the user can call @ref CLScheduler::sync() or create a sync event using @ref CLScheduler::enqueue_sync_event()
+
+@section programming_model_cl_neon OpenCL / Arm® Neon™ interoperability
+
+You can mix OpenCL and Arm® Neon™ kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects.
+*/
+} // namespace arm_compute

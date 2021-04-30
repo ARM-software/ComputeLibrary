@@ -687,7 +687,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            = 
+LAYOUT_FILE            = ./docs/DoxygenLayout.xml
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -768,16 +768,20 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ./docs/00_introduction.dox \
-                         ./docs/01_library.dox \
-                         ./docs/02_tests.dox \
-                         ./docs/03_scripts.dox \
-                         ./docs/04_adding_operator.dox \
-                         ./docs/05_contribution_guidelines.dox \
-                         ./docs/06_functions_list.dox \
-                         ./docs/07_errata.dox \
-                         ./docs/08_api.dox \
-                         ./docs/09_operators_list.dox \
+INPUT                  = ./docs/user_guide/introduction.dox \
+                         ./docs/user_guide/how_to_build_and_run_examples.dox \
+                         ./docs/user_guide/library.dox \
+                         ./docs/user_guide/programming_model.dox \
+                         ./docs/user_guide/api.dox \
+                         ./docs/user_guide/data_type.dox \
+                         ./docs/user_guide/data_layout.dox \
+                         ./docs/user_guide/tests.dox \
+                         ./docs/user_guide/advanced.dox \
+                         ./docs/user_guide/release_version_and_change_log.dox \
+                         ./docs/user_guide/errata.dox \
+                         ./docs/contributor_guide/contribution_guidelines.dox \
+                         ./docs/contributor_guide/adding_operator.dox \
+                         ./docs/contributor_guide/implementation_topics.dox \
                          ./docs/ComputeLibrary.dir \
                          ./arm_compute/ \
                          ./src/ \

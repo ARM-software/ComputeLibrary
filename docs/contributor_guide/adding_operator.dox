@@ -25,9 +25,11 @@
 namespace arm_compute
 {
 /**
-@page add_operator Adding new operators
+@page adding_operator How to Add a New Operator
 
 @tableofcontents
+
+@section S4_0_introduction Adding new operators
 
 @section S4_1_introduction Introduction
 In Compute Library there are two main parts or modules:

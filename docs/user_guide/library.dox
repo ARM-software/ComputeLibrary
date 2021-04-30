@@ -24,7 +24,7 @@
 namespace arm_compute
 {
 /**
-@page architecture Library architecture
+@page architecture Library Architecture
 
 @tableofcontents
 
@@ -43,22 +43,6 @@ The Runtime library is a very basic wrapper around the Core library which can be
 
 For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between Arm® Neon™ and OpenCL, etc.)
 
-@section S4_1_2 Data-type and Data-layout support
-
-Compute Library supports a wide list of data-types, information can been directly found in the documentation of each kernel/function.
-The main data-types that the Machine Learning functions support are the following:
-- BFLOAT16: 16-bit non-standard brain floating point
-- F16: 16-bit half precision floating point
-- F32: 32-bit single precision floating point
-- QASYMM8: 8-bit unsigned asymmetric quantized
-- QASYMM8_SIGNED: 8-bit signed asymmetric quantized
-- QSYMM8_PER_CHANNEL: 8-bit signed symmetric quantized (Used for the weights)
-
-Moreover, Compute Library supports the following data layouts (fast changing dimension from right to left):
-- NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension
-- NCHW: Legacy layout where width is in the fastest changing dimension
-where N = batches, C = channels, H = height, W = width
-
 @section S4_1_3 Fast-math support
 
 Compute Library supports different types of convolution methods, fast-math flag is only used for the Winograd algorithm.
@@ -75,159 +59,6 @@ When the fast-math flag is enabled, both Arm® Neon™ and CL convolution layers
 Although the library supports multi-threading during workload dispatch, thus parallelizing the execution of the workload at multiple threads, the current runtime module implementation is not thread-safe in the sense of executing different functions from separate threads.
 This lies to the fact that the provided scheduling mechanism wasn't designed with thread-safety in mind.
 As it is true with the rest of the runtime library a custom scheduling mechanism can be re-implemented to account for thread-safety if needed and be injected as the library's default scheduler.
-
-@section S4_2_windows_kernels_mt_functions Windows, kernels, multi-threading and functions
-
-@subsection S4_2_1_windows Windows
-
-A @ref Window represents a workload to execute, it can handle up to @ref Coordinates::num_max_dimensions dimensions.
-Each dimension is defined by a start, end and step.
-
-It can split into subwindows as long as *all* the following rules remain true for all the dimensions:
-
-- max[n].start() <= sub[n].start() < max[n].end()
-- sub[n].start() < sub[n].end() <= max[n].end()
-- max[n].step() == sub[n].step()
-- (sub[n].start() - max[n].start()) % max[n].step() == 0
-- (sub[n].end() - sub[n].start()) % max[n].step() == 0
-
-@subsection S4_2_2 Kernels
-
-Each implementation of the @ref IKernel interface (base class of all the kernels in the core library) works in the same way:
-
-OpenCL kernels:
-
-@code{.cpp}
-// Initialize the CLScheduler with the default context and default command queue
-// Implicitly initializes the CLKernelLibrary to use ./cl_kernels as location for OpenCL kernels files and sets a default device for which OpenCL programs are built.
-CLScheduler::get().default_init();
-
-cl::CommandQueue q = CLScheduler::get().queue();
-//Create a kernel object:
-MyKernel kernel;
-// Initialize the kernel with the input/output and options you want to use:
-kernel.configure( input, output, option0, option1);
-// Retrieve the execution window of the kernel:
-const Window& max_window = kernel.window();
-// Run the whole kernel in the current thread:
-kernel.run( q, max_window ); // Enqueue the kernel to process the full window on the default queue
-
-// Wait for the processing to complete:
-q.finish();
-@endcode
-
-Neon / CPP kernels:
-
-@code{.cpp}
-//Create a kernel object:
-MyKernel kernel;
-// Initialize the kernel with the input/output and options you want to use:
-kernel.configure( input, output, option0, option1);
-// Retrieve the execution window of the kernel:
-const Window& max_window = kernel.window();
-// Run the whole kernel in the current thread:
-kernel.run( max_window ); // Run the kernel on the full window
-@endcode
-
-@subsection S4_2_3 Multi-threading
-
-The previous section shows how to run a Arm® Neon™ / CPP kernel in the current thread, however if your system has several CPU cores, you will probably want the kernel to use several cores. Here is how this can be done:
-
-@code{.cpp}
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-
-    const Window      &max_window     = kernel->window();
-    const unsigned int num_iterations = max_window.num_iterations(split_dimension);
-    info.num_threads                  = std::min(num_iterations, _num_threads);
-
-    if(num_iterations == 0)
-    {
-        return;
-    }
-
-    if(!kernel->is_parallelisable() || info.num_threads == 1)
-    {
-        kernel->run(max_window, info);
-    }
-    else
-    {
-        int  t         = 0;
-        auto thread_it = _threads.begin();
-
-        for(; t < info.num_threads - 1; ++t, ++thread_it)
-        {
-            Window win     = max_window.split_window(split_dimension, t, info.num_threads);
-            info.thread_id = t;
-            thread_it->start(kernel, win, info);
-        }
-
-        // Run last part on main thread
-        Window win     = max_window.split_window(split_dimension, t, info.num_threads);
-        info.thread_id = t;
-        kernel->run(win, info);
-
-        try
-        {
-            for(auto &thread : _threads)
-            {
-                thread.wait();
-            }
-        }
-        catch(const std::system_error &e)
-        {
-            std::cerr << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
-        }
-    }
-@endcode
-
-This is a very basic implementation which was originally used in the Arm® Neon™ runtime library by all the Arm® Neon™ functions.
-
-@sa CPPScheduler
-
-@note Some kernels need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and a unique thread_id between 0 and num_threads must be assigned to the @ref ThreadInfo object passed to the ```run``` function.
-
-@subsection S4_2_4 Functions
-
-Functions will automatically allocate the temporary buffers mentioned above, and will automatically multi-thread kernels' executions using the very basic scheduler described in the previous section.
-
-Simple functions only call a single kernel (e.g NEConvolution3x3), while more complex ones consist of several kernels pipelined together (e.g @ref NEFullyConnectedLayer ). Check their documentation to find out which kernels are used by each function.
-
-@code{.cpp}
-//Create a function object:
-MyFunction function;
-// Initialize the function with the input/output and options you want to use:
-function.configure( input, output, option0, option1);
-// Execute the function:
-function.run();
-@endcode
-
-@warning The Compute Library requires Arm® Mali™ OpenCL DDK r8p0 or higher (OpenCL kernels are compiled using the -cl-arm-non-uniform-work-group-size flag)
-
-@note All OpenCL functions and objects in the runtime library use the command queue associated with CLScheduler for all operations, a real implementation would be expected to use different queues for mapping operations and kernels in order to reach a better GPU utilization.
-
-@subsection S4_4_1_cl_scheduler OpenCL Scheduler and kernel library
-
-The Compute Library runtime uses a single command queue and context for all the operations.
-
-The user can get / set this context and command queue through CLScheduler's interface.
-
-The user can get / set the target GPU device through the CLScheduler's interface.
-
-@attention Make sure the application is using the same context as the library as in OpenCL it is forbidden to share objects across contexts. This is done by calling @ref CLScheduler::init() or @ref CLScheduler::default_init() at the beginning of your application.
-
-@attention Make sure the scheduler's target is not changed after function classes are created.
-
-All OpenCL kernels used by the library are built and stored in @ref CLKernelLibrary.
-If the library is compiled with embed_kernels=0 the application can set the path to the OpenCL kernels by calling @ref CLKernelLibrary::init(), by default the path is set to "./cl_kernels"
-
-@subsection S4_4_2_events_sync OpenCL events and synchronization
-
-In order to block until all the jobs in the CLScheduler's command queue are done executing the user can call @ref CLScheduler::sync() or create a sync event using @ref CLScheduler::enqueue_sync_event()
-
-@subsection S4_4_2_cl_neon OpenCL / Arm® Neon™ interoperability
-
-You can mix OpenCL and Arm® Neon™ kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects.
 
 @section S4_5_algorithms Algorithms
 

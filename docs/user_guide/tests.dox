@@ -26,7 +26,7 @@ namespace arm_compute
 namespace test
 {
 /**
-@page tests Validation and benchmarks tests
+@page tests Validation and Benchmarks
 
 @tableofcontents
 
