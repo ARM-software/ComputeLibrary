@@ -159,13 +159,7 @@ void CLReductionOperationKernel::configure(const CLCompileContext &compile_conte
         case 0:
         {
             build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(width));
-            kernel_axis_name = "x";
-
-            if(is_serial_op)
-            {
-                build_opts.add_option_if_else(_input->info()->data_type() == DataType::F16, "-DCOND_DATA_TYPE=short", "-DCOND_DATA_TYPE=int");
-                kernel_axis_name = "non_parallel_x";
-            }
+            kernel_axis_name = ((is_serial_op) ? "non_parallel_x" : "x");
         }
         break;
         case 1:
@@ -236,15 +230,15 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
             {
                 // Set out window
                 bool   has_collapsed = true;
-                Window window_in     = window.collapse_if_possible(window, 1, &has_collapsed);
+                Window window_in     = window.collapse_if_possible(window, 2, &has_collapsed);
                 ARM_COMPUTE_ERROR_ON(!has_collapsed);
 
                 Window window_out = window_in;
                 window_out.set(0, Window::Dimension());
 
                 unsigned int idx = 0;
-                add_2D_tensor_argument(idx, _input, window_in);
-                add_2D_tensor_argument(idx, _output, window_out);
+                add_3D_tensor_argument(idx, _input, window_in);
+                add_3D_tensor_argument(idx, _output, window_out);
                 enqueue(queue, *this, window_in);
             }
         }

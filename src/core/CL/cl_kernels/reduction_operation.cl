@@ -25,12 +25,16 @@
 #include "helpers_asymm.h"
 
 #if defined(FLOAT_DATA_TYPE)
-#define ISGREATER(x, y) isgreater(x, y)
-#define ISLESS(x, y) isless(x, y)
+#define ISGREATER(x, y) (SELECT_VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE))(isgreater(x, y))
+#define ISLESS(x, y) (SELECT_VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE))(isless(x, y))
+#define ISGREATER_SCALAR(x, y) (SELECT_DATA_TYPE(DATA_TYPE_PROMOTED))(isgreater(x, y))
+#define ISLESS_SCALAR(x, y) (SELECT_DATA_TYPE(DATA_TYPE_PROMOTED))(isless(x, y))
 #else // !FLOAT_DATA_TYPE
 #if defined(WIDTH)
 #define ISGREATER(x, y) (x > y) ? 1 : 0
 #define ISLESS(x, y) (x < y) ? 1 : 0
+#define ISGREATER_SCALAR ISGREATER
+#define ISLESS_SCALAR ISLESS
 #else // !defined(WIDTH)
 #define ISGREATER(x, y) select((VEC_DATA_TYPE(int, VEC_SIZE))0, (VEC_DATA_TYPE(int, VEC_SIZE)) - 1, x > y)
 #define ISLESS(x, y) select((VEC_DATA_TYPE(int, VEC_SIZE))0, (VEC_DATA_TYPE(int, VEC_SIZE)) - 1, x < y)
@@ -66,13 +70,14 @@
  * @param[in] output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void reduction_operation_x(
-    IMAGE_DECLARATION(input),
-    IMAGE_DECLARATION(output))
+    TENSOR3D_DECLARATION(input),
+    TENSOR3D_DECLARATION(output))
 {
     int y = get_global_id(1);
+    int z = get_global_id(2);
 
-    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + y * input_stride_y;
-    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + y * output_stride_y;
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + y * input_stride_y + z * input_stride_z;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + y * output_stride_y + z * output_stride_z;
 
 #if defined(PROD)
     DATA_TYPE res = (DATA_TYPE)1;
@@ -108,7 +113,6 @@ __kernel void reduction_operation_x(
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width size must be passed at compile time using -DWIDTH e.g. -DWIDTH=128
  * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
- * @note In case of MIN and MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
  *
  * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: S32/F16/F32 and QASYMM8/QASYMM8_SIGNED for operation MEAN
  * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
@@ -137,9 +141,9 @@ __kernel void reduction_operation_non_parallel_x(
     {
         DATA_TYPE_PROMOTED in = CONVERT(*((__global DATA_TYPE *)vector_offset(&input, x)), DATA_TYPE_PROMOTED);
 #if defined(MIN)
-        res = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
+        res = select(res, in, ISLESS_SCALAR(in, res));
 #elif defined(MAX)
-        res = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
+        res = select(res, in, ISGREATER_SCALAR(in, res));
 #elif defined(PROD)
 #if defined(OFFSET) && defined(SCALE)
         res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 1);
