@@ -390,10 +390,10 @@ struct RedOpX
 
     inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, const ReductionOperation op)
     {
-        const TensorInfo in_info        = *(in->info());
-        const int        window_step_x  = 16 / sizeof(T);
-        const auto       window_start_x = static_cast<int>(in_window.x().start());
-        const auto       window_end_x   = static_cast<int>(in_window.x().end());
+        const size_t input_dim_0    = in->info()->dimension(0);
+        const int    window_step_x  = 16 / sizeof(T);
+        const auto   window_start_x = static_cast<int>(in_window.x().start());
+        const auto   window_end_x   = static_cast<int>(in_window.x().end());
 
         Window in_win_no_pad = in_window;
         in_win_no_pad.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -479,13 +479,20 @@ struct RedOpX
                 case ReductionOperation::MEAN_SUM:
                 case ReductionOperation::SUM_SQUARE:
                 {
+#ifdef ARM_COMPUTE_DEBUG_ENABLED
+                    auto res = static_cast<T>(0.f);
+                    for(int i = 0; i < S; ++i)
+                    {
+                        res += wrapper::vgetlane(vec_res_value, i);
+                    }
+#else  // ARM_COMPUTE_DEBUG_ENABLED
                     auto carry_res = wrapper::vpadd(wrapper::vgethigh(vec_res_value), wrapper::vgetlow(vec_res_value));
                     for(int i = 0; i < S / 4; ++i)
                     {
                         carry_res = wrapper::vpadd(carry_res, carry_res);
                     }
                     auto res = wrapper::vgetlane(carry_res, 0);
-
+#endif // ARM_COMPUTE_DEBUG_ENABLED
                     if(op == ReductionOperation::SUM_SQUARE)
                     {
                         // Compute left-over elements
@@ -505,7 +512,7 @@ struct RedOpX
 
                     if(op == ReductionOperation::MEAN_SUM)
                     {
-                        res /= in_info.dimension(0);
+                        res /= input_dim_0;
                     }
 
                     *(reinterpret_cast<T *>(output.ptr())) = res;
@@ -813,10 +820,14 @@ struct RedOpX_quantized
                 carry_res      = wrapper::vadd(carry_res, vec_res_value3);
                 carry_res      = wrapper::vadd(carry_res, vec_res_value4);
 
+#ifdef ARM_COMPUTE_DEBUG_ENABLED
+                const float res_f = wrapper::vgetlane(carry_res, 0) + wrapper::vgetlane(carry_res, 1) + wrapper::vgetlane(carry_res, 2) + wrapper::vgetlane(carry_res, 3);
+                auto        res   = static_cast<int32_t>(res_f);
+#else  // ARM_COMPUTE_DEBUG_ENABLED
                 auto carry_paddition = wrapper::vpadd(wrapper::vgethigh(carry_res), wrapper::vgetlow(carry_res));
                 carry_paddition      = wrapper::vpadd(carry_paddition, carry_paddition);
                 auto res             = static_cast<int32_t>(wrapper::vgetlane(carry_paddition, 0));
-
+#endif // ARM_COMPUTE_DEBUG_ENABLED
                 // Compute left-over elements
                 for(; x < window_end_x; ++x)
                 {
@@ -1575,6 +1586,7 @@ void reduce_op(const Window &window, const ITensor *input, ITensor *output, unsi
             default:
                 ARM_COMPUTE_ERROR("Not supported");
         }
+        return;
     }
 
     switch(axis)
