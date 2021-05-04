@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_CLRUNTIME_CONTEXT_H
 #define ARM_COMPUTE_CLRUNTIME_CONTEXT_H
 
-#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -51,16 +50,14 @@ public:
     void set_gpu_scheduler(CLScheduler *scheduler);
 
     // Inherited overridden methods
-    CLScheduler          *gpu_scheduler();
-    CLKernelLibrary      &kernel_library();
-    CLCoreRuntimeContext *core_runtime_context();
+    CLScheduler     *gpu_scheduler();
+    CLKernelLibrary &kernel_library();
 
 private:
     std::unique_ptr<CLScheduler> _gpu_owned_scheduler{ nullptr };
     CLScheduler                 *_gpu_scheduler{ nullptr };
     CLTuner                      _tuner{ false };
     CLSymbols                    _symbols{};
-    CLCoreRuntimeContext         _core_context{};
     CLBackendType                _backend_type{ CLBackendType::Native };
 };
 } // namespace arm_compute

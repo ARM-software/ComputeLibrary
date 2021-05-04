@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,17 +31,15 @@
 
 namespace arm_compute
 {
-class CLCoreRuntimeContext;
 /** OpenCL memory region interface */
 class ICLMemoryRegion : public IMemoryRegion
 {
 public:
     /** Constructor
      *
-     * @param[in] ctx  Runtime context
      * @param[in] size Region size
      */
-    ICLMemoryRegion(CLCoreRuntimeContext *ctx, size_t size);
+    ICLMemoryRegion(size_t size);
     /** Default Destructor */
     virtual ~ICLMemoryRegion() = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -99,17 +97,15 @@ class CLBufferMemoryRegion final : public ICLMemoryRegion
 public:
     /** Constructor
      *
-     * @param[in] ctx   Runtime context
      * @param[in] flags Memory flags
      * @param[in] size  Region size
      */
-    CLBufferMemoryRegion(CLCoreRuntimeContext *ctx, cl_mem_flags flags, size_t size);
+    CLBufferMemoryRegion(cl_mem_flags flags, size_t size);
     /** Constructor
      *
      * @param[in] buffer Buffer to be used as a memory region
-     * @param[in] ctx    Runtime context
      */
-    CLBufferMemoryRegion(const cl::Buffer &buffer, CLCoreRuntimeContext *ctx);
+    CLBufferMemoryRegion(const cl::Buffer &buffer);
 
     // Inherited methods overridden :
     void *ptr() final;
@@ -123,12 +119,11 @@ class ICLSVMMemoryRegion : public ICLMemoryRegion
 protected:
     /** Constructor
      *
-     * @param[in] ctx       Runtime context
      * @param[in] flags     Memory flags
      * @param[in] size      Region size
      * @param[in] alignment Alignment
      */
-    ICLSVMMemoryRegion(CLCoreRuntimeContext *ctx, cl_mem_flags flags, size_t size, size_t alignment);
+    ICLSVMMemoryRegion(cl_mem_flags flags, size_t size, size_t alignment);
     /** Destructor */
     virtual ~ICLSVMMemoryRegion();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -153,12 +148,11 @@ class CLCoarseSVMMemoryRegion final : public ICLSVMMemoryRegion
 public:
     /** Constructor
      *
-     * @param[in] ctx       Runtime context
      * @param[in] flags     Memory flags
      * @param[in] size      Region size
      * @param[in] alignment Alignment
      */
-    CLCoarseSVMMemoryRegion(CLCoreRuntimeContext *ctx, cl_mem_flags flags, size_t size, size_t alignment);
+    CLCoarseSVMMemoryRegion(cl_mem_flags flags, size_t size, size_t alignment);
 
     // Inherited methods overridden :
     void *map(cl::CommandQueue &q, bool blocking) final;
@@ -171,12 +165,11 @@ class CLFineSVMMemoryRegion final : public ICLSVMMemoryRegion
 public:
     /** Constructor
      *
-     * @param[in] ctx       Runtime context
      * @param[in] flags     Memory flags
      * @param[in] size      Region size
      * @param[in] alignment Alignment
      */
-    CLFineSVMMemoryRegion(CLCoreRuntimeContext *ctx, cl_mem_flags flags, size_t size, size_t alignment);
+    CLFineSVMMemoryRegion(cl_mem_flags flags, size_t size, size_t alignment);
 
     // Inherited methods overridden :
     void *map(cl::CommandQueue &q, bool blocking) final;

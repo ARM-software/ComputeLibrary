@@ -65,7 +65,6 @@ cc_library_static {
         "src/core/AccessWindowStatic.cpp",
         "src/core/AccessWindowTranspose.cpp",
         "src/core/CL/CLCompileContext.cpp",
-        "src/core/CL/CLCoreRuntimeContext.cpp",
         "src/core/CL/CLHelpers.cpp",
         "src/core/CL/CLKernelLibrary.cpp",
         "src/core/CL/CLUtils.cpp",

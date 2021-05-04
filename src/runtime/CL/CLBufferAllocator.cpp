@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,6 @@
  */
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
 
-#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLMemoryRegion.h"
@@ -33,23 +32,10 @@
 
 namespace arm_compute
 {
-CLBufferAllocator::CLBufferAllocator(CLCoreRuntimeContext *ctx)
-    : _ctx(ctx)
-{
-}
-
 void *CLBufferAllocator::allocate(size_t size, size_t alignment)
 {
     ARM_COMPUTE_UNUSED(alignment);
-    cl_mem buf;
-    if(_ctx == nullptr)
-    {
-        buf = clCreateBuffer(CLScheduler::get().context().get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size, nullptr, nullptr);
-    }
-    else
-    {
-        buf = clCreateBuffer(_ctx->context().get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size, nullptr, nullptr);
-    }
+    cl_mem buf{ clCreateBuffer(CLScheduler::get().context().get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size, nullptr, nullptr) };
     return static_cast<void *>(buf);
 }
 
@@ -62,6 +48,6 @@ void CLBufferAllocator::free(void *ptr)
 std::unique_ptr<IMemoryRegion> CLBufferAllocator::make_region(size_t size, size_t alignment)
 {
     ARM_COMPUTE_UNUSED(alignment);
-    return std::make_unique<CLBufferMemoryRegion>(_ctx, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size);
+    return std::make_unique<CLBufferMemoryRegion>(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size);
 }
 } // namespace arm_compute

@@ -23,7 +23,6 @@
  */
 #include "src/core/gpu/cl/kernels/ClActivationKernel.h"
 
-#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/TensorInfo.h"
