@@ -38,7 +38,6 @@
 
 namespace arm_compute
 {
-class CLCoreRuntimeContext;
 class CLCompileContext;
 class CLBuildOptions;
 
@@ -201,16 +200,6 @@ bool preferred_dummy_work_items_support(const cl::Device &device);
  * @return True if the extension is supported
  */
 bool image2d_from_buffer_supported(const cl::Device &device);
-
-/** Creates an opencl kernel
- *
- * @param[in] ctx         A context to be used to create the opencl kernel.
- * @param[in] kernel_name The kernel name.
- * @param[in] build_opts  The build options to be used for the opencl kernel compilation.
- *
- * @return An opencl kernel
- */
-cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts);
 
 /** Creates an opencl kernel using a compile context
  *

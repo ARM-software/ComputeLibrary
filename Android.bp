@@ -354,6 +354,7 @@ cc_library_static {
         "src/core/cpu/kernels/sub/neon/qasymm8.cpp",
         "src/core/cpu/kernels/sub/neon/qasymm8_signed.cpp",
         "src/core/cpu/kernels/sub/neon/qsymm16.cpp",
+        "src/core/gpu/cl/ClKernelLibrary.cpp",
         "src/core/gpu/cl/kernels/ClActivationKernel.cpp",
         "src/core/gpu/cl/kernels/ClBatchConcatenateKernel.cpp",
         "src/core/gpu/cl/kernels/ClConvertFullyConnectedWeightsKernel.cpp",
