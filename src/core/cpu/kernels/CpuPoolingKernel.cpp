@@ -183,14 +183,27 @@ const PoolingKernel *get_implementation(DataType dt, DataLayout dl, int pool_str
 }
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info,
-                          unsigned int &pooled_w, unsigned int pooled_h, const ITensorInfo *indices, Size2D pool_size)
+                          const ITensorInfo *indices, Size2D pool_size)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON(pool_size.x() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(pool_size.y() == 0);
 
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
+    int                 output_width    = 0;
+    int                 output_height   = 0;
     PoolingType         pool_type       = pool_info.pool_type;
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
+    const auto          data_layout     = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
+    const int           idx_width       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int           idx_height      = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    std::tie(output_width, output_height) = scaled_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height],
+                                                                     pool_size.x(), pool_size.y(), pool_info.pad_stride_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1), "Calculated output dimension size is invalid");
+
+    TensorInfo out_info(TensorInfo(compute_pool_shape(*src, pool_info), 1, dst->data_type()));
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
@@ -210,14 +223,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
-        ARM_COMPUTE_RETURN_ERROR_ON((dst->dimension(get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::WIDTH)) != pooled_w)
-                                    || (dst->dimension(get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::HEIGHT)) != pooled_h));
-
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &out_info);
         if(indices)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
-            ARM_COMPUTE_RETURN_ERROR_ON((indices->dimension(get_data_layout_dimension_index(indices->data_layout(), DataLayoutDimension::WIDTH)) != pooled_w)
-                                        || (indices->dimension(get_data_layout_dimension_index(indices->data_layout(), DataLayoutDimension::HEIGHT)) != pooled_h));
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(indices, &out_info);
         }
     }
 
@@ -227,18 +237,10 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     return Status{};
 }
 
-Status validate_arguments_pool_info(const unsigned int pool_size_x, const unsigned int pool_size_y)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON(pool_size_x == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON(pool_size_y == 0);
-
-    return Status{};
-}
-
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITensorInfo *dst, ITensorInfo *indices, const PoolingLayerInfo &pool_info,
                                                         unsigned int &num_elems_processed_per_iteration,
                                                         BorderSize   &border_size,
-                                                        unsigned int pooled_w, unsigned int pooled_h, int pool_size_x, int pool_size_y)
+                                                        int pool_size_x, int pool_size_y)
 {
     // dst auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_pool_shape(*src, pool_info)));
@@ -260,18 +262,13 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
     const int           src_height                   = src->dimension(idx_height);
     const PadStrideInfo pad_stride_info              = pool_info.pad_stride_info;
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
-    const int  pool_pad_right  = pad_stride_info.pad_right();
-    const int  pool_pad_top    = pad_stride_info.pad_top();
-    const int  pool_pad_left   = pad_stride_info.pad_left();
-    const int  pool_pad_bottom = pad_stride_info.pad_bottom();
-    const bool is_square       = pool_size_x == pool_size_y;
-
-    // Check dst dimensions
-    std::tie(pooled_w, pooled_h) = scaled_dimensions(src->dimension(idx_width),
-                                                     src->dimension(idx_height),
-                                                     pool_size_x,
-                                                     pool_size_y,
-                                                     pad_stride_info);
+    const int          pool_pad_right  = pad_stride_info.pad_right();
+    const int          pool_pad_top    = pad_stride_info.pad_top();
+    const int          pool_pad_left   = pad_stride_info.pad_left();
+    const int          pool_pad_bottom = pad_stride_info.pad_bottom();
+    const bool         is_square       = pool_size_x == pool_size_y;
+    const unsigned int pooled_w        = dst->dimension(idx_width);
+    const unsigned int pooled_h        = dst->dimension(idx_height);
 
     //If it's not squared and optimized will be executed the MxN
     num_elems_read_per_iteration      = 1;
@@ -398,20 +395,8 @@ void CpuPoolingKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Pooli
         is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width,
         is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height);
 
-    // Validate pool info before calling scaled_dimensions
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_pool_info(pool_size.x(), pool_size.y()));
-
-    // Check dst dimensions
-    unsigned int pooled_w;
-    unsigned int pooled_h;
-    std::tie(pooled_w, pooled_h) = scaled_dimensions(src->dimension(idx_width),
-                                                     src->dimension(idx_height),
-                                                     pool_size.x(),
-                                                     pool_size.y(),
-                                                     pad_stride_info);
-
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, pool_info, pooled_w, pooled_h, indices, pool_size));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, pool_info, indices, pool_size));
 
     // Set instance variables
     _pool_info     = pool_info;
@@ -429,7 +414,7 @@ void CpuPoolingKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Pooli
     {
         // Configure kernel window
         auto win_config = validate_and_configure_window(src, dst, indices, pool_info, _num_elems_processed_per_iteration,
-                                                        _border_size, pooled_w, pooled_h, pool_size.x(), pool_size.y());
+                                                        _border_size, pool_size.x(), pool_size.y());
         ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
         ICpuKernel::configure(win_config.second);
     }
@@ -439,36 +424,22 @@ Status CpuPoolingKernel::validate(const ITensorInfo *src, const ITensorInfo *dst
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
-    unsigned int pooled_w                          = 0;
-    unsigned int pooled_h                          = 0;
     unsigned int num_elems_processed_per_iteration = 0;
     BorderSize   border_size(0);
 
-    const bool   is_global_pooling = pool_info.is_global_pooling;
-    unsigned int pool_size_x       = 0;
-    unsigned int pool_size_y       = 0;
+    const bool is_global_pooling = pool_info.is_global_pooling;
 
     // Get data layout
     const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
     const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
-    pool_size_x = is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width;
-    pool_size_y = is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height;
+    unsigned int pool_size_x = is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width;
+    unsigned int pool_size_y = is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height;
 
-    // Validate pool info before calling scaled_dimensions
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_pool_info(pool_size_x, pool_size_y));
-
-    // Check dst dimensions
-    std::tie(pooled_w, pooled_h) = scaled_dimensions(src->dimension(idx_width),
-                                                     src->dimension(idx_height),
-                                                     pool_size_x,
-                                                     pool_size_y,
-                                                     pool_info.pad_stride_info);
-
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, pool_info, pooled_w, pooled_h, indices, Size2D(pool_size_x, pool_size_y)));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, pool_info, indices, Size2D(pool_size_x, pool_size_y)));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get(),
-                                                              (indices) ? indices->clone().get() : nullptr, pool_info, num_elems_processed_per_iteration, border_size, pooled_w, pooled_h,
+                                                              (indices) ? indices->clone().get() : nullptr, pool_info, num_elems_processed_per_iteration, border_size,
                                                               pool_size_x, pool_size_y)
                                 .first);
 

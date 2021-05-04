@@ -779,6 +779,20 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
                                                         const PadStrideInfo &pad_stride_info,
                                                         const Size2D        &dilation = Size2D(1U, 1U));
 
+/** Returns calculated width and height of output scaled tensor depending on dimensions rounding mode.
+ *
+ * @param[in] width           Width of input tensor (Number of columns)
+ * @param[in] height          Height of input tensor (Number of rows)
+ * @param[in] kernel_width    Kernel width.
+ * @param[in] kernel_height   Kernel height.
+ * @param[in] pad_stride_info Pad and stride information.
+ *
+ * @return A pair with the new width in the first position and the new height in the second, returned values can be < 1
+ */
+std::pair<int, int> scaled_dimensions_signed(int width, int height,
+                                             int kernel_width, int kernel_height,
+                                             const PadStrideInfo &pad_stride_info);
+
 /** Check if the given reduction operation should be handled in a serial way.
  *
  * @param[in] op   Reduction operation to perform

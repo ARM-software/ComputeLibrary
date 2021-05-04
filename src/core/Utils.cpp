@@ -426,6 +426,35 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
     return std::make_pair(static_cast<unsigned int>(w), static_cast<unsigned int>(h));
 }
 
+std::pair<int, int> scaled_dimensions_signed(int width, int height,
+                                             int kernel_width, int kernel_height,
+                                             const PadStrideInfo &pad_stride_info)
+{
+    const int pad_left   = pad_stride_info.pad_left();
+    const int pad_top    = pad_stride_info.pad_top();
+    const int pad_right  = pad_stride_info.pad_right();
+    const int pad_bottom = pad_stride_info.pad_bottom();
+    const int stride_x   = pad_stride_info.stride().first;
+    const int stride_y   = pad_stride_info.stride().second;
+    int       w          = 0;
+    int       h          = 0;
+    switch(pad_stride_info.round())
+    {
+        case DimensionRoundingType::FLOOR:
+            w = static_cast<int>(std::floor((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<int>(std::floor((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
+            break;
+        case DimensionRoundingType::CEIL:
+            w = static_cast<int>(std::ceil((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<int>(std::ceil((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported rounding type");
+    }
+
+    return std::make_pair(static_cast<int>(w), static_cast<int>(h));
+}
+
 bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis)
 {
     const bool is_min_max        = (op == ReductionOperation::MAX || op == ReductionOperation::MIN);

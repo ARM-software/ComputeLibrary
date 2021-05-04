@@ -67,6 +67,18 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(src->data_type()) && pool_info.pool_type == PoolingType::L2),
                                     "Unsupported combination of parameters!");
 
+    const auto   data_layout       = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
+    const int    idx_width         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int    idx_height        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const bool   is_global_pooling = pool_info.is_global_pooling;
+    unsigned int pool_size_x       = is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width;
+    unsigned int pool_size_y       = is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height;
+    int          output_width      = 0;
+    int          output_height     = 0;
+    std::tie(output_width, output_height) = scaled_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height],
+                                                                     pool_size_x, pool_size_y, pool_info.pad_stride_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1), "Calculated output dimension size is invalid");
+
     // Check indices
     if(indices)
     {
