@@ -54,6 +54,19 @@ public:
     NEElementwiseMax &operator=(NEElementwiseMax &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |S32            |S32            |S32            |
+     * |S16            |S16            |S16            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
+     *
      * @param[in, out] input1   First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
@@ -100,6 +113,19 @@ public:
     /** Default move assignment operator */
     NEElementwiseMin &operator=(NEElementwiseMin &&);
     /** Initialise the kernel's inputs, output and conversion policy.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |S32            |S32            |S32            |
+     * |S16            |S16            |S16            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
      *
      * @param[in, out] input1   First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
@@ -148,6 +174,19 @@ public:
     NEElementwiseSquaredDiff &operator=(NEElementwiseSquaredDiff &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |S32            |S32            |S32            |
+     * |S16            |S16            |S16            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
+     *
      * @param[in, out] input1   First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
@@ -194,6 +233,15 @@ public:
     /** Default move assignment operator */
     NEElementwiseDivision &operator=(NEElementwiseDivision &&);
     /** Initialise the kernel's inputs, output and conversion policy.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
      *
      * @param[in, out] input1   First tensor input. Data types supported: F16/F32.
      * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
@@ -243,6 +291,15 @@ public:
     NEElementwisePower &operator=(NEElementwisePower &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
+     *
      * @param[in, out] input1   First tensor input. Data types supported: F16/F32.
      * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
@@ -289,6 +346,20 @@ public:
     /** Default move assignment operator */
     NEElementwiseComparison &operator=(NEElementwiseComparison &&);
     /** Initialise the kernel's inputs, output and conversion policy.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst   |
+     * |:--------------|:--------------|:-----|
+     * |QASYMM8        |QASYMM8        |U8    |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |U8    |
+     * |S32            |S32            |U8    |
+     * |U8             |U8             |U8    |
+     * |S16            |S16            |U8    |
+     * |F16            |F16            |U8    |
+     * |F32            |F32            |U8    |
      *
      * @param[in, out] input1 First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.

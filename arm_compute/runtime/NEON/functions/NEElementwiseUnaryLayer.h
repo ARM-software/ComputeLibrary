@@ -54,6 +54,16 @@ public:
 
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F16            |F16            |
+     * |F32            |F32            |
+     * |S32            |S32            |
+     *
      * @param[in]  input  Input tensor. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
      * @param[out] output Output tensor. Data types supported: Same as @p input.
      */

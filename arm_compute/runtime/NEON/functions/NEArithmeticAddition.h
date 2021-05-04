@@ -52,8 +52,7 @@ public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * Valid data layouts:
-     * - NHWC
-     * - NCHW
+     * - All
      *
      * Valid data type configurations:
      * |src0           |src1           |dst            |

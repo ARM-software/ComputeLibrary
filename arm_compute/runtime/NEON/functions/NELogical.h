@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,14 @@ public:
 
     /** Initialise the kernel's inputs and output
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1          |dst          |
+     * |:--------------|:-------------|:------------|
+     * |U8             |U8            |U8           |
+     *
      * @param[in]  input1 First tensor input. Data type supported: U8.
      * @param[in]  input2 Second tensor input. Data type supported: U8.
      * @param[out] output Output tensor. Data type supported: U8.
@@ -83,6 +91,14 @@ public:
 
     /** Initialise the kernel's inputs and output
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1          |dst          |
+     * |:--------------|:-------------|:------------|
+     * |U8             |U8            |U8           |
+     *
      * @param[in]  input1 First tensor input. Data type supported: U8.
      * @param[in]  input2 Second tensor input. Data type supported: U8.
      * @param[out] output Output tensor. Data type supported: U8.
@@ -117,6 +133,14 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE_INC(NELogicalNot)
 
     /** Initialise the kernel's inputs and output
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst           |
+     * |:--------------|:-------------|
+     * |U8             |U8            |
      *
      * @param[in]  input  Input tensor. Data type supported: U8.
      * @param[out] output Output tensor. Data type supported: U8.

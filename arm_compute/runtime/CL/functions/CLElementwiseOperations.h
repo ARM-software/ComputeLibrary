@@ -55,19 +55,23 @@ public:
     CLArithmeticAddition &operator=(CLArithmeticAddition &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * Valid configurations (Input1,Input2) -> Output :
+     * Valid data layouts:
+     * - All
      *
-     *   - (U8,U8)           -> U8
-     *   - (U8,U8)           -> S16
-     *   - (S16,U8)          -> S16
-     *   - (U8,S16)          -> S16
-     *   - (S16,S16)         -> S16
-     *   - (S32,S32)         -> S32
-     *   - (F16,F16)         -> F16
-     *   - (F32,F32)         -> F32
-     *   - (QASYMM8,QASYMM8) -> QASYMM8
-     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |QASYMM16       |
+     * |U8             |U8             |U8             |
+     * |U8             |U8             |S16            |
+     * |U8             |S16            |S16            |
+     * |S16            |U8             |S16            |
+     * |S16            |S16            |S16            |
+     * |S32            |S32            |S32            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
      *
      * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
@@ -161,19 +165,23 @@ public:
     CLArithmeticSubtraction &operator=(CLArithmeticSubtraction &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * Valid configurations (Input1,Input2) -> Output :
+     * Valid data layouts:
+     * - All
      *
-     *   - (U8,U8)           -> U8
-     *   - (U8,U8)           -> S16
-     *   - (S16,U8)          -> S16
-     *   - (U8,S16)          -> S16
-     *   - (S16,S16)         -> S16
-     *   - (S32,S32)         -> S32
-     *   - (F16,F16)         -> F16
-     *   - (F32,F32)         -> F32
-     *   - (QASYMM8,QASYMM8) -> QASYMM8
-     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |QASYMM16       |
+     * |U8             |U8             |U8             |
+     * |U8             |U8             |S16            |
+     * |U8             |S16            |S16            |
+     * |S16            |U8             |S16            |
+     * |S16            |S16            |S16            |
+     * |S32            |S32            |S32            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
      *
      * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
@@ -267,6 +275,15 @@ public:
     CLArithmeticDivision &operator=(CLArithmeticDivision &&);
     /** Initialise the kernel's inputs, output.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
+     *
      * @param[in, out] input1   First tensor input. Data types supported: F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[in, out] input2   Second tensor input. Same as @p input1.
@@ -326,6 +343,22 @@ public:
     /** Default move assignment operator */
     CLElementwiseMax &operator=(CLElementwiseMax &&);
     /** Initialise the kernel's inputs, output and conversion policy.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |QASYMM16       |
+     * |U8             |U8             |U8             |
+     * |S16            |S16            |S16            |
+     * |S32            |S32            |S32            |
+     * |U32            |U32            |U32            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
      *
      * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
@@ -387,6 +420,22 @@ public:
     CLElementwiseMin &operator=(CLElementwiseMin &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |QASYMM16       |
+     * |U8             |U8             |U8             |
+     * |S16            |S16            |S16            |
+     * |S32            |S32            |S32            |
+     * |U32            |U32            |U32            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
+     *
      * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[in, out] input2   Second tensor input. Data types supported: same as @p input1.
@@ -447,6 +496,20 @@ public:
     CLElementwiseSquaredDiff &operator=(CLElementwiseSquaredDiff &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |QASYMM16       |
+     * |U8             |U8             |U8             |
+     * |S16            |S16            |S16            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
+     *
      * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[in, out] input2   Second tensor input. Data types supported: same as @p input1.
@@ -506,6 +569,15 @@ public:
     /** Default move assignment operator */
     CLElementwisePower &operator=(CLElementwisePower &&);
     /** Initialise the kernel's inputs, output and conversion policy.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
      *
      * @param[in, out] input1   First tensor input. Data types supported: F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.

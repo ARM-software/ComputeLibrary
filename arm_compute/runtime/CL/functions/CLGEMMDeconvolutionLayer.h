@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,6 +92,17 @@ public:
     /** Default desctructor */
     ~CLGEMMDeconvolutionLayer();
     /** Set the input, weights, biases and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2     |dst            |
+     * |:--------------|:------------------|:--------|:--------------|
+     * |F16            |F16                |F16      |F16            |
+     * |F32            |F32                |F32      |F32            |
+     * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
      *
      * @param[in,out] input       Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
      *                            Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. Data layout supported: NHWC

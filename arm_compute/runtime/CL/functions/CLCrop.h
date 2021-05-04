@@ -55,6 +55,14 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
+     * Valid data layouts:
+     * - NHWC
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |F32            |
+     *
      * @param[in]  input               Source tensor. Data type supported: All. Data layouts supported: NHWC.
      * @param[out] output              Destination tensor. Data type supported: F32
      * @param[in]  start               Coordinates of where to start cropping the image.

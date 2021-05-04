@@ -51,7 +51,7 @@
  *
  */
 
-/** ArithmeticAddition (no CL)
+/** ArithmeticAddition
  *
  * Description:
  * Function to add 2 tensors.
@@ -61,7 +61,7 @@
  *
  */
 
-/** ArithmeticSubtraction (no CL)
+/** ArithmeticSubtraction
  *
  * Description:
  * Function to substract 2 tensors.
@@ -161,7 +161,7 @@
  *
  */
 
-/** Comparison (only CL)
+/** Comparison
  *
  * Description:
  * Function to compare 2 tensors.
@@ -216,7 +216,7 @@
  *
  */
 
-/** Crop (only CL)
+/** Crop
  *
  * Description:
  * Performs a copy of input tensor to the output tensor.
@@ -246,7 +246,7 @@
  *
  */
 
-/** DeconvolutionLayerUpsample (only CL)
+/** DeconvolutionLayerUpsample
  *
  * Description:
  * Function to execute deconvolution upsample on OpenCL.
@@ -296,7 +296,7 @@
  *
  */
 
-/** DetectionPostProcessLayer (no CL)
+/** DetectionPostProcessLayer
  *
  * Description:
  * Function to generate the detection output based on center size encoded boxes, class prediction and anchors by doing non maximum suppression (NMS).
@@ -316,7 +316,7 @@
  *
  */
 
-/** DirectDeconvolutionLayer (only CL)
+/** DirectDeconvolutionLayer
  *
  * Description:
  * Function to run the deconvolution layer.
@@ -326,7 +326,7 @@
  *
  */
 
-/** ElementWiseOperations (skip)
+/** ElementWiseOperations
  *
  * Description:
  * Function to perform in Cpu:
@@ -336,7 +336,6 @@
  * - Pow
  * - SquaredDiff
  * - Comparisons (Equal, greater, greater_equal, less, less_equal, not_equal)
- *
  * Function to perform in CL:
  * - Add
  * - Sub
@@ -351,18 +350,18 @@
  * ANEURALNETWORKS_MINIMUM
  * ANEURALNETWORKS_POW
  * ANEURALNETWORKS_DIV
- * ANEURALNETWORKS_ADD (only CL)
- * ANEURALNETWORKS_SUB (only CL)
- * ANEURALNETWORKS_EQUAL (no CL)
- * ANEURALNETWORKS_GREATER (no CL)
- * ANEURALNETWORKS_GREATER_EQUAL (no CL)
- * ANEURALNETWORKS_LESS (no CL)
- * ANEURALNETWORKS_LESS_EQUAL (no CL)
- * ANEURALNETWORKS_NOT_EQUAL (no CL)
+ * ANEURALNETWORKS_ADD
+ * ANEURALNETWORKS_SUB
+ * ANEURALNETWORKS_EQUAL
+ * ANEURALNETWORKS_GREATER
+ * ANEURALNETWORKS_GREATER_EQUAL
+ * ANEURALNETWORKS_LESS
+ * ANEURALNETWORKS_LESS_EQUAL
+ * ANEURALNETWORKS_NOT_EQUAL
  *
  */
 
-/** ElementWiseOperationUnary (skip)
+/** ElementwiseUnaryLayer
  *
  * Description:
  * Function to perform:
@@ -494,7 +493,7 @@
  *
  */
 
-/** GEMMConv2D (no CL)
+/** GEMMConv2D
  *
  * Description:
  * General Matrix Multiplication.
@@ -514,7 +513,7 @@
  *
  */
 
-/** GEMMDeconvolutionLayer (only CL)
+/** GEMMDeconvolutionLayer
  *
  * Description:
  * General Matrix Multiplication.
@@ -574,7 +573,7 @@
  *
  */
 
-/** Logical (no CL)
+/** Logical
  *
  * Description:
  * Function to perform:
@@ -587,7 +586,7 @@
  *
  */
 
-/** LogicalAnd (only CL)
+/** LogicalAnd
  *
  * Description:
  * Function to perform Logical AND.
@@ -597,7 +596,7 @@
  *
  */
 
-/** LogicalOr (only CL)
+/** LogicalOr
  *
  * Description:
  * Function to perform Logical OR.
@@ -607,7 +606,7 @@
  *
  */
 
-/** LogicalNot (only CL)
+/** LogicalNot
  *
  * Description:
  * Function to perform Logical NOT.
@@ -724,7 +723,7 @@
 /** PriorBoxLayer
  *
  * Description:
- * Function to .
+ * Function to compute prior boxes and clip.
  *
  * Equivalent Android NNAPI Op:
  * n/a
@@ -889,7 +888,7 @@
  *
  */
 
-/** SoftmaxLayer (skip)
+/** SoftmaxLayer
  *
  * Description:
  * Function to compute a SoftmaxLayer and a Log SoftmaxLayer.
@@ -990,7 +989,7 @@
  *
  */
 
-/** WinogradInputTransform (only CL)
+/** WinogradInputTransform
  *
  * Description:
  * Function to.

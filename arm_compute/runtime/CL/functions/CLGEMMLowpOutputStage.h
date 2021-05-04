@@ -288,10 +288,20 @@ class CLGEMMLowpOutputStage : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1          |dst           |
+     * |:--------------|:-------------|:-------------|
+     * |S32            |S32           |QASYMM8       |
+     * |S32            |S32           |QASYMM8_SIGNED|
+     * |S32            |S32           |QSYMM16       |
+     *
      * @param[in]  input  Input tensor. Data type supported: S32
      * @param[in]  bias   Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
      *                    Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output Output tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[out] output Output tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM16
      * @param[in]  info   GEMMLowp output stage metadata.
      */
     void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info);

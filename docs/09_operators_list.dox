@@ -145,6 +145,62 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>F32<td>U32, S32
     </table>
 <tr>
+  <td rowspan="1">ArithmeticAddition
+  <td rowspan="1" style="width:200px;"> Function to add 2 tensors.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_ADD
+      </ul>
+  <td>NEArithmeticAddition
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>QSYMM16<td>QSYMM16<td>S32
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="1">ArithmeticSubtraction
+  <td rowspan="1" style="width:200px;"> Function to substract 2 tensors.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_SUB
+      </ul>
+  <td>NEArithmeticSubtraction
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>QSYMM16<td>QSYMM16<td>S32
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
   <td rowspan="2">BatchNormalizationLayer
   <td rowspan="2" style="width:200px;"> Function to perform batch normalization.
   <td rowspan="2">
@@ -422,6 +478,28 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>All<td>All
     </table>
 <tr>
+  <td rowspan="1">Comparison
+  <td rowspan="1" style="width:200px;"> Function to compare 2 tensors.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_EQUAL
+       <li>ANEURALNETWORKS_GREATER
+       <li>ANEURALNETWORKS_GREATER_EQUAL
+       <li>ANEURALNETWORKS_LESS
+       <li>ANEURALNETWORKS_LESS_EQUAL
+       <li>ANEURALNETWORKS_NOT_EQUAL
+      </ul>
+  <td>CLComparison
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>All<td>All<td>U8
+    </table>
+<tr>
   <td rowspan="2">ConcatenateLayer
   <td rowspan="2" style="width:200px;"> Function to concatenate tensors along a given axis.
   <td rowspan="2">
@@ -554,6 +632,23 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>All<td>All
     </table>
 <tr>
+  <td rowspan="1">Crop
+  <td rowspan="1" style="width:200px;"> Performs a copy of input tensor to the output tensor.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLCrop
+  <td>
+      <ul>
+       <li>NHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>F32
+    </table>
+<tr>
   <td rowspan="2">CropResize
   <td rowspan="2" style="width:200px;"> Function to perform cropping and resizing.
   <td rowspan="2">
@@ -620,6 +715,24 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="1">DeconvolutionLayerUpsample
+  <td rowspan="1" style="width:200px;"> Function to execute deconvolution upsample on OpenCL.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE_CONV_2D
+      </ul>
+  <td>CLDeconvolutionLayerUpsample
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
     </table>
 <tr>
   <td rowspan="2">DepthConvertLayer
@@ -768,6 +881,25 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QSYMM16<td>F16, F32
     </table>
 <tr>
+  <td rowspan="1">DetectionPostProcessLayer
+  <td rowspan="1" style="width:200px;"> Function to generate the detection output based on center size encoded boxes, class prediction and anchors by doing non maximum suppression (NMS).
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_DETECTION_POSTPROCESSING
+      </ul>
+  <td>NEDetectionPostProcessLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0 - src2<th>dst0 - dst3
+    <tr><td>QASYMM8<td>F32
+    <tr><td>QASYMM8_SIGNED<td>F32
+    <tr><td>F32<td>F32
+    </table>
+<tr>
   <td rowspan="2">DirectConvolutionLayer
   <td rowspan="2" style="width:200px;"> Function to compute direct convolution.
   <td rowspan="2">
@@ -800,6 +932,364 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>F32<td>F32<td>F32<td>F32
     <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="1">DirectDeconvolutionLayer
+  <td rowspan="1" style="width:200px;"> Function to run the deconvolution layer.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE_CONV_2D
+      </ul>
+  <td>CLDirectDeconvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="13">ElementWiseOperations
+  <td rowspan="13" style="width:200px;"> Function to perform in Cpu: - Div - Max - Min - Pow - SquaredDiff - Comparisons (Equal, greater, greater_equal, less, less_equal, not_equal) Function to perform in CL: - Add - Sub - Div - Max - Min - Pow - SquaredDiff
+  <td rowspan="13">
+      <ul>
+       <li>ANEURALNETWORKS_MAXIMUM
+       <li>ANEURALNETWORKS_MINIMUM
+       <li>ANEURALNETWORKS_POW
+       <li>ANEURALNETWORKS_DIV
+       <li>ANEURALNETWORKS_ADD
+       <li>ANEURALNETWORKS_SUB
+       <li>ANEURALNETWORKS_EQUAL
+       <li>ANEURALNETWORKS_GREATER
+       <li>ANEURALNETWORKS_GREATER_EQUAL
+       <li>ANEURALNETWORKS_LESS
+       <li>ANEURALNETWORKS_LESS_EQUAL
+       <li>ANEURALNETWORKS_NOT_EQUAL
+      </ul>
+  <td>NEElementwiseMax
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwiseMin
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwiseSquaredDiff
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwiseDivision
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwisePower
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwiseComparison
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>U8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>U8
+    <tr><td>S32<td>S32<td>U8
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>S16<td>S16<td>U8
+    <tr><td>F16<td>F16<td>U8
+    <tr><td>F32<td>F32<td>U8
+    </table>
+<tr>
+  <td>CLArithmeticAddition
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLArithmeticSubtraction
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLArithmeticDivision
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLElementwiseMax
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>U32<td>U32<td>U32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLElementwiseMin
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>U32<td>U32<td>U32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLElementwiseSquaredDiff
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLElementwisePower
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="8">ElementwiseUnaryLayer
+  <td rowspan="8" style="width:200px;"> Function to perform: - Rsqrt - Exp - Neg - Log - Abs - Round - Sin
+  <td rowspan="8">
+      <ul>
+       <li>ANEURALNETWORKS_ABS
+       <li>ANEURALNETWORKS_EXP
+       <li>ANEURALNETWORKS_LOG
+       <li>ANEURALNETWORKS_NEG
+       <li>ANEURALNETWORKS_RSQRT
+       <li>ANEURALNETWORKS_SIN
+      </ul>
+  <td>NEElementwiseUnaryLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    <tr><td>S32<td>S32
+    </table>
+<tr>
+  <td>CLRsqrtLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLExpLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLNegLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLSinLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLLogLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLAbsLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLRoundLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
     </table>
 <tr>
   <td rowspan="2">FFT1D
@@ -1009,7 +1499,7 @@ where N = batches, C = channels, H = height, W = width
       <ul>
        <li>ANEURALNETWORKS_FULLY_CONNECTED
       </ul>
-  <td>NEFullyConnectedLayerReshapeWeightsManaged
+  <td>NEFullyConnectedLayer
   <td>
       <ul>
        <li>NHWC
@@ -1024,7 +1514,7 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
     </table>
 <tr>
-  <td>CLFullyConnectedLayerReshapeWeightsManaged
+  <td>CLFullyConnectedLayer
   <td>
       <ul>
        <li>NHWC
@@ -1118,7 +1608,7 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>BFLOAT16<td>BFLOAT16<td>BFLOAT16<td>BFLOAT16
     </table>
 <tr>
-  <td>CLGEMMReshapeRHSMatrixKernelManaged
+  <td>CLGEMM
   <td>
       <ul>
        <li>All
@@ -1130,13 +1620,34 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>F16<td>F16<td>F16<td>F16
     </table>
 <tr>
+  <td rowspan="1">GEMMConv2D
+  <td rowspan="1" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_2D
+      </ul>
+  <td>NEGEMMConv2d
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>BFLOAT16<td>BFLOAT16<td>BFLOAT16<td>BFLOAT16
+    </table>
+<tr>
   <td rowspan="2">GEMMConvolutionLayer
   <td rowspan="2" style="width:200px;"> General Matrix Multiplication.
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_CONV_2D
       </ul>
-  <td>NEConvolutionLayerReshapeWeights
+  <td>NEGEMMConvolutionLayer
   <td>
       <ul>
        <li>NHWC
@@ -1154,7 +1665,7 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
     </table>
 <tr>
-  <td>CLConvolutionLayerReshapeWeights
+  <td>CLGEMMConvolutionLayer
   <td>
       <ul>
        <li>NHWC
@@ -1169,6 +1680,26 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="1">GEMMDeconvolutionLayer
+  <td rowspan="1" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE_CONV_2D
+      </ul>
+  <td>CLGEMMDeconvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
     </table>
 <tr>
   <td rowspan="2">GEMMLowpMatrixMultiplyCore
@@ -1221,6 +1752,38 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>S32
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>S32
     <tr><td>QASYMM8_SIGNED<td>QSYMM8<td>S32<td>S32
+    </table>
+<tr>
+  <td rowspan="2">GEMMLowpOutputStage
+  <td rowspan="2" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEGEMMLowpOutputStage
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>S32<td>S32<td>QASYMM8
+    <tr><td>S32<td>S32<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>QSYMM16
+    </table>
+<tr>
+  <td>CLGEMMLowpOutputStage
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>S32<td>S32<td>QASYMM8
+    <tr><td>S32<td>S32<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>QSYMM16
     </table>
 <tr>
   <td rowspan="2">GenerateProposalsLayer
@@ -1317,6 +1880,96 @@ where N = batches, C = channels, H = height, W = width
     <tr><th>src<th>dst
     <tr><td>F16<td>F16
     <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="3">Logical
+  <td rowspan="3" style="width:200px;"> Function to perform: - Logical AND - Logical OR - Logical NOT
+  <td rowspan="3">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NELogicalAnd
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>U8<td>U8<td>U8
+    </table>
+<tr>
+  <td>NELogicalOr
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>U8<td>U8<td>U8
+    </table>
+<tr>
+  <td>NELogicalNot
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="1">LogicalAnd
+  <td rowspan="1" style="width:200px;"> Function to perform Logical AND.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLLogicalAnd
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>U8<td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="1">LogicalOr
+  <td rowspan="1" style="width:200px;"> Function to perform Logical OR.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLLogicalOr
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>U8<td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="1">LogicalNot
+  <td rowspan="1" style="width:200px;"> Function to perform Logical NOT.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLLogicalNot
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
     </table>
 <tr>
   <td rowspan="2">LSTMLayer
@@ -1660,7 +2313,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">PriorBoxLayer
-  <td rowspan="2" style="width:200px;"> Function to .
+  <td rowspan="2" style="width:200px;"> Function to compute prior boxes and clip.
   <td rowspan="2">
       <ul>
        <li>n/a
@@ -2151,6 +2804,41 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>All<td>All
     </table>
 <tr>
+  <td rowspan="2">SoftmaxLayer
+  <td rowspan="2" style="width:200px;"> Function to compute a SoftmaxLayer and a Log SoftmaxLayer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_LOG_SOFTMAX
+       <li>ANEURALNETWORKS_SOFTMAX
+      </ul>
+  <td>NESoftmaxLayerGeneric
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLSoftmaxLayerGeneric
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
   <td rowspan="2">SpaceToBatchLayer
   <td rowspan="2" style="width:200px;"> Function to divide a tensor spatially.
   <td rowspan="2">
@@ -2409,6 +3097,25 @@ where N = batches, C = channels, H = height, W = width
     <tr><th>src0<th>src1<th>src2<th>dst
     <tr><td>F16<td>F16<td>F16<td>F16
     <tr><td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="1">WinogradInputTransform
+  <td rowspan="1" style="width:200px;"> Function to.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLWinogradInputTransform
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
     </table>
 </table>
 
