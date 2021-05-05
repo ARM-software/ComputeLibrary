@@ -28,7 +28,7 @@ namespace arm_compute
 
 @tableofcontents
 
-@section S4_1_1 Core vs Runtime libraries
+@section architecture_core_vs_runtime Core vs Runtime libraries
 
 The Core library is a low level collection of algorithms implementations, it is designed to be embedded in existing projects and applications:
 
@@ -43,7 +43,7 @@ The Runtime library is a very basic wrapper around the Core library which can be
 
 For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between Arm® Neon™ and OpenCL, etc.)
 
-@section S4_1_3 Fast-math support
+@section architecture_fast_math Fast-math support
 
 Compute Library supports different types of convolution methods, fast-math flag is only used for the Winograd algorithm.
 When the fast-math flag is enabled, both Arm® Neon™ and CL convolution layers will try to dispatch the fastest implementation available, which may introduce a drop in accuracy as well. The different scenarios involving the fast-math flag are presented below:
@@ -54,23 +54,23 @@ When the fast-math flag is enabled, both Arm® Neon™ and CL convolution layers
     - no-fast-math: No Winograd support
     - fast-math: Supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7,5x5,7x7
 
-@section S4_1_4 Thread-safety
+@section architecture_thread_safety Thread-safety
 
 Although the library supports multi-threading during workload dispatch, thus parallelizing the execution of the workload at multiple threads, the current runtime module implementation is not thread-safe in the sense of executing different functions from separate threads.
 This lies to the fact that the provided scheduling mechanism wasn't designed with thread-safety in mind.
 As it is true with the rest of the runtime library a custom scheduling mechanism can be re-implemented to account for thread-safety if needed and be injected as the library's default scheduler.
 
-@section S4_5_algorithms Algorithms
+@section architecture__algorithms Algorithms
 
 All computer vision algorithms in this library have been implemented following the [OpenVX 1.1 specifications](https://www.khronos.org/registry/vx/specs/1.1/html/). Please refer to the Khronos documentation for more information.
 
-@section S4_6_images_tensors Images, padding, border modes and tensors
+@section architecture_images_tensors Images, padding, border modes and tensors
 
 Most kernels and functions in the library process images, however, in order to be future proof most of the kernels actually accept tensors. See below for more information about how they are related.
 
 @attention Each memory object can be written by only one kernel, however it can be read by several kernels. Writing to the same object from several kernels will result in undefined behavior. The kernel writing to an object must be configured before the kernel(s) reading from it.
 
-@subsection S4_6_1_padding_and_border Padding and border modes
+@subsection architecture_images_tensors_padding_and_border Padding and border modes
 
 Several algorithms require a neighborhood around the current pixel to compute it's value. This means the algorithm will not be able to process the borders of the image unless you give it more information about how those border pixels should be processed. The @ref BorderMode enum is used for this purpose.
 
@@ -82,7 +82,7 @@ You have 3 types of @ref BorderMode :
 
 Moreover both OpenCL and Arm® Neon™ use vector loads and stores instructions to access the data in buffers, so in order to avoid having special cases to handle for the borders all the images and tensors used in this library must be padded.
 
-@subsubsection padding Padding
+@subsubsection architecture_images_tensors_padding Padding
 
 There are different ways padding can be calculated:
 
@@ -90,7 +90,7 @@ There are different ways padding can be calculated:
 
 @note It's important to call allocate @b after the function is configured: if the image / tensor is already allocated then the function will shrink its execution window instead of increasing the padding. (See below for more details).
 
-- Manual padding / no padding / auto padding: You can allocate your images / tensors up front (before configuring your functions). In that case the function will use whatever padding is available and will shrink its execution window if there isn't enough padding available (which translates into a smaller valid region for the output). See also @ref valid_region).
+- Manual padding / no padding / auto padding: You can allocate your images / tensors up front (before configuring your functions). In that case the function will use whatever padding is available and will shrink its execution window if there isn't enough padding available (which translates into a smaller valid region for the output). See also @ref architecture_images_tensors_valid_region).
 If you don't want to manually set the padding but still want to allocate your objects upfront then you can use auto_padding. It guarantees that the allocation will have enough padding to run any of the provided functions.
 
 @code{.cpp}
@@ -119,7 +119,7 @@ gauss.run();
 
 @warning Some kernels need up to 3 neighbor values to calculate the value of a given pixel. Therefore, to be safe, we use a 4-pixel padding all around the image. In addition, some kernels read and write up to 32 pixels at the same time. To cover that case as well we add an extra 32 pixels of padding at the end of each row. As a result auto padded buffers waste a lot of memory and are less cache friendly. It is therefore recommended to use accurate padding or manual padding wherever possible.
 
-@subsubsection valid_region Valid regions
+@subsubsection architecture_images_tensors_valid_region Valid regions
 
 Some kernels (like edge detectors for example) need to read values of neighboring pixels to calculate the value of a given pixel, it is therefore not possible to calculate the values of the pixels on the edges.
 
@@ -127,7 +127,7 @@ Another case is: if a kernel processes 8 pixels per iteration and the image's di
 
 In order to know which pixels have been calculated, each kernel sets a valid region for each output image or tensor. See also @ref TensorInfo::valid_region(), @ref ValidRegion
 
-@subsection S4_6_2_tensors Tensors
+@subsection architecture_images_tensors_tensors Tensors
 
 Tensors are multi-dimensional arrays with a maximum of @ref Coordinates::num_max_dimensions dimensions.
 
@@ -135,7 +135,7 @@ Depending on the number of dimensions tensors can be interpreted as various obje
 
 @note Most algorithms process images (i.e a 2D slice of the tensor), therefore only padding along the X and Y axes is required (2D slices can be stored contiguously in memory).
 
-@subsection S4_6_3_description_conventions Images and Tensors description conventions
+@subsection architecture_images_tensors_description_conventions Images and Tensors description conventions
 
 Image objects are defined by a @ref Format and dimensions expressed as [width, height, batch]
 
@@ -157,7 +157,7 @@ For example, to read the element located at the coordinates (x,y) of a float ten
 float value = *reinterpret_cast<float*>(input.buffer() + input.info()->offset_element_in_bytes(Coordinates(x,y)));
 @endcode
 
-@subsection S4_6_4_working_with_objects Working with Images and Tensors using iterators
+@subsection architecture_images_tensors_working_with_objects Working with Images and Tensors using iterators
 
 The library provides some iterators to access objects' data.
 Iterators are created by associating a data object (An image or a tensor for example) with an iteration window.
@@ -171,7 +171,7 @@ Here are a couple of examples of how to use the iterators to fill / read tensors
 
 @snippet examples/neon_copy_objects.cpp Copy objects example
 
-@subsection S4_6_5_sub_tensors Sub-tensors
+@subsection architecture_images_tensors_sub_tensors Sub-tensors
 
 Sub-tensors are aliases to existing Tensors, as a result creating a sub-tensor does not result in any underlying memory allocation.
 
@@ -190,13 +190,13 @@ Where \a parent is the parent tensor which we want to create an alias for, \a te
 
 @warning Limitation of the sub-tensor is that it cannot be extracted spatially, meaning sub-tensors should have the same width and height as the parent tensor. The main reasons for this is the fact that individual kernels might need to operate with a step size that is not a multiple of the sub-tensor spatial dimension. This could lead to elements being overwritten by different kernels operating on different sub-tensors of the same underlying tensor.
 
-@section S4_7_memory_manager MemoryManager
+@section architecture_memory_manager MemoryManager
 
 @ref IMemoryManager is a memory managing interface that can be used to reduce the memory requirements of a given pipeline by recycling temporary buffers.
 
-@subsection S4_7_1_memory_manager_components MemoryGroup, MemoryPool and MemoryManager Components
+@subsection architecture_memory_manager_component MemoryGroup, MemoryPool and MemoryManager Components
 
-@subsubsection S4_7_1_1_memory_group MemoryGroup
+@subsubsection architecture_memory_manager_component_memory_group MemoryGroup
 
 @ref IMemoryGroup defines the memory managing granularity.
 
@@ -204,13 +204,13 @@ MemoryGroup binds a number of objects to a bucket of memory requirements that ne
 
 Requesting backing memory for a specific group can be done using @ref IMemoryGroup::acquire and releasing the memory back using @ref IMemoryGroup::release.
 
-@subsubsection S4_7_1_2_memory_pool MemoryPool
+@subsubsection architecture_memory_manager_component_memory_pool MemoryPool
 
 @ref IMemoryPool defines a pool of memory that can be used to provide backing memory to a memory group.
 
 @note @ref BlobMemoryPool is currently implemented which models the memory requirements as a vector of distinct memory blobs.
 
-@subsubsection S4_7_1_2_memory_manager_components MemoryManager Components
+@subsubsection architecture_memory_manager_component_memory_manager_components MemoryManager Components
 
 @ref IMemoryManager consists of two components:
 - @ref ILifetimeManager that keeps track of the lifetime of the registered objects of the memory groups and given an @ref IAllocator creates an appropriate memory pool that fulfils the memory requirements of all the registered memory groups.
@@ -218,7 +218,7 @@ Requesting backing memory for a specific group can be done using @ref IMemoryGro
 
 @note @ref BlobLifetimeManager is currently implemented which models the memory requirements as a vector of distinct memory blobs.
 
-@subsection S4_7_2_working_with_memory_manager Working with the Memory Manager
+@subsection architecture_memory_manager_working_with_memory_manager Working with the Memory Manager
 Using a memory manager to reduce the memory requirements of a pipeline can be summed in the following steps:
 
 Initially a memory manager must be set-up:
@@ -274,7 +274,7 @@ memory_group.release(); // Release memory so that it can be reused
 @note Execution of a pipeline can be done in a multi-threading environment as memory acquisition/release are thread safe.
 @note If you are handling sensitive data and it's required to zero out the memory buffers before freeing, make sure to also zero out the intermediate buffers. You can access the buffers through the memory group's mappings.
 
-@subsection S4_7_3_memory_manager_function_support Function support
+@subsection architecture_memory_manager_function_support Function support
 
 Most of the library's function have been ported to use @ref IMemoryManager for their internal temporary buffers.
 
@@ -301,7 +301,7 @@ conv1.run();
 conv2.run();
 @endcode
 
-@section S4_8_import_memory Import Memory Interface
+@section architecture_import_memory Import Memory Interface
 
 The implemented @ref TensorAllocator and @ref CLTensorAllocator objects provide an interface capable of importing existing memory to a tensor as backing memory.
 
@@ -323,7 +323,7 @@ It is important to note the following:
 - The tensor mustn't be memory managed.
 - Padding requirements should be accounted by the client code. In other words, if padding is required by the tensor after the function configuration step, then the imported backing memory should account for it. Padding can be checked through the @ref TensorInfo::padding() interface.
 
-@section S4_9_opencl_tuner OpenCL Tuner
+@section architecture_opencl_tuner OpenCL Tuner
 
 OpenCL kernels when dispatched to the GPU take two arguments:
 - The Global Workgroup Size (GWS): That's the number of times to run an OpenCL kernel to process all the elements we want to process.
@@ -339,7 +339,7 @@ However this process takes quite a lot of time, which is why it cannot be enable
 
 But, when the @ref CLTuner is disabled ( Target = 1 for the graph examples), the @ref graph::Graph will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not.
 
-@section S4_10_cl_queue_prioritites OpenCL Queue Priorities
+@section architecture_cl_queue_prioritites OpenCL Queue Priorities
 
 OpenCL 2.1 exposes the `cl_khr_priority_hints` extensions that if supported by an underlying implementation allows the user to specify priority hints to the created command queues.
 Is important to note that this does not specify guarantees or the explicit scheduling behavior, this is something that each implementation needs to expose.
@@ -359,13 +359,13 @@ cl_command_queue priority_queue = clCreateCommandQueueWithProperties(ctx, dev, q
 CLScheduler::get().set_queue(::cl::CommandQueue(priority_queue));
 @endcode
 
-@section S4_11_weights_manager Weights Manager
+@section architecture_weights_manager Weights Manager
 
 @ref IWeightsManager is a weights managing interface that can be used to reduce the memory requirements of a given pipeline by reusing transformed weights across multiple function executions.
 @ref IWeightsManager is responsible for managing weight tensors alongside with their transformations.
 @ref ITransformWeights provides an interface for running the desired transform function. This interface is used by the weights manager.
 
-@subsection S4_10_1_working_with_weights_manager Working with the Weights Manager
+@subsection architecture_weights_manager_working_with_weights_manager Working with the Weights Manager
 Following is a simple example that uses the weights manager:
 
 Initially a weights manager must be set-up:
@@ -380,9 +380,49 @@ wm->acquire(weights, &_reshape_weights_managed_function); // Acquire the address
 wm->run(weights, &_reshape_weights_managed_function);     // Run the transpose function
 @endcode
 
-@section S5_0_experimental Experimental Features
+@section programming_model Programming Model
+@subsection programming_model_functions Functions
 
-@subsection S5_1_run_time_context Run-time Context
+Functions will automatically allocate the temporary buffers mentioned above, and will automatically multi-thread kernels' executions using the very basic scheduler described in the previous section.
+
+Simple functions only call a single kernel (e.g NEConvolution3x3), while more complex ones consist of several kernels pipelined together (e.g @ref NEFullyConnectedLayer ). Check their documentation to find out which kernels are used by each function.
+
+@code{.cpp}
+//Create a function object:
+MyFunction function;
+// Initialize the function with the input/output and options you want to use:
+function.configure( input, output, option0, option1);
+// Execute the function:
+function.run();
+@endcode
+
+@warning The Compute Library requires Arm® Mali™ OpenCL DDK r8p0 or higher (OpenCL kernels are compiled using the -cl-arm-non-uniform-work-group-size flag)
+
+@note All OpenCL functions and objects in the runtime library use the command queue associated with CLScheduler for all operations, a real implementation would be expected to use different queues for mapping operations and kernels in order to reach a better GPU utilization.
+
+@subsection programming_model_scheduler OpenCL Scheduler
+
+The Compute Library runtime uses a single command queue and context for all the operations.
+
+The user can get / set this context and command queue through CLScheduler's interface.
+
+The user can get / set the target GPU device through the CLScheduler's interface.
+
+@attention Make sure the application is using the same context as the library as in OpenCL it is forbidden to share objects across contexts. This is done by calling @ref CLScheduler::init() or @ref CLScheduler::default_init() at the beginning of your application.
+
+@attention Make sure the scheduler's target is not changed after function classes are created.
+
+@subsection programming_model__events_sync OpenCL events and synchronization
+
+In order to block until all the jobs in the CLScheduler's command queue are done executing the user can call @ref CLScheduler::sync() or create a sync event using @ref CLScheduler::enqueue_sync_event()
+
+@subsection programming_model_cl_neon OpenCL / Arm® Neon™ interoperability
+
+You can mix OpenCL and Arm® Neon™ kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects.
+
+@section architecture_experimental Experimental Features
+
+@subsection architecture_experimental_run_time_context Run-time Context
 
 Some of the Compute Library components are modelled as singletons thus posing limitations to supporting some use-cases and ensuring a more client-controlled API.
 Thus, we are introducing an aggregate service interface @ref IRuntimeContext which will encapsulate the services that the singletons were providing and allow better control of these by the client code.
@@ -394,9 +434,115 @@ All the kernels/functions will now accept a Runtime Context object which will al
 
 Finally, we will try to adapt our code-base progressively to use the new mechanism but will continue supporting the legacy mechanism to allow a smooth transition. Changes will apply to all our three backends: Neon, OpenCL and OpenGL ES.
 
-@subsection S5_2_clvk CLVK
+@subsection architecture_experimental_clvk CLVK
 
 Compute Library offers experimental support for [CLVK](https://github.com/kpet/clvk). If CLVK is installed in the system, users can select the backend when running a graph example with --target=clvk.
 If no target is specified and more that one OpenCL implementations are present, Compute Library will pick the first available.
+
+@section architecture_experimental_api Experimental Application Programming Interface
+
+@subsection architecture_experimental_api_overview Overview
+
+In this section we present Compute Library's experimental application programming interface (API) architecture along with
+a detailed explanation of its components. Compute Library's API consists of multiple high-level operators and
+even more internally distinct computational blocks that can be executed on a command queue.
+Operators can be bound to multiple Tensor objects and executed concurrently or asynchronously if needed.
+All operators and associated objects are encapsulated in a Context-based mechanism, which provides all related
+construction services.
+
+@subsection architecture_experimental_api_objects Fundamental objects
+
+Compute Library consists of a list of fundamental objects that are responsible for creating and orchestrating operator execution.
+Below we present these objects in more detail.
+
+@subsubsection architecture_experimental_api_objects_context AclContext or Context
+
+AclContext or Context acts as a central creational aggregate service. All other objects are bound to or created from a context.
+It provides, internally, common facilities such as
+- allocators for object creation or backing memory allocation
+- serialization interfaces
+- any other modules that affect the construction of objects (e.g., program cache for OpenCL).
+
+The followings sections will describe parameters that can be given on the creation of Context.
+
+@paragraph architecture_experimental_api_object_context_target AclTarget
+Context is initialized with a backend target (AclTarget) as different backends might have a different subset of services.
+Currently the following targets are supported:
+- #AclCpu: a generic CPU target that accelerates primitives through SIMD technologies
+- #AclGpuOcl: a target for GPU acceleration using OpenCL
+
+@paragraph architecture_experimental_api_object_context_execution_mode AclExecutionMode
+An execution mode (AclExecutionMode) can be passed as an argument that affects the operator creation.
+At the moment the following execution modes are supported:
+- #AclPreferFastRerun: Provides faster re-run. It can be used when the operators are expected to be executed multiple
+times under the same execution context
+- #AclPreferFastStart: Provides faster single execution. It can be used when the operators will be executed only once,
+thus reducing their latency is important (Currently, it is not implemented)
+
+@paragraph architecture_experimental_api_object_context_capabilitys AclTargetCapabilities
+Context creation can also have a list of capabilities of hardware as one of its parameters. This is currently
+available only for the CPU backend. A list of architecture capabilities can be passed to influence the selection
+of the underlying kernels. Such capabilities can be for example the enablement of SVE or the dot product
+instruction explicitly.
+@note The underlying hardware should support the given capability list.
+
+@paragraph architecture_experimental_api_object_context_allocator Allocator
+An allocator object that implements @ref AclAllocator can be passed to the Context upon its creation.
+This user-provided allocator will be used for allocation of any internal backing memory.
+
+@note To enable interoperability with OpenCL, additional entrypoints are provided
+to extract (@ref AclGetClContext) or set (@ref AclSetClContext) the internal OpenCL context.
+
+@subsubsection architecture_experimental_api_objects_tensor AclTensor or Tensor
+
+A tensor is a mathematical object that can describe physical properties like matrices.
+It can be also considered a generalization of matrices that can represent arbitrary
+dimensionalities. AclTensor is an abstracted interface that represents a tensor.
+
+AclTensor, in addition to the elements of the physical properties they represent,
+also contains the information such as shape, data type, data layout and strides to not only
+fully describe the characteristics of the physical properties but also provide information
+how the object stored in memory should be traversed. @ref AclTensorDescriptor is a dedicated
+object to represent such metadata.
+
+@note The allocation of an AclTensor can be deferred until external memory is imported
+as backing memory to accomplish a zero-copy context.
+
+@note To enable interoperability with OpenCL, additional entrypoints are provided
+to extract (@ref AclGetClMem) the internal OpenCL memory object.
+
+As Tensors can reside in different memory spaces, @ref AclMapTensor and @ref AclUnmapTensor entrypoints
+are provided to map Tensors in and out of the host memory system, respectively.
+
+@subsubsection architecture_experimental_api_objects_queue AclQueue or Queue
+
+AclQueue acts as a runtime aggregate service. It provides facilities to schedule
+and execute operators using underlying hardware. It also contains services like
+tuning mechanisms (e.g., Local workgroup size tuning for OpenCL) that can be specified
+during operator execution.
+
+@note To enable interoperability with OpenCL, additional entrypoints are provided
+to extract (@ref AclGetClQueue) or set (@ref AclSetClQueue) the internal OpenCL queue.
+
+@subsection architecture_experimental_api_internal Internal
+@subsubsection architecture_experimental_api_internal_operator_vs_kernels Operators vs Kernels
+
+Internally, Compute Library separates the executable primitives in two categories: kernels and operators
+which operate in a hierarchical way.
+
+A kernel is the lowest-level computation block whose responsibility is performing a task on a given group of data.
+For design simplicity, kernels computation does NOT involve the following:
+
+- Memory allocation: All the memory manipulation should be handled by the caller.
+- Multi-threading: The information on how the workload can be split is provided by kernels,
+so the caller can effectively distribute the workload to multiple threads.
+
+On the other hand, operators combine one or multiple kernels to achieve more complex calculations.
+The responsibilities of the operators can be summarized as follows:
+
+- Defining the scheduling policy and dispatching of the underlying kernels to the hardware backend
+- Providing information to the caller required by the computation (e.g., memory requirements)
+- Allocation of any required auxiliary memory if it isn't given by its caller explicitly
+
 */
 } // namespace arm_compute

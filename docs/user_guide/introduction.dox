@@ -23,7 +23,11 @@
 ///
 namespace arm_compute
 {
-/** @page introduction Introduction
+/**
+@mainpage Introduction
+@copydoc introduction
+
+@page introduction Introduction
 
 @tableofcontents
 
