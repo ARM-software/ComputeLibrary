@@ -79,7 +79,7 @@ public:
      *
      * @return tuner_mode Indicates how exhaustive the search for the optimal tuning parameters should be while tuning
      *
-     * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+     * @deprecated This function is deprecated and is intended to be removed in 21.08 release
      */
     CLTunerMode get_tuner_mode() const;
 
@@ -88,7 +88,7 @@ public:
      * @param[in] kernel_id   Unique identifiant of the kernel
      * @param[in] optimal_lws Optimal local workgroup size to use for the given kernel
      *
-     * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+     * @deprecated This function is deprecated and is intended to be removed in 21.08 release
      */
     ARM_COMPUTE_DEPRECATED_REL_REPLACE(21.02, add_tuning_params)
     void add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal_lws);
@@ -104,7 +104,7 @@ public:
      *
      * @param[in] lws_table The unordered_map container to import
      *
-     * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+     * @deprecated This function is deprecated and is intended to be removed in 21.08 release
      */
     ARM_COMPUTE_DEPRECATED_REL_REPLACE(21.02, import_tuning_params)
     void import_lws_table(const std::unordered_map<std::string, cl::NDRange> &lws_table);
@@ -119,7 +119,7 @@ public:
      *
      * @return The lws table as unordered_map container
      *
-     * @deprecated This function is deprecated and is intended to be removed in 21.05 release
+     * @deprecated This function is deprecated and is intended to be removed in 21.08 release
      */
     ARM_COMPUTE_DEPRECATED_REL_REPLACE(21.02, tuning_params_table)
     const std::unordered_map<std::string, cl::NDRange> &lws_table();
