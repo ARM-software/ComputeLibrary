@@ -172,21 +172,22 @@ public:
      * |:--------------|:--------------|
      * |F16            |F16            |
      * |F32            |F32            |
+     * |S32            |S32            |
      *
-     * @param[in]  input  Input tensor. Data types supported: F16/F32.
+     * @param[in]  input  Input tensor. Data types supported: F16/F32/S32
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Input tensor. Data types supported: F16/F32.
+     * @param[in]  input           Input tensor. Data types supported: F16/F32/S32
      * @param[out] output          Output tensor. Data types supported: same as @p input.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNegLayer
      *
-     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] input  First tensor input info. Data types supported: F16/F32/S32
      * @param[in] output Output tensor info. Data types supported: Same as @p input.
      *
      * @return a status

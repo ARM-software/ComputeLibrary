@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,15 @@ TEST_SUITE(CL)
 TEST_SUITE(NegLayer)
 template <typename T>
 using CLNegLayerFixture = NegValidationFixture<CLTensor, CLAccessor, CLNegLayer, T>;
+
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNegLayerFixture<int>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                    DataType::S32)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
