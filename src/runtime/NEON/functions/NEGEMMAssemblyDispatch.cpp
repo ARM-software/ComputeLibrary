@@ -75,7 +75,7 @@ Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *d, 
     else
     {
         p.multis  = b->info()->tensor_shape().z();
-        p.batches = d->info()->tensor_shape().total_size_upper(2) / p.multis; //COMPMID-1423: Agree on and document the layout of gemm inputs/outputs
+        p.batches = d->info()->tensor_shape().total_size_upper(2) / p.multis;
     }
 
     // Update M in case of GEMM3D for output

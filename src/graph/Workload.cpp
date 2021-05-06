@@ -45,7 +45,6 @@ void execute_task(ExecutionTask &task)
         task.task->run();
     }
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
-    // COMPMID-3012 - Hide the printing logic from the execute_task method in the graph API
     else if(task.node->type() == NodeType::PrintLayer)
     {
         auto print_node   = utils::cast::polymorphic_downcast<PrintLayerNode *>(task.node);

@@ -459,7 +459,6 @@ bool CpuDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITens
     }
 
     // Check data type
-    // TODO (COMPMID-3004): Add assembly optimized routine for QASYMM8_SIGNED NEDepthwiseConvolutionLayer
     const DataType input_type            = input->data_type();
     const bool     is_input_type_valid   = is_data_type_float(input_type) || input_type == DataType::QASYMM8;
     const DataType weights_type          = weights->data_type();

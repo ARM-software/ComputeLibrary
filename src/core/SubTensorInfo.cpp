@@ -121,7 +121,6 @@ bool SubTensorInfo::extend_padding(const PaddingSize &padding)
     ARM_COMPUTE_ERROR_ON(_parent->total_size() == 0);
 
     // Check that you do not extend padding on sub-tensors unless XY shape matches parent tensor
-    // TODO(COMPMID-3558): Remove _extend_parent check
     if(!_extend_parent && (padding.left || padding.right))
     {
         ARM_COMPUTE_ERROR_ON(_parent->tensor_shape().x() != tensor_shape().x());

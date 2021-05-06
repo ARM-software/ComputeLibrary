@@ -47,7 +47,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1); // COMPMID-1071 Add depth multiplier support for NHWC
+    ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1);
 
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(std::max(conv_info.pad_top(), conv_info.pad_bottom()) > 4);
