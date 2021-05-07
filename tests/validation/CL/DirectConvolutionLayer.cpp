@@ -221,10 +221,10 @@ TEST_SUITE(NHWC)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1, 3, 1, 1 })),
                framework::dataset::make("StrideY", { 1, 3, 2, 1 })),
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
@@ -259,10 +259,10 @@ TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1, 3, 1, 1 })),
                framework::dataset::make("StrideY", { 1, 3, 2, 1 })),
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
@@ -277,10 +277,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framewo
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1 })),
                framework::dataset::make("StrideY", { 2 })),
                framework::dataset::make("PadX", { 1 })),
@@ -314,10 +314,10 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1, 3, 1, 1 })),
                framework::dataset::make("StrideY", { 1, 3, 2, 1 })),
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
@@ -333,10 +333,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1 })),
                framework::dataset::make("StrideY", { 2 })),
                framework::dataset::make("PadX", { 1 })),
@@ -371,10 +371,10 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1, 3, 1, 1 })),
                framework::dataset::make("StrideY", { 1, 3, 2, 1 })),
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
@@ -390,10 +390,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1 })),
                framework::dataset::make("StrideY", { 1 })),
                framework::dataset::make("PadX", { 1 })),

@@ -124,13 +124,13 @@
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 #define DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, a, b, c) \
     ({                                                \
-        DOT_PRODUCT4_INTEGER8((a.lo), (b.lo), c);     \
-        DOT_PRODUCT4_INTEGER8((a.hi), (b.hi), c);     \
+        DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, (a.lo), (b.lo), c);     \
+        DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, (a.hi), (b.hi), c);     \
     })
 #define DOT_PRODUCT16_INTEGER8(DST_DATA_TYPE, a, b, c) \
     ({                                                 \
-        DOT_PRODUCT8_INTEGER8((a.lo), (b.lo), c);      \
-        DOT_PRODUCT8_INTEGER8((a.hi), (b.hi), c);      \
+        DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, (a.lo), (b.lo), c);      \
+        DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, (a.hi), (b.hi), c);      \
     })
 
 /** Load a vector from global memory (tensor)
