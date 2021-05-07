@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,7 +86,7 @@ __kernel void select_same_rank(
 
     // Calculate result
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    res0 = select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0);
+    res0 = select(in_y, in_x, CONVERT(in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0, SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)));
 
     // Boundary-aware store
     STORE_VECTOR_SELECT(res, DATA_TYPE, (__global DATA_TYPE *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
@@ -152,7 +152,7 @@ __kernel void select_different_rank_2(
 
     // Calculate result
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    res0 = select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0);
+    res0 = select(in_y, in_x, CONVERT(in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0, SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)));
 
     // Boundary-aware store
     STORE_VECTOR_SELECT(res, DATA_TYPE, (__global DATA_TYPE *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
@@ -220,7 +220,7 @@ __kernel void select_different_rank_n(
 
     // Calculate result
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    res0 = select(in_y, in_x, in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0);
+    res0 = select(in_y, in_x, CONVERT(in_c > (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0, SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)));
 
     // Boundary-aware store
     STORE_VECTOR_SELECT(res, DATA_TYPE, (__global DATA_TYPE *)out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
