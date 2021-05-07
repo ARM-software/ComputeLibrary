@@ -56,6 +56,8 @@ bool are_context_options_valid(const AclContextOptions *options)
 
 arm_compute::IContext *create_context(AclTarget target, const AclContextOptions *options)
 {
+    ARM_COMPUTE_UNUSED(options);
+
     switch(target)
     {
 #ifdef ARM_COMPUTE_CPU_ENABLED
