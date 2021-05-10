@@ -30,6 +30,12 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- Experimented performance regressions for some networks on OpenCL when using Arm® Mali™ DDK r8p0
+    - Versions Affected: >= v21.05
+    - OSs Affected: All
+    - Conditions:
+        - Arm® Mali™ DDK r8p0
+
 - Under certain conditions, CLFullyConnectedLayer quantized tests may fail due to an issue in the test framework.
     - Versions Affected: 21.02
     - OSs Affected: Linux
@@ -37,6 +43,15 @@ namespace arm_compute
         - armv7a architecture
         - release mode
         - asserts enabled
+
+- Performance regression in Convolution Layer OpenCL backend on Mali™ G77 when QSYMM8_PER_CHANNEL is used as weights' data type.
+    - Versions Affected: >= v20.11
+    - OSs Affected: All
+    - Conditions:
+        - Mali™ G77
+        - Convolution Layer in use
+        - OpenCL backend
+        - Convolution Layer uses QSYMM8_PER_CHANNEL as the data type of its weight
 
 - A wrong test configuration has been found in CLGEMMMatrixMultiplyReshapedOnlyRHS set of tests.
     - Versions Affected: >= 20.11
