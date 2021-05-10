@@ -171,7 +171,7 @@ protected:
         ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
-        add_padding_x({ &src, &weights, &bias, &dst }, data_layout);
+        add_padding_x({ &src, &bias, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
