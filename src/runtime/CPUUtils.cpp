@@ -189,10 +189,13 @@ CPUModel midr_to_model(const unsigned int midr)
         // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
         switch(cpunum)
         {
+            case 0x803: // A55r0
+                model = CPUModel::A55r0;
+                break;
             case 0x804: // A76
                 model = CPUModel::GENERIC_FP16_DOT;
                 break;
-            case 0x805: // A55
+            case 0x805: // A55r1
                 model = CPUModel::A55r1;
                 break;
             default:
