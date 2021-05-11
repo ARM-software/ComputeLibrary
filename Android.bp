@@ -642,7 +642,6 @@ cc_library_static {
         "src/runtime/cpu/operators/CpuMul.cpp",
         "src/runtime/cpu/operators/CpuPermute.cpp",
         "src/runtime/cpu/operators/CpuPooling.cpp",
-        "src/runtime/cpu/operators/CpuPoolingAssemblyDispatch.cpp",
         "src/runtime/cpu/operators/CpuQuantize.cpp",
         "src/runtime/cpu/operators/CpuReshape.cpp",
         "src/runtime/cpu/operators/CpuScale.cpp",

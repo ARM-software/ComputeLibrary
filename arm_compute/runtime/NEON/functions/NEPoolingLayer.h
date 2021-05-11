@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -38,9 +39,7 @@ class ITensorInfo;
 
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following kernels:
  *
- * -# @ref NEFillBorderKernel (executed if padding size is different from zero)
- * -# @ref cpu::kernels::CpuPoolingKernel
- * -# @ref cpu::CpuPoolingAssemblyDispatch
+ * -# @ref cpu::CpuPooling
  */
 class NEPoolingLayer : public IFunction
 {
@@ -96,6 +95,8 @@ public:
     void run() override;
 
 private:
+    MemoryGroup _memory_group;
+
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

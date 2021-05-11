@@ -26,8 +26,7 @@
 
 #include "src/runtime/cpu/ICpuOperator.h"
 
-#include "arm_compute/runtime/IMemoryManager.h"
-#include "src/runtime/cpu/operators/CpuPoolingAssemblyDispatch.h"
+#include "arm_compute/core/experimental/Types.h"
 
 #include <memory>
 
@@ -38,19 +37,17 @@ struct PoolingLayerInfo;
 
 namespace cpu
 {
-// Forward Declarations
-class CpuPoolingAssemblyDispatch;
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following kernels:
  *
  * -# @ref NEFillBorderKernel (executed if padding size is different from zero)
  * -# @ref kernels::CpuPoolingKernel
- * -# @ref CpuPoolingAssemblyDispatch
+ * -# @ref kernels::CpuPoolingAssemblyWrapperKernel
  */
 class CpuPooling : public ICpuOperator
 {
 public:
     /** Constructor */
-    CpuPooling(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    CpuPooling();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CpuPooling(const CpuPooling &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -86,16 +83,16 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
+    experimental::MemoryRequirements workspace() const override;
 
 private:
-    std::shared_ptr<IMemoryManager> _memory_manager;
+    std::unique_ptr<INEKernel> _pooling_layer_kernel;
+    std::unique_ptr<INEKernel> _border_handler;
+    std::unique_ptr<INEKernel> _asm_glue;
 
-    std::unique_ptr<INEKernel>                  _pooling_layer_kernel;
-    std::unique_ptr<INEKernel>                  _border_handler;
-    std::unique_ptr<CpuPoolingAssemblyDispatch> _asm_glue;
-
-    bool       _is_global_pooling_layer;
-    DataLayout _data_layout;
+    bool                             _is_global_pooling_layer;
+    DataLayout                       _data_layout;
+    experimental::MemoryRequirements _mem_req;
 };
 } // namespace cpu
 } // namespace arm_compute

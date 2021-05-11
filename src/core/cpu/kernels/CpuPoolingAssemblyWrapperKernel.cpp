@@ -146,8 +146,8 @@ void CpuPoolingAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window 
     ARM_COMPUTE_ERROR_ON(tensors.empty());
 
     const ITensor *src       = tensors.get_const_tensor(TensorType::ACL_SRC);
-    ITensor       *dst       = tensors.get_tensor(TensorType::ACL_DST_0);
-    ITensor       *workspace = tensors.get_tensor(TensorType::ACL_DST_1);
+    ITensor       *dst       = tensors.get_tensor(TensorType::ACL_DST);
+    ITensor       *workspace = tensors.get_tensor(TensorType::ACL_INT_0);
 
     const auto in_ptr        = src->buffer() + src->info()->offset_first_element_in_bytes();
     auto       out_ptr       = dst->buffer() + dst->info()->offset_first_element_in_bytes();

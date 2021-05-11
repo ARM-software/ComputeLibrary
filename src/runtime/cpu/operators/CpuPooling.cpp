@@ -27,41 +27,59 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/core/cpu/kernels/CpuPoolingAssemblyWrapperKernel.h"
 #include "src/core/cpu/kernels/CpuPoolingKernel.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-CpuPooling::CpuPooling(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_manager(std::move(memory_manager)), _pooling_layer_kernel(), _border_handler(), _asm_glue(), _is_global_pooling_layer(false), _data_layout(DataLayout::NCHW)
+CpuPooling::CpuPooling()
+    : _pooling_layer_kernel(),
+      _border_handler(),
+      _asm_glue(),
+      _is_global_pooling_layer(false),
+      _data_layout(DataLayout::NCHW),
+      _mem_req()
 {
 }
 
 CpuPooling::~CpuPooling() = default;
 
-void CpuPooling::configure(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
+void CpuPooling::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
 {
     // Check if we can run assembly kernels. Currently, indices are not supported by those kernels
-    const bool run_optimised = bool(CpuPoolingAssemblyDispatch::validate(input, output, pool_info)) && (indices == nullptr);
+    const bool run_optimised = bool(kernels::CpuPoolingAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
+
+    // Get data layout
+    _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
+
+    // Check if we have Global Pooling Layer
+    const unsigned int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    _is_global_pooling_layer      = (src->dimension(idx_width) == pool_info.pool_size.width) && (src->dimension(idx_height) == pool_info.pool_size.height);
 
     if(run_optimised)
     {
-        _asm_glue = std::make_unique<CpuPoolingAssemblyDispatch>(_memory_manager);
-        _asm_glue->configure(input, output, pool_info);
-        ARM_COMPUTE_ERROR_ON(!_asm_glue->is_configured());
+        const CPUInfo     &ci          = NEScheduler::get().cpu_info();
+        const unsigned int num_threads = NEScheduler::get().num_threads();
+
+        auto pooling_wrapper = std::make_unique<kernels::CpuPoolingAssemblyWrapperKernel>();
+        ARM_COMPUTE_ERROR_ON(pooling_wrapper == nullptr);
+        pooling_wrapper->configure(src, dst, pool_info, ci);
+
+        // Get kernel's memory requirements
+        constexpr size_t alignment      = 4096;
+        const size_t     workspace_size = pooling_wrapper->get_working_size(num_threads);
+        _mem_req.push_back({ TensorType::ACL_INT_0, workspace_size, alignment });
+
+        _asm_glue = std::move(pooling_wrapper);
     }
     else
     {
-        // Check if we have Global Pooling Layer
-        _is_global_pooling_layer = (input->dimension(0) == pool_info.pool_size.width) && (input->dimension(1) == pool_info.pool_size.height);
-
-        // Get data layout
-        _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : pool_info.data_layout;
-
         // Configure pooling kernel
         auto k = std::make_unique<kernels::CpuPoolingKernel>();
-        k->configure(input, output, pool_info, indices);
+        k->configure(src, dst, pool_info, indices);
         _pooling_layer_kernel = std::move(k);
 
         switch(_data_layout)
@@ -71,12 +89,12 @@ void CpuPooling::configure(ITensorInfo *input, ITensorInfo *output, const Poolin
                 // Configure border depending on operation required (quantize border in case of asymmetric data_type)
                 BorderMode border_mode = (!indices && pool_info.pool_type == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
                 PixelValue zero_value((indices) ? std::numeric_limits<int>::min() : 0.f);
-                if(is_data_type_quantized_asymmetric(input->data_type()) && !pool_info.exclude_padding)
+                if(is_data_type_quantized_asymmetric(src->data_type()) && !pool_info.exclude_padding)
                 {
-                    zero_value = PixelValue(0, input->data_type(), input->quantization_info());
+                    zero_value = PixelValue(0, src->data_type(), src->quantization_info());
                 }
                 auto b = std::make_unique<NEFillBorderKernel>();
-                b->configure(input, _pooling_layer_kernel->border_size(), border_mode, zero_value);
+                b->configure(src, _pooling_layer_kernel->border_size(), border_mode, zero_value);
                 _border_handler = std::move(b);
                 break;
             }
@@ -88,23 +106,26 @@ void CpuPooling::configure(ITensorInfo *input, ITensorInfo *output, const Poolin
     }
 }
 
-Status CpuPooling::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status CpuPooling::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    const bool run_optimised = bool(CpuPoolingAssemblyDispatch::validate(input, output, pool_info)) && (indices == nullptr);
+    const bool run_optimised = bool(kernels::CpuPoolingAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
 
     if(run_optimised)
     {
         return Status{};
     }
 
-    return kernels::CpuPoolingKernel::validate(input, output, pool_info, indices);
+    return kernels::CpuPoolingKernel::validate(src, dst, pool_info, indices);
 }
 
 void CpuPooling::run(ITensorPack &tensors)
 {
-    if(_asm_glue && _asm_glue->is_configured())
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No tensors provided");
+
+    if(_asm_glue)
     {
-        _asm_glue->run(tensors);
+        const auto hints = (_is_global_pooling_layer) ? Window::DimX : Window::DimY;
+        NEScheduler::get().schedule_op(_asm_glue.get(), hints, _asm_glue->window(), tensors);
     }
     else
     {
@@ -125,6 +146,11 @@ void CpuPooling::run(ITensorPack &tensors)
                 ARM_COMPUTE_ERROR("Data layout not supported");
         }
     }
+}
+
+experimental::MemoryRequirements CpuPooling::workspace() const
+{
+    return _mem_req;
 }
 } // namespace cpu
 } // namespace arm_compute

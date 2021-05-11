@@ -23,7 +23,9 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/Tensor.h"
 #include "src/runtime/cpu/operators/CpuPooling.h"
 
 namespace arm_compute
@@ -33,16 +35,15 @@ struct NEPoolingLayer::Impl
     ITensor                         *src{ nullptr };
     ITensor                         *dst{ nullptr };
     ITensor                         *indices{ nullptr };
-    std::shared_ptr<IMemoryManager>  memory_manager{ nullptr };
+    Tensor                           workspace{ nullptr };
     std::unique_ptr<cpu::CpuPooling> op{ nullptr };
 };
 
 NEPoolingLayer::~NEPoolingLayer() = default;
 
 NEPoolingLayer::NEPoolingLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _impl(std::make_unique<Impl>())
+    : _memory_group(memory_manager), _impl(std::make_unique<Impl>())
 {
-    _impl->memory_manager = std::move(memory_manager);
 }
 
 void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info, ITensor *indices)
@@ -50,8 +51,17 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _impl->src     = input;
     _impl->dst     = output;
     _impl->indices = indices;
-    _impl->op      = std::make_unique<cpu::CpuPooling>(_impl->memory_manager);
+    _impl->op      = std::make_unique<cpu::CpuPooling>();
     _impl->op->configure(input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr);
+
+    // Allocate workspace based on kernel's memory requirements
+    const experimental::MemoryRequirements mem_req = _impl->op->workspace();
+    if(!mem_req.empty())
+    {
+        _impl->workspace.allocator()->init(TensorInfo(TensorShape{ (mem_req[0].size + mem_req[0].alignment) }, 1, DataType::S8), mem_req[0].alignment);
+        _memory_group.manage(&_impl->workspace);
+        _impl->workspace.allocator()->allocate();
+    }
 }
 
 Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
@@ -65,6 +75,7 @@ void NEPoolingLayer::run()
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST_0, _impl->dst);
     pack.add_tensor(TensorType::ACL_DST_1, _impl->indices);
+    pack.add_tensor(TensorType::ACL_INT_0, &_impl->workspace);
     _impl->op->run(pack);
 }
 } // namespace arm_compute

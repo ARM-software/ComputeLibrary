@@ -349,7 +349,6 @@ if env['neon']:
                              'src/runtime/cpu/operators/CpuDirectConvolution.cpp',
                              'src/runtime/cpu/operators/CpuPermute.cpp',
                              'src/runtime/cpu/operators/CpuPooling.cpp',
-                             'src/runtime/cpu/operators/CpuPoolingAssemblyDispatch.cpp',
                             ]
     cpu_operator_files = ['src/runtime/cpu/operators/CpuAdd.cpp',
                           'src/runtime/cpu/operators/CpuConcatenate.cpp',
