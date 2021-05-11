@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -2459,6 +2459,10 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #error "K0 value not supported"
 #endif // K0 conditions
 #endif // defined(MIXED_PRECISION)
+
+#if defined(ARM_DOT_K0XN0)
+#undef ARM_DOT_K0XN0
+#endif // defined(ARM_DOT_K0XN0)
 
 #if N0 == 2
 #define ARM_DOT_K0XN0(a, b, c)           \
