@@ -260,7 +260,8 @@ if env['neon']:
                                       "src/core/NEON/kernels/convolution/winograd/",
                                       "src/core/NEON/kernels/convolution/depthwise/",
                                       "src/core/NEON/kernels/assembly/",
-                                      "arm_compute/core/NEON/kernels/assembly/"])
+                                      "arm_compute/core/NEON/kernels/assembly/",
+                                      "src/core/cpu/kernels/assembly/",])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
@@ -367,7 +368,8 @@ if env['neon']:
                           'src/runtime/cpu/operators/CpuSub.cpp',
                           'src/runtime/cpu/operators/CpuTranspose.cpp',
                          ]
-    runtime_files += [ cpu_rt_files, cpu_operator_hp_files, cpu_operator_files ]
+    cpu_internal_operator_files = ['src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.cpp',]
+    runtime_files += [ cpu_rt_files, cpu_operator_hp_files, cpu_operator_files, cpu_internal_operator_files ]
 
 bootcode_o = []
 if env['os'] == 'bare_metal':

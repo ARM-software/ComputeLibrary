@@ -36,13 +36,16 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensor;
-class NEGEMMAssemblyDispatch;
+namespace cpu
+{
+class CpuGemmAssemblyDispatch;
+}
 
 /** Basic function to compute the convolution layer. This function calls the following kernels/functions:
  *
  * Supports only NHWC data layout
  *
- * -# @ref NEGEMMAssemblyDispatch
+ * -# @ref cpu::CpuGemmAssemblyDispatch
  * -# @ref NEActivationLayer, in case activation cannot be fused in the assembly dispatch
  *
  * Weights are transformed from OHWI to HWIO format using the following kernels:
@@ -111,13 +114,13 @@ public:
     void prepare() override;
 
 private:
-    std::unique_ptr<NEGEMMAssemblyDispatch> _gemm_asm_func;
-    NEActivationLayer                       _activation_func;
-    NEPermute                               _weights_permute_func;
-    const ITensor                          *_original_weights;
-    Tensor                                  _permuted_weights;
-    bool                                    _is_prepared;
-    bool                                    _run_activation;
+    std::unique_ptr<cpu::CpuGemmAssemblyDispatch> _gemm_asm_func;
+    NEActivationLayer                             _activation_func;
+    NEPermute                                     _weights_permute_func;
+    const ITensor                                *_original_weights;
+    Tensor                                        _permuted_weights;
+    bool                                          _is_prepared;
+    bool                                          _run_activation;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEGEMMCONV2D_H */

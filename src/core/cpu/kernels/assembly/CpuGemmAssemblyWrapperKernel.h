@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,8 @@
 
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_gemm_compute_iface.hpp"
 #include "src/core/NEON/INEKernel.h"
+#include "src/core/cpu/kernels/assembly/arm_gemm_compute_iface.hpp"
 
 #include "gemm_common.hpp"
 
@@ -35,11 +35,15 @@ namespace arm_compute
 {
 class ITensor;
 
+namespace cpu
+{
+namespace kernel
+{
 /** This class is a wrapper for the assembly kernels.
   *
   * Some kernels were written in assembly and highly optimised for specific CPUs like A53 or A55.
   * This class works as a wrapper for these assembly kernels. The arm compute library creates an instance
-  * of NEGEMMAssemblyWrapperKernel and other auxiliary data structures to execute a single assembly kernel
+  * of CpuGemmAssemblyWrapperKernel and other auxiliary data structures to execute a single assembly kernel
   * in the context of an NEFunctions.
   *
   * The type T is the type of the actual kernel implemented in assembly which is of type
@@ -48,19 +52,19 @@ class ITensor;
   *
   */
 template <typename TypeInput, typename TypeOutput>
-class NEGEMMAssemblyWrapperKernel final : public INEKernel
+class CpuGemmAssemblyWrapperKernel final : public INEKernel
 {
 public:
     /** Constructor
      */
-    NEGEMMAssemblyWrapperKernel()
-        : _kernel(nullptr), _name("NEGEMMAssemblyWrapperKernel")
+    CpuGemmAssemblyWrapperKernel()
+        : _kernel(nullptr), _name("CpuGemmAssemblyWrapperKernel")
     {
     }
 
-    NEGEMMAssemblyWrapperKernel(NEGEMMAssemblyWrapperKernel &)  = delete;
-    NEGEMMAssemblyWrapperKernel(NEGEMMAssemblyWrapperKernel &&) = default;
-    NEGEMMAssemblyWrapperKernel &operator=(NEGEMMAssemblyWrapperKernel &) = delete;
+    CpuGemmAssemblyWrapperKernel(CpuGemmAssemblyWrapperKernel &)  = delete;
+    CpuGemmAssemblyWrapperKernel(CpuGemmAssemblyWrapperKernel &&) = default;
+    CpuGemmAssemblyWrapperKernel &operator=(CpuGemmAssemblyWrapperKernel &) = delete;
 
     const char *name() const override
     {
@@ -94,8 +98,8 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in] kernel      Pointer to an assembly kernel implementation.
-     * @param[in] num_threads Number of concurrent threads which will execute the kernel.
+     * @param[in] kernel          Pointer to an assembly kernel implementation.
+     * @param[in] kernel_name_tag Tag to be attacehd to the kernel's name.
      */
     void configure(arm_gemm::GemmCommon<TypeInput, TypeOutput> *kernel, std::string kernel_name_tag)
     {
@@ -116,5 +120,7 @@ private:
     arm_gemm::GemmCommon<TypeInput, TypeOutput> *_kernel;
     std::string _name;
 };
+} // namespace kernel
+} // namespace cpu
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H */

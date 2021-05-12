@@ -26,7 +26,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+#include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 #include <set>
 
@@ -66,10 +66,10 @@ GEMMLowpOutputStageInfo calculate_output_stage_metadata(const ITensorInfo *input
     quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, os_info);
     return os_info;
 }
-AsmGemmInfo init_assembly_metadata(const Conv2dInfo &info, bool is_indirect)
+cpu::AsmGemmInfo init_assembly_metadata(const Conv2dInfo &info, bool is_indirect)
 {
-    AsmGemmInfo asm_info;
-    asm_info.method                  = is_indirect ? AsmConvMethod::Indirect : AsmConvMethod::Conv;
+    cpu::AsmGemmInfo asm_info;
+    asm_info.method                  = is_indirect ? cpu::AsmConvMethod::Indirect : cpu::AsmConvMethod::Conv;
     asm_info.ps_info                 = info.conv_info;
     asm_info.activation_info         = info.act_info;
     asm_info.depth_output_gemm3d     = true;
@@ -83,7 +83,7 @@ AsmGemmInfo init_assembly_metadata(const Conv2dInfo &info, bool is_indirect)
 } // namespace
 
 NEGEMMConv2d::NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager)
-    : _gemm_asm_func(std::make_unique<NEGEMMAssemblyDispatch>(memory_manager)), _activation_func(), _weights_permute_func(), _original_weights(nullptr), _permuted_weights(), _is_prepared(false),
+    : _gemm_asm_func(std::make_unique<cpu::CpuGemmAssemblyDispatch>(memory_manager)), _activation_func(), _weights_permute_func(), _original_weights(nullptr), _permuted_weights(), _is_prepared(false),
       _run_activation(false)
 {
 }
@@ -102,7 +102,7 @@ void NEGEMMConv2d::configure(ITensor *input, const ITensor *weights, const ITens
     _weights_permute_func.configure(weights, &_permuted_weights, PermutationVector{ 3, 0, 1, 2 });
 
     // Configure assembly dispatch
-    AsmGemmInfo asm_info = init_assembly_metadata(info, false);
+    cpu::AsmGemmInfo asm_info = init_assembly_metadata(info, false);
     if(is_data_type_quantized(input->info()->data_type()))
     {
         asm_info.output_stage = calculate_output_stage_metadata(input->info(), weights->info(), output->info(), info.act_info);
@@ -149,8 +149,8 @@ Status NEGEMMConv2d::validate(const ITensorInfo *input, const ITensorInfo *weigh
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
 
-    AsmGemmInfo asm_info = init_assembly_metadata(info, false);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMAssemblyDispatch::validate(input, weights, biases, output, asm_info));
+    cpu::AsmGemmInfo asm_info = init_assembly_metadata(info, false);
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuGemmAssemblyDispatch::validate(input, weights, biases, output, asm_info));
     return Status{};
 }
 void NEGEMMConv2d::run()

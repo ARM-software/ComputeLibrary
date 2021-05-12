@@ -21,17 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+#include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
-#include "src/core/NEON/kernels/assembly/arm_gemm.hpp"
+#include "src/core/cpu/kernels/assembly/CpuGemmAssemblyWrapperKernel.h"
+#include "src/core/cpu/kernels/assembly/arm_gemm.hpp"
 
 #include <arm_neon.h>
 #include <cstdlib>
 
 namespace arm_compute
+{
+namespace cpu
 {
 namespace
 {
@@ -213,7 +215,7 @@ private:
 
 /** Fallback in case ACL doesn't have a function */
 template <typename TypeInput, typename TypeOutput, class OutputStage = arm_gemm::Nothing>
-class Fallback : public NEGEMMAssemblyDispatch::IFallback
+class Fallback : public CpuGemmAssemblyDispatch::IFallback
 {
 public:
     /** Destructor */
@@ -484,7 +486,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensor *a, c
     }
 
     // arm_compute wrapper for the Gemm object (see above)
-    std::unique_ptr<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>> acl_gemm_wrapper = std::make_unique<NEGEMMAssemblyWrapperKernel<TypeInput, TypeOutput>>();
+    auto acl_gemm_wrapper = std::make_unique<kernel::CpuGemmAssemblyWrapperKernel<TypeInput, TypeOutput>>();
     ARM_COMPUTE_ERROR_ON(acl_gemm_wrapper == nullptr);
     acl_gemm_wrapper->configure(_gemm_kernel_asm.get(), gemm_cfg.filter);
     const size_t workspace_size = _gemm_kernel_asm->get_working_size();
@@ -679,7 +681,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
 }
 
 template <typename TypeInput, typename TypeOutput>
-void create_arm_gemm(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &arm_gemm, MemoryGroup &memory_group,
+void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_gemm, MemoryGroup &memory_group,
                      const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, arm_gemm::Activation activation, const AsmGemmInfo &info,
                      IWeightsManager *weights_manager)
 {
@@ -696,7 +698,7 @@ void create_arm_gemm(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &arm_gem
 }
 
 template <typename TypeInput, typename TypeOutput>
-void create_arm_gemm_quant(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &arm_gemm, MemoryGroup &memory_group,
+void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_gemm, MemoryGroup &memory_group,
                            const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, arm_gemm::Activation activation, const AsmGemmInfo &info,
                            IWeightsManager *weights_manager)
 {
@@ -742,12 +744,12 @@ void create_arm_gemm_quant(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &a
 
 } //namespace
 
-NEGEMMAssemblyDispatch::NEGEMMAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
+CpuGemmAssemblyDispatch::CpuGemmAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _arm_gemm(nullptr), _memory_group(std::move(memory_manager)), _weights_manager(weights_manager)
 {
 }
 
-Status NEGEMMAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info)
+Status CpuGemmAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info)
 {
     ARM_COMPUTE_UNUSED(c, info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, d);
@@ -778,19 +780,19 @@ Status NEGEMMAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo 
     return Status{};
 }
 
-bool NEGEMMAssemblyDispatch::is_activation_supported(const ActivationLayerInfo &activation)
+bool CpuGemmAssemblyDispatch::is_activation_supported(const ActivationLayerInfo &activation)
 {
     arm_gemm::Activation act = map_to_arm_gemm_activation(activation);
     return act.type != arm_gemm::Activation::Type::None;
 }
 
-void NEGEMMAssemblyDispatch::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, const AsmGemmInfo &info)
+void CpuGemmAssemblyDispatch::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, const AsmGemmInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
     arm_gemm::Activation act = map_to_arm_gemm_activation(info.activation_info);
 
     //If we don't support a combination of data types, silently return: it is the caller's responsibility to check if configure() was successful via is_configured()
-    if(!NEGEMMAssemblyDispatch::validate(a->info(), b->info(), c != nullptr ? c->info() : nullptr, d->info(), info))
+    if(!CpuGemmAssemblyDispatch::validate(a->info(), b->info(), c != nullptr ? c->info() : nullptr, d->info(), info))
     {
         return;
     }
@@ -839,22 +841,23 @@ void NEGEMMAssemblyDispatch::configure(const ITensor *a, const ITensor *b, const
     }
 }
 
-void NEGEMMAssemblyDispatch::prepare()
+void CpuGemmAssemblyDispatch::prepare()
 {
     ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
     _arm_gemm->prepare();
 }
 
-bool NEGEMMAssemblyDispatch::is_configured() const
+bool CpuGemmAssemblyDispatch::is_configured() const
 {
     return _arm_gemm != nullptr && _arm_gemm->is_configured();
 }
 
-void NEGEMMAssemblyDispatch::run()
+void CpuGemmAssemblyDispatch::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
     _arm_gemm->run();
 }
-} //namespace arm_compute
+} // namespace cpu
+} // namespace arm_compute

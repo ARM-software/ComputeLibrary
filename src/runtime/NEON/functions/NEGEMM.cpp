@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+#include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 #include <cmath>
 
@@ -48,10 +48,10 @@ namespace arm_compute
 {
 namespace
 {
-AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
+cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
 {
-    AsmGemmInfo asm_info;
-    asm_info.method                  = AsmConvMethod::Im2Col;
+    cpu::AsmGemmInfo asm_info;
+    asm_info.method                  = cpu::AsmConvMethod::Im2Col;
     asm_info.reinterpret_input_as_3d = info.reinterpret_input_as_3d();
     asm_info.depth_output_gemm3d     = info.depth_output_gemm3d();
     asm_info.activation_info         = info.activation_info();
@@ -61,7 +61,7 @@ AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
 } // namespace
 
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager), _weights_manager(weights_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(std::make_unique<NEGEMMAssemblyDispatch>()), _ma_kernel(),
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(std::make_unique<cpu::CpuGemmAssemblyDispatch>()), _ma_kernel(),
       _alpha_scale_func(nullptr), _add_bias(), _activation_func(), _tmp_a(), _tmp_b(), _tmp_d(), _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_alpha_scale(false),
       _run_addition(false), _run_bias_addition(false), _run_activation(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
@@ -73,9 +73,9 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 {
     ARM_COMPUTE_ERROR_THROW_ON(NEGEMM::validate(a->info(), b->info(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta, gemm_info));
 
-    const AsmGemmInfo asm_info      = init_assembly_metadata(gemm_info);
-    const bool        is_c_bias     = gemm_info.reshape_b_only_on_first_run();
-    bool              run_optimised = bool(NEGEMMAssemblyDispatch::validate(a->info(), b->info(), (is_c_bias && c != nullptr) ? c->info() : nullptr, d->info(), asm_info));
+    const cpu::AsmGemmInfo asm_info      = init_assembly_metadata(gemm_info);
+    const bool             is_c_bias     = gemm_info.reshape_b_only_on_first_run();
+    bool                   run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a->info(), b->info(), (is_c_bias && c != nullptr) ? c->info() : nullptr, d->info(), asm_info));
 
     // Check if we need to reshape the matrix B only on the first run
     _is_prepared                      = false;
@@ -85,7 +85,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     _run_alpha_scale                  = alpha != 1.f;
     _run_bias_addition                = c != nullptr && gemm_info.reshape_b_only_on_first_run();
     _run_addition                     = beta != 0 && c != nullptr && !gemm_info.reshape_b_only_on_first_run();
-    _run_activation                   = gemm_info.activation_info().enabled() && (!run_optimised || (run_optimised && !NEGEMMAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
+    _run_activation                   = gemm_info.activation_info().enabled() && (!run_optimised || (run_optimised && !cpu::CpuGemmAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
 
     if(run_optimised)
     {
@@ -235,8 +235,8 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     }
 
     // Check if we need to run the optimized assembly kernel
-    AsmGemmInfo asm_info      = init_assembly_metadata(gemm_info);
-    const bool  run_optimised = bool(NEGEMMAssemblyDispatch::validate(a, b, is_c_bias ? c : nullptr, output, asm_info));
+    cpu::AsmGemmInfo asm_info      = init_assembly_metadata(gemm_info);
+    const bool       run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, is_c_bias ? c : nullptr, output, asm_info));
 
     if(!run_optimised)
     {

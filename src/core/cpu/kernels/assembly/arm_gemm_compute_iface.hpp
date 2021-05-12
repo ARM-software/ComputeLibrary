@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,8 @@
  */
 #pragma once
 
-#include "arm_compute/core/Window.h"
 #include "arm_compute/core/Dimensions.h"
+#include "arm_compute/core/Window.h"
 
 #include "ndrange.hpp"
 
@@ -35,14 +35,14 @@
  * so maintain their own types which represent similar information.
  */
 
-namespace arm_gemm {
-
+namespace arm_gemm
+{
 //we want to unify the maximum number of dimensions used beween arm_gemm and arm compute library
 constexpr std::size_t ndrange_max =
     arm_compute::Dimensions<unsigned int>::num_max_dimensions;
 
-using ndrange_t=NDRange<ndrange_max>;
-using ndcoord_t=NDCoordinate<ndrange_max>;
+using ndrange_t = NDRange<ndrange_max>;
+using ndcoord_t = NDCoordinate<ndrange_max>;
 
 /* Converts an `arm_gemm::ndrange_t` to a `arm_compute::Window`
  *
@@ -52,10 +52,12 @@ using ndcoord_t=NDCoordinate<ndrange_max>;
  * @param [ndr] the `arm_gemm::ndrange_t` we wish to convert into a `arm_compute::Window`
  * @returns an `arm_compute::Window` representing the same dimensional ranges as `ndr`
  */
-inline arm_compute::Window to_window(const ndrange_t& ndr) {
+inline arm_compute::Window to_window(const ndrange_t &ndr)
+{
     arm_compute::Window win;
 
-    for(unsigned int i = 0; i!=ndrange_max; ++i) {
+    for(unsigned int i = 0; i != ndrange_max; ++i)
+    {
         //populate the window with the dimensions of the NDRange
         win.set(i, arm_compute::Window::Dimension(0, ndr.get_size(i)));
     }
@@ -69,10 +71,12 @@ inline arm_compute::Window to_window(const ndrange_t& ndr) {
  * @param [ndc] the `arm_gemm::ndcoord_t` we wish to convert into a `arm_compute::Window`
  * @returns an `arm_compute::Window` representing the same dimensional ranges as `ndc`
  */
-inline arm_compute::Window to_window(const ndcoord_t& ndc) {
+inline arm_compute::Window to_window(const ndcoord_t &ndc)
+{
     arm_compute::Window win;
 
-    for(unsigned int i = 0; i!=ndrange_max; ++i) {
+    for(unsigned int i = 0; i != ndrange_max; ++i)
+    {
         const auto start = ndc.get_position(i);
         const auto size  = ndc.get_size(i);
         const auto stop  = start + size;
@@ -92,8 +96,10 @@ inline arm_compute::Window to_window(const ndcoord_t& ndc) {
  * @param [win] the `arm_compute::Window` we want to convert to `arm_gemm::ndrange_t`
  * @return the resultant ndrange_t
  */
-inline ndrange_t to_ndrange(const arm_compute::Window& win) {
-    return {
+inline ndrange_t to_ndrange(const arm_compute::Window &win)
+{
+    return
+    {
         static_cast<unsigned int>(win[0].end() - win[0].start()),
         static_cast<unsigned int>(win[1].end() - win[1].start()),
         static_cast<unsigned int>(win[2].end() - win[2].start()),
@@ -108,8 +114,10 @@ inline ndrange_t to_ndrange(const arm_compute::Window& win) {
  * @param [win] the `arm_compute::Window` we want to convert to `arm_gemm::ndcoord_t`
  * @return the resultant ndcoord_t
  */
-inline ndcoord_t to_ndcoord(const arm_compute::Window& win) {
-    return {
+inline ndcoord_t to_ndcoord(const arm_compute::Window &win)
+{
+    return
+    {
         { static_cast<unsigned int>(win[0].start()), static_cast<unsigned int>(win[0].end() - win[0].start()) },
         { static_cast<unsigned int>(win[1].start()), static_cast<unsigned int>(win[1].end() - win[1].start()) },
         { static_cast<unsigned int>(win[2].start()), static_cast<unsigned int>(win[2].end() - win[2].start()) },

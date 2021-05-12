@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,16 +42,16 @@
 #include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
-#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+#include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 namespace arm_compute
 {
 namespace
 {
-AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
+cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
 {
-    AsmGemmInfo asm_info;
-    asm_info.method                  = AsmConvMethod::Im2Col;
+    cpu::AsmGemmInfo asm_info;
+    asm_info.method                  = cpu::AsmConvMethod::Im2Col;
     asm_info.reinterpret_input_as_3d = info.reinterpret_input_as_3d();
     asm_info.depth_output_gemm3d     = info.depth_output_gemm3d();
     asm_info.activation_info         = info.activation_info();
@@ -66,7 +66,7 @@ using namespace arm_compute::misc::shape_calculator;
 NEGEMMLowpMatrixMultiplyCore::~NEGEMMLowpMatrixMultiplyCore() = default;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager), _weights_manager(weights_manager), _asm_glue(std::make_unique<NEGEMMAssemblyDispatch>(memory_manager, weights_manager)), _mm_kernel(), _mtx_a_reshape_kernel(),
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _asm_glue(std::make_unique<cpu::CpuGemmAssemblyDispatch>(memory_manager, weights_manager)), _mm_kernel(), _mtx_a_reshape_kernel(),
       _mtx_b_reshape_kernel(), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _offset_contribution_output_stage_kernel(), _activation_func(),
       _convert_to_signed_asymm(), _convert_from_signed_asymm(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _mm_result_s32(), _signed_a(), _signed_output(), _original_b(nullptr), _a_offset(0),
       _b_offset(0), _run_vector_matrix_multiplication(false), _assembly_path(false), _fused_assembly_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false), _fuse_output_stage(false),
@@ -135,7 +135,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     }
 
     // Initialize assembly kernel meta-data
-    const AsmGemmInfo asm_info = init_assembly_metadata(gemm_info);
+    const cpu::AsmGemmInfo asm_info = init_assembly_metadata(gemm_info);
 #ifdef __aarch64__
     switch(a->info()->data_type())
     {
@@ -261,7 +261,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     }
     // Configure activation
     const ActivationLayerInfo &activation = gemm_info.activation_info();
-    _run_activation                       = activation.enabled() && (!_assembly_path || !NEGEMMAssemblyDispatch::is_activation_supported(activation));
+    _run_activation                       = activation.enabled() && (!_assembly_path || !cpu::CpuGemmAssemblyDispatch::is_activation_supported(activation));
     if(_run_activation)
     {
         _activation_func.configure(output, nullptr, activation);
@@ -362,19 +362,19 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     }
 
     // Initialize assembly kernel meta-data
-    const AsmGemmInfo asm_info = init_assembly_metadata(info);
+    const cpu::AsmGemmInfo asm_info = init_assembly_metadata(info);
 
     // Check if we need to run the optimized assembly kernel
     bool run_optimised             = false;
     bool run_optimised_requantized = false;
     if(is_data_type_quantized_asymmetric(a_to_use->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
     {
-        run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, c, output, asm_info));
+        run_optimised             = bool(cpu::CpuGemmAssemblyDispatch::validate(a_to_use, b, c, output, asm_info));
         run_optimised_requantized = run_optimised;
     }
     else
     {
-        run_optimised = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, nullptr, fuse_output_stage ? &mm_result_s32_info : output, asm_info));
+        run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a_to_use, b, nullptr, fuse_output_stage ? &mm_result_s32_info : output, asm_info));
     }
 
     if(run_optimised)

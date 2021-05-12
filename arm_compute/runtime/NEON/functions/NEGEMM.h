@@ -41,12 +41,15 @@ class NEGEMMInterleave4x4Kernel;
 class NEGEMMMatrixAdditionKernel;
 class NEGEMMMatrixMultiplyKernel;
 class NEGEMMTranspose1xWKernel;
-class NEGEMMAssemblyDispatch;
+namespace cpu
+{
+class CpuGemmAssemblyDispatch;
+}
 
 /** Basic function to execute GEMM. This function calls the following kernels:
  *
  * If optimized assembly is available:
- *  -# @ref NEGEMMAssemblyDispatch
+ *  -# @ref cpu::CpuGemmAssemblyDispatch
  *  -# @ref NEActivationLayer (if alpha != 1.0)
  * Else:
  *  -# @ref NEGEMMInterleave4x4Kernel (if the output tensor is a matrix)
@@ -119,16 +122,16 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                                 _memory_group;
-    IWeightsManager                            *_weights_manager;
-    std::unique_ptr<NEGEMMInterleave4x4Kernel>  _interleave_kernel;
-    std::unique_ptr<NEGEMMTranspose1xWKernel>   _transpose_kernel;
-    std::unique_ptr<NEGEMMMatrixMultiplyKernel> _mm_kernel;
-    std::unique_ptr<NEGEMMAssemblyDispatch>     _asm_glue;
-    std::unique_ptr<NEGEMMMatrixAdditionKernel> _ma_kernel;
-    NEActivationLayer                           _alpha_scale_func;
-    NEArithmeticAddition                        _add_bias;
-    NEActivationLayer                           _activation_func;
+    MemoryGroup                                   _memory_group;
+    IWeightsManager                              *_weights_manager;
+    std::unique_ptr<NEGEMMInterleave4x4Kernel>    _interleave_kernel;
+    std::unique_ptr<NEGEMMTranspose1xWKernel>     _transpose_kernel;
+    std::unique_ptr<NEGEMMMatrixMultiplyKernel>   _mm_kernel;
+    std::unique_ptr<cpu::CpuGemmAssemblyDispatch> _asm_glue;
+    std::unique_ptr<NEGEMMMatrixAdditionKernel>   _ma_kernel;
+    NEActivationLayer                             _alpha_scale_func;
+    NEArithmeticAddition                          _add_bias;
+    NEActivationLayer                             _activation_func;
 
     Tensor         _tmp_a;
     Tensor         _tmp_b;

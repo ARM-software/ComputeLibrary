@@ -32,6 +32,8 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
 /* Convolution method supported by the assembly gemm interface */
 enum class AsmConvMethod
 {
@@ -55,18 +57,21 @@ struct AsmGemmInfo
 };
 
 /** Assembly kernel glue */
-class NEGEMMAssemblyDispatch : public IFunction
+class CpuGemmAssemblyDispatch : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
+    CpuGemmAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copy constructed */
-    NEGEMMAssemblyDispatch(const NEGEMMAssemblyDispatch &) = delete;
+    CpuGemmAssemblyDispatch(const CpuGemmAssemblyDispatch &) = delete;
     /** Prevent instances of this class from being copied */
-    NEGEMMAssemblyDispatch &operator=(const NEGEMMAssemblyDispatch &) = delete;
-    NEGEMMAssemblyDispatch(NEGEMMAssemblyDispatch &&)                 = default;
-    NEGEMMAssemblyDispatch &operator=(NEGEMMAssemblyDispatch &&) = default;
-    ~NEGEMMAssemblyDispatch()                                    = default;
+    CpuGemmAssemblyDispatch &operator=(const CpuGemmAssemblyDispatch &) = delete;
+    /** Default move constructor */
+    CpuGemmAssemblyDispatch(CpuGemmAssemblyDispatch &&) = default;
+    /** Default move assignment operator */
+    CpuGemmAssemblyDispatch &operator=(CpuGemmAssemblyDispatch &&) = default;
+    /** Defautl destructor */
+    ~CpuGemmAssemblyDispatch() = default;
 
     class IFallback
     {
@@ -121,5 +126,6 @@ private:
     MemoryGroup                _memory_group;    /**< Function memory group */
     IWeightsManager           *_weights_manager; /**< Pointer to the weights manager */
 };
+} // namespace cpu
 } // namespace arm_compute
 #endif /* SRC_NEGEMMASSEMBLYDISPATCH_H */

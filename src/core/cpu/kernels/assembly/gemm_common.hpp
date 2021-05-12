@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,7 +81,7 @@ public:
     /** Main execute member fucntion
      * @param [in] work_range     specifies the range of work we want to be computed, total range defined by get_window_size()
      * @param [in] thread_locator where are we inside of the thread space
-     * @naram [in] threadid       a unique threadid
+     * @param [in] threadid       a unique threadid
      */
     virtual void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) = 0;
 

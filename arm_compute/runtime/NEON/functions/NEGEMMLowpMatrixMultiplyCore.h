@@ -44,7 +44,10 @@ class NEGEMMLowpOffsetContributionOutputStageKernel;
 class NEGEMMLowpMatrixAReductionKernel;
 class NEGEMMLowpMatrixBReductionKernel;
 class NEGEMMTranspose1xWKernel;
-class NEGEMMAssemblyDispatch;
+namespace cpu
+{
+class CpuGemmAssemblyDispatch;
+}
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore. This function calls the following kernels if the DOT product instruction is not available:
  *
@@ -135,7 +138,7 @@ public:
 private:
     MemoryGroup                                                    _memory_group;
     IWeightsManager                                               *_weights_manager;
-    std::unique_ptr<NEGEMMAssemblyDispatch>                        _asm_glue;
+    std::unique_ptr<cpu::CpuGemmAssemblyDispatch>                  _asm_glue;
     std::unique_ptr<NEGEMMLowpMatrixMultiplyKernel>                _mm_kernel;
     std::unique_ptr<NEGEMMInterleave4x4Kernel>                     _mtx_a_reshape_kernel;
     std::unique_ptr<NEGEMMTranspose1xWKernel>                      _mtx_b_reshape_kernel;
