@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,15 +52,15 @@ SimpleTensor<T> remap(const SimpleTensor<T> &in, SimpleTensor<float> &map_x, Sim
         const Coordinates id_out = index2coord(out.shape(), idx);
         valid_mask[idx]          = 1;
         Coordinates src_idx      = id_out; // need to setup all coordinates and not just xy
-        src_idx.set(0, static_cast<int>(std::floor(map_x[idx])));
-        src_idx.set(1, static_cast<int>(std::floor(map_y[idx])));
         if((0 <= map_y[idx]) && (map_y[idx] < height) && (0 <= map_x[idx]) && (map_x[idx] < width))
         {
             switch(policy)
             {
                 case InterpolationPolicy::NEAREST_NEIGHBOR:
                 {
-                    out[idx] = tensor_elem_at(in, src_idx, border_mode, constant_border_value);
+                    src_idx.set(0, static_cast<int>(std::floor(map_x[idx])));
+                    src_idx.set(1, static_cast<int>(std::floor(map_y[idx])));
+                    out[idx] = in[coord2index(in.shape(), src_idx)];
                     break;
                 }
                 case InterpolationPolicy::BILINEAR:

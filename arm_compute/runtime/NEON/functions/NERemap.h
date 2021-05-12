@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_NEREMAP_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <cstdint>
@@ -36,10 +36,9 @@ class ITensor;
 
 /** Basic function to execute remap. This function calls the following kernels:
  *
- * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NERemapKernel
  */
-class NERemap : public INESimpleFunction
+class NERemap : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the function's sources, destination, interpolation policy and border mode.
@@ -58,7 +57,7 @@ public:
      * @param[out]     output                Output tensor. Data type supported: U8.
      * @param[in]      policy                Interpolation policy to use. Only NEAREST and BILINEAR are supported.
      * @param[in]      border_mode           Border mode to use on the input tensor.
-     * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT. Defaults to 0.
      *
      */
     void configure(ITensor *input, const ITensor *map_x, const ITensor *map_y, ITensor *output,
