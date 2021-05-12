@@ -2292,12 +2292,13 @@ __kernel void gemmlowp_output_stage_quantize_down_float(TENSOR3D_DECLARATION(src
 
     VEC_DATA_TYPE(int, VEC_SIZE)
     biases_values = VLOAD(VEC_SIZE)(0, (__global int *)bias_addr);
-    input_values += (int4)biases_values;
+    input_values += (VEC_DATA_TYPE(int, VEC_SIZE))biases_values;
 #endif // defined(ADD_BIAS)
 
     // Convert to float
-    float4 input_values_f = convert_float4(input_values);
-    input_values_f        = round(input_values_f * (float)REAL_MULTIPLIER + (float)OUTPUT_OFFSET);
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    input_values_f = CONVERT(input_values, VEC_DATA_TYPE(float, VEC_SIZE));
+    input_values_f = round(input_values_f * (float)REAL_MULTIPLIER + (float)OUTPUT_OFFSET);
 
     VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE)
     res0 = CONVERT_SAT(input_values_f, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, VEC_SIZE));

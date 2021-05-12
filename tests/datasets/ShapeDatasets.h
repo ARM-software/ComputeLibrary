@@ -165,7 +165,7 @@ public:
         : ShapeDataset("Shape",
     {
         // Batch size 1
-        TensorShape{ 9U, 9U },
+        TensorShape{ 1U, 9U },
                      TensorShape{ 27U, 13U, 2U },
     })
     {
