@@ -88,9 +88,9 @@ public:
     Small2DShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 7U, 7U },
-                     TensorShape{ 27U, 13U },
-                     TensorShape{ 128U, 64U }
+        TensorShape{ 1U, 7U },
+                     TensorShape{ 5U, 13U },
+                     TensorShape{ 32U, 64U }
     })
     {
     }

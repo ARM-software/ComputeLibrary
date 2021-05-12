@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,7 +78,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
                        framework::dataset::make("DataType", DataType::F16)),
                        framework::dataset::make("InPlace", { false, true })),
-                       framework::dataset::make("Epsilon", { 1e-8 })))
+                       framework::dataset::make("Epsilon", { 1e-3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

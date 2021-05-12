@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,31 +76,25 @@ __kernel void mean_stddev_normalization(
         sum_sq += data * data;
     }
     // Perform reduction
-#if VEC_SIZE > 8
-    sum.s01234567 += sum.s89abcdef;
-    sum_sq.s01234567 += sum_sq.s89abcdef;
-#endif // VEC_SIZE > 8
-#if VEC_SIZE > 4
-    sum.s0123 += sum.s4567;
-    sum_sq.s0123 += sum_sq.s4567;
-#endif // VEC_SIZE > 4
-#if VEC_SIZE > 2
-    sum.s01 += sum.s23;
-    sum_sq.s01 += sum_sq.s23;
-#endif // VEC_SIZE > 2
-    sum.s0 += sum.s1;
-    sum_sq.s0 += sum_sq.s1;
+    sum    = SUM_REDUCE(sum, VEC_SIZE);
+    sum_sq = SUM_REDUCE(sum_sq, VEC_SIZE);
+
+#if VEC_SIZE > 1
+#define sum sum.s0
+#define sum_sq sum_sq.s0
+#endif // VEC_SIZE > 1
+
     // Left-overs loop
     for(; i < WIDTH; ++i)
     {
         DATA_TYPE data = *((__global DATA_TYPE *)offset(&in, i, 0));
 
-        sum.s0 += data;
-        sum_sq.s0 += data * data;
+        sum += data;
+        sum_sq += data * data;
     }
 
-    DATA_TYPE mean       = sum.s0 / WIDTH;
-    DATA_TYPE var        = (sum_sq.s0 / WIDTH) - (mean * mean);
+    DATA_TYPE mean       = sum / WIDTH;
+    DATA_TYPE var        = (sum_sq / WIDTH) - (mean * mean);
     DATA_TYPE stddev_inv = 1.f / sqrt(var + EPSILON);
 
     i = 0;
