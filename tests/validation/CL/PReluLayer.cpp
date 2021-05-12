@@ -200,6 +200,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<int16_t>, framework::Datase
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+FIXTURE_DATA_TEST_CASE(RunOneDimensional, CLPReluLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(framework::dataset::make("Shape", TensorShape(1U, 16U)), PReluLayerS16Dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
 TEST_SUITE_END()
 
 TEST_SUITE(Float)

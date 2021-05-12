@@ -39,10 +39,15 @@
 #define MIN(x, y) min(x, y)
 #define SQUARED_DIFF(x, y) (x - y) * (x - y)
 #define POWER(x, y) pow(x, y)
+
+#if VEC_SIZE_OUT == 1
+#define PRELU(x, y) (x > 0 ? x : x * y)
+#else // VEC_SIZE_OUT == 1
 #define PRELU(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE_OUT)0), SELECT_VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))))
+#endif // VEC_SIZE_OUT == 1
 
 #if defined(S32)
-#define DIV(x, y) CONVERT(floor(CONVERT(x , VEC_DATA_TYPE(float, VEC_SIZE_OUT)) / CONVERT(y , VEC_DATA_TYPE(float, VEC_SIZE_OUT))), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT));
+#define DIV(x, y) CONVERT(floor(CONVERT(x, VEC_DATA_TYPE(float, VEC_SIZE_OUT)) / CONVERT(y, VEC_DATA_TYPE(float, VEC_SIZE_OUT))), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT));
 #else /* S32 */
 #define DIV(x, y) (x / y)
 #endif /* S32 */
