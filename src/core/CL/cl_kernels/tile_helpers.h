@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 
+// *INDENT-OFF*
+// clang-format off
+
 /** Tile object
  *  A tile object is a 2D memory block and can be accessed using the following syntax:
  *  -# a[m0].v    = access the the vector at row "m0" (OpenCL vector)
@@ -39,21 +42,21 @@
         DATA_TYPE##W v;                     \
     } BASENAME[H]
 
-#define TENSOR4D_IMAGE(name)             \
-    __read_only image2d_t name##_img,    \
-    __global uchar *name##_ptr,      \
-    uint            name##_stride_x, \
-    uint            name##_step_x,   \
-    uint            name##_stride_y, \
-    uint            name##_step_y,   \
-    uint            name##_stride_z, \
-    uint            name##_step_z,   \
-    uint            name##_stride_w, \
-    uint            name##_step_w,   \
+#define TENSOR4D_IMAGE(name)          \
+    __read_only image2d_t name##_img, \
+    __global uchar *name##_ptr,       \
+    uint            name##_stride_x,  \
+    uint            name##_step_x,    \
+    uint            name##_stride_y,  \
+    uint            name##_step_y,    \
+    uint            name##_stride_z,  \
+    uint            name##_step_z,    \
+    uint            name##_stride_w,  \
+    uint            name##_step_w,    \
     uint            name##_offset_first_element_in_bytes
 
-#define TENSOR4D_BUFFER(name)        \
-    __global uchar *name##_ptr,      \
+#define TENSOR4D_BUFFER(name)    \
+    __global uchar *name##_ptr,  \
     uint        name##_stride_x, \
     uint        name##_step_x,   \
     uint        name##_stride_y, \
@@ -67,9 +70,143 @@
 #define TENSOR4D_STR(name, type) TENSOR4D_##type(name)
 #define TENSOR4D(name, type) TENSOR4D_STR(name, type)
 
-/** Loop unrolling */
-#define LOOP_UNROLLING(DATA_TYPE, VAR, START_IDX, NUM_ITERATIONS, STEP) \
-    _Pragma("unroll") for(DATA_TYPE VAR = START_IDX; VAR < NUM_ITERATIONS; VAR += STEP)
+#define UNROLL_INCR(idx, step, macro) idx += (step); (macro)
+
+#define LOOP_UNROLLING_1(idx, step, macro) (macro)
+#define LOOP_UNROLLING_2(idx, step, macro) LOOP_UNROLLING_1(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_3(idx, step, macro) LOOP_UNROLLING_2(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_4(idx, step, macro) LOOP_UNROLLING_3(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_5(idx, step, macro) LOOP_UNROLLING_4(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_6(idx, step, macro) LOOP_UNROLLING_5(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_7(idx, step, macro) LOOP_UNROLLING_6(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_8(idx, step, macro) LOOP_UNROLLING_7(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_9(idx, step, macro) LOOP_UNROLLING_8(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_10(idx, step, macro) LOOP_UNROLLING_9(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_11(idx, step, macro) LOOP_UNROLLING_10(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_12(idx, step, macro) LOOP_UNROLLING_11(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_13(idx, step, macro) LOOP_UNROLLING_12(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_14(idx, step, macro) LOOP_UNROLLING_13(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_15(idx, step, macro) LOOP_UNROLLING_14(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_16(idx, step, macro) LOOP_UNROLLING_15(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_17(idx, step, macro) LOOP_UNROLLING_16(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_18(idx, step, macro) LOOP_UNROLLING_17(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_19(idx, step, macro) LOOP_UNROLLING_18(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_20(idx, step, macro) LOOP_UNROLLING_19(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_21(idx, step, macro) LOOP_UNROLLING_20(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_22(idx, step, macro) LOOP_UNROLLING_21(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_23(idx, step, macro) LOOP_UNROLLING_22(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_24(idx, step, macro) LOOP_UNROLLING_23(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_25(idx, step, macro) LOOP_UNROLLING_24(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_26(idx, step, macro) LOOP_UNROLLING_25(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_27(idx, step, macro) LOOP_UNROLLING_26(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_28(idx, step, macro) LOOP_UNROLLING_27(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_29(idx, step, macro) LOOP_UNROLLING_28(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_30(idx, step, macro) LOOP_UNROLLING_29(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_31(idx, step, macro) LOOP_UNROLLING_30(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_32(idx, step, macro) LOOP_UNROLLING_31(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_33(idx, step, macro) LOOP_UNROLLING_32(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_34(idx, step, macro) LOOP_UNROLLING_33(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_35(idx, step, macro) LOOP_UNROLLING_34(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_36(idx, step, macro) LOOP_UNROLLING_35(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_37(idx, step, macro) LOOP_UNROLLING_36(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_38(idx, step, macro) LOOP_UNROLLING_37(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_39(idx, step, macro) LOOP_UNROLLING_38(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_40(idx, step, macro) LOOP_UNROLLING_39(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_41(idx, step, macro) LOOP_UNROLLING_40(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_42(idx, step, macro) LOOP_UNROLLING_41(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_43(idx, step, macro) LOOP_UNROLLING_42(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_44(idx, step, macro) LOOP_UNROLLING_43(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_45(idx, step, macro) LOOP_UNROLLING_44(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_46(idx, step, macro) LOOP_UNROLLING_45(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_47(idx, step, macro) LOOP_UNROLLING_46(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_48(idx, step, macro) LOOP_UNROLLING_47(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_49(idx, step, macro) LOOP_UNROLLING_48(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_50(idx, step, macro) LOOP_UNROLLING_49(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_51(idx, step, macro) LOOP_UNROLLING_50(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_52(idx, step, macro) LOOP_UNROLLING_51(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_53(idx, step, macro) LOOP_UNROLLING_52(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_54(idx, step, macro) LOOP_UNROLLING_53(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_55(idx, step, macro) LOOP_UNROLLING_54(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_56(idx, step, macro) LOOP_UNROLLING_55(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_57(idx, step, macro) LOOP_UNROLLING_56(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_58(idx, step, macro) LOOP_UNROLLING_57(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_59(idx, step, macro) LOOP_UNROLLING_58(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_60(idx, step, macro) LOOP_UNROLLING_59(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_61(idx, step, macro) LOOP_UNROLLING_60(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_62(idx, step, macro) LOOP_UNROLLING_61(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_63(idx, step, macro) LOOP_UNROLLING_62(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_64(idx, step, macro) LOOP_UNROLLING_63(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_65(idx, step, macro) LOOP_UNROLLING_64(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_66(idx, step, macro) LOOP_UNROLLING_65(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_67(idx, step, macro) LOOP_UNROLLING_66(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_68(idx, step, macro) LOOP_UNROLLING_67(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_69(idx, step, macro) LOOP_UNROLLING_68(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_70(idx, step, macro) LOOP_UNROLLING_69(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_71(idx, step, macro) LOOP_UNROLLING_70(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_72(idx, step, macro) LOOP_UNROLLING_71(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_73(idx, step, macro) LOOP_UNROLLING_72(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_74(idx, step, macro) LOOP_UNROLLING_73(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_75(idx, step, macro) LOOP_UNROLLING_74(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_76(idx, step, macro) LOOP_UNROLLING_75(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_77(idx, step, macro) LOOP_UNROLLING_76(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_78(idx, step, macro) LOOP_UNROLLING_77(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_79(idx, step, macro) LOOP_UNROLLING_78(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_80(idx, step, macro) LOOP_UNROLLING_79(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_81(idx, step, macro) LOOP_UNROLLING_80(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_82(idx, step, macro) LOOP_UNROLLING_81(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_83(idx, step, macro) LOOP_UNROLLING_82(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_84(idx, step, macro) LOOP_UNROLLING_83(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_85(idx, step, macro) LOOP_UNROLLING_84(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_86(idx, step, macro) LOOP_UNROLLING_85(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_87(idx, step, macro) LOOP_UNROLLING_86(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_88(idx, step, macro) LOOP_UNROLLING_87(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_89(idx, step, macro) LOOP_UNROLLING_88(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_90(idx, step, macro) LOOP_UNROLLING_89(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_91(idx, step, macro) LOOP_UNROLLING_90(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_92(idx, step, macro) LOOP_UNROLLING_91(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_93(idx, step, macro) LOOP_UNROLLING_92(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_94(idx, step, macro) LOOP_UNROLLING_93(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_95(idx, step, macro) LOOP_UNROLLING_94(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_96(idx, step, macro) LOOP_UNROLLING_95(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_97(idx, step, macro) LOOP_UNROLLING_96(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_98(idx, step, macro) LOOP_UNROLLING_97(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_99(idx, step, macro) LOOP_UNROLLING_98(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_100(idx, step, macro) LOOP_UNROLLING_99(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_101(idx, step, macro) LOOP_UNROLLING_100(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_102(idx, step, macro) LOOP_UNROLLING_101(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_103(idx, step, macro) LOOP_UNROLLING_102(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_104(idx, step, macro) LOOP_UNROLLING_103(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_105(idx, step, macro) LOOP_UNROLLING_104(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_106(idx, step, macro) LOOP_UNROLLING_105(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_107(idx, step, macro) LOOP_UNROLLING_106(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_108(idx, step, macro) LOOP_UNROLLING_107(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_109(idx, step, macro) LOOP_UNROLLING_108(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_110(idx, step, macro) LOOP_UNROLLING_109(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_111(idx, step, macro) LOOP_UNROLLING_110(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_112(idx, step, macro) LOOP_UNROLLING_111(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_113(idx, step, macro) LOOP_UNROLLING_112(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_114(idx, step, macro) LOOP_UNROLLING_113(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_115(idx, step, macro) LOOP_UNROLLING_114(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_116(idx, step, macro) LOOP_UNROLLING_115(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_117(idx, step, macro) LOOP_UNROLLING_116(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_118(idx, step, macro) LOOP_UNROLLING_117(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_119(idx, step, macro) LOOP_UNROLLING_118(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_120(idx, step, macro) LOOP_UNROLLING_119(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_121(idx, step, macro) LOOP_UNROLLING_120(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_122(idx, step, macro) LOOP_UNROLLING_121(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_123(idx, step, macro) LOOP_UNROLLING_122(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_124(idx, step, macro) LOOP_UNROLLING_123(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_125(idx, step, macro) LOOP_UNROLLING_124(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_126(idx, step, macro) LOOP_UNROLLING_125(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_127(idx, step, macro) LOOP_UNROLLING_126(idx, step, macro); UNROLL_INCR(idx, step, macro)
+#define LOOP_UNROLLING_128(idx, step, macro) LOOP_UNROLLING_127(idx, step, macro); UNROLL_INCR(idx, step, macro)
+
+#define LOOP_UNROLLING(type, idx, start, step, num, macro) LOOP_UNROLLING_STR(type, idx, start, step, num, macro)
+#define LOOP_UNROLLING_STR(type, idx, start, step, num, macro) \
+    {                                                          \
+        type idx = start;                                      \
+        LOOP_UNROLLING_##num(idx, step, macro);                \
+    }
 
 /** Get the get_global_id with partial N0. This function is useful when the dimension is not multiple of N0 and we need to use a partial N0
  *  to avoid out-of-bound read/write
@@ -122,15 +259,15 @@
         val += (DST_DATA_TYPE)x.s3 * (DST_DATA_TYPE)y.s3; \
     })
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
-#define DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, a, b, c) \
-    ({                                                \
-        DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, (a.lo), (b.lo), c);     \
-        DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, (a.hi), (b.hi), c);     \
+#define DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, a, b, c)            \
+    ({                                                           \
+        DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, (a.lo), (b.lo), c); \
+        DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, (a.hi), (b.hi), c); \
     })
-#define DOT_PRODUCT16_INTEGER8(DST_DATA_TYPE, a, b, c) \
-    ({                                                 \
-        DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, (a.lo), (b.lo), c);      \
-        DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, (a.hi), (b.hi), c);      \
+#define DOT_PRODUCT16_INTEGER8(DST_DATA_TYPE, a, b, c)           \
+    ({                                                           \
+        DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, (a.lo), (b.lo), c); \
+        DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, (a.hi), (b.hi), c); \
     })
 
 /** Load a vector from global memory (tensor)
@@ -168,11 +305,11 @@
  * @param[out] dst           Output tile
  */
 #define T_LOAD(DATA_TYPE, HEIGHT, WIDTH, TENSOR_TYPE, TENSOR, X, Y, YI_MULTIPLIER, STRIDE_Y, dst)                      \
-    ({ \
-        LOOP_UNROLLING(int, _i, 0, HEIGHT, 1) \
-        { \
+    ({                                                                                                                 \
+        LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                          \
+        {                                                                                                              \
             dst[_i].v = V_LOAD(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, ((Y) + _i * (int)(YI_MULTIPLIER)), STRIDE_Y); \
-        }                                                                                                                  \
+        })                                                                                                             \
     })
 
 /** Load a tile from global memory (tensor) using an indirect Y index tile
@@ -189,11 +326,11 @@
  * @param[out] dst         Output tile
  */
 #define T_LOAD_INDIRECT(DATA_TYPE, HEIGHT, WIDTH, TENSOR_TYPE, TENSOR, X, STRIDE_Y, indirect_y, dst)    \
-    ({ \
-        LOOP_UNROLLING(int, _i, 0, HEIGHT, 1) \
-        { \
+    ({                                                                                                  \
+        LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                           \
+        {                                                                                               \
             dst[_i].v = V_LOAD(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, (indirect_y[_i].v), STRIDE_Y); \
-        }                                                                                                   \
+        })                                                                                              \
     })
 
 /** Load a tile from global memory (tensor) when the tensor is stored using a NHWC layout
@@ -215,27 +352,26 @@
  * @param[out] dst           Output tile
  */
 #define T_LOAD_NHWC(DATA_TYPE, TILE_HEIGHT, TILE_WIDTH, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, dst)   \
-    ({ \
-        LOOP_UNROLLING(int, _yk, 0, (TILE_HEIGHT), 1) \
-        { \
-            LOOP_UNROLLING(int, _xk, 0, (TILE_WIDTH), 1) \
-            { \
-                int _src_y = (X) + _xk + ((Y) + _yk) * (TENSOR_WIDTH); \
-                _src_y    += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT); \
+    ({                                                                                                                                                \
+        LOOP_UNROLLING(int, _yk, 0, 1, TILE_HEIGHT,                                                                                                   \
+        {                                                                                                                                             \
+            LOOP_UNROLLING(int, _xk, 0, 1, TILE_WIDTH,                                                                                                \
+            {                                                                                                                                         \
+                int _src_y = (X) + _xk + ((Y) + _yk) * (TENSOR_WIDTH);                                                                                \
+                _src_y    += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT);                                                                        \
                 int _src_valid_y = (((X) + _xk) >= 0 && ((X) + _xk) < (int)(TENSOR_WIDTH) && ((Y) + _yk) >= 0 && ((Y) + _yk) < (int)(TENSOR_HEIGHT)); \
-                if(_src_valid_y != 0) \
-                { \
-                    dst[_xk + _yk * (TILE_WIDTH)].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y); \
+                if(_src_valid_y != 0)                                                                                                                 \
+                {                                                                                                                                     \
+                    dst[_xk + _yk * (TILE_WIDTH)].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y);                     \
                 }                                                                                                                                     \
-            }                                                                                                                                                 \
-        }                                                                                                                                                 \
+            })                                                                                                                                        \
+        })                                                                                                                                            \
     })
 
 /** Load a tile from global memory (tensor) when the tensor is stored using a NHWC layout using indirect X and Y coordinates
  *
  * @param[in]  DATA_TYPE     Data type
- * @param[in]  TILE_HEIGHT   Number of elements to load from Y (height) dimension
- * @param[in]  TILE_WIDTH    Number of elements to load from X (width) dimension
+ * @param[in]  TILE_AREA     Number of elements to load from Y (height) dimension * Number of elements to load from X (width) dimension
  * @param[in]  TILE_CHANNELS Number of elements to load from C (channel) dimension
  * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image). Currently BUFFER only is supported
  *                           In case of cl_image, only TILE_CHANNELS multiples of 4 are supported (4, 8, 16)
@@ -251,18 +387,18 @@
  * @param[out] yi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect Y coordinate
  * @param[out] dst           Output tile
  */
-#define T_LOAD_NHWC_INDIRECT(DATA_TYPE, TILE_HEIGHT, TILE_WIDTH, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, xi, yi, dst)  \
-    ({ \
-        LOOP_UNROLLING(int, _i, 0, (TILE_WIDTH * TILE_HEIGHT), 1) \
-        { \
-            int _src_y = (X) + xi[_i].v + ((Y) + yi[_i].v) * (TENSOR_WIDTH); \
-            _src_y    += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT); \
+#define T_LOAD_NHWC_INDIRECT(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, xi, yi, dst)                \
+    ({                                                                                                                                                                \
+        LOOP_UNROLLING(int, _i, 0, 1, TILE_AREA,                                                                                                                      \
+        {                                                                                                                                                             \
+            int _src_y = (X) + xi[_i].v + ((Y) + yi[_i].v) * (TENSOR_WIDTH);                                                                                          \
+            _src_y += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT);                                                                                               \
             int _src_valid_y = (((X) + xi[_i].v) >= 0 && ((X) + xi[_i].v) < (int)(TENSOR_WIDTH) && ((Y) + yi[_i].v) >= 0 && ((Y) + yi[_i].v) < (int)(TENSOR_HEIGHT)); \
-            if(_src_valid_y != 0) \
-            { \
-                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y); \
+            if(_src_valid_y != 0)                                                                                                                                     \
+            {                                                                                                                                                         \
+                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y);                                                               \
             }                                                                                                                                                         \
-        }                                                                                                                                                                 \
+        })                                                                                                                                                            \
     })
 
 /** Store a tile to global memory (tensor) using an indirect Y index tile and conditionally use a different length for the store
@@ -287,19 +423,19 @@
     ({                                                                                                                                                                                             \
         if(WIDTH1_CONDITION)                                                                                                                                                                       \
         {                                                                                                                                                                                          \
-            LOOP_UNROLLING(int, _i, 0, HEIGHT, 1)                                                                                                                                                  \
+            LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
             {                                                                                                                                                                                      \
                 VSTORE_PARTIAL(WIDTH0, WIDTH1)                                                                                                                                                     \
                 (src[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
-            }                                                                                                                                                                                      \
+            })                                                                                                                                                                                     \
         }                                                                                                                                                                                          \
         else                                                                                                                                                                                       \
         {                                                                                                                                                                                          \
-            LOOP_UNROLLING(int, _i, 0, HEIGHT, 1)                                                                                                                                                  \
+            LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
             {                                                                                                                                                                                      \
                 VSTORE(WIDTH0)                                                                                                                                                                     \
                 (src[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
-            }                                                                                                                                                                                      \
+            })                                                                                                                                                                                     \
         }                                                                                                                                                                                          \
     })
 
@@ -315,24 +451,24 @@
  * @param[in]  rhs           RHS tile
  * @param[out] dst           DST tile
  */
-#define T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, lhs, rhs, dst)                                                                                                                                                               \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, M0, 1) \
-        { \
-            ACC_DATA_TYPE _tm = 0; \
-            LOOP_UNROLLING(int, _k0, 0, K0, 1) \
-            { \
-                _tm += ((ACC_DATA_TYPE)lhs[_m0].s[_k0] * (ACC_DATA_TYPE)WEI_OFFSET); \
-            } \
-            LOOP_UNROLLING(int, _n0, 0, N0, 1) \
-            { \
-                dst[_m0].s[_n0] += _tm; \
-                LOOP_UNROLLING(int, _k0, 0, K0, 1) \
-                { \
+#define T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, lhs, rhs, dst)        \
+    ({                                                                                               \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                                                           \
+        {                                                                                            \
+            ACC_DATA_TYPE _tm = 0;                                                                   \
+            LOOP_UNROLLING(int, _k0, 0, 1, K0,                                                       \
+            {                                                                                        \
+                _tm += ((ACC_DATA_TYPE)lhs[_m0].s[_k0] * (ACC_DATA_TYPE)WEI_OFFSET);                 \
+            })                                                                                       \
+            LOOP_UNROLLING(int, _n0, 0, 1, N0,                                                       \
+            {                                                                                        \
+                dst[_m0].s[_n0] += _tm;                                                              \
+                LOOP_UNROLLING(int, _k0, 0, 1, K0,                                                   \
+                {                                                                                    \
                     dst[_m0].s[_n0] += ((ACC_DATA_TYPE)rhs[_n0].s[_k0] * (ACC_DATA_TYPE)SRC_OFFSET); \
-                } \
-            }                                                                                                                                                                                                                                               \
-        }                                                                                                                                                                                                                                                       \
+                })                                                                                   \
+            })                                                                                       \
+        });                                                                                          \
     })
 
 /** Quantized the tile (ASYMMETRIC) with fixed-point scale
@@ -347,25 +483,25 @@
  * @param[in]  src            Input tile
  * @param[out] dst            Output tile
  */
-#define T_QUANTIZE8_ASYMMETRIC(SRC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst)                          \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, M0, 1) \
-        { \
-            LOOP_UNROLLING(int, _n0, 0, N0, 1) \
-            { \
-                SRC_DATA_TYPE _tmp = 0; \
-                if(DST_SHIFT < 0) \
-                { \
+#define T_QUANTIZE8_ASYMMETRIC(SRC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst)      \
+    ({                                                                                                                     \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                                                                                 \
+        {                                                                                                                  \
+            LOOP_UNROLLING(int, _n0, 0, 1, N0,                                                                             \
+            {                                                                                                              \
+                SRC_DATA_TYPE _tmp = 0;                                                                                    \
+                if(DST_SHIFT < 0)                                                                                          \
+                {                                                                                                          \
                     _tmp = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(src[_m0].s[_n0], DST_MULTIPLIER, DST_SHIFT, 1); \
-                } \
-                else \
-                { \
-                    _tmp = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(src[_m0].s[_n0], DST_MULTIPLIER, DST_SHIFT, 1); \
-                } \
-                _tmp += DST_OFFSET; \
-                dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
-            }                                                                                                                                          \
-        }                                                                                                                                          \
+                }                                                                                                          \
+                else                                                                                                       \
+                {                                                                                                          \
+                    _tmp = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(src[_m0].s[_n0], DST_MULTIPLIER, DST_SHIFT, 1);    \
+                }                                                                                                          \
+                _tmp += DST_OFFSET;                                                                                        \
+                dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                        \
+            })                                                                                                             \
+        })                                                                                                                 \
     })
 
 /** Conditional rowset (memset by row)
@@ -380,14 +516,14 @@
  * @param[out]     mask         Mask to check for setting the row to VALUE_TO_SET
  */
 #define T_ROWSET_MASK(DATA_TYPE, M0, N0, VALUE_TO_SET, a, mask)                                                                                            \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, M0, 1) \
-        { \
-            LOOP_UNROLLING(int, _n0, 0, N0, 1) \
-            { \
+    ({                                                                                                                                                     \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                                                                                                                 \
+        {                                                                                                                                                  \
+            LOOP_UNROLLING(int, _n0, 0, 1, N0,                                                                                                             \
+            {                                                                                                                                              \
                 a[_m0].s[_n0] = select((DATA_TYPE)(a[_m0].s[_n0]), (DATA_TYPE)(VALUE_TO_SET), (SELECT_DATA_TYPE(DATA_TYPE))(mask[_m0].v == (DATA_TYPE)0)); \
-            }                                                                                                                                                      \
-        }                                                                                                                                                      \
+            })                                                                                                                                             \
+        })                                                                                                                                                 \
     })
 
 /** Element-wise activation
@@ -404,11 +540,11 @@
  * @param[out] dst             DST tile
  */
 #define T_ACTIVATION(DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, src, dst)               \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, M0, 1) \
-        { \
+    ({                                                                                         \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                                                     \
+        {                                                                                      \
             dst[_m0].v = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, N0, src[_m0].v, A_VAL, B_VAL); \
-        }                                                                                          \
+        })                                                                                     \
     })
 
 /** Element-wise addition with a constant value
@@ -423,14 +559,14 @@
  * @param[out] dst          DST tile
  */
 #define T_ADD_CONSTANT(DATA_TYPE, M0, N0, lhs, rhs_constant, dst) \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, M0, 1) \
-        { \
-            LOOP_UNROLLING(int, _n0, 0, N0, 1) \
-            { \
+    ({                                                            \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
+        {                                                         \
+            LOOP_UNROLLING(int, _n0, 0, 1, N0,                    \
+            {                                                     \
                 dst[_m0].s[_n0] = lhs[_m0].s[_n0] + rhs_constant; \
-            }                                                             \
-        }                                                             \
+            })                                                    \
+        })                                                        \
     })
 
 /** Element-wise addition with RHS broadcasted (RHS has the X dimension only)
@@ -446,11 +582,11 @@
  * @param[out] dst       DST tile
  */
 #define T_ADD_BROADCAST_X(DATA_TYPE, M0, N0, lhs, rhs, dst) \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, M0, 1) \
-        { \
+    ({                                                      \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
+        {                                                   \
             dst[_m0].v = lhs[_m0].v + rhs[0].v;             \
-        }                                                       \
+        })                                                  \
     })
 
 /** Matrix multiplication
@@ -478,24 +614,27 @@
 #define T_MMUL_NT_T_uchar_uchar_int(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
 #define T_MMUL_NT_T_FLOAT(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
     {                                                                                     \
-        LOOP_UNROLLING(int, _m, 0, M0, 1)                                                 \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                 \
         {                                                                                 \
-            LOOP_UNROLLING(int, _n, 0, N0, 1)                                             \
+            LOOP_UNROLLING(int, _n, 0, 1, N0,                                             \
             {                                                                             \
-                LOOP_UNROLLING(int, _k, 0, K0, 1)                                         \
+                LOOP_UNROLLING(int, _k, 0, 1, K0,                                         \
                 {                                                                         \
                     dst[_m].s[_n] = fma((lhs[_m].s[_k]), (rhs[_n].s[_k]), dst[_m].s[_n]); \
-                }                                                                         \
-            }                                                                             \
-        }                                                                                 \
+                })                                                                        \
+            })                                                                            \
+        })                                                                                \
     }
 #define T_MMUL_NT_T_INTEGER8(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                            \
-    ({ \
-        LOOP_UNROLLING(int, _m, 0, M0, 1) \
-        { \
-            LOOP_UNROLLING(int, _n, 0, N0, 1) \
-            { \
+    ({                                                                                            \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                         \
+        {                                                                                         \
+            LOOP_UNROLLING(int, _n, 0, 1, N0,                                                     \
+            {                                                                                     \
                 DOT_PRODUCT_INTEGER8(DST_DATA_TYPE, K0, (lhs[_m].v), (rhs[_n].v), dst[_m].s[_n]); \
-            }                                                                                             \
-        }                                                                                             \
+            })                                                                                    \
+        })                                                                                        \
     })
+
+// clang-format on
+// *INDENT-ON*

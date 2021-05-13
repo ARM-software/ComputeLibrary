@@ -237,17 +237,17 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     TILE(uint, 8, 1, src_indirect_y);
 
     // Calculate the indirect Y for the source tensor
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         src_indirect_y[i].v = mout + i * _ISRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(_ISRC_HEIGHT * 8);
-    }
+    })
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         in[i].v = 0;
-    }
+    })
 
     // Load the values across the 8 channels to compose the 8x1 tile
     T_LOAD_INDIRECT(DATA_TYPE, 8, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
@@ -270,17 +270,17 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     TILE(uint, 2, 1, dst_indirect_y);
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    LOOP_UNROLLING(int, yk, 0, 2, 1)
+    LOOP_UNROLLING(int, yk, 0, 1, 2,
     {
         int y_c              = min(y_out + yk, ((int)_IDST_HEIGHT - 1));
         dst_indirect_y[yk].v = x_out + y_c * (int)(_IDST_WIDTH);
-    }
+    })
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    LOOP_UNROLLING(int, xk, 0, 2, 1)
+    LOOP_UNROLLING(int, xk, 0, 1, 2,
     {
         int x_c              = min(x_out + xk, ((int)_IDST_WIDTH - 1));
         dst_indirect_y[xk].v = x_c + y_out * (int)(_IDST_WIDTH);
-    }
+    })
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones
@@ -294,33 +294,33 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     TILE(uint, 64, 1, src_indirect_y);
 
     // Calculate the indirect Y for the source tensor
-    LOOP_UNROLLING(int, i, 0, 64, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 64,
     {
         src_indirect_y[i].v = mout + i * _ISRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(_ISRC_HEIGHT * 64);
-    }
+    })
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 64, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 64,
     {
         in[i].v = 0;
-    }
+    })
 
     // Load the values across the 64 channels to compose the 8x8 tile
     T_LOAD_INDIRECT(DATA_TYPE, 64, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         tmp[i * 2].v     = in[0 + i].v + in[8 + i].v + in[16 + i].v + in[24 + i].v + in[32 + i].v + in[40 + i].v + in[48 + i].v;
         tmp[i * 2 + 1].v = -in[8 + i].v + in[16 + i].v - 2 * in[24 + i].v + 2 * in[32 + i].v + -3 * in[40 + i].v + 3 * in[48 + i].v + in[56 + i].v;
-    }
+    })
 
     // Compute the 2x2 output tile
-    LOOP_UNROLLING(int, i, 0, 2, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 2,
     {
         out[i * 2].v     = tmp[0 + i].v + tmp[2 + i].v + tmp[4 + i].v + tmp[6 + i].v + tmp[8 + i].v + tmp[10 + i].v + tmp[12 + i].v;
         out[i * 2 + 1].v = -tmp[2 + i].v + tmp[4 + i].v - 2 * tmp[6 + i].v + 2 * tmp[8 + i].v - 3 * tmp[10 + i].v + 3 * tmp[12 + i].v + tmp[14 + i].v;
-    }
+    })
 
 #if defined(HAS_BIAS)
     // Add bias
@@ -336,16 +336,16 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     TILE(uint, 4, 1, dst_indirect_y);
 
     // Calculate the destination indirect Y
-    LOOP_UNROLLING(int, yk, 0, 2, 1)
+    LOOP_UNROLLING(int, yk, 0, 1, 2,
     {
-        LOOP_UNROLLING(int, xk, 0, 2, 1)
+        LOOP_UNROLLING(int, xk, 0, 1, 2,
         {
             int x_c                       = min(x_out + xk, ((int)_IDST_WIDTH - 1));
             int y_c                       = min(y_out + yk, ((int)_IDST_HEIGHT - 1));
             dst_indirect_y[xk + yk * 2].v = x_c + y_c * _IDST_WIDTH;
             dst_indirect_y[xk + yk * 2].v += bout * (int)(_IDST_WIDTH * _IDST_HEIGHT);
-        }
-    }
+        })
+    })
 
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 4, N0, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
@@ -630,17 +630,17 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     TILE(DATA_TYPE, 4, N0, out);
     TILE(uint, 6, 1, src_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 6, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 6,
     {
         src_indirect_y[i].v = mout + i * SRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 6);
-    }
+    })
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 6, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 6,
     {
         in[i].v = 0;
-    }
+    })
 
     // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
     T_LOAD_INDIRECT(DATA_TYPE, 6, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
@@ -669,19 +669,19 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 
     // Calculate the destination indirect Y
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    LOOP_UNROLLING(int, yk, 0, 4, 1)
+    LOOP_UNROLLING(int, yk, 0, 1, 4,
     {
         int y_c              = min(y_out + yk, ((int)DST_HEIGHT - 1));
         dst_indirect_y[yk].v = x_out + y_c * DST_WIDTH;
         dst_indirect_y[yk].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
-    }
+    })
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    LOOP_UNROLLING(int, xk, 0, 4, 1)
+    LOOP_UNROLLING(int, xk, 0, 1, 4,
     {
         int x_c              = min(x_out + xk, ((int)DST_WIDTH - 1));
         dst_indirect_y[xk].v = x_c + y_out * DST_WIDTH;
         dst_indirect_y[xk].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
-    }
+    })
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones
@@ -694,22 +694,22 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     TILE(DATA_TYPE, 4, N0, tmp);
     TILE(uint, 36, 1, src_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 36, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 36,
     {
         src_indirect_y[i].v = mout + i * SRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 36);
-    }
+    })
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 36, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 36,
     {
         in[i].v = 0;
-    }
+    })
 
     // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
     T_LOAD_INDIRECT(DATA_TYPE, 36, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
 
-    LOOP_UNROLLING(int, i, 0, 6, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 6,
     {
         tmp[0].v     = in[6 + i].v + in[12 + i].v;
         tmp[1].v     = in[6 + i].v - in[12 + i].v;
@@ -720,12 +720,12 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
         in[6 + i].v  = tmp[3].v + tmp[1].v;
         in[12 + i].v = fma(tmp[2].v, (VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[0].v);
         in[18 + i].v = fma(tmp[3].v, (VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[1].v) + in[30 + i].v;
-    }
+    })
 
     // Compute the output tile
     TILE(DATA_TYPE, 16, N0, out);
 
-    LOOP_UNROLLING(int, i, 0, 4, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 4,
     {
         tmp[0].v         = in[6 * i + 1].v + in[6 * i + 2].v;
         tmp[1].v         = in[6 * i + 1].v - in[6 * i + 2].v;
@@ -736,7 +736,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
         out[4 * i + 1].v = tmp[3].v + tmp[1].v;
         out[4 * i + 2].v = fma(tmp[2].v, (VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[0].v);
         out[4 * i + 3].v = fma(tmp[3].v, (VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[1].v) + in[6 * i + 5].v;
-    }
+    })
 
 #if defined(HAS_BIAS)
     TILE(DATA_TYPE, 1, N0, b);
@@ -755,16 +755,16 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     TILE(uint, 16, 1, dst_indirect_y);
 
     // Calculate the destination indirect Y
-    LOOP_UNROLLING(int, yk, 0, 4, 1)
+    LOOP_UNROLLING(int, yk, 0, 1, 4,
     {
-        LOOP_UNROLLING(int, xk, 0, 4, 1)
+        LOOP_UNROLLING(int, xk, 0, 1, 4,
         {
             int x_c                       = min(x_out + xk, ((int)DST_WIDTH - 1));
             int y_c                       = min(y_out + yk, ((int)DST_HEIGHT - 1));
             dst_indirect_y[xk + yk * 4].v = x_c + y_c * DST_WIDTH;
             dst_indirect_y[xk + yk * 4].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
-        }
-    }
+        })
+    })
 
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 16, N0, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
@@ -1076,17 +1076,17 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     TILE(DATA_TYPE, 4, N0, tmp);
     TILE(uint, 8, 1, src_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         src_indirect_y[i].v = mout + i * SRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 8);
-    }
+    })
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         in[i].v = 0;
-    }
+    })
 
     // "in" contains 1x8 or 8x1 tile here
     T_LOAD_INDIRECT(DATA_TYPE, 8, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
@@ -1119,19 +1119,19 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
     // Calculate the destination indirect Y
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    LOOP_UNROLLING(int, yk, 0, 4, 1)
+    LOOP_UNROLLING(int, yk, 0, 1, 4,
     {
         int y_c              = min(y_out + yk, ((int)DST_HEIGHT - 1));
         dst_indirect_y[yk].v = x_out + y_c * DST_WIDTH;
         dst_indirect_y[yk].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
-    }
+    })
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    LOOP_UNROLLING(int, xk, 0, 4, 1)
+    LOOP_UNROLLING(int, xk, 0, 1, 4,
     {
         int x_c              = min(x_out + xk, ((int)DST_WIDTH - 1));
         dst_indirect_y[xk].v = x_c + y_out * DST_WIDTH;
         dst_indirect_y[xk].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
-    }
+    })
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones
@@ -1143,23 +1143,23 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     TILE(DATA_TYPE, 6, N0, tmp);
     TILE(uint, 64, 1, src_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 64, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 64,
     {
         src_indirect_y[i].v = mout + i * SRC_HEIGHT;
         src_indirect_y[i].v += bout * (int)(SRC_HEIGHT * 64);
-    }
+    })
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 64, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 64,
     {
         in[i].v = 0;
-    }
+    })
 
     // "in" here is 8x8 tile
     T_LOAD_INDIRECT(DATA_TYPE, 64, N0, BUFFER, src, cout, src_stride_y, src_indirect_y, in);
 
     // A^T * in
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         tmp[0].v = in[8 + i].v + in[16 + i].v;
         tmp[1].v = in[8 + i].v - in[16 + i].v;
@@ -1175,13 +1175,13 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
         in[8 + i].v  = tmp[1].v + fma((VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[5].v, tmp[3].v);
         in[16 + i].v = tmp[0].v + fma((VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[2].v, tmp[4].v);
         in[24 + i].v = tmp[1].v + fma((VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[3].v, tmp[5].v) + in[56 + i].v;
-    }
+    })
 
     // Compute the output tile
     TILE(DATA_TYPE, 16, N0, out);
 
     // in * A, with in = A^T * in as above
-    LOOP_UNROLLING(int, i, 0, 4, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 4,
     {
         tmp[0].v = in[8 * i + 1].v + in[8 * i + 2].v;
         tmp[1].v = in[8 * i + 1].v - in[8 * i + 2].v;
@@ -1197,7 +1197,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
         out[4 * i + 1].v = tmp[1].v + fma((VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[5].v, tmp[3].v);
         out[4 * i + 2].v = fma((VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[2].v, tmp[0].v) + tmp[4].v;
         out[4 * i + 3].v = fma((VEC_DATA_TYPE(DATA_TYPE, N0))4.0f, tmp[3].v, tmp[1].v) + tmp[5].v + in[8 * i + 7].v;
-    }
+    })
 
 #if defined(HAS_BIAS)
     TILE(DATA_TYPE, 1, N0, b);
@@ -1216,16 +1216,16 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     TILE(uint, 16, 1, dst_indirect_y);
 
     // Calculate the destination indirect Y
-    LOOP_UNROLLING(int, yk, 0, 4, 1)
+    LOOP_UNROLLING(int, yk, 0, 1, 4,
     {
-        LOOP_UNROLLING(int, xk, 0, 4, 1)
+        LOOP_UNROLLING(int, xk, 0, 1, 4,
         {
             int x_c                       = min(x_out + xk, ((int)DST_WIDTH - 1));
             int y_c                       = min(y_out + yk, ((int)DST_HEIGHT - 1));
             dst_indirect_y[xk + yk * 4].v = x_c + y_c * DST_WIDTH;
             dst_indirect_y[xk + yk * 4].v += bout * (int)(DST_WIDTH * DST_HEIGHT);
-        }
-    }
+        })
+    })
 
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 16, N0, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);

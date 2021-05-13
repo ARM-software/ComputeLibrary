@@ -971,10 +971,10 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     TILE(DATA_TYPE, 6, 1, out);
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 6, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 6,
     {
         in[i].v = 0;
-    }
+    })
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
     T_LOAD_NHWC(DATA_TYPE, 1, 6, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
@@ -984,10 +984,10 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
 
     TILE(DATA_TYPE, 6, 1, com);
 
-    LOOP_UNROLLING(int, i, 0, 6, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 6,
     {
         in[i].v *= 4.0f;
-    }
+    })
 
     com[0].v = in[2].v - 4.f * in[0].v;
     com[1].v = in[3].v - 4.f * in[1].v;
@@ -1006,11 +1006,11 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
 
     TILE(uint, 6, 1, dst_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 6, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 6,
     {
         dst_indirect_y[i].v = mout + i * _INUM_TILES_X * _INUM_TILES_Y;
         dst_indirect_y[i].v += bout * _INUM_TILES_X * _INUM_TILES_Y * 6;
-    }
+    })
 
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 6, 1, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 
@@ -1019,10 +1019,10 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     TILE(DATA_TYPE, 36, 1, in);
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 36, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 36,
     {
         in[i].v = 0;
-    }
+    })
 
     // Load the tile from a NHWC tensor
     T_LOAD_NHWC(DATA_TYPE, 6, 6, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
@@ -1030,7 +1030,7 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     TILE(DATA_TYPE, 6, 1, com);
     TILE(DATA_TYPE, 36, 1, tmp);
 
-    LOOP_UNROLLING(int, i, 0, 6, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 6,
     {
         com[0].v         = in[2 * 6 + i].v - (DATA_TYPE)4.0f * in[0 * 6 + i].v;
         com[1].v         = in[3 * 6 + i].v - (DATA_TYPE)4.0f * in[1 * 6 + i].v;
@@ -1045,11 +1045,11 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
         tmp[i + 3 * 6].v = com[5].v + com[4].v;
         tmp[i + 4 * 6].v = com[5].v - com[4].v;
         tmp[i + 5 * 6].v = com[3].v - com[1].v;
-    }
+    })
 
     TILE(DATA_TYPE, 36, 1, out);
 
-    LOOP_UNROLLING(int, i, 0, 6, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 6,
     {
         com[0].v         = tmp[i * 6 + 2].v - 4.f * tmp[i * 6 + 0].v;
         com[1].v         = tmp[i * 6 + 3].v - 4.f * tmp[i * 6 + 1].v;
@@ -1064,16 +1064,16 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
         out[i * 6 + 3].v = com[5].v + com[4].v;
         out[i * 6 + 4].v = com[5].v - com[4].v;
         out[i * 6 + 5].v = com[3].v - com[1].v;
-    }
+    })
 
     // Compute destination address
     TILE(uint, 36, 1, dst_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 36, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 36,
     {
         dst_indirect_y[i].v = mout + i * _INUM_TILES_X * _INUM_TILES_Y;
         dst_indirect_y[i].v += bout * _INUM_TILES_X * _INUM_TILES_Y * 36;
-    }
+    })
 
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 36, 1, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
@@ -1141,10 +1141,10 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     TILE(DATA_TYPE, 8, 1, out);
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         in[i].v = 0;
-    }
+    })
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
     T_LOAD_NHWC(DATA_TYPE, 1, 8, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
@@ -1171,11 +1171,11 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
 
     TILE(uint, 8, 1, dst_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         dst_indirect_y[i].v = mout + i * _INUM_TILES_X * _INUM_TILES_Y;
         dst_indirect_y[i].v += bout * _INUM_TILES_X * _INUM_TILES_Y * 8;
-    }
+    })
 
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 8, 1, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 
@@ -1185,17 +1185,17 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     TILE(DATA_TYPE, 64, 1, out);
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 64, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 64,
     {
         in[i].v = 0;
-    }
+    })
 
     // Load the tile from a NHWC tensor
     T_LOAD_NHWC(DATA_TYPE, 8, 8, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
 
     TILE(DATA_TYPE, 8, 8, com);
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         com[0].s[i] = in[2 * 8 + i].s[0] - (DATA_TYPE)4.25f * in[4 * 8 + i].s[0] + in[6 * 8 + i].s[0];                                    // x
         com[1].s[i] = in[1 * 8 + i].s[0] - (DATA_TYPE)4.25f * in[3 * 8 + i].s[0] + in[5 * 8 + i].s[0];                                    // x
@@ -1205,7 +1205,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
         com[5].s[i] = (DATA_TYPE)2.0f * in[1 * 8 + i].s[0] - (DATA_TYPE)2.5f * in[3 * 8 + i].s[0] + (DATA_TYPE)0.5f * in[5 * 8 + i].s[0];
         com[6].s[i] = in[0 * 8 + i].s[0] - (DATA_TYPE)5.25f * in[2 * 8 + i].s[0] + (DATA_TYPE)5.25f * in[4 * 8 + i].s[0] - in[6 * 8 + i].s[0];
         com[7].s[i] = -in[1 * 8 + i].s[0] + (DATA_TYPE)5.25f * in[3 * 8 + i].s[0] - (DATA_TYPE)5.25f * in[5 * 8 + i].s[0] + in[7 * 8 + i].s[0];
-    }
+    })
 
     TILE(DATA_TYPE, 8, 8, tmp);
     tmp[0].v = com[6].v;
@@ -1217,7 +1217,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     tmp[6].v = com[4].v - com[5].v;
     tmp[7].v = com[7].v;
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         com[0].s[0]         = tmp[i].s[2] - 4.25f * tmp[i].s[4] + tmp[i].s[6];
         com[0].s[1]         = tmp[i].s[1] - 4.25f * tmp[i].s[3] + tmp[i].s[5];
@@ -1233,15 +1233,15 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
         out[i * 8 + 5].s[0] = com[0].s[4] + com[0].s[5];
         out[i * 8 + 6].s[0] = com[0].s[4] - com[0].s[5];
         out[i * 8 + 7].s[0] = -tmp[i].s[1] + 5.25f * tmp[i].s[3] - 5.25f * tmp[i].s[5] + tmp[i].s[7];
-    }
+    })
 
     TILE(uint, 64, 1, dst_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 64, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 64,
     {
         dst_indirect_y[i].v = mout + i * _INUM_TILES_X * _INUM_TILES_Y;
         dst_indirect_y[i].v += bout * _INUM_TILES_X * _INUM_TILES_Y * 64;
-    }
+    })
 
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 64, 1, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 
@@ -1310,10 +1310,10 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
     TILE(DATA_TYPE, 8, 1, out);
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         in[i].v = 0;
-    }
+    })
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
     T_LOAD_NHWC(DATA_TYPE, 1, 8, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
@@ -1321,10 +1321,10 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
     T_LOAD_NHWC(DATA_TYPE, 8, 1, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         in[i].v *= (DATA_TYPE) - 36.0f;
-    }
+    })
 
     TILE(DATA_TYPE, 1, 8, com) = { { { 0 } } };
 
@@ -1345,11 +1345,11 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
 
     TILE(uint, 8, 1, dst_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         dst_indirect_y[i].v = mout + i * _INUM_TILES_X * _INUM_TILES_Y;
         dst_indirect_y[i].v += bout * _INUM_TILES_X * _INUM_TILES_Y * 8;
-    }
+    })
 
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 8, 1, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 
@@ -1359,17 +1359,17 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
     TILE(DATA_TYPE, 64, 1, out);
 
     // Initialize the input tile
-    LOOP_UNROLLING(int, i, 0, 64, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 64,
     {
         in[i].v = 0;
-    }
+    })
 
     // Load the tile from a NHWC tensor
     T_LOAD_NHWC(DATA_TYPE, 8, 8, 1, BUFFER, src, bout, y, x, cout, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, in);
 
     TILE(DATA_TYPE, 8, 8, com);
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         com[0].s[i] = (DATA_TYPE)36.0f * in[2 * 8 + i].s[0] - (DATA_TYPE)13.0f * in[4 * 8 + i].s[0] + in[6 * 8 + i].s[0];
         com[1].s[i] = (DATA_TYPE)36.0f * in[1 * 8 + i].s[0] - (DATA_TYPE)13.0f * in[3 * 8 + i].s[0] + in[5 * 8 + i].s[0];
@@ -1379,7 +1379,7 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
         com[5].s[i] = (DATA_TYPE)12.0f * in[1 * 8 + i].s[0] - (DATA_TYPE)15.0f * in[3 * 8 + i].s[0] + (DATA_TYPE)3.0f * in[5 * 8 + i].s[0];
         com[6].s[i] = (DATA_TYPE)49.0f * in[2 * 8 + i].s[0] - (DATA_TYPE)36.0f * in[0 * 8 + i].s[0] + in[6 * 8 + i].s[0] - (DATA_TYPE)14.0f * in[4 * 8 + i].s[0];
         com[7].s[i] = (DATA_TYPE)49.0f * in[3 * 8 + i].s[0] - (DATA_TYPE)36.0f * in[1 * 8 + i].s[0] + in[7 * 8 + i].s[0] - (DATA_TYPE)14.0f * in[5 * 8 + i].s[0];
-    }
+    })
 
     TILE(DATA_TYPE, 8, 8, tmp);
     tmp[0].v = com[6].v;
@@ -1391,7 +1391,7 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
     tmp[6].v = com[4].v + com[5].v;
     tmp[7].v = com[7].v;
 
-    LOOP_UNROLLING(int, i, 0, 8, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 8,
     {
         com[0].s[0]         = 36.0f * tmp[i].s[2] - 13.0f * tmp[i].s[4] + tmp[i].s[6];
         com[0].s[1]         = 36.0f * tmp[i].s[1] - 13.0f * tmp[i].s[3] + 1.0f * tmp[i].s[5];
@@ -1407,15 +1407,15 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
         out[i * 8 + 5].s[0] = com[0].s[4] - com[0].s[5];
         out[i * 8 + 6].s[0] = com[0].s[4] + com[0].s[5];
         out[i * 8 + 7].s[0] = -36.0f * tmp[i].s[1] + 0.0f * tmp[i].s[2] + 49.0f * tmp[i].s[3] - 14.0f * tmp[i].s[5] + tmp[i].s[7];
-    }
+    })
 
     TILE(uint, 64, 1, dst_indirect_y);
 
-    LOOP_UNROLLING(int, i, 0, 64, 1)
+    LOOP_UNROLLING(int, i, 0, 1, 64,
     {
         dst_indirect_y[i].v = mout + i * _INUM_TILES_X * _INUM_TILES_Y;
         dst_indirect_y[i].v += bout * _INUM_TILES_X * _INUM_TILES_Y * 64;
-    }
+    })
 
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 64, 1, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 

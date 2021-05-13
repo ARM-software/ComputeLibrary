@@ -141,21 +141,21 @@ __kernel void direct_convolution_nhwc(
     TILE(int, M0, 1, yi);
 
     // Convert the linear index to coordinate
-    LOOP_UNROLLING(int, i, 0, M0, 1)
+    LOOP_UNROLLING(int, i, 0, 1, M0,
     {
         xi[i].v = ((mout + i) % _IDST_WIDTH) * STRIDE_X;
         yi[i].v = ((mout + i) / _IDST_WIDTH) * STRIDE_Y;
         xi[i].v -= PAD_LEFT;
         yi[i].v -= PAD_TOP;
-    }
+    })
 
     // Initialize the accumulators
     TILE(ACC_DATA_TYPE, M0, N0, c);
 
-    LOOP_UNROLLING(int, i, 0, M0, 1)
+    LOOP_UNROLLING(int, i, 0, 1, M0,
     {
         c[i].v = 0;
-    }
+    })
 
     for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
     {
@@ -169,13 +169,13 @@ __kernel void direct_convolution_nhwc(
             TILE(SRC_DATA_TYPE, M0, K0, a);
             TILE(WEI_DATA_TYPE, N0, K0, b);
 
-            LOOP_UNROLLING(int, i, 0, M0, 1)
+            LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = ZERO_VALUE;
-            }
+            })
 
             // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, 1, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
+            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
 
             // Load tile from the weights tensor
             T_LOAD(WEI_DATA_TYPE, N0, K0, WEI_TENSOR_TYPE, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
@@ -199,13 +199,13 @@ __kernel void direct_convolution_nhwc(
             TILE(SRC_DATA_TYPE, M0, 1, a);
             TILE(WEI_DATA_TYPE, N0, 1, b);
 
-            LOOP_UNROLLING(int, i, 0, M0, 1)
+            LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = ZERO_VALUE;
-            }
+            })
 
             // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, 1, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
+            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
 
             // Load tile from the weights tensor
             // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
@@ -240,11 +240,11 @@ __kernel void direct_convolution_nhwc(
     TILE(uint, M0, 1, dst_indirect_y);
 
     // Calculate the destination indirect Y
-    LOOP_UNROLLING(int, i, 0, M0, 1)
+    LOOP_UNROLLING(int, i, 0, 1, M0,
     {
         dst_indirect_y[i].v = (uint)min(mout + i, (int)(_IDST_WIDTH * _IDST_HEIGHT) - 1);
         dst_indirect_y[i].v += bout * (int)(_IDST_WIDTH * _IDST_HEIGHT);
-    }
+    })
 
     bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
 
