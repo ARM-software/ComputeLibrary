@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/Macros.h"
 
 #include <memory>
 
@@ -42,9 +41,16 @@ class NELogicalAnd : public IFunction
 public:
     /** Constructor */
     NELogicalAnd();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELogicalAnd(const NELogicalAnd &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELogicalAnd(NELogicalAnd &&) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELogicalAnd &operator=(const NELogicalAnd &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELogicalAnd &operator=(NELogicalAnd &&) = delete;
     /** Destructor */
     ~NELogicalAnd();
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE_INC(NELogicalAnd)
 
     /** Initialise the kernel's inputs and output
      *
@@ -85,9 +91,16 @@ class NELogicalOr : public IFunction
 public:
     /** Constructor */
     NELogicalOr();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELogicalOr(const NELogicalOr &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELogicalOr(NELogicalOr &&) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELogicalOr &operator=(const NELogicalOr &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELogicalOr &operator=(NELogicalOr &&) = delete;
     /** Destructor */
     ~NELogicalOr();
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE_INC(NELogicalOr)
 
     /** Initialise the kernel's inputs and output
      *
@@ -128,9 +141,16 @@ class NELogicalNot : public IFunction
 public:
     /** Constructor */
     NELogicalNot();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELogicalNot(const NELogicalNot &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELogicalNot(NELogicalNot &&) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELogicalNot &operator=(const NELogicalNot &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NELogicalNot &operator=(NELogicalNot &&) = delete;
     /** Destructor */
     ~NELogicalNot();
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE_INC(NELogicalNot)
 
     /** Initialise the kernel's inputs and output
      *

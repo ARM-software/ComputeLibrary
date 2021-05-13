@@ -28,7 +28,6 @@
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
-#include "src/core/common/Macros.h"
 
 #include <memory>
 
@@ -41,11 +40,18 @@ class ITensorInfo;
 class NEScale : public IFunction
 {
 public:
-    /** Default Constructor */
+    /** Constructor */
     NEScale();
-    /** Default Destructor */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEScale(const NEScale &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEScale(NEScale &&) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEScale &operator=(const NEScale &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEScale &operator=(NEScale &&) = delete;
+    /** Destructor */
     ~NEScale();
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(NEScale);
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
      * Valid data layouts:
