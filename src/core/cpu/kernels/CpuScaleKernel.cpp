@@ -178,8 +178,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dx, const I
     if(info.interpolation_policy == InterpolationPolicy::BILINEAR)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dx, 1, DataType::F32);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dy, 1, DataType::F32);
+        if(dx != nullptr && dy != nullptr)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dx, 1, DataType::F32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dy, 1, DataType::F32);
+        }
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy));

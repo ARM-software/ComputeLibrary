@@ -846,7 +846,7 @@ void mul_S32_S32_S32(const ITensor *src1, const ITensor *src2, ITensor *out, con
                 }
                 else
                 {
-                    uint64_t mask = (1u << n) - 1;
+                    uint64_t mask = ((uint64_t)1u << n) - 1;
                     tmp           = (tmp + static_cast<int64_t>(mask)) >> n;
                 }
                 if(is_sat)
@@ -909,7 +909,7 @@ void mul_S32_S32_S32(const ITensor *src1, const ITensor *src2, ITensor *out, con
                 }
                 else
                 {
-                    uint64_t mask = (1u << n) - 1;
+                    uint64_t mask = ((uint64_t)1u << n) - 1;
                     tmp           = (tmp + static_cast<int64_t>(mask)) >> n;
                 }
                 if(is_sat)

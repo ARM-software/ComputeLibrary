@@ -108,11 +108,11 @@ void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, I
     // Output auto initialization if not yet initialized
     if(use_mixed_precision)
     {
-        auto_init_if_empty(*output->info(), out_shape, 1, DataType::F32);
+        auto_init_if_empty(*_output->info(), out_shape, 1, DataType::F32);
     }
     else
     {
-        auto_init_if_empty(*output->info(), out_shape, 1, input->info()->data_type());
+        auto_init_if_empty(*_output->info(), out_shape, 1, input->info()->data_type());
     }
     ICLKernel::configure_internal(win);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
