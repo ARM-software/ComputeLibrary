@@ -256,7 +256,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
             window_changed = window_changed || update_window_and_padding(win_out, bias_access);
         }
 
-        if(output_multipliers != nullptr && output_multipliers->dimension(0) > 1)
+        if(output_multipliers != nullptr && output_stage.is_quantized_per_channel)
         {
             AccessWindowHorizontal output_multipliers_access(output_multipliers, 0, num_elems_processed_per_iteration_x);
             AccessWindowHorizontal output_shifts_access(output_shifts, 0, num_elems_processed_per_iteration_x);

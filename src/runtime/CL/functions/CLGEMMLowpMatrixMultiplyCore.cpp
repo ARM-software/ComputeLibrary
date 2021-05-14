@@ -344,6 +344,12 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
 
         GEMMLowpOutputStageInfo gemmlowp_output_stage = gemm_info.gemmlowp_output_stage();
         gemmlowp_output_stage.output_data_type        = _matrix_a->info()->data_type();
+        if(num_filters == 1)
+        {
+            // Per-channel quantization with OFM == 1 is equivalent to uniform quantization.
+            // Setting this flag to false prevents the kernel from adding useless padding to the output multipliers and shifts
+            gemmlowp_output_stage.is_quantized_per_channel = false;
+        }
 
         gemm_kernel_info.output_stage = gemmlowp_output_stage;
 
