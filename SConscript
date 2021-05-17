@@ -347,6 +347,7 @@ if env['neon']:
                              'src/runtime/cpu/operators/CpuDepthwiseConvolution.cpp',
                              'src/runtime/cpu/operators/CpuDepthwiseConvolutionAssemblyDispatch.cpp',
                              'src/runtime/cpu/operators/CpuDirectConvolution.cpp',
+                             'src/runtime/cpu/operators/CpuFlatten.cpp',
                              'src/runtime/cpu/operators/CpuPermute.cpp',
                              'src/runtime/cpu/operators/CpuPooling.cpp',
                             ]
