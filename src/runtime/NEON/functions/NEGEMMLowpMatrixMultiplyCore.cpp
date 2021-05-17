@@ -146,14 +146,21 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         {
             if(is_data_type_quantized_asymmetric(a_to_use->info()->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
             {
-                _asm_glue->configure(a_to_use, b, c, output, asm_info);
+                auto c_info_to_use = c == nullptr ? nullptr : c->info();
+                _asm_glue->configure(a_to_use->info(), b->info(), c_info_to_use, output->info(), asm_info);
                 _fused_assembly_path = _asm_glue->is_configured();
+                _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_2, c);
+                _asm_glue_tensors.add_tensor(TensorType::ACL_DST, output);
             }
             else
             {
-                _asm_glue->configure(a_to_use, b, nullptr, _fuse_output_stage ? &_mm_result_s32 : output, asm_info);
+                auto output_to_use = (_fuse_output_stage ? &_mm_result_s32 : output);
+                _asm_glue->configure(a_to_use->info(), b->info(), nullptr, output_to_use->info(), asm_info);
+                _asm_glue_tensors.add_tensor(TensorType::ACL_DST, output_to_use);
             }
             _assembly_path = _asm_glue->is_configured();
+            _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
+            _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_1, b);
             break;
         }
         default:
@@ -513,7 +520,7 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     // Run GEMM
     if(_asm_glue->is_configured())
     {
-        _asm_glue->run();
+        _asm_glue->run(_asm_glue_tensors);
     }
     else
     {
@@ -583,7 +590,7 @@ void NEGEMMLowpMatrixMultiplyCore::prepare()
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
-            _asm_glue->prepare();
+            _asm_glue->prepare(_asm_glue_tensors);
             if(!original_b_managed_by_weights_manager)
             {
                 _original_b->mark_as_unused();

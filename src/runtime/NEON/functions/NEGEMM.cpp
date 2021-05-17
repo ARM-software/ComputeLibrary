@@ -89,9 +89,18 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
     if(run_optimised)
     {
-        const ITensor *c_to_use = is_c_bias ? c : nullptr;
-        _asm_glue->configure(a, b, c_to_use, d, asm_info);
+        const ITensor     *c_to_use      = is_c_bias ? c : nullptr;
+        const ITensorInfo *c_info_to_use = c_to_use != nullptr ? c_to_use->info() : nullptr;
+        _asm_glue->configure(a->info(), b->info(), c_info_to_use, d->info(), asm_info);
         ARM_COMPUTE_ERROR_ON(!_asm_glue->is_configured());
+
+        _asm_glue_tensors =
+        {
+            { ACL_SRC_0, a },
+            { ACL_SRC_1, b },
+            { ACL_SRC_2, c_to_use },
+            { ACL_DST, d },
+        };
 
         // Scale product by alpha
         if(_run_alpha_scale)
@@ -314,7 +323,7 @@ void NEGEMM::run()
 
     if(_asm_glue->is_configured())
     {
-        _asm_glue->run();
+        _asm_glue->run(_asm_glue_tensors);
         if(_run_alpha_scale)
         {
             _alpha_scale_func.run();
@@ -368,7 +377,7 @@ void NEGEMM::prepare()
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
-            _asm_glue->prepare();
+            _asm_glue->prepare(_asm_glue_tensors);
             if(!original_b_managed_by_weights_manager)
             {
                 _original_b->mark_as_unused();

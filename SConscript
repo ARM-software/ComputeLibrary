@@ -375,6 +375,7 @@ if env['neon']:
                           'src/runtime/cpu/operators/CpuSoftmax.cpp',
                           'src/runtime/cpu/operators/CpuSub.cpp',
                           'src/runtime/cpu/operators/CpuTranspose.cpp',
+                          'src/runtime/cpu/operators/CpuGemmDirectConv2d.cpp',
                          ]
     cpu_internal_operator_files = ['src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.cpp',]
     runtime_files += [ cpu_rt_files, cpu_operator_hp_files, cpu_operator_files, cpu_internal_operator_files ]

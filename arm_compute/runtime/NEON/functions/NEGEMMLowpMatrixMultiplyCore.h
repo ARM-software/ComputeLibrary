@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H
 
 #include "NEActivationLayer.h"
+#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
@@ -169,6 +170,8 @@ private:
     bool _fuse_output_stage;
     bool _run_activation;
     bool _flip_signedness;
+
+    ITensorPack _asm_glue_tensors{};
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H */

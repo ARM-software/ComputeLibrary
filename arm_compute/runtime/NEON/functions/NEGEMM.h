@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_NEGEMM_H
 #define ARM_COMPUTE_NEGEMM_H
 
+#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
@@ -144,6 +145,8 @@ private:
     bool           _run_activation;
     bool           _reshape_b_only_on_first_run;
     bool           _is_prepared;
+
+    ITensorPack _asm_glue_tensors{};
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMM_H */

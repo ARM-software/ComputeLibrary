@@ -27,15 +27,13 @@
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
-#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEPermute.h"
-#include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class ITensorInfo;
 namespace cpu
 {
 class CpuGemmAssemblyDispatch;
@@ -114,13 +112,8 @@ public:
     void prepare() override;
 
 private:
-    std::unique_ptr<cpu::CpuGemmAssemblyDispatch> _gemm_asm_func;
-    NEActivationLayer                             _activation_func;
-    NEPermute                                     _weights_permute_func;
-    const ITensor                                *_original_weights;
-    Tensor                                        _permuted_weights;
-    bool                                          _is_prepared;
-    bool                                          _run_activation;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEGEMMCONV2D_H */
