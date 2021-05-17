@@ -78,8 +78,13 @@ inline bool validate_gemm_kernel(CLGEMMKernelType kernel_type)
     }
 }
 //Automatically select between mlgo (prioritized) and default heuristics for gemm kernel type
-inline CLGEMMKernelType auto_select_gemm_kernel(auto_heuristics::CommonQuery query, bool reshape_b_only_on_first_run)
+inline CLGEMMKernelType auto_select_gemm_kernel(auto_heuristics::CommonQuery query, bool reshape_b_only_on_first_run, bool constant_weights)
 {
+    if(!constant_weights)
+    {
+        return CLGEMMKernelType::NATIVE_V1;
+    }
+
     auto gemm_kernel = auto_heuristics::select_mlgo_gemm_kernel(query, reshape_b_only_on_first_run);
     if(bool(gemm_kernel))
     {
@@ -564,7 +569,8 @@ void ClGemm::configure(const CLCompileContext &compile_context, ITensorInfo *a, 
     const unsigned int batch_size              = reinterpret_input_as_3d ? a->dimension(3) : a->dimension(2);
 
     // Select GEMMType
-    _gemm_kernel_type = auto_select_gemm_kernel(auto_heuristics::CommonQuery{ CLScheduler::get().target(), a->data_type(), m, n, k, batch_size }, _reshape_b_only_on_first_run);
+    _gemm_kernel_type = auto_select_gemm_kernel(auto_heuristics::CommonQuery{ CLScheduler::get().target(), a->data_type(), m, n, k, batch_size }, _reshape_b_only_on_first_run,
+                                                gemm_info.constant_weights());
 
     const bool fuse_add_c = (!(helpers::float_ops::is_zero(beta)) && c != nullptr);
 
@@ -613,7 +619,7 @@ Status ClGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     {
         CLScheduler::get().target(), a->data_type(), m, n, k, batch_size,
     },
-    gemm_info.reshape_b_only_on_first_run());
+    gemm_info.reshape_b_only_on_first_run(), gemm_info.constant_weights());
 
     const bool fuse_add_c = (!(helpers::float_ops::is_zero(beta)) && c != nullptr);
 

@@ -355,6 +355,7 @@ public:
         FullyConnectedLayerInfo fc_info;
         fc_info.activation_info      = activation_info;
         fc_info.are_weights_reshaped = true;
+        fc_info.transpose_weights    = false;
         fc_info.constant_weights     = false;
         FunctionType fc;
         fc.configure(&_src, &_weights, &_bias, &_dst, fc_info);

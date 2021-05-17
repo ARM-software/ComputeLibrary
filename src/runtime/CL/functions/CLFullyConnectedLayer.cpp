@@ -157,7 +157,8 @@ void CLFullyConnectedLayer::configure_mm(const CLCompileContext &compile_context
                                          gemmlowp_output_stage,           // gemmlowp_output_stage
                                          fc_info.fp_mixed_precision,      // fp_mixed_precision
                                          true,                            // broadcast_bias
-                                         fc_info.activation_info);        // activation_info
+                                         fc_info.activation_info,         // activation_info
+                                         fc_info.constant_weights);       // constant_weights
 
     if(_is_quantized)
     {
@@ -325,6 +326,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(fc_info.activation_info.enabled() && is_data_type_quantized(input->data_type()) && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU
                                 && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
+    ARM_COMPUTE_RETURN_ERROR_ON(!fc_info.constant_weights && (!fc_info.are_weights_reshaped || fc_info.transpose_weights));
 
     bool weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
     bool is_fc_after_conv = true;
