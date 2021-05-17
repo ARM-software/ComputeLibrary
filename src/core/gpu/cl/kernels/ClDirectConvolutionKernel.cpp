@@ -416,7 +416,7 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
 
         const unsigned int n0                 = win_config.second.x().step();
         const unsigned int m0                 = win_config.second.y().step();
-        const unsigned int k0                 = adjust_vec_size(8u, src->dimension(channel_idx));
+        const unsigned int k0                 = adjust_vec_size(is_data_type_quantized(data_type)? 16u : 8u, src->dimension(channel_idx));
         const unsigned int partial_store_n0   = dst->dimension(channel_idx) % n0;
         const unsigned int pad_left           = conv_info.pad_left();
         const unsigned int pad_top            = conv_info.pad_top();
