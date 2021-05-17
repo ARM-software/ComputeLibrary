@@ -35,6 +35,7 @@ Binaries available at https://github.com/ARM-software/ComputeLibrary/releases.
     - Arm® Cortex®-A processor family using Arm® Neon™ technology
     - Arm® Cortex®-R processor family with Armv8-R AArch64 architecture using Arm® Neon™ technology
     - Arm® Cortex®-X1 processor using Arm® Neon™ technology
+    - Arm® Neoverse™-N1 processor using Arm® Neon™ technology
 
 - Arm® Mali™ GPUs:
     - Arm® Mali™-G processor family

@@ -141,9 +141,6 @@ CPUModel midr_to_model(const unsigned int midr)
                     model = CPUModel::A55r0;
                 }
                 break;
-            case 0xd44: // X1
-                model = CPUModel::X1;
-                break;
             case 0xd09: // A73
                 model = CPUModel::A73;
                 break;
@@ -157,11 +154,15 @@ CPUModel midr_to_model(const unsigned int midr)
                     model = CPUModel::GENERIC_FP16;
                 }
                 break;
+            case 0xd06: // A65
             case 0xd0b: // A76
-            case 0xd06:
-            case 0xd0c:
-            case 0xd0d:
+            case 0xd0c: // N1
+            case 0xd0d: // A77
+            case 0xd41: // A78
                 model = CPUModel::GENERIC_FP16_DOT;
+                break;
+            case 0xd44: // X1
+                model = CPUModel::X1;
                 break;
             case 0xd46:
                 model = CPUModel::KLEIN;
@@ -189,6 +190,12 @@ CPUModel midr_to_model(const unsigned int midr)
         // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
         switch(cpunum)
         {
+            case 0x800: // A73
+                model = CPUModel::A73;
+                break;
+            case 0x801: // A53
+                model = CPUModel::A53;
+                break;
             case 0x803: // A55r0
                 model = CPUModel::A55r0;
                 break;
