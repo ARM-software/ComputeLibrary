@@ -25,23 +25,30 @@
 #define ARM_COMPUTE_CLFLATTENLAYER_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 
+#include <memory>
 namespace arm_compute
 {
 class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to execute flatten. This function calls the following OpenCL kernel:
-*
-* -# @ref CLReshapeLayer
-*
-*/
+/** Basic function to execute flatten */
 class CLFlattenLayer : public IFunction
 {
 public:
+    CLFlattenLayer();
+    /** Destructor */
+    ~CLFlattenLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLFlattenLayer(const CLFlattenLayer &) = delete;
+    /** Default move constructor */
+    CLFlattenLayer(CLFlattenLayer &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLFlattenLayer &operator=(const CLFlattenLayer &) = delete;
+    /** Default move assignment operator */
+    CLFlattenLayer &operator=(CLFlattenLayer &&);
     /** Initialise the kernel's input and output.
      *
      * Valid data layouts:
@@ -82,7 +89,8 @@ public:
     void run() override;
 
 private:
-    CLReshapeLayer _reshape{};
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 
