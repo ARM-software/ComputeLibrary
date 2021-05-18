@@ -48,7 +48,8 @@ cc_library_static {
                          "src/core/NEON/kernels/assembly",
                          "src/core/NEON/kernels/convolution/common",
                          "src/core/NEON/kernels/convolution/depthwise",
-                         "src/core/NEON/kernels/convolution/winograd"],
+                         "src/core/NEON/kernels/convolution/winograd",
+                         "src/core/cpu/kernels/assembly"],
     export_include_dirs: [".", "./include"],
     srcs: [
         "src/c/AclContext.cpp",
