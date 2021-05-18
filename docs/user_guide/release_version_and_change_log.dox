@@ -259,13 +259,13 @@ v20.11 Public major release
    - CLElementwiseOperationKernel
    - @ref CLBatchNormalizationLayerKernel
    - CLPoolingLayerKernel
-   - @ref CLWinogradInputTransformKernel
+   - CLWinogradInputTransformKernel
    - @ref CLGEMMLowpMatrixMultiplyNativeKernel
    - @ref CLGEMMLowpMatrixAReductionKernel
    - @ref CLGEMMLowpMatrixBReductionKernel
    - @ref CLGEMMLowpOffsetContributionOutputStageKernel
    - @ref CLGEMMLowpOffsetContributionKernel
-   - @ref CLWinogradOutputTransformKernel
+   - CLWinogradOutputTransformKernel
    - @ref CLGEMMLowpMatrixMultiplyReshapedKernel
    - @ref CLFuseBatchNormalizationKernel
    - @ref CLDepthwiseConvolutionLayerNativeKernel
@@ -273,7 +273,7 @@ v20.11 Public major release
    - CLCopyKernel
    - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
    - CLActivationLayerKernel
-   - @ref CLWinogradFilterTransformKernel
+   - CLWinogradFilterTransformKernel
    - CLWidthConcatenateLayerKernel
    - CLWidthConcatenate4TensorsKernel
    - CLWidthConcatenate2TensorsKernel
@@ -1102,8 +1102,8 @@ v18.05 Public major release
     - @ref CLLSTMLayer
     - @ref CLRNNLayer
     - CLWidthConcatenateLayer / CLWidthConcatenateLayerKernel
-    - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
-    - @ref CLWinogradInputTransformKernel / @ref CLWinogradInputTransform
+    - CLWinogradFilterTransformKernel / @ref CLWinogradConvolutionLayer
+    - CLWinogradInputTransformKernel / CLWinogradInputTransform
  - New Arm® Neon™ kernels / functions:
     - NEConvertFullyConnectedWeightsKernel / @ref NEConvertFullyConnectedWeights.
  - Created the validate method in @ref CLDepthwiseConvolutionLayer.

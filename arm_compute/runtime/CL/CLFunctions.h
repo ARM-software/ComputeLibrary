@@ -111,6 +111,5 @@
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
 #include "arm_compute/runtime/CL/functions/CLUnstack.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
 
 #endif /* ARM_COMPUTE_CLFUNCTIONS_H */

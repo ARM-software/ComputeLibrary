@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLWinogradInputTransformKernel.h"
+#include "src/core/gpu/cl/kernels/ClWinogradInputTransformKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -36,10 +36,15 @@
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
+namespace opencl
+{
+namespace kernels
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
@@ -95,69 +100,62 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-CLWinogradInputTransformKernel::CLWinogradInputTransformKernel()
-    : _border_size(0), _input(nullptr), _output(nullptr), _data_layout(DataLayout::UNKNOWN), _num_tiles_x(0), _num_tiles_y(0), _step_z(1)
+ClWinogradInputTransformKernel::ClWinogradInputTransformKernel()
+    : _border_size(0), _data_layout(DataLayout::UNKNOWN), _num_tiles_x(0), _num_tiles_y(0), _step_z(1)
 {
 }
 
-BorderSize CLWinogradInputTransformKernel::border_size() const
+BorderSize ClWinogradInputTransformKernel::border_size() const
 {
     return _border_size;
 }
 
-void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
+void ClWinogradInputTransformKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const WinogradInfo &winograd_info)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, winograd_info);
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, winograd_info));
 
-void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), winograd_info));
-
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({ src, dst });
 
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
 
-    _data_layout = input->info()->data_layout();
+    _data_layout = src->data_layout();
 
     const size_t idx_w = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
 
     // Compute the number of output tiles along the x and y direction of size "output_tile_size"
-    const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(input->info()->dimension(idx_w), input->info()->dimension(idx_h)),
+    const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(src->dimension(idx_w), src->dimension(idx_h)),
                                                                 kernel_size,
                                                                 output_tile_size,
                                                                 conv_info);
 
-    _input       = input;
-    _output      = output;
     _num_tiles_x = num_tiles.width;
     _num_tiles_y = num_tiles.height;
 
-    const TensorShape output_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input->info(), winograd_info);
+    const TensorShape output_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*src, winograd_info);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(output_shape));
 
-    ARM_COMPUTE_ERROR_ON(_num_tiles_x * _num_tiles_y != static_cast<int>(output->info()->dimension(1)));
-    const size_t total_batches = input->info()->tensor_shape().total_size_upper(3);
+    ARM_COMPUTE_ERROR_ON(_num_tiles_x * _num_tiles_y != static_cast<int>(dst->dimension(1)));
+    const size_t total_batches = src->tensor_shape().total_size_upper(3);
 
     CLBuildOptions build_opts;
     if(_data_layout == DataLayout::NHWC)
     {
         build_opts.add_option("-DNHWC");
-        build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(idx_w)));
-        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(idx_h)));
+        build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(idx_w)));
+        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(idx_h)));
         build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));
         build_opts.add_option("-DNUM_TILES_Y=" + support::cpp11::to_string(_num_tiles_y));
         build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
         build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
         build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
         build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
-        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL");
         build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_INPUT_TRANSFORM_VERTICAL");
     }
@@ -168,10 +166,10 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
         build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
         build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
         build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
-        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL");
         build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_INPUT_TRANSFORM_VERTICAL");
-        build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
+        build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(2)));
     }
 
     // Create kernel
@@ -183,7 +181,7 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     // Check optimized kernel if output_dims == 2x2
     if((tile_max_dim == 2) && (_data_layout == DataLayout::NCHW))
     {
-        _step_z = (_input->info()->dimension(2) % 2) != 0 ? 1 : 2;
+        _step_z = (src->dimension(2) % 2) != 0 ? 1 : 2;
     }
 
     // Append stepz and data layout
@@ -194,20 +192,20 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Create window and update padding
-    auto win_config = validate_and_configure_window(input->info(), output->info(), winograd_info);
+    auto win_config = validate_and_configure_window(src, dst, winograd_info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second, cl::NDRange(1, 1, 8));
+    IClKernel::configure_internal(win_config.second, cl::NDRange(1, 1, 8));
 
-    _border_size = BorderSize(_input->info()->padding());
+    _border_size = BorderSize(src->padding());
 
-    ARM_COMPUTE_ERROR_ON((input->info()->data_layout() == DataLayout::NHWC) && has_padding_changed(padding_info));
+    ARM_COMPUTE_ERROR_ON((src->data_layout() == DataLayout::NHWC) && has_padding_changed(padding_info));
 
     _config_id = kernel_name;
-    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += support::cpp11::to_string(src->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += support::cpp11::to_string(src->dimension(1));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(2));
+    _config_id += support::cpp11::to_string(src->dimension(2));
     _config_id += "_";
     _config_id += support::cpp11::to_string(conv_info.pad_left());
     _config_id += "_";
@@ -216,19 +214,21 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     _config_id += lower_string(string_from_data_layout(_data_layout));
 }
 
-Status CLWinogradInputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
+Status ClWinogradInputTransformKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, winograd_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), winograd_info).first);
-
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, winograd_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get(), winograd_info).first);
     return Status{};
 }
 
-void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClWinogradInputTransformKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
+
+    auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     const size_t idx_w         = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const size_t idx_h         = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
@@ -236,7 +236,7 @@ void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue 
     const size_t total_batches = window.shape().total_size_upper(3);
 
     // Collapse window
-    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window window_collapsed = window.collapse_if_possible(IClKernel::window(), Window::DimZ);
 
     if(_data_layout == DataLayout::NHWC)
     {
@@ -245,8 +245,8 @@ void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue 
         slice.set(2, Window::Dimension(0, total_batches, 1));
 
         unsigned int idx = 0;
-        add_4D_tensor_argument(idx, _input, slice);
-        add_4D_tensor_argument(idx, _output, slice);
+        add_4D_tensor_argument(idx, src, slice);
+        add_4D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
     else
@@ -259,17 +259,20 @@ void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue 
         slice.set(idx_c, Window::Dimension(slice[idx_c].start(), slice[idx_c].end(), _step_z));
 
         unsigned int idx = 2 * num_arguments_per_3D_tensor();
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(src->info()->strides_in_bytes()[3]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(dst->info()->strides_in_bytes()[3]));
 
         do
         {
             unsigned int idx = 0;
-            add_3D_tensor_argument(idx, _input, slice);
-            add_3D_tensor_argument(idx, _output, slice);
+            add_3D_tensor_argument(idx, src, slice);
+            add_3D_tensor_argument(idx, dst, slice);
 
             enqueue(queue, *this, slice, lws_hint());
         }
         while(window_collapsed.slide_window_slice_3D(slice));
     }
 }
+} // namespace kernels
+} // namespace opencl
+} // namespace arm_compute

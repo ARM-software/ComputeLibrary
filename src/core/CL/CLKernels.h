@@ -80,8 +80,5 @@
 #include "src/core/CL/kernels/CLStridedSliceKernel.h"
 #include "src/core/CL/kernels/CLTileKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
-#include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
-#include "src/core/CL/kernels/CLWinogradInputTransformKernel.h"
-#include "src/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 
 #endif /* ARM_COMPUTE_CLKERNELS_H */

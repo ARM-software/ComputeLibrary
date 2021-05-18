@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
+#include "src/core/gpu/cl/kernels/ClWinogradFilterTransformKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -36,12 +36,16 @@
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 using namespace arm_compute::misc::shape_calculator;
 
 namespace arm_compute
+{
+namespace opencl
+{
+namespace kernels
 {
 namespace
 {
@@ -87,69 +91,61 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-CLWinogradFilterTransformKernel::CLWinogradFilterTransformKernel()
-    : _input(nullptr), _output(nullptr)
+void ClWinogradFilterTransformKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const WinogradInfo &winograd_info)
 {
-}
-
-void CLWinogradFilterTransformKernel::configure(const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, winograd_info);
-}
-
-void CLWinogradFilterTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_winograd_filter_transform_shape(*input->info(), winograd_info)));
+    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_winograd_filter_transform_shape(*src, winograd_info)));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), winograd_info));
-    auto padding_info = get_padding_info({ input, output });
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, winograd_info));
+    auto padding_info = get_padding_info({ src, dst });
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DSRC_DIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DSRC_DIM_Z=" + support::cpp11::to_string(src->dimension(2)));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_FILTER_TRANSFORM_HORIZONTAL");
     build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_FILTER_TRANSFORM_VERTICAL");
     const Size2D kernel_size      = winograd_info.kernel_size;
     const Size2D output_tile_size = winograd_info.output_tile_size;
 
     // Create kernel
-    std::string kernel_name = "winograd_filter_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(input->info()->data_layout()));
+    std::string kernel_name = "winograd_filter_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(src->data_layout()));
     _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
-    _input  = input;
-    _output = output;
-
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
+    auto win_config = validate_and_configure_window(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    IClKernel::configure_internal(win_config.second);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLWinogradFilterTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
+Status ClWinogradFilterTransformKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, winograd_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, winograd_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get()).first);
 
     return Status{};
 }
 
-void CLWinogradFilterTransformKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClWinogradFilterTransformKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IClKernel::window(), window);
+
+    auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     // Setup output window
     Window window_out;
-    window_out.use_tensor_dimensions(_output->info()->tensor_shape(), 0);
+    window_out.use_tensor_dimensions(dst->info()->tensor_shape(), 0);
 
     unsigned int idx = 0;
-    add_4D_tensor_argument(idx, _input, window);
-    add_3D_tensor_argument(idx, _output, window_out);
+    add_4D_tensor_argument(idx, src, window);
+    add_3D_tensor_argument(idx, dst, window_out);
     enqueue(queue, *this, window, lws_hint());
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

@@ -59,6 +59,9 @@
                     "src/core/gpu/cl/kernels/ClWidthConcatenate2TensorsKernel.cpp",
                     "src/core/gpu/cl/kernels/ClWidthConcatenate4TensorsKernel.cpp",
                     "src/core/gpu/cl/kernels/ClWidthConcatenateKernel.cpp",
+                    "src/core/gpu/cl/kernels/ClWinogradFilterTransformKernel.cpp",
+                    "src/core/gpu/cl/kernels/ClWinogradInputTransformKernel.cpp",
+                    "src/core/gpu/cl/kernels/ClWinogradOutputTransformKernel.cpp",
                     "src/core/CL/kernels/CLGenerateProposalsLayerKernel.cpp",
                     "src/core/CL/kernels/CLArgMinMaxLayerKernel.cpp",
                     "src/core/CL/kernels/CLBatchNormalizationLayerKernel.cpp",
@@ -113,10 +116,7 @@
                     "src/core/CL/kernels/CLStackLayerKernel.cpp",
                     "src/core/CL/kernels/CLStridedSliceKernel.cpp",
                     "src/core/CL/kernels/CLTileKernel.cpp",
-                    "src/core/CL/kernels/CLWeightsReshapeKernel.cpp",
-                    "src/core/CL/kernels/CLWinogradFilterTransformKernel.cpp",
-                    "src/core/CL/kernels/CLWinogradInputTransformKernel.cpp",
-                    "src/core/CL/kernels/CLWinogradOutputTransformKernel.cpp"
+                    "src/core/CL/kernels/CLWeightsReshapeKernel.cpp"
                 ]
             }
         }
