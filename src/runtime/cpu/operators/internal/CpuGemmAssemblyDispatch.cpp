@@ -240,7 +240,7 @@ public:
      */
     void configure(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, ITensorInfo *d,
                    arm_gemm::GemmArgs args, const AsmGemmInfo &gemm_info,
-                   MemoryGroup &memory_group, IWeightsManager *weights_manager, const OutputStage &os = {});
+                   IWeightsManager *weights_manager, const OutputStage &os = {});
 
     /** Set requantization shifts to be used
      *
@@ -265,13 +265,42 @@ public:
     bool is_configured() const override;
 
 private:
-    /** Allocate a workspace tensor.
+    static constexpr size_t _workspace_alignment{ 4096 };
+    /** Function to get the memory requirements */
+    experimental::MemoryRequirements get_workspace() const override
+    {
+        experimental::MemoryRequirements req{};
+        const auto                       size = _gemm_kernel_asm->get_working_size();
+        if(size > 0)
+        {
+            req.emplace_back(TensorType::ACL_INT, size, _workspace_alignment);
+        }
+        return req;
+    }
+
+    /** Function to import workspace tensors
      *
-     * @param[in] workspace_size Size to allocate.
-     * @param[in] memory_group   Tensor memory group.
-     * @param[in] alignment      Workspace memory alignment.
+     * @param[in] tensors Tensor pack includes workspace tensors
      */
-    void allocate_workspace(size_t workspace_size, MemoryGroup &memory_group, size_t alignment);
+    void import_workspace(ITensorPack &tensors)
+    {
+        const auto size = _gemm_kernel_asm->get_working_size();
+
+        if(size > 0)
+        {
+            auto imported_tensor = tensors.get_tensor(TensorType::ACL_INT);
+            ARM_COMPUTE_ERROR_ON_NULLPTR(imported_tensor);
+            const size_t workspace_size = _gemm_kernel_asm->get_working_size();
+            _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + _workspace_alignment) }, 1, DataType::S8), _workspace_alignment);
+            _workspace.allocator()->import_memory(imported_tensor->buffer());
+        }
+    }
+    /** Function free used workspace tensors */
+    void free_imported_workspace()
+    {
+        _workspace.allocator()->free();
+    }
+
     /** Configure the indirect buffer
      *
      * @param[in]  a    Input tensor containing the Matrix A.
@@ -332,6 +361,9 @@ private:
         _pretranspose = nullptr;
     }
 };
+
+template <typename TypeInput, typename TypeOutput, class OutputStage>
+constexpr size_t Fallback<TypeInput, TypeOutput, OutputStage>::_workspace_alignment;
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
 std::tuple<bool, const int32_t *, const int32_t *, const int32_t *>
@@ -470,7 +502,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure_indirect(const ITen
 template <typename TypeInput, typename TypeOutput, class OutputStage>
 void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, ITensorInfo *d,
                                                              arm_gemm::GemmArgs args, const AsmGemmInfo &gemm_info,
-                                                             MemoryGroup &memory_group, IWeightsManager *weights_manager, const OutputStage &os)
+                                                             IWeightsManager *weights_manager, const OutputStage &os)
 {
     ARM_COMPUTE_UNUSED(c);
     arm_gemm::GemmConfig gemm_cfg;
@@ -492,13 +524,6 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
     auto acl_gemm_wrapper = std::make_unique<kernel::CpuGemmAssemblyWrapperKernel<TypeInput, TypeOutput>>();
     ARM_COMPUTE_ERROR_ON(acl_gemm_wrapper == nullptr);
     acl_gemm_wrapper->configure(_gemm_kernel_asm.get(), gemm_cfg.filter);
-    const size_t workspace_size = _gemm_kernel_asm->get_working_size();
-    if(workspace_size > 0)
-    {
-        // Allocate workspace
-        const unsigned int alignment = 4096;
-        allocate_workspace(workspace_size, memory_group, alignment);
-    }
 
     //if we disable this code below in brackets then ConvLayer deadlocks when threads > 1 and
     //the shapes are In=1x1x1024 Weights=1x1x1024x1001 Biases=1001 Out=1x1x1001
@@ -587,15 +612,6 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::prepare(ITensorPack &tensors)
 }
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
-void Fallback<TypeInput, TypeOutput, OutputStage>::allocate_workspace(size_t workspace_size, MemoryGroup &memory_group, size_t alignment)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "size cannot be 0");
-    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment) }, 1, DataType::S8), alignment);
-    memory_group.manage(&_workspace);
-    _workspace.allocator()->allocate();
-}
-
-template <typename TypeInput, typename TypeOutput, class OutputStage>
 bool Fallback<TypeInput, TypeOutput, OutputStage>::is_configured() const
 {
     return _optimised_kernel != nullptr;
@@ -608,6 +624,10 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
     auto b = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto c = tensors.get_const_tensor(TensorType::ACL_SRC_2);
     auto d = tensors.get_tensor(TensorType::ACL_DST);
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
+
+    import_workspace(tensors);
 
     int       lda = a->info()->strides_in_bytes().y() / sizeof(TypeInput);
     int       ldb = 0;
@@ -684,10 +704,11 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
                                  bias, 0);
     // Schedule
     NEScheduler::get().schedule(_optimised_kernel.get(), scheduling_hint);
+    free_imported_workspace();
 }
 
 template <typename TypeInput, typename TypeOutput>
-void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_gemm, MemoryGroup &memory_group,
+void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_gemm,
                      const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, ITensorInfo *d, arm_gemm::Activation activation, const AsmGemmInfo &info,
                      IWeightsManager *weights_manager)
 {
@@ -699,12 +720,12 @@ void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_ge
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput>>();
-    fallback->configure(a, b, c, d, args, info, memory_group, weights_manager);
+    fallback->configure(a, b, c, d, args, info, weights_manager);
     arm_gemm = std::move(fallback);
 }
 
 template <typename TypeInput, typename TypeOutput>
-void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_gemm, MemoryGroup &memory_group,
+void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_gemm,
                            const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, ITensorInfo *d, arm_gemm::Activation activation, const AsmGemmInfo &info,
                            IWeightsManager *weights_manager)
 {
@@ -744,14 +765,14 @@ void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &
     }
 
     // Configure fallback
-    fallback->configure(a, b, c, d, args, info, memory_group, weights_manager, gemm_requant_info);
+    fallback->configure(a, b, c, d, args, info, weights_manager, gemm_requant_info);
     arm_gemm = std::move(fallback);
 }
 
 } //namespace
 
-CpuGemmAssemblyDispatch::CpuGemmAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _arm_gemm(nullptr), _memory_group(std::move(memory_manager)), _weights_manager(weights_manager)
+CpuGemmAssemblyDispatch::CpuGemmAssemblyDispatch(IWeightsManager *weights_manager)
+    : _arm_gemm(nullptr), _weights_manager(weights_manager)
 {
 }
 
@@ -806,40 +827,40 @@ void CpuGemmAssemblyDispatch::configure(const ITensorInfo *a, const ITensorInfo 
     switch(a->data_type())
     {
         case DataType::F32:
-            create_arm_gemm<float, float>(_arm_gemm, _memory_group, a, b, c, d, act, info, _weights_manager);
+            create_arm_gemm<float, float>(_arm_gemm, a, b, c, d, act, info, _weights_manager);
             break;
 #ifdef __aarch64__
         case DataType::U8:
         case DataType::QASYMM8:
             if(d->data_type() == DataType::S32)
             {
-                create_arm_gemm<uint8_t, uint32_t>(_arm_gemm, _memory_group, a, b, c, d, act, info, _weights_manager);
+                create_arm_gemm<uint8_t, uint32_t>(_arm_gemm, a, b, c, d, act, info, _weights_manager);
             }
             else
             {
-                create_arm_gemm_quant<uint8_t, uint8_t>(_arm_gemm, _memory_group, a, b, c, d, act, info, _weights_manager);
+                create_arm_gemm_quant<uint8_t, uint8_t>(_arm_gemm, a, b, c, d, act, info, _weights_manager);
             }
             break;
         case DataType::S8:
         case DataType::QASYMM8_SIGNED:
             if(d->data_type() == DataType::S32)
             {
-                create_arm_gemm<int8_t, int32_t>(_arm_gemm, _memory_group, a, b, c, d, act, info, _weights_manager);
+                create_arm_gemm<int8_t, int32_t>(_arm_gemm, a, b, c, d, act, info, _weights_manager);
             }
             else
             {
-                create_arm_gemm_quant<int8_t, int8_t>(_arm_gemm, _memory_group, a, b, c, d, act, info, _weights_manager);
+                create_arm_gemm_quant<int8_t, int8_t>(_arm_gemm, a, b, c, d, act, info, _weights_manager);
             }
             break;
 #endif /* __aarch64__ */
 #if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
         case DataType::BFLOAT16:
-            create_arm_gemm<bfloat16, float>(_arm_gemm, _memory_group, a, b, c, d, act, info, _weights_manager);
+            create_arm_gemm<bfloat16, float>(_arm_gemm, a, b, c, d, act, info, _weights_manager);
             break;
 #endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            create_arm_gemm<float16_t, float16_t>(_arm_gemm, _memory_group, a, b, c, d, act, info, _weights_manager);
+            create_arm_gemm<float16_t, float16_t>(_arm_gemm, a, b, c, d, act, info, _weights_manager);
             break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
@@ -860,10 +881,13 @@ bool CpuGemmAssemblyDispatch::is_configured() const
 
 void CpuGemmAssemblyDispatch::run(ITensorPack &tensors)
 {
-    MemoryGroupResourceScope scope_mg(_memory_group);
-
     ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
     _arm_gemm->run(tensors);
+}
+
+experimental::MemoryRequirements CpuGemmAssemblyDispatch::workspace() const
+{
+    return is_configured() ? _arm_gemm->get_workspace() : experimental::MemoryRequirements{};
 }
 } // namespace cpu
 } // namespace arm_compute

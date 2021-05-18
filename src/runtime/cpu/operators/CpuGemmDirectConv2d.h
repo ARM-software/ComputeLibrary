@@ -48,7 +48,7 @@ class CpuGemmDirectConv2d : public ICpuOperator
 {
 public:
     /** Constructor */
-    CpuGemmDirectConv2d(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
+    CpuGemmDirectConv2d();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmDirectConv2d);
     /** Destructor */
     ~CpuGemmDirectConv2d();
@@ -80,15 +80,16 @@ public:
     void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const Conv2dInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CpuGemmDirectConv2d
      *
-     * Similar to CpuGemmDirectConv2d::configure()
+     * Similar to @ref CpuGemmDirectConv2d::configure()
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv2dInfo &info);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
+    experimental::MemoryRequirements workspace() const override;
 
 private:
     std::unique_ptr<CpuGemmAssemblyDispatch> _gemm_asm_func;
@@ -100,11 +101,13 @@ private:
     bool                                     _is_prepared{ false };
     bool                                     _run_activation{ false };
 
-    /** Function to allocated a tensor for permuted weights
+    /** Function to import workspace tensors
      *
-     * @note This function will be removed when memory injection is properly implemented.
+     * @param[in] tensors Tensor pack includes workspace tensors
      */
-    void allocate_permuted_weights();
+    void import_workspace_memory(ITensorPack &tensors);
+    /** Function free used workspace tensors */
+    void free_imported_workspace_memory();
 };
 } // namespace cpu
 } // namespace arm_compute

@@ -26,24 +26,37 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
 
 #include <set>
 
 namespace arm_compute
 {
-using OperatorType = cpu::CpuGemmDirectConv2d;
+using OperatorType      = cpu::CpuGemmDirectConv2d;
+using WorkspaceDataType = WorkspaceData<Tensor>;
 
 struct NEGEMMConv2d::Impl
 {
     ITensorPack                   tensors{};
+    MemoryGroup                   mg{};
     std::unique_ptr<OperatorType> op{ nullptr };
+    WorkspaceDataType             ws{};
+
+    void allocate_and_add_workspace()
+    {
+        if(op)
+        {
+            ws = manage_workspace<Tensor>(op->workspace(), mg, tensors);
+        }
+    }
 };
 
 NEGEMMConv2d::NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _impl(std::make_unique<Impl>())
 {
-    _impl->op = std::make_unique<OperatorType>(memory_manager);
+    _impl->op = std::make_unique<OperatorType>();
+    _impl->mg = MemoryGroup(memory_manager);
 }
 
 NEGEMMConv2d::~NEGEMMConv2d() = default;
@@ -55,7 +68,9 @@ void NEGEMMConv2d::configure(ITensor *input, const ITensor *weights, const ITens
     _impl->tensors.add_const_tensor(TensorType::ACL_SRC_2, biases);
     _impl->tensors.add_tensor(TensorType::ACL_DST, output);
 
-    _impl->op->configure(input->info(), weights->info(), biases->info(), output->info(), info);
+    _impl->op->configure(input->info(), weights->info(), ((biases) ? biases->info() : nullptr), output->info(), info);
+
+    _impl->allocate_and_add_workspace();
 }
 
 Status NEGEMMConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const Conv2dInfo &info)
