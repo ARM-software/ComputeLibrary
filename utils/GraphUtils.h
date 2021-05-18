@@ -673,20 +673,16 @@ inline TensorShape permute_shape(TensorShape tensor_shape, DataLayout in_data_la
 
 /** Utility function to return the TargetHint
  *
- * @param[in] target Integer value which expresses the selected target. Must be 0 for Neon or 1 for OpenCL or 2 (OpenCL with Tuner)
+ * @param[in] target Integer value which expresses the selected target. Must be 0 for Arm® Neon™ or 1 for OpenCL or 2 (OpenCL with Tuner)
  *
  * @return the TargetHint
  */
 inline graph::Target set_target_hint(int target)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(target > 3, "Invalid target. Target must be 0 (NEON), 1 (OpenCL), 2 (OpenCL + Tuner), 3 (GLES)");
+    ARM_COMPUTE_ERROR_ON_MSG(target > 2, "Invalid target. Target must be 0 (NEON), 1 (OpenCL), 2 (OpenCL + Tuner)");
     if((target == 1 || target == 2))
     {
         return graph::Target::CL;
-    }
-    else if(target == 3)
-    {
-        return graph::Target::GC;
     }
     else
     {

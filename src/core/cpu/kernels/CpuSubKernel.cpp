@@ -201,9 +201,7 @@ void CpuSubKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
 
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*src0, *src1);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
+    const TensorShape &out_shape = TensorShape::broadcast_shape(src0->tensor_shape(), src1->tensor_shape());
 
     // Auto initialize dst if not initialized
     set_shape_if_empty(*dst, out_shape);
@@ -211,10 +209,7 @@ void CpuSubKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     _policy = policy;
 
     // CpuSubKernel doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(valid_region);
-    Window win = calculate_max_window(valid_region, Steps());
+    Window win = calculate_max_window(out_shape, Steps());
 
     ICpuKernel::configure(win);
 }

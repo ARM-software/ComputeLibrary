@@ -57,6 +57,25 @@ public:
     NEArithmeticSubtraction &operator=(NEArithmeticSubtraction &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |QASYMM16       |
+     * |QSYMM16        |QSYMM16        |S32            |
+     * |U8             |U8             |U8             |
+     * |U8             |U8             |S16            |
+     * |U8             |S16            |S16            |
+     * |S16            |U8             |S16            |
+     * |S16            |S16            |S16            |
+     * |S32            |S32            |S32            |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
+     *
      * @param[in]  input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
      * @param[in]  input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
      * @param[out] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32

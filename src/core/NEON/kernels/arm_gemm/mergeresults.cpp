@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,6 +96,12 @@ void MergeResults(Tout * out, const Tin * in, int ldc, int y0, int ymax, int x0,
 }
 
 #include "merges/list.hpp"
+
+/* Cortex-A53 8x6 SGEMM kernel uses a templated merge as the optimized merge
+ * generator cannot cope with the width (6) not being a multiple of VL (4). */
+#ifdef __aarch64__
+template void MergeResults<6u, 8u, false, float, float>(float *, float const*, int, int, int, int, int, float const *, Activation, bool);
+#endif
 
 #if defined(__aarch64__) && defined(__ARM_FP16_ARGS)
 template void MergeResults<12u, 8u, false, float, __fp16>(__fp16*, float const*, int, int, int, int, int, __fp16 const*, Activation, bool);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #ifndef ARM_COMPUTE_MISC_UTILITY_H
 #define ARM_COMPUTE_MISC_UTILITY_H
+
+#include "arm_compute/core/Error.h"
 
 #include <algorithm>
 #include <array>
@@ -207,6 +209,25 @@ inline std::string tolower(std::string string)
         return std::tolower(c);
     });
     return string;
+}
+
+/** Get environment variable as a string
+ *
+ * @note Return empty string on bare-metal
+ *
+ * @param[in] env_name Name of the Environment variable to retrieve
+ *
+ * @return Environment variable content, or empty string if the variable is undefined or on bare-metal
+ */
+inline std::string getenv(const std::string &env_name)
+{
+#ifdef BARE_METAL
+    ARM_COMPUTE_UNUSED(env_name);
+    return std::string{};
+#else  // BARE_METAL
+    const auto env_chr = std::getenv(env_name.c_str());
+    return env_chr == nullptr ? std::string{} : std::string{ env_chr };
+#endif // BARE_METAL
 }
 } // namespace utility
 } // namespace arm_compute

@@ -111,12 +111,12 @@ protected:
         TensorType *gamma_ptr = _use_gamma ? &gamma : nullptr;
         norm.configure(&src, &dst, &mean, &var, beta_ptr, gamma_ptr, epsilon, act_info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(mean.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(var.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(beta.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(gamma.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(mean.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(var.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(beta.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(gamma.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -126,12 +126,12 @@ protected:
         beta.allocator()->allocate();
         gamma.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!mean.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!var.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!beta.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!gamma.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!mean.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!var.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!beta.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!gamma.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), AccessorType(mean), AccessorType(var), AccessorType(beta), AccessorType(gamma));

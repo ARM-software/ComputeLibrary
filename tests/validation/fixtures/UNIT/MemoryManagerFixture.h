@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,8 +100,8 @@ protected:
 
         // Finalize memory manager
         mm->populate(_allocator, 1 /* num_pools */);
-        ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 1, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(mm->lifetime_manager()->are_all_finalized());
+        ARM_COMPUTE_ASSERT(mm->pool_manager()->num_pools() == 1);
 
         // Fill tensors
         fill(AccessorType(src), 0);
@@ -206,8 +206,8 @@ protected:
 
         // Finalize memory manager
         mm->populate(_allocator, 1 /* num_pools */);
-        ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 1, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(mm->lifetime_manager()->are_all_finalized());
+        ARM_COMPUTE_ASSERT(mm->pool_manager()->num_pools() == 1);
 
         // Fill tensors (1st iteration)
         fill(AccessorType(src), 0);
@@ -340,8 +340,8 @@ protected:
 
         // Finalize memory manager
         mm->populate(_allocator, 1 /* num_pools */);
-        ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 1, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(mm->lifetime_manager()->are_all_finalized());
+        ARM_COMPUTE_ASSERT(mm->pool_manager()->num_pools() == 1);
 
         // Fill tensors (1st iteration)
         fill(AccessorType(src), 0);

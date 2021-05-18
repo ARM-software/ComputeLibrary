@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,14 @@ class NEBitwiseOr : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs and output
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |U8             |U8             |
      *
      * @param[in]  input1 First tensor input. Data type supported: U8.
      * @param[in]  input2 Second tensor input. Data type supported: U8.

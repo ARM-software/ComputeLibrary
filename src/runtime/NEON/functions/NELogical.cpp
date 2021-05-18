@@ -42,8 +42,7 @@ NELogicalAnd::NELogicalAnd()
     : _impl(std::make_unique<Impl>())
 {
 }
-NELogicalAnd &NELogicalAnd::operator=(NELogicalAnd &&) = default;
-NELogicalAnd::~NELogicalAnd()                          = default;
+NELogicalAnd::~NELogicalAnd() = default;
 
 void NELogicalAnd::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
@@ -75,8 +74,7 @@ NELogicalOr::NELogicalOr()
     : _impl(std::make_unique<Impl>())
 {
 }
-NELogicalOr &NELogicalOr::operator=(NELogicalOr &&) = default;
-NELogicalOr::~NELogicalOr()                         = default;
+NELogicalOr::~NELogicalOr() = default;
 
 void NELogicalOr::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
@@ -108,8 +106,7 @@ NELogicalNot::NELogicalNot()
     : _impl(std::make_unique<Impl>())
 {
 }
-NELogicalNot &NELogicalNot::operator=(NELogicalNot &&) = default;
-NELogicalNot::~NELogicalNot()                          = default;
+NELogicalNot::~NELogicalNot() = default;
 
 void NELogicalNot::configure(const ITensor *input, ITensor *output)
 {

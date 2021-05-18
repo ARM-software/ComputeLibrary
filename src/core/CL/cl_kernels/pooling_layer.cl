@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "helpers.h"
 #include "repeat.h"
+#include "tile_helpers.h"
 
 #if defined(POOL_AVG) || defined(POOL_L2)
 #define POOL_OP(x, y) ((x) + (y))
@@ -506,7 +507,7 @@ inline void offset_no_padding_nchw(const Tensor3D *input, uint *offset_top, uint
 #if defined(TENSOR_CHANNEL) && defined(TENSOR_WIDTH) && defined(TENSOR_HEIGHT)
     *offset_top = (uint)((offset_base / sizeof(DATA_TYPE)) % (TENSOR_CHANNEL * TENSOR_WIDTH * TENSOR_HEIGHT));
 #else  /* defined(TENSOR_CHANNEL) && defined(TENSOR_WIDTH) && defined(TENSOR_HEIGHT) */
-    *offset_top = (uint)(offset_base / sizeof(DATA_TYPE));
+    *offset_top   = (uint)(offset_base / sizeof(DATA_TYPE));
 #endif /* defined(TENSOR_CHANNEL) && defined(TENSOR_WIDTH) && defined(TENSOR_HEIGHT) */
 
     *offset_bottom = *offset_top + input->stride_y / sizeof(DATA_TYPE) - pad_horiz;
@@ -703,56 +704,78 @@ __kernel void pooling_layer_MxN_nhwc(
 {
     // Note: If C is not multiple of VEC_SIZE, we shift back of VEC_SIZE_LEFTOVER elements to compute the leftover elements for get_global_id(0) == 0
     // Note: If C is less than VEC_SIZE, VEC_SIZE should be SHRINKED to the closest smaller VEC_SIZE. This operation is performed on the host side
-    int offset_c = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0) * sizeof(DATA_TYPE);
-    int idx_out_w = get_global_id(1);
+    int idx_out_c = GET_SPATIAL_IDX(0, VEC_SIZE, VEC_SIZE_LEFTOVER);
+    int idx_out_w = GET_SPATIAL_IDX(1, 1, 0);
 #if DST_BATCH_SIZE != 1
     // If batch size != 1, the batch size dimension is collapsed over the height dimension
-    int idx_out_h = get_global_id(2) % DST_HEIGHT;
-    int idx_out_n = get_global_id(2) / DST_HEIGHT;
-#else //DST_BATCH_SIZE != 1
-    int idx_out_h = get_global_id(2);
+    int idx_out_h = GET_SPATIAL_IDX(2, 1, 0) % DST_HEIGHT;
+    int idx_out_n = GET_SPATIAL_IDX(2, 1, 0) / DST_HEIGHT;
+#else  //DST_BATCH_SIZE != 1
+    int idx_out_h = GET_SPATIAL_IDX(2, 1, 0);
     int idx_out_n = 0;
 #endif // DST_BATCH_SIZE != 1
 
-    int idx_in_w  = idx_out_w * STRIDE_X - PAD_X;
-    int idx_in_h  = idx_out_h * STRIDE_Y - PAD_Y;
+    __global unsigned char *in_base_ptr = input_ptr + input_offset_first_element_in_bytes + idx_out_c * sizeof(DATA_TYPE) + idx_out_n * input_stride_w;
 
-    int pool_x_s = max((int)0, -idx_in_w);
-    int pool_x_e = min((int)POOL_SIZE_X, (int)SRC_WIDTH - idx_in_w);
-    int pool_y_s = max((int)0, -idx_in_h);
-    int pool_y_e = min((int)POOL_SIZE_Y, (int)SRC_HEIGHT - idx_in_h);
-
-    __global unsigned char *in_base_ptr = input_ptr + input_offset_first_element_in_bytes +
-                                                      offset_c +
-                                                      idx_out_n * input_stride_w;
-
-    __global unsigned char *out_base_ptr = output_ptr + output_offset_first_element_in_bytes +
-                                                        offset_c +
-                                                        idx_out_w * output_stride_y +
-                                                        idx_out_h * output_stride_z +
-                                                        idx_out_n * output_stride_w;
-
-#if ((defined(POOL_AVG) || defined(POOL_L2)))
-#if defined(EXCLUDE_PADDING)
-    int filter_size = 0;
-#else // defined(EXCLUDE_PADDING)
-    int filter_size = POOL_SIZE_X * POOL_SIZE_Y;
-#endif // defined(EXCLUDE_PADDING)
-#endif // ((defined(POOL_AVG) || defined(POOL_L2)))
+    __global unsigned char *out_base_ptr = output_ptr + output_offset_first_element_in_bytes + idx_out_c * sizeof(DATA_TYPE) + idx_out_w * output_stride_y + idx_out_h * output_stride_z + idx_out_n *
+                                           output_stride_w;
 
     VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
     res0 = INITIAL_VALUE;
+
+#if POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && PAD_X == 0 && PAD_Y == 0
+    // Global pooling path
+
+    int filter_size = POOL_SIZE_X * POOL_SIZE_Y;
+
+#pragma unroll 8
+    for(int y = 0; y < POOL_SIZE_X * POOL_SIZE_Y; ++y)
+    {
+        VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
+        data0;
+#if defined(FP_MIXED_PRECISION)
+        // In case of FP_MIXED_PRECISION, ACC_DATA_TYPE is != DATA_TYPE
+        data0 = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr), VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
+#else  // defined(FP_MIXED_PRECISION)
+        data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr));
+#endif // defined(FP_MIXED_PRECISION)
+
+#if defined(POOL_L2)
+        // Raise to power of 2 for L2 Pooling
+        data0 *= data0;
+#endif // defined(POOL_L2)
+
+        res0 = POOL_OP(res0, data0);
+
+        in_base_ptr += input_stride_y;
+    }
+#else // POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && PAD_X == 0 && PAD_Y == 0
+
+    int idx_in_w = idx_out_w * STRIDE_X - PAD_X;
+    int idx_in_h = idx_out_h * STRIDE_Y - PAD_Y;
+
+    int pool_x_s    = max((int)0, -idx_in_w);
+    int pool_x_e    = min((int)POOL_SIZE_X, (int)SRC_WIDTH - idx_in_w);
+    int pool_y_s    = max((int)0, -idx_in_h);
+    int pool_y_e    = min((int)POOL_SIZE_Y, (int)SRC_HEIGHT - idx_in_h);
+
+#if defined(EXCLUDE_PADDING)
+    int filter_size = (pool_y_e - pool_y_s) * (pool_x_e - pool_x_s);
+#else  // defined(EXCLUDE_PADDING)
+    int filter_size = POOL_SIZE_X * POOL_SIZE_Y;
+#endif // defined(EXCLUDE_PADDING)
 
     for(int y = pool_y_s; y < pool_y_e; ++y)
     {
         for(int x = pool_x_s; x < pool_x_e; ++x)
         {
-            VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE) data0;
+            VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
+            data0;
 #if defined(FP_MIXED_PRECISION)
             // In case of FP_MIXED_PRECISION, ACC_DATA_TYPE is != DATA_TYPE
             data0 = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z)), VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
-#else // defined(FP_MIXED_PRECISION)
-            data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z));
+#else  // defined(FP_MIXED_PRECISION)
+            data0   = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z));
 #endif // defined(FP_MIXED_PRECISION)
 
 #if defined(POOL_L2)
@@ -760,15 +783,13 @@ __kernel void pooling_layer_MxN_nhwc(
             data0 *= data0;
 #endif // defined(POOL_L2)
             res0 = POOL_OP(res0, data0);
-
-#if ((defined(POOL_AVG) || defined(POOL_L2))) && defined(EXCLUDE_PADDING)
-            filter_size++;
-#endif // ((defined(POOL_AVG) || defined(POOL_L2))) && defined(EXCLUDE_PADDING)
         }
     }
 
+#endif // POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && PAD_X == 0 && PAD_Y == 0
+
 #if defined(POOL_AVG) || defined(POOL_L2)
-    res0 /= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))filter_size;
+            res0 /= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))filter_size;
 #endif // defined(POOL_AVG) || defined(POOL_L2)
 
 #if defined(POOL_L2)
@@ -778,9 +799,10 @@ __kernel void pooling_layer_MxN_nhwc(
 
     // Store result
 #if defined(FP_MIXED_PRECISION)
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) res_converted0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res_converted0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
     STORE_VECTOR_SELECT(res_converted, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, (VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0);
-#else // defined(FP_MIXED_PRECISION)
+#else  // defined(FP_MIXED_PRECISION)
     STORE_VECTOR_SELECT(res, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, (VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0);
 #endif // defined(FP_MIXED_PRECISION)
 }
@@ -853,23 +875,18 @@ __kernel void pooling_layer_2x2_nhwc(
     // If batch size != 1, the batch size dimension is collapsed over the height dimension
     int idx_out_h = get_global_id(2) % DST_HEIGHT;
     int idx_out_n = get_global_id(2) / DST_HEIGHT;
-#else //SRC_BATCH_SIZE != 1
+#else  //SRC_BATCH_SIZE != 1
     int idx_out_h = get_global_id(2);
     int idx_out_n = 0;
 #endif // SRC_BATCH_SIZE != 1
 
-    int idx_in_w  = idx_out_w * STRIDE_X - PAD_X;
-    int idx_in_h  = idx_out_h * STRIDE_Y - PAD_Y;
+    int idx_in_w = idx_out_w * STRIDE_X - PAD_X;
+    int idx_in_h = idx_out_h * STRIDE_Y - PAD_Y;
 
-    __global unsigned char *in_base_ptr = input_ptr + input_offset_first_element_in_bytes +
-                                                      idx_out_c * sizeof(DATA_TYPE) +
-                                                      idx_out_n * input_stride_w;
+    __global unsigned char *in_base_ptr = input_ptr + input_offset_first_element_in_bytes + idx_out_c * sizeof(DATA_TYPE) + idx_out_n * input_stride_w;
 
-    __global unsigned char *out_base_ptr = output_ptr + output_offset_first_element_in_bytes +
-                                                        idx_out_c * sizeof(DATA_TYPE) +
-                                                        idx_out_w * output_stride_y +
-                                                        idx_out_h * output_stride_z +
-                                                        idx_out_n * output_stride_w;
+    __global unsigned char *out_base_ptr = output_ptr + output_offset_first_element_in_bytes + idx_out_c * sizeof(DATA_TYPE) + idx_out_w * output_stride_y + idx_out_h * output_stride_z + idx_out_n *
+                                           output_stride_w;
 
     int pool_x_s = max((int)0, -idx_in_w);
     int pool_x_e = min((int)2, (int)SRC_WIDTH - idx_in_w);
@@ -891,11 +908,11 @@ __kernel void pooling_layer_2x2_nhwc(
     data1 = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x1 * input_stride_y + y0 * input_stride_z)), VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
     data2 = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x0 * input_stride_y + y1 * input_stride_z)), VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
     data3 = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x1 * input_stride_y + y1 * input_stride_z)), VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
-#else // defined(FP_MIXED_PRECISION)
-    data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x0 * input_stride_y + y0 * input_stride_z));
-    data1 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x1 * input_stride_y + y0 * input_stride_z));
-    data2 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x0 * input_stride_y + y1 * input_stride_z));
-    data3 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x1 * input_stride_y + y1 * input_stride_z));
+#else  // defined(FP_MIXED_PRECISION)
+    data0         = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x0 * input_stride_y + y0 * input_stride_z));
+    data1         = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x1 * input_stride_y + y0 * input_stride_z));
+    data2         = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x0 * input_stride_y + y1 * input_stride_z));
+    data3         = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + x1 * input_stride_y + y1 * input_stride_z));
 #endif // defined(FP_MIXED_PRECISION)
 
 #if !defined(POOL_MAX)
@@ -931,7 +948,7 @@ __kernel void pooling_layer_2x2_nhwc(
 #if defined(POOL_AVG) || defined(POOL_L2)
 #if defined(EXCLUDE_PADDING)
     res0 /= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))filter_size;
-#else // !defined(EXCLUDE_PADDING)
+#else  // !defined(EXCLUDE_PADDING)
     res0 /= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))4;
 #endif // defined(EXCLUDE_PADDING)
 #endif // defined(POOL_AVG) || defined(POOL_L2)
@@ -943,9 +960,10 @@ __kernel void pooling_layer_2x2_nhwc(
 
     // Store result
 #if defined(FP_MIXED_PRECISION)
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) res_converted0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res_converted0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
     STORE_VECTOR_SELECT(res_converted, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, (VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0);
-#else // defined(FP_MIXED_PRECISION)
+#else  // defined(FP_MIXED_PRECISION)
     STORE_VECTOR_SELECT(res, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, (VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0);
 #endif // defined(FP_MIXED_PRECISION)
 
@@ -955,24 +973,26 @@ __kernel void pooling_layer_2x2_nhwc(
     // Note: DST_CHANNELS and DST_BATCH_SIZE can be used for either the input and output tensor
 
     // note: Batch dimension does not contribute in the offset contribution
-    VEC_DATA_TYPE(uint, VEC_SIZE) base_index = (uint)idx_out_c;
+    VEC_DATA_TYPE(uint, VEC_SIZE)
+    base_index = (uint)idx_out_c;
 
     base_index += VEC_OFFS(uint, VEC_SIZE);
 
-    VEC_DATA_TYPE(uint, VEC_SIZE) index0 = base_index + (uint)x0 * DST_CHANNELS + (uint)y0 * (DST_CHANNELS * SRC_WIDTH);
-    VEC_DATA_TYPE(uint, VEC_SIZE) index1 = base_index + (uint)x1 * DST_CHANNELS + (uint)y0 * (DST_CHANNELS * SRC_WIDTH);
-    VEC_DATA_TYPE(uint, VEC_SIZE) index2 = base_index + (uint)x0 * DST_CHANNELS + (uint)y1 * (DST_CHANNELS * SRC_WIDTH);
-    VEC_DATA_TYPE(uint, VEC_SIZE) index3 = base_index + (uint)x1 * DST_CHANNELS + (uint)y1 * (DST_CHANNELS * SRC_WIDTH);
+    VEC_DATA_TYPE(uint, VEC_SIZE)
+    index0 = base_index + (uint)x0 * DST_CHANNELS + (uint)y0 * (DST_CHANNELS * SRC_WIDTH);
+    VEC_DATA_TYPE(uint, VEC_SIZE)
+    index1 = base_index + (uint)x1 * DST_CHANNELS + (uint)y0 * (DST_CHANNELS * SRC_WIDTH);
+    VEC_DATA_TYPE(uint, VEC_SIZE)
+    index2 = base_index + (uint)x0 * DST_CHANNELS + (uint)y1 * (DST_CHANNELS * SRC_WIDTH);
+    VEC_DATA_TYPE(uint, VEC_SIZE)
+    index3 = base_index + (uint)x1 * DST_CHANNELS + (uint)y1 * (DST_CHANNELS * SRC_WIDTH);
 
     index0 = select(index1, index0, CONVERT(isgreaterequal(data0, data1), VEC_DATA_TYPE(int, VEC_SIZE)));
     index1 = select(index3, index2, CONVERT(isgreaterequal(data2, data3), VEC_DATA_TYPE(int, VEC_SIZE)));
     index0 = select(index1, index0, CONVERT(isgreaterequal(max(data0, data1), max(data2, data3)), VEC_DATA_TYPE(int, VEC_SIZE)));
 
-    __global unsigned char *idx_base_ptr = indices_ptr + indices_offset_first_element_in_bytes +
-                                                         idx_out_c * sizeof(uint) +
-                                                         idx_out_w * indices_stride_y +
-                                                         idx_out_h * indices_stride_z +
-                                                         idx_out_n * indices_stride_w;
+    __global unsigned char *idx_base_ptr = indices_ptr + indices_offset_first_element_in_bytes + idx_out_c * sizeof(uint) + idx_out_w * indices_stride_y + idx_out_h * indices_stride_z + idx_out_n *
+                                           indices_stride_w;
 
     // Store result
     STORE_VECTOR_SELECT(index, uint, idx_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, ((VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0));

@@ -87,6 +87,49 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 TEST_SUITE(CL)
 TEST_SUITE(DirectConvolutionLayer)
 
+/** Check whether the configuration of a Direct Convolution layer with no
+ * bias leads to a successful execution.
+ */
+TEST_CASE(NoBias, framework::DatasetMode::PRECOMMIT)
+{
+    const auto     src_shape     = TensorShape(27U, 13U, 2U);
+    const auto     weights_shape = TensorShape(3U, 3U, 2U, 4U);
+    const auto     bias_shape    = TensorShape(4U);
+    const auto     dst_shape     = TensorShape(25U, 11U, 4U);
+    constexpr auto dt            = DataType::F32;
+
+    auto src     = create_tensor<CLTensor>(src_shape, dt);
+    auto weights = create_tensor<CLTensor>(weights_shape, dt);
+    auto dst     = create_tensor<CLTensor>(dst_shape, dt);
+
+    const auto conv_info = PadStrideInfo(1, 1, 0, 0);
+
+    // Create Direct Convolution function
+    CLDirectConvolutionLayer conv{};
+    conv.configure(&src, &weights, nullptr, &dst, conv_info);
+
+    src.allocator()->allocate();
+    weights.allocator()->allocate();
+    dst.allocator()->allocate();
+
+    library->fill_tensor_value(CLAccessor(src), 1.f);
+    library->fill_tensor_value(CLAccessor(weights), 1.f);
+
+    conv.run();
+
+    // Compute reference to compare
+    SimpleTensor<float> ref_src{ src_shape, dt };
+    SimpleTensor<float> ref_weights{ weights_shape, dt };
+    SimpleTensor<float> ref_bias{ bias_shape, dt };
+    library->fill_tensor_value(ref_src, 1.f);
+    library->fill_tensor_value(ref_weights, 1.f);
+    // No bias
+    library->fill_tensor_value(ref_bias, 0.f);
+    auto ref_dst = reference::convolution_layer<float>(ref_src, ref_weights, ref_bias, dst_shape, conv_info);
+
+    validate(CLAccessor(dst), ref_dst);
+}
+
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
@@ -164,9 +207,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
 template <typename T>
 using CLDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
 template <typename T>
+using CLDirectConvolutionLayerMixedDataLayoutFixture = DirectConvolutionValidationFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T, true>;
+template <typename T>
 using CLDirectConvolutionValidationWithTensorShapesFixture = DirectConvolutionValidationWithTensorShapesFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
 template <typename T>
 using CLDirectConvolutionLayerQuantizedFixture = DirectConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
+template <typename T>
+using CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture = DirectConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T, true>;
 template <typename T>
 using CLDirectConvolutionValidationWithTensorShapesQuantizedFixture = DirectConvolutionValidationWithTensorShapesQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
 
@@ -174,16 +221,16 @@ TEST_SUITE(NHWC)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1, 3, 1, 1 })),
                framework::dataset::make("StrideY", { 1, 3, 2, 1 })),
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
                framework::dataset::make("PadY", { 1, 3, 0, 4 })),
                framework::dataset::make("KernelSize", { 3, 8, 1, 9 })),
-               framework::dataset::make("NumKernels", { 7, 3, 1, 3 })),
+               framework::dataset::make("NumKernels", { 17, 3, 1, 19 })),
                framework::dataset::make("DataType",  DataType::F16)),
                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
                framework::dataset::make("DataLayout", DataLayout::NHWC)))
@@ -212,23 +259,40 @@ TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1, 3, 1, 1 })),
                framework::dataset::make("StrideY", { 1, 3, 2, 1 })),
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
                framework::dataset::make("PadY", { 1, 3, 0, 4 })),
                framework::dataset::make("KernelSize", { 3, 8, 1, 9 })),
-               framework::dataset::make("NumKernels", { 7, 3, 1, 3 })),
+               framework::dataset::make("NumKernels", { 17, 3, 1, 19 })),
                framework::dataset::make("DataType",  DataType::F32)),
                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
                framework::dataset::make("DataLayout", DataLayout::NHWC)))
 {
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT,
+               combine(combine(combine(zip(zip(zip(zip(zip(zip(
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
+               framework::dataset::make("StrideX", { 1 })),
+               framework::dataset::make("StrideY", { 2 })),
+               framework::dataset::make("PadX", { 1 })),
+               framework::dataset::make("PadY", { 3 })),
+               framework::dataset::make("KernelSize", { 3 })),
+               framework::dataset::make("NumKernels", { 3 })),
+               framework::dataset::make("DataType",  DataType::F32)),
+               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
+               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
                framework::dataset::make("InputShape", { TensorShape(800U, 800U, 3U) } ),
@@ -244,17 +308,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framewo
 {
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1, 3, 1, 1 })),
                framework::dataset::make("StrideY", { 1, 3, 2, 1 })),
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
@@ -268,7 +331,25 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+               combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
+               framework::dataset::make("StrideX", { 1 })),
+               framework::dataset::make("StrideY", { 2 })),
+               framework::dataset::make("PadX", { 1 })),
+               framework::dataset::make("PadY", { 1 })),
+               framework::dataset::make("KernelSize", { 3 })),
+               framework::dataset::make("NumKernels", { 3 })),
+               framework::dataset::make("DataType",  DataType::QASYMM8)),
+               framework::dataset::make("QuantizationInfo", QuantizationInfo(1.1f / 255, 10))),
+               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
+               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
                combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
                framework::dataset::make("InputShape", { TensorShape(800U, 800U, 3U) } ),
@@ -287,14 +368,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerQuantizedFixture<uint8_
 }
 
 TEST_SUITE_END() // QASYMM8
-//
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                        TensorShape(9U, 5U, 6U, 4U),
-                                                        TensorShape(3U, 5U, 7U, 2U),
-                                                        TensorShape(32U, 37U, 3U) } ),
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
                framework::dataset::make("StrideX", { 1, 3, 1, 1 })),
                framework::dataset::make("StrideY", { 1, 3, 2, 1 })),
                framework::dataset::make("PadX", { 1, 3, 0, 4 })),
@@ -308,7 +388,25 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+               combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
+               framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+                                                        TensorShape(19U, 5U, 16U, 4U),
+                                                        TensorShape(13U, 5U, 17U, 2U),
+                                                        TensorShape(32U, 37U, 13U) } ),
+               framework::dataset::make("StrideX", { 1 })),
+               framework::dataset::make("StrideY", { 1 })),
+               framework::dataset::make("PadX", { 1 })),
+               framework::dataset::make("PadY", { 1 })),
+               framework::dataset::make("KernelSize", { 3 })),
+               framework::dataset::make("NumKernels", { 3 })),
+               framework::dataset::make("DataType",  DataType::QASYMM8_SIGNED)),
+               framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255, 10))),
+               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
+               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY,
                combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(
                framework::dataset::make("InputShape", { TensorShape(800U, 800U, 3U) } ),
@@ -358,6 +456,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framewo
 {
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
+                                                                                                                    DataType::F32)),
+                                                                                                                    ActivationFunctionsDataset),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly, framework::dataset::make("DataType", DataType::F32)),
                                                                                                                   ActivationFunctionsDataset),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })))
@@ -385,9 +490,17 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 });
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data_precommit,
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10)})),
+                       QuantizedActivationFunctionsDataset),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data_precommit,
-                       framework::dataset::make("DataType",
-                                                DataType::QASYMM8)),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
                        QuantizedActivationFunctionsDataset),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })))
@@ -451,7 +564,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(data_precommit, framework::dataset::make("DataType",
+                                                                                                                        DataType::QASYMM8_SIGNED)),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.1f, -10) })),
+                                                                                                                        QuantizedActivationFunctionsDataset),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
 FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(data_precommit_9x9,
                        framework::dataset::make("DataType",
                                                 DataType::QASYMM8_SIGNED)),

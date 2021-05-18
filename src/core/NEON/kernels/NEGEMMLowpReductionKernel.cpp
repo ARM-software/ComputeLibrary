@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -82,7 +81,6 @@ void NEGEMMLowpMatrixAReductionKernel::configure(const ITensor *mtx_a, ITensor *
     auto_init_if_empty(*_output->info(), TensorShape(_input->info()->dimension(1)), 1, DataType::S32);
 
     Window win = calculate_max_window(*_output->info(), Steps(1));
-    _output->info()->set_valid_region(ValidRegion(Coordinates(), _output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
@@ -204,7 +202,6 @@ void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b, ITensor *
 
     // Configure kernel window
     Window win = calculate_max_window_horizontal(*_output->info(), Steps(num_elems_processed_per_iteration));
-    _output->info()->set_valid_region(ValidRegion(Coordinates(), _output->info()->tensor_shape()));
     INEKernel::configure(win);
 }
 

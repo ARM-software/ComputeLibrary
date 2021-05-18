@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,18 @@
         }                                                                                \
     } while(false)
 
+#define ARM_COMPUTE_LOG_MSG_WITH_FUNCNAME(logger_name, log_level, msg)                   \
+    do                                                                                   \
+    {                                                                                    \
+        auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
+        if(__logger != nullptr)                                                          \
+        {                                                                                \
+            std::ostringstream s;                                                        \
+            s << __func__ << ":" << msg;                                                 \
+            __logger->log(log_level, s.str());                                           \
+        }                                                                                \
+    } while(false)
+
 #define ARM_COMPUTE_LOG_MSG_WITH_FORMAT(logger_name, log_level, fmt, ...)                     \
     do                                                                                        \
     {                                                                                         \
@@ -68,6 +80,7 @@
 #else /* ARM_COMPUTE_LOGGING_ENABLED */
 
 #define ARM_COMPUTE_LOG_MSG(logger_name, log_level, msg)
+#define ARM_COMPUTE_LOG_MSG_WITH_FUNCNAME(logger_name, log_level, msg)
 #define ARM_COMPUTE_LOG_MSG_WITH_FORMAT(logger_name, log_level, fmt, ...)
 #define ARM_COMPUTE_LOG_STREAM(logger_name, log_level, stream)
 

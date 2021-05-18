@@ -150,7 +150,7 @@ void pooling2_nchw_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *d
         *(reinterpret_cast<T *>(out.ptr())) = static_cast<T>(vget_lane_f32(max_data, 0));
 
         // Calculate max data indice, which will be used in max unpool.
-        const uint32_t   offset_base              = offset_no_padding<T>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y);
+        const uint32_t   offset_base              = offset_no_padding<T>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y, DataLayout::NCHW);
         const uint32_t   offset_top               = (uint32_t)(offset_base / sizeof(T));
         const uint32_t   offset_bottom            = offset_top + in_stride_y / sizeof(T) - pad_right - pad_left;
         const uint32x2_t voffset_top              = { offset_top, offset_top + 1u };

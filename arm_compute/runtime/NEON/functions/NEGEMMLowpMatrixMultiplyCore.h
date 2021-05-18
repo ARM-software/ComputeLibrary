@@ -37,7 +37,6 @@ namespace arm_compute
 {
 class ITensor;
 class NEConvertQuantizedSignednessKernel;
-class NEConvertQuantizedSignednessKernel;
 class NEGEMMInterleave4x4Kernel;
 class NEGEMMLowpMatrixMultiplyKernel;
 class NEGEMMLowpOffsetContributionKernel;
@@ -47,7 +46,7 @@ class NEGEMMLowpMatrixBReductionKernel;
 class NEGEMMTranspose1xWKernel;
 class NEGEMMAssemblyDispatch;
 
-/** Basic function to execute GEMMLowpMatrixMultiplyCore on Neon. This function calls the following Neon kernels if the DOT product instruction is not available:
+/** Basic function to execute GEMMLowpMatrixMultiplyCore. This function calls the following kernels if the DOT product instruction is not available:
  *
  *  -# @ref NEGEMMInterleave4x4Kernel
  *  -# @ref NEGEMMTranspose1xWKernel
@@ -76,6 +75,26 @@ public:
     /** Default destructor */
     ~NEGEMMLowpMatrixMultiplyCore();
     /** Initialise the kernel's inputs, output
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2     |dst            |
+     * |:--------------|:------------------|:--------|:--------------|
+     * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |QASYMM8        |
+     * |QASYMM8        |QSYMM8             |S32      |QASYMM8        |
+     * |QASYMM8        |QASYMM8            |S32      |S32            |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |S32            |
+     * |QASYMM8        |QSYMM8             |S32      |S32            |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8             |S32      |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |S32            |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |S32            |
+     * |QASYMM8_SIGNED |QSYMM8             |S32      |S32            |
      *
      * @note GEMM_LOWP:  low precision GEMM kernel
      *  This kernel performs the following computations:

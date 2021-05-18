@@ -42,12 +42,8 @@
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/CL/CLDistribution1D.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #endif /* ARM_COMPUTE_CL */
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
-#endif /* ARM_COMPUTE_GC */
 
 #include <cstdlib>
 #include <cstring>
@@ -248,47 +244,7 @@ inline void unmap(CLTensor &tensor)
 {
     tensor.unmap();
 }
-
-/** Maps a distribution if needed
- *
- * @param[in] distribution Distribution to be mapped
- * @param[in] blocking     Specified if map is blocking or not
- */
-inline void map(CLDistribution1D &distribution, bool blocking)
-{
-    distribution.map(blocking);
-}
-
-/** Unmaps a distribution if needed
- *
- * @param distribution  Distribution to be unmapped
- */
-inline void unmap(CLDistribution1D &distribution)
-{
-    distribution.unmap();
-}
 #endif /* ARM_COMPUTE_CL */
-
-#ifdef ARM_COMPUTE_GC
-/** Maps a tensor if needed
- *
- * @param[in] tensor   Tensor to be mapped
- * @param[in] blocking Specified if map is blocking or not
- */
-inline void map(GCTensor &tensor, bool blocking)
-{
-    tensor.map(blocking);
-}
-
-/** Unmaps a tensor if needed
- *
- * @param tensor  Tensor to be unmapped
- */
-inline void unmap(GCTensor &tensor)
-{
-    tensor.unmap();
-}
-#endif /* ARM_COMPUTE_GC */
 
 /** Specialized class to generate random non-zero FP16 values.
  *  uniform_real_distribution<half> generates values that get rounded off to zero, causing
@@ -562,7 +518,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         fs << "P6\n"
            << width << " " << height << " 255\n";
 
-        // Map buffer if creating a CLTensor/GCTensor
+        // Map buffer if creating a CLTensor
         map(tensor, true);
 
         switch(tensor.info()->format())
@@ -605,7 +561,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
                 ARM_COMPUTE_ERROR("Unsupported format");
         }
 
-        // Unmap buffer if creating a CLTensor/GCTensor
+        // Unmap buffer if creating a CLTensor
         unmap(tensor);
     }
     catch(const std::ofstream::failure &e)
@@ -696,7 +652,7 @@ void load_trained_data(T &tensor, const std::string &filename)
             throw std::runtime_error("Could not load binary data: " + filename);
         }
 
-        // Map buffer if creating a CLTensor/GCTensor
+        // Map buffer if creating a CLTensor
         map(tensor, true);
 
         Window window;
@@ -716,7 +672,7 @@ void load_trained_data(T &tensor, const std::string &filename)
         },
         in);
 
-        // Unmap buffer if creating a CLTensor/GCTensor
+        // Unmap buffer if creating a CLTensor
         unmap(tensor);
     }
     catch(const std::ofstream::failure &e)

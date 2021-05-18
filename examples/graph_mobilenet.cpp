@@ -101,7 +101,6 @@ public:
         config.tuner_mode  = common_params.tuner_mode;
         config.tuner_file  = common_params.tuner_file;
         config.mlgo_file   = common_params.mlgo_file;
-        config.mlgo_file   = common_params.mlgo_file;
 
         graph.finalize(common_params.target, config);
 

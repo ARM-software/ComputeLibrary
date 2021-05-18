@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -184,31 +184,6 @@ const std::string &string_from_activation_func(ActivationLayerInfo::ActivationFu
     return act_map[act];
 }
 
-const std::string &string_from_matrix_pattern(MatrixPattern pattern)
-{
-    static std::map<MatrixPattern, const std::string> pattern_map =
-    {
-        { MatrixPattern::BOX, "BOX" },
-        { MatrixPattern::CROSS, "CROSS" },
-        { MatrixPattern::DISK, "DISK" },
-        { MatrixPattern::OTHER, "OTHER" },
-    };
-
-    return pattern_map[pattern];
-}
-
-const std::string &string_from_non_linear_filter_function(NonLinearFilterFunction function)
-{
-    static std::map<NonLinearFilterFunction, const std::string> func_map =
-    {
-        { NonLinearFilterFunction::MAX, "MAX" },
-        { NonLinearFilterFunction::MEDIAN, "MEDIAN" },
-        { NonLinearFilterFunction::MIN, "MIN" },
-    };
-
-    return func_map[function];
-}
-
 const std::string &string_from_interpolation_policy(InterpolationPolicy policy)
 {
     static std::map<InterpolationPolicy, const std::string> interpolation_policy_map =
@@ -330,6 +305,7 @@ DataType data_type_from_name(const std::string &name)
         { "f16", DataType::F16 },
         { "f32", DataType::F32 },
         { "qasymm8", DataType::QASYMM8 },
+        { "qasymm8_signed", DataType::QASYMM8_SIGNED },
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED

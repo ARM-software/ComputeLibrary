@@ -75,7 +75,7 @@ Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *d, 
     else
     {
         p.multis  = b->info()->tensor_shape().z();
-        p.batches = d->info()->tensor_shape().total_size_upper(2) / p.multis; //COMPMID-1423: Agree on and document the layout of gemm inputs/outputs
+        p.batches = d->info()->tensor_shape().total_size_upper(2) / p.multis;
     }
 
     // Update M in case of GEMM3D for output
@@ -182,7 +182,7 @@ public:
 
     void configure(size_t B_pretranspose_size, unsigned int alignment)
     {
-        _output.allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
+        _output.allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment) }, 1, DataType::S8), alignment);
         _B_pretranspose_size = B_pretranspose_size;
     }
 
@@ -285,7 +285,7 @@ private:
 
     /** Assembly Gemm kernel */
     std::shared_ptr<arm_gemm::GemmCommon<TypeInput, TypeOutput>> _gemm_kernel_asm{ nullptr };
-    /** Optimised Neon kernel */
+    /** Optimised Arm® Neon™ kernel */
     std::unique_ptr<INEKernel> _optimised_kernel{ nullptr };
     /** Input A */
     const ITensor *_a
@@ -525,7 +525,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensor *a, c
         else
         {
             _pretranspose = new Tensor();
-            static_cast<Tensor *>(_pretranspose)->allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
+            static_cast<Tensor *>(_pretranspose)->allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment) }, 1, DataType::S8), alignment);
         }
     }
 
@@ -587,7 +587,7 @@ template <typename TypeInput, typename TypeOutput, class OutputStage>
 void Fallback<TypeInput, TypeOutput, OutputStage>::allocate_workspace(size_t workspace_size, MemoryGroup &memory_group, size_t alignment)
 {
     ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "size cannot be 0");
-    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
+    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment) }, 1, DataType::S8), alignment);
     memory_group.manage(&_workspace);
     _workspace.allocator()->allocate();
 }

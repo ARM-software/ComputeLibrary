@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,18 @@ namespace arm_compute
 class CLSplit : public CPPSplit<CLSlice, ICLTensor>
 {
 public:
+    /** CLSplit
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
+     */
+
     // Inherited methods overridden:
     void run() override;
 };

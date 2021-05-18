@@ -120,10 +120,6 @@ void CpuFloorKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
     // Configure kernel window
     const Window win = calculate_max_window(*src, Steps());
 
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
-
     ICPPKernel::configure(win);
 }
 

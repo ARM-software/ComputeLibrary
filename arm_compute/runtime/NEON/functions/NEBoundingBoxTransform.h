@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,15 +32,22 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEBoundingBoxTransformKernel.
- *
- * This function calls the following Neon kernels:
- * -# @ref NEBoundingBoxTransformKernel
- */
+/** Basic function to run @ref NEBoundingBoxTransformKernel. */
 class NEBoundingBoxTransform : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |QASYMM16       |QASYMM8        |QASYMM16       |
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
      *
      * @param[in]  boxes      Source tensor. Bounding box proposals in pixel coordinates. Size(M, 4), format [x1, y1, x2, y2]. Data types supported: QASYMM16/F16/F32.
      * @param[out] pred_boxes Destination tensor. Pixel coordinates of the transformed bounding boxes. Size (M, 4*K), format [x1, y1, x2, y2]. Data types supported: Same as @p input

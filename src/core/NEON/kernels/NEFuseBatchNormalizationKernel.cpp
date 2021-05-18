@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -444,13 +444,11 @@ void NEFuseBatchNormalizationKernel::configure(const ITensor *input_weights, con
     {
         // Output tensor auto initialization if not yet initialized
         auto_init_if_empty(*_fused_weights->info(), *_input_weights->info()->clone());
-        fused_weights->info()->set_valid_region(input_weights->info()->valid_region());
     }
     if(_fused_bias != nullptr)
     {
         // Output tensor auto initialization if not yet initialized
         auto_init_if_empty(*_fused_bias->info(), *_bn_mean->info()->clone());
-        _fused_bias->info()->set_valid_region(bn_mean->info()->valid_region());
     }
 
     // Validate arguments

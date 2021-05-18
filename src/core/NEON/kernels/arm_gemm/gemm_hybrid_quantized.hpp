@@ -81,31 +81,6 @@ class GemmHybridQuantized : public GemmCommon<To, Tr> {
     static unsigned int compute_k_block(const GemmArgs &args) {
         // We don't support K blocks as we only temporarily store 32 bit results.
         return args._Ksize;
-
-        if (args._cfg && args._cfg->inner_block_size) {
-            return args._cfg->inner_block_size;
-        }
-
-        const unsigned int L1_size = args._ci->get_L1_cache_size();
-
-        // k_block: Find out how much of the larger array can be loaded into half the cache.
-        // This should account for associative caches.
-        unsigned int k_block = (L1_size / 2) / (sizeof(Toi) * (std::max(strategy::out_width(), strategy::out_height())));
-
-        // Needs to be (at least a single) multiple of the K unroll level.
-        k_block /= strategy::k_unroll();
-        k_block = std::max(k_block, 1U) * strategy::k_unroll();
-
-        // Now tune to presented problem size; this is how many blocks we need.
-        unsigned int numk_blocks = iceildiv(args._Ksize, k_block);
-
-        // So divide the space equally into that many blocks.
-        k_block = iceildiv(args._Ksize, numk_blocks);
-
-        // And round UP to the K unroll level required.
-        k_block = roundup(k_block, strategy::k_unroll());
-
-        return k_block;
     }
 
     static unsigned int compute_n_block(const GemmArgs &args) {

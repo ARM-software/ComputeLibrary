@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,46 +31,15 @@
 #include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
+#include "arm_compute/runtime/CL/functions/CLTranspose.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
-/** Basic function to reshape the weights of Fully Connected layer with OpenCL. This function calls the following kernels:
- *
- *  -# @ref CLTransposeKernel
- *
- * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
- */
-class CLFullyConnectedLayerReshapeWeights : public ICLSimpleFunction
-{
-public:
-    /** Set the input and output tensors.
-     *
-     * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[out] output Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
-     */
-    void configure(const ICLTensor *input, ICLTensor *output);
-    /** Set the input and output tensors.
-     *
-     * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[out] output          Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
-     */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayerReshapeWeights
-     *
-     * @param[in] input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] output Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-};
-
 namespace weights_transformations
 {
-/** Basic function to manage the reshape weights generated from @ref CLFullyConnectedLayerReshapeWeights */
+/** Basic function to manage the reshape weights generated from @ref CLTranspose */
 class CLFullyConnectedLayerReshapeWeightsManaged : public ITransformWeights
 {
 public:
@@ -100,7 +69,7 @@ public:
         return _uid;
     }
 
-    /** Configures the @ref CLFullyConnectedLayerReshapeWeights function
+    /** Configures the @ref CLTranspose function
      *
      * @param[in] input Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      */
@@ -108,7 +77,7 @@ public:
     {
         configure(CLKernelLibrary::get().get_compile_context(), input);
     }
-    /** Configures the @ref CLFullyConnectedLayerReshapeWeights function
+    /** Configures the @ref CLTranspose function
      *
      * @param[in] compile_context The compile context to be used.
      * @param[in] input           Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -119,16 +88,16 @@ public:
     }
 
 private:
-    static constexpr uint32_t           _uid = 0x0;
-    CLTensor                            _output{};
-    CLFullyConnectedLayerReshapeWeights _func{};
+    static constexpr uint32_t _uid = 0x0;
+    CLTensor                  _output{};
+    CLTranspose               _func{};
 };
 } // namespace weights_transformations
 
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
  *
  *  -# @ref CLIm2ColKernel (called when the input comes from a convolutional layer)
- *  -# @ref CLFullyConnectedLayerReshapeWeights (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
+ *  -# @ref CLTranspose (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref CLGEMMMatrixMultiplyKernel or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
@@ -147,6 +116,18 @@ public:
     /** Default move assignment operator */
     CLFullyConnectedLayer &operator=(CLFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2   |dst            |
+     * |:--------------|:------------------|:------|:--------------|
+     * |F16            |F16                |F16    |F16            |
+     * |F32            |F32                |F32    |F32            |
+     * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
      *
      * @param[in]  input   Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights Weights tensor. The weights must be 2 dimensional.
@@ -213,7 +194,7 @@ private:
     weights_transformations::CLConvertFullyConnectedWeightsManaged      _convert_weights_managed;
     weights_transformations::CLFullyConnectedLayerReshapeWeightsManaged _reshape_weights_managed_function;
     CLFlattenLayer                                                      _flatten_layer;
-    CLFullyConnectedLayerReshapeWeights                                 _reshape_weights_function;
+    CLTranspose                                                         _reshape_weights_function;
     CLGEMM                                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                                        _mm_gemmlowp;
     CLTensor                                                            _flatten_output;

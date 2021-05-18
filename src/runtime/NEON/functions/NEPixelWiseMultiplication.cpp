@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,64 +24,30 @@
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "src/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
+#include "src/runtime/cpu/operators/CpuMul.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-namespace experimental
-{
-void NEPixelWiseMultiplication::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
-                                          const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(act_info);
-    auto k = std::make_unique<NEPixelWiseMultiplicationKernel>();
-    k->configure(input1, input2, output, scale, overflow_policy, rounding_policy);
-    _kernel = std::move(k);
-}
-Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
-                                           const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return NEPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy);
-}
-
-void NEComplexPixelWiseMultiplication::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(act_info);
-    auto k = std::make_unique<NEComplexPixelWiseMultiplicationKernel>();
-    k->configure(input1, input2, output);
-    _kernel = std::move(k);
-}
-
-Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return NEComplexPixelWiseMultiplicationKernel::validate(input1, input2, output);
-}
-} // namespace experimental
-
 struct NEPixelWiseMultiplication::Impl
 {
-    const ITensor                                           *src_0{ nullptr };
-    const ITensor                                           *src_1{ nullptr };
-    ITensor                                                 *dst{ nullptr };
-    std::unique_ptr<experimental::NEPixelWiseMultiplication> op{ nullptr };
+    const ITensor               *src_0{ nullptr };
+    const ITensor               *src_1{ nullptr };
+    ITensor                     *dst{ nullptr };
+    std::unique_ptr<cpu::CpuMul> op{ nullptr };
 };
 
 NEPixelWiseMultiplication::NEPixelWiseMultiplication()
     : _impl(std::make_unique<Impl>())
 {
 }
-NEPixelWiseMultiplication::NEPixelWiseMultiplication(NEPixelWiseMultiplication &&) = default;
-NEPixelWiseMultiplication &NEPixelWiseMultiplication::operator=(NEPixelWiseMultiplication &&) = default;
-NEPixelWiseMultiplication::~NEPixelWiseMultiplication()                                       = default;
+NEPixelWiseMultiplication::~NEPixelWiseMultiplication() = default;
 
 Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
                                            const ActivationLayerInfo &act_info)
 {
-    return experimental::NEPixelWiseMultiplication::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
+    return cpu::CpuMul::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
 }
 
 void NEPixelWiseMultiplication::configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
@@ -90,7 +56,7 @@ void NEPixelWiseMultiplication::configure(const ITensor *input1, const ITensor *
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEPixelWiseMultiplication>();
+    _impl->op    = std::make_unique<cpu::CpuMul>();
     _impl->op->configure(input1->info(), input2->info(), output->info(), scale, overflow_policy, rounding_policy, act_info);
 }
 
@@ -105,23 +71,21 @@ void NEPixelWiseMultiplication::run()
 
 struct NEComplexPixelWiseMultiplication::Impl
 {
-    ITensor                                                        *src_0{ nullptr };
-    ITensor                                                        *src_1{ nullptr };
-    ITensor                                                        *dst{ nullptr };
-    std::unique_ptr<experimental::NEComplexPixelWiseMultiplication> op{ nullptr };
+    ITensor                            *src_0{ nullptr };
+    ITensor                            *src_1{ nullptr };
+    ITensor                            *dst{ nullptr };
+    std::unique_ptr<cpu::CpuComplexMul> op{ nullptr };
 };
 
 NEComplexPixelWiseMultiplication::NEComplexPixelWiseMultiplication()
     : _impl(std::make_unique<Impl>())
 {
 }
-NEComplexPixelWiseMultiplication::NEComplexPixelWiseMultiplication(NEComplexPixelWiseMultiplication &&) = default;
-NEComplexPixelWiseMultiplication &NEComplexPixelWiseMultiplication::operator=(NEComplexPixelWiseMultiplication &&) = default;
-NEComplexPixelWiseMultiplication::~NEComplexPixelWiseMultiplication()                                              = default;
+NEComplexPixelWiseMultiplication::~NEComplexPixelWiseMultiplication() = default;
 
 Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    return experimental::NEComplexPixelWiseMultiplication::validate(input1, input2, output, act_info);
+    return cpu::CpuComplexMul::validate(input1, input2, output, act_info);
 }
 
 void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
@@ -129,7 +93,7 @@ void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
-    _impl->op    = std::make_unique<experimental::NEComplexPixelWiseMultiplication>();
+    _impl->op    = std::make_unique<cpu::CpuComplexMul>();
     _impl->op->configure(input1->info(), input2->info(), output->info(), act_info);
 }
 

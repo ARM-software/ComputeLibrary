@@ -40,7 +40,7 @@ inline int32_t asymm_rounding_divide_by_pow2(int32_t x, int exponent)
     return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
 }
 
-/** Multiplication of two integers. The same as ARMv7 Neon VQRDMULH instruction. */
+/** Multiplication of two integers. The same as ARMv7 Arm® Neon™ VQRDMULH instruction. */
 inline int32_t asymm_int_mult(int32_t a, int32_t b)
 {
     bool    overflow = a == b && a == std::numeric_limits<int32_t>::min();

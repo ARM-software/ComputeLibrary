@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,14 @@ public:
     /** Default constructor */
     CLUnstack();
     /** Set the input, output and unstacking axis.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
      *
      * @param[in]     input         A tensor to be unstacked. Data type supported: All.
      * @param[in,out] output_vector A vector of tensors. Data types supported: same as @p input.

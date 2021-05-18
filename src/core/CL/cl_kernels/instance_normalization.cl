@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,14 +23,11 @@
  */
 #include "helpers.h"
 
-#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(INTERNAL_DATA_TYPE) && defined(GAMMA) && defined(BETA) && defined(EPSILON) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z)
-/** This function normalizes the input 2D tensor across the first dimension with respect to mean and standard deviation of the same dimension.
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(INTERNAL_DATA_TYPE) & defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z)
+/** This function computes the mean and variance of each plane of the input tensor and provides it as output.
  *
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  * @attention Data type should be passed using the -DDATA_TYPE=data_type compile flag, e.g. -DDATA_TYPE=float
- * @attention The scale scalar value applied to the normalized tensor should be passed using the -DGAMMA=value compile flag, e.g. -DGAMMA=1.3
- * @attention The offset scalar value applied to the normalized tensor should be passed using the -DBETA=value compile flag, e.g. -DBETA=2.4
- * @attention Normalization epsilon parameter should be given as a preprocessor argument with -DEPSILON=value. e.g. -DEPSILON=0.001f
  * @attention Dimensions X, Y, and Z should be given as a preprocessor argument with -DDIM_X=value, -DDIM_Y=value, -DDIM_Z=value. e.g. -DDIM_X=6, -DDIM_Y=2, -DDIM_Z=7
  *
  * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
@@ -40,6 +37,8 @@
  * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  input_stride_z                       Stride of the first source tensor in Z dimension (in bytes)
  * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  input_stride_w                       Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  input_step_w                         input_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the first source tensor
  * @param[out] output_ptr                           (Optional) Pointer to the destination tensor. Supported data types: same as @p input_ptr
  * @param[in]  output_stride_x                      (Optional) Stride of the destination tensor in X dimension (in bytes)
@@ -50,38 +49,37 @@
  * @param[in]  output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination tensor
  */
-__kernel void instance_normalization(
-    TENSOR4D_DECLARATION(input)
-#ifndef IN_PLACE
-    ,
-    TENSOR4D_DECLARATION(output)
-#endif /* IN_PLACE */
-)
+__kernel void compute_mean_var(
+    TENSOR4D_DECLARATION(input),
+    TENSOR3D_DECLARATION(output))
 {
-    Tensor4D in = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
-#ifndef IN_PLACE
-    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
-#endif /* IN_PLACE */
-
-    INTERNAL_DATA_TYPE sum    = 0.f;
-    INTERNAL_DATA_TYPE sum_sq = 0.f;
+    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
 
 #if defined(NHWC)
-
-    const int ch             = get_global_id(0); // Current channel
-    const int batch          = get_global_id(2); // Current batch
-    const int elements_plane = DIM_Y * DIM_Z;
+    const int          ch             = get_global_id(0); // Current channel
+    const int          batch          = get_global_id(1); // Current batch
+    const int          elements_plane = DIM_Y * DIM_Z;
+    INTERNAL_DATA_TYPE part_sum       = 0.f;
+    INTERNAL_DATA_TYPE part_sum_sq    = 0.f;
+    const int          in_offset      = input_offset_first_element_in_bytes + batch * input_stride_w + ch * sizeof(DATA_TYPE);
 
     for(int i_w = 0; i_w < DIM_Y; ++i_w)
     {
         for(int i_h = 0; i_h < DIM_Z; ++i_h)
         {
             INTERNAL_DATA_TYPE data = (INTERNAL_DATA_TYPE) * ((__global DATA_TYPE *)tensor4D_offset(&in, ch, i_w, i_h, batch));
-            sum += data;
-            sum_sq += data * data;
+            part_sum += data;
+            part_sum_sq += data * data;
         }
     }
 
+    INTERNAL_DATA_TYPE mean                      = (part_sum / elements_plane);
+    INTERNAL_DATA_TYPE var                       = (part_sum_sq / elements_plane) - (mean * mean);
+    __global INTERNAL_DATA_TYPE *output_address0 = (__global INTERNAL_DATA_TYPE *)tensor3D_offset(&out, ch, 0, batch);
+    *output_address0                             = mean;
+    __global INTERNAL_DATA_TYPE *output_address1 = (__global INTERNAL_DATA_TYPE *)tensor3D_offset(&out, ch, 1, batch);
+    *output_address1                             = var;
 #else // !defined(NHWC)
     const int ch             = get_global_id(2) % DIM_Z; // Current channel
     const int batch          = get_global_id(2) / DIM_Z; // Current batch
@@ -127,16 +125,83 @@ __kernel void instance_normalization(
     part_sum.s0 += part_sum.s1;
     part_sum_sq.s0 += part_sum_sq.s1;
 
-    sum    = (INTERNAL_DATA_TYPE)part_sum.s0;
-    sum_sq = (INTERNAL_DATA_TYPE)part_sum_sq.s0;
+    INTERNAL_DATA_TYPE sum    = (INTERNAL_DATA_TYPE)part_sum.s0;
+    INTERNAL_DATA_TYPE sum_sq = (INTERNAL_DATA_TYPE)part_sum_sq.s0;
+
+    const INTERNAL_DATA_TYPE mean = (sum / elements_plane);
+    const INTERNAL_DATA_TYPE var  = (sum_sq / elements_plane) - (mean * mean);
+
+    __global INTERNAL_DATA_TYPE *output_address0 = (__global INTERNAL_DATA_TYPE *)tensor3D_offset(&out, ch, 0, batch);
+    *output_address0                             = mean;
+    __global INTERNAL_DATA_TYPE *output_address1 = (__global INTERNAL_DATA_TYPE *)tensor3D_offset(&out, ch, 1, batch);
+    *output_address1                             = var;
 
 #endif // defined(NHWC)
+}
+#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z) */
 
-    const INTERNAL_DATA_TYPE mean   = (sum / elements_plane);
-    const INTERNAL_DATA_TYPE var    = (sum_sq / elements_plane) - (mean * mean);
-    const INTERNAL_DATA_TYPE multip = GAMMA / sqrt(var + EPSILON);
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(INTERNAL_DATA_TYPE) && defined(GAMMA) && defined(BETA) && defined(EPSILON) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z)
+/** This function normalizes the input 2D tensor across the first dimension with respect to mean and standard deviation of the same dimension.
+ *
+ * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @attention Data type should be passed using the -DDATA_TYPE=data_type compile flag, e.g. -DDATA_TYPE=float
+ * @attention The scale scalar value applied to the normalized tensor should be passed using the -DGAMMA=value compile flag, e.g. -DGAMMA=1.3
+ * @attention The offset scalar value applied to the normalized tensor should be passed using the -DBETA=value compile flag, e.g. -DBETA=2.4
+ * @attention Normalization epsilon parameter should be given as a preprocessor argument with -DEPSILON=value. e.g. -DEPSILON=0.001f
+ * @attention Dimensions X, Y, and Z should be given as a preprocessor argument with -DDIM_X=value, -DDIM_Y=value, -DDIM_Z=value. e.g. -DDIM_X=6, -DDIM_Y=2, -DDIM_Z=7
+ *
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
+ * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  input_stride_z                       Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the first source tensor
+ * @param[out] output_ptr                           (Optional) Pointer to the destination tensor. Supported data types: same as @p input_ptr
+ * @param[in]  output_stride_x                      (Optional) Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  output_stride_y                      (Optional) Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  output_stride_z                      (Optional) Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination tensor
+ */
+__kernel void instance_normalization(
+    TENSOR4D_DECLARATION(input),
+    TENSOR3D_DECLARATION(mean_var)
+#ifndef IN_PLACE
+    ,
+    TENSOR4D_DECLARATION(output)
+#endif /* IN_PLACE */
+)
+{
+    Tensor4D in       = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor3D mean_var = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(mean_var);
+#ifndef IN_PLACE
+    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
+#endif /* IN_PLACE */
 
 #if defined(NHWC)
+    const int ch    = get_global_id(0); // Current channel
+    const int batch = get_global_id(2); // Current batch
+#else                                   /* defined(NHWC) */
+    const int ch    = get_global_id(2) % DIM_Z; // Current channel
+    const int batch = get_global_id(2) / DIM_Z; // Current batch
+#endif                                  /* defined(NHWC) */
+
+    const __global INTERNAL_DATA_TYPE *mean_ptr                   = (__global INTERNAL_DATA_TYPE *)tensor3D_offset(&mean_var, ch, 0, batch);
+    const __global INTERNAL_DATA_TYPE *var_ptr                    = (__global INTERNAL_DATA_TYPE *)tensor3D_offset(&mean_var, ch, 1, batch);
+    const INTERNAL_DATA_TYPE                               mean   = (INTERNAL_DATA_TYPE) * mean_ptr;
+    const INTERNAL_DATA_TYPE                               var    = (INTERNAL_DATA_TYPE) * var_ptr;
+    const INTERNAL_DATA_TYPE                               multip = GAMMA / sqrt(var + EPSILON);
+    const INTERNAL_DATA_TYPE                               beta   = (INTERNAL_DATA_TYPE)BETA;
+
+#if defined(NHWC)
+    const int in_offset = input_offset_first_element_in_bytes + batch * input_stride_w + ch * sizeof(DATA_TYPE);
+#ifndef IN_PLACE
+    const int out_offset = output_offset_first_element_in_bytes + batch * input_stride_w + ch * sizeof(DATA_TYPE);
+#endif /* IN_PLACE */
 
     for(int i_w = 0; i_w < DIM_Y; ++i_w)
     {
@@ -151,7 +216,6 @@ __kernel void instance_normalization(
             *(output_address) = (*(input_address) - mean) * multip + (INTERNAL_DATA_TYPE)BETA;
         }
     }
-
 #else // !defined(NHWC)
     for(int y = 0; y < DIM_Y; ++y)
     {

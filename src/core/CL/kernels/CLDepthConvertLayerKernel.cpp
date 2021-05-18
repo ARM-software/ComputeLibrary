@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,11 +118,6 @@ void CLDepthConvertLayerKernel::configure(const CLCompileContext &compile_contex
     unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
     _kernel.setArg(idx++, shift);
 
-    // Since we have a leftover vector size calculated using the input tensor shape, it is required to
-    // have the input region equal to the tensor shape
-    ValidRegion input_valid_region = input->info()->valid_region();
-    input->info()->set_valid_region(ValidRegion(Coordinates(0, 0), input->info()->tensor_shape()));
-
     // Configure kernel
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win);
@@ -131,9 +126,6 @@ void CLDepthConvertLayerKernel::configure(const CLCompileContext &compile_contex
     const Window &full_window      = window();
     Window        collapsed_window = full_window.collapse_if_possible(full_window, Window::DimZ);
     ICLKernel::configure_internal(collapsed_window);
-
-    // Restore the valid region
-    input->info()->set_valid_region(input_valid_region);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 

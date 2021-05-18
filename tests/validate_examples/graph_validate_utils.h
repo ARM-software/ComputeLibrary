@@ -240,7 +240,6 @@ public:
         {
             arm_compute::graph::Target::NEON,
             arm_compute::graph::Target::CL,
-            arm_compute::graph::Target::GC,
         };
 
         const std::set<arm_compute::DataType> supported_data_types

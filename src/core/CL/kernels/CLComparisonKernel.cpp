@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,16 +75,13 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input1, input2);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
-
+    const TensorShape &out_shape                         = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
     const unsigned int num_elems_processed_per_iteration = calculate_num_elems_processed_per_iteration(input1);
 
     // Auto initialize output if not initialized
     auto_init_if_empty(output, out_shape, 1, DataType::U8, QuantizationInfo());
 
-    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration));
+    Window win        = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration));
     Window win_input1 = win.broadcast_if_dimension_le_one(input1);
     Window win_input2 = win.broadcast_if_dimension_le_one(input2);
 
@@ -95,8 +92,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
     bool window_changed = update_window_and_padding(win_input1, input1_access)
                           || update_window_and_padding(win_input2, input2_access)
                           || update_window_and_padding(win, output_access);
-
-    output_access.set_valid_region(win, valid_region);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);

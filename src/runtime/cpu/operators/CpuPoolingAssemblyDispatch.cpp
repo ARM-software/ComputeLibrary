@@ -62,7 +62,7 @@ void CpuPoolingAssemblyDispatch::configure(const ITensorInfo *src, ITensorInfo *
     // Allocate workspace based on kernel's memory requirements
     constexpr size_t alignment      = 4096;
     const size_t     workspace_size = pooling_wrapper->get_working_size(num_threads);
-    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
+    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment) }, 1, DataType::S8), alignment);
     _memory_group.manage(&_workspace);
     _workspace.allocator()->allocate();
 

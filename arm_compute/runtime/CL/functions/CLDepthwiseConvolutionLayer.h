@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,8 @@ namespace arm_compute
 class CLCompileContext;
 class CLFillBorderKernel;
 class CLDepthwiseConvolutionLayerNativeKernel;
-class CLDepthwiseConvolutionLayerReshapeWeightsKernel;
-class ICLDepthwiseConvolutionLayer3x3Kernel;
+class CLDepthwiseConvolutionLayer3x3NCHWKernel;
+class CLDepthwiseConvolutionLayer3x3NHWCKernel;
 class ICLTensor;
 
 /** Function to execute a depthwise convolution
@@ -57,6 +57,20 @@ public:
     /** Default destructor */
     ~CLDepthwiseConvolutionLayer();
     /** Initialize the function's source, destination, weights and convolution information.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2   |dst            |
+     * |:--------------|:------------------|:------|:--------------|
+     * |F16            |F16                |F16    |F16            |
+     * |F32            |F32                |F32    |F32            |
+     * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32    |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32    |QASYMM8_SIGNED |
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/FP16/FP32. Data layout supported: NHWC, NCHW
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
@@ -123,19 +137,17 @@ private:
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for 3x3 QASYMM8 supported.
      * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in] gpu_target       (Optional) GPU target to validate the kernel for. Defaults to midgard.
      *
      * @return a Depthwise Convolution Function
      */
     static DepthwiseConvolutionFunction get_depthwiseconvolution_function(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
                                                                           const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1,
-                                                                          ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U), GPUTarget gpu_target = GPUTarget::MIDGARD);
+                                                                          ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
     /** Basic function to execute a depthwise convolution for kernel size 3x3xC (when data layout NCHW) or Cx3x3 (when data layout NHWC). This function calls the following OpenCL kernels:
     *
     * -# @ref CLDepthwiseConvolutionLayer3x3NCHWKernel (if data_layout == NCHW)
     * -# @ref CLDepthwiseConvolutionLayer3x3NHWCKernel (if data_layout == NHWC)
-    * -# @ref CLDepthwiseConvolutionLayerReshapeWeightsKernel (if data_layout == NHWC)
     * -# @ref CLFillBorderKernel (if pad_x or pad_y > 0)
     *
     */
@@ -200,7 +212,7 @@ private:
          * @return a status
          */
         static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1,
-                               ActivationLayerInfo act_info = ActivationLayerInfo(), GPUTarget gpu_target = GPUTarget::MIDGARD, const Size2D &dilation = Size2D(1U, 1U));
+                               ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
         // Inherited methods overriden:
         void run() override;
@@ -212,25 +224,25 @@ private:
         };
 
     private:
-        MemoryGroup                                                      _memory_group;
-        std::unique_ptr<ICLDepthwiseConvolutionLayer3x3Kernel>           _kernel;
-        std::unique_ptr<CLFillBorderKernel>                              _border_handler;
-        CLPermute                                                        _permute_input_to_nchw;
-        CLPermute                                                        _permute_weights_to_nchw;
-        CLPermute                                                        _permute_output_to_nhwc;
-        std::unique_ptr<CLDepthwiseConvolutionLayerReshapeWeightsKernel> _reshape_weights;
-        CLTensor                                                         _permuted_input;
-        CLTensor                                                         _permuted_weights;
-        CLTensor                                                         _permuted_output;
-        CLTensor                                                         _output_multipliers;
-        CLTensor                                                         _output_shifts;
-        const ITensor                                                   *_original_weights;
-        const ITensor                                                   *_input;
-        const ITensor                                                   *_output;
-        bool                                                             _needs_permute;
-        bool                                                             _needs_weights_reshape;
-        bool                                                             _is_prepared;
-        bool                                                             _is_quantized;
+        MemoryGroup                                               _memory_group;
+        std::unique_ptr<CLDepthwiseConvolutionLayer3x3NCHWKernel> _kernel_nchw;
+        std::unique_ptr<CLDepthwiseConvolutionLayer3x3NHWCKernel> _kernel_nhwc;
+        std::unique_ptr<CLFillBorderKernel>                       _border_handler;
+        CLPermute                                                 _permute_input_to_nchw;
+        CLPermute                                                 _permute_weights_to_nchw;
+        CLPermute                                                 _permute_output_to_nhwc;
+        CLTensor                                                  _permuted_input;
+        CLTensor                                                  _permuted_weights;
+        CLTensor                                                  _permuted_output;
+        CLTensor                                                  _output_multipliers;
+        CLTensor                                                  _output_shifts;
+        const ITensor                                            *_original_weights;
+        const ITensor                                            *_input;
+        const ITensor                                            *_output;
+        bool                                                      _needs_permute;
+        bool                                                      _is_prepared;
+        bool                                                      _is_quantized;
+        bool                                                      _is_nhwc;
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:

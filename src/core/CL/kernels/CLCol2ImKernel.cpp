@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,10 +74,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Update window and padding just for the input tensor as we cannot access out-of-bounds elements in the output one
     AccessWindowHorizontal input_access(input, 0, num_elems_read_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access);
-
-    Coordinates coord;
-    coord.set_num_dimensions(output->num_dimensions());
-    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);

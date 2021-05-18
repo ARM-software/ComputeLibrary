@@ -25,7 +25,6 @@
 #ifndef ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H
 #define ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H
 
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "support/Requires.h"

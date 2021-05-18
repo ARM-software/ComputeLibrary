@@ -76,12 +76,12 @@ protected:
         FunctionType rnn;
         rnn.configure(&input, &weights, &recurrent_weights, &bias, &hidden_state, &output, info);
 
-        ARM_COMPUTE_EXPECT(input.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(recurrent_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(hidden_state.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(output.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(input.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(recurrent_weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(hidden_state.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(output.info()->is_resizable());
 
         // Allocate tensors
         input.allocator()->allocate();
@@ -91,12 +91,12 @@ protected:
         hidden_state.allocator()->allocate();
         output.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!input.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!recurrent_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!hidden_state.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!output.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!input.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!recurrent_weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!hidden_state.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!output.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(input), 0);

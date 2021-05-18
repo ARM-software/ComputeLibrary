@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,17 +41,21 @@ class CLDepthConvertLayer : public ICLSimpleFunction
 public:
     /** Initialize the function's source, destination
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst                                   |
+     * |:--------------|:-------------------------------------|
+     * |U8             | S8, U16, S16, U32, S32, F16, F32     |
+     * |U16            | U8, S8, S16, U32, S32, F16, F32      |
+     * |S16            | U8, S8, U16, U32, S32, F16, F32      |
+     * |U32            | U8, S8, U16, S16, S32, F16, F32      |
+     * |S32            | U8, S8, U16, S16, U32, F16, F32      |
+     * |F16            | U8, S8, U16, S16, U32, F32           |
+     * |F32            | U8, S8, U16, S16, U32, F16           |
+     *
      * Input data type must be different than output data type.
-     *
-     * Valid conversions Input -> Output :
-     *
-     *   - U8  -> S8, U16, S16, U32, S32, F16, F32
-     *   - U16 -> U8, S8, S16, U32, S32, F16, F32
-     *   - S16 -> U8, S8, U16, U32, S32, F16, F32
-     *   - U32 -> U8, S8, U16, S16, S32, F16, F32
-     *   - S32 -> U8, S8, U16, S16, U32, F16, F32
-     *   - F16 -> U8, S8, U16, S16, U32, F32
-     *   - F32 -> U8, S8, U16, S16, U32, F16
      *
      * @param[in]  input  The input tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[out] output The output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.

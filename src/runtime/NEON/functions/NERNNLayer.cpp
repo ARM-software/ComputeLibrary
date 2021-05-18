@@ -30,7 +30,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"

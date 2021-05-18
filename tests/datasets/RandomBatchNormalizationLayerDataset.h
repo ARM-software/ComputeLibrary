@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,9 +42,9 @@ class SmallRandomBatchNormalizationLayerDataset final : public BatchNormalizatio
 public:
     SmallRandomBatchNormalizationLayerDataset()
     {
-        add_config(TensorShape(15U, 16U, 2U, 12U), TensorShape(2U), 0.1f);
+        add_config(TensorShape(1U, 16U, 2U, 12U), TensorShape(2U), 0.1f);
         add_config(TensorShape(21U, 11U, 12U, 7U), TensorShape(12U), 0.1f);
-        add_config(TensorShape(7U, 3U, 6U, 11U), TensorShape(6U), 0.1f);
+        add_config(TensorShape(32U, 3U, 6U, 11U), TensorShape(6U), 0.1f);
     }
 };
 class LargeRandomBatchNormalizationLayerDataset final : public BatchNormalizationLayerDataset

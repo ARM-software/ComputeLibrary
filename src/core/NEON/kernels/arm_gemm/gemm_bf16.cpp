@@ -49,22 +49,22 @@ static const GemmImplementation<bfloat16, float> gemm_bf16_methods[] =
 { // gemm_bf16_interleaved
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_bf16fp32_mmla_8x3VL",
-    [](const GemmArgs &args) { return (args._Ksize>4); },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>4); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_bf16fp32_mmla_8x3VL, bfloat16, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_bf16fp32_dot_6x4VL",
-    nullptr,
-    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)); },
+    [](const GemmArgs &args) { return args._ci->has_sve(); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN && ((args._Ksize <= 128) && (args._Nsize <= 128)); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_bf16fp32_dot_6x4VL, bfloat16, float>(args); }
 },
 { // gemm_bf16_interleaved
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_bf16fp32_dot_8x3VL",
-    [](const GemmArgs &args) { return (args._Ksize>2); },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>2); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_bf16fp32_dot_8x3VL, bfloat16, float>(args); }
 },
 # endif // SVE

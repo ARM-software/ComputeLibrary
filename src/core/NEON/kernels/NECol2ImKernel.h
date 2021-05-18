@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to perform col2im reshaping.
+/** Kernel to perform col2im reshaping.
  *
  * Rearranges each matrix column into image blocks. It's the inverse operation of @ref NEIm2ColKernel.
  *

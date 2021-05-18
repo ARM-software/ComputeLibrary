@@ -42,7 +42,8 @@ namespace arm_compute
 class ITensor;
 class ICPPKernel;
 
-/** Basic function to simulate a convolution layer. This function calls the following Neon kernels:
+/** Basic function to simulate a convolution layer. This function calls the following kernels:
+ *
  * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
  * -# @ref NEWinogradLayerTransformInputKernel
  * -# @ref NEWinogradLayerTransformOutputKernel
@@ -64,6 +65,16 @@ public:
     ~NEWinogradConvolutionLayer() = default;
 
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |src2   |dst            |
+     * |:--------------|:--------------|:------|:--------------|
+     * |F16            |F16            |F16    |F16            |
+     * |F32            |F32            |F32    |F32            |
      *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                              while every optional dimension from 4 and above represent a batch of inputs.
@@ -134,6 +145,7 @@ private:
     ITensor       *_output;
     bool           _is_prepared;
     bool           _is_activationlayer_enabled;
+    DataLayout     _data_layout;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H */

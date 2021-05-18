@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,6 @@
  */
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -84,7 +83,6 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input
 
     // Create window
     Window win = calculate_max_window(*output, Steps());
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     return std::make_pair(Status{}, win);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,12 @@
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
@@ -39,9 +39,8 @@
 #include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
-#include "src/core/NEON/kernels/NETransposeKernel.h"
+#include "src/core/cpu/kernels/CpuTransposeKernel.h"
 
-#include <algorithm>
 #include <cmath>
 
 namespace arm_compute
@@ -141,18 +140,6 @@ Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const I
     return Status{};
 }
 } // namespace
-
-void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITensor *output)
-{
-    auto k = std::make_unique<NETransposeKernel>();
-    k->configure(input, output);
-    _kernel = std::move(k);
-}
-
-Status NEFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return NETransposeKernel::validate(input, output);
-}
 
 NEFullyConnectedLayer::~NEFullyConnectedLayer() = default;
 
@@ -369,7 +356,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     if(!weights_reshaped)
     {
         // Validate reshape weights kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayerReshapeWeights::validate(weights, &reshaped_weights));
+        ARM_COMPUTE_RETURN_ON_ERROR(NETranspose::validate(weights, &reshaped_weights));
         weights_to_use = &reshaped_weights;
     }
 

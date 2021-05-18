@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,7 +97,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     window_changed = update_window_and_padding(win_in, input_access) || // window used by the execute_window_loop
                      update_window_and_padding(win, output_access);     // window used to update the padding requirements of output tensor
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS

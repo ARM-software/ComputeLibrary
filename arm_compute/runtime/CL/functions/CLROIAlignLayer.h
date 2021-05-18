@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,17 @@ class CLROIAlignLayer : public ICLSimpleFunction
 {
 public:
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |dst            |
+     * |:--------------|:--------------|:--------------|
+     * |F16            |F16            |F16            |
+     * |F32            |F32            |F32            |
+     * |QASYMM8        |QASYMM16       |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM16       |QASYMM8_SIGNED |
      *
      * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  rois      ROIs tensor, it is a 2D tensor of size [5, N] (where N is the number of ROIs) containing top left and bottom right corner

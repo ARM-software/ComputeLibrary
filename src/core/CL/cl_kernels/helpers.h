@@ -502,6 +502,11 @@
 
 #define convert_char1_sat convert_char_sat
 #define convert_uchar1_sat convert_uchar_sat
+#define convert_uchar2_sat convert_uchar2_sat
+#define convert_uchar3_sat convert_uchar3_sat
+#define convert_uchar4_sat convert_uchar4_sat
+#define convert_uchar8_sat convert_uchar8_sat
+#define convert_uchar16_sat convert_uchar16_sat
 #define convert_short1_sat convert_short_sat
 #define convert_ushort1_sat convert_ushort_sat
 #define convert_int1_sat convert_int_sat
@@ -561,6 +566,16 @@
 
 #define SUM_REDUCE_STR(x, size) sum_reduce_##size(x)
 #define SUM_REDUCE(x, size) SUM_REDUCE_STR(x, size)
+
+#define prod_reduce_1(x) (x)
+#define prod_reduce_2(x) ((x).s0) * ((x).s1)
+#define prod_reduce_3(x) prod_reduce_2((x).s01) * ((x).s2)
+#define prod_reduce_4(x) prod_reduce_2((x).s01) * prod_reduce_2((x).s23)
+#define prod_reduce_8(x) prod_reduce_4((x).s0123) * prod_reduce_4((x).s4567)
+#define prod_reduce_16(x) prod_reduce_8((x).s01234567) * prod_reduce_8((x).s89ABCDEF)
+
+#define PROD_REDUCE_STR(x, size) prod_reduce_##size(x)
+#define PROD_REDUCE(x, size) PROD_REDUCE_STR(x, size)
 
 #define max_reduce_1(x) (x)
 #define max_reduce_2(x) max(((x).s0), ((x).s1))

@@ -64,11 +64,22 @@ public:
     CLConcatenateLayer &operator=(CLConcatenateLayer &&);
     /** Initialise the kernel's inputs vector and output.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
      * @note Preconditions can be found respectively at @ref opencl::kernels::ClWidthConcatenateKernel,
      *       @ref opencl::kernels::ClHeightConcatenateKernel and @ref opencl::kernels::ClDepthConcatenateKernel.
      *
-     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: All
+     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
      * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
@@ -80,7 +91,7 @@ public:
      *       @ref opencl::kernels::ClHeightConcatenateKernel and @ref opencl::kernels::ClDepthConcatenateKernel.
      *
      * @param[in]     compile_context The compile context to be used.
-     * @param[in,out] inputs_vector   The vectors containing all the tensors to concatenate. Data types supported: All
+     * @param[in,out] inputs_vector   The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    output          Output tensor. Data types supported: Same as @p input.
      * @param[in]     axis            Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
@@ -91,7 +102,7 @@ public:
      * @note Preconditions can be found respectively at @ref opencl::kernels::ClWidthConcatenateKernel,
      *       @ref opencl::kernels::ClHeightConcatenateKernel and @ref opencl::kernels::ClDepthConcatenateKernel.
      *
-     * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: All.
+     * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
      * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      *

@@ -128,15 +128,6 @@ if env['neon']:
         alias = examples_env.Alias(example, prog)
         Default(alias)
 
-if env['gles_compute']:
-    for file in Glob("./gc_*.cpp"):
-        example = os.path.basename(os.path.splitext(str(file))[0])
-        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = examples_libs + arm_compute_libs)
-        Depends(prog, arm_compute_dependency)
-        prog = install_bin(prog)
-        alias = examples_env.Alias(example, prog)
-        Default(alias)
-
 if env['external_tests_dir']:
     for file in Glob(env['external_tests_dir'] + "/examples/graph_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,7 +111,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
         AccessWindowStatic    output_access(output, 0, 0, output_static_window_end_x, output_static_window_end_y);
         window_changed = update_window_and_padding(win, input_access, output_access);
-        output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -138,6 +137,11 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_winograd_output_transform_shape(*input->info(), winograd_info)));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info, act_info));
+
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info.output_tile_size);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure_internal(win_config.second);
 
     auto padding_info = get_padding_info({ input, bias, output });
 
@@ -177,10 +181,13 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
     }
 
     build_opts.add_option_if(_bias != nullptr, std::string("-DHAS_BIAS"));
+    build_opts.add_option("-cl-fast-relaxed-math");
+    build_opts.add_option("-DN0=" + support::cpp11::to_string(win_config.second.x().step()));
     build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
     build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
     build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(_input->info()->dimension(1)));
     build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(_output->info()->dimension(idx_width)));
     build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(_output->info()->dimension(idx_height)));
     build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
@@ -190,11 +197,6 @@ void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_
     // Create kernel
     std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
     _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
-
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info.output_tile_size);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;

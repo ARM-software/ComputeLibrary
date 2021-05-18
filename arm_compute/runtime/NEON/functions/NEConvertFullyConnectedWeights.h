@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,17 +26,14 @@
 
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/ITransformWeights.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
-#include <memory>
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
-class NEConvertFullyConnectedWeightsKernel;
 
-/** Basic function to run @ref NEConvertFullyConnectedWeightsKernel. */
+/** Basic function to run @ref cpu::kernels::CpuConvertFullyConnectedWeightsKernel. */
 class NEConvertFullyConnectedWeights : public IFunction
 {
 public:
@@ -53,6 +50,15 @@ public:
     /** Default destructor */
     ~NEConvertFullyConnectedWeights();
     /** Initialize the function.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
      *
      * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: All.
      * @param[out] output               The converted weights tensor. Shape and Data Type: Same as @p input.
@@ -75,12 +81,13 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<NEConvertFullyConnectedWeightsKernel> _kernel;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 namespace weights_transformations
 {
-/** Basic function to run @ref NEConvertFullyConnectedWeightsKernel. */
+/** Basic function to manage @ref NEConvertFullyConnectedWeights. */
 class NEConvertFullyConnectedWeightsManaged : public ITransformWeights
 {
 public:

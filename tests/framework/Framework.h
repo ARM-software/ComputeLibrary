@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,7 @@ struct FrameworkConfig
     int                                            num_iterations{ 1 };         /**< Number of iterations per test. */
     float                                          cooldown_sec{ -1.f };        /**< Delay between tests in seconds. */
     LogLevel                                       log_level{ LogLevel::NONE }; /**< Verbosity of the output. */
+    bool                                           configure_only{ false };     /**< Only configure kernels */
 };
 
 /** Information about a test case.
@@ -306,6 +307,21 @@ public:
      * @param[in] instr_info Instruments info to set
      */
     void set_instruments_info(InstrumentsInfo instr_info);
+    /** Get the configure only flag
+     *
+     * @return The current configure only flag.
+     */
+    bool configure_only() const;
+    /** Return whether the new fixture has been called
+     *
+     * @return The current new fixture call flag.
+     */
+    bool new_fixture_call() const;
+    /** Set the new fixture call flag
+     *
+     * @param[in] val Value to set for the flag
+     */
+    void set_new_fixture_call(bool val);
 
 private:
     Framework();
@@ -340,6 +356,8 @@ private:
     bool                   _stop_on_error{ false };
     bool                   _error_on_missing_assets{ false };
     std::vector<Printer *> _printers{};
+    bool                   _configure_only{ false };
+    bool                   _new_fixture_call{ false };
 
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentsDescription, create_function *> _available_instruments{};

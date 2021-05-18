@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,10 @@
 #ifndef ARM_COMPUTE_CLQUANTIZATIONLAYER_H
 #define ARM_COMPUTE_CLQUANTIZATIONLAYER_H
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -35,15 +37,38 @@ class ITensorInfo;
 
 /** Basic function to simulate a quantization layer. This function calls the following CL kernels:
  *
+ * -# @ref opencl::ClQuantization
+ *
  * @note The implementation supports only 3D input tensors.
  *
- * -# @ref CLQuantizationLayerKernel
- *
  */
-class CLQuantizationLayer : public ICLSimpleFunction
+class CLQuantizationLayer : public IFunction
 {
 public:
+    /** Default Constructor */
+    CLQuantizationLayer();
+    /** Default Destructor */
+    ~CLQuantizationLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLQuantizationLayer(const CLQuantizationLayer &) = delete;
+    /** Default move constructor */
+    CLQuantizationLayer(CLQuantizationLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLQuantizationLayer &operator=(const CLQuantizationLayer &) = delete;
+    /** Default move assignment operator */
+    CLQuantizationLayer &operator=(CLQuantizationLayer &&) = default;
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src                |dst                                |
+     * |:------------------|:----------------------------------|
+     * |QASYMM8            |QASYMM8, QASYMM8_SIGNED, QASYMM16  |
+     * |QASYMM8_SIGNED     |QASYMM8, QASYMM8_SIGNED, QASYMM16  |
+     * |F16                |QASYMM8, QASYMM8_SIGNED, QASYMM16  |
+     * |F32                |QASYMM8, QASYMM8_SIGNED, QASYMM16  |
      *
      * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/32.
      * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
@@ -68,6 +93,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } //namespace arm_compute
 #endif /* ARM_COMPUTE_CLQUANTIZATIONLAYER_H */

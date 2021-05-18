@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -1127,9 +1126,6 @@ void NEGEMMMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor 
         win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     }
 
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
     INEKernel::configure(win);
 }
 

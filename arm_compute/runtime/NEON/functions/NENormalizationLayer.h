@@ -39,7 +39,7 @@ namespace arm_compute
 class ITensor;
 class NENormalizationLayerKernel;
 
-/** Basic function to compute a normalization layer. This function calls the following Neon kernels:
+/** Basic function to compute a normalization layer. This function calls the following kernels:
  *
  * -# @ref NEPixelWiseMultiplication
  * -# @ref NEFillBorderKernel
@@ -62,6 +62,16 @@ public:
     /** Default destructor */
     ~NENormalizationLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |F32      |F32       |
+     * |F16      |F16       |
      *
      * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
      *                       and an optional 4th dimension for batch of inputs. Data type supported: F16/F32. Data layouts supported: NCHW/NHWC.

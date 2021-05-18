@@ -1035,37 +1035,37 @@
  *
  * @param[in] K0       The size of the source vectors
  * @param[in] BASENAME The basename of transposed vectors
- * @param[in] B        The basename of source vectors for transposition
+ * @param[in] BS       The basename of source vectors for transposition
  * @param[in] TYPE     The data type of the transposed vectors
  * @{
  */
-#define TRANSPOSE_K0X1(K0, BASENAME, B, TYPE) \
-    COLUMN_VECTOR_SCALAR(K0, 0, BASENAME, B, TYPE);
-#define TRANSPOSE_K0X2(K0, BASENAME, B, TYPE) \
-    COLUMN_VECTOR(K0, 0, BASENAME, B, TYPE);  \
-    COLUMN_VECTOR(K0, 1, BASENAME, B, TYPE);
-#define TRANSPOSE_K0X3(K0, BASENAME, B, TYPE) \
-    TRANSPOSE_K0X2(K0, BASENAME, B, TYPE);    \
-    COLUMN_VECTOR(K0, 2, BASENAME, B, TYPE);
-#define TRANSPOSE_K0X4(K0, BASENAME, B, TYPE) \
-    TRANSPOSE_K0X3(K0, BASENAME, B, TYPE);    \
-    COLUMN_VECTOR(K0, 3, BASENAME, B, TYPE);
-#define TRANSPOSE_K0X8(K0, BASENAME, B, TYPE) \
-    TRANSPOSE_K0X4(K0, BASENAME, B, TYPE);    \
-    COLUMN_VECTOR(K0, 4, BASENAME, B, TYPE);  \
-    COLUMN_VECTOR(K0, 5, BASENAME, B, TYPE);  \
-    COLUMN_VECTOR(K0, 6, BASENAME, B, TYPE);  \
-    COLUMN_VECTOR(K0, 7, BASENAME, B, TYPE);
-#define TRANSPOSE_K0X16(K0, BASENAME, B, TYPE) \
-    TRANSPOSE_K0X8(K0, BASENAME, B, TYPE);     \
-    COLUMN_VECTOR(K0, 8, BASENAME, B, TYPE);   \
-    COLUMN_VECTOR(K0, 9, BASENAME, B, TYPE);   \
-    COLUMN_VECTOR(K0, A, BASENAME, B, TYPE);   \
-    COLUMN_VECTOR(K0, B, BASENAME, B, TYPE);   \
-    COLUMN_VECTOR(K0, C, BASENAME, B, TYPE);   \
-    COLUMN_VECTOR(K0, D, BASENAME, B, TYPE);   \
-    COLUMN_VECTOR(K0, E, BASENAME, B, TYPE);   \
-    COLUMN_VECTOR(K0, F, BASENAME, B, TYPE);
+#define TRANSPOSE_K0X1(K0, BASENAME, BS, TYPE) \
+    COLUMN_VECTOR_SCALAR(K0, 0, BASENAME, BS, TYPE);
+#define TRANSPOSE_K0X2(K0, BASENAME, BS, TYPE) \
+    COLUMN_VECTOR(K0, 0, BASENAME, BS, TYPE);  \
+    COLUMN_VECTOR(K0, 1, BASENAME, BS, TYPE);
+#define TRANSPOSE_K0X3(K0, BASENAME, BS, TYPE) \
+    TRANSPOSE_K0X2(K0, BASENAME, BS, TYPE);    \
+    COLUMN_VECTOR(K0, 2, BASENAME, BS, TYPE);
+#define TRANSPOSE_K0X4(K0, BASENAME, BS, TYPE) \
+    TRANSPOSE_K0X3(K0, BASENAME, BS, TYPE);    \
+    COLUMN_VECTOR(K0, 3, BASENAME, BS, TYPE);
+#define TRANSPOSE_K0X8(K0, BASENAME, BS, TYPE) \
+    TRANSPOSE_K0X4(K0, BASENAME, BS, TYPE);    \
+    COLUMN_VECTOR(K0, 4, BASENAME, BS, TYPE);  \
+    COLUMN_VECTOR(K0, 5, BASENAME, BS, TYPE);  \
+    COLUMN_VECTOR(K0, 6, BASENAME, BS, TYPE);  \
+    COLUMN_VECTOR(K0, 7, BASENAME, BS, TYPE);
+#define TRANSPOSE_K0X16(K0, BASENAME, BS, TYPE) \
+    TRANSPOSE_K0X8(K0, BASENAME, BS, TYPE);     \
+    COLUMN_VECTOR(K0, 8, BASENAME, BS, TYPE);   \
+    COLUMN_VECTOR(K0, 9, BASENAME, BS, TYPE);   \
+    COLUMN_VECTOR(K0, A, BASENAME, BS, TYPE);   \
+    COLUMN_VECTOR(K0, B, BASENAME, BS, TYPE);   \
+    COLUMN_VECTOR(K0, C, BASENAME, BS, TYPE);   \
+    COLUMN_VECTOR(K0, D, BASENAME, BS, TYPE);   \
+    COLUMN_VECTOR(K0, E, BASENAME, BS, TYPE);   \
+    COLUMN_VECTOR(K0, F, BASENAME, BS, TYPE);
 
 /** @} */ // end of group TRANSPOSE_K0Xn
 
@@ -1074,37 +1074,37 @@
  * @param[in] K0       The number of source vectors
  * @param[in] IDX_COL  The index value
  * @param[in] BASENAME The basename of the destination vectors
- * @param[in] B        The basename of the source vectors
+ * @param[in] BS       The basename of the source vectors
  * @param[in] TYPE     The data type of the destination vectors
  */
-#define COLUMN_VECTOR(K0, IDX_COL, BASENAME, B, TYPE) \
-    CONCAT(COLUMN_VECTOR, K0)                         \
-    (IDX_COL, BASENAME, B, TYPE);
+#define COLUMN_VECTOR(K0, IDX_COL, BASENAME, BS, TYPE) \
+    CONCAT(COLUMN_VECTOR, K0)                          \
+    (IDX_COL, BASENAME, BS, TYPE);
 
 /** Create column vectors to contain the values at the given index. Utility macro for transposing a column-vector
  *
  * @param[in] K0       The number of source vectors
  * @param[in] IDX_COL  The index value
  * @param[in] BASENAME The basename of the destination vectors
- * @param[in] B        The basename of the source vectors
+ * @param[in] BS       The basename of the source vectors
  * @param[in] TYPE     The data type of the destination vectors
  */
-#define COLUMN_VECTOR_SCALAR(K0, IDX_COL, BASENAME, B, TYPE) \
-    CONCAT(COLUMN_VECTOR_SCALAR, K0)                         \
-    (IDX_COL, BASENAME, B, TYPE);
+#define COLUMN_VECTOR_SCALAR(K0, IDX_COL, BASENAME, BS, TYPE) \
+    CONCAT(COLUMN_VECTOR_SCALAR, K0)                          \
+    (IDX_COL, BASENAME, BS, TYPE);
 
 /** Create transposed vectors form the given source vectors
  *
  * @param[in] K0       The size of source vectors
  * @param[in] N0       The number of source vectors
  * @param[in] BASENAME The basename of transposed vectors
- * @param[in] B        The basename of source vectors for transposition
+ * @param[in] BS       The basename of source vectors for transposition
  * @param[in] TYPE     The data type of the transposed vectors
  *
  */
-#define TRANSPOSE_K0XN0(K0, N0, BASENAME, B, TYPE) \
-    CONCAT(TRANSPOSE_K0X, N0)                      \
-    (K0, BASENAME, B, TYPE);
+#define TRANSPOSE_K0XN0(K0, N0, BASENAME, BS, TYPE) \
+    CONCAT(TRANSPOSE_K0X, N0)                       \
+    (K0, BASENAME, BS, TYPE);
 
 /** Add the variables (BIAS0 to BIASn-1) to the others (BASENAME0 to BASENAMEn-1)
  * @name ADD_ROW_n

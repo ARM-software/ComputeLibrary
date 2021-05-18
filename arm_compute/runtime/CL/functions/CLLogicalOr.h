@@ -87,6 +87,14 @@ public:
     CLLogicalOr &operator=(CLLogicalOr &&);
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1          |dst          |
+     * |:--------------|:-------------|:------------|
+     * |U8             |U8            |U8           |
+     *
      * @param[in]  input1 Input tensor. Data types supported: U8.
      * @param[in]  input2 Input tensor. Data types supported: same as @p input1.
      * @param[out] output Output tensor. Data types supported: same as @p input1.

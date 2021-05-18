@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to perform layer normalization */
+/** Kernel to perform layer normalization for QLSTM. */
 class NEQLSTMLayerNormalizationKernel : public INEKernel
 {
 public:

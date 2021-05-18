@@ -249,10 +249,6 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
             window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
                              update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
         }
-
-        Coordinates coord;
-        coord.set_num_dimensions(output->num_dimensions());
-        output_access.set_valid_region(win_out, ValidRegion(coord, output->tensor_shape()));
     }
 
     // Collapse along the Z direction
@@ -356,6 +352,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
     build_opts.add_option_if(activation_info.enabled(), "-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(activation_info.activation())));
     build_opts.add_option_if(activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(activation_info.a()));
     build_opts.add_option_if(activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(activation_info.b()));
+    build_opts.add_option("-DIN1_DIM_X=" + support::cpp11::to_string(input1->info()->dimension(0)));
 
     const bool is_bifrost = get_arch_from_target(gpu_target) == GPUTarget::BIFROST;
 
@@ -428,7 +425,6 @@ void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_conte
             kernel_name = "gemm_mm_floating_point";
         }
     }
-
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 

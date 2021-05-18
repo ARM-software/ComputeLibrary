@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,27 @@
  */
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 
-#include "src/core/CL/kernels/CLDequantizationLayerKernel.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/KernelDescriptors.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClDequantization.h"
 
 namespace arm_compute
 {
+struct CLDequantizationLayer::Impl
+{
+    const ICLTensor                          *src{ nullptr };
+    ICLTensor                                *dst{ nullptr };
+    std::unique_ptr<opencl::ClDequantization> op{ nullptr };
+};
+
+CLDequantizationLayer::CLDequantizationLayer()
+    : _impl(std::make_unique<Impl>())
+{
+}
+CLDequantizationLayer::~CLDequantizationLayer() = default;
+
 void CLDequantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
@@ -34,13 +51,23 @@ void CLDequantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLDequantizationLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
-    auto k = std::make_unique<CLDequantizationLayerKernel>();
-    k->configure(compile_context, input, output);
-    _kernel = std::move(k);
+    _impl->src = input;
+    _impl->dst = output;
+
+    _impl->op = std::make_unique<opencl::ClDequantization>();
+    _impl->op->configure(compile_context, input->info(), output->info());
 }
 
 Status CLDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return CLDequantizationLayerKernel::validate(input, output);
+    return opencl::ClDequantization::validate(input, output);
+}
+
+void CLDequantizationLayer::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

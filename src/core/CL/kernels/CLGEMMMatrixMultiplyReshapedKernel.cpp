@@ -161,16 +161,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-    AccessWindowStatic input0_access(input0, 0, 0,
-                                     input0->dimension(0),
-                                     input0->dimension(1));
-    AccessWindowStatic input1_access(input1, 0, 0,
-                                     input1->dimension(0),
-                                     input1->dimension(1));
-    AccessWindowStatic output_access(output, 0, 0,
-                                     output->dimension(0),
-                                     output->dimension(1));
-
     if(input2 != nullptr)
     {
         const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
@@ -181,16 +171,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
                                          ceil_to_multiple(input2->dimension(0), bias_processed_per_iteration_x),
                                          ceil_to_multiple(input2->dimension(1), bias_processed_per_iteration_y));
 
-        window_changed = update_window_and_padding(win, input0_access, input1_access, input2_access) || // window used by the execute_window_loop
-                         update_window_and_padding(win_out, output_access);                             // window used to update the padding requirements of output tensor
+        window_changed = update_window_and_padding(win, input2_access); // window used by the execute_window_loop
     }
-    else
-    {
-        window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
-                         update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
-    }
-
-    output_access.set_valid_region(win_out, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,8 +74,6 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     AccessWindowStatic     output_access(output, 0, 0, 2, output->dimension(1));
 
     bool window_changed = update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_tuple(err, win);

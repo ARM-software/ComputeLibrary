@@ -175,10 +175,20 @@ TEST_SUITE(FFTConvolutionLayer)
 
 template <typename T>
 using CLFFTConvolutionLayerFixture = FFTConvolutionValidationFixture<CLTensor, CLAccessor, CLFFTConvolutionLayer, T>;
+template <typename T>
+using CLFFTConvolutionLayerMixedDataLayoutFixture = FFTConvolutionValidationFixture<CLTensor, CLAccessor, CLFFTConvolutionLayer, T, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFFTConvolutionLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                 ActivationFunctionsSmallDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFFTConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFFTConvolutionLayerDataset(),
                                                                                                                  framework::dataset::make("DataType", DataType::F32)),
                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                  ActivationFunctionsSmallDataset))

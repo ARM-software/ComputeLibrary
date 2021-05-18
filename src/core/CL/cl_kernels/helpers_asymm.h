@@ -192,7 +192,7 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
 
 /** Each bit of the result is set to the corresponding bit of either then_val or
  * else_val depending on whether the corresponding bit of if_mask is set.
- * Equivalent to the VBSL instruction in Arm Neon.
+ * Equivalent to the VBSL instruction in Arm® Neon™.
  *
  * @param[in] size Size of vector.
  *
@@ -320,7 +320,7 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
     }
 
 /** Calculates (a+b)/2, rounded to the nearest integer.
- * Equivalent to VRHADD in the Arm Neon instruction set.
+ * Equivalent to VRHADD in the Arm Arm® Neon™ instruction set.
  *
  * @param[in] size Size of vector.
  *
@@ -425,9 +425,22 @@ QUANTIZE_IMPL(uchar, 1)
 QUANTIZE_IMPL(char, 1)
 QUANTIZE_IMPL(uint, 1)
 QUANTIZE_IMPL(int, 1)
+QUANTIZE_IMPL(uchar, 2)
+QUANTIZE_IMPL(char, 2)
+QUANTIZE_IMPL(uint, 2)
+QUANTIZE_IMPL(int, 2)
+QUANTIZE_IMPL(uchar, 3)
+QUANTIZE_IMPL(char, 3)
+QUANTIZE_IMPL(uint, 3)
+QUANTIZE_IMPL(int, 3)
 QUANTIZE_IMPL(uchar, 4)
 QUANTIZE_IMPL(ushort, 4)
 QUANTIZE_IMPL(short, 4)
+QUANTIZE_IMPL(int, 4)
+QUANTIZE_IMPL(uchar, 8)
+QUANTIZE_IMPL(char, 8)
+QUANTIZE_IMPL(uint, 8)
+QUANTIZE_IMPL(int, 8)
 QUANTIZE_IMPL(uchar, 16)
 QUANTIZE_IMPL(char, 16)
 QUANTIZE_IMPL(ushort, 16)
@@ -439,9 +452,22 @@ DEQUANTIZE_IMPL(uchar, 1)
 DEQUANTIZE_IMPL(char, 1)
 DEQUANTIZE_IMPL(uint, 1)
 DEQUANTIZE_IMPL(int, 1)
+DEQUANTIZE_IMPL(uchar, 2)
+DEQUANTIZE_IMPL(char, 2)
+DEQUANTIZE_IMPL(uint, 2)
+DEQUANTIZE_IMPL(int, 2)
+DEQUANTIZE_IMPL(uchar, 3)
+DEQUANTIZE_IMPL(char, 3)
+DEQUANTIZE_IMPL(uint, 3)
+DEQUANTIZE_IMPL(int, 3)
 DEQUANTIZE_IMPL(uchar, 4)
 DEQUANTIZE_IMPL(ushort, 4)
 DEQUANTIZE_IMPL(short, 4)
+DEQUANTIZE_IMPL(int, 4)
+DEQUANTIZE_IMPL(uchar, 8)
+DEQUANTIZE_IMPL(char, 8)
+DEQUANTIZE_IMPL(uint, 8)
+DEQUANTIZE_IMPL(int, 8)
 DEQUANTIZE_IMPL(uchar, 16)
 DEQUANTIZE_IMPL(char, 16)
 DEQUANTIZE_IMPL(ushort, 16)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,14 +115,6 @@ private:
     uint8_t *_mapping;
 };
 
-/** Interface for OpenCL Array of Key Points. */
-using ICLKeyPointArray = ICLArray<KeyPoint>;
-/** Interface for OpenCL Array of 2D Coordinates. */
-using ICLCoordinates2DArray = ICLArray<Coordinates2D>;
-/** Interface for OpenCL Array of Detection Windows. */
-using ICLDetectionWindowArray = ICLArray<DetectionWindow>;
-/** Interface for OpenCL Array of 2D Sizes. */
-using ICLSize2DArray = ICLArray<Size2D>;
 /** Interface for OpenCL Array of uint8s. */
 using ICLUInt8Array = ICLArray<cl_uchar>;
 /** Interface for OpenCL Array of uint16s. */

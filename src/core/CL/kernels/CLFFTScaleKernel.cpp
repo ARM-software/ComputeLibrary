@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,25 +50,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    // Configure kernel window
-    Window win = calculate_max_window(*input, Steps());
-
-    if(output != nullptr)
-    {
-        // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output, *input->clone());
-
-        // CLFFTScaleKernel doesn't need padding so update_window_and_padding() can be skipped
-        Coordinates coord;
-        coord.set_num_dimensions(output->num_dimensions());
-        output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
-    }
-
-    return std::make_pair(Status{}, win);
-}
 } // namespace
 
 CLFFTScaleKernel::CLFFTScaleKernel()
@@ -105,9 +86,15 @@ void CLFFTScaleKernel::configure(const CLCompileContext &compile_context, ICLTen
     _kernel.setArg<cl_float>(idx, config.scale);
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), _run_in_place ? nullptr : output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    Window win = calculate_max_window(*input->info(), Steps());
+
+    if(output != nullptr)
+    {
+        // Output auto inizialitation if not yet initialized
+        auto_init_if_empty(*output->info(), *input->info()->clone());
+    }
+
+    ICLKernel::configure_internal(win);
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
@@ -124,7 +111,6 @@ Status CLFFTScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *o
 {
     ARM_COMPUTE_UNUSED(config);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
 
     return Status{};
 }

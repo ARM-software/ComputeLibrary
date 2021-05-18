@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,9 +31,11 @@
 namespace arm_compute
 {
 const cl::Buffer CLTensorAllocator::_empty_buffer = cl::Buffer();
-
 namespace
 {
+/** Global user-defined allocator that can be used for all internal allocations of a CLTensor */
+static IAllocator *static_global_cl_allocator = nullptr;
+
 /** Helper function used to allocate the backing memory of a tensor
  *
  * @param[in] context   OpenCL context to use
@@ -130,7 +132,11 @@ void CLTensorAllocator::allocate()
     if(_associated_memory_group == nullptr)
     {
         // Perform memory allocation
-        if(_ctx == nullptr)
+        if(static_global_cl_allocator != nullptr)
+        {
+            _memory.set_owned_region(static_global_cl_allocator->make_region(info().total_size(), 0));
+        }
+        else if(_ctx == nullptr)
         {
             auto legacy_ctx = CLCoreRuntimeContext(nullptr, CLScheduler::get().context(), CLScheduler::get().queue());
             _memory.set_owned_region(allocate_region(&legacy_ctx, info().total_size(), 0));
@@ -142,6 +148,7 @@ void CLTensorAllocator::allocate()
     }
     else
     {
+        // Finalize memory management instead
         _associated_memory_group->finalize_memory(_owner, _memory, info().total_size(), alignment());
     }
 
@@ -192,6 +199,11 @@ void CLTensorAllocator::set_associated_memory_group(IMemoryGroup *associated_mem
     ARM_COMPUTE_ERROR_ON(_memory.region() != nullptr && _memory.cl_region()->cl_data().get() != nullptr);
 
     _associated_memory_group = associated_memory_group;
+}
+
+void CLTensorAllocator::set_global_allocator(IAllocator *allocator)
+{
+    static_global_cl_allocator = allocator;
 }
 
 uint8_t *CLTensorAllocator::lock()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,6 +72,14 @@ public:
     /** Default move assignment operator */
     CLLSTMLayerQuantized &operator=(CLLSTMLayerQuantized &&) = default;
     /** Initialize function's tensors.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0 - src8 |src9 - src12 |src13   |src14  |dst0   |dst1   |
+     * |:-----------|:------------|:-------|:------|:------|:------|
+     * |QASYMM8     |S32          |QSYMM16 |QASYMM8|QSYMM16|QASYMM8|
      *
      * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: QASYMM8.
      * @param[in]  input_to_input_weights      2D weights tensor with dimensions [input_size, output_size]. Data type supported: Same as @p input.

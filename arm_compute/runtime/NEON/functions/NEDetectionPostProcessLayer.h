@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,16 @@ public:
     /** Default destructor */
     ~NEDetectionPostProcessLayer() = default;
     /** Configure the detection output layer NE function
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0 - src2    |dst0 - dst3    |
+     * |:--------------|:--------------|
+     * |QASYMM8        |F32            |
+     * |QASYMM8_SIGNED |F32            |
+     * |F32            |F32            |
      *
      * @param[in]  input_box_encoding The bounding box input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F32.
      * @param[in]  input_score        The class prediction input tensor. Data types supported: same as @p input_box_encoding.

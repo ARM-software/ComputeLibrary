@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,25 +25,55 @@
 #define ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYER_H
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
+class ICLKernel;
+class CLRuntimeContext;
 
 /** Basic function to perform a Instance normalization.
  *
  * This function runs the following kernels:
  * -# @ref CLInstanceNormalizationLayerKernel
  */
-class CLInstanceNormalizationLayer : public ICLSimpleFunction
+class CLInstanceNormalizationLayer : public IFunction
 {
 public:
-    /** Default constructor */
-    CLInstanceNormalizationLayer();
+    /** Constructor
+     *
+     * @param[in] ctx Runtime context to be used by the function
+     */
+    CLInstanceNormalizationLayer(CLRuntimeContext *ctx = nullptr);
+
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLInstanceNormalizationLayer(const CLInstanceNormalizationLayer &) = delete;
+    /** Default move constructor */
+    CLInstanceNormalizationLayer(CLInstanceNormalizationLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLInstanceNormalizationLayer &operator=(const CLInstanceNormalizationLayer &) = delete;
+    /** Default move assignment operator */
+    CLInstanceNormalizationLayer &operator=(CLInstanceNormalizationLayer &&) = default;
+    /** Default destructor */
+    ~CLInstanceNormalizationLayer();
+
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |F16      |F16       |
+     * |F32      |F32       |
      *
      * @param[in, out] input               Source tensor. In case of @p output tensor = nullptr this tensor will store the result of the normalization.
      *                                     Data types supported: F16/F32. Data layout supported: NHWC, NCHW
@@ -79,6 +109,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, float gamma = 1.0f, float beta = 0.0f, float epsilon = 1e-12f, bool use_mixed_precision = true);
+    void run() override;
+
+private:
+    std::unique_ptr<ICLKernel> _inst_norm_kernel; /**< Kernel to run */
+    std::unique_ptr<ICLKernel> _mean_var_kernel;  /**< Kernel to run */
+    CLTensor                   _mean_var_tensor;
+    CLRuntimeContext          *_ctx; /**< Context to use */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYER_H */

@@ -51,30 +51,30 @@ static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_s8s32_mmla_8x3VL",
-    [](const GemmArgs &args) { return (args._Ksize>8); },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>8); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int32_t>(args); }
 },
 #endif
 {
     GemmMethod::GEMM_HYBRID,
     "sve_smallK_hybrid_s8s32_dot_8x1VL",
-    [](const GemmArgs &args) { return args._Ksize<=64 && !args._indirect_input; },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._Ksize<=64 && !args._indirect_input; },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmHybrid<cls_sve_smallK_hybrid_s8s32_dot_8x1VL, int8_t, int32_t>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8s32_dot_6x4VL",
-    [](const GemmArgs &args) { return args._Ksize>=16; },
-    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._Ksize>=16; },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN && (((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8))); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_s8s32_dot_6x4VL, int8_t, int32_t>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_s8s32_dot_8x3VL",
-    [](const GemmArgs &args) { return (args._Ksize>4); },
-    nullptr,
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>4); },
+    [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_s8s32_dot_8x3VL, int8_t, int32_t>(args); }
 },
 #endif // SVE

@@ -36,7 +36,6 @@
 
 namespace arm_gemm
 {
-
 // Actual kernel implementations
 void sve_hybrid_u8qa_dot_4x4VL( ARGLIST );
 
@@ -73,7 +72,6 @@ public:
 
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_u8qa_dot_4x4VL;
-
     cls_sve_hybrid_u8qa_dot_4x4VL(const CPUInfo *)
     {
     }

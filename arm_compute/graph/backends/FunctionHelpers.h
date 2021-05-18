@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -871,6 +871,12 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     {
         std::tie(func, func_name) = create_named_function<typename EltwiseFunctions::Maximum>(
                                         std::string("ElementwiseMaximum"),
+                                        input1, input2, output, act_info);
+    }
+    else if(eltwise_op == EltwiseOperation::Div)
+    {
+        std::tie(func, func_name) = create_named_function<typename EltwiseFunctions::Division>(
+                                        std::string("ArithmeticDivision"),
                                         input1, input2, output, act_info);
     }
     else

@@ -61,6 +61,15 @@ public:
 
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
+     *
      * @param[in, out] input  Source tensor. Data type supported: All.
      * @param[out]     output Destination tensor. Data type supported: same as @p input.
      * @param[in]      info   Contains padding and policies to be used in the deconvolution.

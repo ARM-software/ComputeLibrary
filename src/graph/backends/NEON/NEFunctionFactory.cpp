@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ struct NETargetInfo
 
 Target NETargetInfo::TargetType = Target::NEON;
 
-/** Collection of Neon convolution functions */
+/** Collection of CPU convolution functions */
 struct NEConvolutionLayerFunctions
 {
     using GenericConvolutionLayer  = NEConvolutionLayer;
@@ -63,22 +63,23 @@ struct NEConvolutionLayerFunctions
     using WinogradConvolutionLayer = NEWinogradConvolutionLayer;
 };
 
-/** Collection of Neon element-wise functions */
+/** Collection of CPU element-wise functions */
 struct NEEltwiseFunctions
 {
     using Addition       = NEArithmeticAddition;
     using Subtraction    = NEArithmeticSubtraction;
     using Multiplication = NEPixelWiseMultiplication;
     using Maximum        = NEElementwiseMax;
+    using Division       = NEElementwiseDivision;
 };
 
-/** Collection of Neon unary element-wise functions */
+/** Collection of CPU unary element-wise functions */
 struct NEUnaryEltwiseFunctions
 {
     using Exp = NEExpLayer;
 };
 
-/** Function and tensor types to be used inside a Neon fused convolution/batch normalization layer */
+/** Function and tensor types to be used inside a fused convolution/batch normalization layer */
 struct NEFusedLayerTypes
 {
     using ConvolutionLayer          = NEConvolutionLayer;

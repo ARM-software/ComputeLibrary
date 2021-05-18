@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,10 +80,10 @@ protected:
         for(auto &out : output_slices)
         {
             out.allocator()->allocate();
-            ARM_COMPUTE_EXPECT(!out.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!out.info()->is_resizable());
         }
         input_tensor.allocator()->allocate();
-        ARM_COMPUTE_EXPECT(!input_tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!input_tensor.info()->is_resizable());
         fill(AccessorType(input_tensor), 0);
         // Compute function
         unstack.run();

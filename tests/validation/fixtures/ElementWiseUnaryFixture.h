@@ -44,11 +44,12 @@ class ElementWiseUnaryValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, DataType input_data_type, bool in_place, ElementWiseUnary op)
+    void setup(TensorShape input_shape, DataType input_data_type, bool in_place, ElementWiseUnary op, bool use_dynamic_shape = false)
     {
-        _op        = op;
-        _target    = compute_target(input_shape, input_data_type, in_place);
-        _reference = compute_reference(input_shape, input_data_type);
+        _op                = op;
+        _target            = compute_target(input_shape, input_data_type, in_place);
+        _reference         = compute_reference(input_shape, input_data_type);
+        _use_dynamic_shape = use_dynamic_shape;
     }
 
 protected:
@@ -131,18 +132,32 @@ protected:
 
         TensorType *actual_dst = in_place ? &src : &dst;
 
+        // if _use_dynamic_shape is true, this fixture will test scenario for dynamic shapes.
+        // - At configure time, all input tensors are marked as dynamic using set_tensor_dynamic()
+        // - After configure, tensors are marked as static for run using set_tensor_static()
+        // - The tensors with static shape are given to run()
+        if(_use_dynamic_shape)
+        {
+            set_tensor_dynamic(src);
+        }
+
         // Create and configure function
         FunctionType elwiseunary_layer;
         elwiseunary_layer.configure(&src, actual_dst);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        if(_use_dynamic_shape)
+        {
+            set_tensor_static(src);
+        }
+
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         src.allocator()->allocate();
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
         if(!in_place)
         {
-            ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
             dst.allocator()->allocate();
-            ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
         }
 
         // Fill tensors
@@ -175,6 +190,7 @@ protected:
     TensorType       _target{};
     SimpleTensor<T>  _reference{};
     ElementWiseUnary _op{};
+    bool             _use_dynamic_shape{ false };
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
@@ -185,6 +201,17 @@ public:
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::RSQRT);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class RsqrtDynamicShapeValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::RSQRT, true);
     }
 };
 

@@ -27,7 +27,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/NEON/INEKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -51,7 +50,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
 
     if(output->total_size() != 0)
     {
@@ -81,10 +80,6 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(vector_size));
-
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }

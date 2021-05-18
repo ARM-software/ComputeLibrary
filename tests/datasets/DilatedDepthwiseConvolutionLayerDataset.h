@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -130,10 +130,9 @@ public:
         add_config(TensorShape(21U, 31U, 9U, 4U), Size2D(3U, 3U), PadStrideInfo(2, 2, 1, 0), Size2D(2U, 2U));
         add_config(TensorShape(33U, 27U, 11U, 3U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1), Size2D(4U, 4U));
         add_config(TensorShape(33U, 27U, 11U, 3U), Size2D(3U, 3U), PadStrideInfo(2, 2, 1, 1), Size2D(2U, 5U));
-        add_config(TensorShape(233U, 277U, 55U, 3U), Size2D(3U, 3U), PadStrideInfo(2, 1, 0, 0), Size2D(3U, 3U));
         add_config(TensorShape(177U, 311U, 22U), Size2D(3U, 3U), PadStrideInfo(1, 2, 1, 1), Size2D(4U, 4U));
         add_config(TensorShape(233U, 277U, 55U), Size2D(3U, 3U), PadStrideInfo(1, 2, 0, 0), Size2D(5U, 5U));
-        add_config(TensorShape(333U, 277U, 77U, 5U), Size2D(3U, 3U), PadStrideInfo(2, 3, 0, 1), Size2D(4U, 4U));
+        add_config(TensorShape(333U, 277U, 77U), Size2D(3U, 3U), PadStrideInfo(2, 3, 0, 0), Size2D(4U, 4U));
         add_config(TensorShape(177U, 311U, 22U), Size2D(3U, 3U), PadStrideInfo(2, 1, 1, 1), Size2D(3U, 3U));
     }
 };

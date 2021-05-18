@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,17 +76,21 @@ __kernel void normalize_planar_yuv_layer_q8_nchw(TENSOR3D_DECLARATION(src),
 
     const uint current_slice = get_global_id(2) % NUM_CHANNELS;
 
-    float16 curr_mean_flt = (float16)(*((__global DATA_TYPE *)(mean.ptr + current_slice * sizeof(DATA_TYPE))));
-    curr_mean_flt         = round(curr_mean_flt - OFFSET_FLT) * SCALE_FLT;
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    curr_mean_flt = (VEC_DATA_TYPE(float, VEC_SIZE))(*((__global DATA_TYPE *)(mean.ptr + current_slice * sizeof(DATA_TYPE))));
+    curr_mean_flt = round(curr_mean_flt - OFFSET_FLT) * SCALE_FLT;
 
-    float16 curr_std_flt = (float16)(*((__global DATA_TYPE *)(std.ptr + current_slice * sizeof(DATA_TYPE))));
-    curr_std_flt         = round(curr_std_flt - OFFSET_FLT) * SCALE_FLT;
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    curr_std_flt = (VEC_DATA_TYPE(float, VEC_SIZE))(*((__global DATA_TYPE *)(std.ptr + current_slice * sizeof(DATA_TYPE))));
+    curr_std_flt = round(curr_std_flt - OFFSET_FLT) * SCALE_FLT;
 
-    float16 data_flt = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr), float16);
-    data_flt         = round(data_flt - OFFSET_FLT) * SCALE_FLT;
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    data_flt = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr), VEC_DATA_TYPE(float, VEC_SIZE));
+    data_flt = round(data_flt - OFFSET_FLT) * SCALE_FLT;
 
     // Perform normalization
-    float16 res_flt = (data_flt - curr_mean_flt) / curr_std_flt;
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    res_flt = (data_flt - curr_mean_flt) / curr_std_flt;
 
     const TYPE res_u8 = CONVERT_SAT(round(res_flt / SCALE_FLT) + OFFSET_FLT, TYPE);
     VSTORE(VEC_SIZE)
@@ -101,6 +105,7 @@ __kernel void normalize_planar_yuv_layer_q8_nchw(TENSOR3D_DECLARATION(src),
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE e.g. -DVEC_SIZE=8
  * @note The quantization offset should be given as a preprocessor argument using -DOFFSET e.g. -DOFFSET=8
  * @note The quantization scale should be given as a preprocessor argument using -DSCALE e.g. -DSCALE=8
+ * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                            Pointer to the first source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                       Stride of the first source tensor in X dimension (in bytes)
@@ -132,27 +137,30 @@ __kernel void normalize_planar_yuv_layer_q8_nhwc(TENSOR3D_DECLARATION(src),
                                                  VECTOR_DECLARATION(mean),
                                                  VECTOR_DECLARATION(std))
 {
-    Tensor3D src  = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D dst  = CONVERT_TO_TENSOR3D_STRUCT(dst);
-    Vector   mean = CONVERT_TO_VECTOR_STRUCT(mean);
-    Vector   std  = CONVERT_TO_VECTOR_STRUCT(std);
+    uint x_offs = max((int)(get_global_id(0) * VEC_SIZE * sizeof(DATA_TYPE) - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE * sizeof(DATA_TYPE)), 0);
 
-    const uint current_slice = get_global_id(0);
+    __global uchar *src_addr  = src_ptr + src_offset_first_element_in_bytes + x_offs + get_global_id(1) * src_stride_y + get_global_id(2) * src_stride_z;
+    __global uchar *dst_addr  = dst_ptr + dst_offset_first_element_in_bytes + x_offs + get_global_id(1) * dst_stride_y + get_global_id(2) * dst_stride_z;
+    __global uchar *mean_addr = mean_ptr + mean_offset_first_element_in_bytes + x_offs;
+    __global uchar *std_addr  = std_ptr + std_offset_first_element_in_bytes + x_offs;
 
-    float16 curr_mean_flt = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(mean.ptr + current_slice * VEC_SIZE * sizeof(DATA_TYPE))), float16);
-    curr_mean_flt         = round(curr_mean_flt - OFFSET_FLT) * SCALE_FLT;
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    curr_mean_flt = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)mean_addr), VEC_DATA_TYPE(float, VEC_SIZE));
+    curr_mean_flt = round(curr_mean_flt - OFFSET_FLT) * SCALE_FLT;
 
-    float16 curr_std_flt = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(std.ptr + current_slice * VEC_SIZE * sizeof(DATA_TYPE))), float16);
-    curr_std_flt         = round(curr_std_flt - OFFSET_FLT) * SCALE_FLT;
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    curr_std_flt = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)std_addr), VEC_DATA_TYPE(float, VEC_SIZE));
+    curr_std_flt = round(curr_std_flt - OFFSET_FLT) * SCALE_FLT;
 
-    float16 data_flt = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr), float16);
-    data_flt         = round(data_flt - OFFSET_FLT) * (SCALE_FLT);
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    data_flt = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src_addr), VEC_DATA_TYPE(float, VEC_SIZE));
+    data_flt = round(data_flt - OFFSET_FLT) * (SCALE_FLT);
 
     // Perform normalization
-    float16 res_flt = (data_flt - curr_mean_flt) / curr_std_flt;
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    res_flt = (data_flt - curr_mean_flt) / curr_std_flt;
 
-    const TYPE res_u8 = CONVERT_SAT(round(res_flt / SCALE_FLT) + OFFSET_FLT, TYPE);
-    VSTORE(VEC_SIZE)
-    (res_u8, 0, (__global DATA_TYPE *)dst.ptr);
+    const TYPE res0 = CONVERT_SAT(round(res_flt / SCALE_FLT) + OFFSET_FLT, TYPE);
+    STORE_VECTOR_SELECT(res, DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif // defined(DATA_TYPE) && defined(VEC_SIZE) && defined(OFFSET) && defined(SCALE)

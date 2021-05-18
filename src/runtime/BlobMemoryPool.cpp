@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,6 @@ BlobMemoryPool::BlobMemoryPool(IAllocator *allocator, std::vector<BlobInfo> blob
 
 BlobMemoryPool::~BlobMemoryPool()
 {
-    ARM_COMPUTE_ERROR_ON(!_allocator);
     free_blobs();
 }
 

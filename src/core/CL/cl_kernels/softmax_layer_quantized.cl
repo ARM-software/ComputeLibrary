@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -324,7 +324,6 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
     // How many work-items needed to complete the computation.
-    //TODO: Optimize this calculation (avoid %).
     int boundary_workitems = (SRC_WIDTH % (GRID_SIZE * VECTOR_SIZE)) / VECTOR_SIZE;
     if(lid < boundary_workitems)
     {
@@ -429,7 +428,6 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
         sum1D = sum1D + select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
-    //TODO: Optimize the calculation (avoid %).
     boundary_workitems = (SRC_WIDTH % (GRID_SIZE * VECTOR_SIZE)) / VECTOR_SIZE;
     if(lid < boundary_workitems)
     {

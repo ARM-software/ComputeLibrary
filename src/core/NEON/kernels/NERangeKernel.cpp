@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
@@ -43,7 +42,7 @@ namespace
 template <typename T>
 void range_function(ITensor *output, float start, float step, const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector<T, wrapper::traits::BitWidth::W128>::tag_type;
 
     const auto step_vec  = wrapper::vdup_n(static_cast<T>(step), ExactTagType{});
@@ -126,10 +125,7 @@ void NERangeKernel::configure(ITensor *output, float start, float end, float ste
     auto_init_if_empty(*output->info(), TensorShape(num_of_elements_in_range(start, end, step)), 1, output->info()->data_type(), output->info()->quantization_info());
 
     // Configure kernel window
-    Window      win = calculate_max_window(*output->info(), Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    Window win = calculate_max_window(*output->info(), Steps());
 
     _start  = start;
     _end    = end;

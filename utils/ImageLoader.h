@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -182,7 +182,7 @@ public:
         ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
         try
         {
-            // Map buffer if creating a CLTensor/GCTensor
+            // Map buffer if creating a CLTensor
             map(image, true);
 
             // Validate feeding data
@@ -238,7 +238,7 @@ public:
                     ARM_COMPUTE_ERROR("Unsupported format");
             }
 
-            // Unmap buffer if creating a CLTensor/GCTensor
+            // Unmap buffer if creating a CLTensor
             unmap(image);
         }
         catch(const std::ifstream::failure &e)

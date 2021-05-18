@@ -28,7 +28,7 @@
 
 namespace arm_compute
 {
-/** Neon Scheduler */
+/** CPU Scheduler */
 using NEScheduler = Scheduler;
 }
 #endif /*ARM_COMPUTE_NESCHEDULER_H */

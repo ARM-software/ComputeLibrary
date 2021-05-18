@@ -40,7 +40,7 @@ namespace utils
  *
  * --help             : Print the example's help message.
  * --threads          : The number of threads to be used by the example during execution.
- * --target           : Execution target to be used by the examples. Supported target options: Neon, CL, GC.
+ * --target           : Execution target to be used by the examples. Supported target options: Neon, CL, CLVK.
  * --type             : Data type to be used by the examples. Supported data type options: QASYMM8, F16, F32.
  * --layout           : Data layout to be used by the examples. Supported data layout options : NCHW, NHWC.
  * --enable-tuner     : Toggle option to enable the OpenCL dynamic tuner.
@@ -62,7 +62,6 @@ namespace utils
  *
  * Note that data, image and labels options should be provided to perform an inference run on an image.
  * Note that validation-file and validation-path should be provided to perform a graph accuracy estimation.
- * Note GLES target is not supported for most of the networks.
  *
  * Example execution commands:
  *

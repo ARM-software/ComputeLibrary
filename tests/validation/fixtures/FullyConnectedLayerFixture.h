@@ -56,11 +56,12 @@ public:
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights,
-               DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo activation_info)
+               DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo activation_info, bool mixed_layout = false)
     {
         ARM_COMPUTE_UNUSED(weights_shape);
         ARM_COMPUTE_UNUSED(bias_shape);
 
+        _mixed_layout      = mixed_layout;
         _data_type         = data_type;
         _bias_data_type    = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
         _quantization_info = quantization_info;
@@ -71,6 +72,21 @@ public:
     }
 
 protected:
+    void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
+    {
+        const DataLayout data_layout = src.info()->data_layout();
+        // Test Multi DataLayout graph cases, when the data layout changes after configure
+        src.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        dst.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+
+        // Compute Convolution function
+        layer.run();
+
+        // Reinstating original data layout for the test suite to properly check the values
+        src.info()->set_data_layout(data_layout);
+        dst.info()->set_data_layout(data_layout);
+    }
+
     template <typename U>
     void fill(U &&tensor, int i)
     {
@@ -143,10 +159,12 @@ protected:
         FunctionType fc;
         fc.configure(&src, &weights, &bias, &dst, fc_info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+
+        add_padding_x({ &src, &weights, &bias, &dst });
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -154,10 +172,10 @@ protected:
         bias.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0);
@@ -189,8 +207,15 @@ protected:
             fill(AccessorType(weights), 1);
         }
 
-        // Compute NEFullyConnectedLayer function
-        fc.run();
+        if(_mixed_layout)
+        {
+            mix_layout(fc, src, dst);
+        }
+        else
+        {
+            // Compute NEFullyConnectedLayer function
+            fc.run();
+        }
 
         return dst;
     }
@@ -214,11 +239,12 @@ protected:
     SimpleTensor<T>     _reference{};
     DataType            _data_type{};
     DataType            _bias_data_type{};
+    bool                _mixed_layout{ false };
     QuantizationInfo    _quantization_info{};
     ActivationLayerInfo _activation_info{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class FullyConnectedLayerValidationFixture : public FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -228,11 +254,11 @@ public:
     {
         FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, transpose_weights,
                                                                                                       reshape_weights, data_type,
-                                                                                                      QuantizationInfo(), activation_info);
+                                                                                                      QuantizationInfo(), activation_info, mixed_layout);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class FullyConnectedLayerValidationQuantizedFixture : public FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -242,7 +268,7 @@ public:
     {
         FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, transpose_weights,
                                                                                                       reshape_weights, data_type,
-                                                                                                      quantization_info, activation_info);
+                                                                                                      quantization_info, activation_info, mixed_layout);
     }
 };
 } // namespace validation

@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -386,15 +385,15 @@ public:
 template <typename T, int S>
 struct RedOpX
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     inline void operator()(const Window &in_window, Window &out_window, const ITensor *in, ITensor *out, const ReductionOperation op)
     {
-        const TensorInfo in_info        = *(in->info());
-        const int        window_step_x  = 16 / sizeof(T);
-        const auto       window_start_x = static_cast<int>(in_window.x().start());
-        const auto       window_end_x   = static_cast<int>(in_window.x().end());
+        const size_t input_dim_0    = in->info()->dimension(0);
+        const int    window_step_x  = 16 / sizeof(T);
+        const auto   window_start_x = static_cast<int>(in_window.x().start());
+        const auto   window_end_x   = static_cast<int>(in_window.x().end());
 
         Window in_win_no_pad = in_window;
         in_win_no_pad.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -480,13 +479,20 @@ struct RedOpX
                 case ReductionOperation::MEAN_SUM:
                 case ReductionOperation::SUM_SQUARE:
                 {
+#ifdef ARM_COMPUTE_DEBUG_ENABLED
+                    auto res = static_cast<T>(0.f);
+                    for(int i = 0; i < S; ++i)
+                    {
+                        res += wrapper::vgetlane(vec_res_value, i);
+                    }
+#else  // ARM_COMPUTE_DEBUG_ENABLED
                     auto carry_res = wrapper::vpadd(wrapper::vgethigh(vec_res_value), wrapper::vgetlow(vec_res_value));
                     for(int i = 0; i < S / 4; ++i)
                     {
                         carry_res = wrapper::vpadd(carry_res, carry_res);
                     }
                     auto res = wrapper::vgetlane(carry_res, 0);
-
+#endif // ARM_COMPUTE_DEBUG_ENABLED
                     if(op == ReductionOperation::SUM_SQUARE)
                     {
                         // Compute left-over elements
@@ -506,7 +512,7 @@ struct RedOpX
 
                     if(op == ReductionOperation::MEAN_SUM)
                     {
-                        res /= in_info.dimension(0);
+                        res /= input_dim_0;
                     }
 
                     *(reinterpret_cast<T *>(output.ptr())) = res;
@@ -859,7 +865,7 @@ struct RedOpX_quantized
 template <typename T, int S>
 struct RedOpYZW
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
     using neon_vector  = typename wrapper::traits::neon_vector<T, S>::type;
 
@@ -1078,7 +1084,7 @@ struct RedOpYZW
 template <typename T, int S, int axis, ReductionOperation op>
 struct RedOpYZW_complex
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
     using neon_vector  = typename wrapper::traits::neon_vector<T, S>::type;
 
@@ -1178,6 +1184,19 @@ struct RedOpYZW_quantized
         Iterator input(in, in_win_no_pad);
         Iterator output(out, out_win_no_pad);
 
+        using vector_type   = typename wrapper::traits::neon_bitvector<PromotedType, wrapper::traits::BitWidth::W128>::type;
+        using vector_type_f = typename wrapper::traits::neon_vector<float, 4>::type;
+
+        vector_type vec_res_value1{};
+        vector_type vec_res_value2{};
+        vector_type vec_res_value3{};
+        vector_type vec_res_value4{};
+
+        vector_type_f vec_res_value1_f{};
+        vector_type_f vec_res_value2_f{};
+        vector_type_f vec_res_value3_f{};
+        vector_type_f vec_res_value4_f{};
+
         execute_window_loop(in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<T *>(input.ptr());
@@ -1187,15 +1206,15 @@ struct RedOpYZW_quantized
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 uint32x4x4_t vec_res_idx{ { 0 } };
-                auto         vec_res_value1 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
-                auto         vec_res_value2 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
-                auto         vec_res_value3 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
-                auto         vec_res_value4 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+                vec_res_value1 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+                vec_res_value2 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+                vec_res_value3 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+                vec_res_value4 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
 
-                auto vec_res_value1_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
-                auto vec_res_value2_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
-                auto vec_res_value3_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
-                auto vec_res_value4_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+                vec_res_value1_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+                vec_res_value2_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+                vec_res_value3_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+                vec_res_value4_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
 
                 auto vec_res_value = wrapper::vloadq(input_ptr + x);
 
@@ -1527,6 +1546,7 @@ void reduce_op(const Window &window, const ITensor *input, ITensor *output, unsi
             default:
                 ARM_COMPUTE_ERROR("Not supported");
         }
+        return;
     }
 
     switch(axis)
@@ -1669,9 +1689,6 @@ void NEReductionOperationKernel::configure(const ITensor *input, ITensor *output
     _reduction_axis = axis;
 
     // Configure kernel window
-    Coordinates coord;
-    coord.set_num_dimensions(input->info()->num_dimensions());
-    input->info()->set_valid_region(ValidRegion(coord, input->info()->tensor_shape()));
     Window win = calculate_max_window(*input->info(), Steps());
     INEKernel::configure(win);
 
@@ -1681,7 +1698,6 @@ void NEReductionOperationKernel::configure(const ITensor *input, ITensor *output
     const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
     DataType   output_data_type = is_arg_min_max ? DataType::S32 : input->info()->data_type();
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
-    output->info()->set_valid_region(ValidRegion(coord, output_shape));
 }
 
 Status NEReductionOperationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)

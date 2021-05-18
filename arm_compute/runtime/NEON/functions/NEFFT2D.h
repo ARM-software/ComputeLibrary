@@ -36,7 +36,7 @@ namespace arm_compute
 // Forward declaration
 class ITensor;
 
-/** Basic function to execute two dimensional FFT. This function calls the following Neon kernels:
+/** Basic function to execute two dimensional FFT. This function calls the following kernels:
  *
  * -# @ref NEFFT1D 1D FFT is performed on the first given axis
  * -# @ref NEFFT1D 1D FFT is performed on the second given axis
@@ -57,6 +57,14 @@ public:
     /** Default destructor */
     ~NEFFT2D();
     /** Initialise the function's source and destinations
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |F32    |F32    |
      *
      * @param[in]  input  Source tensor. Data types supported: F32.
      * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,11 +22,28 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
-#include "src/core/CL/kernels/CLConvertFullyConnectedWeightsKernel.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
+
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClConvertFullyConnectedWeights.h"
 
 namespace arm_compute
 {
+struct CLConvertFullyConnectedWeights::Impl
+{
+    const ICLTensor                                        *src{ nullptr };
+    ICLTensor                                              *dst{ nullptr };
+    std::unique_ptr<opencl::ClConvertFullyConnectedWeights> op{ nullptr };
+};
+CLConvertFullyConnectedWeights::CLConvertFullyConnectedWeights()
+    : _impl(std::make_unique<Impl>())
+{
+}
+CLConvertFullyConnectedWeights::~CLConvertFullyConnectedWeights() = default;
+
 void CLConvertFullyConnectedWeights::configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
                                                DataLayout data_layout)
 {
@@ -36,14 +53,25 @@ void CLConvertFullyConnectedWeights::configure(const ICLTensor *input, ICLTensor
 void CLConvertFullyConnectedWeights::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
                                                DataLayout data_layout)
 {
-    auto k = std::make_unique<CLConvertFullyConnectedWeightsKernel>();
-    k->configure(compile_context, input, output, original_input_shape, data_layout);
-    _kernel = std::move(k);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = std::make_unique<opencl::ClConvertFullyConnectedWeights>();
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), original_input_shape, data_layout);
 }
 
 Status CLConvertFullyConnectedWeights::validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape,
                                                 DataLayout data_layout)
 {
-    return CLConvertFullyConnectedWeightsKernel::validate(input, output, original_input_shape, data_layout);
+    return opencl::ClConvertFullyConnectedWeights::validate(input, output, original_input_shape, data_layout);
 }
+
+void CLConvertFullyConnectedWeights::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
+}
+
 } // namespace arm_compute

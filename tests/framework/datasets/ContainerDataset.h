@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 
 #include "Dataset.h"
 #include "support/StringSupport.h"
-#include "tests/TypePrinter.h"
 
 #include <string>
 #include <tuple>

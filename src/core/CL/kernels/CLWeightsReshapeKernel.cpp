@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,8 +107,6 @@ void CLWeightsReshapeKernel::configure(const CLCompileContext &compile_context, 
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
-    // The CLWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
     ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));

@@ -76,7 +76,7 @@ bool is_target_supported(Target target);
 /** Returns default target for execution
  *
  * @note If an OpenCL backend exists then OpenCL is returned,
- *       else if the Neon backend exists returns Neon as target.
+ *       else if the CPU backend exists returns @ref Target::NEON as target.
  *       If no backends are registered an error is raised.
  *
  * @return Default target

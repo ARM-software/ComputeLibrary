@@ -59,6 +59,15 @@ public:
 
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |All      |All       |
+     *
      * @param[in]  input          Source tensor. Data types supported: All.
      * @param[out] output         Output tensor. Data type supported: same as @p input
      * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]

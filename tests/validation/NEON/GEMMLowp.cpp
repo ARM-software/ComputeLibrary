@@ -37,7 +37,6 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/GEMMLowpAssemblyFixture.h"
 #include "tests/validation/fixtures/GEMMLowpFixture.h"
 
 namespace arm_compute

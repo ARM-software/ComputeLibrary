@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,6 +61,16 @@ public:
     ~CLNormalizationLayer();
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |F32      |F32       |
+     * |F16      |F16       |
+     *
      * @param[in, out] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
      *                           and an optional 4th dimension for batch of inputs. Data types supported: F16/F32 (Written to by the border handler).
      *                           Data layouts supported: NCHW/NHWC.
@@ -99,5 +109,5 @@ private:
     std::unique_ptr<CLNormalizationLayerKernel> _norm_kernel;    /**< Normalization layer kernel to run */
     std::unique_ptr<CLFillBorderKernel>         _border_handler; /**< Kernel to handle  borders */
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLNORMALIZATIONLAYER_H */

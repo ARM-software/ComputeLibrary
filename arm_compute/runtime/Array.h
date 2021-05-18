@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,14 +60,6 @@ private:
     std::unique_ptr<T[]> _values;
 };
 
-/** Array of Key Points. */
-using KeyPointArray = Array<KeyPoint>;
-/** Array of 2D Coordinates. */
-using Coordinates2DArray = Array<Coordinates2D>;
-/** Array of Detection Windows. */
-using DetectionWindowArray = Array<DetectionWindow>;
-/** Array of 2D Sizes. */
-using Size2DArray = Array<Size2D>;
 /** Array of uint8s. */
 using UInt8Array = Array<uint8_t>;
 /** Array of uint16s. */

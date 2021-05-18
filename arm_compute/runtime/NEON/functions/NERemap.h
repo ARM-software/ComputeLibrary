@@ -34,18 +34,23 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to execute remap. This function calls the following Neon kernels:
+/** Basic function to execute remap. This function calls the following kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
  * -# @ref NERemapKernel
- *
- * @deprecated This function is deprecated and is intended to be removed in 21.05 release
- *
  */
 class NERemap : public INESimpleFunction
 {
 public:
     /** Initialise the function's sources, destination, interpolation policy and border mode.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0   |src1   |src2   |dst    |
+     * |:------|:------|:------|:------|
+     * |U8     |F32    |F32    |U 8    |
      *
      * @param[in, out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
      * @param[in]      map_x                 Map for X coordinates. Data type supported: F32.

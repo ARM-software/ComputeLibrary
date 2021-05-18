@@ -28,10 +28,8 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -53,9 +51,12 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().total_size() != dst->tensor_shape().total_size());
+    if(dst->tensor_shape().total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().total_size() != dst->tensor_shape().total_size());
+    }
 
     return Status{};
 }
@@ -93,9 +94,6 @@ void ClReshapeKernel::configure(const CLCompileContext &compile_context, const I
 
     // Configure kernel window
     Window win = calculate_max_window(*src);
-
-    // Set the dst valid region
-    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
     ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));

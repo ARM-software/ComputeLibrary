@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/IDevice.h"
 
 #include <set>
+#include <sstream>
 #include <string>
 
 namespace arm_compute

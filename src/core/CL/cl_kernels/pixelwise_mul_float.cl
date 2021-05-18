@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,10 @@
 #if defined(ACTIVATION_TYPE)
 #include "activation_float_helpers.h"
 #endif // defined(ACTIVATION_TYPE)
+
+#define VEC_ACC_TYPE VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE_OUT)
+#define VEC_OUT_TYPE VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)
+#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE_OUT)
 
 /** Performs a pixelwise multiplication with float scale of either integer or float inputs.
  *
@@ -77,31 +81,30 @@ __kernel void pixelwise_mul_float(
     const float scale)
 {
     // Get pixels pointer
-    Tensor3D in1 = CONVERT_TO_TENSOR3D_STRUCT(in1);
-    Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+    size_t x = max((int)(get_global_id(0) * VEC_SIZE_OUT - (VEC_SIZE_OUT - VEC_SIZE_LEFTOVER) % VEC_SIZE_OUT), 0);
+    size_t y = get_global_id(1);
+    size_t z = get_global_id(2);
+
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x * in1_stride_x + y * in1_stride_y + z * in1_stride_z;
+    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + x * in2_stride_x + y * in2_stride_y + z * in2_stride_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x * out_stride_x + y * out_stride_y + z * out_stride_z;
 
     // Load data
-    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
-    in1_data = CONVERT(vload16(0, (__global DATA_TYPE_IN1 *)in1.ptr), VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
-    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
-    in2_data = CONVERT(vload16(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
+    VEC_ACC_TYPE in1_data = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN1, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_IN1 *)in1_addr)), VEC_ACC_TYPE);
+    VEC_ACC_TYPE in2_data = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN2, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE_IN2 *)in2_addr)), VEC_ACC_TYPE);
 
     // Perform multiplication
 #ifdef DATA_TYPE_FLOAT
-    VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
-    res = CONVERT(in1_data * in2_data * (ACC_DATA_TYPE)scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
+    VEC_OUT_TYPE res0 = CONVERT(in1_data * in2_data * (ACC_DATA_TYPE)scale, VEC_OUT_TYPE);
 #else  /* DATA_TYPE_FLOAT */
-    VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
-    res = CONVERT_OP_FLOAT(CONVERT_OP_FLOAT((convert_float16(in1_data * in2_data) * scale), VEC_DATA_TYPE(ACC_DATA_TYPE, 16), ROUND), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), ROUND);
+    VEC_OUT_TYPE res0 = CONVERT_OP_FLOAT(CONVERT_OP_FLOAT((CONVERT(in1_data * in2_data, VEC_FLOAT) * scale), VEC_ACC_TYPE, ROUND), VEC_OUT_TYPE, ROUND);
 #endif /* DATA_TYPE_FLOAT */
 
 #if defined(ACTIVATION_TYPE)
-    vstore16(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, VEC_SIZE, res, A_VAL, B_VAL), 0, (__global DATA_TYPE_OUT *)out.ptr);
-#else  // defined(ACTIVATION_TYPE)
-    // Store result
-    vstore16(res, 0, (__global DATA_TYPE_OUT *)out.ptr);
+    res0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, VEC_SIZE_OUT, res0, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
+
+    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE_OUT, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 #endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(ACC_DATA_TYPE) && defined(DATA_TYPE_OUT) */
 
@@ -155,7 +158,7 @@ __kernel void pixelwise_mul_complex(
     res = { vin1.x *vin2.x - vin1.y * vin2.y, vin1.x *vin2.y + vin2.x * vin1.y };
 
 #if defined(ACTIVATION_TYPE)
-    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, res, A_VAL, B_VAL), 0, (__global DATA_TYPE *)out.ptr);
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE_OUT, res, A_VAL, B_VAL), 0, (__global DATA_TYPE *)out.ptr);
 #else  // defined(ACTIVATION_TYPE)
     // Store result
     vstore2(res, 0, (__global DATA_TYPE *)out.ptr);

@@ -47,12 +47,21 @@ public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEPermute(const NEPermute &) = delete;
     /** Default move constructor */
-    NEPermute(NEPermute &&);
+    NEPermute(NEPermute &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEPermute &operator=(const NEPermute &) = delete;
     /** Default move assignment operator */
-    NEPermute &operator=(NEPermute &&);
-    /** Configure the permute Neon kernel
+    NEPermute &operator=(NEPermute &&) = default;
+    /** Configure the permute function
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |All    |All    |
      *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4
      *

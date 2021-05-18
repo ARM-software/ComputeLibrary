@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,9 +51,10 @@ const auto ArithmeticDivisionFP16Dataset = combine(combine(framework::dataset::m
                                                    framework::dataset::make("DataType", DataType::F16));
 const auto ArithmeticDivisionFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
                                                    framework::dataset::make("DataType", DataType::F32));
-const auto EmptyActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
-{ ActivationLayerInfo() });
-const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+const auto ArithmeticDivisionS32Dataset = combine(combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::S32)),
+                                                  framework::dataset::make("DataType", DataType::S32));
+const auto EmptyActivationFunctionsDataset = framework::dataset::make("ActivationInfo", { ActivationLayerInfo() });
+const auto ActivationFunctionsDataset      = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
@@ -88,6 +89,27 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+
+using CLArithmeticDivisionIntegerFixture = ArithmeticDivisionValidationIntegerFixture<CLTensor, CLAccessor, CLArithmeticDivision, int>;
+
+TEST_SUITE(Integer)
+TEST_SUITE(S32)
+
+FIXTURE_DATA_TEST_CASE(RunSmallInteger, CLArithmeticDivisionIntegerFixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticDivisionS32Dataset),
+                                                                                                                       EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunIntegerWithActivation, CLArithmeticDivisionIntegerFixture, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticDivisionS32Dataset),
+                       ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+TEST_SUITE_END()
+TEST_SUITE_END()
 
 template <typename T>
 using CLArithmeticDivisionFloatFixture = ArithmeticDivisionValidationFloatFixture<CLTensor, CLAccessor, CLArithmeticDivision, T>;

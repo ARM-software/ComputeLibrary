@@ -34,7 +34,7 @@ public:
     virtual ~IFunction() = default;
     /** Run the kernels contained in the function
      *
-     * For Neon kernels:
+     * For CPU kernels:
      * - Multi-threading is used for the kernels which are parallelisable.
      * - By default std::thread::hardware_concurrency() threads are used.
      *

@@ -1,4 +1,6 @@
-# Copyright (c) 2017 Arm Limited.
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2017-2021 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -28,7 +30,7 @@ Import('vars')
 # vars is imported from arm_compute:
 variables = [
     BoolVariable("pmu", "Enable PMU counters", False),
-    BoolVariable("mali", "Enable Mali hardware counters", False),
+    BoolVariable("mali", "Enable Arm® Mali™ hardware counters", False),
 ]
 
 # We need a separate set of Variables for the Help message (Otherwise the global variables will get displayed twice)
@@ -46,11 +48,6 @@ Help(new_options.GenerateHelpText(framework_env))
 
 if(env['opencl']):
     framework_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
-
-if(env['gles_compute']):
-    framework_env.Append(CPPDEFINES=['ARM_COMPUTE_GC'])
-    if env['os'] != 'android':
-        framework_env.Append(CPPPATH = ["#opengles-3.1/include", "#opengles-3.1/mali_include"])
 
 framework_env.Append(CPPPATH = ["."])
 framework_env.Append(CPPFLAGS=['-Wno-overloaded-virtual'])
@@ -72,7 +69,7 @@ if not env['opencl']:
     files = [f for f in files if "OpenCL" not in os.path.basename(str(f))]
 
 if not framework_env['mali']:
-    # Remove Mali files
+    # Remove Arm® Mali™ files
     files = [f for f in files if "MaliCounter" not in os.path.basename(str(f))]
 else:
     framework_env.Append(CPPDEFINES = ['MALI_ENABLED'])

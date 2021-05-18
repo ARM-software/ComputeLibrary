@@ -46,7 +46,7 @@ class ScaleValidationGenericFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
-               bool align_corners)
+               bool align_corners, bool mixed_layout)
     {
         _shape             = shape;
         _policy            = policy;
@@ -55,6 +55,7 @@ public:
         _data_type         = data_type;
         _quantization_info = quantization_info;
         _align_corners     = align_corners;
+        _mixed_layout      = mixed_layout;
 
         generate_scale(shape);
 
@@ -67,6 +68,21 @@ public:
     }
 
 protected:
+    void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
+    {
+        const DataLayout data_layout = src.info()->data_layout();
+        // Test Multi DataLayout graph cases, when the data layout changes after configure
+        src.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        dst.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+
+        // Compute Convolution function
+        layer.run();
+
+        // Reinstating original data layout for the test suite to properly check the values
+        src.info()->set_data_layout(data_layout);
+        dst.info()->set_data_layout(data_layout);
+    }
+
     void generate_scale(const TensorShape &shape)
     {
         static constexpr float _min_scale{ 0.25f };
@@ -143,21 +159,29 @@ protected:
 
         scale.configure(&src, &dst, ScaleKernelInfo{ _policy, _border_mode, _constant_border_value, _sampling_policy, /* use_padding */ false, _align_corners });
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+
+        add_padding_x({ &src, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src));
 
-        // Compute function
-        scale.run();
-
+        if(_mixed_layout)
+        {
+            mix_layout(scale, src, dst);
+        }
+        else
+        {
+            // Compute function
+            scale.run();
+        }
         return dst;
     }
 
@@ -182,11 +206,12 @@ protected:
     DataType            _data_type{};
     QuantizationInfo    _quantization_info{};
     bool                _align_corners{ false };
+    bool                _mixed_layout{ false };
     float               _scale_x{ 1.f };
     float               _scale_y{ 1.f };
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class ScaleValidationQuantizedFixture : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -201,10 +226,11 @@ public:
                                                                                         policy,
                                                                                         border_mode,
                                                                                         sampling_policy,
-                                                                                        align_corners);
+                                                                                        align_corners,
+                                                                                        mixed_layout);
     }
 };
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class ScaleValidationFixture : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -218,7 +244,8 @@ public:
                                                                                         policy,
                                                                                         border_mode,
                                                                                         sampling_policy,
-                                                                                        align_corners);
+                                                                                        align_corners,
+                                                                                        mixed_layout);
     }
 };
 } // namespace validation

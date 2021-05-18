@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/CL/CLArray.h"
 #include "arm_compute/runtime/CL/CLMemory.h"
+#include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
@@ -126,6 +127,13 @@ public:
      * @param[in] associated_memory_group Memory group to associate the tensor with
      */
     void set_associated_memory_group(IMemoryGroup *associated_memory_group);
+
+    /** Sets global allocator that will be used by all CLTensor objects
+     *
+     *
+     * @param[in] allocator Allocator to be used as a global allocator
+     */
+    static void set_global_allocator(IAllocator *allocator);
 
 protected:
     /** Call map() on the OpenCL buffer.

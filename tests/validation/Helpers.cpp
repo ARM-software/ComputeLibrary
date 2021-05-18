@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,82 +32,6 @@ namespace test
 {
 namespace validation
 {
-void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPattern pattern)
-{
-    unsigned int                v = 0;
-    std::mt19937                gen(library->seed());
-    std::bernoulli_distribution dist(0.5);
-
-    for(int r = 0; r < rows; ++r)
-    {
-        for(int c = 0; c < cols; ++c, ++v)
-        {
-            uint8_t val = 0;
-
-            switch(pattern)
-            {
-                case MatrixPattern::BOX:
-                    val = 255;
-                    break;
-                case MatrixPattern::CROSS:
-                    val = ((r == (rows / 2)) || (c == (cols / 2))) ? 255 : 0;
-                    break;
-                case MatrixPattern::DISK:
-                    val = (((r - rows / 2.0f + 0.5f) * (r - rows / 2.0f + 0.5f)) / ((rows / 2.0f) * (rows / 2.0f)) + ((c - cols / 2.0f + 0.5f) * (c - cols / 2.0f + 0.5f)) / ((cols / 2.0f) *
-                            (cols / 2.0f))) <= 1.0f ? 255 : 0;
-                    break;
-                case MatrixPattern::OTHER:
-                    val = (dist(gen) ? 0 : 255);
-                    break;
-                default:
-                    return;
-            }
-
-            mask[v] = val;
-        }
-    }
-
-    if(pattern == MatrixPattern::OTHER)
-    {
-        std::uniform_int_distribution<uint8_t> distribution_u8(0, ((cols * rows) - 1));
-        mask[distribution_u8(gen)] = 255;
-    }
-}
-
-HarrisCornersParameters harris_corners_parameters()
-{
-    HarrisCornersParameters params;
-
-    std::mt19937                           gen(library->seed());
-    std::uniform_real_distribution<float>  threshold_dist(0.f, 0.001f);
-    std::uniform_real_distribution<float>  sensitivity(0.04f, 0.15f);
-    std::uniform_real_distribution<float>  euclidean_distance(0.f, 30.f);
-    std::uniform_int_distribution<uint8_t> int_dist(0, 255);
-
-    params.threshold             = threshold_dist(gen);
-    params.sensitivity           = sensitivity(gen);
-    params.min_dist              = euclidean_distance(gen);
-    params.constant_border_value = int_dist(gen);
-
-    return params;
-}
-
-CannyEdgeParameters canny_edge_parameters()
-{
-    CannyEdgeParameters params;
-
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<uint8_t> int_dist(0, 255);
-    std::uniform_int_distribution<uint8_t> threshold_dist(2, 255);
-
-    params.constant_border_value = int_dist(gen);
-    params.upper_thresh          = threshold_dist(gen); // upper_threshold >= 2
-    threshold_dist               = std::uniform_int_distribution<uint8_t>(1, params.upper_thresh - 1);
-    params.lower_thresh          = threshold_dist(gen); // lower_threshold >= 1 && lower_threshold < upper_threshold
-
-    return params;
-}
-
 template <>
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 {
@@ -399,6 +323,30 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
     const int min_bound = quantize_qsymm8_per_channel(min, quant_info, channel_id);
     const int max_bound = quantize_qsymm8_per_channel(max, quant_info, channel_id);
     return std::pair<int, int> { min_bound, max_bound };
+}
+
+void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout)
+{
+    if(data_layout == DataLayout::NHWC)
+    {
+        constexpr unsigned int lower = 1U;
+        constexpr unsigned int upper = 16U;
+
+        std::uniform_int_distribution<unsigned int> distribution(lower, upper);
+        size_t                                      seed_offset = 0;
+
+        for(ITensor *tensor : tensors)
+        {
+            ARM_COMPUTE_ERROR_ON(!tensor->info()->is_resizable());
+
+            std::mt19937 gen(library->seed() + seed_offset++);
+
+            const unsigned int right = distribution(gen);
+            const unsigned int left  = distribution(gen);
+
+            tensor->info()->extend_padding(PaddingSize(0U, right, 0U, left));
+        }
+    }
 }
 
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);

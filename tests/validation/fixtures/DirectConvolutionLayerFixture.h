@@ -53,10 +53,11 @@ public:
 
     template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels,
-               DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout)
+               DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout, bool mixed_layout = false)
     {
         _quantization_info = quantization_info;
         _data_type         = data_type;
+        _mixed_layout      = mixed_layout;
 
         TensorShape         weights_shape(kernel_size, kernel_size, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
@@ -89,6 +90,21 @@ public:
     }
 
 protected:
+    void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
+    {
+        DataLayout data_layout = src.info()->data_layout();
+        // Test Multi DataLayout graph cases, when the data layout changes after configure
+        src.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        dst.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+
+        // Compute Convolution function
+        layer.run();
+
+        // Reinstating original data layout for the test suite to properly check the values
+        src.info()->set_data_layout(data_layout);
+        dst.info()->set_data_layout(data_layout);
+    }
+
     template <typename U>
     void fill(U &&tensor, int i)
     {
@@ -150,10 +166,12 @@ protected:
         FunctionType conv;
         conv.configure(&src, &weights, &bias, &dst, info, act_info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+
+        add_padding_x({ &src, &bias, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -161,18 +179,25 @@ protected:
         bias.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0);
         fill(AccessorType(weights), 1);
         fill(AccessorType(bias), 2);
 
-        // Compute NEConvolutionLayer function
-        conv.run();
+        if(_mixed_layout)
+        {
+            mix_layout(conv, src, dst);
+        }
+        else
+        {
+            // Compute Convolution function
+            conv.run();
+        }
 
         return dst;
     }
@@ -197,9 +222,10 @@ protected:
     SimpleTensor<T>  _reference{};
     QuantizationInfo _quantization_info{};
     DataType         _data_type{};
+    bool             _mixed_layout{ false };
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class DirectConvolutionValidationFixture : public DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -208,11 +234,11 @@ public:
                DataLayout data_layout)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, QuantizationInfo(),
-                                                                                                    act_info, data_layout);
+                                                                                                    act_info, data_layout, mixed_layout);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class DirectConvolutionValidationQuantizedFixture : public DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -221,7 +247,7 @@ public:
                ActivationLayerInfo act_info, DataLayout data_layout)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, quantization_info,
-                                                                                                    act_info, data_layout);
+                                                                                                    act_info, data_layout, mixed_layout);
     }
 };
 

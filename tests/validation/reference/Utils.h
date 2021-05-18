@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/Types.h"
 #include "tests/Globals.h"
-#include "tests/ILutAccessor.h"
 #include "tests/Types.h"
 
 #include <array>
@@ -122,26 +121,6 @@ void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<T> &src, Simp
 }
 
 RawTensor transpose(const RawTensor &src, int chunk_width = 1);
-
-/** Fill matrix random.
- *
- * @param[in,out] matrix Matrix
- */
-template <std::size_t SIZE>
-inline void fill_warp_matrix(std::array<float, SIZE> &matrix)
-{
-    std::mt19937                          gen(library.get()->seed());
-    std::uniform_real_distribution<float> dist(-1, 1);
-    for(auto &x : matrix)
-    {
-        x = dist(gen);
-    }
-    if(SIZE == 9)
-    {
-        // This is only used in Warp Perspective, we set M[3][3] = 1 so that Z0 is not 0 and we avoid division by 0.
-        matrix[8] = 1.f;
-    }
-}
 
 bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode);
 } // namespace validation

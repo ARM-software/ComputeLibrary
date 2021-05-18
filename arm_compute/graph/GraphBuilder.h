@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -137,8 +137,6 @@ public:
      */
     static NodeID add_channel_shuffle_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_groups);
     /** Adds a convolution layer node to the graph
-     *
-     * TODO (COMPMID-1113): Add a graph descriptor for convolution layer node
      *
      * @param[in] g                     Graph to add the node to
      * @param[in] params                Common node parameters

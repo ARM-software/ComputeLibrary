@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -204,6 +204,24 @@ void convert_float32x4x4_to_uint8x16(const float32x4x4_t &in, uint8x16_t &out);
  * @param[out] out Converted vector of uint8 to store the result
  */
 void convert_float32x4x4_to_int8x16(const float32x4x4_t &in, int8x16_t &out);
+
+/** Converts from float vector to integer vector
+ *
+ * @param[in] in Float vector to converted
+ *
+ * @return The converted integer vector
+ */
+template <typename float_vec_type, typename int_vec_type>
+int_vec_type convert_float_to_int(const float_vec_type &in);
+
+/** Converts from integer vector to float vector
+ *
+ * @param[in] in Integer vector to converted
+ *
+ * @return The converted float vector
+ */
+template <typename float_vec_type, typename int_vec_type>
+float_vec_type convert_int_to_float(const int_vec_type &in);
 
 /** Calculate sine.
  *

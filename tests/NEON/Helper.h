@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,9 @@
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/runtime/cpu/ICpuOperator.h"
 #include "tests/Globals.h"
 
 #include <algorithm>
@@ -104,7 +106,7 @@ public:
 
 /** As above but this also setups a Zero border on the input tensor of the kernel's bordersize */
 template <typename K>
-class NESynthetizeFunctionWithZeroConstantKernelBorder : public INESimpleFunction
+class NESynthetizeFunctionWithZeroConstantKernelBorder : public cpu::ICpuOperator
 {
 public:
     /** Configure the kernel.
@@ -123,6 +125,15 @@ public:
         b->configure(first, BorderSize(_kernel->border_size()), BorderMode::CONSTANT, PixelValue());
         _border_handler = std::move(b);
     }
+
+    void run(ITensorPack &tensors)
+    {
+        NEScheduler::get().schedule(_border_handler.get(), Window::DimZ);
+        NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
+    }
+
+private:
+    std::unique_ptr<INEKernel> _border_handler{ nullptr };
 };
 
 } // namespace test

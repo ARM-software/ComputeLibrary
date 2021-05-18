@@ -106,9 +106,9 @@ protected:
         MaxUnpoolingFunctionType unpool_layer;
         unpool_layer.configure(&dst, &indices, &unpooled, pool_info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(indices.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(indices.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -116,10 +116,10 @@ protected:
         indices.allocator()->allocate();
         unpooled.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!indices.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!unpooled.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!indices.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!unpooled.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src));

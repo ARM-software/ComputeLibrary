@@ -42,7 +42,7 @@ Binaries available at https://github.com/ARM-software/ComputeLibrary/releases.
 
 - x86
 
-### Supported OS
+### Supported Systems
 
 - Android™
 - Bare Metal
@@ -72,7 +72,7 @@ You must use your real name, no pseudonyms or anonymous contributions are accept
 
 Android is a trademark of Google LLC.
 
-Arm, Cortex and Mali are registered trademarks or trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
+Arm, Cortex, Mali and Neon are registered trademarks or trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
 
 Linux® is the registered trademark of Linus Torvalds in the U.S. and other countries.
 

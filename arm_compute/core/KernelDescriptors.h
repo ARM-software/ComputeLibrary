@@ -114,6 +114,7 @@ struct SoftmaxKernelInfo
     float    beta{ 1.f };                          /**< A scaling factor for the exponent with default value 1.0 */
     bool     is_log{ false };                      /**< Flag used to perform Log Softmax operation */
     DataType input_data_type{ DataType::UNKNOWN }; /**< Input tensor data type */
+    int32_t  axis{ 0 };                            /**< The dimension in which to apply softmax. */
 };
 
 /** Descriptor used by the direct convolution layer output stage kernels */
@@ -190,14 +191,14 @@ struct ScaleKernelInfo
                     SamplingPolicy      sampling_policy       = SamplingPolicy::CENTER,
                     bool                use_padding           = true,
                     bool                align_corners         = false,
-                    DataLayout          data_layout           = DataLayout::UNKNOWN)
+                    DataLayout          data_layout           = DataLayout::UNKNOWN) noexcept
         : interpolation_policy{ interpolation_policy },
-          border_mode{ border_mode },
-          constant_border_value{ constant_border_value },
-          sampling_policy{ sampling_policy },
-          use_padding{ use_padding },
-          align_corners{ align_corners },
-          data_layout{ data_layout }
+    border_mode{ border_mode },
+    constant_border_value{ constant_border_value },
+    sampling_policy{ sampling_policy },
+    use_padding{ use_padding },
+    align_corners{ align_corners },
+    data_layout{ data_layout }
     {
     }
 
@@ -208,30 +209,6 @@ struct ScaleKernelInfo
     bool                use_padding;           /**< Indication of using padding */
     bool                align_corners;         /**< Align corners of input and output */
     DataLayout          data_layout;           /**< Data layout to use */
-};
-
-struct ThresholdKernelInfo
-{
-    /** Default constructor */
-    ThresholdKernelInfo() = default;
-    /** Constructor
-     *
-     * @param[in] threshold   Threshold. When the threshold type is RANGE, this is used as the lower threshold.
-     * @param[in] false_value value to set when the condition is not respected.
-     * @param[in] true_value  value to set when the condition is respected.
-     * @param[in] type        Thresholding type. Either RANGE or BINARY.
-     * @param[in] upper       Upper threshold. Only used when the thresholding type is RANGE.
-     */
-    ThresholdKernelInfo(uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
-        : threshold(threshold), false_value(false_value), true_value(true_value), type(type), upper(upper)
-    {
-    }
-
-    uint8_t       threshold{ 0 };
-    uint8_t       false_value{ 0 };
-    uint8_t       true_value{ 0 };
-    ThresholdType type{ ThresholdType::BINARY };
-    uint8_t       upper{ 0 };
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */

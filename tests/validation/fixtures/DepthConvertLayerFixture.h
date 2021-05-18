@@ -67,7 +67,7 @@ protected:
         }
         else
         {
-            // When converting S32 to F16, both reference and Neon implementations are + or - infinity outside the F16 range.
+            // When converting S32 to F16, both reference and Compute Library implementations are + or - infinity outside the F16 range.
             if(dt_in == DataType::S32 && dt_out == DataType::F16)
             {
                 std::uniform_int_distribution<int32_t> distribution_s32(-65504, 65504);
@@ -90,15 +90,15 @@ protected:
         FunctionType depth_convert;
         depth_convert.configure(&src, &dst, policy, shift);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0, dt_in, dt_out);

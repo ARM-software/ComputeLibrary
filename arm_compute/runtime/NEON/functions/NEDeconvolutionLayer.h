@@ -64,11 +64,10 @@ namespace arm_compute
  * The weights used by Deconvolution are supposed to be the same as the ones used for Convolution. Therefore, it will be necessary to use the weights in the
  * reverse order to perform an actual convolution. This is achieved by using @ref NEReverse.
  *
- * This function calls the following Neon kernels/functions:
+ * This function calls the following kernels/functions:
  *
  * -# @ref CPPUpsample
  * -# @ref NEConvolutionLayer
- * -# @ref NEPermute
  * -# @ref NEReverse
  *
  */
@@ -91,9 +90,23 @@ public:
 
     /** Set the input, weights, biases and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2   |dst            |
+     * |:--------------|:------------------|:------|:--------------|
+     * |F16            |F16                |F16    |F16            |
+     * |F32            |F32                |F32    |F32            |
+     * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32    |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32    |QASYMM8_SIGNED |
+     *
      * @param[in,out] input   Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/F16/QASYMM8/QASYMM8_SIGNED.
-     * @param[in]     weights The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
-     * @param[in]     bias    Optional, ignored if NULL. The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8 and QASYMM8_SIGNED input, F32 for F32 input, F16 for F16 input.
+     * @param[in]     weights The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
+     * @param[in]     bias    Optional, ignored if NULL. The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8/QASYMM8_SIGNED input, F32 for F32 input, F16 for F16 input.
      * @param[out]    output  Output tensor. The output has the same number of dimensions as the @p input.
      * @param[in]     info    Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
      *
@@ -102,8 +115,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEDeconvolutionLayer
      *
      * @param[in] input   Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/F16/QASYMM8/QASYMM8_SIGNED.
-     * @param[in] weights The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
-     * @param[in] bias    (Optional) The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8 and QASYMM8_SIGNED input, F32 for F32 input, F16 for F16 input.
+     * @param[in] weights The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
+     * @param[in] bias    (Optional) The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8/QASYMM8_SIGNED input, F32 for F32 input, F16 for F16 input.
      * @param[in] output  Output tensor info. The output has the same number of dimensions as the @p input.
      * @param[in] info    Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
      *

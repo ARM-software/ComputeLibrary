@@ -51,116 +51,7 @@ namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool use_bias = true>
-class WinogradConvolutionLayerValidationFixture : public framework::Fixture
-{
-public:
-    template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
-               DataType data_type, ActivationLayerInfo act_info)
-    {
-        ARM_COMPUTE_UNUSED(dilation);
-
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info);
-    }
-
-protected:
-    template <typename U>
-    void fill(U &&tensor, int i, float min, float max)
-    {
-        switch(tensor.data_type())
-        {
-            case DataType::F16:
-            {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ float(min), float(max) };
-                library->fill(tensor, distribution, i);
-                break;
-            }
-            case DataType::F32:
-            {
-                std::uniform_real_distribution<float> distribution(min, max);
-                library->fill(tensor, distribution, i);
-                break;
-            }
-            default:
-            {
-                ARM_COMPUTE_ERROR("Not supported");
-            }
-        }
-    }
-
-    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, const PadStrideInfo &info,
-                              DataType data_type, ActivationLayerInfo act_info)
-    {
-        // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1);
-
-        // Create and configure function
-        FunctionType conv;
-        ARM_COMPUTE_EXPECT(static_cast<bool>(conv.validate(src.info(), weights.info(), (use_bias) ? bias.info() : nullptr, dst.info(), info, act_info)), framework::LogLevel::ERRORS);
-        conv.configure(&src, &weights, (use_bias) ? &bias : nullptr, &dst, info, act_info);
-
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-        // Allocate tensors
-        src.allocator()->allocate();
-        weights.allocator()->allocate();
-        dst.allocator()->allocate();
-        bias.allocator()->allocate();
-
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-        // Fill tensors
-        fill(AccessorType(src), 0, -1.f, 1.f);
-        fill(AccessorType(weights), 1, -1.f, 1.f);
-        fill(AccessorType(bias), 2, -1.f, 1.f);
-
-        // Compute Winograd Convolution function
-        conv.run();
-
-        return dst;
-    }
-
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                                      DataType data_type, ActivationLayerInfo act_info)
-    {
-        // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1 };
-        SimpleTensor<T> weights{ weights_shape, data_type, 1 };
-        SimpleTensor<T> bias{ bias_shape, data_type, 1 };
-
-        // Fill reference
-        fill(src, 0, -1.f, 1.f);
-        fill(weights, 1, -1.f, 1.f);
-        if(use_bias)
-        {
-            fill(bias, 2, -1.f, 1.f);
-        }
-        else
-        {
-            fill(bias, 2, 0.f, 0.f);
-        }
-
-        SimpleTensor<T> conv_out = reference::convolution_layer<T>(src, weights, bias, output_shape, info);
-
-        return (act_info.enabled()) ? reference::activation_layer<T>(conv_out, act_info) : conv_out;
-    }
-
-    TensorType      _target{};
-    SimpleTensor<T> _reference{};
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename T1 = T, bool use_bias = true>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename T1 = T, bool use_bias = true, bool mixed_layout = false>
 class WinogradConvolutionLayerFastMathValidationFixture : public framework::Fixture
 {
 public:
@@ -170,11 +61,27 @@ public:
 
     {
         ARM_COMPUTE_UNUSED(dilation);
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, info, data_type, act_info);
+        _mixed_layout = mixed_layout;
+        _target       = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
+        _reference    = compute_reference(input_shape, weights_shape, bias_shape, info, data_type, act_info);
     }
 
 protected:
+    void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
+    {
+        const DataLayout data_layout = src.info()->data_layout();
+        // Test Multi DataLayout graph cases, when the data layout changes after configure
+        src.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        dst.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+
+        // Compute Convolution function
+        layer.run();
+
+        // Reinstating original data layout for the test suite to properly check the values
+        src.info()->set_data_layout(data_layout);
+        dst.info()->set_data_layout(data_layout);
+    }
+
     template <typename U>
     void fill(U &&tensor, int i, float min, float max)
     {
@@ -221,10 +128,12 @@ protected:
                            framework::LogLevel::ERRORS);
         conv.configure(&src, &weights, (use_bias) ? &bias : nullptr, &dst, info, act_info, true /* Enable fast math */);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+
+        add_padding_x({ &src, &weights, &bias, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -232,19 +141,25 @@ protected:
         dst.allocator()->allocate();
         bias.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0, -0.5f, 0.5f);
         fill(AccessorType(weights), 1, -0.5f, 0.5f);
         fill(AccessorType(bias), 2, -0.5f, 0.5f);
 
-        // Compute Winograd Convolution function
-        conv.run();
-
+        if(_mixed_layout)
+        {
+            mix_layout(conv, src, dst);
+        }
+        else
+        {
+            // Compute function
+            conv.run();
+        }
         return dst;
     }
 
@@ -321,9 +236,10 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
+    bool            _mixed_layout{ false };
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class WinogradInputTransformValidationFixture : public framework::Fixture
 {
 public:
@@ -331,12 +247,29 @@ public:
     void setup(TensorShape input_shape, WinogradInfo winograd_info, DataLayout data_layout, DataType data_type)
     {
         TensorShape output_shape = compute_winograd_input_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
-
-        _target    = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
-        _reference = compute_reference(input_shape, output_shape, winograd_info, data_type);
+        _mixed_layout            = mixed_layout;
+        _target                  = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
+        _reference               = compute_reference(input_shape, output_shape, winograd_info, data_type);
     }
 
 protected:
+    void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
+    {
+        const DataLayout data_layout_src = src.info()->data_layout();
+        const DataLayout data_layout_dst = dst.info()->data_layout();
+
+        // Test Multi DataLayout graph cases, when the data layout changes after configure
+        src.info()->set_data_layout(data_layout_src == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        dst.info()->set_data_layout(data_layout_dst == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+
+        // Compute Convolution function
+        layer.run();
+
+        // Reinstating original data layout for the test suite to properly check the values
+        src.info()->set_data_layout(data_layout_src);
+        dst.info()->set_data_layout(data_layout_dst);
+    }
+
     template <typename U>
     void fill(U &&tensor, int i, float min, float max)
     {
@@ -375,22 +308,30 @@ protected:
         FunctionType transf;
         transf.configure(&src, &dst, winograd_info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+
+        add_padding_x({ &src, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0, -1.f, 1.f);
 
-        // Compute Winograd input transform function
-        transf.run();
-
+        if(_mixed_layout)
+        {
+            mix_layout(transf, src, dst);
+        }
+        else
+        {
+            // Compute Winograd input transform function
+            transf.run();
+        }
         return dst;
     }
 
@@ -405,11 +346,12 @@ protected:
         return reference::winograd_input_transform<T>(src, output_shape, winograd_info);
     }
 
+    bool            _mixed_layout{ false };
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class WinogradFilterTransformValidationFixture : public framework::Fixture
 {
 public:
@@ -419,11 +361,29 @@ public:
         WinogradInfo winograd_info(output_tile, Size2D(input_shape[0], input_shape[1]), Size2D() /* Not needed */, PadStrideInfo() /* Not needed */, DataLayout::NCHW /* Not needed */);
         TensorShape  output_shape = compute_winograd_filter_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
 
-        _target    = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
-        _reference = compute_reference(input_shape, output_shape, winograd_info, data_type);
+        _mixed_layout = mixed_layout;
+        _target       = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
+        _reference    = compute_reference(input_shape, output_shape, winograd_info, data_type);
     }
 
 protected:
+    void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
+    {
+        const DataLayout data_layout_src = src.info()->data_layout();
+        const DataLayout data_layout_dst = dst.info()->data_layout();
+
+        // Test Multi DataLayout graph cases, when the data layout changes after configure
+        src.info()->set_data_layout(data_layout_src == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        dst.info()->set_data_layout(data_layout_dst == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+
+        // Compute Convolution function
+        layer.run();
+
+        // Reinstating original data layout for the test suite to properly check the values
+        src.info()->set_data_layout(data_layout_src);
+        dst.info()->set_data_layout(data_layout_dst);
+    }
+
     template <typename U>
     void fill(U &&tensor, int i, float min, float max)
     {
@@ -463,21 +423,30 @@ protected:
         FunctionType filter_transform;
         filter_transform.configure(&src, &dst, winograd_info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+
+        add_padding_x({ &src, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0, -1.f, 1.f);
 
-        filter_transform.run();
-
+        if(_mixed_layout)
+        {
+            mix_layout(filter_transform, src, dst);
+        }
+        else
+        {
+            // Compute Winograd filter transform function
+            filter_transform.run();
+        }
         return dst;
     }
 
@@ -492,11 +461,12 @@ protected:
         return reference::winograd_filter_transform<T>(src, output_shape, winograd_info);
     }
 
+    bool            _mixed_layout{ false };
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class WinogradOutputTransformValidationFixture : public framework::Fixture
 {
 public:
@@ -508,6 +478,23 @@ public:
     }
 
 protected:
+    void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
+    {
+        const DataLayout data_layout_src = src.info()->data_layout();
+        const DataLayout data_layout_dst = dst.info()->data_layout();
+
+        // Test Multi DataLayout graph cases, when the data layout changes after configure
+        src.info()->set_data_layout(data_layout_src == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        dst.info()->set_data_layout(data_layout_dst == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+
+        // Compute Convolution function
+        layer.run();
+
+        // Reinstating original data layout for the test suite to properly check the values
+        src.info()->set_data_layout(data_layout_src);
+        dst.info()->set_data_layout(data_layout_dst);
+    }
+
     template <typename U>
     void fill(U &&tensor, int i, float min, float max)
     {
@@ -545,25 +532,34 @@ protected:
         FunctionType output_transform;
         output_transform.configure(&src, &bias, &dst, winograd_info, act_info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+
+        add_padding_x({ &src, &bias, &dst }, winograd_info.output_data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
         bias.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0, -1.f, 1.f);
         fill(AccessorType(bias), 1, -1.f, 1.f);
 
-        output_transform.run();
-
+        if(_mixed_layout)
+        {
+            mix_layout(output_transform, src, dst);
+        }
+        else
+        {
+            // Compute Winograd output transform function
+            output_transform.run();
+        }
         return dst;
     }
 
@@ -585,6 +581,7 @@ protected:
         return (act_info.enabled()) ? reference::activation_layer<T>(winograd_output, act_info) : winograd_output;
     }
 
+    bool            _mixed_layout{ false };
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };

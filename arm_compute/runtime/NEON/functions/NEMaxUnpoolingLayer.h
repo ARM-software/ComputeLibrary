@@ -35,7 +35,7 @@ class ITensorInfo;
 class NEFill;
 class NEMaxUnpoolingLayerKernel;
 
-/** Function to perform MaxUnpooling. This function calls the following Neon kernels:
+/** Function to perform MaxUnpooling. This function calls the following kernels:
  *
  * -# @ref NEFill
  * -# @ref NEMaxUnpoolingLayerKernel
@@ -56,6 +56,18 @@ public:
     /** Default destructor */
     ~NEMaxUnpoolingLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
      *
      * @note Only supported pool size 2
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -146,22 +146,31 @@ void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_c
     const size_t total_batches = input->info()->tensor_shape().total_size_upper(3);
 
     CLBuildOptions build_opts;
-    build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));
-    build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
-    build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
-    build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
-    build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL");
-    build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_INPUT_TRANSFORM_VERTICAL");
     if(_data_layout == DataLayout::NHWC)
     {
-        build_opts.add_option_if(total_batches > 1, "-DNUM_TILES_Y=" + support::cpp11::to_string(_num_tiles_y));
-        build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
-        build_opts.add_option("-DSRC_DIM_2=" + support::cpp11::to_string(_input->info()->dimension(2)));
+        build_opts.add_option("-DNHWC");
+        build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(idx_w)));
+        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(idx_h)));
+        build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));
+        build_opts.add_option("-DNUM_TILES_Y=" + support::cpp11::to_string(_num_tiles_y));
+        build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
+        build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+        build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
+        build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+        build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL");
+        build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_INPUT_TRANSFORM_VERTICAL");
     }
     else
     {
+        build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));
+        build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
+        build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+        build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
+        build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+        build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL");
+        build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_INPUT_TRANSFORM_VERTICAL");
         build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
     }
 
@@ -229,28 +238,38 @@ void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue 
     // Collapse window
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
 
-    Window slice = window_collapsed.first_slice_window_3D();
-    slice.set(idx_w, Window::Dimension(0, _num_tiles_x, 1));
-    slice.set(idx_h, Window::Dimension(0, _num_tiles_y, 1));
     if(_data_layout == DataLayout::NHWC)
     {
-        slice.set(idx_h, Window::Dimension(0, _num_tiles_y * total_batches, 1));
-    }
+        Window slice = window_collapsed.first_slice_window_3D();
+        slice.set(1, Window::Dimension(0, _num_tiles_x * _num_tiles_y, 1));
+        slice.set(2, Window::Dimension(0, total_batches, 1));
 
-    ARM_COMPUTE_ERROR_ON(((slice[idx_c].end() - slice[idx_c].start()) % _step_z) != 0);
-    slice.set(idx_c, Window::Dimension(slice[idx_c].start(), slice[idx_c].end(), _step_z));
-
-    unsigned int idx = 2 * num_arguments_per_3D_tensor();
-    _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
-    _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
-
-    do
-    {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice);
-
+        add_4D_tensor_argument(idx, _input, slice);
+        add_4D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
-    while(window_collapsed.slide_window_slice_3D(slice));
+    else
+    {
+        Window slice = window_collapsed.first_slice_window_3D();
+        slice.set(idx_w, Window::Dimension(0, _num_tiles_x, 1));
+        slice.set(idx_h, Window::Dimension(0, _num_tiles_y, 1));
+
+        ARM_COMPUTE_ERROR_ON(((slice[idx_c].end() - slice[idx_c].start()) % _step_z) != 0);
+        slice.set(idx_c, Window::Dimension(slice[idx_c].start(), slice[idx_c].end(), _step_z));
+
+        unsigned int idx = 2 * num_arguments_per_3D_tensor();
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
+
+        do
+        {
+            unsigned int idx = 0;
+            add_3D_tensor_argument(idx, _input, slice);
+            add_3D_tensor_argument(idx, _output, slice);
+
+            enqueue(queue, *this, slice, lws_hint());
+        }
+        while(window_collapsed.slide_window_slice_3D(slice));
+    }
 }

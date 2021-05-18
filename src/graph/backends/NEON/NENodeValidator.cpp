@@ -28,7 +28,6 @@
 
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
-#include "src/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
@@ -50,16 +49,17 @@ namespace graph
 {
 namespace backends
 {
-/** Collection of Neon element-wise functions */
+/** Collection of CPU element-wise functions */
 struct NEEltwiseLayerFunctions
 {
     using ArithmeticAddition      = NEArithmeticAddition;
     using ArithmeticSubtraction   = NEArithmeticSubtraction;
     using PixelWiseMultiplication = NEPixelWiseMultiplication;
     using ElementwiseMax          = NEElementwiseMax;
+    using ArithmeticDivision      = NEElementwiseDivision;
 };
 
-/** Collection of Neon unary element-wise functions */
+/** Collection of CPU unary element-wise functions */
 struct NEUnaryEltwiseLayerFunctions
 {
     using ExpLayer = NEExpLayer;

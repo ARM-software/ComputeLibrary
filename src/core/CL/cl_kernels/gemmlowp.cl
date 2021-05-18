@@ -392,10 +392,10 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
-    __global DATA_TYPE *lhs_addr = lhs_ptr + lhs_offset_first_element_in_bytes + (y % V0) * (uint)LHS_OFFSET_X + (y / V0) * (uint)lhs_stride_y + (z * lhs_stride_z);
+    __global DATA_TYPE *lhs_addr = (__global DATA_TYPE *)(lhs_ptr + lhs_offset_first_element_in_bytes + (y % V0) * (uint)LHS_OFFSET_X + (y / V0) * (uint)lhs_stride_y + (z * lhs_stride_z));
 
     // Compute RHS matrix address
-    __global DATA_TYPE *rhs_addr = rhs_ptr + rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X + (x / (uint)H0) * rhs_stride_y;
+    __global DATA_TYPE *rhs_addr = (__global DATA_TYPE *)(rhs_ptr + rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X + (x / (uint)H0) * rhs_stride_y);
 
 #if defined(MATRIX_B_DEPTH)
     // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3

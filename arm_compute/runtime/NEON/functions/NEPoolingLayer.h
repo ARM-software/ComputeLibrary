@@ -36,7 +36,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following Neon kernels:
+/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following kernels:
  *
  * -# @ref NEFillBorderKernel (executed if padding size is different from zero)
  * -# @ref cpu::kernels::CpuPoolingKernel
@@ -58,6 +58,18 @@ public:
     /** Default destructor */
     ~NEPoolingLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
      *
      * @note F16 is supported for pool sizes 2 and 3 only
      *

@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -224,7 +223,7 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
         _function = it->second;
     }
 
-    Window win = calculate_max_window(x->info()->valid_region());
+    Window win = calculate_max_window(*x->info());
     INEKernel::configure(win);
 }
 

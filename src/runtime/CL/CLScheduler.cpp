@@ -24,9 +24,7 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
-#include "arm_compute/runtime/CL/tuners/Tuners.h"
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -97,7 +95,7 @@ bool CLScheduler::is_initialised() const
 std::once_flag CLScheduler::_initialize_symbols;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _cl_default_static_tuner(nullptr), _gemm_heuristics(nullptr)
+    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _gemm_heuristics(nullptr), _backend_type(CLBackendType::Native)
 {
 }
 
@@ -116,29 +114,26 @@ void CLScheduler::default_init_with_context(cl::Device &device, cl::Context &ctx
         cl::CommandQueue  queue = cl::CommandQueue(ctx, device);
         CLKernelLibrary::get().init(cl_kernels_folder, ctx, device);
         init(ctx, queue, device, cl_tuner, gemm_h);
-        _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
-        _cl_tuner                = (cl_tuner == nullptr) ? _cl_default_static_tuner.get() : cl_tuner;
+        _cl_tuner = cl_tuner;
     }
 }
 
-void CLScheduler::default_init(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h)
+void CLScheduler::default_init(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h, CLBackendType cl_backend_type)
 {
     if(!_is_initialised)
     {
         cl::Context ctx;
         cl::Device  dev;
         cl_int      err;
-        std::tie(ctx, dev, err) = create_opencl_context_and_device();
+        std::tie(ctx, dev, err) = create_opencl_context_and_device(cl_backend_type);
         ARM_COMPUTE_ERROR_ON_MSG(err != CL_SUCCESS, "Failed to create OpenCL context");
         cl::CommandQueue queue = cl::CommandQueue(ctx, dev);
         CLKernelLibrary::get().init("./cl_kernels/", ctx, dev);
         init(ctx, queue, dev, cl_tuner, gemm_h);
-        // Create a default static tuner and set if none was provided
-        _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
     }
 
     // Set CL tuner
-    _cl_tuner = (cl_tuner == nullptr) ? _cl_default_static_tuner.get() : cl_tuner;
+    _cl_tuner = cl_tuner;
 }
 
 void CLScheduler::set_context(cl::Context context)
@@ -147,7 +142,7 @@ void CLScheduler::set_context(cl::Context context)
     CLKernelLibrary::get().set_context(_context);
 }
 
-void CLScheduler::init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h)
+void CLScheduler::init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h, CLBackendType cl_backend_type)
 {
     set_context(std::move(context));
     _queue           = std::move(queue);
@@ -155,6 +150,7 @@ void CLScheduler::init(cl::Context context, cl::CommandQueue queue, const cl::De
     _is_initialised  = true;
     _cl_tuner        = cl_tuner;
     _gemm_heuristics = gemm_h;
+    _backend_type    = cl_backend_type;
 }
 
 void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool flush)

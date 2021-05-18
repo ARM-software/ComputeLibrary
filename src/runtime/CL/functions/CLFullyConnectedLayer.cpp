@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@
 #include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLTransposeKernel.h"
+#include "src/core/gpu/cl/kernels/ClTransposeKernel.h"
 #include "support/Cast.h"
 
 #include <algorithm>
@@ -141,29 +141,13 @@ Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const I
 }
 } // namespace
 
-void CLFullyConnectedLayerReshapeWeights::configure(const ICLTensor *input, ICLTensor *output)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output);
-}
-
-void CLFullyConnectedLayerReshapeWeights::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
-{
-    auto k = std::make_unique<CLTransposeKernel>();
-    k->configure(compile_context, input, output);
-    _kernel = std::move(k);
-}
-
-Status CLFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return CLTransposeKernel::validate(input, output);
-}
-
 CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _convert_weights(), _convert_weights_managed(), _reshape_weights_managed_function(), _flatten_layer(), _reshape_weights_function(),
       _mm_gemm(memory_manager, weights_manager), _mm_gemmlowp(memory_manager), _flatten_output(), _converted_weights_output(), _reshape_weights_output(), _are_weights_converted(true),
       _are_weights_reshaped(true), _is_fc_after_conv(true), _is_quantized(false), _is_prepared(false), _original_weights(nullptr)
 {
 }
+
 void CLFullyConnectedLayer::configure_mm(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output,
                                          const FullyConnectedLayerInfo &fc_info)
 {
@@ -380,7 +364,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     if(!weights_reshaped)
     {
         // Validate reshape weights kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayerReshapeWeights::validate(weights, &reshaped_weights));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLTranspose::validate(weights, &reshaped_weights));
         weights_to_use = &reshaped_weights;
     }
 

@@ -1,4 +1,6 @@
-# Copyright (c) 2017-2019 Arm Limited.
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2017-2021 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -28,12 +30,11 @@ Import('install_bin')
 
 # vars is imported from arm_compute:
 variables = [
-    BoolVariable("benchmark_examples", "Build benchmark examples programs", True),
-    BoolVariable("validate_examples", "Build validate examples programs", True),
+    BoolVariable("benchmark_examples", "Build benchmark examples programs", False),
+    BoolVariable("validate_examples", "Build validate examples programs", False),
     BoolVariable("reference_openmp", "Build reference validation with openmp", True),
-    #FIXME Switch the following two options to False before releasing
-    BoolVariable("validation_tests", "Build validation test programs", True),
-    BoolVariable("benchmark_tests", "Build benchmark test programs", True),
+    BoolVariable("validation_tests", "Build validation test programs", False),
+    BoolVariable("benchmark_tests", "Build benchmark test programs", False),
     ("test_filter", "Pattern to specify the tests' filenames to be compiled", "*.cpp")
 ]
 
@@ -127,6 +128,7 @@ if env['opencl']:
     files_validation += Glob('validation/CL/' + filter_pattern)
     if env['external_tests_dir']:
         files_validation += Glob(env['external_tests_dir'] + '/tests/validation/CL/' + filter_pattern)
+    files_validation += Glob('validation/gpu/unit/*.cpp')
 
 if env['neon']:
     filter_pattern = test_env['test_filter']
@@ -144,16 +146,7 @@ if env['neon']:
         files_validation += Glob('validation/NEON/*/' + filter_pattern)
     if env['external_tests_dir']:
         files_validation += Glob(env['external_tests_dir'] + '/tests/validation/NEON/' + filter_pattern)
-
-
-if env['gles_compute']:
-    test_env.Append(CPPDEFINES=['ARM_COMPUTE_GC'])
-
-    files_benchmark += Glob('benchmark/GLES_COMPUTE/*/*.cpp')
-    files_benchmark += Glob('benchmark/GLES_COMPUTE/*.cpp')
-
-    files_validation += Glob('validation/GLES_COMPUTE/*/*.cpp')
-    files_validation += Glob('validation/GLES_COMPUTE/*.cpp')
+    files_validation += Glob('validation/cpu/unit/*.cpp')
 
 extra_link_flags = []
 if env['os'] == 'android':

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,9 +38,14 @@
 #define MAX(x, y) max(x, y)
 #define MIN(x, y) min(x, y)
 #define SQUARED_DIFF(x, y) (x - y) * (x - y)
-#define DIV(x, y) (x / y)
 #define POWER(x, y) pow(x, y)
 #define PRELU(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE_OUT)0), SELECT_VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))))
+
+#if defined(S32)
+#define DIV(x, y) CONVERT(floor(CONVERT(x , VEC_DATA_TYPE(float, VEC_SIZE_OUT)) / CONVERT(y , VEC_DATA_TYPE(float, VEC_SIZE_OUT))), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT));
+#else /* S32 */
+#define DIV(x, y) (x / y)
+#endif /* S32 */
 
 #define AND(x, y) (CONVERT((x && y), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)) & ((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))1))
 #define OR(x, y) (CONVERT((x || y), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)) & ((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))1))

@@ -43,9 +43,8 @@ CLPermute::CLPermute()
     : _impl(std::make_unique<Impl>())
 {
 }
-CLPermute::CLPermute(CLPermute &&) = default;
-CLPermute &CLPermute::operator=(CLPermute &&) = default;
-CLPermute::~CLPermute()                       = default;
+
+CLPermute::~CLPermute() = default;
 
 void CLPermute::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {

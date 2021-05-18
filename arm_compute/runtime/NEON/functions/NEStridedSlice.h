@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,6 +94,14 @@ public:
     NEStridedSlice &operator=(NEStridedSlice &&);
 
     /** Configure kernel
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |All    |All    |
      *
      * @note Supported tensor rank: up to 4
      *

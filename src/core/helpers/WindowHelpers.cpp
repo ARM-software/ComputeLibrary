@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 Arm Limited.
+* Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,57 @@ Window calculate_max_window(const ValidRegion &valid_region, const Steps &steps,
     for(; n < anchor.num_dimensions(); ++n)
     {
         window.set(n, Window::Dimension(anchor[n], std::max<size_t>(1, shape[n])));
+    }
+
+    for(; n < Coordinates::num_max_dimensions; ++n)
+    {
+        window.set(n, Window::Dimension(0, 1));
+    }
+
+    return window;
+}
+
+Window calculate_max_window(const TensorShape &shape, const Steps &steps, bool skip_border, BorderSize border_size)
+{
+    if(!skip_border)
+    {
+        border_size = BorderSize(0);
+    }
+
+    Window window;
+
+    window.set(0, Window::Dimension(
+                   // Skip the border left of the image
+                   border_size.left,
+                   // Skip the border right of the image
+                   // Make sure the window width is a multiple of the step size
+                   border_size.left + ceil_to_multiple(std::max(0, static_cast<int>(shape[0]) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right)), steps[0]),
+                   steps[0]));
+
+    size_t n = 1;
+
+    if(shape.num_dimensions() > 1)
+    {
+        window.set(1, Window::Dimension(
+                       // Skip the border above the image
+                       border_size.top,
+                       // Skip the border below the image
+                       border_size.top + ceil_to_multiple(std::max(0, static_cast<int>(shape[1]) - static_cast<int>(border_size.top) - static_cast<int>(border_size.bottom)), steps[1]),
+                       steps[1]));
+
+        ++n;
+    }
+
+    if(shape.num_dimensions() > 2)
+    {
+        window.set(2, Window::Dimension(0, std::max<size_t>(1, shape[2]), steps[2]));
+
+        ++n;
+    }
+
+    for(; n < shape.num_dimensions(); ++n)
+    {
+        window.set(n, Window::Dimension(0, std::max<size_t>(1, shape[n])));
     }
 
     for(; n < Coordinates::num_max_dimensions; ++n)

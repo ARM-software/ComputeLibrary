@@ -92,6 +92,7 @@ public:
     DECLARE_FUNCTION_PTR(clCreateContext);
     DECLARE_FUNCTION_PTR(clCreateContextFromType);
     DECLARE_FUNCTION_PTR(clCreateCommandQueue);
+    DECLARE_FUNCTION_PTR(clCreateCommandQueueWithProperties);
     DECLARE_FUNCTION_PTR(clGetContextInfo);
     DECLARE_FUNCTION_PTR(clBuildProgram);
     DECLARE_FUNCTION_PTR(clEnqueueNDRangeKernel);
@@ -123,6 +124,7 @@ public:
     DECLARE_FUNCTION_PTR(clGetDeviceIDs);
     DECLARE_FUNCTION_PTR(clGetMemObjectInfo);
     DECLARE_FUNCTION_PTR(clRetainEvent);
+    DECLARE_FUNCTION_PTR(clGetPlatformInfo);
     DECLARE_FUNCTION_PTR(clGetPlatformIDs);
     DECLARE_FUNCTION_PTR(clGetKernelWorkGroupInfo);
     DECLARE_FUNCTION_PTR(clGetCommandQueueInfo);

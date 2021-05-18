@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,6 +92,63 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+
+TEST_SUITE(InPlace)
+TEST_CASE(Validate, framework::DatasetMode::ALL)
+{
+    // PRelu operaotr should be able to take nullptr as output and do the in-place computation.
+    // Shape and data type are selected randomly since they shouldn't matter
+    const auto tensor_info = TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32);
+    const auto result      = arm_compute::CLPReluLayer::validate(&tensor_info, &tensor_info, nullptr);
+    ARM_COMPUTE_EXPECT(bool(result) == true, framework::LogLevel::ERRORS);
+}
+
+SimpleTensor<float> compute_float_reference(const TensorInfo &tensor_info)
+{
+    SimpleTensor<float> ref_src1{ tensor_info.tensor_shape(), tensor_info.data_type() };
+    SimpleTensor<float> ref_src2{ tensor_info.tensor_shape(), tensor_info.data_type() };
+    SimpleTensor<float> ref_dst{ tensor_info.tensor_shape(), tensor_info.data_type() };
+
+    library->fill_tensor_uniform(ref_src1, 0);
+    library->fill_tensor_uniform(ref_src2, 1);
+
+    return reference::arithmetic_operation<float>(ArithmeticOperation::PRELU, ref_src1, ref_src2, ref_dst);
+}
+
+void compute_float_target_in_place(CLTensor &src1, CLTensor &src2, bool use_nullptr_output)
+{
+    auto fn = arm_compute::CLPReluLayer{};
+    fn.configure(&src1, &src2, use_nullptr_output ? nullptr : &src1);
+
+    src1.allocator()->allocate();
+    src2.allocator()->allocate();
+
+    library->fill_tensor_uniform(CLAccessor(src1), 0);
+    library->fill_tensor_uniform(CLAccessor(src2), 1);
+
+    fn.run();
+}
+
+TEST_CASE(ComputeWithNullPtr, framework::DatasetMode::ALL)
+{
+    const auto tensor_info = TensorInfo(TensorShape(33U, 13U, 2U), 1, DataType::F32);
+
+    auto src1 = create_tensor<CLTensor>(tensor_info);
+    auto src2 = create_tensor<CLTensor>(tensor_info);
+    compute_float_target_in_place(src1, src2, true);
+    validate(CLAccessor(src1), compute_float_reference(tensor_info));
+}
+
+TEST_CASE(ComputeWithSameTensor, framework::DatasetMode::ALL)
+{
+    const auto tensor_info = TensorInfo(TensorShape(33U, 13U, 2U), 1, DataType::F32);
+
+    auto src1 = create_tensor<CLTensor>(tensor_info);
+    auto src2 = create_tensor<CLTensor>(tensor_info);
+    compute_float_target_in_place(src1, src2, false);
+    validate(CLAccessor(src1), compute_float_reference(tensor_info));
+}
+TEST_SUITE_END() // InPlace
 
 template <typename T>
 using CLPReluLayerFixture = PReluLayerValidationFixture<CLTensor, CLAccessor, CLPReluLayer, T>;

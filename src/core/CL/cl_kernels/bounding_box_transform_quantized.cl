@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #if defined(DATA_TYPE) && defined(DATA_TYPE_DELTAS) && defined(WEIGHT_X) && defined(WEIGHT_Y) && defined(WEIGHT_W) && defined(WEIGHT_H) && defined(IMG_WIDTH) && defined(IMG_HEIGHT) && defined(BOX_FIELDS) && defined(SCALE_BEFORE) && defined(OFFSET_BOXES) && defined(SCALE_BOXES) && defined(OFFSET_DELTAS) && defined(SCALE_DELTAS) && defined(OFFSET_PRED_BOXES) && defined(SCALE_PRED_BOXES) // Check for compile time constants
 
-/** Perform a padded copy of input tensor to the output tensor for quantized data types. Padding values are defined at compile time
+/** Transform proposal bounding boxes to target bounding box using bounding box deltas for quantized data types.
  *
  * @attention The following variables must be passed at compile time:
  * -# -DDATA_TYPE= Tensor data type. Supported data types: QASYMM16 for boxes and pred_boxes, QASYMM8 for for deltas

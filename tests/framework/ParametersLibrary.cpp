@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,12 +56,5 @@ typename ContextType<CLTensor>::type *ParametersLibrary::get_ctx<CLTensor>()
 }
 #endif /* ARM_COMPUTE_CL */
 
-#if ARM_COMPUTE_GC
-template <>
-typename ContextType<GCTensor>::type *ParametersLibrary::get_ctx<GCTensor>()
-{
-    return static_cast<typename ContextType<GCTensor>::type *>(_gc_ctx.get());
-}
-#endif /* ARM_COMPUTE_GC */
 } // namespace test
 } // namespace arm_compute

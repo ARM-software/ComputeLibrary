@@ -54,6 +54,15 @@ public:
     CLRsqrtLayer &operator=(CLRsqrtLayer &&);
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
      * @param[in]  input  Input tensor. Data types supported: F16/F32.
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
@@ -99,6 +108,15 @@ public:
     /** Default move assignment operator */
     CLExpLayer &operator=(CLExpLayer &&);
     /** Initialize the function
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F16            |F16            |
+     * |F32            |F32            |
      *
      * @param[in]  input  Input tensor. Data types supported: F16/F32.
      * @param[out] output Output tensor. Data types supported: same as @p input.
@@ -146,6 +164,15 @@ public:
     CLNegLayer &operator=(CLNegLayer &&);
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
      * @param[in]  input  Input tensor. Data types supported: F16/F32.
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
@@ -191,6 +218,15 @@ public:
     /** Default move assignment operator */
     CLSinLayer &operator=(CLSinLayer &&);
     /** Initialize the function
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F16            |F16            |
+     * |F32            |F32            |
      *
      * @param[in]  input  Input tensor. Data types supported: F16/F32.
      * @param[out] output Output tensor. Data types supported: same as @p input.
@@ -238,6 +274,15 @@ public:
     CLLogLayer &operator=(CLLogLayer &&);
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
      * @param[in]  input  Input tensor. Data types supported: F16/F32.
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
@@ -284,6 +329,15 @@ public:
     CLAbsLayer &operator=(CLAbsLayer &&);
     /** Initialize the function
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
      * @param[in]  input  Input tensor. Data types supported: F16/F32.
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
@@ -329,6 +383,15 @@ public:
     /** Default move assignment operator */
     CLRoundLayer &operator=(CLRoundLayer &&);
     /** Initialize the function
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F16            |F16            |
+     * |F32            |F32            |
      *
      * @param[in]  input  Input tensor. Data types supported: F16/F32.
      * @param[out] output Output tensor. Data types supported: same as @p input.

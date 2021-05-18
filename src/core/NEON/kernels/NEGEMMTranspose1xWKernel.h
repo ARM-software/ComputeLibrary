@@ -31,7 +31,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Neon kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)
+/** Kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)
  *
  * Following an example of how the transposition1xW works when the input data is F32
  *

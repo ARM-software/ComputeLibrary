@@ -30,10 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to add padding to a tensor
- *
- * Add padding given padding information
- */
+/** Basic kernel to pad the input tensor given padding information. */
 class NEPadLayerKernel : public INEKernel
 {
 public:

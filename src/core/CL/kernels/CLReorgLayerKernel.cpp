@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,7 +101,6 @@ void CLReorgLayerKernel::configure(const CLCompileContext &compile_context, cons
     Window win = calculate_max_window(*output->info(), Steps());
 
     // The CLWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
     ICLKernel::configure_internal(win);
 
     _config_id = kernel_name;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -120,18 +120,18 @@ protected:
                 ARM_COMPUTE_ERROR("Gradient dimension not supported");
         }
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst_x.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst_y.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst_x.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst_y.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
         dst_x.allocator()->allocate();
         dst_y.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst_x.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst_y.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst_x.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst_y.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src));

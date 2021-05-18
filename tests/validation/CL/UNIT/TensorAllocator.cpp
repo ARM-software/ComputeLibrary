@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,14 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 
 #include "arm_compute/core/utils/misc/MMappedFile.h"
+#include "arm_compute/runtime/BlobLifetimeManager.h"
+#include "arm_compute/runtime/CL/CLBufferAllocator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
+#include "arm_compute/runtime/PoolManager.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
@@ -60,11 +65,107 @@ cl_mem import_malloc_memory_helper(void *ptr, size_t size)
 
     return buf;
 }
+
+class DummyAllocator final : public IAllocator
+{
+public:
+    DummyAllocator() = default;
+
+    void *allocate(size_t size, size_t alignment) override
+    {
+        ++_n_calls;
+        return _backend_allocator.allocate(size, alignment);
+    }
+    void free(void *ptr) override
+    {
+        return _backend_allocator.free(ptr);
+    }
+    std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) override
+    {
+        // Needs to be implemented as is the one that is used internally by the CLTensorAllocator
+        ++_n_calls;
+        return _backend_allocator.make_region(size, alignment);
+    }
+    int get_n_calls() const
+    {
+        return _n_calls;
+    }
+
+private:
+    int               _n_calls{};
+    CLBufferAllocator _backend_allocator{};
+};
+
+void run_conv2d(std::shared_ptr<IMemoryManager> mm, IAllocator &mm_allocator)
+{
+    // Create tensors
+    CLTensor src, weights, bias, dst;
+    src.allocator()->init(TensorInfo(TensorShape(16U, 32U, 32U, 2U), 1, DataType::F32, DataLayout::NHWC));
+    weights.allocator()->init(TensorInfo(TensorShape(16U, 3U, 3U, 32U), 1, DataType::F32, DataLayout::NHWC));
+    bias.allocator()->init(TensorInfo(TensorShape(32U), 1, DataType::F32, DataLayout::NHWC));
+    dst.allocator()->init(TensorInfo(TensorShape(32U, 32U, 32U, 2U), 1, DataType::F32, DataLayout::NHWC));
+
+    // Create and configure function
+    CLGEMMConvolutionLayer conv(mm);
+    conv.configure(&src, &weights, &bias, &dst, PadStrideInfo(1U, 1U, 1U, 1U));
+
+    // Allocate tensors
+    src.allocator()->allocate();
+    weights.allocator()->allocate();
+    bias.allocator()->allocate();
+    dst.allocator()->allocate();
+
+    // Finalize memory manager
+    if(mm != nullptr)
+    {
+        mm->populate(mm_allocator, 1 /* num_pools */);
+        ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 1, framework::LogLevel::ERRORS);
+    }
+
+    conv.run();
+}
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(TensorAllocator)
+
+/* Validate that an external global allocator can be used for all internal allocations */
+TEST_CASE(ExternalGlobalAllocator, framework::DatasetMode::ALL)
+{
+    DummyAllocator global_tensor_alloc;
+    CLTensorAllocator::set_global_allocator(&global_tensor_alloc);
+
+    // Run a convolution
+    run_conv2d(nullptr /* mm */, global_tensor_alloc);
+
+    // Check that allocator has been called multiple times > 4
+    ARM_COMPUTE_EXPECT(global_tensor_alloc.get_n_calls() > 4, framework::LogLevel::ERRORS);
+
+    // Nullify global allocator
+    CLTensorAllocator::set_global_allocator(nullptr);
+}
+
+/* Validate that an external global allocator can be used for the pool manager */
+TEST_CASE(ExternalGlobalAllocatorMemoryPool, framework::DatasetMode::ALL)
+{
+    auto lifetime_mgr = std::make_shared<BlobLifetimeManager>();
+    auto pool_mgr     = std::make_shared<PoolManager>();
+    auto mm           = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
+
+    DummyAllocator global_tensor_alloc;
+    CLTensorAllocator::set_global_allocator(&global_tensor_alloc);
+
+    // Run a convolution
+    run_conv2d(mm, global_tensor_alloc);
+
+    // Check that allocator has been called multiple times > 4
+    ARM_COMPUTE_EXPECT(global_tensor_alloc.get_n_calls() > 4, framework::LogLevel::ERRORS);
+
+    // Nullify global allocator
+    CLTensorAllocator::set_global_allocator(nullptr);
+}
 
 /** Validates import memory interface when importing cl buffer objects */
 TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
@@ -79,31 +180,31 @@ TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
     // Negative case : Import nullptr
     CLTensor t1;
     t1.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(!bool(t1.allocator()->import_memory(cl::Buffer())), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t1.allocator()->import_memory(cl::Buffer())));
+    ARM_COMPUTE_ASSERT(t1.info()->is_resizable());
 
     // Negative case : Import memory to a tensor that is memory managed
     CLTensor    t2;
     MemoryGroup mg;
     t2.allocator()->set_associated_memory_group(&mg);
-    ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t2.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t2.allocator()->import_memory(buf)));
+    ARM_COMPUTE_ASSERT(t2.info()->is_resizable());
 
     // Negative case : Invalid buffer size
     CLTensor         t3;
     const TensorInfo info_neg(TensorShape(32U, 16U, 3U), 1, DataType::F32);
     t3.allocator()->init(info_neg);
-    ARM_COMPUTE_EXPECT(!bool(t3.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t3.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!bool(t3.allocator()->import_memory(buf)));
+    ARM_COMPUTE_ASSERT(t3.info()->is_resizable());
 
     // Positive case : Set raw pointer
     CLTensor t4;
     t4.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(bool(t4.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!t4.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(bool(t4.allocator()->import_memory(buf)));
+    ARM_COMPUTE_ASSERT(!t4.info()->is_resizable());
     ARM_COMPUTE_EXPECT(t4.cl_buffer().get() == buf.get(), framework::LogLevel::ERRORS);
     t4.allocator()->free();
-    ARM_COMPUTE_EXPECT(t4.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(t4.info()->is_resizable());
     ARM_COMPUTE_EXPECT(t4.cl_buffer().get() != buf.get(), framework::LogLevel::ERRORS);
 }
 
@@ -141,8 +242,8 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
         std::align(alignment, total_size_in_bytes, aligned_ptr, space);
 
         cl::Buffer wrapped_buffer(import_malloc_memory_helper(aligned_ptr, total_size_in_bytes));
-        ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(wrapped_buffer)), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(bool(tensor.allocator()->import_memory(wrapped_buffer)));
+        ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
 
         // Fill tensor
         std::uniform_real_distribution<float> distribution(-5.f, 5.f);
@@ -205,12 +306,12 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 
         // Map file
         utils::mmap_io::MMappedFile mmapped_file("test_mmap_import.bin", 0 /** Whole file */, 0);
-        ARM_COMPUTE_EXPECT(mmapped_file.is_mapped(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(mmapped_file.is_mapped());
         unsigned char *data = mmapped_file.data();
 
         cl::Buffer wrapped_buffer(import_malloc_memory_helper(data, total_size_in_bytes));
-        ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(wrapped_buffer)), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(bool(tensor.allocator()->import_memory(wrapped_buffer)));
+        ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
 
         // Fill tensor
         std::uniform_real_distribution<float> distribution(-5.f, 5.f);
@@ -233,7 +334,7 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 
         // Release resources
         tensor.allocator()->free();
-        ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
     }
 }
 #endif // !defined(BARE_METAL)

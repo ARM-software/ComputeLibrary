@@ -18,7 +18,6 @@ def get_list_flags( filename, arch):
     flags = ["-std=c++14"]
     flags.append("-DARM_COMPUTE_CPP_SCHEDULER=1")
     flags.append("-DARM_COMPUTE_CL")
-    flags.append("-DARM_COMPUTE_GC")
     if arch == "aarch64":
         flags.append("-DARM_COMPUTE_AARCH64_V8_2")
     return flags
@@ -66,6 +65,7 @@ def filter_clang_tidy_lines( lines ):
                 ("Utils.h" in line and "no member named 'unmap' in 'arm_compute::Tensor'" in line) or
                 ("Utils.h" in line and "no member named 'map' in 'arm_compute::Tensor'" in line) or
                 ("CPUUtils.cpp" in line and "'asm/hwcap.h' file not found" in line) or
+                ("CPUUtils.cpp" in line and "use of undeclared identifier 'HWCAP_SVE'" in line) or
                 ("'arm_compute_version.embed' file not found" in line) ):
                 print_context=False
                 continue
@@ -86,7 +86,6 @@ def filter_clang_tidy_lines( lines ):
                ("TensorAllocator.cpp" in line and "warning: do not declare C-style arrays" in line) or
                ("RawTensor.cpp" in line and "warning: pointer parameter 'ptr' can be pointer to const" in line) or
                ("RawTensor.cpp" in line and "warning: do not declare C-style arrays" in line) or
-               ("GCBufferAllocator.cpp" in line and "warning: initializing non-owner" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move assignment operators should be marked noexcept" in line) or
                ("CLMinMaxLocationKernel.cpp" in line and "Forming reference to null pointer" in line) or
@@ -112,15 +111,15 @@ def filter_clang_tidy_lines( lines ):
                ("NEWinogradLayerKernel.cpp" in line and "use '= default' to define a trivial destructor" in line) or
                ("NEGEMMLowpMatrixMultiplyCore.cpp" in line and "constructor does not initialize these fields" in line) or
                ("NEGEMMLowpAssemblyMatrixMultiplyCore" in line and "constructor does not initialize these fields" in line) or
-               ("NEDepthwiseConvolutionLayerNativeKernel" in line and re.search(r"parameter '[^']+' is unused", line)) or
-               ("NEDepthwiseConvolutionAssemblyDispatch" in line and re.search(r"parameter '[^']+' is unused", line)) or
+               ("CpuDepthwiseConvolutionNativeKernel" in line and re.search(r"parameter '[^']+' is unused", line)) or
+               ("CpuDepthwiseConvolutionAssemblyDispatch" in line and re.search(r"parameter '[^']+' is unused", line)) or
+               ("CpuDepthwiseConvolutionAssemblyDispatch" in line and "modernize-use-equals-default" in line) or
                ("CPUUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("CPUUtils.cpp" in line and "parameter 'cpusv' is unused" in line) or
                ("CPUUtils.cpp" in line and "warning: uninitialized record type" in line) or
-               ("GCKernelLibrary.cpp" in line and "warning: do not declare C-style arrays" in line) or
                ("Utils.h" in line and "warning: Use of zero-allocated memory" in line) or
-               ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line) or # This is to prevent false positive, should be reassessed with the newer clang-tidy
-               ("NEDepthwiseConvolutionLayerNativeKernel.cpp" in line and "cppcoreguidelines-pro-type-member-init" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
+               ("CpuDepthwiseConvolutionNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line) or # This is to prevent false positive, should be reassessed with the newer clang-tidy
+               ("CpuDepthwiseConvolutionNativeKernel.cpp" in line and "cppcoreguidelines-pro-type-member-init" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
                 print_context=False
                 continue
 

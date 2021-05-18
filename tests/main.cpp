@@ -44,9 +44,6 @@
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "utils/TypePrinter.h"
 #endif /* ARM_COMPUTE_CL */
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#endif /* ARM_COMPUTE_GC */
 #include "arm_compute/runtime/Scheduler.h"
 
 #include <fstream>
@@ -152,6 +149,8 @@ int main(int argc, char **argv)
     threads->set_help("Number of threads to use");
     auto cooldown_sec = parser.add_option<utils::SimpleOption<float>>("delay", -1.f);
     cooldown_sec->set_help("Delay to add between test executions in seconds");
+    auto configure_only = parser.add_option<utils::ToggleOption>("configure-only", false);
+    configure_only->set_help("Only configures kernels, without allocating, running or validating. Needed in order to validate OpenCL kernel run-time compilation, without necessarily running or validating the kernels' execution");
 
     try
     {
@@ -179,26 +178,12 @@ int main(int argc, char **argv)
         parameters = std::make_unique<ParametersLibrary>();
         parameters->set_cpu_ctx(std::move(cpu_ctx));
 
-#ifdef ARM_COMPUTE_GC
-        // Setup OpenGL context
-        {
-            auto gles_ctx = std::make_unique<GCRuntimeContext>();
-            ARM_COMPUTE_ERROR_ON(gles_ctx == nullptr);
-            {
-                // Legacy singletons API: This has been deprecated and the singletons will be removed in future releases
-                // Setup singleton for backward compatibility
-                GCScheduler::get().default_init();
-            }
-            parameters->set_gc_ctx(std::move(gles_ctx));
-        };
-#endif /* ARM_COMPUTE_GC */
-
 #ifdef ARM_COMPUTE_CL
         CLTuner                cl_tuner(false);
         CLGEMMHeuristicsHandle gemm_heuristics;
         if(opencl_is_available())
         {
-            auto ctx_dev_err = create_opencl_context_and_device();
+            auto ctx_dev_err = create_opencl_context_and_device(CLBackendType::Native);
             ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
             gemm_heuristics.reload_from_file(mlgo_file->value());
             CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner, &gemm_heuristics);
@@ -281,6 +266,7 @@ int main(int argc, char **argv)
         fconfig.mode           = dataset_mode->value();
         fconfig.log_level      = options.log_level->value();
         fconfig.cooldown_sec   = cooldown_sec->value();
+        fconfig.configure_only = configure_only->value();
         framework.init(fconfig);
 
         for(auto &p : printers)

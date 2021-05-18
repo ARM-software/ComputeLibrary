@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to perform a tile operation */
+/** Basic kernel to perform a tile operation */
 class NETileKernel : public INEKernel
 {
 public:

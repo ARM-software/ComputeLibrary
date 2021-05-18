@@ -32,7 +32,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Neon kernel to convert asymmetric signed to asymmetric signed and vice-versa */
+/** Kernel to convert asymmetric signed to asymmetric signed and vice-versa */
 class NEConvertQuantizedSignednessKernel : public INEKernel
 {
 public:

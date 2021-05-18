@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,27 +24,43 @@
 
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/NEON/kernels/NEQuantizationLayerKernel.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "src/runtime/cpu/operators/CpuQuantization.h"
 
 namespace arm_compute
 {
+struct NEQuantizationLayer::Impl
+{
+    const ITensor                        *src{ nullptr };
+    ITensor                              *dst{ nullptr };
+    std::unique_ptr<cpu::CpuQuantization> op{ nullptr };
+};
+
+NEQuantizationLayer::NEQuantizationLayer()
+    : _impl(std::make_unique<Impl>())
+{
+}
+NEQuantizationLayer::~NEQuantizationLayer() = default;
+
 Status NEQuantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEQuantizationLayerKernel::validate(input, output));
-
-    return Status{};
+    return cpu::CpuQuantization::validate(input, output);
 }
 
 void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = std::make_unique<cpu::CpuQuantization>();
+    _impl->op->configure(input->info(), output->info());
+}
 
-    // Configure quantize kernel
-    auto k = std::make_unique<NEQuantizationLayerKernel>();
-    k->configure(input, output);
-    _kernel = std::move(k);
+void NEQuantizationLayer::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

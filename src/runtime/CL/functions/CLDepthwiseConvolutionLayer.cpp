@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,13 +30,9 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
-#include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
-#include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.h"
-#include "src/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 
 namespace arm_compute
 {
@@ -46,23 +42,18 @@ using namespace arm_compute::misc::shape_calculator;
 namespace
 {
 Status validate_arguments_3x3(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                              unsigned int depth_multiplier, ActivationLayerInfo act_info, GPUTarget gpu_target, const Size2D &dilation)
+                              unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
     // This function should be removed and incorporated inside CLDepthwiseConvolutionLayerInternal3x3 once CLDepthwiseConvolutionLayer3x3 is properly removed
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
-    const bool                      is_quantized           = is_data_type_quantized_asymmetric(input->data_type());
-    const bool                      is_nhwc                = input->data_layout() == DataLayout::NHWC;
-    const bool                      needs_permute          = is_nhwc && (depth_multiplier > 1);
-    const bool                      needs_weights_reshape  = is_nhwc && (depth_multiplier == 1) && is_quantized;
-    const bool                      is_stride_1            = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
-    const bool                      is_stride_1_dilation_1 = (is_stride_1 && dilation.x() == 1 && dilation.y() == 1);
-    const bool                      is_dot8_supported      = dot8_supported(CLKernelLibrary::get().get_device());
-    DepthwiseConvolutionReshapeInfo info;
-    info.c0        = 4;
-    info.transpose = is_stride_1_dilation_1 && is_dot8_supported;
+    const bool is_quantized  = is_data_type_quantized_asymmetric(input->data_type());
+    const bool is_nhwc       = input->data_layout() == DataLayout::NHWC;
+    const bool needs_permute = is_nhwc && (depth_multiplier > 1);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(is_quantized && is_nhwc && !needs_permute);
 
     TensorInfo output_multipliers_shifts_info(TensorInfo(TensorShape(1U), 1, DataType::S32));
     if(is_quantized)
@@ -82,9 +73,10 @@ Status validate_arguments_3x3(const ITensorInfo *input, const ITensorInfo *weigh
 
     if(needs_permute)
     {
-        TensorShape permuted_input_shape   = input->tensor_shape();
-        TensorShape permuted_weights_shape = weights->tensor_shape();
-        TensorShape permuted_output_shape  = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
+        TensorShape           permuted_input_shape   = input->tensor_shape();
+        TensorShape           permuted_weights_shape = weights->tensor_shape();
+        const ConvolutionInfo info{ conv_info, depth_multiplier, ActivationLayerInfo(), dilation };
+        TensorShape           permuted_output_shape = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
 
         permute(permuted_input_shape, PermutationVector(1U, 2U, 0U));
         permute(permuted_weights_shape, PermutationVector(1U, 2U, 0U));
@@ -95,27 +87,17 @@ Status validate_arguments_3x3(const ITensorInfo *input, const ITensorInfo *weigh
         const TensorInfo permuted_output  = output->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_output_shape).set_data_layout(DataLayout::NCHW);
 
         ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(&permuted_input, &permuted_weights, biases, &permuted_output,
-                                                                                       conv_info, depth_multiplier, act_info, gpu_target,
+                                                                                       conv_info, depth_multiplier, act_info,
                                                                                        dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
     }
     else if(is_nhwc)
     {
-        if(needs_weights_reshape)
-        {
-            auto reshaped_weights_shape = arm_compute::misc::shape_calculator::compute_reshaped_depthwise_weights_shape(*weights, info);
-            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, &weights->clone()->set_tensor_shape(reshaped_weights_shape), biases,
-                                                                                           output, conv_info, depth_multiplier, act_info,
-                                                                                           dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info,
-                                                                                           dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
-        }
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info,
+                                                                                       dilation));
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target,
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info,
                                                                                        dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
     }
     return Status{};
@@ -272,9 +254,10 @@ Status CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::validate
 
     if(needs_permute)
     {
-        TensorShape permuted_input_shape   = input->tensor_shape();
-        TensorShape permuted_weights_shape = weights->tensor_shape();
-        TensorShape permuted_output_shape  = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
+        TensorShape           permuted_input_shape   = input->tensor_shape();
+        TensorShape           permuted_weights_shape = weights->tensor_shape();
+        const ConvolutionInfo info{ conv_info, depth_multiplier, ActivationLayerInfo(), dilation };
+        TensorShape           permuted_output_shape = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
 
         permute(permuted_input_shape, PermutationVector(2U, 0U, 1U));
         permute(permuted_weights_shape, PermutationVector(2U, 0U, 1U));
@@ -324,7 +307,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
         {
             _output_multipliers.map();
             _output_shifts.map();
-            const unsigned int idx_ofms = get_data_layout_dimension_index(_output->info()->data_layout(), DataLayoutDimension::CHANNEL);
+            const unsigned int idx_ofms = _needs_permute ? 2 : 0;
             quantization::compute_quantized_multipliers_and_shifts(_input->info(),
                                                                    _original_weights->info(),
                                                                    _output->info(),
@@ -349,12 +332,12 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
 
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::CLDepthwiseConvolutionLayerInternal3x3(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _kernel(nullptr),
+      _kernel_nchw(nullptr),
+      _kernel_nhwc(nullptr),
       _border_handler(std::make_unique<CLFillBorderKernel>()),
       _permute_input_to_nchw(),
       _permute_weights_to_nchw(),
       _permute_output_to_nhwc(),
-      _reshape_weights(std::make_unique<CLDepthwiseConvolutionLayerReshapeWeightsKernel>()),
       _permuted_input(),
       _permuted_weights(),
       _permuted_output(),
@@ -364,9 +347,9 @@ CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::CLDepthwise
       _input(nullptr),
       _output(nullptr),
       _needs_permute(false),
-      _needs_weights_reshape(false),
       _is_prepared(false),
-      _is_quantized(false)
+      _is_quantized(false),
+      _is_nhwc(false)
 {
 }
 
@@ -380,8 +363,6 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
                                                                                     ICLTensor           *output,
                                                                                     const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
-    const GPUTarget gpu_target = CLScheduler::get().target();
-
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLDepthwiseConvolutionLayerInternal3x3::validate(input->info(),
@@ -391,13 +372,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
                                                                                 conv_info,
                                                                                 depth_multiplier,
                                                                                 act_info,
-                                                                                gpu_target,
                                                                                 dilation));
 
-    const bool is_nhwc     = input->info()->data_layout() == DataLayout::NHWC;
-    _is_quantized          = is_data_type_quantized_asymmetric(input->info()->data_type());
-    _needs_permute         = is_nhwc && (depth_multiplier > 1);
-    _needs_weights_reshape = is_nhwc && (depth_multiplier == 1) && _is_quantized;
+    _is_nhwc       = input->info()->data_layout() == DataLayout::NHWC;
+    _is_quantized  = is_data_type_quantized_asymmetric(input->info()->data_type());
+    _needs_permute = _is_nhwc && (depth_multiplier > 1);
 
     _is_prepared      = false;
     _original_weights = weights;
@@ -409,13 +388,6 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
     ICLTensor       *output_to_use  = output;
 
     const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights->info()->data_type());
-    const bool is_stride_1              = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
-    const bool is_dot8_supported        = dot8_supported(CLKernelLibrary::get().get_device()) && !is_quantized_per_channel;
-    const bool is_stride_1_dilation_1   = (is_stride_1 && dilation.x() == 1 && dilation.y() == 1);
-
-    DepthwiseConvolutionReshapeInfo info;
-    info.c0        = 4;
-    info.transpose = is_stride_1_dilation_1 && is_dot8_supported;
 
     if(_needs_permute)
     {
@@ -435,20 +407,15 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
         weights_to_use = &_permuted_weights;
         output_to_use  = &_permuted_output;
 
-        _kernel = std::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
+        _kernel_nchw = std::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
     }
-    else if(is_nhwc)
+    else if(_is_nhwc)
     {
-        if(_needs_weights_reshape)
-        {
-            _reshape_weights->configure(compile_context, weights, &_permuted_weights, info);
-            weights_to_use = &_permuted_weights;
-        }
-        _kernel = std::make_unique<CLDepthwiseConvolutionLayer3x3NHWCKernel>();
+        _kernel_nhwc = std::make_unique<CLDepthwiseConvolutionLayer3x3NHWCKernel>();
     }
     else
     {
-        _kernel = std::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
+        _kernel_nchw = std::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
     }
 
     CLTensor *output_multipliers_to_use = nullptr;
@@ -466,9 +433,16 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
     }
 
     // Configure kernel
-    _kernel->set_target(gpu_target);
-    _kernel->configure(compile_context, input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier,
-                       act_info, dilation, output_multipliers_to_use, output_shifts_to_use);
+    if(_is_nhwc && !_needs_permute)
+    {
+        _kernel_nhwc->configure(compile_context, input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier,
+                                act_info, dilation);
+    }
+    else
+    {
+        _kernel_nchw->configure(compile_context, input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier,
+                                act_info, dilation, output_multipliers_to_use, output_shifts_to_use);
+    }
 
     if(_is_quantized)
     {
@@ -493,13 +467,16 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
     {
         zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().uniform().offset));
     }
-    _border_handler->configure(compile_context, input_to_use, _kernel->border_size(), BorderMode::CONSTANT, zero_value);
+    if(!_is_nhwc || _needs_permute)
+    {
+        _border_handler->configure(compile_context, input_to_use, _kernel_nchw->border_size(), BorderMode::CONSTANT, zero_value);
+    }
 }
 
 Status CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                                                                                     const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, GPUTarget gpu_target, const Size2D &dilation)
+                                                                                     const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
-    return validate_arguments_3x3(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target, dilation);
+    return validate_arguments_3x3(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
 }
 
 void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::run()
@@ -513,7 +490,14 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::run()
         _permute_input_to_nchw.run();
     }
     CLScheduler::get().enqueue(*_border_handler);
-    CLScheduler::get().enqueue(*_kernel);
+    if(_is_nhwc && !_needs_permute)
+    {
+        CLScheduler::get().enqueue(*_kernel_nhwc);
+    }
+    else
+    {
+        CLScheduler::get().enqueue(*_kernel_nchw);
+    }
 
     if(_needs_permute)
     {
@@ -529,7 +513,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::prepar
         {
             _output_multipliers.map();
             _output_shifts.map();
-            const unsigned int idx_ofms = get_data_layout_dimension_index(_output->info()->data_layout(), DataLayoutDimension::CHANNEL);
+            const unsigned int idx_ofms = _is_nhwc ? 0 : 2;
             quantization::compute_quantized_multipliers_and_shifts(_input->info(),
                                                                    _original_weights->info(),
                                                                    _output->info(),
@@ -549,14 +533,6 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::prepar
             _original_weights->mark_as_unused();
         }
 
-        if(_needs_weights_reshape)
-        {
-            ARM_COMPUTE_ERROR_ON(_needs_permute);
-            ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-            _permuted_weights.allocator()->allocate();
-            CLScheduler::get().enqueue(*_reshape_weights);
-            _original_weights->mark_as_unused();
-        }
         _is_prepared = true;
     }
 }
@@ -577,9 +553,8 @@ void CLDepthwiseConvolutionLayer::configure(const CLCompileContext &compile_cont
                                             unsigned int         depth_multiplier,
                                             ActivationLayerInfo act_info, const Size2D &dilation)
 {
-    const GPUTarget gpu_target = CLScheduler::get().target();
-    _depth_conv_func           = get_depthwiseconvolution_function(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info,
-                                                                   dilation, gpu_target);
+    _depth_conv_func = get_depthwiseconvolution_function(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info,
+                                                         dilation);
     switch(_depth_conv_func)
     {
         case DepthwiseConvolutionFunction::OPTIMIZED:
@@ -600,12 +575,11 @@ void CLDepthwiseConvolutionLayer::configure(const CLCompileContext &compile_cont
 Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                              unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
-    const GPUTarget              gpu_target      = CLScheduler::get().target();
-    DepthwiseConvolutionFunction depth_conv_func = get_depthwiseconvolution_function(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation, gpu_target);
+    DepthwiseConvolutionFunction depth_conv_func = get_depthwiseconvolution_function(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
     switch(depth_conv_func)
     {
         case DepthwiseConvolutionFunction::OPTIMIZED:
-            return CLDepthwiseConvolutionLayerInternal3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target, dilation);
+            return CLDepthwiseConvolutionLayerInternal3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
         case DepthwiseConvolutionFunction::GENERIC:
             return CLDepthwiseConvolutionLayerGeneric::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
         default:
@@ -615,10 +589,9 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 
 DepthwiseConvolutionFunction CLDepthwiseConvolutionLayer::get_depthwiseconvolution_function(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
                                                                                             const PadStrideInfo &conv_info,
-                                                                                            unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation, GPUTarget gpu_target)
+                                                                                            unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
-    if(bool(CLDepthwiseConvolutionLayerInternal3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target, dilation)) && (is_data_type_float(input->data_type())
-            || get_arch_from_target(gpu_target) == GPUTarget::MIDGARD))
+    if(bool(CLDepthwiseConvolutionLayerInternal3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation)))
     {
         return DepthwiseConvolutionFunction::OPTIMIZED;
     }

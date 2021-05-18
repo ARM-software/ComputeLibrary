@@ -25,12 +25,10 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/INEKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -50,12 +48,15 @@ namespace
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src) is not needed here as this kernel doesn't use Neon FP16 instructions.
+    // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().total_size() != dst->tensor_shape().total_size());
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+    if(dst->tensor_shape().total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().total_size() != dst->tensor_shape().total_size());
+    }
 
     return Status{};
 }
@@ -82,12 +83,10 @@ void CpuReshapeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
+    ARM_COMPUTE_UNUSED(dst);
 
     // Configure kernel window
     Window win = calculate_max_window(*src);
-
-    // Set the destination valid region
-    dst->set_valid_region(ValidRegion(Coordinates(), dst->tensor_shape()));
 
     ICpuKernel::configure(win);
 }

@@ -50,6 +50,9 @@ public:
      * @return a status
      */
     static Status validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst);
+
+    // Inherited methods overridden:
+    void run(ITensorPack &tensors) override;
 };
 
 } // namespace cpu

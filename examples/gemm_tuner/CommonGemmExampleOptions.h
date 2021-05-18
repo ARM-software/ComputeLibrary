@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/runtime/CL/CLTuner.h"
 #include "utils/TypePrinter.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
@@ -35,11 +36,12 @@ namespace gemm_tuner
 /** Structure holding all the common gemm example parameters */
 struct CommonGemmExampleParams
 {
-    size_t                M{ 100 };                                /**< Number of lhs matrix rows */
-    size_t                N{ 100 };                                /**< Number of rhs matrix columns */
-    size_t                K{ 50 };                                 /**< Number of lhs matrix columns/rhs matrix rows */
-    size_t                B{ 1 };                                  /**< Batch size */
-    arm_compute::DataType data_type{ arm_compute::DataType::F32 }; /**< Data type */
+    size_t                   M{ 100 };                                      /**< Number of lhs matrix rows */
+    size_t                   N{ 100 };                                      /**< Number of rhs matrix columns */
+    size_t                   K{ 50 };                                       /**< Number of lhs matrix columns/rhs matrix rows */
+    size_t                   B{ 1 };                                        /**< Batch size */
+    arm_compute::DataType    data_type{ arm_compute::DataType::F32 };       /**< Data type */
+    arm_compute::CLTunerMode tuner_mode{ arm_compute::CLTunerMode::RAPID }; /**< OpenCL tuner mode */
 };
 
 /** Formatted output of the CommonGemmExampleParams type
@@ -80,12 +82,13 @@ public:
     /** Default destructor */
     ~CommonGemmExampleOptions() = default;
 
-    arm_compute::utils::ToggleOption                      *help;      /**< Show help option */
-    arm_compute::utils::SimpleOption<size_t>              *M;         /**< Number of lhs matrix rows option */
-    arm_compute::utils::SimpleOption<size_t>              *N;         /**< Number of rhs matrix columns option */
-    arm_compute::utils::SimpleOption<size_t>              *K;         /**< Number of lhs matrix columns/rhs matrix rows option */
-    arm_compute::utils::SimpleOption<size_t>              *B;         /**< Batch size option */
-    arm_compute::utils::EnumOption<arm_compute::DataType> *data_type; /**< Data type */
+    arm_compute::utils::ToggleOption                         *help;       /**< Show help option */
+    arm_compute::utils::SimpleOption<size_t>                 *M;          /**< Number of lhs matrix rows option */
+    arm_compute::utils::SimpleOption<size_t>                 *N;          /**< Number of rhs matrix columns option */
+    arm_compute::utils::SimpleOption<size_t>                 *K;          /**< Number of lhs matrix columns/rhs matrix rows option */
+    arm_compute::utils::SimpleOption<size_t>                 *B;          /**< Batch size option */
+    arm_compute::utils::EnumOption<arm_compute::DataType>    *data_type;  /**< Data type */
+    arm_compute::utils::EnumOption<arm_compute::CLTunerMode> *tuner_mode; /**< OpenCL tuner mode */
 };
 
 /** Consumes the common gemm example options and creates a structure containing all information

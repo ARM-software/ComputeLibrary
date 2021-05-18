@@ -23,6 +23,7 @@
  */
 #include "src/runtime/cpu/operators/CpuElementwiseUnary.h"
 #include "src/core/cpu/kernels/CpuElementwiseUnaryKernel.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {
@@ -40,6 +41,18 @@ void CpuElementwiseUnary::configure(ElementWiseUnary op, const ITensorInfo &src,
 Status CpuElementwiseUnary::validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst)
 {
     return KernelType::validate(op, src, dst);
+}
+
+void CpuElementwiseUnary::run(ITensorPack &tensors)
+{
+    if(_kernel->is_window_configured())
+    {
+        ICpuOperator::run(tensors);
+        return;
+    }
+
+    auto src_info = tensors.get_const_tensor(TensorType::ACL_SRC)->info();
+    ICpuOperator::run(tensors, compute_output_shape_and_window(src_info->tensor_shape()).second);
 }
 } // namespace cpu
 } // namespace arm_compute

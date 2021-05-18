@@ -40,10 +40,10 @@ namespace arm_compute
 {
 class CLCompileContext;
 class CLBoundingBoxTransformKernel;
-class CLDequantizationLayerKernel;
+class CLDequantizationLayer;
 class CLComputeAllAnchorsKernel;
 class CLPadLayerKernel;
-class CLQuantizationLayerKernel;
+class CLQuantizationLayer;
 class ICLTensor;
 class ITensorInfo;
 
@@ -55,8 +55,8 @@ class ITensorInfo;
  * -# @ref CLReshapeLayer x 2
  * -# @ref CLBoundingBoxTransform
  * -# @ref CLPadLayerKernel
- * -# @ref CLDequantizationLayerKernel x 2
- * -# @ref CLQuantizationLayerKernel
+ * -# @ref CLDequantizationLayer x 2
+ * -# @ref CLQuantizationLayer
  * And the following CPP functions:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit
  */
@@ -76,6 +76,16 @@ public:
     ~CLGenerateProposalsLayer();
 
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2     |dst            |
+     * |:--------------|:------------------|:--------|:--------------|
+     * |F16            |F16                |F16      |F16            |
+     * |F32            |F32                |F32      |F32            |
+     * |QASYMM8        |QSYMM8             |QSYMM16  |QASYMM8        |
      *
      * @param[in]  scores              Scores from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors.
      *                                 Data types supported: QASYMM8/F16/F32
@@ -144,9 +154,9 @@ private:
     std::unique_ptr<CLComputeAllAnchorsKernel>    _compute_anchors_kernel;
     std::unique_ptr<CLBoundingBoxTransformKernel> _bounding_box_kernel;
     std::unique_ptr<CLPadLayerKernel>             _pad_kernel;
-    std::unique_ptr<CLDequantizationLayerKernel>  _dequantize_anchors;
-    std::unique_ptr<CLDequantizationLayerKernel>  _dequantize_deltas;
-    std::unique_ptr<CLQuantizationLayerKernel>    _quantize_all_proposals;
+    std::unique_ptr<CLDequantizationLayer>        _dequantize_anchors;
+    std::unique_ptr<CLDequantizationLayer>        _dequantize_deltas;
+    std::unique_ptr<CLQuantizationLayer>          _quantize_all_proposals;
 
     // CPP functions
     CPPBoxWithNonMaximaSuppressionLimit _cpp_nms;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,23 +68,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input, ITensorInfo *output,
-                                                        const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                                                        int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
-{
-    // Output tensor auto initialization if not yet initialized
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_strided_slice_shape(*input,
-                                                                                                      starts, ends, strides,
-                                                                                                      begin_mask, end_mask, shrink_axis_mask);
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
-
-    // Create window
-    Window win = calculate_max_window(*output, Steps());
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
-
-    return std::make_pair(Status{}, win);
-}
 } // namespace
 
 void CLStridedSliceKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output,
@@ -106,8 +89,11 @@ void CLStridedSliceKernel::configure(const CLCompileContext &compile_context, co
                                                         begin_mask, end_mask, shrink_axis_mask);
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_strided_slice_shape(*input,
+                                                                                                      starts, ends, strides,
+                                                                                                      begin_mask, end_mask, shrink_axis_mask);
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
+    Window win = calculate_max_window(*output, Steps());
 
     // Enable multiple elements processing along x if stride_x is 1 and output width greater than the access vector size
     const int  vec_size_x     = 16 / input->element_size();
@@ -118,11 +104,11 @@ void CLStridedSliceKernel::configure(const CLCompileContext &compile_context, co
     // Update window if needed
     if(multi_access_x)
     {
-        Window &updated_window = std::get<1>(win_config);
+        Window &updated_window = win;
         updated_window.set(Window::DimX,
                            Window::Dimension(updated_window.x().start(), ceil_to_multiple(updated_window.x().end(), vec_size_x), vec_size_x));
     }
-    ICLKernel::configure_internal(win_config.second);
+    ICLKernel::configure_internal(win);
 
     // Create build options
     CLBuildOptions build_opts;
@@ -169,9 +155,6 @@ Status CLStridedSliceKernel::validate(const ITensorInfo *input, const ITensorInf
                                       int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(),
-                                                              starts, ends, strides, begin_mask, end_mask, shrink_axis_mask)
-                                .first);
 
     return Status{};
 }

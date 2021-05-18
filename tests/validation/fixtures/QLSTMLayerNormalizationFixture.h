@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,9 +91,9 @@ protected:
     {
         for(auto t : tensors)
         {
-            ARM_COMPUTE_EXPECT(t->info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(t->info()->is_resizable());
             t->allocator()->allocate();
-            ARM_COMPUTE_EXPECT(!t->info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!t->info()->is_resizable());
         }
     }
 

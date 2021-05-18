@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ protected:
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
     {
         // Check if indeed the input shape can be reshape to the output one
-        ARM_COMPUTE_EXPECT(input_shape.total_size() == output_shape.total_size(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(input_shape.total_size() == output_shape.total_size());
 
         // Create tensors
         TensorType src = create_tensor<TensorType>(input_shape, data_type);
@@ -72,15 +72,15 @@ protected:
 
         copy.configure(&src, &dst);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), 0);

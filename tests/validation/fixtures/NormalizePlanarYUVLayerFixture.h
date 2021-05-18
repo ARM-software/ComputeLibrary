@@ -97,10 +97,10 @@ protected:
         FunctionType norm;
         norm.configure(&src, &dst, &mean, &std);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(mean.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(std.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(mean.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(std.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -108,10 +108,10 @@ protected:
         mean.allocator()->allocate();
         std.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!mean.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!std.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!mean.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!std.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src), AccessorType(mean), AccessorType(std));

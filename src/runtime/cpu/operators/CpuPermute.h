@@ -59,4 +59,4 @@ public:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_RESHAPE_H */
+#endif /* ARM_COMPUTE_CPU_PERMUTE_H */

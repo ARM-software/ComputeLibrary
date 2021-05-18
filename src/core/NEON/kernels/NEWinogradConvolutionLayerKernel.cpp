@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,11 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/NEON/kernels/convolution/common/utils.hpp"
 #include "src/core/NEON/kernels/convolution/winograd/winograd_layer.hpp"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -496,7 +494,6 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     Window win;
     auto   win_last = _transform->get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
-    _output_nhwc->info()->set_valid_region(ValidRegion(Coordinates(), _output_nhwc->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }

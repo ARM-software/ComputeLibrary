@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,18 +40,22 @@ class NECast : public INESimpleFunctionNoBorder
 public:
     /** Initialize the function's source, destination
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst                                             |
+     * |:--------------|:-----------------------------------------------|
+     * |QASYMM8_SIGNED | S16, S32, F32, F16                             |
+     * |QASYMM8        | U16, S16, S32, F32, F16                        |
+     * |U8             | U16, S16, S32, F32, F16                        |
+     * |U16            | U8, U32                                        |
+     * |S16            | QASYMM8_SIGNED, U8, S32                        |
+     * |F16            | QASYMM8_SIGNED, QASYMM8, F32, S32, U8          |
+     * |S32            | QASYMM8_SIGNED, QASYMM8, F16, F32, U8          |
+     * |F32            | QASYMM8_SIGNED, QASYMM8, BFLOAT16, F16, S32, U8|
+     *
      * Input data type must be different than output data type.
-     *
-     * Valid conversions Input -> Output :
-     *
-     *   - QASYMM8_SIGNED -> S16, S32, F32, F16
-     *   - QASYMM8        -> U16, S16, S32, F32, F16
-     *   - U8             -> U16, S16, S32, F32, F16
-     *   - U16            -> U8, U32
-     *   - S16            -> QASYMM8_SIGNED, U8, S32
-     *   - F16            -> QASYMM8_SIGNED, QASYMM8, F32, S32, U8
-     *   - S32            -> QASYMM8_SIGNED, QASYMM8, F16, F32, U8
-     *   - F32            -> QASYMM8_SIGNED, QASYMM8, BFLOAT16, F16, S32, U8
      *
      * @param[in]  input  The input tensor to convert. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/F16/S32/F32.
      * @param[out] output The output tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/S8/U16/S16/U32/S32/BFLOAT16/F16/F32.

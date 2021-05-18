@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,8 +33,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename TB>
-SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape,
+template <typename T, typename TW, typename TB>
+SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape,
                                     const PadStrideInfo &info, QuantizationInfo out_qinfo)
 {
     // Create reference
@@ -99,7 +99,7 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     }
 
     // Flip weights by 180 degrees
-    SimpleTensor<T> weights_flipped{ weights.shape(), weights.data_type(), 1, weights.quantization_info() };
+    SimpleTensor<TW> weights_flipped{ weights.shape(), weights.data_type(), 1, weights.quantization_info(), weights.data_layout() };
 #if defined(_OPENMP)
     #pragma omp parallel for
 #endif /* _OPENMP */
@@ -142,6 +142,8 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
 }
 
 template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
+                                                   const PadStrideInfo &info, QuantizationInfo out_quant_info);
+template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
                                                    const PadStrideInfo &info, QuantizationInfo out_quant_info);
 template SimpleTensor<int8_t> deconvolution_layer(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
                                                   const PadStrideInfo &info, QuantizationInfo out_quant_info);

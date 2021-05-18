@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -187,8 +187,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetM
 TEST_SUITE_END() // U8
 
 TEST_SUITE_END() // INTERLEAVE_4X4
-
-//TODO(COMPMID-415): Validate valid region
 
 template <typename T>
 using NEGEMMFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T>;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -157,17 +157,17 @@ protected:
         FunctionType bbox_transform;
         bbox_transform.configure(&boxes, &pred_boxes, &deltas, bbox_info);
 
-        ARM_COMPUTE_EXPECT(deltas.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(boxes.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(pred_boxes.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(deltas.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(boxes.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(pred_boxes.info()->is_resizable());
 
         // Allocate tensors
         deltas.allocator()->allocate();
         boxes.allocator()->allocate();
         pred_boxes.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!deltas.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!boxes.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!deltas.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!boxes.info()->is_resizable());
 
         // Fill tensors
         TensorShape        img_shape(bbox_info.scale() * bbox_info.img_width(), bbox_info.scale() * bbox_info.img_height());

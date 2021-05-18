@@ -154,9 +154,9 @@ void add_s16_u8_s16_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, 
                 const auto vsrc1_0  = svreinterpret_s16_u16(svunpklo(vsrc1_u8));
                 const auto vsrc1_1  = svreinterpret_s16_u16(svunpkhi(vsrc1_u8));
                 svst1_s16(pg_0, output_ptr + x, svadd_s16_z(pg_0, vsrc0_0, vsrc1_0));
-                svst1_s16(pg_1, output_ptr + x, svadd_s16_z(pg_1, vsrc0_1, vsrc1_1));
+                svst1_s16(pg_1, output_ptr + x + svcnth(), svadd_s16_z(pg_1, vsrc0_1, vsrc1_1));
 
-                x += svcnth();
+                x += svcntb();
                 pg_u = svwhilelt_b8(x, window_end_x);
                 pg_0 = svwhilelt_b16(x, window_end_x);
                 pg_1 = svwhilelt_b16(x + static_cast<int>(svcnth()), window_end_x);
@@ -172,15 +172,15 @@ void add_s16_u8_s16_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, 
             do
             {
                 const auto vsrc0_0  = svld1_s16(pg_0, input1_ptr + x);
-                const auto vsrc0_1  = svld1_s16(pg_1, input1_ptr + x);
+                const auto vsrc0_1  = svld1_s16(pg_1, input1_ptr + x + svcnth());
                 const auto vsrc1_u8 = svld1_u8(pg_u, input2_ptr + x);
                 const auto vsrc1_0  = svreinterpret_s16_u16(svunpklo(vsrc1_u8));
                 const auto vsrc1_1  = svreinterpret_s16_u16(svunpkhi(vsrc1_u8));
 
                 svst1_s16(pg_0, output_ptr + x, svqadd(vsrc0_0, vsrc1_0));
-                svst1_s16(pg_1, output_ptr + x, svqadd(vsrc0_1, vsrc1_1));
+                svst1_s16(pg_1, output_ptr + x + svcnth(), svqadd(vsrc0_1, vsrc1_1));
 
-                x += svcnth();
+                x += svcntb();
                 pg_u = svwhilelt_b8(x, window_end_x);
                 pg_0 = svwhilelt_b16(x, window_end_x);
                 pg_1 = svwhilelt_b16(x + static_cast<int>(svcnth()), window_end_x);

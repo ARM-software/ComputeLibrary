@@ -51,7 +51,7 @@ class NEConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayerReshapeWeights();
+    NEConvolutionLayerReshapeWeights() noexcept;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayerReshapeWeights(const NEConvolutionLayerReshapeWeights &) = delete;
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */
@@ -150,7 +150,7 @@ private:
 };
 } // namespace weights_transformations
 
-/** Basic function to compute the convolution layer. This function calls the following Neon kernels/functions:
+/** Basic function to compute the convolution layer. This function calls the following kernels/functions:
  *
  * -# @ref NEIm2ColKernel
  * -# @ref NEGEMM (if the data type is BFLOAT16/FP16/FP32)
@@ -176,6 +176,21 @@ public:
     /** Default destructor */
     ~NEGEMMConvolutionLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2     |dst            |
+     * |:--------------|:------------------|:--------|:--------------|
+     * |F16            |F16                |F16      |F16            |
+     * |F32            |F32                |F32      |F32            |
+     * |BFLOAT16       |BFLOAT16           |BFLOAT16 |BFLOAT16       |
+     * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |QASYMM8_SIGNED |
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.

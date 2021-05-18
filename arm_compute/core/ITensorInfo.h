@@ -41,8 +41,24 @@ class ITensorInfo : public misc::ICloneable<ITensorInfo>
 {
 public:
     using TensorDimsState = Coordinates;
-
-public:
+    /** Get the value representing dynamic dimension state
+     *
+     * @return Value representing dynamic dimension state
+     *
+     */
+    static constexpr int32_t get_dynamic_state_value()
+    {
+        return _dynamic_dimension;
+    }
+    /** Get the value representing static dimension state
+     *
+     * @return Value representing static dimension state
+     *
+     */
+    static constexpr int32_t get_static_state_value()
+    {
+        return _static_dimension;
+    }
     /** Default virtual destructor */
     virtual ~ITensorInfo() = default;
     /** Set the data type to the specified value.
@@ -297,6 +313,10 @@ public:
 
         return std::pair<TensorShape, ValidRegion>(bc_shape, bc_valid_region);
     }
+
+private:
+    static constexpr int32_t _dynamic_dimension = -1;
+    static constexpr int32_t _static_dimension  = 0;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_TENSORINFO_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_UNUSED(idx_c);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_c) != (input->dimension(idx_c) * depth_multiplier));
 
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
+    const ConvolutionInfo info{ conv_info, depth_multiplier, ActivationLayerInfo(), dilation };
+    const TensorShape     output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
 
     const bool is_quantized = is_data_type_quantized(input->data_type());
 
@@ -156,7 +157,8 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
 
     auto padding_info = get_padding_info({ input, output });
 
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*(input->info()), *(weights->info()), conv_info, depth_multiplier, dilation);
+    const ConvolutionInfo info{ conv_info, depth_multiplier, ActivationLayerInfo(), dilation };
+    const TensorShape     output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*(input->info()), *(weights->info()), info);
     auto_init_if_empty(*(output->info()), input->info()->clone()->set_tensor_shape(output_shape).set_quantization_info(output->info()->quantization_info()));
 
     _input              = input;

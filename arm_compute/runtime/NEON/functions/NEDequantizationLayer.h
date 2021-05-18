@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,10 @@
 #ifndef ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H
 #define ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -34,11 +35,35 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEDequantizationLayerKernel that dequantizes an input tensor */
-class NEDequantizationLayer : public INESimpleFunctionNoBorder
+/** Basic function to run @ref cpu::CpuDequantization that dequantizes an input tensor */
+class NEDequantizationLayer : public IFunction
 {
 public:
+    /** Default Constructor */
+    NEDequantizationLayer();
+    /** Default Destructor */
+    ~NEDequantizationLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEDequantizationLayer(const NEDequantizationLayer &) = delete;
+    /** Default move constructor */
+    NEDequantizationLayer(NEDequantizationLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEDequantizationLayer &operator=(const NEDequantizationLayer &) = delete;
+    /** Default move assignment operator */
+    NEDequantizationLayer &operator=(NEDequantizationLayer &&) = default;
     /** Configure the kernel.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src                |dst         |
+     * |:------------------|:-----------|
+     * |QASYMM8            |F16, F32    |
+     * |QASYMM8_SIGNED     |F16, F32    |
+     * |QSYMM8_PER_CHANNEL |F16, F32    |
+     * |QSYMM8             |F16, F32    |
+     * |QSYMM16            |F16, F32    |
      *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
      * @param[out] output Destination tensor with the same dimensions of input. Data type supported: F16/F32.
@@ -52,6 +77,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H */

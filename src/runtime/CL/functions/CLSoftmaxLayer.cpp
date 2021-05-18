@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,34 +22,35 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
-
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/ICLKernel.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLSoftmaxLayerKernel.h"
-#include "src/core/helpers/SoftmaxHelpers.h"
+#include "src/core/gpu/cl/kernels/ClSoftmaxKernel.h"
+#include "src/runtime/gpu/cl/operators/ClPermute.h"
+#include "src/runtime/gpu/cl/operators/ClSoftmax.h"
 
 namespace arm_compute
 {
+using OperatorType = opencl::ClSoftmax;
+
+template <bool IS_LOG>
+struct CLSoftmaxLayerGeneric<IS_LOG>::Impl
+{
+    const ICLTensor              *src{ nullptr };
+    ICLTensor                    *dst{ nullptr };
+    std::unique_ptr<OperatorType> op{ nullptr };
+    MemoryGroup                   memory_group{};
+    std::vector<std::pair<TensorType, std::unique_ptr<CLTensor>>> workspace_tensors{};
+};
+
 template <bool IS_LOG>
 CLSoftmaxLayerGeneric<IS_LOG>::CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)),
-      _permute_input(),
-      _permute_output(),
-      _max_shift_exp_sum_kernel(std::make_unique<CLLogits1DMaxShiftExpSumKernel>()),
-      _norm_kernel(std::make_unique<CLLogits1DNormKernel>()),
-      _max(),
-      _sum(),
-      _tmp(),
-      _input_permuted(),
-      _output_permuted(),
-      _needs_permute()
+    : _impl(std::make_unique<Impl>())
 {
+    _impl->memory_group = MemoryGroup(std::move(memory_manager));
 }
 
 template <bool IS_LOG>
@@ -64,118 +65,63 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor 
 template <bool IS_LOG>
 void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta, int32_t axis)
 {
-    // Perform validation step
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CLSoftmaxLayerGeneric<IS_LOG>::validate(input->info(), output->info(), beta, axis));
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = std::make_unique<OperatorType>();
 
-    const size_t actual_axis = static_cast<size_t>(wrap_around(axis, static_cast<int32_t>(input->info()->num_dimensions())));
-
-    _needs_permute              = actual_axis != 0;
-    ICLTensor       *tmp_output = output;
-    const ICLTensor *tmp_input  = _needs_permute ? &_input_permuted : input;
-    if(_needs_permute)
-    {
-        _memory_group.manage(&_input_permuted);
-        _memory_group.manage(&_output_permuted);
-        _permute_input.configure(compile_context, input, &_input_permuted, softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis));
-        tmp_output = &_output_permuted;
-    }
-
-    // Create intermediate tensors
-    DataType   tmp_data_type = is_data_type_quantized_asymmetric(tmp_input->info()->data_type()) ? DataType::S32 : tmp_input->info()->data_type();
-    TensorInfo tensor_info_tmp(tmp_input->info()->clone()->set_data_type(tmp_data_type));
-    _tmp.allocator()->init(tensor_info_tmp);
-    TensorShape max_sum_shape = tmp_input->info()->tensor_shape();
-    max_sum_shape.set(0, 1);
-    _max.allocator()->init(tmp_input->info()->clone()->set_tensor_shape(max_sum_shape));
-    _sum.allocator()->init(tmp_input->info()->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type));
-
-    // Set GPU target to kernels
-    _max_shift_exp_sum_kernel->set_target(CLScheduler::get().target());
-
-    // Manage intermediate buffers
-    _memory_group.manage(&_tmp);
-    _memory_group.manage(&_max);
-    _memory_group.manage(&_sum);
-
-    SoftmaxKernelInfo softmax_info;
-    softmax_info.beta            = beta;
-    softmax_info.is_log          = IS_LOG;
-    softmax_info.input_data_type = tmp_input->info()->data_type();
-
-    // Configure kernels
-    _max_shift_exp_sum_kernel->configure(compile_context, tmp_input, &_max, &_tmp, &_sum, softmax_info);
-    _norm_kernel->configure(compile_context, &_tmp, &_sum, tmp_output, softmax_info);
-
-    // Allocate intermediate buffers
-    _tmp.allocator()->allocate();
-    _max.allocator()->allocate();
-    _sum.allocator()->allocate();
-    if(_needs_permute)
-    {
-        _permute_output.configure(compile_context, &_output_permuted, output, softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis));
-        _input_permuted.allocator()->allocate();
-        _output_permuted.allocator()->allocate();
-    }
+    SoftmaxKernelInfo softmax_info{ beta, IS_LOG, input->info()->data_type(), axis };
+    _impl->op->configure(compile_context, *input->info(), *output->info(), softmax_info);
+    allocate_workspace();
 }
 
 template <bool IS_LOG>
 Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Only up to 4 dimensions are supported");
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_RETURN_ERROR_ON(axis < static_cast<int32_t>(-input->num_dimensions()) || static_cast<int32_t>(input->num_dimensions()) <= axis);
+    SoftmaxKernelInfo softmax_info{ beta, IS_LOG, input->data_type(), axis };
+    return OperatorType::validate(*input, *output, softmax_info);
+}
 
-    const size_t actual_axis   = static_cast<size_t>(wrap_around(axis, static_cast<int32_t>(input->num_dimensions())));
-    const bool   needs_permute = actual_axis != 0;
-    if(needs_permute)
+template <bool IS_LOG>
+void           CLSoftmaxLayerGeneric<IS_LOG>::allocate_workspace()
+{
+    const auto memory_requirements = _impl->op->workspace();
+    std::for_each(memory_requirements.begin(), memory_requirements.end(), [this](const experimental::MemoryInfo & memory_info)
     {
-        const PermutationVector permutation_vector = softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis);
-        const TensorShape       permuted_shape     = misc::shape_calculator::compute_permutation_output_shape(*input, permutation_vector);
-        TensorInfo              input_permuted(input->clone()->set_tensor_shape(permuted_shape));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(input, &input_permuted, permutation_vector));
-        TensorInfo output_permuted(output->clone()->set_tensor_shape(permuted_shape));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(&output_permuted, output, permutation_vector));
-    }
+        auto tensor_info = TensorInfo{ TensorShape(memory_info.size), 1, DataType::U8 };
+        _impl->workspace_tensors.emplace_back(memory_info.type, std::make_unique<CLTensor>());
+        auto tensor = _impl->workspace_tensors.back().second.get();
+        ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+        tensor->allocator()->init(tensor_info);
+        _impl->memory_group.manage(tensor);
+    });
 
-    // Create intermediate tensor info
-    DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->data_type()) ? DataType::S32 : input->data_type();
-    TensorInfo tensor_info_tmp(input->clone()->set_data_type(tmp_data_type).set_is_resizable(true));
-
-    TensorShape max_sum_shape = input->tensor_shape();
-    max_sum_shape.set(0, 1);
-    TensorInfo tensor_info_max(input->clone()->set_tensor_shape(max_sum_shape).set_is_resizable(true));
-    TensorInfo tensor_info_sum(input->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(QuantizationInfo()).set_is_resizable(true));
-
-    SoftmaxKernelInfo softmax_info;
-    softmax_info.beta            = beta;
-    softmax_info.is_log          = IS_LOG;
-    softmax_info.input_data_type = input->data_type();
-
-    ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DNormKernel::validate(&tensor_info_tmp, &tensor_info_sum, output, softmax_info));
-
-    return Status{};
+    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [](std::pair<TensorType, std::unique_ptr<CLTensor>> &wt)
+    {
+        auto tensor = wt.second.get();
+        tensor->allocator()->allocate();
+    });
 }
 
 template <bool IS_LOG>
 void           CLSoftmaxLayerGeneric<IS_LOG>::run()
 {
-    MemoryGroupResourceScope scope_mg(_memory_group);
+    // Acquire all the temporaries
+    MemoryGroupResourceScope scope_mg(_impl->memory_group);
 
-    if(_needs_permute)
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);
+
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+
+    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [&pack](std::pair<TensorType, std::unique_ptr<CLTensor>> &wt)
     {
-        _permute_input.run();
-    }
+        auto tensor = wt.second.get();
+        ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+        pack.add_tensor(wt.first, tensor);
+    });
 
-    CLScheduler::get().enqueue(*_max_shift_exp_sum_kernel, false);
-    CLScheduler::get().enqueue(*_norm_kernel, !_needs_permute);
-
-    if(_needs_permute)
-    {
-        _permute_output.run();
-    }
+    _impl->op->run(pack);
 }
 
 template class CLSoftmaxLayerGeneric<false>;

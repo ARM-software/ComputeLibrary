@@ -32,7 +32,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Neon kernel to stacks a rank-R tensor into one with rank-(R+1) along the axis dimension.*/
+/** Basic kernel to stack a rank-R tensor into one with rank-(R+1) along the axis dimension. */
 class NEStackLayerKernel : public INEKernel
 {
 public:

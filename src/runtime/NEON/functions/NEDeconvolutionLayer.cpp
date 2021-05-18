@@ -85,16 +85,22 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, input);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(weights, input);
     const unsigned int width_idx  = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH);
     const unsigned int height_idx = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::HEIGHT);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) != weights->dimension(height_idx));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) < 1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(weights, input);
+    if(is_data_type_quantized_per_channel(weights->data_type()) && is_data_type_quantized(input->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QSYMM8_PER_CHANNEL);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    }
 
     auto out_dims = deconvolution_output_dimensions(input->dimension(width_idx), input->dimension(height_idx), weights->dimension(width_idx), weights->dimension(height_idx), info);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     if(bias != nullptr)
     {
         if(is_data_type_quantized_asymmetric(input->data_type()))
@@ -118,20 +124,20 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(Window::DimZ) != output_shape.z(), "Output's depth is invalid.");
     }
 
-    uint32_t            deconv_pad_x    = 0;
-    uint32_t            deconv_pad_y    = 0;
-    const unsigned int  stride_x        = info.stride().first;
-    const unsigned int  stride_y        = info.stride().second;
+    uint32_t           deconv_pad_x = 0;
+    uint32_t           deconv_pad_y = 0;
+    const unsigned int stride_x     = info.stride().first;
+    const unsigned int stride_y     = info.stride().second;
     // Guard against overflows in compute_deconvolution_upsampled_shape()
-    const DataLayout data_layout = input->data_layout();
-    const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const unsigned int out_x = (input->dimension(idx_w) - 1) * stride_x + 1;
-    const unsigned int out_y = (input->dimension(idx_h) - 1) * stride_y + 1;
+    const DataLayout   data_layout = input->data_layout();
+    const size_t       idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t       idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int out_x       = (input->dimension(idx_w) - 1) * stride_x + 1;
+    const unsigned int out_y       = (input->dimension(idx_h) - 1) * stride_y + 1;
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) > out_x);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_h) > out_y);
     ARM_COMPUTE_RETURN_ERROR_ON((out_x - weights->dimension(idx_w) + 1) > out_dims.first);
-    ARM_COMPUTE_RETURN_ERROR_ON((out_y - weights->dimension(idx_h) + 1 ) > out_dims.second);
+    ARM_COMPUTE_RETURN_ERROR_ON((out_y - weights->dimension(idx_h) + 1) > out_dims.second);
 
     const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
     TensorInfo          scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape));

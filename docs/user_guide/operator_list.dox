@@ -1,0 +1,3123 @@
+///
+/// Copyright (c) 2021 Arm Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+namespace arm_compute
+{
+/**
+@page operators_list Supported Operators
+
+@tableofcontents
+
+@section S9_1_operators_list Supported Operators
+
+Compute Library supports operators that are listed in below table.
+
+Compute Library supports a wide list of data-types, information can been directly found in the documentation of each kernel/function.
+The main data-types that the Machine Learning functions support are the following:
+  <ul>
+    <li>BFLOAT16: 16-bit non-standard brain floating point
+    <li>QASYMM8: 8-bit unsigned asymmetric quantized
+    <li>QASYMM8_SIGNED: 8-bit signed asymmetric quantized
+    <li>QSYMM8_PER_CHANNEL: 8-bit signed symmetric quantized (Used for the weights)
+    <li>QSYMM8: 8-bit unsigned symmetric quantized
+    <li>QSYMM16: 16-bit unsigned symmetric quantized
+    <li>F32: 32-bit single precision floating point
+    <li>F16: 16-bit half precision floating point
+    <li>S32: 32-bit signed integer
+    <li>U8: 8-bit unsigned char
+    <li>All: include all above data types
+  </ul>
+
+Compute Library supports the following data layouts (fast changing dimension from right to left):
+  <ul>
+    <li>NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension
+    <li>NCHW: Legacy layout where width is in the fastest changing dimension
+    <li>All: include all above data layouts
+  </ul>
+where N = batches, C = channels, H = height, W = width
+
+<table>
+<caption id="multi_row"></caption>
+<tr>
+  <th>Function
+  <th>Description
+  <th>Equivalent Android NNAPI Op
+  <th>Backends
+  <th>Data Layouts
+  <th>Data Types
+<tr>
+  <td rowspan="2">ActivationLayer
+  <td rowspan="2" style="width:200px;"> Function to simulate an activation layer with the specified activation function.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_ELU
+       <li>ANEURALNETWORKS_HARD_SWISH
+       <li>ANEURALNETWORKS_LOGISTIC
+       <li>ANEURALNETWORKS_RELU
+       <li>ANEURALNETWORKS_RELU1
+       <li>ANEURALNETWORKS_RELU6
+       <li>ANEURALNETWORKS_TANH
+      </ul>
+  <td>NEActivationLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLActivationLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">ArgMinMaxLayer
+  <td rowspan="2" style="width:200px;"> Function to calculate the index of the minimum or maximum values in a tensor based on an axis.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_ARGMAX
+       <li>ANEURALNETWORKS_ARGMIN
+      </ul>
+  <td>NEArgMinMaxLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>U32, S32
+    <tr><td>QASYMM8_SIGNED<td>U32, S32
+    <tr><td>S32<td>U32, S32
+    <tr><td>F16<td>U32, S32
+    <tr><td>F32<td>U32, S32
+    </table>
+<tr>
+  <td>CLArgMinMaxLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>U32, S32
+    <tr><td>QASYMM8_SIGNED<td>U32, S32
+    <tr><td>S32<td>U32, S32
+    <tr><td>F16<td>U32, S32
+    <tr><td>F32<td>U32, S32
+    </table>
+<tr>
+  <td rowspan="1">ArithmeticAddition
+  <td rowspan="1" style="width:200px;"> Function to add 2 tensors.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_ADD
+      </ul>
+  <td>NEArithmeticAddition
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>QSYMM16<td>QSYMM16<td>S32
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="1">ArithmeticSubtraction
+  <td rowspan="1" style="width:200px;"> Function to substract 2 tensors.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_SUB
+      </ul>
+  <td>NEArithmeticSubtraction
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>QSYMM16<td>QSYMM16<td>S32
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">BatchNormalizationLayer
+  <td rowspan="2" style="width:200px;"> Function to perform batch normalization.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEBatchNormalizationLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td>CLBatchNormalizationLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="2">BatchToSpaceLayer
+  <td rowspan="2" style="width:200px;"> Batch to space transformation.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_BATCH_TO_SPACE_ND
+      </ul>
+  <td>NEBatchToSpaceLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>All<td>s32<td>All
+    </table>
+<tr>
+  <td>CLBatchToSpaceLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>All<td>s32<td>All
+    </table>
+<tr>
+  <td rowspan="2">BitwiseAnd
+  <td rowspan="2" style="width:200px;"> Function to performe bitwise AND between 2 tensors.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_LOGICAL_AND
+      </ul>
+  <td>NEBitwiseAnd
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td>CLBitwiseAnd
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="2">BitwiseNot
+  <td rowspan="2" style="width:200px;"> Function to performe bitwise NOT.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_LOGICAL_NOT
+      </ul>
+  <td>NEBitwiseNot
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td>CLBitwiseNot
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="2">BitwiseOr
+  <td rowspan="2" style="width:200px;"> Function to performe bitwise OR between 2 tensors.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_LOGICAL_OR
+      </ul>
+  <td>NEBitwiseOr
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td>CLBitwiseOr
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="2">BitwiseXor
+  <td rowspan="2" style="width:200px;"> Function to performe bitwise XOR between 2 tensors.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEBitwiseXor
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td>CLBitwiseXor
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="2">BoundingBoxTransform
+  <td rowspan="2" style="width:200px;"> Transform proposal bounding boxes to target bounding box using bounding box deltas.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEBoundingBoxTransform
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM16<td>QASYMM8<td>QASYMM16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLBoundingBoxTransform
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM16<td>QASYMM8<td>QASYMM16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">Cast
+  <td rowspan="2" style="width:200px;"> Function to cast a tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CAST
+      </ul>
+  <td>NECast
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8_SIGNED<td>S16, S32, F32, F16
+    <tr><td>QASYMM8<td>U16, S16, S32, F32, F16
+    <tr><td>U8<td>U16, S16, S32, F32, F16
+    <tr><td>U16<td>U8, U32
+    <tr><td>S16<td>QASYMM8_SIGNED, U8, S32
+    <tr><td>F16<td>QASYMM8_SIGNED, QASYMM8, F32, S32, U8
+    <tr><td>S32<td>QASYMM8_SIGNED, QASYMM8, F16, F32, U8
+    <tr><td>F32<td>QASYMM8_SIGNED, QASYMM8, BFLOAT16, F16, S32, U8
+    </table>
+<tr>
+  <td>CLCast
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>S8, U16, S16, U32, S32, F16, F32
+    <tr><td>U16<td>U8, S8, S16, U32, S32, F16, F32
+    <tr><td>S16<td>U8, S8, U16, U32, S32, F16, F32
+    <tr><td>U32<td>U8, S8, U16, S16, S32, F16, F32
+    <tr><td>S32<td>U8, S8, U16, S16, U32, F16, F32
+    <tr><td>F16<td>U8, S8, U16, S16, U32, F32
+    <tr><td>F32<td>U8, S8, U16, S16, U32, F16
+    </table>
+<tr>
+  <td rowspan="2">ChannelShuffleLayer
+  <td rowspan="2" style="width:200px;"> Function to shuffle the channels of the input tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CHANNEL_SHUFFLE
+      </ul>
+  <td>NEChannelShuffleLayer
+  <td>
+      <ul>
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLChannelShuffleLayer
+  <td>
+      <ul>
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="1">Comparison
+  <td rowspan="1" style="width:200px;"> Function to compare 2 tensors.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_EQUAL
+       <li>ANEURALNETWORKS_GREATER
+       <li>ANEURALNETWORKS_GREATER_EQUAL
+       <li>ANEURALNETWORKS_LESS
+       <li>ANEURALNETWORKS_LESS_EQUAL
+       <li>ANEURALNETWORKS_NOT_EQUAL
+      </ul>
+  <td>CLComparison
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>All<td>All<td>U8
+    </table>
+<tr>
+  <td rowspan="2">ConcatenateLayer
+  <td rowspan="2" style="width:200px;"> Function to concatenate tensors along a given axis.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CONCATENATION
+      </ul>
+  <td>NEConcatenateLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLConcatenateLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">ConvertFullyConnectedWeights
+  <td rowspan="2" style="width:200px;"> Function to tranpose the wieghts for the fully connected layer.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEConvertFullyConnectedWeights
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLConvertFullyConnectedWeights
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">ConvolutionLayer
+  <td rowspan="2" style="width:200px;"> Function to compute a convolution layer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_2D
+      </ul>
+  <td>NEConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="2">Copy
+  <td rowspan="2" style="width:200px;"> Function to copy a tensor.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NECopy
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLCopy
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="1">Crop
+  <td rowspan="1" style="width:200px;"> Performs a copy of input tensor to the output tensor.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLCrop
+  <td>
+      <ul>
+       <li>NHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>F32
+    </table>
+<tr>
+  <td rowspan="2">CropResize
+  <td rowspan="2" style="width:200px;"> Function to perform cropping and resizing.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NECropResize
+  <td>
+      <ul>
+       <li>NHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>All<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLCropResize
+  <td>
+      <ul>
+       <li>NHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>All<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">DeconvolutionLayer
+  <td rowspan="2" style="width:200px;"> Function to compute a deconvolution or tranpose convolution.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE_CONV_2D
+      </ul>
+  <td>NEDeconvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLDeconvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="1">DeconvolutionLayerUpsample
+  <td rowspan="1" style="width:200px;"> Function to execute deconvolution upsample on OpenCL.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE_CONV_2D
+      </ul>
+  <td>CLDeconvolutionLayerUpsample
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">DepthConvertLayer
+  <td rowspan="2" style="width:200px;"> Performs a down-scaling depth conversion.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEDepthConvertLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>F16, F32
+    <tr><td>U8<td>U16, S16, S32
+    <tr><td>U16<td>U8, U32
+    <tr><td>S16<td>U8, S32
+    <tr><td>BFLOAT16<td>F32
+    <tr><td>F16<td>QASYMM8, F32
+    <tr><td>F32<td>QASYMM8, F16, BFLOAT16
+    </table>
+<tr>
+  <td>CLDepthConvertLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>S8, U16, S16, U32, S32, F16, F32
+    <tr><td>U16<td>U8, S8, S16, U32, S32, F16, F32
+    <tr><td>S16<td>U8, S8, U16, U32, S32, F16, F32
+    <tr><td>U32<td>U8, S8, U16, S16, S32, F16, F32
+    <tr><td>S32<td>U8, S8, U16, S16, U32, F16, F32
+    <tr><td>F16<td>U8, S8, U16, S16, U32, F32
+    <tr><td>F32<td>U8, S8, U16, S16, U32, F16
+    </table>
+<tr>
+  <td rowspan="2">DepthToSpaceLayer
+  <td rowspan="2" style="width:200px;"> Depth to Space transformation.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_DEPTH_TO_SPACE
+      </ul>
+  <td>NEDepthToSpaceLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLDepthToSpaceLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">DepthwiseConvolutionLayer
+  <td rowspan="2" style="width:200px;"> Function to perform depthwise separable convolution.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_DEPTHWISE_CONV_2D
+      </ul>
+  <td>NEDepthwiseConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLDepthwiseConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="2">DequantizationLayer
+  <td rowspan="2" style="width:200px;"> Function to dequantize the values in a tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_DEQUANTIZE
+      </ul>
+  <td>NEDequantizationLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>F16, F32
+    <tr><td>QASYMM8_SIGNED<td>F16, F32
+    <tr><td>QSYMM8_PER_CHANNEL<td>F16, F32
+    <tr><td>QSYMM8<td>F16, F32
+    <tr><td>QSYMM16<td>F16, F32
+    </table>
+<tr>
+  <td>CLDequantizationLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>F16, F32
+    <tr><td>QASYMM8_SIGNED<td>F16, F32
+    <tr><td>QSYMM8_PER_CHANNEL<td>F16, F32
+    <tr><td>QSYMM8<td>F16, F32
+    <tr><td>QSYMM16<td>F16, F32
+    </table>
+<tr>
+  <td rowspan="1">DetectionPostProcessLayer
+  <td rowspan="1" style="width:200px;"> Function to generate the detection output based on center size encoded boxes, class prediction and anchors by doing non maximum suppression (NMS).
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_DETECTION_POSTPROCESSING
+      </ul>
+  <td>NEDetectionPostProcessLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0 - src2<th>dst0 - dst3
+    <tr><td>QASYMM8<td>F32
+    <tr><td>QASYMM8_SIGNED<td>F32
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">DirectConvolutionLayer
+  <td rowspan="2" style="width:200px;"> Function to compute direct convolution.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_2D
+      </ul>
+  <td>NEDirectConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLDirectConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="1">DirectDeconvolutionLayer
+  <td rowspan="1" style="width:200px;"> Function to run the deconvolution layer.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE_CONV_2D
+      </ul>
+  <td>CLDirectDeconvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="13">ElementWiseOperations
+  <td rowspan="13" style="width:200px;"> Function to perform in Cpu: - Div - Max - Min - Pow - SquaredDiff - Comparisons (Equal, greater, greater_equal, less, less_equal, not_equal) Function to perform in CL: - Add - Sub - Div - Max - Min - Pow - SquaredDiff
+  <td rowspan="13">
+      <ul>
+       <li>ANEURALNETWORKS_MAXIMUM
+       <li>ANEURALNETWORKS_MINIMUM
+       <li>ANEURALNETWORKS_POW
+       <li>ANEURALNETWORKS_DIV
+       <li>ANEURALNETWORKS_ADD
+       <li>ANEURALNETWORKS_SUB
+       <li>ANEURALNETWORKS_EQUAL
+       <li>ANEURALNETWORKS_GREATER
+       <li>ANEURALNETWORKS_GREATER_EQUAL
+       <li>ANEURALNETWORKS_LESS
+       <li>ANEURALNETWORKS_LESS_EQUAL
+       <li>ANEURALNETWORKS_NOT_EQUAL
+      </ul>
+  <td>NEElementwiseMax
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwiseMin
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwiseSquaredDiff
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwiseDivision
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwisePower
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>NEElementwiseComparison
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>U8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>U8
+    <tr><td>S32<td>S32<td>U8
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>S16<td>S16<td>U8
+    <tr><td>F16<td>F16<td>U8
+    <tr><td>F32<td>F32<td>U8
+    </table>
+<tr>
+  <td>CLArithmeticAddition
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLArithmeticSubtraction
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLArithmeticDivision
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLElementwiseMax
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>U32<td>U32<td>U32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLElementwiseMin
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
+    <tr><td>U32<td>U32<td>U32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLElementwiseSquaredDiff
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLElementwisePower
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="8">ElementwiseUnaryLayer
+  <td rowspan="8" style="width:200px;"> Function to perform: - Rsqrt - Exp - Neg - Log - Abs - Round - Sin
+  <td rowspan="8">
+      <ul>
+       <li>ANEURALNETWORKS_ABS
+       <li>ANEURALNETWORKS_EXP
+       <li>ANEURALNETWORKS_LOG
+       <li>ANEURALNETWORKS_NEG
+       <li>ANEURALNETWORKS_RSQRT
+       <li>ANEURALNETWORKS_SIN
+      </ul>
+  <td>NEElementwiseUnaryLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    <tr><td>S32<td>S32
+    </table>
+<tr>
+  <td>CLRsqrtLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLExpLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLNegLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLSinLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLLogLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLAbsLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLRoundLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">FFT1D
+  <td rowspan="2" style="width:200px;"> Fast Fourier Transform 1D.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEFFT1D
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLFFT1D
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="2">FFT2D
+  <td rowspan="2" style="width:200px;"> Fast Fourier Transform 2D.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEFFT2D
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLFFT2D
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="2">FFTConvolutionLayer
+  <td rowspan="2" style="width:200px;"> Fast Fourier Transform Convolution.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_2D
+      </ul>
+  <td>NEFFTConvolutionLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLFFTConvolutionLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="2">Fill
+  <td rowspan="2" style="width:200px;"> Set the values of a tensor with a given value.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_FILL
+      </ul>
+  <td>NEFill
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLFill
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">FillBorder
+  <td rowspan="2" style="width:200px;"> Function to .
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEFillBorder
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLFillBorder
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">FlattenLayer
+  <td rowspan="2" style="width:200px;"> Reshape a tensor to be 1D
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_RESHAPE
+      </ul>
+  <td>NEFlattenLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLFlattenLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">Floor
+  <td rowspan="2" style="width:200px;"> Round the value to the lowest number.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_FLOOR
+      </ul>
+  <td>NEFloor
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td>CLFloor
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="2">FullyConnectedLayer
+  <td rowspan="2" style="width:200px;"> Function to perform a fully connected / dense layer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_FULLY_CONNECTED
+      </ul>
+  <td>NEFullyConnectedLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLFullyConnectedLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="2">FuseBatchNormalization
+  <td rowspan="2" style="width:200px;"> Function to fuse the batch normalization node to a preceding convolution node.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEFuseBatchNormalization
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td>CLFuseBatchNormalization
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="2">Gather
+  <td rowspan="2" style="width:200px;"> Performs the Gather operation along the chosen axis.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_GATHER
+      </ul>
+  <td>NEGather
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLGather
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">GEMM
+  <td rowspan="2" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEGEMM
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>BFLOAT16<td>BFLOAT16<td>BFLOAT16<td>BFLOAT16
+    </table>
+<tr>
+  <td>CLGEMM
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>F16<td>F16<td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="1">GEMMConv2D
+  <td rowspan="1" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_2D
+      </ul>
+  <td>NEGEMMConv2d
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>BFLOAT16<td>BFLOAT16<td>BFLOAT16<td>BFLOAT16
+    </table>
+<tr>
+  <td rowspan="2">GEMMConvolutionLayer
+  <td rowspan="2" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_2D
+      </ul>
+  <td>NEGEMMConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>BFLOAT16<td>BFLOAT16<td>BFLOAT16<td>BFLOAT16
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLGEMMConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="1">GEMMDeconvolutionLayer
+  <td rowspan="1" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="1">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE_CONV_2D
+      </ul>
+  <td>CLGEMMDeconvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="2">GEMMLowpMatrixMultiplyCore
+  <td rowspan="2" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEGEMMLowpMatrixMultiplyCore
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>S32
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>S32
+    <tr><td>QASYMM8<td>QSYMM8<td>S32<td>S32
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>S32
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>S32
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8<td>S32<td>S32
+    </table>
+<tr>
+  <td>CLGEMMLowpMatrixMultiplyCore
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QSYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>S32
+    <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>S32
+    <tr><td>QASYMM8<td>QSYMM8<td>S32<td>S32
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>S32
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>S32
+    <tr><td>QASYMM8_SIGNED<td>QSYMM8<td>S32<td>S32
+    </table>
+<tr>
+  <td rowspan="2">GEMMLowpOutputStage
+  <td rowspan="2" style="width:200px;"> General Matrix Multiplication.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEGEMMLowpOutputStage
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>S32<td>S32<td>QASYMM8
+    <tr><td>S32<td>S32<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>QSYMM16
+    </table>
+<tr>
+  <td>CLGEMMLowpOutputStage
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>S32<td>S32<td>QASYMM8
+    <tr><td>S32<td>S32<td>QASYMM8_SIGNED
+    <tr><td>S32<td>S32<td>QSYMM16
+    </table>
+<tr>
+  <td rowspan="2">GenerateProposalsLayer
+  <td rowspan="2" style="width:200px;"> Function to generate proposals for a RPN (Region Proposal Network).
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_GENERATE_PROPOSALS
+      </ul>
+  <td>NEGenerateProposalsLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QSYMM8<td>QSYMM16<td>QASYMM8
+    </table>
+<tr>
+  <td>CLGenerateProposalsLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QSYMM8<td>QSYMM16<td>QASYMM8
+    </table>
+<tr>
+  <td rowspan="2">InstanceNormalizationLayer
+  <td rowspan="2" style="width:200px;"> Function to perform a Instance normalization on a given axis.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_INSTANCE_NORMALIZATION
+      </ul>
+  <td>NEInstanceNormalizationLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLInstanceNormalizationLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">L2NormalizeLayer
+  <td rowspan="2" style="width:200px;"> Function to perform a L2 normalization on a given axis.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_L2_NORMALIZATION
+      </ul>
+  <td>NEL2NormalizeLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLL2NormalizeLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="3">Logical
+  <td rowspan="3" style="width:200px;"> Function to perform: - Logical AND - Logical OR - Logical NOT
+  <td rowspan="3">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NELogicalAnd
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>U8<td>U8<td>U8
+    </table>
+<tr>
+  <td>NELogicalOr
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>U8<td>U8<td>U8
+    </table>
+<tr>
+  <td>NELogicalNot
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="1">LogicalAnd
+  <td rowspan="1" style="width:200px;"> Function to perform Logical AND.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLLogicalAnd
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>U8<td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="1">LogicalOr
+  <td rowspan="1" style="width:200px;"> Function to perform Logical OR.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLLogicalOr
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>U8<td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="1">LogicalNot
+  <td rowspan="1" style="width:200px;"> Function to perform Logical NOT.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLLogicalNot
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>U8<td>U8
+    </table>
+<tr>
+  <td rowspan="2">LSTMLayer
+  <td rowspan="2" style="width:200px;"> Function to perform a single time step in a Long Short-Term Memory (LSTM) layer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_LSTM
+      </ul>
+  <td>NELSTMLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0 - src13<th>dst0 - dst3
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLLSTMLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0 - src13<th>dst0 - dst3
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">LSTMLayerQuantized
+  <td rowspan="2" style="width:200px;"> Function to perform quantized LSTM (Long Short-Term Memory)
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_QUANTIZED_LSTM
+       <li>ANEURALNETWORKS_QUANTIZED_16BIT_LSTM
+      </ul>
+  <td>NELSTMLayerQuantized
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0 - src8<th>src9 - src12<th>src13<th>src14<th>dst0<th>dst1
+    <tr><td>QASYMM8<td>S32<td>QSYMM16<td>QASYMM8<td>QSYMM16<td>QASYMM8
+    </table>
+<tr>
+  <td>CLLSTMLayerQuantized
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0 - src8<th>src9 - src12<th>src13<th>src14<th>dst0<th>dst1
+    <tr><td>QASYMM8<td>S32<td>QSYMM16<td>QASYMM8<td>QSYMM16<td>QASYMM8
+    </table>
+<tr>
+  <td rowspan="2">MaxUnpoolingLayer
+  <td rowspan="2" style="width:200px;"> Function to perform MaxUnpooling.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEMaxUnpoolingLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLMaxUnpoolingLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">MeanStdDevNormalizationLayer
+  <td rowspan="2" style="width:200px;"> Function to execute mean and standard deviation normalization.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEMeanStdDevNormalizationLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td>CLMeanStdDevNormalizationLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="2">NormalizationLayer
+  <td rowspan="2" style="width:200px;"> Function to compute normalization layer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_LOCAL_RESPONSE_NORMALIZATION
+      </ul>
+  <td>NENormalizationLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td>CLNormalizationLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="2">PadLayer
+  <td rowspan="2" style="width:200px;"> Function to pad a tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_PAD
+       <li>ANEURALNETWORKS_PAD_V2
+      </ul>
+  <td>NEPadLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLPadLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">Permute
+  <td rowspan="2" style="width:200px;"> Function to transpose an ND tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE
+      </ul>
+  <td>NEPermute
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLPermute
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">PixelWiseMultiplication
+  <td rowspan="2" style="width:200px;"> Function to performe a multiplication.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_MUL
+      </ul>
+  <td>NEPixelWiseMultiplication
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>QSYMM16<td>QSYMM16<td>S32
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>S32<td>F32
+    </table>
+<tr>
+  <td>CLPixelWiseMultiplication
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
+    <tr><td>QSYMM16<td>QSYMM16<td>S32
+    <tr><td>U8<td>U8<td>U8
+    <tr><td>U8<td>U8<td>S16
+    <tr><td>U8<td>S16<td>S16
+    <tr><td>S16<td>U8<td>S16
+    <tr><td>S16<td>S16<td>S16
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>S32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">PoolingLayer
+  <td rowspan="2" style="width:200px;"> Function to performe pooling with the specified pooling operation.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_AVERAGE_POOL_2D
+       <li>ANEURALNETWORKS_L2_POOL_2D
+       <li>ANEURALNETWORKS_MAX_POOL_2D
+      </ul>
+  <td>NEPoolingLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLPoolingLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">PReluLayer
+  <td rowspan="2" style="width:200px;"> Function to compute the activation layer with the PRELU activation function.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_PRELU
+      </ul>
+  <td>NEPReluLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLPReluLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">PriorBoxLayer
+  <td rowspan="2" style="width:200px;"> Function to compute prior boxes and clip.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEPriorBoxLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLPriorBoxLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">QLSTMLayer
+  <td rowspan="2" style="width:200px;"> Function to perform quantized LSTM (Long Short-Term Memory).
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_QUANTIZED_LSTM
+       <li>ANEURALNETWORKS_QUANTIZED_16BIT_LSTM
+      </ul>
+  <td>NEQLSTMLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1 - src6<th>src7 -src9<th>src10<th>src11<th>dst0<th>dst1 - dst2
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8<td>S32<td>QSYMM16<td>QASYMM8_SIGNED<td>QSYMM16<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLQLSTMLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1 - src6<th>src7 -src9<th>src10<th>src11<th>dst0<th>dst1 - dst2
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8<td>S32<td>QSYMM16<td>QASYMM8_SIGNED<td>QSYMM16<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="2">QuantizationLayer
+  <td rowspan="2" style="width:200px;"> Function to perform quantization layer
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_QUANTIZE
+      </ul>
+  <td>NEQuantizationLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    <tr><td>F16<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    <tr><td>F32<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    </table>
+<tr>
+  <td>CLQuantizationLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    <tr><td>F16<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    <tr><td>F32<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    </table>
+<tr>
+  <td rowspan="2">Range
+  <td rowspan="2" style="width:200px;"> Function to generates a sequence of numbers starting from START and extends by increments of 'STEP' up to but not including 'END'.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NERange
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>dst
+    <tr><td>U8
+    <tr><td>S8
+    <tr><td>U16
+    <tr><td>S16
+    <tr><td>U32
+    <tr><td>S32
+    <tr><td>F16
+    <tr><td>F32
+    </table>
+<tr>
+  <td>CLRange
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>dst
+    <tr><td>U8
+    <tr><td>S8
+    <tr><td>QASYMM8
+    <tr><td>U16
+    <tr><td>S16
+    <tr><td>U32
+    <tr><td>S32
+    <tr><td>F16
+    <tr><td>F32
+    </table>
+<tr>
+  <td rowspan="2">ReduceMean
+  <td rowspan="2" style="width:200px;"> Function to performe reduce mean operation.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_MEAN
+      </ul>
+  <td>NEReduceMean
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLReduceMean
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">ReductionOperation
+  <td rowspan="2" style="width:200px;"> Function to performe reduce with the following operations - ARG_IDX_MAX: Index of the max value - ARG_IDX_MIN: Index of the min value - MEAN_SUM:    Mean of sum - PROD:        Product - SUM_SQUARE:  Sum of squares - SUM:         Sum - MIN:         Min - MAX:         Max
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_REDUCE_ALL
+       <li>ANEURALNETWORKS_REDUCE_ANY
+       <li>ANEURALNETWORKS_REDUCE_MAX
+       <li>ANEURALNETWORKS_REDUCE_MIN
+       <li>ANEURALNETWORKS_REDUCE_PROD
+       <li>ANEURALNETWORKS_REDUCE_SUM
+      </ul>
+  <td>NEReductionOperation
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    <tr><td>S32<td>S32
+    </table>
+<tr>
+  <td>CLReductionOperation
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    <tr><td>S32<td>S32
+    </table>
+<tr>
+  <td rowspan="2">ReorgLayer
+  <td rowspan="2" style="width:200px;"> Performs a reorganization layer of input tensor to the output tensor.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEReorgLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLReorgLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">ReshapeLayer
+  <td rowspan="2" style="width:200px;"> Function to reshape a tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_RESHAPE
+       <li>ANEURALNETWORKS_SQUEEZE
+      </ul>
+  <td>NEReshapeLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLReshapeLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">Reverse
+  <td rowspan="2" style="width:200px;"> Function to reverse tensor according to axis.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEReverse
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>All<td>U32<td>All
+    </table>
+<tr>
+  <td>CLReverse
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>All<td>U32<td>All
+    </table>
+<tr>
+  <td rowspan="2">RNNLayer
+  <td rowspan="2" style="width:200px;"> Function to perform recurrent neural network layer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_RNN
+      </ul>
+  <td>NERNNLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>src3<th>dst0<th>dst1
+    <tr><td>F16<td>F16<td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLRNNLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>src3<th>dst0<th>dst1
+    <tr><td>F16<td>F16<td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">ROIAlignLayer
+  <td rowspan="2" style="width:200px;"> Function to perform ROI alignment.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_ROI_ALIGN
+      </ul>
+  <td>NEROIAlignLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM16<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM16<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLROIAlignLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM16<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM16<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="2">ROIPoolingLayer
+  <td rowspan="2" style="width:200px;"> Function to perform ROI pooling.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_ROI_POOLING
+      </ul>
+  <td>NEROIPoolingLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F32<td>U16<td>F32
+    <tr><td>QASYMM8<td>U16<td>QASYMM8
+    </table>
+<tr>
+  <td>CLROIPoolingLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>dst
+    <tr><td>F16<td>U16<td>F16
+    <tr><td>F32<td>U16<td>F32
+    <tr><td>QASYMM8<td>U16<td>QASYMM8
+    </table>
+<tr>
+  <td rowspan="2">Scale
+  <td rowspan="2" style="width:200px;"> Function to perform resize a tensor using to interpolate: - Bilinear - Nearest neighbor
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_RESIZE_BILINEAR
+       <li>ANEURALNETWORKS_RESIZE_NEAREST_NEIGHBOR
+      </ul>
+  <td>NEScale
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    <tr><td>U8<td>U8
+    <tr><td>S16<td>S16
+    </table>
+<tr>
+  <td>CLScale
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    <tr><td>U8<td>U8
+    <tr><td>S16<td>S16
+    </table>
+<tr>
+  <td rowspan="2">Select
+  <td rowspan="2" style="width:200px;"> Function to select values from 2 tensors depending on an input tensor of booleans.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_SELECT
+      </ul>
+  <td>NESelect
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>U8<td>All<td>All<td>All
+    </table>
+<tr>
+  <td>CLSelect
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>U8<td>All<td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">Slice
+  <td rowspan="2" style="width:200px;"> Function to perform tensor slicing.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_SLICE
+      </ul>
+  <td>NESlice
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLSlice
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">SoftmaxLayer
+  <td rowspan="2" style="width:200px;"> Function to compute a SoftmaxLayer and a Log SoftmaxLayer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_LOG_SOFTMAX
+       <li>ANEURALNETWORKS_SOFTMAX
+      </ul>
+  <td>NESoftmaxLayerGeneric
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td>CLSoftmaxLayerGeneric
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">SpaceToBatchLayer
+  <td rowspan="2" style="width:200px;"> Function to divide a tensor spatially.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_SPACE_TO_BATCH_ND
+      </ul>
+  <td>NESpaceToBatchLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>All<td>S32<td>S32<td>All
+    </table>
+<tr>
+  <td>CLSpaceToBatchLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>All<td>S32<td>S32<td>All
+    </table>
+<tr>
+  <td rowspan="2">SpaceToDepthLayer
+  <td rowspan="2" style="width:200px;"> Function to rearrange blocks of spatial data into depth.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_SPACE_TO_DEPTH
+      </ul>
+  <td>NESpaceToDepthLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLSpaceToDepthLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">Split
+  <td rowspan="2" style="width:200px;"> Function to split a tensor along a given axis.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_SPLIT
+      </ul>
+  <td>NESplit
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLSplit
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">StackLayer
+  <td rowspan="2" style="width:200px;"> Function to stack tensors along an axis.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEStackLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLStackLayer
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">StridedSlice
+  <td rowspan="2" style="width:200px;"> Function to extract a strided slice of a tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_STRIDED_SLICE
+      </ul>
+  <td>NEStridedSlice
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLStridedSlice
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">Tile
+  <td rowspan="2" style="width:200px;"> Function to construct a tensor by tiling a given tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_TILE
+      </ul>
+  <td>NETile
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLTile
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">Transpose
+  <td rowspan="2" style="width:200px;"> Function to transpose a 2D tensor.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_TRANSPOSE
+      </ul>
+  <td>NETranspose
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLTranspose
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">Unstack
+  <td rowspan="2" style="width:200px;"> Function to unpack a rank-R tensor into rank-(R-1) tensors.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEUnstack
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td>CLUnstack
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>All<td>All
+    </table>
+<tr>
+  <td rowspan="2">WinogradConvolutionLayer
+  <td rowspan="2" style="width:200px;"> Function to do Winograd Convolution.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_2D
+      </ul>
+  <td>NEWinogradConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLWinogradConvolutionLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="1">WinogradInputTransform
+  <td rowspan="1" style="width:200px;"> Function to.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLWinogradInputTransform
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    </table>
+</table>
+
+*/
+} // namespace

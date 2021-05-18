@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/misc/Utility.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -95,10 +94,6 @@ void NEROIAlignLayerKernel::configure(const ITensor *input, const ITensor *rois,
     Window             window;
     window.set(Window::DimX, Window::Dimension(0, num_rois));
     window.set(Window::DimY, Window::Dimension(0, 1));
-
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     // Set instance variables
     _input     = input;

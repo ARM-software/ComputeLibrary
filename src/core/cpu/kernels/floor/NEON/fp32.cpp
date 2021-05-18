@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/Validate.h"
 #include "src/core/NEON/NEMath.h"
-#include "src/core/common/Validate.h"
 
 #include <arm_neon.h>
 #include <cmath>

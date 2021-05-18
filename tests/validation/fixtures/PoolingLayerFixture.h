@@ -47,14 +47,30 @@ class PoolingLayerValidationGenericFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(TensorShape shape, PoolingLayerInfo pool_info, DataType data_type, DataLayout data_layout, bool indices = false,
-               QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo())
+               QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo(), bool mixed_layout = false)
     {
-        _pool_info = pool_info;
-        _target    = compute_target(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
-        _reference = compute_reference(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
+        _mixed_layout = mixed_layout;
+        _pool_info    = pool_info;
+        _target       = compute_target(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
+        _reference    = compute_reference(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
     }
 
 protected:
+    void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
+    {
+        const DataLayout data_layout = src.info()->data_layout();
+        // Test Multi DataLayout graph cases, when the data layout changes after configure
+        src.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        dst.info()->set_data_layout(data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+
+        // Compute Convolution function
+        layer.run();
+
+        // Reinstating original data layout for the test suite to properly check the values
+        src.info()->set_data_layout(data_layout);
+        dst.info()->set_data_layout(data_layout);
+    }
+
     template <typename U>
     void fill(U &&tensor)
     {
@@ -94,25 +110,33 @@ protected:
         FunctionType pool_layer;
         pool_layer.configure(&src, &dst, info, (indices) ? &_target_indices : nullptr);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(_target_indices.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(_target_indices.info()->is_resizable());
+
+        add_padding_x({ &src, &dst, &_target_indices }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
         _target_indices.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!_target_indices.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!_target_indices.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src));
 
-        // Compute function
-        pool_layer.run();
-
+        if(_mixed_layout)
+        {
+            mix_layout(pool_layer, src, dst);
+        }
+        else
+        {
+            // Compute function
+            pool_layer.run();
+        }
         return dst;
     }
 
@@ -129,6 +153,7 @@ protected:
     TensorType             _target{};
     SimpleTensor<T>        _reference{};
     PoolingLayerInfo       _pool_info{};
+    bool                   _mixed_layout{ false };
     TensorType             _target_indices{};
     SimpleTensor<uint32_t> _ref_indices{};
 };
@@ -144,7 +169,7 @@ public:
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class PoolingLayerValidationFixture : public PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -152,7 +177,7 @@ public:
     void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, DataLayout data_layout)
     {
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, data_layout, pad_stride_info, exclude_padding),
-                                                                                               data_type, data_layout);
+                                                                                               data_type, data_layout, false, mixed_layout);
     }
 };
 
@@ -168,7 +193,7 @@ public:
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class PoolingLayerValidationQuantizedFixture : public PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -177,7 +202,7 @@ public:
                QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo())
     {
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, data_layout, pad_stride_info, exclude_padding),
-                                                                                               data_type, data_layout, false, input_qinfo, output_qinfo);
+                                                                                               data_type, data_layout, false, input_qinfo, output_qinfo, mixed_layout);
     }
 };
 

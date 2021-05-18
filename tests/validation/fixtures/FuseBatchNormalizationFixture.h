@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,14 +96,14 @@ protected:
         FunctionType fuse_batch_normalization;
         fuse_batch_normalization.configure(&w, &mean, &var, w_fused_to_use, b_fused_to_use, b_to_use, beta_to_use, gamma_to_use, _epsilon, fuse_bn_type);
 
-        ARM_COMPUTE_EXPECT(w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(mean.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(var.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(w_fused.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(b_fused.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(beta.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(gamma.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(b.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(mean.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(var.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(w_fused.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(b_fused.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(beta.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(gamma.info()->is_resizable());
 
         // Allocate tensors
         w.allocator()->allocate();
@@ -115,14 +115,14 @@ protected:
         beta.allocator()->allocate();
         gamma.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!mean.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!var.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!w_fused.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!b_fused.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!beta.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!gamma.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!mean.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!var.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!w_fused.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!b_fused.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!beta.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!gamma.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(w), 0U, -1.0f, 1.0f);

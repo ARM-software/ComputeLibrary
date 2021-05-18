@@ -28,24 +28,18 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
-#include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
 
 namespace arm_compute
 {
-class NEDirectConvolutionLayerOutputStageKernel;
-class NEDirectConvolutionLayerKernel;
-class NEFillBorderKernel;
-
+class ITensor;
+class ITensorInfo;
 /** Function to run the direct convolution.
  *
- *  This function calls the following Neon kernels:
+ *  This function calls the following:
  *
- * -# @ref NEFillBorderKernel for the input
- * -# @ref NEDirectConvolutionLayerOutputStageKernel
- * -# @ref NEDirectConvolutionLayerKernel
+ * -# @ref cpu::CpuDirectConvolution
  */
 class NEDirectConvolutionLayer : public IFunction
 {
@@ -63,6 +57,16 @@ public:
     /** Default destructor */
     ~NEDirectConvolutionLayer();
     /** Set the input, weights, biases and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0   |src1   |src2   |dst    |
+     * |:------|:------|:------|:------|
+     * |F16    |F16    |F16    |F16    |
+     * |F32    |F32    |F32    |F32    |
      *
      * @note: DirectConvolution only works in the following configurations:
      *    1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32
@@ -108,16 +112,9 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                                _memory_group;
-    std::unique_ptr<NEDirectConvolutionLayerOutputStageKernel> _output_stage_kernel;
-    std::unique_ptr<NEDirectConvolutionLayerKernel>            _conv_kernel;
-    std::unique_ptr<NEFillBorderKernel>                        _input_border_handler;
-    NEActivationLayer                                          _activationlayer_function;
-    Tensor                                                     _accumulator;
-    bool                                                       _has_bias;
-    bool                                                       _is_activationlayer_enabled;
-    unsigned int                                               _dim_split;
-    bool                                                       _is_padding_required;
+    struct Impl;
+    std::shared_ptr<IMemoryManager> _memory_manager;
+    std::unique_ptr<Impl>           _impl;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H */

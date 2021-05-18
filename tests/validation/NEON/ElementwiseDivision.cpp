@@ -93,6 +93,34 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+// Test test cases will execute the function with dynamic-stated shapes
+// Since other elementwise operations share the same kernel, this tests are added only here.
+// Also, only FP32 is tested since data type doesn't/shouldn't matter with dynamic shapes.
+TEST_SUITE(DynamicShape)
+template <typename T>
+using CpuElementwiseDivisionDynamicShapeFixture = ArithmeticDivisionDynamicShapeValidationFixture<Tensor, Accessor, NEElementwiseDivision, T>;
+
+template <typename T>
+using CpuElementwiseDivisionBroadcastDynamicShapeFixture = ArithmeticDivisionBroadcastDynamicShapeValidationFixture<Tensor, Accessor, NEElementwiseDivision, T>;
+
+TEST_SUITE(F32)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CpuElementwiseDivisionDynamicShapeFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseDivisionFP32Dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CpuElementwiseDivisionBroadcastDynamicShapeFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
+                       ElementwiseDivisionFP32Dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
+}
+
+TEST_SUITE_END() // F32
+TEST_SUITE_END() // DynamicShape
+
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(F16)

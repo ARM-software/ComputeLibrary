@@ -52,6 +52,14 @@ public:
     NEReshapeLayer &operator=(NEReshapeLayer &&);
     /** Initialise the kernel's inputs and outputs
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src    |dst    |
+     * |:------|:------|
+     * |All    |All    |
+     *
      * @param[in]  input  Input tensor. Data type supported: All
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,6 +104,11 @@ DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensor
                                                                    const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_UNUSED(output, bias, weights_info);
+
+    if(is_data_type_quantized_per_channel(weights->data_type()))
+    {
+        return DeconvolutionMethod::DIRECT;
+    }
 
     const DataLayout data_layout = input->data_layout();
 

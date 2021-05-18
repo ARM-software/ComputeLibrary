@@ -98,7 +98,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     win.set(channel_idx, Window::Dimension(0, 1, 1));
 
     // The NEIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     return std::make_pair(Status{}, win);
 }

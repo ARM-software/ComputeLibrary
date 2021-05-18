@@ -29,7 +29,6 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/NEMath.h"
@@ -163,17 +162,14 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     }
 
     // Configure kernel window
-    Window      win = calculate_max_window(*input->info(), Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    Window win = calculate_max_window(*input->info(), Steps());
     INEKernel::configure(win);
 }
 
 template <typename T, unsigned int S, unsigned int dim, bool do_2D_norm>
 void NENormalizationLayerKernel::normalize_float(const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
     Window win(window);

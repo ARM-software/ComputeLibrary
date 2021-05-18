@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,9 +42,11 @@ enum class CPUModel
     GENERIC,
     GENERIC_FP16,
     GENERIC_FP16_DOT,
+    A35,
     A53,
     A55r0,
     A55r1,
+    KLEIN,
     X1,
     A73
 };
@@ -75,6 +77,10 @@ inline std::string cpu_model_to_string(CPUModel val)
         case CPUModel::GENERIC:
         {
             return std::string("GENERIC");
+        }
+        case CPUModel::KLEIN:
+        {
+            return std::string("KLEIN");
         }
         case CPUModel::GENERIC_FP16:
         {
@@ -136,6 +142,11 @@ public:
      * @return true of the cpu supports dot product, false otherwise
      */
     bool has_dotprod() const;
+    /** Checks if the cpu model supports sve.
+     *
+     * @return true of the cpu supports sve, false otherwise
+     */
+    bool has_sve() const;
     /** Gets the cpu model for a given cpuid.
      *
      * @param[in] cpuid the id of the cpu core to be retrieved,
@@ -178,6 +189,11 @@ public:
      * @param[in] dotprod whether the cpu supports dot product.
      */
     void set_dotprod(const bool dotprod);
+    /** Set sve support
+     *
+     * @param[in] sve whether the cpu supports sve.
+     */
+    void set_sve(const bool sve);
     /** Set the cpumodel for a given cpu core
      *
      * @param[in] cpuid the id of the core to be set.
@@ -200,6 +216,7 @@ private:
     std::vector<CPUModel> _percpu        = {};
     bool                  _fp16          = false;
     bool                  _dotprod       = false;
+    bool                  _sve           = false;
     unsigned int          _L1_cache_size = 32768;
     unsigned int          _L2_cache_size = 262144;
 };

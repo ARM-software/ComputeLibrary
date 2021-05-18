@@ -50,7 +50,7 @@ using datasets::ScaleSamplingPolicySet;
 using datasets::ScaleAlignCornersSamplingPolicySet;
 
 /** We consider vector size in byte 64 since the maximum size of
- * a vector used by @ref NEScaleKernel is currently 64-byte (float32x4x4).
+ * a vector used by the kernel is currently 64-byte (float32x4x4).
  * There are possibility to reduce test time further by using
  * smaller vector sizes for different data types where applicable.
  */
@@ -94,9 +94,8 @@ TEST_SUITE(Validate)
 
 /** Validate test suite is to test ARM_COMPUTE_RETURN_ON_* macros
  * we use to check the validity of given arguments in @ref NEScale
- * and subsequent call to @ref NEScaleKernel.
  * Since this is using validate() of @ref NEScale, which pre-adjust
- * arguments for @ref NEScaleKernel, the following conditions in
+ * arguments for the kernel, the following conditions in
  * the kernel are not currently tested.
  * - The same input and output
  * - Data type of offset, dx and dy
@@ -317,12 +316,25 @@ DATA_TEST_CASE(CheckNoPaddingInterpAREA, framework::DatasetMode::ALL, combine(co
 template <typename T>
 using NEScaleFixture = ScaleValidationFixture<Tensor, Accessor, NEScale, T>;
 template <typename T>
+using NEScaleMixedDataLayoutFixture = ScaleValidationFixture<Tensor, Accessor, NEScale, T, true>;
+template <typename T>
 using NEScaleQuantizedFixture = ScaleValidationQuantizedFixture<Tensor, Accessor, NEScale, T>;
+template <typename T>
+using NEScaleQuantizedMixedDataLayoutFixture = ScaleValidationQuantizedFixture<Tensor, Accessor, NEScale, T, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 const auto f32_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<float>())), framework::dataset::make("DataType", DataType::F32));
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, ScaleSamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo  src_info(_shape, 1, _data_type);
+    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEScaleMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, ASSEMBLE_DATASET(f32_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -415,6 +427,15 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 const auto qasymm8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::QASYMM8));
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
+{
+    //Create valid region
+    TensorInfo  src_info(_shape, 1, _data_type);
+    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(Accessor(_target), _reference, valid_region, tolerance_u8);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEScaleQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);

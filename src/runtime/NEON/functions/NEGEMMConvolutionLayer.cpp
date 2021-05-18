@@ -52,7 +52,7 @@ namespace arm_compute
 using namespace arm_compute::misc::shape_calculator;
 
 NEConvolutionLayerReshapeWeights::~NEConvolutionLayerReshapeWeights() = default;
-NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights()
+NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights() noexcept
     : _weights_reshape_kernel()
 {
 }
@@ -373,7 +373,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     else
     {
         TensorInfo out_info{ *output->info() };
-        out_info.set_data_type(output_data_type).set_data_layout(input->info()->data_layout());
+        out_info.set_data_type(output_data_type).set_data_layout(input->info()->data_layout()).set_is_resizable(true);
         _gemm_output.allocator()->init(out_info);
         _gemm_output_3d.allocator()->init(out_info);
         _memory_group.manage(&_gemm_output);
@@ -431,7 +431,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Grouping (num_groups != 1) is not supported on Neon");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Grouping (num_groups != 1) is not supported");
 
     const DataLayout data_layout = input->data_layout();
     const DataType   data_type   = input->data_type();
@@ -523,8 +523,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     if(!skip_im2col)
     {
         // Create tensor info for im2col reshaped inputs
-        // For Neon the batch size is on the fourth dimension
-        // TODO (giaiod01): Auto-initialize the output shape of im2col COMPMID-1482
+        // For CPU, the batch size is on the fourth dimension
         TensorShape shape_im2col = input->tensor_shape();
         shape_im2col.set(0, mat_weights_rows);
         shape_im2col.set(1, conv_w * conv_h);
@@ -532,7 +531,6 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
         im2col_reshaped_info = TensorInfo(shape_im2col, 1, data_type);
         im2col_reshaped_info.set_quantization_info(input->quantization_info());
-
         ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation));
         gemm_input_to_use = &im2col_reshaped_info;
     }

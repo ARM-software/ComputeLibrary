@@ -167,22 +167,22 @@ protected:
                        &scratch, &output_state_out, &cell_state_out, &output,
                        lstm_params, info, cell_threshold, projection_threshold);
 
-        ARM_COMPUTE_EXPECT(input.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(input_to_forget_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(input_to_cell_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(input_to_output_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(recurrent_to_forget_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(recurrent_to_cell_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(recurrent_to_output_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(forget_gate_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(cell_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(output_gate_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(output_state_in.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(cell_state_in.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(scratch.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(output_state_out.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(cell_state_out.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(output.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(input.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(input_to_forget_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(input_to_cell_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(input_to_output_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(recurrent_to_forget_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(recurrent_to_cell_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(recurrent_to_output_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(forget_gate_bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(cell_bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(output_gate_bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(output_state_in.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(cell_state_in.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(scratch.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(output_state_out.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(cell_state_out.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(output.info()->is_resizable());
 
         // Allocate tensors
         input.allocator()->allocate();
@@ -202,22 +202,22 @@ protected:
         cell_state_out.allocator()->allocate();
         output.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!input.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!input_to_forget_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!input_to_cell_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!input_to_output_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!recurrent_to_forget_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!recurrent_to_cell_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!recurrent_to_output_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!forget_gate_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!cell_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!output_gate_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!output_state_in.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!cell_state_in.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!scratch.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!output_state_out.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!cell_state_out.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!output.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!input.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!input_to_forget_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!input_to_cell_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!input_to_output_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!recurrent_to_forget_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!recurrent_to_cell_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!recurrent_to_output_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!forget_gate_bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!cell_bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!output_gate_bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!output_state_in.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!cell_state_in.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!scratch.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!output_state_out.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!cell_state_out.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!output.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(input), 0);
@@ -236,18 +236,18 @@ protected:
 
         if(!cifg_opt)
         {
-            ARM_COMPUTE_EXPECT(input_to_input_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(recurrent_to_input_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(cell_to_input_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(input_gate_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(input_to_input_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(recurrent_to_input_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(cell_to_input_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(input_gate_bias.info()->is_resizable());
             input_to_input_w.allocator()->allocate();
             recurrent_to_input_w.allocator()->allocate();
             cell_to_input_w.allocator()->allocate();
             input_gate_bias.allocator()->allocate();
-            ARM_COMPUTE_EXPECT(!input_to_input_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(!recurrent_to_input_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(!cell_to_input_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(!input_gate_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!input_to_input_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!recurrent_to_input_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!cell_to_input_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!input_gate_bias.info()->is_resizable());
             fill(AccessorType(input_to_input_w), 13);
             fill(AccessorType(recurrent_to_input_w), 14);
             if(peephole_opt)
@@ -260,26 +260,26 @@ protected:
 
         if(peephole_opt)
         {
-            ARM_COMPUTE_EXPECT(cell_to_forget_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(cell_to_output_w.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(cell_to_forget_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(cell_to_output_w.info()->is_resizable());
             cell_to_forget_w.allocator()->allocate();
             cell_to_output_w.allocator()->allocate();
-            ARM_COMPUTE_EXPECT(!cell_to_forget_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(!cell_to_output_w.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!cell_to_forget_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!cell_to_output_w.info()->is_resizable());
             fill(AccessorType(cell_to_forget_w), 18);
             fill(AccessorType(cell_to_output_w), 19);
         }
 
         if(projection_opt)
         {
-            ARM_COMPUTE_EXPECT(projection_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(projection_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(projection_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(projection_bias.info()->is_resizable());
 
             projection_w.allocator()->allocate();
             projection_bias.allocator()->allocate();
 
-            ARM_COMPUTE_EXPECT(!projection_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(!projection_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!projection_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!projection_bias.info()->is_resizable());
 
             fill(AccessorType(projection_w), 20);
             fill(AccessorType(projection_bias), 21);
@@ -289,25 +289,25 @@ protected:
         {
             if(!cifg_opt)
             {
-                ARM_COMPUTE_EXPECT(input_layer_norm_w.info()->is_resizable(), framework::LogLevel::ERRORS);
+                ARM_COMPUTE_ASSERT(input_layer_norm_w.info()->is_resizable());
 
                 input_layer_norm_w.allocator()->allocate();
 
-                ARM_COMPUTE_EXPECT(!input_layer_norm_w.info()->is_resizable(), framework::LogLevel::ERRORS);
+                ARM_COMPUTE_ASSERT(!input_layer_norm_w.info()->is_resizable());
 
                 fill(AccessorType(input_layer_norm_w), 22);
             }
-            ARM_COMPUTE_EXPECT(forget_layer_norm_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(cell_layer_norm_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(output_layer_norm_w.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(forget_layer_norm_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(cell_layer_norm_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(output_layer_norm_w.info()->is_resizable());
 
             forget_layer_norm_w.allocator()->allocate();
             cell_layer_norm_w.allocator()->allocate();
             output_layer_norm_w.allocator()->allocate();
 
-            ARM_COMPUTE_EXPECT(!forget_layer_norm_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(!cell_layer_norm_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            ARM_COMPUTE_EXPECT(!output_layer_norm_w.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_ASSERT(!forget_layer_norm_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!cell_layer_norm_w.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!output_layer_norm_w.info()->is_resizable());
 
             fill(AccessorType(forget_layer_norm_w), 23);
             fill(AccessorType(cell_layer_norm_w), 24);

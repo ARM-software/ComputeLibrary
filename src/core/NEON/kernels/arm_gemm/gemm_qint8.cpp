@@ -58,46 +58,46 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_s8s32_mmla_8x3VL",
-    [](const GemmArgs &args, const Requantize32 &) { return (args._Ksize>8); },
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_sve() && (args._Ksize>8); },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int8_t>(args, qp); }
 },
 #endif
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "sve_smallK_hybrid_s8s32_dot_8x1VL",
-    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize<=64 && !args._indirect_input; },
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_sve() && args._Ksize<=64 && !args._indirect_input; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<cls_sve_smallK_hybrid_s8s32_dot_8x1VL, int8_t, int8_t>(args, qp); }
 },
 #ifdef SVE2
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qs_dot_6x4VL",
-    [](const GemmArgs &, const Requantize32 &qp) { return quant_hybrid_symmetric(qp); },
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sve() && quant_hybrid_symmetric(qp); },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qs_dot_6x4VL, int8_t, int8_t, Requantize32>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qa_dot_4x4VL",
-    [](const GemmArgs &, const Requantize32 &qp) { return quant_hybrid_asymmetric(qp); },
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &qp) { return  args._ci->has_sve() && quant_hybrid_asymmetric(qp); },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qa_dot_4x4VL, int8_t, int8_t, Requantize32>(args, qp); }
 },
 #endif
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8s32_dot_6x4VL",
-    nullptr,
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &) { return  args._ci->has_sve(); },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8s32_dot_6x4VL, int8_t, int8_t, Requantize32, true>(args, qp); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_s8s32_dot_8x3VL",
-    [](const GemmArgs &args, const Requantize32 &) { return (args._Ksize>4); },
-    nullptr,
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_sve() && (args._Ksize>4); },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_sve_interleaved_s8s32_dot_8x3VL, int8_t, int8_t>(args, qp); }
 },
 #endif // SVE

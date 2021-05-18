@@ -110,16 +110,16 @@ protected:
         fuse_fn.configure(&conv_w, &bn_mean, &bn_var, &fused_w, &fused_b, conv_b_ptr, beta_ptr, gamma_ptr, epsilon);
         conv_fn.configure(&src, &fused_w, &fused_b, &dst, info);
 
-        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(conv_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(conv_b.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bn_mean.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bn_var.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bn_beta.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bn_gamma.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(fused_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(fused_b.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(conv_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(conv_b.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bn_mean.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bn_var.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bn_beta.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bn_gamma.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(fused_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(fused_b.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -133,16 +133,16 @@ protected:
         fused_b.allocator()->allocate();
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!conv_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!conv_b.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bn_mean.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bn_var.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bn_beta.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bn_gamma.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!fused_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!fused_b.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!conv_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!conv_b.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bn_mean.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bn_var.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bn_beta.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bn_gamma.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!fused_w.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!fused_b.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(src),

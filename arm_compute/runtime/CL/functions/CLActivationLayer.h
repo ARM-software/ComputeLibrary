@@ -59,6 +59,19 @@ public:
     CLActivationLayer &operator=(CLActivationLayer &&);
     /** Set the input and output tensor.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |QSYMM16        |QSYMM16        |
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
+     *
      * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
      *
      * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result

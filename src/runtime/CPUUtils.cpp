@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Log.h"
 #include "support/StringSupport.h"
 
 #include <algorithm>
@@ -61,11 +62,26 @@
 #define HWCAP_ASIMDDP (1 << 20) // NOLINT
 #endif                          /* HWCAP_ASIMDDP */
 
+#ifndef HWCAP_SVE
+#define HWCAP_SVE (1 << 22) // NOLINT
+#endif                      /* HWCAP_SVE */
+
 namespace
 {
 using namespace arm_compute;
 
 #if !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__))
+
+bool model_supports_sve(CPUModel model)
+{
+    switch(model)
+    {
+        case CPUModel::KLEIN:
+            return true;
+        default:
+            return false;
+    }
+}
 
 bool model_supports_dot(CPUModel model)
 {
@@ -74,6 +90,7 @@ bool model_supports_dot(CPUModel model)
         case CPUModel::GENERIC_FP16_DOT:
         case CPUModel::A55r1:
         case CPUModel::X1:
+        case CPUModel::KLEIN:
             return true;
         default:
             return false;
@@ -88,6 +105,7 @@ bool model_supports_fp16(CPUModel model)
         case CPUModel::GENERIC_FP16_DOT:
         case CPUModel::A55r1:
         case CPUModel::X1:
+        case CPUModel::KLEIN:
             return true;
         default:
             return false;
@@ -145,6 +163,9 @@ CPUModel midr_to_model(const unsigned int midr)
             case 0xd0d:
                 model = CPUModel::GENERIC_FP16_DOT;
                 break;
+            case 0xd46:
+                model = CPUModel::KLEIN;
+                break;
             default:
                 model = CPUModel::GENERIC;
                 break;
@@ -157,6 +178,22 @@ CPUModel midr_to_model(const unsigned int midr)
         {
             case 0xd40: // A76
                 model = CPUModel::GENERIC_FP16_DOT;
+                break;
+            default:
+                model = CPUModel::GENERIC;
+                break;
+        }
+    }
+    else if(implementer == 0x51)
+    {
+        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
+        switch(cpunum)
+        {
+            case 0x804: // A76
+                model = CPUModel::GENERIC_FP16_DOT;
+                break;
+            case 0x805: // A55
+                model = CPUModel::A55r1;
                 break;
             default:
                 model = CPUModel::GENERIC;
@@ -219,8 +256,9 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
     if(file.is_open())
     {
         std::string line;
-        int         midr   = 0;
-        int         curcpu = -1;
+        int         midr     = 0;
+        int         curcpu   = -1;
+        const int   num_cpus = static_cast<int>(cpusv.size());
 
         while(bool(getline(file, line)))
         {
@@ -237,9 +275,13 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
                     return;
                 }
 
-                if(curcpu >= 0)
+                if(curcpu >= 0 && curcpu < num_cpus)
                 {
                     cpusv[curcpu] = midr_to_model(midr);
+                }
+                else
+                {
+                    ARM_COMPUTE_LOG_INFO_MSG_CORE("Trying to populate a core id with id greater than the expected number of cores!");
                 }
 
                 midr   = 0;
@@ -290,9 +332,13 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
             }
         }
 
-        if(curcpu >= 0)
+        if(curcpu >= 0 && curcpu < num_cpus)
         {
             cpusv[curcpu] = midr_to_model(midr);
+        }
+        else
+        {
+            ARM_COMPUTE_LOG_INFO_MSG_CORE("Trying to populate a core id with id greater than the expected number of cores!");
         }
     }
 
@@ -359,11 +405,11 @@ namespace cpu
 void get_cpu_configuration(CPUInfo &cpuinfo)
 {
 #if !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__))
-    bool cpuid               = false;
-    bool hwcaps_fp16_support = false;
-    bool hwcaps_dot_support  = false;
-
-    const uint32_t hwcaps = getauxval(AT_HWCAP);
+    bool           cpuid               = false;
+    bool           hwcaps_fp16_support = false;
+    bool           hwcaps_dot_support  = false;
+    bool           hwcaps_sve          = false;
+    const uint32_t hwcaps              = getauxval(AT_HWCAP);
 
     if((hwcaps & HWCAP_CPUID) != 0)
     {
@@ -379,6 +425,11 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
     if((hwcaps & HWCAP_ASIMDDP) != 0)
     {
         hwcaps_dot_support = true;
+    }
+
+    if((hwcaps & HWCAP_SVE) != 0)
+    {
+        hwcaps_sve = true;
     }
 #endif /* defined(__aarch64__) */
 
@@ -398,17 +449,43 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
     // We assume that the system does not have mixed architectures
     bool one_supports_dot  = false;
     bool one_supports_fp16 = false;
+    bool one_supports_sve  = false;
     for(const auto &v : percpu)
     {
         one_supports_dot  = one_supports_dot || model_supports_dot(v);
         one_supports_fp16 = one_supports_fp16 || model_supports_fp16(v);
+        one_supports_sve  = one_supports_sve || model_supports_sve(v);
         cpuinfo.set_cpu_model(j++, v);
     }
     cpuinfo.set_dotprod(one_supports_dot || hwcaps_dot_support);
     cpuinfo.set_fp16(one_supports_fp16 || hwcaps_fp16_support);
-#else  /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
+    cpuinfo.set_sve(one_supports_sve || hwcaps_sve);
+#elif(BARE_METAL) && defined(__aarch64__) /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
+    cpuinfo.set_cpu_num(1);
+    const CPUModel cpumodel{ CPUModel::GENERIC };
+    cpuinfo.set_cpu_model(0, cpumodel);
+    // Assume single CPU in bare metal mode.  Just read the ID register and feature bits directly.
+    uint64_t fr0, pfr0, midr;
+    __asm __volatile(
+        "MRS  %0, ID_AA64ISAR0_EL1\n"
+        "MRS  %1, ID_AA64PFR0_EL1\n"
+        "MRS  %2, midr_el1"
+        : "=r"(fr0), "=r"(pfr0), "=r"(midr));
+    if((fr0 >> 44) & 0xf)
+    {
+        cpuinfo.set_dotprod(true);
+    }
+    if((pfr0 >> 16) & 0xf)
+    {
+        cpuinfo.set_fp16(true);
+    }
+    if((pfr0 >> 32) & 0xf)
+    {
+        cpuinfo.set_sve(true);
+    }
+#else                                     /* #elif(BARE_METAL) && defined(__aarch64__)  */
     ARM_COMPUTE_UNUSED(cpuinfo);
-#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
+#endif                                    /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
 }
 
 unsigned int get_threads_hint()

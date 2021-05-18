@@ -38,7 +38,7 @@ namespace arm_compute
 {
 class NEPadLayerKernel;
 
-/** Basic function to pad a tensor. This function calls the following Neon functions/kernels:
+/** Basic function to pad a tensor. This function calls the following functions/kernels:
  *
  *  - For padding mode = PaddingMode::CONSTANT:
  *      -# @ref NEPadLayerKernel
@@ -64,6 +64,15 @@ public:
     /** Default destructor */
     ~NEPadLayer();
     /** Initialize the function
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |All      |All       |
      *
      * @param[in]  input          Source tensor. Data types supported: All.
      * @param[out] output         Output tensor. Data type supported: same as @p input

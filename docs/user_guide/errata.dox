@@ -1,0 +1,91 @@
+///
+/// Copyright (c) 2019-2021 Arm Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+namespace arm_compute
+{
+/**
+@page errata Errata
+
+@tableofcontents
+
+@section S7_1_errata Errata
+
+- Experimented performance regressions for some networks on OpenCL when using Arm® Mali™ DDK r8p0
+    - Versions Affected: >= v21.05
+    - OSs Affected: All
+    - Conditions:
+        - Arm® Mali™ DDK r8p0
+
+- Under certain conditions, CLFullyConnectedLayer quantized tests may fail due to an issue in the test framework.
+    - Versions Affected: 21.02
+    - OSs Affected: Linux
+    - Conditions:
+        - armv7a architecture
+        - release mode
+        - asserts enabled
+
+- Performance regression in Convolution Layer OpenCL backend on Mali™ G77 when QSYMM8_PER_CHANNEL is used as weights' data type.
+    - Versions Affected: >= v20.11
+    - OSs Affected: All
+    - Conditions:
+        - Mali™ G77
+        - Convolution Layer in use
+        - OpenCL backend
+        - Convolution Layer uses QSYMM8_PER_CHANNEL as the data type of its weight
+
+- A wrong test configuration has been found in CLGEMMMatrixMultiplyReshapedOnlyRHS set of tests.
+    - Versions Affected: >= 20.11
+    - Conditions:
+        - Data type input: F32/F16
+        - Fused bounded relu activation with coefficient 'a' being negative
+
+- Under certain conditions, the validation test case 'CL/DirectConvolutionLayer/Float/FP32/RunSmall9x9\@InputShape=32x37x3x4:StrideX=1:StrideY=1:PadX=0:PadY=0:KernelSize=9:NumKernels=1:DataType=F32:ActivationInfo=LU_BOUNDED_RELU:DataLayout=NHWC' may fail.
+    - Versions Affected: >= v20.08
+    - Conditions:
+        - The validation suite has to run in nightly mode and execute 40k+ test cases before the test mentioned above
+
+- Under certain conditions, benchmark examples can hang when OpenCL profiling queues are enabled.
+    - Versions Affected: >= v19.11
+    - OSs Affected: Linux
+    - Conditions:
+        - Arm® Mali™ DDK r1p0 - r8p0, and
+        - Linux kernel >= 4.4
+
+- On Android with arm64-v8a/arm64-v8.2-a architecture, Arm® Neon™ validation tests can fail when compiled using Android Ndk
+  >= r18b in debug mode (https://github.com/android/ndk/issues/1135).
+    - Versions Affected: >= v19.11
+    - OSs Affected: Android
+    - Conditions:
+        - arm64-v8a/arm64-v8.2-a architecture, and
+        - Compiled using Android NDK >= r18b in debug mode.
+
+- An issue has been identified with CLCast.
+    - Versions Affected: >= 18.11
+    - Conditions:
+        - Data type input: F32
+        - Data type output: All integer types
+        - Conversion policy: SATURATE
+    - Result: OpenCL backend will always wrap around instead of saturating for out-of-range inputs
+
+*/
+} // namespace

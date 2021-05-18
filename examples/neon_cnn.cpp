@@ -257,7 +257,7 @@ private:
     Tensor out_fc0{};
     Tensor out_softmax{};
 
-    // Neon allocator
+    // Allocator
     Allocator allocator{};
 
     // Memory groups

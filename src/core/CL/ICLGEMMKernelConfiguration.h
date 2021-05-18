@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,8 +27,60 @@
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/Types.h"
 
+#include <array>
 namespace arm_compute
 {
+/** Basic container for the OpenCL GEMM configuration functions */
+template <class T>
+class CLGEMMConfigArray
+{
+public:
+    /** Alias for F32 index */
+    static constexpr size_t DT_F32 = 0;
+    /** Alias for F16 index */
+    static constexpr size_t DT_F16 = 1;
+    /** Alias for Int8 index */
+    static constexpr size_t DT_INT8 = 2;
+
+    /** Constructor
+     *
+     * @param[in] func_f32  Function to call for GEMM F32
+     * @param[in] func_f16  Function to call for GEMM F16
+     * @param[in] func_int8 Function to call for GEMM Int8 (QASYMM8, QASYMM8_SIGNED, QSYMM8_PER_CHANNEL)
+     *
+     */
+    CLGEMMConfigArray(T func_f32, T func_f16, T func_int8)
+        : _configs{ func_f32, func_f16, func_int8 }
+    {
+    }
+
+    /** Method to return the GEMM configuration function based on data type
+     *
+     * @param[in] data_type Input data type
+     *
+     * @return the valid function otherwise it returns nullptr if the data type is not valid
+     */
+    T get_function(DataType data_type)
+    {
+        switch(data_type)
+        {
+            case DataType::F32:
+                return _configs.at(DT_F32);
+            case DataType::F16:
+                return _configs.at(DT_F16);
+            case DataType::QASYMM8:
+            case DataType::QASYMM8_SIGNED:
+            case DataType::QSYMM8_PER_CHANNEL:
+                return _configs.at(DT_INT8);
+            default:
+                return nullptr;
+        }
+    }
+
+private:
+    std::array<T, 3> _configs;
+};
+
 /** Basic interface for the GEMM kernel configuration */
 class ICLGEMMKernelConfiguration
 {

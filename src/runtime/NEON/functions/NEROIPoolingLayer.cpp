@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
-
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
@@ -36,7 +35,12 @@ NEROIPoolingLayer::NEROIPoolingLayer()
 {
 }
 
-void NEROIPoolingLayer::configure(const ITensor *input, const ITensor *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info)
+Status NEROIPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+{
+    return NEROIPoolingLayerKernel::validate(input, rois, output, pool_info);
+}
+
+void NEROIPoolingLayer::configure(const ITensor *input, const ITensor *rois, const ITensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     _roi_kernel = std::make_unique<NEROIPoolingLayerKernel>();
     _roi_kernel->configure(input, rois, output, pool_info);

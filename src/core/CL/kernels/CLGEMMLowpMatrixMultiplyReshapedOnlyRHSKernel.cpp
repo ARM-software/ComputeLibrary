@@ -406,7 +406,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
         kernel_name += "_fused_output_stage_fixedpoint";
         _fuse_output_stage = true;
         // If a_offset == 0, vector_sum_col can be a nullptr
-        if(a_offset != 0)
+        if(a_offset != 0 && vector_sum_col != nullptr)
         {
             build_opts.add_option("-DA_OFFSET=" + support::cpp11::to_string(a_offset));
             build_opts.add_option_if(vector_sum_col->info()->tensor_shape().num_dimensions() > 1, "-DSUM_COL_HAS_BATCHES");

@@ -24,6 +24,8 @@
 #include "src/runtime/CL/mlgo/HeuristicTree.h"
 #include "arm_compute/core/Log.h"
 
+#include "support/Cast.h"
+
 #include <algorithm>
 #include <deque>
 #include <set>
@@ -114,7 +116,7 @@ std::pair<bool, T> HeuristicTree::query(GEMMShape shape) const
             return std::make_pair(false, T{});
         }
         ARM_COMPUTE_ERROR_ON_MSG(cur_node->type() != NodeType::Branch, "Unexpected NodeType");
-        auto br_node = dynamic_cast<BranchNode *>(cur_node);
+        auto br_node = utils::cast::polymorphic_downcast<BranchNode *>(cur_node);
         if(evaluate(shape, br_node->condition))
         {
             cur_node = _tree.at(br_node->true_node).get();
@@ -126,7 +128,7 @@ std::pair<bool, T> HeuristicTree::query(GEMMShape shape) const
         ++depth;
     }
     ARM_COMPUTE_ERROR_ON_MSG(cur_node->type() != NodeType::Leaf, "Unexpected NodeType");
-    auto l_node = dynamic_cast<LeafNode<T> *>(cur_node);
+    auto l_node = utils::cast::polymorphic_downcast<LeafNode<T> *>(cur_node);
     return std::make_pair(true, l_node->value);
 }
 
@@ -202,7 +204,7 @@ bool HeuristicTree::check_if_structurally_correct() const
         auto cur_node = _tree.at(id).get();
         if(cur_node->type() == NodeType::Branch)
         {
-            auto br_node = dynamic_cast<BranchNode *>(cur_node);
+            auto br_node = utils::cast::polymorphic_downcast<BranchNode *>(cur_node);
             to_visit.push_back(br_node->true_node);
             to_visit.push_back(br_node->false_node);
         }

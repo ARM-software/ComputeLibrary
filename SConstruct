@@ -1,4 +1,6 @@
-# Copyright (c) 2016, 2017 Arm Limited.
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2016-2021 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -43,7 +45,7 @@ vars.AddVariables(
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a",
-                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
+                  allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal")),
@@ -53,12 +55,10 @@ vars.AddVariables(
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
-    BoolVariable("neon", "Enable Neon support", False),
-    BoolVariable("gles_compute", "Enable OpenGL ES Compute Shader support", False),
+    BoolVariable("neon", "Enable Arm® Neon™ support", False),
     BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", True),
     BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled", False),
     BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
-    BoolVariable("tracing", "Enable runtime tracing", False),
     BoolVariable("openmp", "Enable OpenMP backend", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
@@ -124,7 +124,7 @@ if env['build'] == "embed_only":
     Return()
 
 if env['neon'] and 'x86' in env['arch']:
-    print("Cannot compile Neon for x86")
+    print("Cannot compile Arm® Neon™ for x86")
     Exit(1)
 
 if env['set_soname'] and not version_at_least(SCons.__version__, "2.4"):
@@ -142,8 +142,8 @@ if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['o
     Exit(1)
 
 if not env['exceptions']:
-    if env['opencl'] or env['gles_compute']:
-         print("ERROR: OpenCL and GLES are not supported when building without exceptions. Use opencl=0 gles_compute=0")
+    if env['opencl']:
+         print("ERROR: OpenCL is not supported when building without exceptions. Use opencl=0")
          Exit(1)
 
     env.Append(CPPDEFINES = ['ARM_COMPUTE_EXCEPTIONS_DISABLED'])
@@ -180,10 +180,6 @@ if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])
 
 if env['openmp']:
-    if 'clang++' in cpp_compiler:
-        print( "Clang does not support OpenMP. Use scheduler=cpp.")
-        Exit(1)
-
     env.Append(CPPDEFINES = [('ARM_COMPUTE_OPENMP_SCHEDULER', 1)])
     env.Append(CXXFLAGS = ['-fopenmp'])
     env.Append(LINKFLAGS = ['-fopenmp'])
@@ -207,7 +203,7 @@ if 'v7a' in env['estate'] and env['estate'] == '64':
 prefix = ""
 if 'v7a' in env['arch']:
     env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
-    if env['os'] == 'android' or env['os'] == 'tizen':
+    if (env['os'] == 'android' or env['os'] == 'tizen') and not 'hf' in env['arch']:
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
     else:
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
@@ -290,7 +286,7 @@ if not GetOption("help"):
             print("GCC 6.2.1 or newer is required to compile armv8.2-a code")
             Exit(1)
         elif env['arch'] == 'arm64-v8a' and not version_at_least(compiler_ver, '4.9'):
-            print("GCC 4.9 or newer is required to compile Neon code for AArch64")
+            print("GCC 4.9 or newer is required to compile Arm® Neon™ code for AArch64")
             Exit(1)
 
         if version_at_least(compiler_ver, '6.1'):
@@ -345,20 +341,19 @@ if env['os'] == 'linux' and env['arch'] == 'armv7a':
 if env['specs_file'] != "":
     env.Append(LINKFLAGS = ['-specs='+env['specs_file']])
 
+if env['neon']:
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_CPU_ENABLED'])
+
 if env['opencl']:
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_OPENCL_ENABLED'])
     if env['os'] in ['bare_metal'] or env['standalone']:
         print("Cannot link OpenCL statically, which is required for bare metal / standalone builds")
-        Exit(1)
-
-if env['gles_compute']:
-    if env['os'] in ['bare_metal'] or env['standalone']:
-        print("Cannot link OpenGLES statically, which is required for bare metal / standalone builds")
         Exit(1)
 
 if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
     env.Append(LIBS = ['pthread'])
 
-if env['opencl'] or env['gles_compute']:
+if env['opencl']:
     if env['embed_kernels']:
         env.Append(CPPDEFINES = ['EMBEDDED_KERNELS'])
     if env['compress_kernels']:
@@ -391,9 +386,6 @@ for dirname in os.listdir("./include"):
     Default( install_include("include/%s" % dirname))
 
 Export('version_at_least')
-
-if env['gles_compute'] and env['os'] != 'android':
-    env.Append(CPPPATH = ['#/include/linux'])
 
 SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 

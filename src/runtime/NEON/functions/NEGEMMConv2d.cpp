@@ -128,6 +128,7 @@ Status NEGEMMConv2d::validate(const ITensorInfo *input, const ITensorInfo *weigh
     const TensorShape i_shape   = input->tensor_shape();
     const TensorShape w_shape   = weights->tensor_shape();
     ARM_COMPUTE_RETURN_ERROR_ON(w_shape[0] != i_shape[0]);
+    ARM_COMPUTE_RETURN_ERROR_ON(info.dilation != Size2D(1U, 1U));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
     // Validate biases
     if(biases != nullptr)

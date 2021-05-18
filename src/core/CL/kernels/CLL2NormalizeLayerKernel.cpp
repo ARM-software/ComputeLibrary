@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,8 +42,6 @@ namespace
 {
 constexpr int max_input_tensor_dim = 3;
 
-constexpr unsigned int num_elems_processed_per_iteration = 16;
-
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
     ARM_COMPUTE_UNUSED(epsilon);
@@ -71,24 +69,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, cons
 
     return Status{};
 }
-
-std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type());
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, input->valid_region());
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-
-    return std::make_tuple(err, win);
-}
 } // namespace
 
 CLL2NormalizeLayerKernel::CLL2NormalizeLayerKernel()
@@ -105,6 +85,7 @@ void CLL2NormalizeLayerKernel::configure(const CLCompileContext &compile_context
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), sum->info(), output->info(), axis, epsilon));
+    auto padding_info = get_padding_info({ input, sum, output });
 
     _input       = input;
     _sum         = sum;
@@ -112,10 +93,14 @@ void CLL2NormalizeLayerKernel::configure(const CLCompileContext &compile_context
     _actual_axis = wrap_around(axis, max_input_tensor_dim);
     _epsilon     = epsilon;
 
+    const unsigned int vec_size_x           = adjust_vec_size(max_cl_vector_width / input->info()->element_size(), input->info()->dimension(0));
+    const int          vec_size_x_leftovers = input->info()->dimension(0) % vec_size_x;
+
     // Set build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DVEC_SIZE_X=" + support::cpp11::to_string(vec_size_x));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER_X=" + support::cpp11::to_string(vec_size_x_leftovers));
 
     // Create kernel
     std::string  kernel_name;
@@ -123,21 +108,21 @@ void CLL2NormalizeLayerKernel::configure(const CLCompileContext &compile_context
     switch(_actual_axis)
     {
         case 0:
-            kernel_name = "x";
+            kernel_name = "l2_normalize_x";
             idx         = num_arguments_per_2D_tensor() * 3;
             break;
         case 1:
-            kernel_name = "y";
+            kernel_name = "l2_normalize_y";
             idx         = num_arguments_per_2D_tensor() * 3;
             break;
         case 2:
-            kernel_name = "z";
+            kernel_name = "l2_normalize_z";
             idx         = num_arguments_per_3D_tensor() * 3;
             break;
         default:
             ARM_COMPUTE_ERROR("Axis not supported");
     }
-    _kernel = create_kernel(compile_context, "l2_normalize_" + kernel_name, build_opts);
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set epsilon argument
     if(input->info()->data_type() == DataType::F32)
@@ -150,17 +135,18 @@ void CLL2NormalizeLayerKernel::configure(const CLCompileContext &compile_context
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(_input->info(), _output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
+    Window win = calculate_max_window(*input->info(), Steps(vec_size_x));
 
-    ICLKernel::configure_internal(std::get<1>(win_config));
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type());
+
+    ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
 Status CLL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, sum, output, axis, epsilon));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get())));
-
     return Status{};
 }
 

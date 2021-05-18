@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/core/GPUTarget.h"
 #include "src/core/CL/gemm/CLGEMMHelpers.h"
 
-#include <map>
 #include <utility>
 
 namespace arm_compute
@@ -45,20 +44,13 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeMidgard
     using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMDefaultConfigNativeMidgard::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
-    // Configurations for Midgard architectures
-    static std::map<DataType, ConfigurationFunctionExecutorPtr> default_configs =
-    {
-        { DataType::QASYMM8, &CLGEMMDefaultConfigNativeMidgard::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultConfigNativeMidgard::default_q8 },
-        { DataType::QSYMM8, &CLGEMMDefaultConfigNativeMidgard::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultConfigNativeMidgard::default_q8 }
-    };
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_default(nullptr,
+                                                                        nullptr,
+                                                                        &CLGEMMDefaultConfigNativeMidgard::default_q8);
 
-    if(default_configs.find(data_type) != default_configs.end())
-    {
-        return (this->*default_configs[data_type])(m, n, k, b);
-    }
-    ARM_COMPUTE_ERROR("Not supported data type");
+    auto func = configs_default.get_function(data_type);
+    ARM_COMPUTE_ERROR_ON_MSG(func == nullptr, "Data type not support for GEMM");
+    return (this->*func)(m, n, k, b);
 }
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMDefaultConfigNativeMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)

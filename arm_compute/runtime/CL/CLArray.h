@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,15 +102,6 @@ protected:
 private:
     cl::Buffer _buffer;
 };
-
-/** OpenCL Array of Key Points. */
-using CLKeyPointArray = CLArray<KeyPoint>;
-/** OpenCL Array of 2D Coordinates. */
-using CLCoordinates2DArray = CLArray<Coordinates2D>;
-/** OpenCL Array of Detection Windows. */
-using CLDetectionWindowArray = CLArray<DetectionWindow>;
-/** OpenCL Array of 2D Sizes. */
-using CLSize2DArray = CLArray<Size2D>;
 /** OpenCL Array of uint8s. */
 using CLUInt8Array = CLArray<cl_uchar>;
 /** OpenCL Array of uint16s. */

@@ -40,10 +40,6 @@ NEPermute::NEPermute()
 {
 }
 
-NEPermute::NEPermute(NEPermute &&) = default;
-
-NEPermute &NEPermute::operator=(NEPermute &&) = default;
-
 NEPermute::~NEPermute() = default;
 
 void NEPermute::configure(const ITensor *input, ITensor *output, const PermutationVector &perm)

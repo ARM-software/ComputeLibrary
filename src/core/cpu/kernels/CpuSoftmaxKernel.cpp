@@ -228,10 +228,7 @@ void CpuLogits1DMaxKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*dst, output_shape, 1, src->data_type(), src->quantization_info());
 
-    Window      win = calculate_max_window(*src, Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
+    Window win = calculate_max_window(*src, Steps());
 
     ICpuKernel::configure(win);
 }
@@ -330,10 +327,7 @@ void CpuLogits1DSoftmaxKernel<IS_LOG>::configure(const ITensorInfo *src, const I
     auto_init_if_empty(*tmp, TensorInfo(*src).set_data_type(tmp_data_type).reset_padding());
 
     // Configure kernel window
-    Window      win = calculate_max_window(*max, Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
+    Window win = calculate_max_window(*max, Steps());
 
     ICpuKernel::configure(win);
 }

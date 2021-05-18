@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -49,7 +48,7 @@ namespace
 Status validate_arguments(const ITensorInfo *src, unsigned int width_offset, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src) is not needed here as this kernel doesn't use Neon FP16 instructions.
+    // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) + width_offset > dst->dimension(0));
@@ -72,14 +71,12 @@ void CpuConcatenateWidthKernel::configure(const ITensorInfo *src, unsigned int w
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, width_offset, dst));
+    ARM_COMPUTE_UNUSED(dst);
 
     _width_offset = width_offset;
 
     // Configure kernel window
-    Window      win = calculate_max_window(*src, Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
+    Window win = calculate_max_window(*src, Steps());
 
     ICpuKernel::configure(win);
 }

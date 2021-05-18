@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -190,12 +190,15 @@ inline float32x4_t vtanhq_f32(float32x4_t val)
     static const float32x4_t CONST_2        = vdupq_n_f32(2.f);
     static const float32x4_t CONST_MIN_TANH = vdupq_n_f32(-10.f);
     static const float32x4_t CONST_MAX_TANH = vdupq_n_f32(10.f);
+    static const float32x4_t CONST_THR      = vdupq_n_f32(5.e-3);
+    static const float32x4_t CONST_1_3      = vdupq_n_f32(0.3333333f);
 
     float32x4_t x     = vminq_f32(vmaxq_f32(val, CONST_MIN_TANH), CONST_MAX_TANH);
-    float32x4_t exp2x = vexpq_f32(vmulq_f32(CONST_2, x));
-    float32x4_t num   = vsubq_f32(exp2x, CONST_1);
-    float32x4_t den   = vaddq_f32(exp2x, CONST_1);
-    float32x4_t tanh  = vmulq_f32(num, vinvq_f32(den));
+    // x * (1 - x^2/3) if |x| < 5.e-3 or (exp2x - 1) / (exp2x + 1) otherwise
+    float32x4_t exp2x = vbslq_f32(vcgtq_f32(vabsq_f32(x), CONST_THR), vexpq_f32(vmulq_f32(CONST_2, x)), vmulq_f32(x, x));
+    float32x4_t num   = vbslq_f32(vcgtq_f32(vabsq_f32(x), CONST_THR), vsubq_f32(exp2x, CONST_1), vmulq_f32(CONST_1_3, exp2x));
+    float32x4_t den   = vbslq_f32(vcgtq_f32(vabsq_f32(x), CONST_THR), vaddq_f32(exp2x, CONST_1), vsubq_f32(CONST_1, num));
+    float32x4_t tanh  = vbslq_f32(vcgtq_f32(vabsq_f32(x), CONST_THR), vmulq_f32(num, vinvq_f32(den)), vmulq_f32(x, den));
     return tanh;
 }
 
@@ -387,6 +390,34 @@ inline void convert_float32x4x4_to_int8x16(const float32x4x4_t &in, int8x16_t &o
     out = vcombine_s8(vqmovn_s16(low), vqmovn_s16(high));
 }
 
+template <>
+inline uint8x16_t convert_float_to_int<float32x4x4_t, uint8x16_t>(const float32x4x4_t &in)
+{
+    uint8x16_t out;
+    convert_float32x4x4_to_uint8x16(in, out);
+    return out;
+}
+
+template <>
+inline float32x4x4_t convert_int_to_float<float32x4x4_t, uint8x16_t>(const uint8x16_t &in)
+{
+    return convert_uint8x16_to_float32x4x4(in);
+}
+
+template <>
+inline int8x16_t convert_float_to_int<float32x4x4_t, int8x16_t>(const float32x4x4_t &in)
+{
+    int8x16_t out;
+    convert_float32x4x4_to_int8x16(in, out);
+    return out;
+}
+
+template <>
+inline float32x4x4_t convert_int_to_float<float32x4x4_t, int8x16_t>(const int8x16_t &in)
+{
+    return convert_int8x16_to_float32x4x4(in);
+}
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Exponent polynomial coefficients */
 /** Logarithm polynomial coefficients */
@@ -467,7 +498,6 @@ inline float16x8_t vtaylor_polyq_f16(float16x8_t x, const std::array<float16x8_t
 
 inline float16x8_t vexpq_f16(float16x8_t x)
 {
-    // TODO (COMPMID-1535) : Revisit FP16 approximations
     const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
     const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
 
@@ -477,7 +507,6 @@ inline float16x8_t vexpq_f16(float16x8_t x)
 
 inline float16x8_t vlogq_f16(float16x8_t x)
 {
-    // TODO (COMPMID-1535) : Revisit FP16 approximations
     const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
     const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
 
@@ -487,7 +516,6 @@ inline float16x8_t vlogq_f16(float16x8_t x)
 
 inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
 {
-    // TODO (giaiod01) - COMPMID-1535
     float32x4_t n0_f32   = vcvt_f32_f16(vget_low_f16(n));
     float32x4_t n1_f32   = vcvt_f32_f16(vget_high_f16(n));
     float32x4_t val0_f32 = vcvt_f32_f16(vget_low_f16(val));

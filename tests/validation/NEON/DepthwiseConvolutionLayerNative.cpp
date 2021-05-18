@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
+#include "src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/framework/Macros.h"
@@ -37,12 +37,12 @@ namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
 
-// Create function for NEDepthwiseConvolutionLayerKernel
-using NEDepthwiseConvolutionLayerNative = NESynthetizeFunctionWithZeroConstantKernelBorder<NEDepthwiseConvolutionLayerNativeKernel>;
+// Create function for CpuDepthwiseConvolutionKernel
+using CpuDepthwiseConvolutionNative = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuDepthwiseConvolutionNativeKernel>;
 
 // Fixture for NEDepthwiseConvolutionLayerKernel
 template <typename T>
-using NEDepthwiseConvolutionLayerNativeFixture = DepthwiseConvolutionLayerNativeValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerNative, T>;
+using CpuDepthwiseConvolutionNativeFixture = DepthwiseConvolutionLayerNativeValidationFixture<Tensor, Accessor, CpuDepthwiseConvolutionNative, T>;
 
 namespace
 {
@@ -124,8 +124,9 @@ TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL)
     auto biases  = create_tensor<Tensor>(bias_shape, data_type, 1, QuantizationInfo(), data_layout);
     auto dst     = create_tensor<Tensor>(TensorShape(), data_type, 1, QuantizationInfo(), data_layout);
 
-    NEDepthwiseConvolutionLayerNativeKernel dwc;
-    dwc.configure(&src, &weights, &biases, &dst, pad_stride_info);
+    cpu::kernels::CpuDepthwiseConvolutionNativeKernel dwc;
+    const ConvolutionInfo info{pad_stride_info, 1, ActivationLayerInfo(), Size2D(1, 1)};
+    dwc.configure(src.info(), weights.info(), biases.info(), dst.info(), info);
 
     ARM_COMPUTE_EXPECT(src.info()->padding().empty(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->padding().empty(), framework::LogLevel::ERRORS);
@@ -135,7 +136,7 @@ TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL)
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CpuDepthwiseConvolutionNativeFixture<float>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_precommit,
                                                                                                 height_values_precommit),
                                                                                                 channel_values_precommit),
@@ -152,7 +153,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerNativeFixture<float>
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CpuDepthwiseConvolutionNativeFixture<float>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_nightly,
                                                                                                 height_values_nightly),
                                                                                                 channel_values_nightly),

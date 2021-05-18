@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,6 @@ inline const float8 clamp_to_border_with_size_quantized(float8 coords, const flo
     return (float8)(clamped_x.s0, clamped_y.s0, clamped_x.s1, clamped_y.s1, clamped_x.s2, clamped_y.s2, clamped_x.s3, clamped_y.s3);
 }
 
-/* FIXME(COMPMID-682): Clamp border properly in UNDEFINED border mode in Warp, Scale, Remap */
 /** Clamps the given coordinates to the borders.
  *
  * @param[in] coords Vector of 2D coordinates to clamp. Even positions are X coords, odd positions are Y coords.
@@ -122,7 +121,6 @@ inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate_with_border_quanti
     return res;
 }
 
-/* FIXME(COMPMID-682): Clamp border properly in UNDEFINED border mode in Warp, Scale, Remap */
 /** Computes the bilinear interpolation for each set of coordinates in the vector coords and returns the values
  *
  * @param[in] in            Pointer to the source image.

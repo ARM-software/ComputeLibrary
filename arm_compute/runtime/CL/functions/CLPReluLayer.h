@@ -32,43 +32,6 @@ namespace arm_compute
 class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
-
-namespace experimental
-{
-/** Basic function to run @ref arm_compute::opencl::kernels::ClArithmeticKernel for PRELU
- *
- * @note The function implements an activation layer with the PRELU activation function.
- */
-class CLPReluLayer : public ICLOperator
-{
-public:
-    /** Default Constructor */
-    CLPReluLayer();
-    /** Set the input and output tensor.
-     *
-     * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
-     *
-     * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  alpha           PRelu layer parameters. Data types supported: same of @p input.
-     * @param[out] output          Destination tensor. Data type supported: same as @p input
-     */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLPReluLayer
-     *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] alpha  PRelu layer parameters. Data types supported: same of @p input.
-     * @param[in] output Destination tensor info. Data type supported: same as @p input
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-};
-} // namespace experimental
-
 /** Basic function to run @ref opencl::kernels::ClArithmeticKernel for PRELU
  *
  * @note The function implements an activation layer with the PRELU activation function.
@@ -89,6 +52,17 @@ public:
     /** Default move assignment operator */
     CLPReluLayer &operator=(CLPReluLayer &&);
     /** Set the input and output tensor.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
      *
      * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
      *

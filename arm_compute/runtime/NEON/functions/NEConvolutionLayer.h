@@ -37,7 +37,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Basic function to simulate a convolution layer. This function calls one of the following Neon functions:
+/** Basic function to simulate a convolution layer. This function calls one of the following functions:
  * -# @ref NEGEMMConvolutionLayer     (executed only in case GEMM is required for the operation)
  * -# @ref NEWinogradConvolutionLayer (executed only in case Winograd is required for the operation)
  * -# @ref NEDirectConvolutionLayer   (executed only in case Direct Convolution is required for the operation)
@@ -86,12 +86,27 @@ public:
     ~NEConvolutionLayer() = default;
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src0           |src1               |src2   |dst            |
+     * |:--------------|:------------------|:------|:--------------|
+     * |F16            |F16                |F16    |F16            |
+     * |F32            |F32                |F32    |F32            |
+     * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
+     * |QASYMM8        |QSYMM8_PER_CHANNEL |S32    |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32    |QASYMM8_SIGNED |
+     *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                              while every optional dimension from 4 and above represent a batch of inputs.
      *                              Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
+     * @param[in]  weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                              Data type supported: Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
      * @param[in]  biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                              Data type supported: Should match @p input data type, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
+     *                              Data type supported: Same as @p input, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
      * @param[out] output           Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                              Data types supported: Same as @p input.
      * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo.
@@ -110,9 +125,10 @@ public:
      * @param[in] input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                             while every optional dimension from 4 and above represent a batch of inputs.
      *                             Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
+     * @param[in] weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                             Data type supported:Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                             Data type supported: Should match @p input data type, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
+     *                             Data type supported: Same as @p input, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
      * @param[in] output           Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                             Data types supported: Same as @p input.
      * @param[in] conv_info        Contains padding and stride information described in @ref PadStrideInfo.
@@ -134,7 +150,8 @@ public:
      * @param[in] input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                             while every optional dimension from 4 and above represent a batch of inputs.
      *                             Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
+     * @param[in] weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                             Data type supported:Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] output           Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                             Data types supported: Same as @p input.
      * @param[in] conv_info        Contains padding and stride information described in @ref PadStrideInfo.

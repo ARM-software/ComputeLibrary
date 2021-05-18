@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,6 @@ class IAllocator
 public:
     /** Default virtual destructor. */
     virtual ~IAllocator() = default;
-    // TODO (COMPMID-1088) : Change allocator and rest interfaces to use IMemoryRegion
     /** Interface to be implemented by the child class to allocate bytes
      *
      * @param[in] size      Size to allocate

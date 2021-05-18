@@ -33,7 +33,7 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Kernel to perform other operation on Neon */
+/** Kernel to perform gather operation. */
 class NEGatherKernel : public INEKernel
 {
 public:

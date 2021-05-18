@@ -37,7 +37,7 @@ class ITensor;
 /** Function to calculate the index of the minimum or maximum values in a
  *  tensor based on an axis.
  *
- *  This function calls the following Neon kernels:
+ *  This function calls the following kernels:
  *
  * -# @ref NEReductionOperationKernel
  * -# @ref NEFillBorderKernel
@@ -63,6 +63,18 @@ public:
     /** Default destructor */
     ~NEArgMinMaxLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst        |
+     * |:--------------|:----------|
+     * |QASYMM8        |U32, S32   |
+     * |QASYMM8_SIGNED |U32, S32   |
+     * |S32            |U32, S32   |
+     * |F16            |U32, S32   |
+     * |F32            |U32, S32   |
      *
      * @param[in]  input  Input source tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/S32/F16/F32.
      * @param[in]  axis   Axis to find max/min index.

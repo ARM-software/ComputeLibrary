@@ -148,7 +148,7 @@ validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const IT
 template <typename T, bool fused_activation, typename F>
 void NEBatchNormalizationLayerKernel::batch_normalization_nchw(const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     const int  window_step_x  = 16 / sizeof(T);
@@ -164,7 +164,7 @@ void NEBatchNormalizationLayerKernel::batch_normalization_nchw(const Window &win
     F activation_functor(_act_info);
 
     // Hold information about the current feature map we are iterating.
-    // Only compute denominator and Neon vectors once per feature map.
+    // Only compute denominator and constants once per feature map.
     int slice = -1;
 
     const auto input_mean  = reinterpret_cast<const T *>(_mean->ptr_to_element(Coordinates(0, 0)));
@@ -359,10 +359,6 @@ void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output,
     {
         // Output auto initialization if not yet initialized
         auto_init_if_empty(*output->info(), *input->info()->clone());
-
-        Coordinates coord;
-        coord.set_num_dimensions(output->info()->num_dimensions());
-        output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
     }
 }
 

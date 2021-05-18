@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "helpers.h"
+#include "helpers_asymm.h"
 
 #if DATA_SIZE == 32
 #define VEC_SIZE 4
@@ -29,22 +30,39 @@
 #elif DATA_SIZE == 16
 #define VEC_SIZE 8
 #define VEC_MAX vec8_max
-#else /* DATA_SIZE not equals 32 or 16 */
+#elif DATA_SIZE == 8
+#define VEC_SIZE 16
+#define VEC_MAX vec16_max
+#else /* DATA_SIZE not equals 8, 16, 32 */
 #error "Unsupported data size"
 #endif /* DATA_SIZE == 32 */
+
+// Define whether to use max (Quantized datatype) or fmax (Float) functions
+#if defined(OFFSET_OUT) && defined(SCALE_OUT)
+#define MAX(x, y) max(x, y)
+#else // !(defined(OFFSET_OUT) && defined(SCALE_OUT)
+#define MAX(x, y) fmax(x, y)
+#endif // defined(OFFSET_OUT) && defined(SCALE_OUT)
 
 inline DATA_TYPE vec4_max(VEC_DATA_TYPE(DATA_TYPE, 4) vec)
 {
     VEC_DATA_TYPE(DATA_TYPE, 2)
-    temp = fmax(vec.lo, vec.hi);
-    return fmax(temp.x, temp.y);
+    temp = MAX(vec.lo, vec.hi);
+    return MAX(temp.x, temp.y);
 }
 
 inline DATA_TYPE vec8_max(VEC_DATA_TYPE(DATA_TYPE, 8) vec)
 {
     VEC_DATA_TYPE(DATA_TYPE, 4)
-    temp = fmax(vec.lo, vec.hi);
+    temp = MAX(vec.lo, vec.hi);
     return vec4_max(temp);
+}
+
+inline DATA_TYPE vec16_max(VEC_DATA_TYPE(DATA_TYPE, 16) vec)
+{
+    VEC_DATA_TYPE(DATA_TYPE, 8)
+    temp = MAX(vec.lo, vec.hi);
+    return vec8_max(temp);
 }
 
 /** Performs a roi pooling on a single output pixel.
@@ -69,7 +87,8 @@ inline DATA_TYPE roi_pool_1x1(const Tensor3D *input, int region_start_x, int reg
     {
         int num_iter = (int)((region_end_x - region_start_x) / VEC_SIZE);
         VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-        curr_max = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(-FLT_MAX);
+        curr_max = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(MIN_VALUE);
+
         for(int j = region_start_y; j < region_end_y; ++j)
         {
             int i = region_start_x;
@@ -77,27 +96,34 @@ inline DATA_TYPE roi_pool_1x1(const Tensor3D *input, int region_start_x, int reg
             {
                 VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
                 val      = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(input, i, j, pz));
-                curr_max = fmax(val, curr_max);
+                curr_max = MAX(val, curr_max);
             }
             for(; i < region_end_x; ++i)
             {
                 DATA_TYPE val = *(__global DATA_TYPE *)tensor3D_offset(input, i, j, pz);
-                curr_max      = fmax(curr_max, val);
+                curr_max      = MAX(curr_max, val);
             }
         }
-        return (DATA_TYPE)VEC_MAX(curr_max);
+
+        const DATA_TYPE temp = (DATA_TYPE)VEC_MAX(curr_max);
+
+#if defined(OFFSET_OUT) && defined(SCALE_OUT)
+        return QUANTIZE(temp, OFFSET_OUT, SCALE_OUT, DATA_TYPE, 1);
+#endif /* if quantized, requantize and return */
+
+        return temp;
     }
 }
 
 /** Performs a roi pooling function.
  *
- * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16, F32;
+ * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16, F32, QASYMM8;
  * @note Datasize must be passed using -DDATA_SIZE e.g. -DDATA_SIZE=32;
  * @note Input dimensions must be passed using -DMAX_DIM_X, -DMAX_DIM_Y and -DMAX_DIM_Z;
  * @note Pooled region dimensions must be passed using -DPOOLED_DIM_X and -DPOOLED_DIM_Y;
  * @note Spatial scale must be passed using -DSPATIAL_SCALE;
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16, F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16, F32, QASYMM8
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -111,7 +137,7 @@ inline DATA_TYPE roi_pool_1x1(const Tensor3D *input, int region_start_x, int reg
  * @param[in]  rois_stride_y                        Stride of the ROIs tensor in Y dimension (in bytes)
  * @param[in]  rois_step_y                          Step of the ROIs tensor in Y dimension (in bytes)
  * @param[in]  rois_offset_first_element_in_bytes   The offset of the first element in the ROIs tensor
- * @param[out] output_ptr                           Pointer to the destination image. Supported data types: F16, F32
+ * @param[out] output_ptr                           Pointer to the destination image. Supported data types: same as input
  * @param[in]  output_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  output_stride_y                      Stride of the destination image in Y dimension (in bytes)
@@ -139,9 +165,9 @@ __kernel void roi_pooling_layer(
 
     // Load roi parameters
     // roi is laid out as follows { batch_index, x1, y1, x2, y2 }
-    const ushort roi_batch = (ushort) * ((__global DATA_TYPE *)offset(&rois, 0, pw));
-    const VEC_DATA_TYPE(DATA_TYPE, 4)
-    roi               = vload4(0, (__global DATA_TYPE *)offset(&rois, 1, pw));
+    const ushort roi_batch = (ushort) * ((__global ushort *)offset(&rois, 0, pw));
+    const VEC_DATA_TYPE(ushort, 4)
+    roi               = vload4(0, (__global ushort *)offset(&rois, 1, pw));
     const int2 roi_anchor = convert_int2_sat(round(convert_float2(roi.s01) * (float)SPATIAL_SCALE));
     const int2 roi_dims   = convert_int2_sat(fmax(round(convert_float2(roi.s23 - roi.s01) * (float)SPATIAL_SCALE), 1.f));
 

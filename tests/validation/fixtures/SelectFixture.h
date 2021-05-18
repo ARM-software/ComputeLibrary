@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,10 +97,10 @@ protected:
         FunctionType select;
         select.configure(&c_t, &x_t, &y_t, &dst_t);
 
-        ARM_COMPUTE_EXPECT(c_t.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(x_t.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(y_t.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(dst_t.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(c_t.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(x_t.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(y_t.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst_t.info()->is_resizable());
 
         // Allocate tensors
         c_t.allocator()->allocate();
@@ -108,10 +108,10 @@ protected:
         y_t.allocator()->allocate();
         dst_t.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!c_t.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!x_t.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!y_t.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!dst_t.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!c_t.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!x_t.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!y_t.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst_t.info()->is_resizable());
 
         // Fill tensors
         fill_bool(AccessorType(c_t), 0);

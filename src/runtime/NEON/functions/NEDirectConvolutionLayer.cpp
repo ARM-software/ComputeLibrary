@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,107 +27,48 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
-#include "src/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
-#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+#include "src/runtime/cpu/operators/CpuDirectConvolution.h"
 
 namespace arm_compute
 {
-NEDirectConvolutionLayer::~NEDirectConvolutionLayer() = default;
+struct NEDirectConvolutionLayer::Impl
+{
+    ITensor                                   *src{ nullptr };
+    const ITensor                             *weights{ nullptr };
+    const ITensor                             *bias{ nullptr };
+    ITensor                                   *dst{ nullptr };
+    std::unique_ptr<cpu::CpuDirectConvolution> op{ nullptr };
+};
 
 NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _output_stage_kernel(), _conv_kernel(), _input_border_handler(), _activationlayer_function(), _accumulator(), _has_bias(false),
-      _is_activationlayer_enabled(false), _dim_split(Window::DimZ), _is_padding_required()
+    : _memory_manager(std::move(memory_manager)), _impl(std::make_unique<Impl>())
 {
 }
+NEDirectConvolutionLayer::~NEDirectConvolutionLayer() = default;
 
 void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::UNKNOWN);
-    _output_stage_kernel  = std::make_unique<NEDirectConvolutionLayerOutputStageKernel>();
-    _conv_kernel          = std::make_unique<NEDirectConvolutionLayerKernel>();
-    _input_border_handler = std::make_unique<NEFillBorderKernel>();
-
-    // Free accumulator
-    if(_accumulator.buffer() != nullptr)
-    {
-        _accumulator.allocator()->free();
-    }
-
-    _dim_split = input->info()->data_layout() == DataLayout::NCHW ? Window::DimZ : Window::DimY;
-
-    // Check if bias should be added in the convolution result
-    _has_bias = (bias != nullptr);
-
-    _conv_kernel->configure(input, weights, output, conv_info);
-    if(_has_bias)
-    {
-        _output_stage_kernel->configure(output, bias);
-    }
-    _is_padding_required = !_conv_kernel->border_size().empty();
-
-    if(_is_padding_required)
-    {
-        // Add zero padding XY
-        _input_border_handler->configure(input, _conv_kernel->border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
-    }
-
-    //Configure Activation Layer
-    _is_activationlayer_enabled = act_info.enabled();
-    if(_is_activationlayer_enabled)
-    {
-        _activationlayer_function.configure(output, nullptr, act_info);
-    }
+    _impl->src     = input;
+    _impl->weights = weights;
+    _impl->bias    = bias;
+    _impl->dst     = output;
+    _impl->op      = std::make_unique<cpu::CpuDirectConvolution>(_memory_manager);
+    _impl->op->configure(input->info(), weights->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), conv_info, act_info);
 }
 
 Status NEDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                           const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-
-    // output might not be initialized since it can be an intermediate tensor of another layer
-    DataType   data_type = input->data_type();
-    TensorInfo accumulator(output->clone()->set_is_resizable(true).reset_padding().set_data_type(data_type));
-
-    // Validate Convolution kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerKernel::validate(input, weights, &accumulator, conv_info));
-
-    if(bias != nullptr)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, bias);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->dimension(0) != weights->dimension(3),
-                                        "Biases size and number of input feature maps should match");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->num_dimensions() > 1, "Biases should be one dimensional");
-    }
-
-    // Validate bias kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, bias, output));
-
-    if(act_info.enabled())
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
-    }
-
-    return Status{};
+    return cpu::CpuDirectConvolution::validate(input, weights, bias, output, conv_info, act_info);
 }
 
 void NEDirectConvolutionLayer::run()
 {
-    MemoryGroupResourceScope scope_mg(_memory_group);
-
-    if(_is_padding_required)
-    {
-        NEScheduler::get().schedule(_input_border_handler.get(), Window::DimZ);
-    }
-    NEScheduler::get().schedule(_conv_kernel.get(), _dim_split);
-    if(_has_bias)
-    {
-        NEScheduler::get().schedule(_output_stage_kernel.get(), Window::DimY);
-    }
-
-    if(_is_activationlayer_enabled)
-    {
-        _activationlayer_function.run();
-    }
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->weights);
+    pack.add_tensor(TensorType::ACL_SRC_2, _impl->bias);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

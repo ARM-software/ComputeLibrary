@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,15 +48,21 @@ public:
     ~NEDepthConvertLayer() = default;
     /** Initialize the function's source, destination
      *
-     * Valid conversions Input -> Output :
+     * Valid data layouts:
+     * - All
      *
-     *   - QASYMM8  -> F16, F32
-     *   - U8       -> U16, S16, S32
-     *   - U16      -> U8, U32
-     *   - S16      -> U8, S32
-     *   - BFLOAT16 -> F32
-     *   - F16      -> QASYMM8, F32
-     *   - F32      -> QASYMM8, F16, BFLOAT16
+     * Valid data type configurations:
+     * |src            |dst                        |
+     * |:--------------|:--------------------------|
+     * |QASYMM8        | F16, F32                  |
+     * |U8             | U16, S16, S32             |
+     * |U16            | U8, U32                   |
+     * |S16            | U8, S32                   |
+     * |BFLOAT16       | F32                       |
+     * |F16            | QASYMM8, F32              |
+     * |F32            | QASYMM8, F16, BFLOAT16    |
+     *
+     * Input data type must be different than output data type.
      *
      * @param[in]  input  The input tensor to convert. Data types supported: QASYMM8/U8/U16/S16/BFLOAT16/F16/F32.
      * @param[out] output The output tensor. Data types supported: QASYMM8/U8/U16/S16/U32/S32/BFLOAT16/F16/F32.

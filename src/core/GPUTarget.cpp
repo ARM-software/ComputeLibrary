@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -146,7 +146,7 @@ GPUTarget get_target_from_name(const std::string &device_name)
 
     if(!found_mali)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Mali GPU. Target is set to default.");
+        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Arm® Mali™ GPU. Target is set to default.");
         return GPUTarget::MIDGARD;
     }
 
@@ -179,7 +179,7 @@ GPUTarget get_target_from_name(const std::string &device_name)
     // Report in case of unknown target
     if(gpu_target == GPUTarget::UNKNOWN)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Mali GPU unknown. Target is set to the default one. (BIFROST)");
+        ARM_COMPUTE_LOG_INFO_MSG_CORE("Arm® Mali™ Mali GPU unknown. Target is set to the default one. (BIFROST)");
         return GPUTarget::BIFROST;
     }
 

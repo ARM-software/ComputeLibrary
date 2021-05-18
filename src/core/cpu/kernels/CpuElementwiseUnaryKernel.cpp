@@ -108,30 +108,28 @@ CpuElementwiseUnaryKernel::CpuElementwiseUnaryKernel()
 {
 }
 
-void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo &input, ITensorInfo &output)
+void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst)
 {
-    ARM_COMPUTE_ERROR_THROW_ON(validate(op, input, output));
-
-    // Configure kernel window
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input);
-    const TensorShape &out_shape    = broadcast_pair.first;
-    const ValidRegion &valid_region = broadcast_pair.second;
-
-    // Auto initialize output if not initialized
-    auto_init_if_empty(output, out_shape, 1, input.data_type());
-
-    Window win = calculate_max_window(valid_region);
+    ARM_COMPUTE_ERROR_THROW_ON(validate(op, src, dst));
 
     _op = op;
 
-    ICpuKernel::configure(win);
+    // If input shape is dynamic, expect a configured window and dst at run-time.
+    if(src.is_dynamic())
+    {
+        return;
+    }
+
+    auto shape_and_window = compute_output_shape_and_window(src.tensor_shape());
+    auto_init_if_empty(dst, shape_and_window.first, 1, src.data_type());
+    ICpuKernel::configure(shape_and_window.second);
 }
 
-Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInfo &input, const ITensorInfo &output)
+Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src);
 
-    const auto *uk = get_implementation(input.data_type());
+    const auto *uk = get_implementation(src.data_type());
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     switch(op)
@@ -141,19 +139,19 @@ Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInf
         case ElementWiseUnary::LOG:
         case ElementWiseUnary::ROUND:
         case ElementWiseUnary::SIN:
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32);
             break;
         case ElementWiseUnary::NEG:
         case ElementWiseUnary::ABS:
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32, DataType::S32);
             break;
         default:
             ARM_COMPUTE_ERROR("ElementWiseUnary operation not supported");
     }
-    // Validate in case of configured output
-    if(output.total_size() > 0)
+    // Validate in case of configured dst
+    if(dst.total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
     }
 
     return Status{};
@@ -162,8 +160,6 @@ Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInf
 void CpuElementwiseUnaryKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
     auto src  = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto dst  = tensors.get_tensor(TensorType::ACL_DST);

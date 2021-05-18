@@ -40,7 +40,7 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int num_groups)
 {
-    // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
+    // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NCHW, DataLayout::NHWC);
 
@@ -155,10 +155,6 @@ void NEChannelShuffleLayerKernel::configure(const ITensor *input, ITensor *outpu
     Window win = calculate_max_window(*input->info(), Steps());
 
     // The NEChannelShuffleLayerKernel doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
-
     INEKernel::configure(win);
 }
 

@@ -40,6 +40,13 @@ class CLBitwiseNot : public ICLSimpleFunction
 {
 public:
     /** Initialize the function
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |U8             |U8             |
      *
      * @param[in]  input  Input tensor. Data types supported: U8.
      * @param[out] output Output tensor. Data types supported: U8.

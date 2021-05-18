@@ -292,21 +292,21 @@ void Interleave(TOut *out, const TIn *in, size_t in_stride, const unsigned int y
 /* AArch32 */
 #ifdef __arm__
 /* FP32 */
-/* Neon implementation (height 6) */
+/* Arm® Neon™ implementation (height 6) */
 template void IndirectInterleave<6, 1, VLType::None>(float *, const float * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<6, 1, VLType::None>(float *, const float *, size_t, const convolver<float> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<6, 1, VLType::None>(float *, const float *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 
 /* FP16 */
 #if __ARM_FP16_ARGS
-/* Neon implementation using FP32 kernel (height 6) */
+/* Arm® Neon™ implementation using FP32 kernel (height 6) */
 template void IndirectInterleave<6, 1, VLType::None>(float *, const __fp16 * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<6, 1, VLType::None>(float *, const __fp16 *, size_t, const convolver<__fp16> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<6, 1, VLType::None>(float *, const __fp16 *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 #endif /* __ARM_FP16_ARGS */
 
 /* BF16 */
-/* Neon implementation using FP32 kernel */
+/* Arm® Neon™ implementation using FP32 kernel */
 template void IndirectInterleave<6, 1, VLType::None>(float *, const bfloat16 * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<6, 1, VLType::None>(float *, const bfloat16 *, size_t, const convolver<bfloat16> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<6, 1, VLType::None>(float *, const bfloat16 *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
@@ -315,7 +315,7 @@ template void Interleave<6, 1, VLType::None>(float *, const bfloat16 *, size_t, 
 /* AArch64 */
 #ifdef __aarch64__
 /* FP32 */
-/* Neon/SVE implementation (height 8) */
+/* Arm® Neon™/SVE implementation (height 8) */
 template void IndirectInterleave<8, 1, VLType::None>(float *, const float * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<8, 1, VLType::None>(float *, const float *, size_t, const convolver<float> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<8, 1, VLType::None>(float *, const float *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
@@ -339,7 +339,7 @@ template void ConvolutionInterleave<8, 1, VLType::None>(float *, const __fp16 *,
 template void Interleave<8, 1, VLType::None>(float *, const __fp16 *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 
 /* BF16 */
-/* Neon/SVE BFDOT */
+/* Arm® Neon™/SVE BFDOT */
 #ifdef V8P6_BF
 template void IndirectInterleave<8, 2, VLType::None>(bfloat16 *, const bfloat16 * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<8, 2, VLType::None>(bfloat16 *, const bfloat16 *, size_t, const convolver<bfloat16> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
@@ -350,7 +350,7 @@ template void ConvolutionInterleave<8, 4, VLType::None>(bfloat16 *, const bfloat
 template void Interleave<8, 4, VLType::None>(bfloat16 *, const bfloat16 *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 #endif // V8P6_BF
 
-/* Neon/SVE using FP32 kernel */
+/* Arm® Neon™/SVE using FP32 kernel */
 template void IndirectInterleave<8, 1, VLType::None>(float *, const bfloat16 * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<8, 1, VLType::None>(float *, const bfloat16 *, size_t, const convolver<bfloat16> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<8, 1, VLType::None>(float *, const bfloat16 *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
@@ -365,12 +365,12 @@ template void ConvolutionInterleave<8, 1, VLType::None>(uint16_t *, const uint16
 template void Interleave<8, 1, VLType::None>(uint16_t *, const uint16_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 
 /* INT8 */
-/* Neon SMLA/SMLAL (height 4, block 16) */
+/* Arm® Neon™ SMLA/SMLAL (height 4, block 16) */
 template void IndirectInterleave<4, 16, VLType::None>(int8_t *, const int8_t * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<4, 16, VLType::None>(int8_t *, const int8_t *, size_t, const convolver<int8_t> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<4, 16, VLType::None>(int8_t *, const int8_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 
-/* Neon SDOT (height 8, block 4) */
+/* Arm® Neon™ SDOT (height 8, block 4) */
 template void IndirectInterleave<8, 4, VLType::None>(int8_t *, const int8_t * const * const *, unsigned int, unsigned int, unsigned int y0, unsigned int ymax, unsigned int k0, unsigned int kmax, bool, int32_t);
 template void ConvolutionInterleave<8, 4, VLType::None>(int8_t *, const int8_t *, size_t, const convolver<int8_t> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<8, 4, VLType::None>(int8_t *, const int8_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
@@ -382,17 +382,17 @@ template void ConvolutionInterleave<8, 8, VLType::None>(int8_t *, const int8_t *
 template void Interleave<8, 8, VLType::None>(int8_t *, const int8_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 #endif // MMLA_INT8
 
-/* Neon SDOT (height 8, block 1) */
+/* Arm® Neon™ SDOT (height 8, block 1) */
 template void IndirectInterleave<8, 1, VLType::None>(int16_t *, const int8_t * const * const *, unsigned int, unsigned int, unsigned int y0, unsigned int ymax, unsigned int k0, unsigned int kmax, bool, int32_t);
 template void ConvolutionInterleave<8, 1, VLType::None>(int16_t *, const int8_t *, size_t, const convolver<int8_t> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<8, 1, VLType::None>(int16_t *, const int8_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 
-/* Neon SMLA/SMLAL (height 4, block 16) */
+/* Arm® Neon™ SMLA/SMLAL (height 4, block 16) */
 template void IndirectInterleave<4, 16, VLType::None>(uint8_t *, const uint8_t * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<4, 16, VLType::None>(uint8_t *, const uint8_t *, size_t, const convolver<uint8_t> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<4, 16, VLType::None>(uint8_t *, const uint8_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 
-/* Neon SDOT (height 8, block 4) */
+/* Arm® Neon™ SDOT (height 8, block 4) */
 template void IndirectInterleave<8, 4, VLType::None>(uint8_t *, const uint8_t * const * const *, unsigned int, unsigned int, unsigned int y0, unsigned int ymax, unsigned int k0, unsigned int kmax, bool, int32_t);
 template void ConvolutionInterleave<8, 4, VLType::None>(uint8_t *, const uint8_t *, size_t, const convolver<uint8_t> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<8, 4, VLType::None>(uint8_t *, const uint8_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
@@ -404,7 +404,7 @@ template void ConvolutionInterleave<8, 8, VLType::None>(uint8_t *, const uint8_t
 template void Interleave<8, 8, VLType::None>(uint8_t *, const uint8_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 #endif // MMLA_INT8
 
-/* Neon 16-bit (height 8, block 1) */
+/* Arm® Neon™ 16-bit (height 8, block 1) */
 template void IndirectInterleave<8, 1, VLType::None>(uint16_t *, const uint8_t * const * const *, unsigned int, unsigned int, unsigned int y0, unsigned int ymax, unsigned int k0, unsigned int kmax, bool, int32_t);
 template void ConvolutionInterleave<8, 1, VLType::None>(uint16_t *, const uint8_t *, size_t, const convolver<uint8_t> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<8, 1, VLType::None>(uint16_t *, const uint8_t *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);

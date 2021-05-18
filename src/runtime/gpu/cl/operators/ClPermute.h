@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_RESHAPE_H
-#define ARM_COMPUTE_CL_RESHAPE_H
+#ifndef ARM_COMPUTE_CL_PERMUTE_H
+#define ARM_COMPUTE_CL_PERMUTE_H
 
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/runtime/gpu/cl/IClOperator.h"
@@ -61,4 +61,4 @@ public:
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_RESHAPE_H */
+#endif /* ARM_COMPUTE_CL_PERMUTE_H */

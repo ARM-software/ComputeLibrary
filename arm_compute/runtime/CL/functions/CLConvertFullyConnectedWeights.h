@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,21 +26,43 @@
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/ITransformWeights.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class CLCompileContext;
-class CLConvertFullyConnectedWeightsKernel;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLConvertFullyConnectedWeightsKernel. */
-class CLConvertFullyConnectedWeights : public ICLSimpleFunction
+/** Basic function to run an @ref opencl::kernels::ClConvertFullyConnectedWeightsKernel. */
+class CLConvertFullyConnectedWeights : public IFunction
 {
 public:
+    /** Constructor */
+    CLConvertFullyConnectedWeights();
+    /** Destructor */
+    ~CLConvertFullyConnectedWeights();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLConvertFullyConnectedWeights(const CLConvertFullyConnectedWeights &) = delete;
+    /** Default move constructor */
+    CLConvertFullyConnectedWeights(CLConvertFullyConnectedWeights &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLConvertFullyConnectedWeights &operator=(const CLConvertFullyConnectedWeights &) = delete;
+    /** Default move assignment operator */
+    CLConvertFullyConnectedWeights &operator=(CLConvertFullyConnectedWeights &&) = default;
     /** Initialize the function.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |All            |All            |
      *
      * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: All.
      * @param[out] output               The converted weights tensor. Shape and Data Type: Same as @p input.
@@ -69,11 +91,18 @@ public:
      * @param[in] data_layout          The data layout the weights have been trained in.
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape, DataLayout data_layout);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 namespace weights_transformations
 {
-/** Basic function to run @ref CLConvertFullyConnectedWeightsKernel. */
+/** Basic function to manage @ref CLConvertFullyConnectedWeights. */
 class CLConvertFullyConnectedWeightsManaged : public ITransformWeights
 {
 public:

@@ -23,95 +23,94 @@
  */
 #include "src/runtime/cpu/operators/CpuElementwise.h"
 #include "src/core/cpu/kernels/CpuElementwiseKernel.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void CpuElementwiseMax::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuElementwiseBase::run(ITensorPack &tensors)
+{
+    // If the kernel has been configured, use the window from the kernel.
+    if(_kernel->is_window_configured())
+    {
+        ICpuOperator::run(tensors);
+        return;
+    }
+
+    auto src0_info        = tensors.get_const_tensor(TensorType::ACL_SRC_0)->info();
+    auto src1_info        = tensors.get_const_tensor(TensorType::ACL_SRC_1)->info();
+    auto shape_and_window = compute_output_shape_and_window(src0_info->tensor_shape(), src1_info->tensor_shape());
+    ICpuOperator::run(tensors, shape_and_window.second);
+}
+
+template <ArithmeticOperation op>
+void CpuElementwiseArithmetic<op>::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     auto k = std::make_unique<kernels::CpuArithmeticKernel>();
-    k->configure(ArithmeticOperation::MAX, input1, input2, output);
+    k->configure(op, src0, src1, dst);
     _kernel = std::move(k);
 }
 
-Status CpuElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+template <ArithmeticOperation op>
+Status CpuElementwiseArithmetic<op>::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
-    return kernels::CpuArithmeticKernel::validate(ArithmeticOperation::MAX, input1, input2, output);
+    return kernels::CpuArithmeticKernel::validate(op, src0, src1, dst);
 }
 
-void CpuElementwiseMin::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
-{
-    auto k = std::make_unique<kernels::CpuArithmeticKernel>();
-    k->configure(ArithmeticOperation::MIN, input1, input2, output);
-    _kernel = std::move(k);
-}
+template class CpuElementwiseArithmetic<ArithmeticOperation::MAX>;
+template class CpuElementwiseArithmetic<ArithmeticOperation::MIN>;
+template class CpuElementwiseArithmetic<ArithmeticOperation::SQUARED_DIFF>;
+template class CpuElementwiseArithmetic<ArithmeticOperation::PRELU>;
 
-Status CpuElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
-{
-    return kernels::CpuArithmeticKernel::validate(ArithmeticOperation::MIN, input1, input2, output);
-}
-
-void CpuElementwiseSquaredDiff::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
-{
-    auto k = std::make_unique<kernels::CpuArithmeticKernel>();
-    k->configure(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
-    _kernel = std::move(k);
-}
-
-Status CpuElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
-{
-    return kernels::CpuArithmeticKernel::validate(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
-}
-
-void CpuElementwiseDivision::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuElementwiseDivision::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     auto k = std::make_unique<kernels::CpuDivisionKernel>();
-    k->configure(input1, input2, output);
+    k->configure(src0, src1, dst);
     _kernel = std::move(k);
 }
 
-Status CpuElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CpuElementwiseDivision::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
-    return kernels::CpuDivisionKernel::validate(input1, input2, output);
+    return kernels::CpuDivisionKernel::validate(src0, src1, dst);
 }
 
-void CpuElementwisePower::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuElementwisePower::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     auto k = std::make_unique<kernels::CpuPowerKernel>();
-    k->configure(input1, input2, output);
+    k->configure(src0, src1, dst);
     _kernel = std::move(k);
 }
 
-Status CpuElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CpuElementwisePower::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
-    return kernels::CpuPowerKernel::validate(input1, input2, output);
+    return kernels::CpuPowerKernel::validate(src0, src1, dst);
 }
 
 template <ComparisonOperation COP>
-void CpuElementwiseComparisonStatic<COP>::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
+void CpuElementwiseComparisonStatic<COP>::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     auto k = std::make_unique<kernels::CpuComparisonKernel>();
-    k->configure(COP, input1, input2, output);
+    k->configure(COP, src0, src1, dst);
     _kernel = std::move(k);
 }
 
 template <ComparisonOperation COP>
-Status CpuElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CpuElementwiseComparisonStatic<COP>::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
-    return kernels::CpuComparisonKernel::validate(COP, input1, input2, output);
+    return kernels::CpuComparisonKernel::validate(COP, src0, src1, dst);
 }
 
-void CpuElementwiseComparison::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ComparisonOperation op)
+void CpuElementwiseComparison::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ComparisonOperation op)
 {
     auto k = std::make_unique<kernels::CpuComparisonKernel>();
-    k->configure(op, input1, input2, output);
+    k->configure(op, src0, src1, dst);
     _kernel = std::move(k);
 }
 
-Status CpuElementwiseComparison::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op)
+Status CpuElementwiseComparison::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ComparisonOperation op)
 {
-    return kernels::CpuComparisonKernel::validate(op, input1, input2, output);
+    return kernels::CpuComparisonKernel::validate(op, src0, src1, dst);
 }
 
 // Supported Specializations

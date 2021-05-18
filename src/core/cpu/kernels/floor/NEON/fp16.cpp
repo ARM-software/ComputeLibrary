@@ -23,8 +23,8 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/Validate.h"
 #include "src/core/NEON/NEMath.h"
-#include "src/core/common/Validate.h"
 
 #include <arm_neon.h>
 #include <cmath>

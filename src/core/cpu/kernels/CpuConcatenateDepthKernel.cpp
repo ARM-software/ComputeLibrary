@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -134,7 +133,7 @@ void depth_concat(const ITensor *src, ITensor *dst, unsigned int depth_offset, c
 Status validate_arguments(const ITensorInfo *input, unsigned int depth_offset, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
@@ -179,11 +178,7 @@ void CpuConcatenateDepthKernel::configure(const ITensorInfo *src, unsigned int d
     }
 
     // Configure kernel window
-    Window      win = calculate_max_window(*dst, Steps());
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
+    Window win = calculate_max_window(*dst, Steps());
     ICpuKernel::configure(win);
 }
 

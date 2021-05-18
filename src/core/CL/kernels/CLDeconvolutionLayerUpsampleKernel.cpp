@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,7 +96,6 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const CLCompileContext &compi
     // Configure kernel window
     Window                 win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));

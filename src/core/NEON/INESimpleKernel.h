@@ -28,7 +28,7 @@
 
 namespace arm_compute
 {
-/** Interface for simple Neon kernels having 1 tensor input and 1 tensor output */
+/** Interface for simple CPU kernels having 1 tensor input and 1 tensor output */
 using INESimpleKernel = ICPPSimpleKernel;
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_INESIMPLEKERNEL_H */

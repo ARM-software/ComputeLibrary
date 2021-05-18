@@ -57,7 +57,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->num_dimensions() < 1 || src->num_dimensions() > 4,
-                                    "Permutation upto 4-D src tensor is supported");
+                                    "Permutation up to 4-D src tensor is supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(perm.num_dimensions() < 1 || perm.num_dimensions() > 4,
                                     "Permutation vector size should be less than or equal to 4");
     for(const auto &p : perm)
@@ -77,17 +77,12 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 }
 } // namespace
 
-void ClPermuteKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), src, dst, perm);
-}
-
 void ClPermuteKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     auto              padding_info = get_padding_info({ src, dst });
     const TensorShape dst_shape    = get_dst_shape(src, perm);
-    // Output auto inizialitation if not yet initialized
+    // Output auto initialization if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, perm));
@@ -108,11 +103,6 @@ void ClPermuteKernel::configure(const CLCompileContext &compile_context, const I
 
     // Configure  kernel window
     Window win = calculate_max_window(*src, Steps());
-
-    // The CLPermute doesn't need padding so update_window_and_padding() can be skipped
-    Coordinates coord;
-    coord.set_num_dimensions(dst->num_dimensions());
-    dst->set_valid_region(ValidRegion(coord, dst->tensor_shape()));
 
     ICLKernel::configure_internal(win);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));

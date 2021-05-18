@@ -27,7 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
-/** This file contains all available output stages for GEMMLowp on Neon.
+/** This file contains all available output stages for GEMMLowp.
  *
  *  In gemmlowp, the "output stage" is the process that takes a final int32 accumulator value (the output of @ref NEGEMMLowpMatrixMultiplyCore),
  *  and processes it to obtain the final ASYMM8 value.
@@ -40,7 +40,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to execute NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint on Neon.
+/** Basic function to execute NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint.
  *
  *  NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint depends on 3 parameters:
  *
@@ -61,7 +61,7 @@ class ITensorInfo;
  *
  * ((FixedPointMul(input[i][k] + bias[k], result_fixedpoint_multiplier)) >> result_shift) + result_offset_after_shift
  *
- *  This function calls the following Neon kernels:
+ *  This function calls the following kernels:
  *
  * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
  *
@@ -112,7 +112,7 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
 };
-/** Basic function to execute NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint on Neon.
+/** Basic function to execute NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint.
  *
  *  NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint depends on 3 parameters:
  *
@@ -133,7 +133,7 @@ public:
  *
  * ((FixedPointMul(input[i][k] + bias[k], result_fixedpoint_multiplier)) >> result_shift) + result_offset_after_shift
  *
- *  This function calls the following Neon kernels:
+ *  This function calls the following kernels:
  *
  * -# @ref NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel
  *
@@ -184,7 +184,7 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
 };
-/** Basic function to execute NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint on Neon.
+/** Basic function to execute NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint.
  *
  *  NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint depends on 2 parameters:
  *
@@ -205,7 +205,7 @@ public:
  *
  * ((FixedPointMul(input[i][k] + bias[k], result_fixedpoint_multiplier)) >> result_shift) + result_offset_after_shift
  *
- *  This function calls the following Neon kernels:
+ *  This function calls the following kernels:
  *
  * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
  *
@@ -256,9 +256,9 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
 };
 
-/** Basic function to execute GEMMLowpQuantizeDown kernels on Neon.
+/** Basic function to execute GEMMLowpQuantizeDown kernels.
  *
- *  This function calls the following Neon kernels:
+ *  This function calls the following kernels:
  *
  * -# @ref NEGEMMLowpQuantizeDownInt32ScaleKernel
  * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
@@ -281,6 +281,16 @@ public:
     /** Default destructor */
     ~NEGEMMLowpOutputStage();
     /** Initialise the kernel's inputs, output
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1          |dst           |
+     * |:--------------|:-------------|:-------------|
+     * |S32            |S32           |QASYMM8       |
+     * |S32            |S32           |QASYMM8_SIGNED|
+     * |S32            |S32           |QSYMM16       |
      *
      * @param[in]  input  Input tensor. Data type supported: S32
      * @param[in]  bias   Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.

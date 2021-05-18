@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,13 @@
 #include "gemm_helpers.h"
 #include "repeat.h"
 
-#if defined(M) && defined(N) && defined(K) && defined(H0) && defined(V0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#if defined(M) && defined(N) && defined(K) && defined(H0) && defined(V0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0) && defined(IN1_DIM_X)
 /** This OpenCL kernel is optimised for Midgard. It computes the matrix multiplication between matrix A reshaped (src0) and matrix B reshaped (src1)
  *
  * @note The number of rows of destination matrix must be passed at compile time using -DM
  * @note The number of columns of the destination matrix must be passed at compile time using -DN
  * @note The number of rows of the *un-reshaped* matrix B (K) must be passed at compile time using -DK
+ * @note The number of columns of the reshaped rhs matrix must be passed at compile time using -DIN1_DIM_X
  * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
  * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note The optional alpha's value need to be passed at compile time using -DALPHA
@@ -118,7 +119,7 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
     __global float *src_addr_b = (__global float *)(src1_ptr + src1_addr_in_bytes);
 
     // Compute end row address for matrix B
-    __global float *src_end_addr_b = src_addr_b + (src1_stride_y / sizeof(float));
+    __global float *src_end_addr_b = src_addr_b + IN1_DIM_X;
 
     src_addr_a += offset_row_a;
     src_addr_b += offset_row_b;
@@ -583,6 +584,7 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
  * @note The number of rows of destination matrix must be passed at compile time using -DM
  * @note The number of columns of the destination matrix must be passed at compile time using -DN
  * @note The number of rows of the *un-reshaped* matrix B (K) must be passed at compile time using -DK
+ * @note The number of columns of the reshaped rhs matrix must be passed at compile time using -DIN1_DIM_X
  * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
  * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note The optional alpha's value need to be passed at compile time using -DALPHA
@@ -671,7 +673,7 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
     __global half *src_addr_b = (__global half *)(src1_ptr + src1_addr_in_bytes);
 
     // Compute end row address for matrix B
-    __global half *src_end_addr_b = src_addr_b + (src1_stride_y / sizeof(half));
+    __global half *src_end_addr_b = src_addr_b + IN1_DIM_X;
 
     src_addr_a += offset_row_a;
     src_addr_b += offset_row_b;
@@ -807,6 +809,7 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
  * @note The number of rows of destination matrix must be passed at compile time using -DM
  * @note The number of columns of the destination matrix must be passed at compile time using -DN
  * @note The number of rows of the *un-reshaped* matrix B (K) must be passed at compile time using -DK
+ * @note The number of columns of the reshaped rhs matrix must be passed at compile time using -DIN1_DIM_X
  * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
  * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note The optional alpha's value need to be passed at compile time using -DALPHA
@@ -895,7 +898,7 @@ __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
     __global half *src_addr_b = (__global half *)(src1_ptr + src1_addr_in_bytes);
 
     // Compute end row address for matrix B
-    __global half *src_end_addr_b = src_addr_b + (src1_stride_y / sizeof(half));
+    __global half *src_end_addr_b = src_addr_b + IN1_DIM_X;
 
     src_addr_a += offset_row_a;
     src_addr_b += offset_row_b;
@@ -1337,7 +1340,7 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
 
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 
-#endif // defined(M) && defined(N) && defined(K) && defined(H0) && defined(V0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#endif // defined(M) && defined(N) && defined(K) && defined(H0) && defined(V0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0) && defined(IN1_DIM_X)
 
 #if defined(N) && defined(K) && defined(M0) && defined(N0) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 #if defined(DATA_TYPE)
@@ -2023,7 +2026,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
 
     // Compute dst address
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)4 * sizeof(float)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
-                               PARTIAL_STORE_M0) * dst_stride_y);
+                               PARTIAL_STORE_M0)
+                               * dst_stride_y);
 
     uint4 zout = 0;
 
@@ -2427,7 +2431,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
 
     // Compute dst address
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)2 * sizeof(float)) + (COMPUTE_M0_START_ROW(get_global_id(1), M0,
-                               PARTIAL_STORE_M0) * dst_stride_y);
+                               PARTIAL_STORE_M0)
+                               * dst_stride_y);
 
     uint4 zout = 0;
 

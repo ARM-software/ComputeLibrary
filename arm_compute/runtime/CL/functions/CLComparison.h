@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,14 @@ class CLComparison : public ICLSimpleFunction
 {
 public:
     /** Initialise the kernel's inputs and outputs.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src0     |src1     |dst      |
+     * |:--------|:--------|:--------|
+     * |All      |All      |U8       |
      *
      * @param[in]  input1    Source tensor. Data types supported: All.
      *                       The input1 tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.

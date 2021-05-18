@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/common/Validate.h"
+#include "src/common/utils/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -287,9 +287,8 @@ void NELogicalKernel::configure(const ITensorInfo *input1, const ITensorInfo *in
     if(op != LogicalOperation::Not)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(input2);
-        const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
-        out_shape = broadcast_pair.first;
-        win       = calculate_max_window(broadcast_pair.second, Steps());
+        out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
+        win       = calculate_max_window(out_shape, Steps());
     }
     ICPPKernel::configure(win);
 

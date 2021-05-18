@@ -42,7 +42,7 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, int32_t stride)
 {
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use Neon FP16 instructions.
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
@@ -86,7 +86,6 @@ void NEReorgLayerKernel::configure(const ITensor *input, ITensor *output, int32_
     _stride = stride;
 
     // The NEReorgLayerKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps());

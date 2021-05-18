@@ -55,6 +55,17 @@ public:
     NEConcatenateLayer &operator=(NEConcatenateLayer &&);
     /** Initialise the kernel's inputs vector and output.
      *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
+     *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
      * @note Preconditions can be found respectively at @ref cpu::kernels::CpuConcatenateWidthKernel, @ref cpu::kernels::CpuConcatenateHeightKernel,
      *       @ref cpu::kernels::CpuConcatenateDepthKernel and @ref cpu::kernels::CpuConcatenateBatchKernel.

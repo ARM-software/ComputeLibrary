@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,11 +113,11 @@ protected:
         FunctionType range_func;
         range_func.configure(&dst, start, end, step);
 
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
         // Allocate tensors
         dst.allocator()->allocate();
 
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Compute function
         range_func.run();

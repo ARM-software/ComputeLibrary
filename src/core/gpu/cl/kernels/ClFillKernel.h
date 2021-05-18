@@ -35,7 +35,7 @@ namespace opencl
 namespace kernels
 {
 /** Interface for filling the planes of a tensor */
-class ClFillKernel : public ICLKernel
+class ClFillKernel : public IClKernel
 {
 public:
     ClFillKernel() = default;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,16 @@ public:
     /** Default destructor */
     ~NEInstanceNormalizationLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src      |dst       |
+     * |:--------|:---------|
+     * |F16      |F16       |
+     * |F32      |F32       |
      *
      * @param[in, out] input   Source tensor. In case of @p output tensor = nullptr this tensor will store the result of the normalization.
      *                         Data types supported: F16/F32. Data layout supported: NHWC, NCHW

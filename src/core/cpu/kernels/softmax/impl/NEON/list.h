@@ -33,47 +33,10 @@ namespace arm_compute
 {
 namespace cpu
 {
-namespace
-{
-template <typename float_vec_type, typename int_vec_type>
-int_vec_type convert_float_to_int(const float_vec_type &in);
-
-template <typename float_vec_type, typename int_vec_type>
-float_vec_type convert_int_to_float(const int_vec_type &in);
-
-template <>
-uint8x16_t convert_float_to_int<float32x4x4_t, uint8x16_t>(const float32x4x4_t &in)
-{
-    uint8x16_t out;
-    convert_float32x4x4_to_uint8x16(in, out);
-    return out;
-}
-
-template <>
-int8x16_t convert_float_to_int<float32x4x4_t, int8x16_t>(const float32x4x4_t &in)
-{
-    int8x16_t out;
-    convert_float32x4x4_to_int8x16(in, out);
-    return out;
-}
-
-template <>
-float32x4x4_t convert_int_to_float<float32x4x4_t, uint8x16_t>(const uint8x16_t &in)
-{
-    return convert_uint8x16_to_float32x4x4(in);
-}
-
-template <>
-float32x4x4_t convert_int_to_float<float32x4x4_t, int8x16_t>(const int8x16_t &in)
-{
-    return convert_int8x16_to_float32x4x4(in);
-}
-} // namespace
-
 template <typename T>
 void neon_logits_1d_max(const ITensor *in, ITensor *out, const Window &window)
 {
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     constexpr int window_step_x  = 16 / sizeof(T);
@@ -304,7 +267,7 @@ void neon_softmax_logits_1d_float(const ITensor *in, const ITensor *max, void *c
     Iterator max_it(max, window);
     Iterator out_it(out, window);
 
-    /** Neon vector tag type. */
+    /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     constexpr int vec_size   = 16 / sizeof(T);

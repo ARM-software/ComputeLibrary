@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,18 @@ public:
     /** Default destructor */
     ~CLArgMinMaxLayer();
     /** Set the input and output tensors.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst       |
+     * |:--------------|:---------|
+     * |QASYMM8        |U32, S32  |
+     * |QASYMM8_SIGNED |U32, S32  |
+     * |S32            |U32, S32  |
+     * |F16            |U32, S32  |
+     * |F32            |U32, S32  |
      *
      * @param[in]  input  Input source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in]  axis   Axis to find max/min index.

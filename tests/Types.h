@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,14 +30,6 @@
 
 namespace arm_compute
 {
-/** Gradient dimension type. */
-enum class GradientDimension
-{
-    GRAD_X,  /**< x gradient dimension */
-    GRAD_Y,  /**< y gradient dimension */
-    GRAD_XY, /**< x and y gradient dimension */
-};
-
 /** Min and max values and locations */
 template <typename MinMaxType>
 struct MinMaxLocationValues
@@ -47,37 +39,5 @@ struct MinMaxLocationValues
     std::vector<Coordinates2D> min_loc{}; /**< Min value location */
     std::vector<Coordinates2D> max_loc{}; /**< Max value location */
 };
-
-/** Parameters of Optical Flow algorithm. */
-struct OpticalFlowParameters
-{
-    OpticalFlowParameters(Termination termination,
-                          float       epsilon,
-                          size_t      num_iterations,
-                          size_t      window_dimension,
-                          bool        use_initial_estimate)
-        : termination{ std::move(termination) },
-          epsilon{ std::move(epsilon) },
-          num_iterations{ std::move(num_iterations) },
-          window_dimension{ std::move(window_dimension) },
-          use_initial_estimate{ std::move(use_initial_estimate) }
-    {
-    }
-
-    Termination termination;
-    float       epsilon;
-    size_t      num_iterations;
-    size_t      window_dimension;
-    bool        use_initial_estimate;
-};
-
-/** Internal keypoint class for Lucas-Kanade Optical Flow */
-struct InternalKeyPoint
-{
-    float x{ 0.f };                 /**< x coordinate of the keypoint */
-    float y{ 0.f };                 /**< y coordinate of the keypoint */
-    bool  tracking_status{ false }; /**< the tracking status of the keypoint */
-};
-
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_TYPES_H */

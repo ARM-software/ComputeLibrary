@@ -26,40 +26,13 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/NEON/INEOperator.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
 class ITensorInfo;
-
-namespace experimental
-{
-/** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for PRELU
- *
- * @note The function implements an activation layer with the PRELU activation function.
- */
-class NEPRelu : public INEOperator
-{
-public:
-    /** Set the input and output tensor.
-     *
-     * @param[in]  input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  alpha  Source alpha tensor info. Data types supported: same of @p input.
-     * @param[out] output Destination tensor info. Data type supported: same as @p input
-     */
-    void configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
-     *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] alpha  Source alpha tensor info. Data types supported: same of @p input.
-     * @param[in] output Destination tensor info. Data type supported: same as @p input
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
-};
-} // namespace experimental
 
 /** Basic function to run @ref cpu::kernels::CpuArithmeticKernel for PRELU
  *
@@ -81,6 +54,17 @@ public:
     /** Default move assignment operator */
     NEPReluLayer &operator=(NEPReluLayer &&);
     /** Set the input and output tensor.
+     *
+     * Valid data layouts:
+     * - All
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     * |F16            |F16            |
+     * |F32            |F32            |
      *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  alpha  Source alpha tensor. Data types supported: same of @p input.

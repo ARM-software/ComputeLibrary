@@ -52,6 +52,7 @@ enum TensorType : int32_t
     ACL_INT_1   = 51,
     ACL_INT_2   = 52,
     ACL_INT_3   = 53,
+    ACL_INT_4   = 54,
     ACL_SRC_VEC = 256,
 };
 
@@ -59,8 +60,10 @@ namespace experimental
 {
 struct MemoryInfo
 {
-    MemoryInfo(TensorType type, size_t size, size_t alignment)
-        : type(type), size(size), alignment(alignment)
+    MemoryInfo(TensorType type, size_t size, size_t alignment) noexcept
+        : type(type),
+          size(size),
+          alignment(alignment)
     {
     }
     TensorType type;

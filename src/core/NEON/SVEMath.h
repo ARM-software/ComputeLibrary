@@ -171,6 +171,18 @@ svfloat32_t svpow_f32_z(svbool_t pg, svfloat32_t a, svfloat32_t b);
  */
 svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b);
 
+/** Convert and pack four 32-bit float vectors into an 8-bit integer vector
+ *
+ * @param[in] in_0 The first float vector
+ * @param[in] in_1 The second float vector
+ * @param[in] in_2 The third float vector
+ * @param[in] in_3 The fourth float vector
+ *
+ * @return The converted integer vector
+ */
+template <typename int_vec_type>
+int_vec_type convert_float_to_int(const svfloat32_t &in_0, const svfloat32_t &in_1, const svfloat32_t &in_2, const svfloat32_t &in_3);
+
 } // namespace arm_compute
 #include "src/core/NEON/SVEMath.inl"
 #endif /* defined(__ARM_FEATURE_SVE) */

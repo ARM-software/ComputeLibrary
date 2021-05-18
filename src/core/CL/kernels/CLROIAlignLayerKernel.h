@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,7 @@
 #ifndef ARM_COMPUTE_CLROIALIGNLAYERKERNEL_H
 #define ARM_COMPUTE_CLROIALIGNLAYERKERNEL_H
 
-#include "arm_compute/core/CL/ICLArray.h"
 #include "src/core/CL/ICLKernel.h"
-
 namespace arm_compute
 {
 class ICLTensor;

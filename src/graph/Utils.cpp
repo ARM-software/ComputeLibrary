@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,10 +46,6 @@ Target get_default_target()
     {
         return Target::CL;
     }
-    if(is_target_supported(Target::GC))
-    {
-        return Target::GC;
-    }
     ARM_COMPUTE_ERROR("No backend exists!");
 }
 
@@ -76,22 +72,34 @@ void force_target_to_graph(Graph &g, Target target)
 
 PassManager create_default_pass_manager(Target target, const GraphConfig &cfg)
 {
+    ARM_COMPUTE_UNUSED(target);
     PassManager pm;
 
-    const bool is_target_gc = target == Target::GC;
-
     // Passes that mutate graph IR
-    if(cfg.convert_to_uint8)
+    if(cfg.use_synthetic_type)
     {
-        pm.append(std::make_unique<SyntheticDataTypeMutator>(), !is_target_gc);
+        switch(cfg.synthetic_type)
+        {
+            case DataType::QASYMM8:
+            case DataType::QASYMM8_SIGNED:
+            {
+                pm.append(std::make_unique<SyntheticDataTypeMutator>(cfg.synthetic_type));
+                break;
+            }
+            default:
+            {
+                ARM_COMPUTE_ERROR("Unsupported DataType for SyntheticDataTypeMutator");
+                break;
+            }
+        }
     }
-    pm.append(std::make_unique<NodeFusionMutator>(), !is_target_gc);
+    pm.append(std::make_unique<NodeFusionMutator>());
     pm.append(std::make_unique<GroupedConvolutionMutator>());
-    pm.append(std::make_unique<InPlaceOperationMutator>(), !is_target_gc);
+    pm.append(std::make_unique<InPlaceOperationMutator>());
 
     // Passes that mutate backend information
-    pm.append(std::make_unique<DepthConcatSubTensorMutator>(), !is_target_gc);
-    pm.append(std::make_unique<SplitLayerSubTensorMutator>(), !is_target_gc);
+    pm.append(std::make_unique<DepthConcatSubTensorMutator>());
+    pm.append(std::make_unique<SplitLayerSubTensorMutator>());
     pm.append(std::make_unique<NodeExecutionMethodMutator>());
 
     return pm;
