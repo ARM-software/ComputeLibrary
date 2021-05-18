@@ -4,10 +4,7 @@ import re
 import sys
 
 def get_list_includes():
-    return "arm_compute/core/NEON/kernels/assembly " \
-           "arm_compute/core/NEON/kernels/convolution/common " \
-           "arm_compute/core/NEON/kernels/convolution/depthwise " \
-           "arm_compute/core/NEON/kernels/convolution/winograd " \
+    return "src/core/cpu/kernels/assembly " \
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \
            "include/linux include " \
