@@ -1,0 +1,4 @@
+<map id="AclGetClContext" name="AclGetClContext">
+<area shape="rect" id="node1" title="Extract the underlying OpenCL context used by a given Compute Library context object." alt="" coords="217,13,344,39"/>
+<area shape="rect" id="node2" href="$namespacearm__compute_1_1test_1_1validation.xhtml#adb004a15cefe576e9a3c4b733f26a2ed" title=" " alt="" coords="5,5,169,47"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="ClQuantization" name="ClQuantization">
+<area shape="rect" id="node1" title="Basic function to quantize a tensor." alt="" coords="5,155,120,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1experimental_1_1_i_c_l_operator.xhtml" title="Basic interface for functions which have a single async CL kernel." alt="" coords="15,80,110,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1experimental_1_1_i_operator.xhtml" title="Base class for all async functions." alt="" coords="21,5,104,32"/>
+</map>

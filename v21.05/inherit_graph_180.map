@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface." alt="" coords="5,56,124,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_memory_region.xhtml" title="OpenCL memory region interface." alt="" coords="172,31,307,57"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1_memory_region.xhtml" title="Memory region CPU implementation." alt="" coords="181,81,297,108"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_buffer_memory_region.xhtml" title="OpenCL buffer memory region implementation." alt="" coords="355,5,525,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_s_v_m_memory_region.xhtml" title="OpenCL SVM memory region interface." alt="" coords="358,56,522,83"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_c_l_coarse_s_v_m_memory_region.xhtml" title="OpenCL coarse&#45;grain SVM memory region implementation." alt="" coords="573,31,780,57"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_c_l_fine_s_v_m_memory_region.xhtml" title="OpenCL fine&#45;grain SVM memory region implementation." alt="" coords="583,81,770,108"/>
+</map>

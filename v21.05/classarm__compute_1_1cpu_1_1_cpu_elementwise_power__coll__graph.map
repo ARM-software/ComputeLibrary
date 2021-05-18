@@ -1,0 +1,6 @@
+<map id="CpuElementwisePower" name="CpuElementwisePower">
+<area shape="rect" id="node1" title="Basic function to run cpu::kernels::CpuArithmeticKernel for power." alt="" coords="5,229,171,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_cpu_elementwise_base.xhtml" title=" " alt="" coords="9,155,167,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1experimental_1_1_i_n_e_operator.xhtml" title="Basic interface for functions which have a single async CPU kernel." alt="" coords="35,80,141,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1experimental_1_1_i_operator.xhtml" title="Base class for all async functions." alt="" coords="47,5,129,32"/>
+</map>

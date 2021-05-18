@@ -1,0 +1,4 @@
+<map id="AclMapTensor" name="AclMapTensor">
+<area shape="rect" id="node1" title="Map a tensor&#39;s backing memory to the host." alt="" coords="180,5,289,32"/>
+<area shape="rect" id="node2" href="$classacl_1_1_tensor.xhtml#ad4dae3db20740c9ffda9e83e73e373ff" title="Maps the backing memory of a given tensor that can be used by the host to access any contents." alt="" coords="5,5,132,32"/>
+</map>

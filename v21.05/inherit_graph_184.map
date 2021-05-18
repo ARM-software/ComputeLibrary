@@ -1,0 +1,47 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface." alt="" coords="5,1111,64,1137"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_activation_layer_node.xhtml" title="Activation Layer node." alt="" coords="182,5,337,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1_arg_min_max_layer_node.xhtml" title="Arg Min/Max Layer node." alt="" coords="179,56,340,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml" title="Batch Normalization Layer node." alt="" coords="151,107,368,133"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1graph_1_1_bounding_box_transform_layer_node.xhtml" title="Bounding Box Transform Layer node." alt="" coords="140,157,379,184"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1graph_1_1_channel_shuffle_layer_node.xhtml" title="Channel Shuffle Layer node." alt="" coords="166,208,353,235"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1graph_1_1_concatenate_layer_node.xhtml" title="Concatenation Layer node." alt="" coords="173,259,346,285"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1graph_1_1_const_node.xhtml" title="Const node." alt="" coords="213,309,306,336"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml" title="Convolution Layer node." alt="" coords="176,360,343,387"/>
+<area shape="rect" id="node10" href="$classarm__compute_1_1graph_1_1_deconvolution_layer_node.xhtml" title="Deconvolution Layer node." alt="" coords="168,411,351,437"/>
+<area shape="rect" id="node11" href="$classarm__compute_1_1graph_1_1_depth_to_space_layer_node.xhtml" title="DepthToSpace Layer node." alt="" coords="168,461,351,488"/>
+<area shape="rect" id="node12" href="$classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml" title="Depthwise Convolution Layer node." alt="" coords="143,512,375,539"/>
+<area shape="rect" id="node13" href="$classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml" title="Dequantize Layer node." alt="" coords="165,563,353,589"/>
+<area shape="rect" id="node14" href="$classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml" title="DetectionOutput Layer node." alt="" coords="161,613,358,640"/>
+<area shape="rect" id="node15" href="$classarm__compute_1_1graph_1_1_detection_post_process_layer_node.xhtml" title="DetectionPostProcess Layer node." alt="" coords="144,664,375,691"/>
+<area shape="rect" id="node16" href="$classarm__compute_1_1graph_1_1_dummy_node.xhtml" title="Dummy Layer node." alt="" coords="206,715,313,741"/>
+<area shape="rect" id="node17" href="$classarm__compute_1_1graph_1_1_eltwise_layer_node.xhtml" title="Eltwise Layer node." alt="" coords="192,765,327,792"/>
+<area shape="rect" id="node18" href="$classarm__compute_1_1graph_1_1_flatten_layer_node.xhtml" title="Flatten Layer node." alt="" coords="192,816,327,843"/>
+<area shape="rect" id="node19" href="$classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml" title="Fully Connected Layer node." alt="" coords="166,867,353,893"/>
+<area shape="rect" id="node20" href="$classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml" title="Batch Normalization node." alt="" coords="112,917,407,944"/>
+<area shape="rect" id="node21" href="$classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml" title="Fused Depthwise Convolution Batch Normalization node." alt="" coords="159,969,359,1010"/>
+<area shape="rect" id="node22" href="$classarm__compute_1_1graph_1_1_generate_proposals_layer_node.xhtml" title="Generate Proposals Layer node." alt="" coords="153,1035,366,1061"/>
+<area shape="rect" id="node23" href="$classarm__compute_1_1graph_1_1_input_node.xhtml" title="Input Layer node." alt="" coords="215,1085,303,1112"/>
+<area shape="rect" id="node24" href="$classarm__compute_1_1graph_1_1_l2_normalize_layer_node.xhtml" title="L2Normalize Layer node." alt="" coords="174,1136,345,1163"/>
+<area shape="rect" id="node25" href="$classarm__compute_1_1graph_1_1_normalization_layer_node.xhtml" title="Normalization Layer node." alt="" coords="169,1187,349,1213"/>
+<area shape="rect" id="node26" href="$classarm__compute_1_1graph_1_1_normalize_planar_y_u_v_layer_node.xhtml" title="Batch Normalization Layer node." alt="" coords="148,1237,371,1264"/>
+<area shape="rect" id="node27" href="$classarm__compute_1_1graph_1_1_output_node.xhtml" title="Output Layer node." alt="" coords="209,1288,309,1315"/>
+<area shape="rect" id="node28" href="$classarm__compute_1_1graph_1_1_pad_layer_node.xhtml" title="Pad Layer node." alt="" coords="202,1339,317,1365"/>
+<area shape="rect" id="node29" href="$classarm__compute_1_1graph_1_1_permute_layer_node.xhtml" title="Permute Layer node." alt="" coords="186,1389,333,1416"/>
+<area shape="rect" id="node30" href="$classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml" title="Pooling Layer node." alt="" coords="191,1440,328,1467"/>
+<area shape="rect" id="node31" href="$classarm__compute_1_1graph_1_1_p_relu_layer_node.xhtml" title="PRelu Layer node." alt="" coords="197,1491,322,1517"/>
+<area shape="rect" id="node32" href="$classarm__compute_1_1graph_1_1_print_layer_node.xhtml" title="Print Layer node." alt="" coords="199,1541,319,1568"/>
+<area shape="rect" id="node33" href="$classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml" title="PriorBox Layer node." alt="" coords="187,1592,331,1619"/>
+<area shape="rect" id="node34" href="$classarm__compute_1_1graph_1_1_quantization_layer_node.xhtml" title="Quantization Layer node." alt="" coords="173,1643,345,1669"/>
+<area shape="rect" id="node35" href="$classarm__compute_1_1graph_1_1_reduction_layer_node.xhtml" title="Reduction Operation node." alt="" coords="183,1693,336,1720"/>
+<area shape="rect" id="node36" href="$classarm__compute_1_1graph_1_1_reorg_layer_node.xhtml" title="Reorg Layer node." alt="" coords="196,1744,323,1771"/>
+<area shape="rect" id="node37" href="$classarm__compute_1_1graph_1_1_reshape_layer_node.xhtml" title="Reshape Layer node." alt="" coords="187,1795,332,1821"/>
+<area shape="rect" id="node38" href="$classarm__compute_1_1graph_1_1_resize_layer_node.xhtml" title="Resize Layer node." alt="" coords="194,1845,325,1872"/>
+<area shape="rect" id="node39" href="$classarm__compute_1_1graph_1_1_r_o_i_align_layer_node.xhtml" title="ROI Align node." alt="" coords="188,1896,331,1923"/>
+<area shape="rect" id="node40" href="$classarm__compute_1_1graph_1_1_slice_layer_node.xhtml" title="Slice Layer node." alt="" coords="199,1947,320,1973"/>
+<area shape="rect" id="node41" href="$classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml" title="Softmax Layer node." alt="" coords="187,1997,332,2024"/>
+<area shape="rect" id="node42" href="$classarm__compute_1_1graph_1_1_split_layer_node.xhtml" title="Split Layer node." alt="" coords="200,2048,319,2075"/>
+<area shape="rect" id="node43" href="$classarm__compute_1_1graph_1_1_stack_layer_node.xhtml" title="Stack Layer node." alt="" coords="196,2099,323,2125"/>
+<area shape="rect" id="node44" href="$classarm__compute_1_1graph_1_1_strided_slice_layer_node.xhtml" title="Slice Layer node." alt="" coords="176,2149,343,2176"/>
+<area shape="rect" id="node45" href="$classarm__compute_1_1graph_1_1_unary_eltwise_layer_node.xhtml" title="Unary Eltwise Layer node." alt="" coords="173,2200,345,2227"/>
+</map>

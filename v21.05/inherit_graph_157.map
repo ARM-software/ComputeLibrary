@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1cl__gemm_1_1_i_c_l_g_e_m_m_kernel_selection.xhtml" title="Basic interface for the GEMM kernel selection." alt="" coords="5,56,184,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_default_type_bifrost.xhtml" title="Bifrost based OpenCL GEMMKernel selection." alt="" coords="237,5,430,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_default_type_midgard.xhtml" title="Midgard based OpenCL GEMMKernel selection." alt="" coords="232,56,435,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_default_type_valhall.xhtml" title="Valhall based OpenCL GEMMKernel selection." alt="" coords="237,107,430,133"/>
+</map>

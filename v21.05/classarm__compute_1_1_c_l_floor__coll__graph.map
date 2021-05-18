@@ -1,0 +1,4 @@
+<map id="CLFloor" name="CLFloor">
+<area shape="rect" id="node1" title="Basic function to run opencl::kernels::ClFloorKernel." alt="" coords="10,80,79,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="5,5,84,32"/>
+</map>

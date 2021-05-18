@@ -1,0 +1,4 @@
+<map id="CLPixelWiseMultiplication" name="CLPixelWiseMultiplication">
+<area shape="rect" id="node1" title="Basic function to run opencl::ClMul." alt="" coords="5,80,184,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="55,5,134,32"/>
+</map>

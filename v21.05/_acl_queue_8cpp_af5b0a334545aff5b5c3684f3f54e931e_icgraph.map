@@ -1,0 +1,4 @@
+<map id="AclQueueFinish" name="AclQueueFinish">
+<area shape="rect" id="node1" title="Wait until all elements on the queue have been completed." alt="" coords="184,5,303,32"/>
+<area shape="rect" id="node2" href="$classacl_1_1_queue.xhtml#ad5c66901c748265b9e2e8edd2996bd17" title="Block until all the tasks of the queue have been marked as finished." alt="" coords="5,5,136,32"/>
+</map>

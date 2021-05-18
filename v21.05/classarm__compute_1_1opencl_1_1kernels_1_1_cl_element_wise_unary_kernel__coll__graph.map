@@ -1,0 +1,5 @@
+<map id="ClElementWiseUnaryKernel" name="ClElementWiseUnaryKernel">
+<area shape="rect" id="node1" title="Interface for the elementwise unary operator." alt="" coords="5,155,199,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="64,80,140,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="70,5,134,32"/>
+</map>

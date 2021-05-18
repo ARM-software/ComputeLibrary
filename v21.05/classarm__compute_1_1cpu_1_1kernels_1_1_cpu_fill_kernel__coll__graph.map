@@ -1,0 +1,5 @@
+<map id="CpuFillKernel" name="CpuFillKernel">
+<area shape="rect" id="node1" title="Kernel for filling a tensor with a given constant value." alt="" coords="5,155,107,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="11,80,101,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="24,5,88,32"/>
+</map>

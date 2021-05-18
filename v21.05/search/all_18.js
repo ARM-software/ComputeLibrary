@@ -1,0 +1,17 @@
+var searchData=
+[
+  ['x',['X',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#a80c0944640e62d3ed6c5419c1bcc0c88',1,'arm_compute::utils::ConvolutionParams::X()'],['../structarm__compute_1_1_rectangle.xhtml#a4dde988b1b2adba65ae3efa69f65d960',1,'arm_compute::Rectangle::x()'],['../structarm__compute_1_1_coordinates2_d.xhtml#af6d3062751bd565decb1a2cd3b63bdb2',1,'arm_compute::Coordinates2D::x()'],['../structarm__compute_1_1_coordinates3_d.xhtml#aae8a40a17c0be29c1f06ca6b4f9e2235',1,'arm_compute::Coordinates3D::x()'],['../structarm__compute_1_1_detection_window.xhtml#a4dde988b1b2adba65ae3efa69f65d960',1,'arm_compute::DetectionWindow::x()'],['../struct_coordinates2_d.xhtml#a6150e0515f7202e2fb518f7206ed97dc',1,'Coordinates2D::x()'],['../struct_keypoint.xhtml#a6150e0515f7202e2fb518f7206ed97dc',1,'Keypoint::x()'],['../struct_detection_window.xhtml#a0815db32ce16586f5e90a633735df930',1,'DetectionWindow::x()'],['../classarm__compute_1_1_dimensions.xhtml#aa87f8fc26981b0f3228a78c83b95b802',1,'arm_compute::Dimensions::x()'],['../classarm__compute_1_1_size2_d.xhtml#a94b8468af876f5ab54020d5e9787a4f0',1,'arm_compute::Size2D::x()'],['../classarm__compute_1_1_window.xhtml#a273fd2ecdd45169b2f702f01a7e5e382',1,'arm_compute::Window::x()']]],
+  ['x0',['X0',['../sobel__filter_8cl.xhtml#a8476f4a8de2c191433342c9ce896986a',1,'sobel_filter.cl']]],
+  ['x1',['X1',['../sobel__filter_8cl.xhtml#a1964818ccd90a6173ea48cecb652feeb',1,'X1():&#160;sobel_filter.cl'],['../namespacearm__compute.xhtml#aa41d7415a5386798147cccae2333d5d4abb7f5ae6220c9828e5ec91faf054197c',1,'arm_compute::X1()']]],
+  ['x1_2ecpp',['x1.cpp',['../a64__gemm__s8__8x12_2x1_8cpp.xhtml',1,'(Global Namespace)'],['../a64__gemm__u8__8x12_2x1_8cpp.xhtml',1,'(Global Namespace)'],['../a64__hgemm__8x24_2x1_8cpp.xhtml',1,'(Global Namespace)'],['../a64__sgemm__8x12_2x1_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['x2',['X2',['../sobel__filter_8cl.xhtml#a79ae03a0214cb30e57b9e8835f2a0019',1,'sobel_filter.cl']]],
+  ['x3',['X3',['../sobel__filter_8cl.xhtml#adb6fd3d004959525c6a684b82ef50860',1,'sobel_filter.cl']]],
+  ['x4',['X4',['../sobel__filter_8cl.xhtml#a0f79fa7387c308a89a30682d905aa40a',1,'sobel_filter.cl']]],
+  ['x5',['X5',['../sobel__filter_8cl.xhtml#a921884524c9038883b25f03d3bd1b078',1,'sobel_filter.cl']]],
+  ['x6',['X6',['../sobel__filter_8cl.xhtml#a0e11bba5150b8ae2a8831f6f4532e352',1,'sobel_filter.cl']]],
+  ['x_5fend',['x_end',['../_cpu_depthwise_convolution_native_kernel_8cpp.xhtml#a076dad6d7efce7170dcd2efecc69d1e6',1,'CpuDepthwiseConvolutionNativeKernel.cpp']]],
+  ['x_5fleftover_5fstart',['x_leftover_start',['../_cpu_depthwise_convolution_native_kernel_8cpp.xhtml#a6d863d841dad4e2e6e00afeff3d6f00a',1,'CpuDepthwiseConvolutionNativeKernel.cpp']]],
+  ['x_5fstart',['x_start',['../_cpu_depthwise_convolution_native_kernel_8cpp.xhtml#a33ee2954a8e8fb991cd139c9345841c3',1,'CpuDepthwiseConvolutionNativeKernel.cpp']]],
+  ['x_5fstep',['x_step',['../_cpu_depthwise_convolution_native_kernel_8cpp.xhtml#aeca6e77ae523bf2830297882610f8770',1,'CpuDepthwiseConvolutionNativeKernel.cpp']]],
+  ['xor',['XOR',['../namespacearm__compute.xhtml#a1f8212fef242f87e34893c8db13fc16ea97675eb3f268048604dc5155511a2a4d',1,'arm_compute']]]
+];

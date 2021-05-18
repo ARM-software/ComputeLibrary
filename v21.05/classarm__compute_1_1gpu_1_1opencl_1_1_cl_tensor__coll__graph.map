@@ -1,0 +1,8 @@
+<map id="ClTensor" name="ClTensor">
+<area shape="rect" id="node1" title="OpenCL tensor implementation class." alt="" coords="13,247,87,273"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_v2.xhtml" title="Base class specifying the tensor interface." alt="" coords="9,171,91,197"/>
+<area shape="rect" id="node3" href="$struct_acl_tensor__.xhtml" title=" " alt="" coords="5,95,95,121"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1detail_1_1_header.xhtml" title=" " alt="" coords="134,5,203,32"/>
+<area shape="rect" id="node6" href="$struct_acl_context__.xhtml" title=" " alt="" coords="119,95,218,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_context.xhtml" title="Context interface." alt="" coords="203,171,278,197"/>
+</map>

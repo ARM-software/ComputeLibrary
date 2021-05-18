@@ -1,0 +1,5 @@
+<map id="DeconvolutionLayerDescriptor" name="DeconvolutionLayerDescriptor">
+<area shape="rect" id="node1" title="Deconvolution layer descriptor." alt="" coords="22,95,237,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_pad_stride_info.xhtml" title="Padding and stride information class." alt="" coords="5,5,112,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_quantization_info.xhtml" title="Quantization information." alt="" coords="137,5,263,32"/>
+</map>

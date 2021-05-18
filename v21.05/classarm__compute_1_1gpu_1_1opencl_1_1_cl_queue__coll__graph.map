@@ -1,0 +1,8 @@
+<map id="ClQueue" name="ClQueue">
+<area shape="rect" id="node1" title="OpenCL queue implementation class." alt="" coords="13,247,89,273"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_queue.xhtml" title="Base class specifying the queue interface." alt="" coords="17,171,84,197"/>
+<area shape="rect" id="node3" href="$struct_acl_queue__.xhtml" title=" " alt="" coords="5,95,96,121"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1detail_1_1_header.xhtml" title=" " alt="" coords="135,5,204,32"/>
+<area shape="rect" id="node6" href="$struct_acl_context__.xhtml" title=" " alt="" coords="120,95,219,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_context.xhtml" title="Context interface." alt="" coords="204,171,279,197"/>
+</map>

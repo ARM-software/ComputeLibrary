@@ -1,0 +1,4 @@
+var arm__conv_2pooling_2kernels_2a64__fp32__nhwc__avg__3x3__s1__output2x2__depthfirst_2generic_8cpp =
+[
+    [ "a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst_impl", "arm__conv_2pooling_2kernels_2a64__fp32__nhwc__avg__3x3__s1__output2x2__depthfirst_2generic_8cpp.xhtml#a9a5a684efc6549b84d4407a883423cdd", null ]
+];
