@@ -193,7 +193,7 @@ __kernel void channel_shuffle_nhwc(TENSOR4D_DECLARATION(src),
         *(input_ptr + in_channels.s7)
     };
 #elif VEC_SIZE == 16
-    VEC_DATA_TYPE(DATA_TYPE, 8)
+    VEC_DATA_TYPE(DATA_TYPE, 16)
     out0 =
     {
         *(input_ptr + in_channels.s0),
