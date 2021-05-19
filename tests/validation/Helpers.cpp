@@ -325,7 +325,7 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
     return std::pair<int, int> { min_bound, max_bound };
 }
 
-void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout)
+void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout, bool only_right_pad)
 {
     if(data_layout == DataLayout::NHWC)
     {
@@ -342,7 +342,7 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
             std::mt19937 gen(library->seed() + seed_offset++);
 
             const unsigned int right = distribution(gen);
-            const unsigned int left  = distribution(gen);
+            const unsigned int left  = only_right_pad ? 0 : distribution(gen);
 
             tensor->info()->extend_padding(PaddingSize(0U, right, 0U, left));
         }

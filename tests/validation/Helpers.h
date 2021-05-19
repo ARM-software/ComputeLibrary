@@ -233,12 +233,13 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
 /** Add random padding along the X axis (between 1 and 16 columns per side) to all the input tensors.
  *  This is used in our validation suite in order to simulate implicit padding addition after configuring, but before allocating.
  *
- * @param[in] tensors     List of tensors to add padding to
- * @param[in] data_layout (Optional) Data layout of the operator
+ * @param[in] tensors        List of tensors to add padding to
+ * @param[in] data_layout    (Optional) Data layout of the operator
+ * @param[in] only_right_pad (Optional) Only right padding testing, in case of cl image padding
  *
  * @note This function adds padding to the input tensors only if data_layout == DataLayout::NHWC
  */
-void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC);
+void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC, bool only_right_pad = false);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -86,7 +86,7 @@ void update_padding_for_cl_image(ITensorInfo *tensor)
     const unsigned int round_up_width      = ((stride_y_in_elements + row_pitch_alignment - 1) / row_pitch_alignment) * row_pitch_alignment;
     const unsigned int padding             = round_up_width - stride_y_in_elements;
 
-    tensor->extend_padding(PaddingSize(0, padding, 0, 0));
+    tensor->extend_padding(PaddingSize(0, tensor->padding().right + padding, 0, 0));
 }
 
 Status validate_image2d_support_on_rhs(const ITensorInfo &tensor_reshaped_info, const GEMMRHSMatrixInfo &rhs_info)
