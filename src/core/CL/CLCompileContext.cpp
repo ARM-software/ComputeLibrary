@@ -265,8 +265,7 @@ std::string CLCompileContext::generate_build_options(const StringSet &build_opti
         ARM_COMPUTE_ERROR("Non uniform workgroup size is not supported!!");
     }
 
-    const GPUTarget arch = get_arch_from_target(_device.target());
-    if(arch != GPUTarget::UNKNOWN && arch != GPUTarget::MIDGARD)
+    if(gpu_arch != GPUTarget::UNKNOWN && gpu_arch != GPUTarget::MIDGARD)
     {
         const std::string device_vers = _device.device_version();
         const std::regex  ddk_regex("r([0-9]*)p[0-9]");
