@@ -70,6 +70,7 @@
 #define TENSOR4D_STR(name, type) TENSOR4D_##type(name)
 #define TENSOR4D(name, type) TENSOR4D_STR(name, type)
 
+#if !defined(UNROLL_WITH_PRAGMA)
 #define UNROLL_INCR(idx, step, macro) idx += (step); (macro)
 
 #define LOOP_UNROLLING_1(idx, step, macro) (macro)
@@ -201,12 +202,22 @@
 #define LOOP_UNROLLING_127(idx, step, macro) LOOP_UNROLLING_126(idx, step, macro); UNROLL_INCR(idx, step, macro)
 #define LOOP_UNROLLING_128(idx, step, macro) LOOP_UNROLLING_127(idx, step, macro); UNROLL_INCR(idx, step, macro)
 
-#define LOOP_UNROLLING(type, idx, start, step, num, macro) LOOP_UNROLLING_STR(type, idx, start, step, num, macro)
 #define LOOP_UNROLLING_STR(type, idx, start, step, num, macro) \
     {                                                          \
         type idx = start;                                      \
         LOOP_UNROLLING_##num(idx, step, macro);                \
     }
+#else // !defined(UNROLL_WITH_PRAGMA)
+#define LOOP_UNROLLING_STR(type, idx, start, step, num, macro) \
+    {                                                          \
+        _Pragma("unroll")                                      \
+        for(type idx = start; idx < (num * step); idx += step) \
+        {                                                      \
+            (macro);                                           \
+        }                                                      \
+    }
+#endif // !defined(UNROLL_WITH_PRAGMA)
+#define LOOP_UNROLLING(type, idx, start, step, num, macro) LOOP_UNROLLING_STR(type, idx, start, step, num, macro)
 
 /** Get the get_global_id with partial N0. This function is useful when the dimension is not multiple of N0 and we need to use a partial N0
  *  to avoid out-of-bound read/write
