@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuPoolingAssemblyWrapperKernel.h"
+#include "src/core/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -41,7 +41,7 @@ namespace kernels
 {
 using namespace arm_compute::misc::shape_calculator;
 
-void CpuPoolingAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
+void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
@@ -88,7 +88,7 @@ void CpuPoolingAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorI
     INEKernel::configure(win);
 }
 
-Status CpuPoolingAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info)
+Status CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
@@ -136,7 +136,7 @@ Status CpuPoolingAssemblyWrapperKernel::validate(const ITensorInfo *src, const I
     return Status{};
 }
 
-void CpuPoolingAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuPool2dAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(_kernel_asm.get());
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -170,18 +170,18 @@ void CpuPoolingAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window 
                          working_space, info.thread_id, info.num_threads);
 }
 
-size_t CpuPoolingAssemblyWrapperKernel::get_working_size(unsigned int num_threads) const
+size_t CpuPool2dAssemblyWrapperKernel::get_working_size(unsigned int num_threads) const
 {
     return _kernel_asm->get_working_size(num_threads);
 }
 
-bool CpuPoolingAssemblyWrapperKernel::is_configured() const
+bool CpuPool2dAssemblyWrapperKernel::is_configured() const
 {
     return _kernel_asm != nullptr;
 }
 
 template <typename Typesrc, typename Typedst>
-void CpuPoolingAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
+void CpuPool2dAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
 {
     const arm_conv::pooling::PoolingType pool_type = (info.pool_type == PoolingType::AVG) ? arm_conv::pooling::PoolingType::AVERAGE : arm_conv::pooling::PoolingType::MAX;
 
@@ -220,7 +220,7 @@ void CpuPoolingAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src,
 }
 
 template <typename Typesrc, typename Typedst>
-void CpuPoolingAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
+void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
 {
     const arm_conv::pooling::PoolingType pool_type = (info.pool_type == PoolingType::AVG) ? arm_conv::pooling::PoolingType::AVERAGE : arm_conv::pooling::PoolingType::MAX;
 

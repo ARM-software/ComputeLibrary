@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_POOLING_H
-#define ARM_COMPUTE_CL_POOLING_H
+#ifndef ARM_COMPUTE_CL_POOL2D_H
+#define ARM_COMPUTE_CL_POOL2D_H
 
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/runtime/gpu/cl/IClOperator.h"
@@ -36,13 +36,13 @@ namespace opencl
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following OpenCL kernels:
  *
  * -# @ref CLFillBorderKernel (executed if padding size is different from zero)
- * -# @ref opencl::ClPooling
+ * -# @ref opencl::ClPool2d
  */
-class ClPooling : public IClOperator
+class ClPool2d : public IClOperator
 {
 public:
     /** Constructor */
-    ClPooling() = default;
+    ClPool2d() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in]  compile_context The compile context to be used.
@@ -52,12 +52,9 @@ public:
      * @param[out] indices         (optional) The indices info of the maximal values. Data type supported: U32.
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, ITensorInfo *indices = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClPooling
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in]  src     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[out] dst     Destination tensor info. Data type supported: same as @p src
-     * @param[in]  info    Pooling layer parameters.
-     * @param[out] indices (optional) The indices info of the maximal values. Data type supported: U32.
+     * Similar to ClPool2d::configure()
      *
      * @return a status
      */
@@ -72,4 +69,4 @@ private:
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_POOLING_H */
+#endif /* ARM_COMPUTE_CL_POOL2D_H */

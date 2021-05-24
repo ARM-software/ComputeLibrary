@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/gpu/cl/kernels/ClPoolingKernel.h"
+#include "src/core/gpu/cl/kernels/ClPool2dKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -202,17 +202,17 @@ std::tuple<Status, Window, ClPoolingConfig> validate_and_configure_window(ITenso
 }
 } // namespace
 
-ClPoolingKernel::ClPoolingKernel()
+ClPool2dKernel::ClPool2dKernel()
     : _pool_info(), _data_layout(DataLayout::UNKNOWN), _border_size(0), _num_elems_processed_per_iteration(1)
 {
 }
 
-BorderSize ClPoolingKernel::border_size() const
+BorderSize ClPool2dKernel::border_size() const
 {
     return _border_size;
 }
 
-void ClPoolingKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
+void ClPool2dKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
@@ -422,7 +422,7 @@ void ClPoolingKernel::configure(const ClCompileContext &compile_context, ITensor
     ARM_COMPUTE_ERROR_ON(src->data_layout() == DataLayout::NHWC && has_padding_changed(padding_info));
 }
 
-Status ClPoolingKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status ClPool2dKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, pool_info, indices));
     ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(src->clone().get(), dst->clone().get(), pool_info)));
@@ -430,7 +430,7 @@ Status ClPoolingKernel::validate(const ITensorInfo *src, const ITensorInfo *dst,
     return Status{};
 }
 
-void ClPoolingKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClPool2dKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);

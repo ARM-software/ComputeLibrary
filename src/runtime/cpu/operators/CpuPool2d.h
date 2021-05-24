@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_POOLING_H
-#define ARM_COMPUTE_CPU_POOLING_H
-
-#include "src/runtime/cpu/ICpuOperator.h"
+#ifndef ARM_COMPUTE_CPU_POOL2D_H
+#define ARM_COMPUTE_CPU_POOL2D_H
 
 #include "arm_compute/core/experimental/Types.h"
+#include "src/core/common/Macros.h"
+#include "src/runtime/cpu/ICpuOperator.h"
 
 #include <memory>
 
@@ -40,24 +40,17 @@ namespace cpu
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following kernels:
  *
  * -# @ref NEFillBorderKernel (executed if padding size is different from zero)
- * -# @ref kernels::CpuPoolingKernel
- * -# @ref kernels::CpuPoolingAssemblyWrapperKernel
+ * -# @ref kernels::CpuPool2dKernel
+ * -# @ref kernels::CpuPool2dAssemblyWrapperKernel
  */
-class CpuPooling : public ICpuOperator
+class CpuPool2d : public ICpuOperator
 {
 public:
     /** Constructor */
-    CpuPooling();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CpuPooling(const CpuPooling &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CpuPooling &operator=(const CpuPooling &) = delete;
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    CpuPooling(CpuPooling &&) = delete;
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    CpuPooling &operator=(CpuPooling &&) = delete;
+    CpuPool2d();
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPool2d);
     /** Default destructor */
-    ~CpuPooling();
+    ~CpuPool2d();
     /** Set the src and dst tensors.
      *
      * @note F16 is supported for pool sizes 2 and 3 only
@@ -68,14 +61,9 @@ public:
      * @param[out]     indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
     void configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuPooling
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note F16 is supported for pool sizes 2 and 3 only
-     *
-     * @param[in] src       Source tensor info. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] dst       Destination tensor info. Data types supported: same as @p src.
-     * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
-     * @param[in] indices   (optional) Tensor info of the indices of the maximal values. Data type supported: U32.
+     * Similar to CpuPool2d::configure()
      *
      * @return a status
      */
@@ -96,4 +84,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_POOLING_H */
+#endif /* ARM_COMPUTE_CPU_POOL2D_H */

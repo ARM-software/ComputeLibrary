@@ -300,12 +300,11 @@ if env['neon']:
 
     cpu_kernel_hp_files = ['src/core/cpu/kernels/CpuActivationKernel.cpp',
                            'src/core/cpu/kernels/CpuCastKernel.cpp',
-                           'src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.cpp',
-                           'src/core/cpu/kernels/CpuDirectConvolutionKernel.cpp',
-                           'src/core/cpu/kernels/CpuDirectConvolutionOutputStageKernel.cpp',
+                           'src/core/cpu/kernels/CpuDepthwiseConv2dNativeKernel.cpp',
+                           'src/core/cpu/kernels/CpuDirectConv2dKernel.cpp',
+                           'src/core/cpu/kernels/CpuDirectConv2dOutputStageKernel.cpp',
                            'src/core/cpu/kernels/CpuPermuteKernel.cpp',
-                           'src/core/cpu/kernels/CpuPoolingAssemblyWrapperKernel.cpp',
-                           'src/core/cpu/kernels/CpuPoolingKernel.cpp',
+                           'src/core/cpu/kernels/CpuPool2dKernel.cpp',
                            'src/core/cpu/kernels/CpuReshapeKernel.cpp',
                           ]
     cpu_kernel_files = ['src/core/cpu/kernels/CpuAddKernel.cpp',
@@ -352,12 +351,12 @@ if env['neon']:
                    ]
     cpu_operator_hp_files = ['src/runtime/cpu/operators/CpuActivation.cpp',
                              'src/runtime/cpu/operators/CpuCast.cpp',
-                             'src/runtime/cpu/operators/CpuDepthwiseConvolution.cpp',
-                             'src/runtime/cpu/operators/CpuDepthwiseConvolutionAssemblyDispatch.cpp',
-                             'src/runtime/cpu/operators/CpuDirectConvolution.cpp',
+                             'src/runtime/cpu/operators/CpuDepthwiseConv2d.cpp',
+                             'src/runtime/cpu/operators/CpuDepthwiseConv2dAssemblyDispatch.cpp',
+                             'src/runtime/cpu/operators/CpuDirectConv2d.cpp',
                              'src/runtime/cpu/operators/CpuFlatten.cpp',
                              'src/runtime/cpu/operators/CpuPermute.cpp',
-                             'src/runtime/cpu/operators/CpuPooling.cpp',
+                             'src/runtime/cpu/operators/CpuPool2d.cpp',
                             ]
     cpu_operator_files = ['src/runtime/cpu/operators/CpuAdd.cpp',
                           'src/runtime/cpu/operators/CpuConcatenate.cpp',

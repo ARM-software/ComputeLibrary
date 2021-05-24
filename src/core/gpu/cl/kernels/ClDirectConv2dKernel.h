@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_DIRECT_CONVOLUTION_KERNEL_H
-#define ARM_COMPUTE_CL_DIRECT_CONVOLUTION_KERNEL_H
+#ifndef ARM_COMPUTE_CL_DIRECT_CONV2D_KERNEL_H
+#define ARM_COMPUTE_CL_DIRECT_CONV2D_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
@@ -36,11 +36,11 @@ namespace kernels
 {
 /** Interface for the  direct convolution kernel.
  */
-class ClDirectConvolutionKernel : public IClKernel
+class ClDirectConv2dKernel : public IClKernel
 {
 public:
-    ClDirectConvolutionKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClDirectConvolutionKernel);
+    ClDirectConv2dKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClDirectConv2dKernel);
     /** Set the src, weights, biases and dst tensors info.
      *
      * @note: Due to set_valid_region(), thus src/weights/biases cannot be const. Need to change this once the set_valid_region() is removed.
@@ -64,19 +64,9 @@ public:
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClDirectConvolutionKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src       The src tensor info to convolve. 3 lower dimensions represent a single src [width, height, IFM],
-     *                      while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8_SIGNED/QASYMM8/F16/F32.
-     * @param[in] weights   Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                      The 3rd dimension must be the same as the src's volume 3rd dimension.
-     *                      Data type supported:Same as @p src.
-     * @param[in] biases    Biases tensor info. Biases are 1D tensor with dimension [OFM].
-     *                      Data type supported: Should match @p src data type, except for src of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type.
-     * @param[in] dst       Output tensor info.
-     *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p src.
-     * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in] target    Target GPU architecture.
+     * Similar to ClDirectConv2dKernel::configure()
      *
      * @return a status
      */
@@ -94,4 +84,4 @@ public:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_DIRECT_CONVOLUTION_KERNEL_H */
+#endif /*ARM_COMPUTE_CL_DIRECT_CONV2D_KERNEL_H */

@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/gpu/cl/operators/ClDirectConvolution.h"
+#include "src/runtime/gpu/cl/operators/ClDirectConv2d.h"
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/core/gpu/cl/kernels/ClActivationKernel.h"
-#include "src/core/gpu/cl/kernels/ClDirectConvolutionKernel.h"
+#include "src/core/gpu/cl/kernels/ClDirectConv2dKernel.h"
 
 namespace arm_compute
 {
@@ -44,11 +44,11 @@ ITensorPack select_activation_src_dst(ITensorPack &tensors)
 }
 } // namespace
 
-void ClDirectConvolution::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
-                                    const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+void ClDirectConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
+                               const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     // Configure direct convolution kernel
-    auto k = std::make_unique<kernels::ClDirectConvolutionKernel>();
+    auto k = std::make_unique<kernels::ClDirectConv2dKernel>();
     k->set_target(CLScheduler::get().target());
     k->configure(compile_context, src, weights, biases, dst, conv_info);
     _direct_conv_kernel = std::move(k);
@@ -74,10 +74,10 @@ void ClDirectConvolution::configure(const CLCompileContext &compile_context, ITe
     CLScheduler::get().tune_kernel_static(*_direct_conv_kernel);
 }
 
-Status ClDirectConvolution::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                     const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+Status ClDirectConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+                                const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClDirectConvolutionKernel::validate(src, weights, biases, dst, conv_info, CLScheduler::get().target()));
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClDirectConv2dKernel::validate(src, weights, biases, dst, conv_info, CLScheduler::get().target()));
     if(act_info.enabled())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClActivationKernel::validate(dst, dst, act_info));
@@ -85,7 +85,7 @@ Status ClDirectConvolution::validate(const ITensorInfo *src, const ITensorInfo *
     return Status{};
 }
 
-void ClDirectConvolution::run(ITensorPack &tensors)
+void ClDirectConv2d::run(ITensorPack &tensors)
 {
     // Run border handler
     CLScheduler::get().enqueue_op(*_src_border_handler.get(), tensors, false);

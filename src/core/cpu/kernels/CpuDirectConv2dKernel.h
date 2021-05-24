@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DIRECTCONVOLUTION_KERNEL_H
-#define ARM_COMPUTE_CPU_DIRECTCONVOLUTION_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_DIRECTCONV2D_KERNEL_H
+#define ARM_COMPUTE_CPU_DIRECTCONV2D_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -35,13 +35,13 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform Direct Convolution Layer. */
-class CpuDirectConvolutionKernel : public ICpuKernel
+class CpuDirectConv2dKernel : public ICpuKernel
 {
 public:
     /** Default constructor */
-    CpuDirectConvolutionKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDirectConvolutionKernel);
-    /** Set the input, weights, and output tensors.
+    CpuDirectConv2dKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDirectConv2dKernel);
+    /** Set the src, weights, and dst tensors.
      *
      * @note: DirectConvolution only works in the following configurations:
      *        1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3
@@ -57,16 +57,9 @@ public:
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(ITensorInfo *src, ITensorInfo *weights, ITensorInfo *dst, const PadStrideInfo &conv_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuDirectConvolutionKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src       The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
-     *                      while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F16/F32.
-     * @param[in] weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                      The 3rd dimension must be the same as the input's volume 3rd dimension.
-     *                      Data type supported:Same as @p input.
-     * @param[in] dst       Output tensor.
-     *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: F16/F32
-     * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * Similar to CpuDirectConv2dKernel::configure()
      *
      * @return a status
      */
@@ -97,4 +90,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_DIRECTCONVOLUTION_KERNEL_H */
+#endif /*ARM_COMPUTE_CPU_DIRECTCONV2D_KERNEL_H */

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/cpu/operators/CpuDirectConvolution.h"
+#include "src/runtime/cpu/operators/CpuDirectConv2d.h"
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
@@ -32,19 +32,19 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuDirectConvolution::~CpuDirectConvolution() = default;
+CpuDirectConv2d::~CpuDirectConv2d() = default;
 
-CpuDirectConvolution::CpuDirectConvolution(std::shared_ptr<IMemoryManager> memory_manager)
+CpuDirectConv2d::CpuDirectConv2d(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _output_stage_kernel(), _conv_kernel(), _input_border_handler(), _activationlayer_function(), _accumulator(), _has_bias(false),
       _is_activationlayer_enabled(false), _dim_split(Window::DimZ), _is_padding_required()
 {
 }
 
-void CpuDirectConvolution::configure(ITensorInfo *src, ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *dst, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+void CpuDirectConv2d::configure(ITensorInfo *src, ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *dst, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
-    _output_stage_kernel  = std::make_unique<kernels::CpuDirectConvolutionOutputStageKernel>();
-    _conv_kernel          = std::make_unique<kernels::CpuDirectConvolutionKernel>();
+    _output_stage_kernel  = std::make_unique<kernels::CpuDirectConv2dOutputStageKernel>();
+    _conv_kernel          = std::make_unique<kernels::CpuDirectConv2dKernel>();
     _input_border_handler = std::make_unique<NEFillBorderKernel>();
 
     // Free accumulator
@@ -80,8 +80,8 @@ void CpuDirectConvolution::configure(ITensorInfo *src, ITensorInfo *weights, con
     }
 }
 
-Status CpuDirectConvolution::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const PadStrideInfo &conv_info,
-                                      const ActivationLayerInfo &act_info)
+Status CpuDirectConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const PadStrideInfo &conv_info,
+                                 const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
 
@@ -90,7 +90,7 @@ Status CpuDirectConvolution::validate(const ITensorInfo *src, const ITensorInfo 
     TensorInfo accumulator(dst->clone()->set_is_resizable(true).reset_padding().set_data_type(data_type));
 
     // Validate Convolution kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuDirectConvolutionKernel::validate(src, weights, &accumulator, conv_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuDirectConv2dKernel::validate(src, weights, &accumulator, conv_info));
 
     if(bias != nullptr)
     {
@@ -101,7 +101,7 @@ Status CpuDirectConvolution::validate(const ITensorInfo *src, const ITensorInfo 
     }
 
     // Validate bias kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuDirectConvolutionOutputStageKernel::validate(&accumulator, bias, dst));
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuDirectConv2dOutputStageKernel::validate(&accumulator, bias, dst));
 
     if(act_info.enabled())
     {
@@ -111,7 +111,7 @@ Status CpuDirectConvolution::validate(const ITensorInfo *src, const ITensorInfo 
     return Status{};
 }
 
-void CpuDirectConvolution::run(ITensorPack &tensors)
+void CpuDirectConv2d::run(ITensorPack &tensors)
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
 

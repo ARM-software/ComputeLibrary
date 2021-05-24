@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_POOLING_KERNEL_H
-#define ARM_COMPUTE_CPU_POOLING_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_POOL2D_KERNEL_H
+#define ARM_COMPUTE_CPU_POOL2D_KERNEL_H
 
 #include "arm_compute/core/Types.h"
 #include "src/core/common/Macros.h"
@@ -35,12 +35,12 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the pooling layer kernel */
-class CpuPoolingKernel : public ICpuKernel
+class CpuPool2dKernel : public ICpuKernel
 {
 public:
     /** Default constructor */
-    CpuPoolingKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPoolingKernel);
+    CpuPool2dKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPool2dKernel);
     /** Configure kernel for a given list of arguments
      *
      * @note F16 are supported for pool sizes 2 and 3 only
@@ -51,14 +51,9 @@ public:
      * @param[out] indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
     void configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuPoolingKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note F16 are supported for pool sizes 2 and 3 only
-     *
-     * @param[in] src       Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] dst       Destination tensor info. Data types supported: Same as @p src.
-     * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
-     * @param[in] indices   (optional) The indices of the maximal values. Data type supported: U32.
+     * Similar to CpuPool2dKernel::configure()
      *
      * @return a status
      */
@@ -80,4 +75,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_POOLING_KERNEL_H */
+#endif /*ARM_COMPUTE_CPU_POOL2D_KERNEL_H */

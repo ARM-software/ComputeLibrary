@@ -21,14 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/cpu/operators/CpuDepthwiseConvolution.h"
+#include "src/runtime/cpu/operators/CpuDepthwiseConv2d.h"
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.h"
+#include "src/core/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
 
 namespace arm_compute
 {
@@ -36,61 +36,61 @@ namespace cpu
 {
 namespace
 {
-Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ConvolutionInfo &info)
+Status validate_arguments_optimized(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     if(!is_data_type_quantized_per_channel(weights->data_type()))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights);
     }
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(info.dilation.x() < 1 || info.dilation.y() < 1);
-    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) + (weights->dimension(idx_w) - 1) * (info.dilation.x() - 1) > input->dimension(idx_w) + info.pad_stride_info.pad_left() +
+    const size_t idx_w = get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::HEIGHT);
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) + (weights->dimension(idx_w) - 1) * (info.dilation.x() - 1) > src->dimension(idx_w) + info.pad_stride_info.pad_left() +
                                 info.pad_stride_info.pad_right());
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_h) + (weights->dimension(idx_h) - 1) * (info.dilation.y() - 1) > input->dimension(idx_h) + info.pad_stride_info.pad_top() +
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_h) + (weights->dimension(idx_h) - 1) * (info.dilation.y() - 1) > src->dimension(idx_h) + info.pad_stride_info.pad_top() +
                                 info.pad_stride_info.pad_bottom());
 
     if(biases != nullptr)
     {
-        const unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+        const unsigned int channel_idx = get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::CHANNEL);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(channel_idx));
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CpuDepthwiseConvolutionAssemblyDispatch::validate(input, weights, biases, output, info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CpuDepthwiseConv2dAssemblyDispatch::validate(src, weights, biases, dst, info));
 
     //Validate Activation Layer
     if(info.act_info.enabled())
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CpuActivation::validate(output, nullptr, info.act_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(CpuActivation::validate(dst, nullptr, info.act_info));
     }
     return Status{};
 }
 } // namespace
 
-CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::CpuDepthwiseConvolutionOptimizedInternal()
+CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::CpuDepthwiseConv2dOptimizedInternal()
     : _dwc_optimized_func(nullptr), _permute_input(nullptr), _permute_weights(nullptr), _permute_output(nullptr), _activationlayer_function(nullptr), _has_bias(false), _is_quantized(false),
       _is_nchw(true), _permute(false), _is_activationlayer_enabled(false), _is_prepared(false)
 {
 }
 
-void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::configure(ITensorInfo           *input,
-                                                                                  const ITensorInfo     *weights,
-                                                                                  const ITensorInfo     *biases,
-                                                                                  ITensorInfo           *output,
-                                                                                  const ConvolutionInfo &info)
+void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::configure(ITensorInfo           *src,
+                                                                        const ITensorInfo     *weights,
+                                                                        const ITensorInfo     *biases,
+                                                                        ITensorInfo           *dst,
+                                                                        const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConvolutionOptimizedInternal::validate(input, weights, (biases == nullptr) ? nullptr : biases,
-                                                                                  output, info));
+    ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConv2dOptimizedInternal::validate(src, weights, (biases == nullptr) ? nullptr : biases,
+                                                                             dst, info));
 
-    _is_quantized = is_data_type_quantized_asymmetric(input->data_type());
+    _is_quantized = is_data_type_quantized_asymmetric(src->data_type());
     _has_bias     = biases != nullptr;
-    _is_nchw      = input->data_layout() == DataLayout::NCHW;
+    _is_nchw      = src->data_layout() == DataLayout::NCHW;
     _permute      = _is_nchw;
     _is_prepared  = false;
 
@@ -105,7 +105,7 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::configur
         act_info_to_use = info.act_info;
     }
 
-    _dwc_optimized_func = std::make_unique<CpuDepthwiseConvolutionAssemblyDispatch>();
+    _dwc_optimized_func = std::make_unique<CpuDepthwiseConv2dAssemblyDispatch>();
     if(_is_nchw)
     {
         _permute_input   = std::make_unique<cpu::CpuPermute>();
@@ -117,7 +117,7 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::configur
         auto output_perm  = std::make_unique<TensorInfo>();
 
         // Configure the function to transform the input tensor from NCHW -> NHWC
-        _permute_input->configure(input, input_perm.get(), PermutationVector(2U, 0U, 1U));
+        _permute_input->configure(src, input_perm.get(), PermutationVector(2U, 0U, 1U));
         input_perm->set_data_layout(DataLayout::NHWC);
 
         // Configure the function to transform the weights tensor from IHW -> HWI
@@ -125,38 +125,38 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::configur
         weights_perm->set_data_layout(DataLayout::NHWC);
 
         output_perm->set_data_layout(DataLayout::NHWC);
-        output_perm->set_quantization_info(output->quantization_info());
+        output_perm->set_quantization_info(dst->quantization_info());
 
         // Configure optimized depthwise
         _dwc_optimized_func->configure(input_perm.get(), weights_perm.get(), biases, output_perm.get(), info);
 
         // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
         output_perm->set_data_layout(DataLayout::NHWC);
-        _permute_output->configure(output_perm.get(), output, PermutationVector(1U, 2U, 0U));
+        _permute_output->configure(output_perm.get(), dst, PermutationVector(1U, 2U, 0U));
     }
     else
     {
-        _dwc_optimized_func->configure(input, weights, biases, output, info);
+        _dwc_optimized_func->configure(src, weights, biases, dst, info);
     }
 
     // Configure activation
     if(_is_activationlayer_enabled)
     {
         _activationlayer_function = std::make_unique<cpu::CpuActivation>();
-        _activationlayer_function->configure(output, nullptr, info.act_info);
+        _activationlayer_function->configure(dst, nullptr, info.act_info);
     }
 }
 
-Status CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::validate(const ITensorInfo     *input,
-                                                                                   const ITensorInfo     *weights,
-                                                                                   const ITensorInfo     *biases,
-                                                                                   const ITensorInfo     *output,
-                                                                                   const ConvolutionInfo &info)
+Status CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::validate(const ITensorInfo     *src,
+                                                                         const ITensorInfo     *weights,
+                                                                         const ITensorInfo     *biases,
+                                                                         const ITensorInfo     *dst,
+                                                                         const ConvolutionInfo &info)
 {
-    return validate_arguments_optimized(input, weights, biases, output, info);
+    return validate_arguments_optimized(src, weights, biases, dst, info);
 }
 
-void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::run(ITensorPack &tensors)
+void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     prepare(tensors);
@@ -229,7 +229,7 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::run(ITen
     }
 }
 
-void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::prepare(ITensorPack &tensors)
+void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::prepare(ITensorPack &tensors)
 {
     if(!_is_prepared)
     {
@@ -272,35 +272,35 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionOptimizedInternal::prepare(
     }
 }
 
-CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::CpuDepthwiseConvolutionGeneric()
+CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::CpuDepthwiseConv2dGeneric()
     : _depthwise_conv_kernel(nullptr), _permute_input(nullptr), _permute_weights(nullptr), _permute_output(nullptr), _activationlayer_function(nullptr), _is_nchw(true), _is_prepared(false),
       _is_activationlayer_enabled(false)
 {
 }
 
-void CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::configure(ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *output, const ConvolutionInfo &info)
+void CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConvolution::validate(input, weights, (biases == nullptr) ? nullptr : biases,
-                                                                 output, info));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConv2d::validate(src, weights, (biases == nullptr) ? nullptr : biases,
+                                                            dst, info));
 
-    _is_nchw     = input->data_layout() == DataLayout::NCHW;
+    _is_nchw     = src->data_layout() == DataLayout::NCHW;
     _is_prepared = !_is_nchw;
 
-    ITensorInfo       *input_to_use   = input;
+    ITensorInfo       *input_to_use   = src;
     const ITensorInfo *weights_to_use = weights;
-    ITensorInfo       *output_to_use  = output;
+    ITensorInfo       *output_to_use  = dst;
 
     auto input_perm   = std::make_unique<TensorInfo>();
     auto weights_perm = std::make_unique<TensorInfo>();
-    auto output_perm  = std::make_unique<TensorInfo>(output->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(TensorShape()));
+    auto output_perm  = std::make_unique<TensorInfo>(dst->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(TensorShape()));
 
     if(_is_nchw)
     {
         _permute_input   = std::make_unique<cpu::CpuPermute>();
         _permute_weights = std::make_unique<cpu::CpuPermute>();
 
-        _permute_input->configure(input, input_perm.get(), PermutationVector(2U, 0U, 1U));
+        _permute_input->configure(src, input_perm.get(), PermutationVector(2U, 0U, 1U));
         input_perm->set_data_layout(DataLayout::NHWC);
         input_to_use = input_perm.get();
 
@@ -311,13 +311,13 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::configure(ITensorI
         output_to_use = output_perm.get();
     }
 
-    _depthwise_conv_kernel = std::make_unique<cpu::kernels::CpuDepthwiseConvolutionNativeKernel>();
+    _depthwise_conv_kernel = std::make_unique<cpu::kernels::CpuDepthwiseConv2dNativeKernel>();
     _depthwise_conv_kernel->configure(input_to_use, weights_to_use, biases, output_to_use, info);
 
     if(_is_nchw)
     {
         _permute_output = std::make_unique<cpu::CpuPermute>();
-        _permute_output->configure(output_perm.get(), output, PermutationVector(1U, 2U, 0U));
+        _permute_output->configure(output_perm.get(), dst, PermutationVector(1U, 2U, 0U));
         output_perm->set_data_layout(DataLayout::NHWC);
     }
 
@@ -326,48 +326,48 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::configure(ITensorI
     if(_is_activationlayer_enabled)
     {
         _activationlayer_function = std::make_unique<cpu::CpuActivation>();
-        _activationlayer_function->configure(output, nullptr, info.act_info);
+        _activationlayer_function->configure(dst, nullptr, info.act_info);
     }
 }
 
-Status CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                                                                         const ConvolutionInfo &info)
+Status CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+                                                               const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    if(input->data_layout() == DataLayout::NCHW)
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
+    if(src->data_layout() == DataLayout::NCHW)
     {
-        TensorShape permuted_input_shape   = input->tensor_shape();
+        TensorShape permuted_input_shape   = src->tensor_shape();
         TensorShape permuted_weights_shape = weights->tensor_shape();
-        TensorShape permuted_output_shape  = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
+        TensorShape permuted_output_shape  = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *weights, info);
         permute(permuted_input_shape, PermutationVector(2U, 0U, 1U));
         permute(permuted_weights_shape, PermutationVector(2U, 0U, 1U));
         permute(permuted_output_shape, PermutationVector(2U, 0U, 1U));
 
-        const TensorInfo permuted_input   = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_input_shape).set_data_layout(DataLayout::NHWC));
+        const TensorInfo permuted_input   = TensorInfo(src->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_input_shape).set_data_layout(DataLayout::NHWC));
         const TensorInfo permuted_weights = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_weights_shape).set_data_layout(DataLayout::NHWC));
-        const TensorInfo permuted_output  = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_output_shape).set_data_layout(DataLayout::NCHW));
+        const TensorInfo permuted_output  = TensorInfo(dst->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_output_shape).set_data_layout(DataLayout::NCHW));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(CpuPermute::validate(input, &permuted_input, PermutationVector(2U, 0U, 1U)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CpuPermute::validate(src, &permuted_input, PermutationVector(2U, 0U, 1U)));
         ARM_COMPUTE_RETURN_ON_ERROR(CpuPermute::validate(weights, &permuted_weights, PermutationVector(2U, 0U, 1U)));
-        ARM_COMPUTE_RETURN_ON_ERROR(CpuPermute::validate(&permuted_output, output, PermutationVector(1U, 2U, 0U)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CpuPermute::validate(&permuted_output, dst, PermutationVector(1U, 2U, 0U)));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuDepthwiseConvolutionNativeKernel::validate(&permuted_input, &permuted_weights, biases, &permuted_output, info));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuDepthwiseConv2dNativeKernel::validate(&permuted_input, &permuted_weights, biases, &permuted_output, info));
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuDepthwiseConvolutionNativeKernel::validate(input, weights, biases, output, info));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuDepthwiseConv2dNativeKernel::validate(src, weights, biases, dst, info));
     }
 
     // Validate Activation Layer
     if(info.act_info.enabled())
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CpuActivation::validate(output, nullptr, info.act_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(CpuActivation::validate(dst, nullptr, info.act_info));
     }
 
     return Status{};
 }
 
-void CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::run(ITensorPack &tensors)
+void CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::run(ITensorPack &tensors)
 {
     auto src     = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     auto weights = tensors.get_const_tensor(TensorType::ACL_SRC_1);
@@ -421,7 +421,7 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::run(ITensorPack &t
     }
 }
 
-void CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::prepare(ITensorPack &tensors)
+void CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::prepare(ITensorPack &tensors)
 {
     if(!_is_prepared)
     {
@@ -440,47 +440,47 @@ void CpuDepthwiseConvolution::CpuDepthwiseConvolutionGeneric::prepare(ITensorPac
     }
 }
 
-CpuDepthwiseConvolution::CpuDepthwiseConvolution()
+CpuDepthwiseConv2d::CpuDepthwiseConv2d()
     : _depth_conv_func(DepthwiseConvolutionFunction::GENERIC), _func_optimized(), _func_generic()
 {
 }
 
-void CpuDepthwiseConvolution::configure(ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *output, const ConvolutionInfo &info)
+void CpuDepthwiseConv2d::configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info)
 {
-    _depth_conv_func = get_depthwiseconvolution_function(input, weights, (biases != nullptr) ? biases : nullptr, output, info);
+    _depth_conv_func = get_depthwiseconvolution_function(src, weights, (biases != nullptr) ? biases : nullptr, dst, info);
     switch(_depth_conv_func)
     {
         case DepthwiseConvolutionFunction::OPTIMIZED:
-            _func_optimized.configure(input, weights, biases, output, info);
+            _func_optimized.configure(src, weights, biases, dst, info);
             break;
         case DepthwiseConvolutionFunction::GENERIC:
-            _func_generic.configure(input, weights, biases, output, info);
+            _func_generic.configure(src, weights, biases, dst, info);
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported DepthwiseConvolutionFunction");
     }
 }
 
-Status CpuDepthwiseConvolution::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ConvolutionInfo &info)
+Status CpuDepthwiseConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info)
 {
-    DepthwiseConvolutionFunction depth_conv_func = get_depthwiseconvolution_function(input, weights, biases, output, info);
+    DepthwiseConvolutionFunction depth_conv_func = get_depthwiseconvolution_function(src, weights, biases, dst, info);
     switch(depth_conv_func)
     {
         case DepthwiseConvolutionFunction::OPTIMIZED:
-            return CpuDepthwiseConvolutionOptimizedInternal::validate(input, weights, biases, output, info);
+            return CpuDepthwiseConv2dOptimizedInternal::validate(src, weights, biases, dst, info);
             break;
         case DepthwiseConvolutionFunction::GENERIC:
-            return CpuDepthwiseConvolutionGeneric::validate(input, weights, biases, output, info);
+            return CpuDepthwiseConv2dGeneric::validate(src, weights, biases, dst, info);
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported DepthwiseConvolutionFunction");
     }
 }
 
-DepthwiseConvolutionFunction CpuDepthwiseConvolution::get_depthwiseconvolution_function(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                                                                                        const ConvolutionInfo &info)
+DepthwiseConvolutionFunction CpuDepthwiseConv2d::get_depthwiseconvolution_function(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+                                                                                   const ConvolutionInfo &info)
 {
-    if(bool(CpuDepthwiseConvolutionOptimizedInternal::validate(input, weights, biases, output, info)))
+    if(bool(CpuDepthwiseConv2dOptimizedInternal::validate(src, weights, biases, dst, info)))
     {
         return DepthwiseConvolutionFunction::OPTIMIZED;
     }
@@ -490,7 +490,7 @@ DepthwiseConvolutionFunction CpuDepthwiseConvolution::get_depthwiseconvolution_f
     }
 }
 
-void CpuDepthwiseConvolution::run(ITensorPack &tensors)
+void CpuDepthwiseConv2d::run(ITensorPack &tensors)
 {
     switch(_depth_conv_func)
     {
@@ -505,7 +505,7 @@ void CpuDepthwiseConvolution::run(ITensorPack &tensors)
     }
 }
 
-void CpuDepthwiseConvolution::prepare(ITensorPack &tensors)
+void CpuDepthwiseConv2d::prepare(ITensorPack &tensors)
 {
     switch(_depth_conv_func)
     {

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DEPTHWISECONVOLUTIONNATIVEKERNEL_H
-#define ARM_COMPUTE_CPU_DEPTHWISECONVOLUTIONNATIVEKERNEL_H
+#ifndef ARM_COMPUTE_CPU_DEPTHWISECONV2DNATIVEKERNEL_H
+#define ARM_COMPUTE_CPU_DEPTHWISECONV2DNATIVEKERNEL_H
 
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/common/Macros.h"
@@ -40,46 +40,38 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to run a depthwise convolution native on a tensor. */
-class CpuDepthwiseConvolutionNativeKernel : public ICpuKernel
+class CpuDepthwiseConv2dNativeKernel : public ICpuKernel
 {
 public:
     const char *name() const override
     {
-        return "CpuDepthwiseConvolutionNativeKernel";
+        return "CpuDepthwiseConv2dNativeKernel";
     }
     /** Default constructor */
-    CpuDepthwiseConvolutionNativeKernel();
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDepthwiseConvolutionNativeKernel);
+    CpuDepthwiseConv2dNativeKernel();
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDepthwiseConv2dNativeKernel);
 
     /** Initialize the function's source, destination and parameters.
      *
      * @note Supported data layouts: NHWC
      *
-     * @param[in]  input   Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  src     Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights Weights tensor. This is a 3D tensor with dimensions [IFM, W, H].
-     *                     Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
+     *                     Data type supported: Same as @p src or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p src is QASYMM8/QASYMM8_SIGNED.
      * @param[in]  biases  Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                     Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
-     * @param[out] output  Destination tensor. Data type supported: Same as @p input.
+     *                     Data type supported: Same as @p src, S32 when src is QASYMM8/QASYMM8_SIGNED.
+     * @param[out] dst     Destination tensor. Data type supported: Same as @p src.
      * @param[in]  info    Depthwise convolution meta-data.
      *
      */
-    void configure(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *output, const ConvolutionInfo &info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuDepthwiseConvolutionNativeKernel
+    void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info);
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note Supported data layouts: NHWC
-     *
-     * @param[in] input   Source tensor info. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] weights Weights tensor info. This is a 3D tensor with dimensions [IFM, W, H].
-     *                    Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
-     * @param[in] biases  Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                    Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
-     * @param[in] output  Destination tensor info. Data type supported: Same as @p input.
-     * @param[in] info    Depthwise convolution meta-data.
+     * Similar to CpuDepthwiseConv2dNativeKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ConvolutionInfo &info);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -101,7 +93,7 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using DepthwiseFunctionPtr = void (CpuDepthwiseConvolutionNativeKernel::*)(const ITensor *src, const ITensor *weights, const ITensor *bias, ITensor *dst, const Window &window, bool has_biases);
+    using DepthwiseFunctionPtr = void (CpuDepthwiseConv2dNativeKernel::*)(const ITensor *src, const ITensor *weights, const ITensor *bias, ITensor *dst, const Window &window, bool has_biases);
 
     DepthwiseFunctionPtr _func;
     PadStrideInfo        _conv_info;
@@ -114,4 +106,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_DEPTHWISECONVOLUTIONNATIVEKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_DEPTHWISECONV2DNATIVEKERNEL_H */

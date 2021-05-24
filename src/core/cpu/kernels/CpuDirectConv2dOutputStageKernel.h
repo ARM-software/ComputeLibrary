@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DIRECTCONVOLUTION_OUTPUTSTAGE_KERNEL_H
-#define ARM_COMPUTE_CPU_DIRECTCONVOLUTION_OUTPUTSTAGE_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_DIRECTCONV2D_OUTPUTSTAGE_KERNEL_H
+#define ARM_COMPUTE_CPU_DIRECTCONV2D_OUTPUTSTAGE_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/common/Macros.h"
@@ -41,33 +41,27 @@ namespace kernels
  * @note For quantized computations (i.e. @p src of S32 type) the output data type for auto-initialization must be passed as part
  *       of the @ref DirectConvolutionLayerOutputStageKernelInfo.
  */
-class CpuDirectConvolutionOutputStageKernel : public ICpuKernel
+class CpuDirectConv2dOutputStageKernel : public ICpuKernel
 {
 public:
     /** Default constructor */
-    CpuDirectConvolutionOutputStageKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDirectConvolutionOutputStageKernel);
+    CpuDirectConv2dOutputStageKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDirectConv2dOutputStageKernel);
     /** Set the accumulate buffer and the biases of the kernel.
      *
-     * @param[in, out] src  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
+     * @param[in, out] src  Input to add the bias to. If @p dst is not specified then accumulation is done in-place.
      *                      Data type supported: F16/F32/S32
      * @param[in]      bias (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p src
-     * @param[out]     dst  (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
+     * @param[out]     dst  (Optional) If the dst tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
      *                      Note that in-place computation is only supported for F16/F32. For S32 this must not be nullptr.
      *                      Data type supported: F16/F32 or QASYMM8/QASYMM8_SIGNED if @p src is S32
      * @param[in]      info (Optional) DirectConvolutionLayerOutputStageKernel descriptor metadata
      */
     void configure(ITensorInfo *src, const ITensorInfo *bias = nullptr, ITensorInfo *dst = nullptr,
                    const DirectConvolutionLayerOutputStageKernelInfo &info = DirectConvolutionLayerOutputStageKernelInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuDirectConvolutionOutputStageKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                 Data type supported: F16/F32/S32
-     * @param[in] bias (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p src
-     * @param[in] dst  (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
-     *                 Note that in-place computation is only supported for F16/F32. For S32 this must not be nullptr.
-     *                 Data type supported: F16/F32 or QASYMM8/QASYMM8_SIGNED if @p src is S32
-     * @param[in] info (Optional) DirectConvolutionLayerOutputStageKernel descriptor metadata
+     * Similar to CpuDirectConv2dOutputStageKernel::configure()
      *
      * @return a status
      */
@@ -90,4 +84,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_DIRECTCONVOLUTION_OUTPUTSTAGE_KERNEL_H */
+#endif /*ARM_COMPUTE_CPU_DIRECTCONV2D_OUTPUTSTAGE_KERNEL_H */

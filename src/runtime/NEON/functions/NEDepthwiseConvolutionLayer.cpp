@@ -27,7 +27,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/runtime/cpu/operators/CpuDepthwiseConvolution.h"
+#include "src/runtime/cpu/operators/CpuDepthwiseConv2d.h"
 
 using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;
@@ -47,15 +47,15 @@ struct NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal
     const ITensor *biases
     {
         nullptr
-    };                                                                // SRC_2
-    Tensor                                        permuted_input{};   // INT_0
-    Tensor                                        permuted_weights{}; // INT_1
-    Tensor                                        permuted_output{};  // INT_2
-    Tensor                                        workspace{};        // INT_3
-    Tensor                                        packed_weights{};   // INT_4
-    std::shared_ptr<cpu::CpuDepthwiseConvolution> op{ nullptr };
-    bool                                          is_prepared{ false };
-    bool                                          permute{ false };
+    };                                                           // SRC_2
+    Tensor                                   permuted_input{};   // INT_0
+    Tensor                                   permuted_weights{}; // INT_1
+    Tensor                                   permuted_output{};  // INT_2
+    Tensor                                   workspace{};        // INT_3
+    Tensor                                   packed_weights{};   // INT_4
+    std::shared_ptr<cpu::CpuDepthwiseConv2d> op{ nullptr };
+    bool                                     is_prepared{ false };
+    bool                                     permute{ false };
 };
 
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::NEDepthwiseConvolutionLayerOptimizedInternal(std::shared_ptr<IMemoryManager> memory_manager)
@@ -80,7 +80,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
     _impl->dst     = output;
     _impl->permute = is_nhwc;
 
-    _impl->op = std::make_unique<cpu::CpuDepthwiseConvolution>();
+    _impl->op = std::make_unique<cpu::CpuDepthwiseConv2d>();
     ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
     _impl->op->configure(_impl->src->info(), _impl->weights->info(), _impl->biases == nullptr ? nullptr : _impl->biases->info(),
                          _impl->dst->info(), info);
@@ -97,7 +97,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
     }
     info = ConvolutionInfo{ conv_info, depth_multiplier, act_info_to_use, dilation };
 
-    auto dwc_optimized_func = std::make_unique<cpu::CpuDepthwiseConvolutionAssemblyDispatch>();
+    auto dwc_optimized_func = std::make_unique<cpu::CpuDepthwiseConv2dAssemblyDispatch>();
 
     if(is_nhwc)
     {
@@ -154,7 +154,7 @@ Status NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal
                                                                                            const Size2D              &dilation)
 {
     ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
-    return cpu::CpuDepthwiseConvolution::validate(input, weights, biases, output, info);
+    return cpu::CpuDepthwiseConv2d::validate(input, weights, biases, output, info);
 }
 
 void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::run()
@@ -197,17 +197,17 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
 
 struct NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::Impl
 {
-    Tensor                                        permuted_input{};
-    Tensor                                        permuted_weights{};
-    Tensor                                        permuted_output{};
-    bool                                          is_prepared{ false };
-    bool                                          is_nchw{ false };
-    bool                                          is_activationlayer_enabled{ false };
-    const ITensor                                *weights{ nullptr };
-    const ITensor                                *biases{ nullptr };
-    const ITensor                                *src{ nullptr };
-    ITensor                                      *dst{ nullptr };
-    std::shared_ptr<cpu::CpuDepthwiseConvolution> op{ nullptr };
+    Tensor                                   permuted_input{};
+    Tensor                                   permuted_weights{};
+    Tensor                                   permuted_output{};
+    bool                                     is_prepared{ false };
+    bool                                     is_nchw{ false };
+    bool                                     is_activationlayer_enabled{ false };
+    const ITensor                           *weights{ nullptr };
+    const ITensor                           *biases{ nullptr };
+    const ITensor                           *src{ nullptr };
+    ITensor                                 *dst{ nullptr };
+    std::shared_ptr<cpu::CpuDepthwiseConv2d> op{ nullptr };
 };
 
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::NEDepthwiseConvolutionLayerGeneric()
@@ -223,7 +223,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::configure(
                                                                      output->info(), conv_info, depth_multiplier, act_info, dilation));
 
     const ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
-    _impl->op = std::make_unique<cpu::CpuDepthwiseConvolution>();
+    _impl->op = std::make_unique<cpu::CpuDepthwiseConv2d>();
     _impl->op->configure(input->info(), weights->info(), biases == nullptr ? nullptr : biases->info(), output->info(), info);
 
     _impl->src         = input;
@@ -253,7 +253,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::configure(
         output_to_use = &_impl->permuted_output;
     }
 
-    auto depthwise_conv_kernel = std::make_unique<cpu::kernels::CpuDepthwiseConvolutionNativeKernel>();
+    auto depthwise_conv_kernel = std::make_unique<cpu::kernels::CpuDepthwiseConv2dNativeKernel>();
     depthwise_conv_kernel->configure(input_to_use->info(), weights_to_use->info(), biases == nullptr ? nullptr : biases->info(), output_to_use->info(), info);
 
     if(_impl->is_nchw)
@@ -273,7 +273,7 @@ Status NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::validate
                                                                                  unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
     ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
-    return cpu::CpuDepthwiseConvolution::validate(input, weights, biases, output, info);
+    return cpu::CpuDepthwiseConv2d::validate(input, weights, biases, output, info);
 }
 
 void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::run()
@@ -298,10 +298,10 @@ NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer(std::shared_ptr<IMemory
 #ifndef DOXYGEN_SKIP_THIS
 struct NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer::Impl
 {
-    DepthwiseConvolutionFunction                  depth_conv_func{ DepthwiseConvolutionFunction::OPTIMIZED };
-    NEDepthwiseConvolutionLayerOptimizedInternal  func_optimized{ nullptr };
-    NEDepthwiseConvolutionLayerGeneric            func_generic{};
-    std::shared_ptr<cpu::CpuDepthwiseConvolution> op{ nullptr };
+    DepthwiseConvolutionFunction                 depth_conv_func{ DepthwiseConvolutionFunction::OPTIMIZED };
+    NEDepthwiseConvolutionLayerOptimizedInternal func_optimized{ nullptr };
+    NEDepthwiseConvolutionLayerGeneric           func_generic{};
+    std::shared_ptr<cpu::CpuDepthwiseConv2d>     op{ nullptr };
 };
 #endif // DOXYGEN_SKIP_THIS
 
@@ -309,7 +309,7 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
                                             const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
     const ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
-    _impl->op              = std::make_shared<cpu::CpuDepthwiseConvolution>();
+    _impl->op              = std::make_shared<cpu::CpuDepthwiseConv2d>();
     _impl->depth_conv_func = _impl->op->get_depthwiseconvolution_function(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(),
                                                                           info);
     switch(_impl->depth_conv_func)
@@ -329,7 +329,7 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
                                              unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
     ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
-    return cpu::CpuDepthwiseConvolution::validate(input, weights, biases, output, info);
+    return cpu::CpuDepthwiseConv2d::validate(input, weights, biases, output, info);
 }
 
 void NEDepthwiseConvolutionLayer::run()

@@ -21,20 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/cpu/operators/CpuPooling.h"
+#include "src/runtime/cpu/operators/CpuPool2d.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "src/core/cpu/kernels/CpuPoolingAssemblyWrapperKernel.h"
-#include "src/core/cpu/kernels/CpuPoolingKernel.h"
+#include "src/core/cpu/kernels/CpuPool2dKernel.h"
+#include "src/core/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-CpuPooling::CpuPooling()
+CpuPool2d::CpuPool2d()
     : _pooling_layer_kernel(),
       _border_handler(),
       _asm_glue(),
@@ -44,12 +44,12 @@ CpuPooling::CpuPooling()
 {
 }
 
-CpuPooling::~CpuPooling() = default;
+CpuPool2d::~CpuPool2d() = default;
 
-void CpuPooling::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
+void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
 {
     // Check if we can run assembly kernels. Currently, indices are not supported by those kernels
-    const bool run_optimised = bool(kernels::CpuPoolingAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
+    const bool run_optimised = bool(kernels::CpuPool2dAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
 
     // Get data layout
     _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
@@ -64,7 +64,7 @@ void CpuPooling::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLaye
         const CPUInfo     &ci          = NEScheduler::get().cpu_info();
         const unsigned int num_threads = NEScheduler::get().num_threads();
 
-        auto pooling_wrapper = std::make_unique<kernels::CpuPoolingAssemblyWrapperKernel>();
+        auto pooling_wrapper = std::make_unique<kernels::CpuPool2dAssemblyWrapperKernel>();
         ARM_COMPUTE_ERROR_ON(pooling_wrapper == nullptr);
         pooling_wrapper->configure(src, dst, pool_info, ci);
 
@@ -78,7 +78,7 @@ void CpuPooling::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLaye
     else
     {
         // Configure pooling kernel
-        auto k = std::make_unique<kernels::CpuPoolingKernel>();
+        auto k = std::make_unique<kernels::CpuPool2dKernel>();
         k->configure(src, dst, pool_info, indices);
         _pooling_layer_kernel = std::move(k);
 
@@ -106,19 +106,19 @@ void CpuPooling::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLaye
     }
 }
 
-Status CpuPooling::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status CpuPool2d::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    const bool run_optimised = bool(kernels::CpuPoolingAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
+    const bool run_optimised = bool(kernels::CpuPool2dAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
 
     if(run_optimised)
     {
         return Status{};
     }
 
-    return kernels::CpuPoolingKernel::validate(src, dst, pool_info, indices);
+    return kernels::CpuPool2dKernel::validate(src, dst, pool_info, indices);
 }
 
-void CpuPooling::run(ITensorPack &tensors)
+void CpuPool2d::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No tensors provided");
 
@@ -148,7 +148,7 @@ void CpuPooling::run(ITensorPack &tensors)
     }
 }
 
-experimental::MemoryRequirements CpuPooling::workspace() const
+experimental::MemoryRequirements CpuPool2d::workspace() const
 {
     return _mem_req;
 }

@@ -36,7 +36,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run  @ref opencl::ClPooling */
+/** Basic function to run  @ref opencl::ClPool2d */
 class CLPoolingLayer : public IFunction
 {
 public:

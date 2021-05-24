@@ -21,23 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/gpu/cl/operators/ClPooling.h"
+#include "src/runtime/gpu/cl/operators/ClPool2d.h"
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
-#include "src/core/gpu/cl/kernels/ClPoolingKernel.h"
+#include "src/core/gpu/cl/kernels/ClPool2dKernel.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClPooling::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, ITensorInfo *indices)
+void ClPool2d::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, ITensorInfo *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     // Configure pooling kernel
-    auto k = std::make_unique<kernels::ClPoolingKernel>();
+    auto k = std::make_unique<kernels::ClPool2dKernel>();
     k->set_target(CLScheduler::get().target());
     k->configure(compile_context, src, dst, info, indices);
     _pooling = std::move(k);
@@ -85,12 +85,12 @@ void ClPooling::configure(const ClCompileContext &compile_context, ITensorInfo *
     CLScheduler::get().tune_kernel_static(*_pooling);
 }
 
-Status ClPooling::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info, const ITensorInfo *indices)
+Status ClPool2d::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info, const ITensorInfo *indices)
 {
-    return kernels::ClPoolingKernel::validate(src, dst, info, indices);
+    return kernels::ClPool2dKernel::validate(src, dst, info, indices);
 }
 
-void ClPooling::run(ITensorPack &tensors)
+void ClPool2d::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
 

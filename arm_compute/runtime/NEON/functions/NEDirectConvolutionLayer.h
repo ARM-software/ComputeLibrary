@@ -39,7 +39,7 @@ class ITensorInfo;
  *
  *  This function calls the following:
  *
- * -# @ref cpu::CpuDirectConvolution
+ * -# @ref cpu::CpuDirectConv2d
  */
 class NEDirectConvolutionLayer : public IFunction
 {

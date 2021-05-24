@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/runtime/cpu/operators/CpuDepthwiseConvolutionAssemblyDispatch.h"
+#include "src/runtime/cpu/operators/CpuDepthwiseConv2dAssemblyDispatch.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Utils.h"
@@ -211,13 +211,13 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_fp32_convolver(int kernel_
     }
 }
 
-std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensorInfo     *input,
+std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensorInfo     *src,
                                                                    const ITensorInfo     *weights,
                                                                    ITensorInfo           *output,
                                                                    const ConvolutionInfo &info)
 {
-    const DataType    data_type = input->data_type();
-    const TensorShape shape     = input->tensor_shape();
+    const DataType    data_type = src->data_type();
+    const TensorShape shape     = src->tensor_shape();
 
     const int n_batches       = shape[3];
     const int in_rows         = shape.z();
@@ -249,7 +249,7 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
     // Create quantized convolver
     if(is_uniform_quantized)
     {
-        const UniformQuantizationInfo input_qinfo   = input->quantization_info().uniform();
+        const UniformQuantizationInfo input_qinfo   = src->quantization_info().uniform();
         const UniformQuantizationInfo weights_qinfo = weights->quantization_info().uniform();
         const UniformQuantizationInfo output_qinfo  = output->quantization_info().uniform();
 
@@ -273,7 +273,7 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
     }
     else if(is_perchannel_quantized)
     {
-        const UniformQuantizationInfo input_qinfo   = input->quantization_info().uniform();
+        const UniformQuantizationInfo input_qinfo   = src->quantization_info().uniform();
         const QuantizationInfo        weights_qinfo = weights->quantization_info();
         const UniformQuantizationInfo output_qinfo  = output->quantization_info().uniform();
 
@@ -327,7 +327,7 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
 }
 } // namespace
 
-struct CpuDepthwiseConvolutionAssemblyDispatch::LocalImpl
+struct CpuDepthwiseConv2dAssemblyDispatch::LocalImpl
 {
     std::unique_ptr<depthwise::IDepthwiseConvolution> dwc_assembly_kernel{ nullptr };
     NEDepthwiseConvolutionAssemblyKernelWrapper       dwc_acl_kernel{};
@@ -336,36 +336,36 @@ struct CpuDepthwiseConvolutionAssemblyDispatch::LocalImpl
 };
 
 #ifndef DOXYGEN_SKIP_THIS
-CpuDepthwiseConvolutionAssemblyDispatch::CpuDepthwiseConvolutionAssemblyDispatch()
+CpuDepthwiseConv2dAssemblyDispatch::CpuDepthwiseConv2dAssemblyDispatch()
     : _pImpl(std::make_unique<LocalImpl>())
 {
 }
 #endif /* DOXYGEN_SKIP_THIS */
 
-CpuDepthwiseConvolutionAssemblyDispatch::~CpuDepthwiseConvolutionAssemblyDispatch() = default;
+CpuDepthwiseConv2dAssemblyDispatch::~CpuDepthwiseConv2dAssemblyDispatch() = default;
 
-void CpuDepthwiseConvolutionAssemblyDispatch::configure(const ITensorInfo     *input,
-                                                        const ITensorInfo     *weights,
-                                                        const ITensorInfo     *bias,
-                                                        ITensorInfo           *output,
-                                                        const ConvolutionInfo &info)
+void CpuDepthwiseConv2dAssemblyDispatch::configure(const ITensorInfo     *src,
+                                                   const ITensorInfo     *weights,
+                                                   const ITensorInfo     *bias,
+                                                   ITensorInfo           *dst,
+                                                   const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_UNUSED(bias);
-    ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConvolutionAssemblyDispatch::validate(input,
-                                                                                 weights,
-                                                                                 bias != nullptr ? bias : nullptr,
-                                                                                 output,
-                                                                                 info));
+    ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConv2dAssemblyDispatch::validate(src,
+                                                                            weights,
+                                                                            bias != nullptr ? bias : nullptr,
+                                                                            dst,
+                                                                            info));
 
     // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
-    auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
+    const TensorShape dst_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *weights, info);
+    auto_init_if_empty(*dst, src->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(dst_shape).set_quantization_info(dst->quantization_info()));
 
     _pImpl->is_prepared = false;
 
     // Create convolver
-    _pImpl->dwc_assembly_kernel = create_convolver(input, weights, output, info);
+    _pImpl->dwc_assembly_kernel = create_convolver(src, weights, dst, info);
     ARM_COMPUTE_ERROR_ON(_pImpl->dwc_assembly_kernel == nullptr);
 
     // Create assembly kernel wrapper
@@ -386,27 +386,27 @@ void CpuDepthwiseConvolutionAssemblyDispatch::configure(const ITensorInfo     *i
     _pImpl->mem_req.push_back({ TensorType::ACL_INT_1, pack_tensor_size, alignment });
 }
 
-experimental::MemoryRequirements CpuDepthwiseConvolutionAssemblyDispatch::workspace() const
+experimental::MemoryRequirements CpuDepthwiseConv2dAssemblyDispatch::workspace() const
 {
     return _pImpl->mem_req;
 }
 
-Status CpuDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo     *input,
-                                                         const ITensorInfo     *weights,
-                                                         const ITensorInfo     *bias,
-                                                         const ITensorInfo     *output,
-                                                         const ConvolutionInfo &info)
+Status CpuDepthwiseConv2dAssemblyDispatch::validate(const ITensorInfo     *src,
+                                                    const ITensorInfo     *weights,
+                                                    const ITensorInfo     *bias,
+                                                    const ITensorInfo     *dst,
+                                                    const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     if(weights->data_type() != DataType::QSYMM8_PER_CHANNEL)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights);
     }
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, weights);
 
     // Validate convolver
-    ARM_COMPUTE_RETURN_ERROR_ON(!is_optimized_supported(input, weights, info));
+    ARM_COMPUTE_RETURN_ERROR_ON(!is_optimized_supported(src, weights, info));
 
     // Validate activation
     const bool is_relu  = arm_compute::utils::info_helpers::is_relu(info.act_info);
@@ -416,50 +416,50 @@ Status CpuDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo     *
     // Check bias
     if(bias != nullptr)
     {
-        unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+        unsigned int channel_idx = get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::CHANNEL);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != weights->dimension(channel_idx));
     }
 
     // Check output
-    if(output->total_size() != 0)
+    if(dst->total_size() != 0)
     {
-        const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        const TensorShape dst_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *weights, info);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
 
     // The uniform quantization case will only have 1 scale value in the weights quantization info
-    const UniformQuantizationInfo input_qinfo   = input->quantization_info().uniform();
+    const UniformQuantizationInfo src_qinfo     = src->quantization_info().uniform();
     const QuantizationInfo        weights_qinfo = weights->quantization_info();
-    const UniformQuantizationInfo output_qinfo  = output->quantization_info().uniform();
+    const UniformQuantizationInfo dst_qinfo     = dst->quantization_info().uniform();
     for(auto const s : weights_qinfo.scale())
     {
-        const float fmultipler = input_qinfo.scale * s / output_qinfo.scale;
+        const float fmultipler = src_qinfo.scale * s / dst_qinfo.scale;
         ARM_COMPUTE_RETURN_ERROR_ON(fmultipler > 1.f);
     }
 
     return Status{};
 }
 
-bool CpuDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITensorInfo     *input,
-                                                                     const ITensorInfo     *weights,
-                                                                     const ConvolutionInfo &info)
+bool CpuDepthwiseConv2dAssemblyDispatch::is_optimized_supported(const ITensorInfo     *src,
+                                                                const ITensorInfo     *weights,
+                                                                const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights);
 
     // Reshape input shape if in NHWC format
-    const DataLayout data_layout = input->data_layout();
-    TensorShape      in_shape{ input->tensor_shape() };
+    const DataLayout data_layout = src->data_layout();
+    TensorShape      in_shape{ src->tensor_shape() };
     if(data_layout == DataLayout::NHWC)
     {
-        in_shape.set(Window::DimX, input->tensor_shape().y());
-        in_shape.set(Window::DimY, input->tensor_shape().z());
-        in_shape.set(Window::DimZ, input->tensor_shape().x());
+        in_shape.set(Window::DimX, src->tensor_shape().y());
+        in_shape.set(Window::DimY, src->tensor_shape().z());
+        in_shape.set(Window::DimZ, src->tensor_shape().x());
     }
 
     // Check data type
-    const DataType input_type            = input->data_type();
+    const DataType input_type            = src->data_type();
     const bool     is_input_type_valid   = is_data_type_float(input_type) || input_type == DataType::QASYMM8;
     const DataType weights_type          = weights->data_type();
     const bool     is_weights_type_valid = is_data_type_float(weights_type) || weights_type == DataType::QASYMM8 || weights_type == DataType::QASYMM8_SIGNED
@@ -497,7 +497,7 @@ bool CpuDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITens
     return is_input_type_valid && is_weights_type_valid && weights_supported && supported_strides && supported_padding && (info.depth_multiplier == 1) && is_dilation_supported;
 }
 
-void CpuDepthwiseConvolutionAssemblyDispatch::run(ITensorPack &tensors)
+void CpuDepthwiseConv2dAssemblyDispatch::run(ITensorPack &tensors)
 {
     // Prepare assembly kernel
     prepare(tensors);
@@ -530,7 +530,7 @@ void CpuDepthwiseConvolutionAssemblyDispatch::run(ITensorPack &tensors)
     NEScheduler::get().schedule(&_pImpl->dwc_acl_kernel, Window::DimX);
 }
 
-void CpuDepthwiseConvolutionAssemblyDispatch::prepare(ITensorPack &tensors)
+void CpuDepthwiseConv2dAssemblyDispatch::prepare(ITensorPack &tensors)
 {
     if(!_pImpl->is_prepared)
     {

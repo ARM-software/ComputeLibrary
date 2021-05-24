@@ -39,7 +39,7 @@ class ITensorInfo;
 
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following kernels:
  *
- * -# @ref cpu::CpuPooling
+ * -# @ref cpu::CpuPool2d
  */
 class NEPoolingLayer : public IFunction
 {

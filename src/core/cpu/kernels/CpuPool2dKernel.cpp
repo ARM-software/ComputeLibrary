@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuPoolingKernel.h"
+#include "src/core/cpu/kernels/CpuPool2dKernel.h"
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -374,12 +374,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
 }
 } // namespace
 
-BorderSize CpuPoolingKernel::border_size() const
+BorderSize CpuPool2dKernel::border_size() const
 {
     return _border_size;
 }
 
-void CpuPoolingKernel::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
+void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info;
@@ -420,7 +420,7 @@ void CpuPoolingKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Pooli
     }
 }
 
-Status CpuPoolingKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status CpuPool2dKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
@@ -446,7 +446,7 @@ Status CpuPoolingKernel::validate(const ITensorInfo *src, const ITensorInfo *dst
     return Status{};
 }
 
-void CpuPoolingKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuPool2dKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -505,9 +505,9 @@ void CpuPoolingKernel::run_op(ITensorPack &tensors, const Window &window, const 
     uk->ukernel(src, dst, indices, _pool_info, window_src, window);
 }
 
-const char *CpuPoolingKernel::name() const
+const char *CpuPool2dKernel::name() const
 {
-    return "CpuPoolingKernel";
+    return "CpuPool2dKernel";
 }
 } // namespace kernels
 } // namespace cpu

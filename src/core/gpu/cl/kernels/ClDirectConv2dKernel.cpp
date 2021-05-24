@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/gpu/cl/kernels/ClDirectConvolutionKernel.h"
+#include "src/core/gpu/cl/kernels/ClDirectConv2dKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -369,13 +369,13 @@ bool export_to_cl_image_support(ITensorInfo *tensor, GPUTarget gpu_target, DataL
 
 } // namespace
 
-BorderSize ClDirectConvolutionKernel::border_size() const
+BorderSize ClDirectConv2dKernel::border_size() const
 {
     return _border_size;
 }
 
-void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
-                                          const PadStrideInfo &conv_info)
+void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
+                                     const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
 
@@ -564,8 +564,8 @@ void ClDirectConvolutionKernel::configure(const CLCompileContext &compile_contex
     _config_id += lower_string(string_from_data_layout(_data_layout));
 }
 
-Status ClDirectConvolutionKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info,
-                                           const GPUTarget target)
+Status ClDirectConv2dKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info,
+                                      const GPUTarget target)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, conv_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), weights->clone().get(), dst->clone().get(), conv_info, target).first);
@@ -573,7 +573,7 @@ Status ClDirectConvolutionKernel::validate(const ITensorInfo *src, const ITensor
     return Status{};
 }
 
-void ClDirectConvolutionKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);

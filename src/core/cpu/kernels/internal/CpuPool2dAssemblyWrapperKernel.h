@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_POOLING_ASSEMBLY_WRAPPER_KERNEL_H
-#define ARM_COMPUTE_CPU_POOLING_ASSEMBLY_WRAPPER_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_POOL2D_ASSEMBLY_WRAPPER_KERNEL_H
+#define ARM_COMPUTE_CPU_POOL2D_ASSEMBLY_WRAPPER_KERNEL_H
 
 #include "arm_compute/core/Types.h"
 #include "src/core/NEON/kernels/assembly/pooling.hpp"
@@ -41,23 +41,21 @@ namespace kernels
   *
   * Some kernels were written in assembly and highly optimised for specific
   * CPUs like A53 or A55. The arm compute library creates an instance of
-  * CpuPoolingAssemblyWrapperKernel and other auxiliary data structures to
+  * CpuPool2dAssemblyWrapperKernel and other auxiliary data structures to
   * execute a single assembly kernel in the context of an NEFunction.
   *
   */
-class CpuPoolingAssemblyWrapperKernel final : public ICpuKernel
+class CpuPool2dAssemblyWrapperKernel final : public ICpuKernel
 {
 public:
     /** Constructor
      */
-    CpuPoolingAssemblyWrapperKernel()                                   = default;
-    CpuPoolingAssemblyWrapperKernel(CpuPoolingAssemblyWrapperKernel &)  = delete;
-    CpuPoolingAssemblyWrapperKernel(CpuPoolingAssemblyWrapperKernel &&) = default;
-    CpuPoolingAssemblyWrapperKernel &operator=(CpuPoolingAssemblyWrapperKernel &) = delete;
+    CpuPool2dAssemblyWrapperKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPool2dAssemblyWrapperKernel);
 
     const char *name() const override
     {
-        return "CpuPoolingAssemblyWrapperKernel";
+        return "CpuPool2dAssemblyWrapperKernel";
     }
 
     /** Initialise the kernel's src and dst.
@@ -69,13 +67,11 @@ public:
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info);
 
-    /** Indicates whether or not this function can be used to process the given parameters.
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] dst  Destination tensor to store the result of pooling. Data types supported: same as @p src.
-     * @param[in] info Pooling meta-data
+     * Similar to CpuPool2dAssemblyWrapperKernel::configure()
      *
-     * @return a status.
+     * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info);
 
@@ -120,4 +116,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_POOLING_ASSEMBLY_WRAPPER_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_POOL2D_ASSEMBLY_WRAPPER_KERNEL_H */

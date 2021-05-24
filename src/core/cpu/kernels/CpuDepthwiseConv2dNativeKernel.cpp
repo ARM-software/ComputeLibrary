@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.h"
+#include "src/core/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/ITensorInfo.h"
@@ -74,7 +74,7 @@ struct DepthwiseConvolutionRunInfo
     const size_t   input_width;
     const size_t   input_depth;
 
-    DepthwiseConvolutionRunInfo(const ITensorInfo &input, const ITensorInfo &weights, const PadStrideInfo &conv_info, const Window &w, uint32_t depth_multiplier = 1)
+    DepthwiseConvolutionRunInfo(const ITensorInfo &input, const ITensorInfo &weights, const PadStrideInfo &conv_info, const Window &w, uint32_t depth_multiplier = 1) // NOLINT
         : num_read_elements_per_iteration((depth_multiplier == 1 ? (vector_size / element_size_from_data_type(input.data_type())) : 1)),
           x_start(w.x().start()),
           x_end(w.x().end()),
@@ -110,14 +110,14 @@ inline bool is_valid_input_region(int32_t base_w, uint32_t base_h, uint32_t w, u
 }
 
 template <typename T>
-void depthwise_loop_multiplier1_fp(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+void depthwise_loop_multiplier1_fp(const ITensor *src, const ITensor *weights, const ITensor *biases, ITensor *dst, const PadStrideInfo &conv_info,
                                    const Size2D &dilation, const Window &window, bool has_biases)
 {
     constexpr auto element_per_vector = vector_size / sizeof(T);
     using VectorType                  = typename wrapper::traits::neon_vector<T, element_per_vector>::type;
     using TagType                     = typename wrapper::traits::neon_vector<T, element_per_vector>::tag_type;
 
-    const auto run_info = DepthwiseConvolutionRunInfo(*input->info(), *weights->info(), conv_info, window);
+    const auto run_info = DepthwiseConvolutionRunInfo(*src->info(), *weights->info(), conv_info, window);
 
     const VectorType zero_vector = wrapper::vdup_n(static_cast<T>(0), TagType{});
 
@@ -135,9 +135,9 @@ void depthwise_loop_multiplier1_fp(const ITensor *input, const ITensor *weights,
     Window win_output = window;
     win_output.set(Window::DimX, dim_manual_loop);
 
-    Iterator input_it(input, win_input);
+    Iterator input_it(src, win_input);
     Iterator weights_it(weights, win_weights);
-    Iterator output_it(output, win_output);
+    Iterator output_it(dst, win_output);
     Iterator biases_it{};
 
     if(has_biases)
@@ -224,10 +224,10 @@ void depthwise_loop_multiplier1_fp(const ITensor *input, const ITensor *weights,
 }
 
 template <typename T>
-void depthwise_loop_generic_fp(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+void depthwise_loop_generic_fp(const ITensor *src, const ITensor *weights, const ITensor *biases, ITensor *dst, const PadStrideInfo &conv_info,
                                const Size2D &dilation, unsigned int depth_multiplier, const Window &window, bool has_biases)
 {
-    const auto run_info = DepthwiseConvolutionRunInfo(*input->info(), *weights->info(), conv_info, window, depth_multiplier);
+    const auto run_info = DepthwiseConvolutionRunInfo(*src->info(), *weights->info(), conv_info, window, depth_multiplier);
 
     Window execution_window = window;
     execution_window.set(Window::DimX, Window::Dimension(0, run_info.input_depth, 1));
@@ -246,9 +246,9 @@ void depthwise_loop_generic_fp(const ITensor *input, const ITensor *weights, con
     Window win_output = window;
     win_output.set_dimension_step(Window::DimX, run_info.x_step);
 
-    Iterator input_it(input, win_input);
+    Iterator input_it(src, win_input);
     Iterator weights_it(weights, win_weights);
-    Iterator output_it(output, win_output);
+    Iterator output_it(dst, win_output);
     Iterator biases_it{};
 
     if(has_biases)
@@ -306,23 +306,24 @@ void depthwise_loop_generic_fp(const ITensor *input, const ITensor *weights, con
 }
 
 template <typename T, typename TW>
-void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                          const Size2D &dilation, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window, bool has_biases)
+void depthwise_loop_multiplier1_quantized(const ITensor *src, const ITensor *weights, const ITensor *biases, ITensor *dst, const PadStrideInfo &conv_info,
+                                          const Size2D &dilation, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window, bool has_biases) // NOLINT
 {
+    ARM_COMPUTE_UNUSED(output_multiplier, output_shift);
     constexpr auto element_per_vector = vector_size / sizeof(T);
     using VectorType                  = typename wrapper::traits::neon_vector<T, element_per_vector>::type;
     using TagType                     = typename wrapper::traits::neon_vector<T, element_per_vector>::tag_type;
     using AccType                     = int32_t;
     using AccArrayType                = std::array<AccType, element_per_vector>;
 
-    const auto out_of_bound_value  = PixelValue(static_cast<uint64_t>(0), input->info()->data_type(), input->info()->quantization_info()).get<T>();
+    const auto out_of_bound_value  = PixelValue(static_cast<uint64_t>(0), src->info()->data_type(), src->info()->quantization_info()).get<T>();
     const auto out_of_bound_vector = wrapper::vdup_n(static_cast<T>(out_of_bound_value), TagType{});
 
-    const auto run_info = DepthwiseConvolutionRunInfo(*input->info(), *weights->info(), conv_info, window);
+    const auto run_info = DepthwiseConvolutionRunInfo(*src->info(), *weights->info(), conv_info, window);
 
-    const int32_t input_qoffset   = input->info()->quantization_info().uniform().offset;
+    const int32_t input_qoffset   = src->info()->quantization_info().uniform().offset;
     const int32_t weights_qoffset = weights->info()->quantization_info().uniform().offset;
-    const int32_t output_qoffset  = output->info()->quantization_info().uniform().offset;
+    const int32_t output_qoffset  = dst->info()->quantization_info().uniform().offset;
     const int32_t k_offset        = run_info.weights_width * run_info.weights_height * input_qoffset * weights_qoffset;
 
     Window execution_window = window;
@@ -339,9 +340,9 @@ void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *w
     Window win_output = window;
     win_output.set(Window::DimX, dim_manual_loop);
 
-    Iterator input_it(input, win_input);
+    Iterator input_it(src, win_input);
     Iterator weights_it(weights, win_weights);
-    Iterator output_it(output, win_output);
+    Iterator output_it(dst, win_output);
     Iterator biases_it{};
 
     if(has_biases)
@@ -482,18 +483,18 @@ void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *w
 }
 
 template <typename T, typename TW>
-void depthwise_loop_generic_quantized(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                      const Size2D &dilation, unsigned int depth_multiplier, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window, bool has_biases)
+void depthwise_loop_generic_quantized(const ITensor *src, const ITensor *weights, const ITensor *biases, ITensor *dst, const PadStrideInfo &conv_info,
+                                      const Size2D &dilation, unsigned int depth_multiplier, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window, bool has_biases) // NOLINT
 {
     using AccType = int32_t;
 
-    const auto run_info = DepthwiseConvolutionRunInfo(*input->info(), *weights->info(), conv_info, window, depth_multiplier);
+    const auto run_info = DepthwiseConvolutionRunInfo(*src->info(), *weights->info(), conv_info, window, depth_multiplier);
 
-    const auto out_of_bound_value = PixelValue(static_cast<uint64_t>(0), input->info()->data_type(), input->info()->quantization_info()).get<T>();
+    const auto out_of_bound_value = PixelValue(static_cast<uint64_t>(0), src->info()->data_type(), src->info()->quantization_info()).get<T>();
 
-    const int32_t input_qoffset   = input->info()->quantization_info().uniform().offset;
+    const int32_t input_qoffset   = src->info()->quantization_info().uniform().offset;
     const int32_t weights_qoffset = weights->info()->quantization_info().uniform().offset;
-    const int32_t output_qoffset  = output->info()->quantization_info().uniform().offset;
+    const int32_t output_qoffset  = dst->info()->quantization_info().uniform().offset;
     const int32_t k_offset        = run_info.weights_width * run_info.weights_height * input_qoffset * weights_qoffset;
 
     Window execution_window = window;
@@ -512,9 +513,9 @@ void depthwise_loop_generic_quantized(const ITensor *input, const ITensor *weigh
     Window win_output = window;
     win_output.set_dimension_step(Window::DimX, run_info.x_step);
 
-    Iterator input_it(input, win_input);
+    Iterator input_it(src, win_input);
     Iterator weights_it(weights, win_weights);
-    Iterator output_it(output, win_output);
+    Iterator output_it(dst, win_output);
     Iterator biases_it{};
 
     if(has_biases)
@@ -585,8 +586,8 @@ void depthwise_loop_generic_quantized(const ITensor *input, const ITensor *weigh
 }
 
 template <typename T, typename TW>
-void depthwise_loop_pow2_quantized_per_tensor(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                              const Size2D &dilation, unsigned int depth_multiplier, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window, bool has_biases)
+void depthwise_loop_pow2_quantized_per_tensor(const ITensor *src, const ITensor *weights, const ITensor *biases, ITensor *dst, const PadStrideInfo &conv_info,
+                                              const Size2D &dilation, unsigned int depth_multiplier, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window, bool has_biases) // NOLINT
 {
     constexpr int half_vec = vector_size / 2;
 
@@ -595,11 +596,11 @@ void depthwise_loop_pow2_quantized_per_tensor(const ITensor *input, const ITenso
     using AccVectorTagType = typename wrapper::traits::neon_vector<AccType, half_vec>::tag_type;
     using TagType          = typename wrapper::traits::neon_vector<T, vector_size>::tag_type;
 
-    const auto run_info = DepthwiseConvolutionRunInfo(*input->info(), *weights->info(), conv_info, window, depth_multiplier);
+    const auto run_info = DepthwiseConvolutionRunInfo(*src->info(), *weights->info(), conv_info, window, depth_multiplier);
 
-    const auto input_qoffset_vec   = wrapper::vreinterpret(wrapper::vmovl(wrapper::vdup_n(static_cast<T>(input->info()->quantization_info().uniform().offset), TagType{})));
+    const auto input_qoffset_vec   = wrapper::vreinterpret(wrapper::vmovl(wrapper::vdup_n(static_cast<T>(src->info()->quantization_info().uniform().offset), TagType{})));
     const auto weights_qoffset_vec = wrapper::vreinterpret(wrapper::vmovl(wrapper::vdup_n(static_cast<TW>(weights->info()->quantization_info().uniform().offset), TagType{})));
-    const auto output_qoffset_vec  = wrapper::vdup_n(output->info()->quantization_info().uniform().offset, arm_compute::wrapper::traits::vector_128_tag{});
+    const auto output_qoffset_vec  = wrapper::vdup_n(dst->info()->quantization_info().uniform().offset, arm_compute::wrapper::traits::vector_128_tag{});
 
     const auto lower = wrapper::vdup_n(static_cast<AccType>(std::numeric_limits<T>::lowest()), AccVectorTagType{});
     const auto upper = wrapper::vdup_n(static_cast<AccType>(std::numeric_limits<T>::max()), AccVectorTagType{});
@@ -624,9 +625,9 @@ void depthwise_loop_pow2_quantized_per_tensor(const ITensor *input, const ITenso
     Window win_output = window;
     win_output.set_dimension_step(Window::DimX, run_info.x_step);
 
-    Iterator input_it(input, win_input);
+    Iterator input_it(src, win_input);
     Iterator weights_it(weights, win_weights);
-    Iterator output_it(output, win_output);
+    Iterator output_it(dst, win_output);
     Iterator biases_it{};
 
     if(has_biases)
@@ -722,16 +723,16 @@ void depthwise_loop_pow2_quantized_per_tensor(const ITensor *input, const ITenso
     input_it, weights_it, biases_it, output_it);
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ConvolutionInfo &info)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(info.depth_multiplier == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(1) + (weights->dimension(1) - 1) * (info.dilation.x() - 1) > input->dimension(1) + info.pad_stride_info.pad_left() + info.pad_stride_info.pad_right());
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(2) + (weights->dimension(2) - 1) * (info.dilation.y() - 1) > input->dimension(2) + info.pad_stride_info.pad_top() + info.pad_stride_info.pad_bottom());
-    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(0) * info.depth_multiplier) != weights->dimension(0));
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(1) + (weights->dimension(1) - 1) * (info.dilation.x() - 1) > src->dimension(1) + info.pad_stride_info.pad_left() + info.pad_stride_info.pad_right());
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(2) + (weights->dimension(2) - 1) * (info.dilation.y() - 1) > src->dimension(2) + info.pad_stride_info.pad_top() + info.pad_stride_info.pad_bottom());
+    ARM_COMPUTE_RETURN_ERROR_ON((src->dimension(0) * info.depth_multiplier) != weights->dimension(0));
     ARM_COMPUTE_RETURN_ERROR_ON((info.dilation.x() < 1) || (info.dilation.y() < 1));
     ARM_COMPUTE_RETURN_ERROR_ON((info.pad_stride_info.stride().first < 1) || (info.pad_stride_info.stride().second < 1));
 
@@ -742,7 +743,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights);
     }
 
     if(biases != nullptr)
@@ -750,7 +751,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(0));
 
-        if(is_data_type_quantized_asymmetric(input->data_type()))
+        if(is_data_type_quantized_asymmetric(src->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
@@ -760,36 +761,36 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         }
     }
 
-    if(output->total_size() != 0)
+    if(dst->total_size() != 0)
     {
-        const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *weights, info);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
 
     return Status{};
 }
 } // namespace
 
-CpuDepthwiseConvolutionNativeKernel::CpuDepthwiseConvolutionNativeKernel()
+CpuDepthwiseConv2dNativeKernel::CpuDepthwiseConv2dNativeKernel()
     : _func(), _conv_info(), _depth_multiplier(1), _dilation(), _output_multiplier(), _output_shift(), _has_biases()
 {
 }
 
-void CpuDepthwiseConvolutionNativeKernel::configure(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *output, const ConvolutionInfo &info)
+void CpuDepthwiseConv2dNativeKernel::configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, weights, (biases != nullptr) ? biases : nullptr, output, info));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, (biases != nullptr) ? biases : nullptr, dst, info));
 
     _conv_info        = info.pad_stride_info;
     _depth_multiplier = info.depth_multiplier;
     _dilation         = info.dilation;
     _has_biases       = (biases != nullptr);
 
-    if(is_data_type_quantized(input->data_type()))
+    if(is_data_type_quantized(src->data_type()))
     {
-        const auto input_scale  = input->quantization_info().uniform().scale;
-        const auto output_scale = output->quantization_info().uniform().scale;
+        const auto input_scale  = src->quantization_info().uniform().scale;
+        const auto output_scale = dst->quantization_info().uniform().scale;
 
         auto weights_scale = weights->quantization_info().scale();
         if(!is_data_type_quantized_per_channel(weights->data_type()))
@@ -815,50 +816,50 @@ void CpuDepthwiseConvolutionNativeKernel::configure(const ITensorInfo *input, co
     switch(weights->data_type())
     {
         case DataType::QASYMM8:
-            _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<uint8_t, uint8_t>;
+            _func = &CpuDepthwiseConv2dNativeKernel::run_depthwise<uint8_t, uint8_t>;
             break;
         case DataType::QASYMM8_SIGNED:
-            _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<int8_t, int8_t>;
+            _func = &CpuDepthwiseConv2dNativeKernel::run_depthwise<int8_t, int8_t>;
             break;
         case DataType::QSYMM8_PER_CHANNEL:
-            if(input->data_type() == DataType::QASYMM8)
+            if(src->data_type() == DataType::QASYMM8)
             {
-                _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<uint8_t, int8_t>;
+                _func = &CpuDepthwiseConv2dNativeKernel::run_depthwise<uint8_t, int8_t>;
             }
             else
             {
-                _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<int8_t, int8_t>;
+                _func = &CpuDepthwiseConv2dNativeKernel::run_depthwise<int8_t, int8_t>;
             }
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<float16_t, float16_t>;
+            _func = &CpuDepthwiseConv2dNativeKernel::run_depthwise<float16_t, float16_t>;
             break;
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F32:
-            _func = &CpuDepthwiseConvolutionNativeKernel::run_depthwise<float, float>;
+            _func = &CpuDepthwiseConv2dNativeKernel::run_depthwise<float, float>;
             break;
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
             break;
     }
 
-    const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
-    auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
+    const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *weights, info);
+    auto_init_if_empty(*dst, src->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(dst->quantization_info()));
 
-    Window win = calculate_max_window(*output, Steps());
+    Window win = calculate_max_window(*dst, Steps());
     ICpuKernel::configure(win);
 }
 
-Status CpuDepthwiseConvolutionNativeKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ConvolutionInfo &info)
+Status CpuDepthwiseConv2dNativeKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, info));
     return Status{};
 }
 
-template <typename T, typename TW, CpuDepthwiseConvolutionNativeKernel::FloatEnalber<T>>
-void CpuDepthwiseConvolutionNativeKernel::run_depthwise(const ITensor *src, const ITensor *weights, const ITensor *biases,
-                                                        ITensor *dst, const Window &window, bool has_biases)
+template <typename T, typename TW, CpuDepthwiseConv2dNativeKernel::FloatEnalber<T>>
+void CpuDepthwiseConv2dNativeKernel::run_depthwise(const ITensor *src, const ITensor *weights, const ITensor *biases,
+                                                   ITensor *dst, const Window &window, bool has_biases)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
@@ -873,9 +874,9 @@ void CpuDepthwiseConvolutionNativeKernel::run_depthwise(const ITensor *src, cons
     }
 }
 
-template <typename T, typename TW, CpuDepthwiseConvolutionNativeKernel::Quantized8bitEnalber<T>>
-void CpuDepthwiseConvolutionNativeKernel::run_depthwise(const ITensor *src, const ITensor *weights, const ITensor *biases,
-                                                        ITensor *dst, const Window &window, bool has_biases)
+template <typename T, typename TW, CpuDepthwiseConv2dNativeKernel::Quantized8bitEnalber<T>>
+void CpuDepthwiseConv2dNativeKernel::run_depthwise(const ITensor *src, const ITensor *weights, const ITensor *biases,
+                                                   ITensor *dst, const Window &window, bool has_biases)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
@@ -900,7 +901,7 @@ void CpuDepthwiseConvolutionNativeKernel::run_depthwise(const ITensor *src, cons
     }
 }
 
-void CpuDepthwiseConvolutionNativeKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuDepthwiseConv2dNativeKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);

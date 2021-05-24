@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuDirectConvolutionOutputStageKernel.h"
+#include "src/core/cpu/kernels/CpuDirectConv2dOutputStageKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -384,8 +384,8 @@ void output_stage_nhwc(ITensor *src, const ITensor *bias, const Window &window, 
 }
 } // namespace
 
-void CpuDirectConvolutionOutputStageKernel::configure(ITensorInfo *src, const ITensorInfo *bias, ITensorInfo *dst,
-                                                      const DirectConvolutionLayerOutputStageKernelInfo &info)
+void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo *src, const ITensorInfo *bias, ITensorInfo *dst,
+                                                 const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
     ARM_COMPUTE_UNUSED(bias);
     // Perform validation step
@@ -483,14 +483,14 @@ void CpuDirectConvolutionOutputStageKernel::configure(ITensorInfo *src, const IT
     }
 }
 
-Status CpuDirectConvolutionOutputStageKernel::validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst,
-                                                       const DirectConvolutionLayerOutputStageKernelInfo &info)
+Status CpuDirectConv2dOutputStageKernel::validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst,
+                                                  const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, bias, dst, info));
     return Status{};
 }
 
-void CpuDirectConvolutionOutputStageKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuDirectConv2dOutputStageKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -504,9 +504,9 @@ void CpuDirectConvolutionOutputStageKernel::run_op(ITensorPack &tensors, const W
     (*_func)(src, bias, window, dst, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift);
 }
 
-const char *CpuDirectConvolutionOutputStageKernel::name() const
+const char *CpuDirectConv2dOutputStageKernel::name() const
 {
-    return "CpuDirectConvolutionOutputStageKernel";
+    return "CpuDirectConv2dOutputStageKernel";
 }
 } // namespace kernels
 } // namespace cpu

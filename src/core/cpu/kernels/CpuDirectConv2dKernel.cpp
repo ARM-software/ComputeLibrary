@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuDirectConvolutionKernel.h"
+#include "src/core/cpu/kernels/CpuDirectConv2dKernel.h"
 
 #include "src/core/NEON/kernels/detail/NEDirectConvolutionDetail.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -995,7 +995,7 @@ bool have_zero_x_internal_padding(ITensorInfo *src, ITensorInfo *weights)
 } // namespace
 
 template <typename T>
-void CpuDirectConvolutionKernel::convolve_nhwc_optimized(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst)
+void CpuDirectConv2dKernel::convolve_nhwc_optimized(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst)
 {
     // This function assumes that input and weights have not padding in channel
 
@@ -1116,7 +1116,7 @@ void CpuDirectConvolutionKernel::convolve_nhwc_optimized(const Window &window, c
 }
 
 template <typename T>
-void CpuDirectConvolutionKernel::convolve_nhwc(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst)
+void CpuDirectConv2dKernel::convolve_nhwc(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst)
 {
     // Declare useful types
     using vtype       = wrapper::traits::neon_bitvector<T, wrapper::traits::BitWidth::W128>;
@@ -1219,12 +1219,12 @@ void CpuDirectConvolutionKernel::convolve_nhwc(const Window &window, const ITens
     out);
 }
 
-BorderSize CpuDirectConvolutionKernel::border_size() const
+BorderSize CpuDirectConv2dKernel::border_size() const
 {
     return _border_size;
 }
 
-void CpuDirectConvolutionKernel::configure(ITensorInfo *src, ITensorInfo *weights, ITensorInfo *dst, const PadStrideInfo &conv_info)
+void CpuDirectConv2dKernel::configure(ITensorInfo *src, ITensorInfo *weights, ITensorInfo *dst, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
 
@@ -1263,7 +1263,7 @@ void CpuDirectConvolutionKernel::configure(ITensorInfo *src, ITensorInfo *weight
     ICpuKernel::configure(win_config.second);
 }
 
-Status CpuDirectConvolutionKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const PadStrideInfo &conv_info)
+Status CpuDirectConv2dKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const PadStrideInfo &conv_info)
 {
     unsigned int num_weight_elems_read_per_row   = 0;
     unsigned int num_elems_read_per_iteration    = 0;
@@ -1283,7 +1283,7 @@ Status CpuDirectConvolutionKernel::validate(const ITensorInfo *src, const ITenso
     return Status{};
 }
 
-void CpuDirectConvolutionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -1376,7 +1376,7 @@ void CpuDirectConvolutionKernel::run_op(ITensorPack &tensors, const Window &wind
         }
     }
 }
-const char *CpuDirectConvolutionKernel::name() const
+const char *CpuDirectConv2dKernel::name() const
 {
     return "CpuDirectConvolutionLayerKernel";
 }

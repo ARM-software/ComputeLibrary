@@ -26,17 +26,17 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "src/runtime/cpu/operators/CpuPooling.h"
+#include "src/runtime/cpu/operators/CpuPool2d.h"
 
 namespace arm_compute
 {
 struct NEPoolingLayer::Impl
 {
-    ITensor                         *src{ nullptr };
-    ITensor                         *dst{ nullptr };
-    ITensor                         *indices{ nullptr };
-    Tensor                           workspace{ nullptr };
-    std::unique_ptr<cpu::CpuPooling> op{ nullptr };
+    ITensor                        *src{ nullptr };
+    ITensor                        *dst{ nullptr };
+    ITensor                        *indices{ nullptr };
+    Tensor                          workspace{ nullptr };
+    std::unique_ptr<cpu::CpuPool2d> op{ nullptr };
 };
 
 NEPoolingLayer::~NEPoolingLayer() = default;
@@ -51,7 +51,7 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _impl->src     = input;
     _impl->dst     = output;
     _impl->indices = indices;
-    _impl->op      = std::make_unique<cpu::CpuPooling>();
+    _impl->op      = std::make_unique<cpu::CpuPool2d>();
     _impl->op->configure(input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr);
 
     // Allocate workspace based on kernel's memory requirements
@@ -66,7 +66,7 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
 
 Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    return cpu::CpuPooling::validate(input, output, pool_info, indices);
+    return cpu::CpuPool2d::validate(input, output, pool_info, indices);
 }
 
 void NEPoolingLayer::run()
