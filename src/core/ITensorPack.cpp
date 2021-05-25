@@ -67,6 +67,11 @@ ITensor *ITensorPack::get_tensor(int id)
     return it != _pack.end() ? it->second.tensor : nullptr;
 }
 
+void ITensorPack::remove_tensor(int id)
+{
+    _pack.erase(id);
+}
+
 size_t ITensorPack::size() const
 {
     return _pack.size();

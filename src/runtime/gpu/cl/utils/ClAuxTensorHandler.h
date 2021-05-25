@@ -50,6 +50,8 @@ public:
             if(pack_inject)
             {
                 pack.add_tensor(slot_id, &_tensor);
+                _injected_tensor_pack = &pack;
+                _injected_slot_id     = slot_id;
             }
         }
         else
@@ -68,6 +70,17 @@ public:
         }
     }
 
+    CLAuxTensorHandler(const CLAuxTensorHandler &) = delete;
+    CLAuxTensorHandler &operator=(const CLAuxTensorHandler) = delete;
+
+    ~CLAuxTensorHandler()
+    {
+        if(_injected_tensor_pack)
+        {
+            _injected_tensor_pack->remove_tensor(_injected_slot_id);
+        }
+    }
+
     ICLTensor *get()
     {
         return &_tensor;
@@ -79,7 +92,9 @@ public:
     }
 
 private:
-    CLTensor _tensor{};
+    CLTensor     _tensor{};
+    ITensorPack *_injected_tensor_pack{ nullptr };
+    int          _injected_slot_id{ TensorType::ACL_UNKNOWN };
 };
 } // namespace opencl
 } // namespace arm_compute

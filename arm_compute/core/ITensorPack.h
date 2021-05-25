@@ -95,6 +95,11 @@ public:
      * @return The pointer to the tensor if exist and is const else nullptr
      */
     const ITensor *get_const_tensor(int id) const;
+    /** Remove the tensor stored with the given id
+     *
+     * @param[in] id ID of tensor to remove
+     */
+    void remove_tensor(int id);
     /** Pack size accessor
      *
      * @return Number of tensors registered to the pack
