@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -268,9 +268,12 @@ void fuse_node_with_activation(Graph &g, const Edge *output_edge, const std::set
 template <typename N1, typename N2, typename F, typename... Args>
 void fuse_layer(Graph &g, std::function<bool(INode &)> const &prec, const F fuse_fcn, Args &&... optional_arguments)
 {
-    // Not interested in the order of nodes
-    for(auto &node : g.nodes())
+    // Note that fused nodes may be added to the end of the node list.
+    // Instead of only looping over the original list of nodes, we loop over the current node list which could be growing.
+    // This is intentional as it probes the newly added fused nodes for further fusing opportunities.
+    for(unsigned int i = 0; i < g.nodes().size(); ++i)
     {
+        auto node = g.node(i);
         // Check if the node is of type N and not a branching node
         if(node && node->type() == N1::node_type && node->output_edges().size() == 1)
         {
