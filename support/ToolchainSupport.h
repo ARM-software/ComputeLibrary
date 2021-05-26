@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,6 +70,21 @@ template <typename T, typename = typename std::enable_if<std::is_floating_point<
 inline T round(T value)
 {
     return ::round(value);
+}
+
+/** Round floating-point value with half value rounding away from zero and cast to long
+ *
+ * @note This function implements the same behaviour as std::lround except that it doesn't
+ *       support Integral type. The latter is not in the namespace std in some Android toolchains.
+ *
+ * @param[in] value floating-point value to be rounded.
+ *
+ * @return Floating-point value of rounded @p value casted to long
+ */
+template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+inline long lround(T value)
+{
+    return ::lround(value);
 }
 
 /** Truncate floating-point value.
@@ -170,6 +185,21 @@ inline T round(T value)
 {
     //Workaround Valgrind's mismatches: when running from Valgrind the call to std::round(-4.500000) == -4.000000 instead of 5.00000
     return (value < 0.f) ? static_cast<int>(value - 0.5f) : static_cast<int>(value + 0.5f);
+}
+
+/** Round floating-point value with half value rounding away from zero and cast to long
+ *
+ * @note This function implements the same behaviour as std::lround except that it doesn't
+ *       support Integral type. The latter is not in the namespace std in some Android toolchains.
+ *
+ * @param[in] value floating-point value to be rounded.
+ *
+ * @return Floating-point value of rounded @p value casted to long
+ */
+template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+inline long lround(T value)
+{
+    return std::lround(value);
 }
 
 /** Truncate floating-point value.

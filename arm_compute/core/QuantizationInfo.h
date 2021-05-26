@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,10 @@
 #ifndef ARM_COMPUTE_QUANTIZATION_INFO_H
 #define ARM_COMPUTE_QUANTIZATION_INFO_H
 
-#include "arm_compute/core/Rounding.h"
-#include "utils/misc/Utility.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Rounding.h"
+#include "support/ToolchainSupport.h"
+#include "utils/misc/Utility.h"
 
 #include <cstddef>
 #include <type_traits>
@@ -216,14 +217,33 @@ struct Qasymm8QuantizationHelper
 
     /** Quantize a value given a 8-bit asymmetric quantization scheme
      *
-     * @param[in] value           Value to quantize
-     * @param[in] qinfo           Quantization information to use for quantizing
-     * @param[in] rounding_policy (Optional) Rounding policy to use. Default: nearest up
+     * @param[in] value Value to quantize
+     * @param[in] qinfo Quantization information to use for quantizing
      *
      * @return Quantized value
      */
-    static inline QUANTIZED_TYPE quantize(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+    static inline QUANTIZED_TYPE quantize(float value, const UniformQuantizationInfo &qinfo)
     {
+        ARM_COMPUTE_ERROR_ON(qinfo.scale == 0);
+        const int quantized = support::cpp11::lround(value / qinfo.scale) + qinfo.offset;
+        return static_cast<QUANTIZED_TYPE>(arm_compute::utility::clamp<decltype(quantized), QUANTIZED_TYPE>(quantized));
+    }
+
+    /** Quantize a value given a 8-bit asymmetric quantization scheme using a specific rounding policy
+     *
+     * @param[in] value           Value to quantize
+     * @param[in] qinfo           Quantization information to use for quantizing
+     * @param[in] rounding_policy Rounding policy to use
+     *
+     * @return Quantized value
+     */
+    static inline QUANTIZED_TYPE quantize(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy)
+    {
+        if(rounding_policy == RoundingPolicy::TO_NEAREST_UP)
+        {
+            return quantize(value, qinfo);
+        }
+
         ARM_COMPUTE_ERROR_ON(qinfo.scale == 0);
         const int quantized = arm_compute::round(value / qinfo.scale, rounding_policy) + qinfo.offset;
         return static_cast<QUANTIZED_TYPE>(arm_compute::utility::clamp<decltype(quantized), QUANTIZED_TYPE>(quantized));
