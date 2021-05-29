@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "activation_float_helpers.h"
 #include "helpers.h"
 #include "helpers_asymm.h"
 #include "tile_helpers.h"
@@ -255,6 +256,9 @@ __kernel void direct_convolution_nhwc(
     // Quantize the tile
     T_QUANTIZE8_ASYMMETRIC(ACC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, c, cq);
 #endif // defined(IS_QUANTIZED)
+
+    // Apply activation
+    T_ACTIVATION(DST_DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, _IOUTPUT_TILE, _IOUTPUT_TILE);
 
     // _IOUTPUT_TILE: c = fp32/fp16, cq=qasymm8
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones

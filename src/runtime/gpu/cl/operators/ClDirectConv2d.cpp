@@ -47,10 +47,13 @@ ITensorPack select_activation_src_dst(ITensorPack &tensors)
 void ClDirectConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
                                const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+
     // Configure direct convolution kernel
-    auto k = std::make_unique<kernels::ClDirectConv2dKernel>();
+    const ActivationLayerInfo conv2d_act_info = (src->data_layout() == DataLayout::NHWC && is_data_type_float(src->data_type())) ? act_info : ActivationLayerInfo();
+    auto                      k               = std::make_unique<kernels::ClDirectConv2dKernel>();
     k->set_target(CLScheduler::get().target());
-    k->configure(compile_context, src, weights, biases, dst, conv_info);
+    k->configure(compile_context, src, weights, biases, dst, conv_info, conv2d_act_info);
     _direct_conv_kernel = std::move(k);
 
     // Configure border handler
@@ -63,7 +66,8 @@ void ClDirectConv2d::configure(const CLCompileContext &compile_context, ITensorI
     b->configure(compile_context, src, _direct_conv_kernel->border_size(), BorderMode::CONSTANT, zero_value);
     _src_border_handler = std::move(b);
 
-    if(act_info.enabled())
+    // Fused activation is currently supported for NHWC and floating point types
+    if(act_info.enabled() && !conv2d_act_info.enabled())
     {
         auto a = std::make_unique<kernels::ClActivationKernel>();
         a->configure(compile_context, dst, dst, act_info);
@@ -77,7 +81,7 @@ void ClDirectConv2d::configure(const CLCompileContext &compile_context, ITensorI
 Status ClDirectConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
                                 const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClDirectConv2dKernel::validate(src, weights, biases, dst, conv_info, CLScheduler::get().target()));
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClDirectConv2dKernel::validate(src, weights, biases, dst, conv_info, ActivationLayerInfo(), CLScheduler::get().target()));
     if(act_info.enabled())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClActivationKernel::validate(dst, dst, act_info));

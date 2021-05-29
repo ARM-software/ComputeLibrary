@@ -34,8 +34,7 @@ namespace opencl
 {
 namespace kernels
 {
-/** Interface for the  direct convolution kernel.
- */
+/** Interface for the  direct convolution kernel. */
 class ClDirectConv2dKernel : public IClKernel
 {
 public:
@@ -62,15 +61,18 @@ public:
      * @param[out] dst             Output tensor info.
      *                             The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p src.
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  act_info        Contains activaton information described in @ref ActivationLayerInfo.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info);
+    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
+                   const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClDirectConv2dKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info, const GPUTarget target);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+                           const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const GPUTarget target);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
