@@ -103,14 +103,6 @@ class NESlice : public INEOperator
 public:
     /** Configure kernel
      *
-     * Valid data layouts:
-     * - All
-     *
-     * Valid data type configurations:
-     * |src    |dst    |
-     * |:------|:------|
-     * |All    |All    |
-     *
      * @note Supported tensor rank: up to 4
      * @note Start indices must be non-negative. 0 <= starts[i]
      * @note End coordinates can be negative, which represents the number of elements before the end of that dimension.

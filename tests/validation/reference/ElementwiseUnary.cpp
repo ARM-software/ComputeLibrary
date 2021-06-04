@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ElementWiseUnary.h"
+#include "ElementwiseUnary.h"
 
 namespace arm_compute
 {

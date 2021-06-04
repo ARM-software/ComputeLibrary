@@ -44,8 +44,8 @@ v21.05 Public major release
  - Various bug fixes.
  - Various optimisations.
  - Various documentation updates:
-   - Add supported operators and coressponding Android NNAPI operators.
-   - Documentaiton reorg into user guide and contributor guide.
+   - Add supported operators and corresponding Android NNAPI operators.
+   - Documentation reorg into user guide and contributor guide.
  - Add support for a global allocator for OpenCL tensors
  - Add experimental support for [CLVK](https://github.com/kpet/clvk).
  - Add data type S32 support for:
@@ -201,7 +201,7 @@ v21.02 Public major release
  - Add functionality to load the OpenCL GEMM heuristics at runtime
    - The GEMM heuristic file (MLGO) can be used to update the default GEMM heuristics available for OpenCL
  - Note: there might be performance regressions against v20.08 in Inception v3 using int8 data types on Arm Mali-G77 GPUs. Currently under investigation
- - Note: data-type decoupling is in progress and expiremental. Warning of unused symbols might be raised
+ - Note: data-type decoupling is in progress and experimental. Warning of unused symbols might be raised
 
 v20.11 Public major release
  - Various bug fixes.
@@ -514,7 +514,7 @@ v20.08 Public major release
  - Added new data type U8 support for:
    - @ref NECropKernel
    - CLCropKernel
- - Added aligh_corner support for nearest neighbor interpolation in:
+ - Added align_corner support for nearest neighbor interpolation in:
    - NEScaleKernel
    - CLScaleKernel
  - New OpenCL kernels / functions:
@@ -828,7 +828,7 @@ v19.08 Public major release
  - Enable the fusion of batch normalization with convolution and depthwise convolution layer for FP32 in the graph API (OpenCL only)
  - Added support for fusing activation function and broadcast addition with the matrix multiplication for FP32 (OpenCL only)
  - Re-factored the depthwise convolution layer kernel on Arm® Neon™ for generic cases
- - Added an optimized depthwise convolution layer kernel for 5x5 filters (Neon only)
+ - Added an optimized depthwise convolution layer kernel for 5x5 filters (Neon™ only)
  - Added support to enable OpenCL kernel cache. Added example showing how to load the prebuilt OpenCL kernels from a binary cache file
  - Altered @ref QuantizationInfo interface to support per-channel quantization.
  - The CLDepthwiseConvolutionLayer3x3 will be included by @ref CLDepthwiseConvolutionLayer to accommodate for future optimizations.
@@ -967,8 +967,8 @@ v19.02 Public major release
  - Add 4D tensors support to
     - @ref NESoftmaxLayer
  - Fused activation in @ref CLWinogradConvolutionLayer
- - Extented @ref NEPermute to support more cases
- - Added Neon/SVE GEMM Hybrid kernels
+ - Extended @ref NEPermute to support more cases
+ - Added Neon™/SVE GEMM Hybrid kernels
  - Added u8 and s8 hybrid assembly kernels
  - Introduced GEMM strategy name in NEGEMMAssemblyWrapper
  - Improved @ref CLTuner
@@ -1078,11 +1078,11 @@ v18.08 Public major release
 v18.05 Public major release
  - Various bug fixes.
  - Various optimisations.
- - Major redesign in the interface for the neon kernels implemented in assembly.
+ - Major redesign in the interface for the Neon™ kernels implemented in assembly.
  - Removed arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore / arm_compute::NEHGEMMAArch64FP16Kernel
- - Added NEGEMMAssemblyWrapper and AssemblyKernelGlue which are used to execute assembly kernels in neon functions.
+ - Added NEGEMMAssemblyWrapper and AssemblyKernelGlue which are used to execute assembly kernels in Neon™ functions.
  - Minor changes to the CPUInfo type to make it compatible with the new assembly gemm interface.
- - Moved neon assembly kernels to the folder src/core/Neon/kernels/arm_gemm.
+ - Moved Neon™ assembly kernels to the folder src/core/Neon/kernels/arm_gemm.
  - Improved doxygen documentation.
  - Improved memory management for layer's transitions.
  - Added support for NHWC data layout in tensors.
@@ -1123,7 +1123,7 @@ v18.05 Public major release
  - Replaced NEDeconvolutionLayerUpsampleKernel with NEScaleKernel in @ref NEDeconvolutionLayer.
  - Added fast maths flag in @ref CLConvolutionLayer.
  - Added new tests and benchmarks in validation and benchmark frameworks
- - Merge Activation layer with Convolution Layer (Neon. CL, GLES)
+ - Merge Activation layer with Convolution Layer (Neon™, CL, GLES)
  - Added support to OpenCL 2.0 SVM
  - Added support to import memory in OpenCL tensors.
  - Added the prepare() method to perform any one off pre-processing before running the function.

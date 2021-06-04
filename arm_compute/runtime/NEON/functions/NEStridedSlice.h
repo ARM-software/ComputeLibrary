@@ -109,14 +109,6 @@ class NEStridedSlice : public INEOperator
 public:
     /** Configure kernel
      *
-     * Valid data layouts:
-     * - All
-     *
-     * Valid data type configurations:
-     * |src    |dst    |
-     * |:------|:------|
-     * |All    |All    |
-     *
      * @note Supported tensor rank: up to 4
      *
      * @param[in]  input            Source tensor info. Data type supported: All

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/functions/CLElementWiseUnaryLayer.h"
+#include "arm_compute/runtime/CL/functions/CLElementwiseUnaryLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/CL/CLAccessor.h"
@@ -32,7 +32,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/ElementWiseUnaryFixture.h"
+#include "tests/validation/fixtures/ElementwiseUnaryFixture.h"
 
 namespace arm_compute
 {

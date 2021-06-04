@@ -32,7 +32,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/ElementWiseUnaryFixture.h"
+#include "tests/validation/fixtures/ElementwiseUnaryFixture.h"
 
 namespace arm_compute
 {

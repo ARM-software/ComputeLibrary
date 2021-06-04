@@ -94,7 +94,7 @@
 /** BitwiseAnd
  *
  * Description:
- * Function to performe bitwise AND between 2 tensors.
+ * Function to perform bitwise AND between 2 tensors.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_LOGICAL_AND
@@ -104,7 +104,7 @@
 /** BitwiseNot
  *
  * Description:
- * Function to performe bitwise NOT.
+ * Function to perform bitwise NOT.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_LOGICAL_NOT
@@ -114,7 +114,7 @@
 /** BitwiseOr
  *
  * Description:
- * Function to performe bitwise OR between 2 tensors.
+ * Function to perform bitwise OR between 2 tensors.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_LOGICAL_OR
@@ -124,7 +124,7 @@
 /** BitwiseXor
  *
  * Description:
- * Function to performe bitwise XOR between 2 tensors.
+ * Function to perform bitwise XOR between 2 tensors.
  *
  * Equivalent Android NNAPI Op:
  * n/a
@@ -189,7 +189,7 @@
 /** ConvertFullyConnectedWeights
  *
  * Description:
- * Function to tranpose the wieghts for the fully connected layer.
+ * Function to transpose the weights for the fully connected layer.
  *
  * Equivalent Android NNAPI Op:
  * n/a
@@ -239,7 +239,7 @@
 /** DeconvolutionLayer
  *
  * Description:
- * Function to compute a deconvolution or tranpose convolution.
+ * Function to compute a deconvolution or transpose convolution.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_TRANSPOSE_CONV_2D
@@ -326,7 +326,7 @@
  *
  */
 
-/** ElementWiseOperations
+/** ElementwiseOperations
  *
  * Description:
  * Function to perform in Cpu:
@@ -426,7 +426,7 @@
 /** FillBorder
  *
  * Description:
- * Function to .
+ * Function to fill the borders within the XY-planes.
  *
  * Equivalent Android NNAPI Op:
  * n/a
@@ -493,7 +493,7 @@
  *
  */
 
-/** GEMMConv2D
+/** GEMMConv2d
  *
  * Description:
  * General Matrix Multiplication.
@@ -691,7 +691,7 @@
 /** PixelWiseMultiplication
  *
  * Description:
- * Function to performe a multiplication.
+ * Function to perform a multiplication.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_MUL
@@ -701,7 +701,7 @@
 /** PoolingLayer
  *
  * Description:
- * Function to performe pooling with the specified pooling operation.
+ * Function to perform pooling with the specified pooling operation.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_AVERAGE_POOL_2D
@@ -764,7 +764,7 @@
 /** ReduceMean
  *
  * Description:
- * Function to performe reduce mean operation.
+ * Function to perform reduce mean operation.
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_MEAN
@@ -774,7 +774,7 @@
 /** ReductionOperation
  *
  * Description:
- * Function to performe reduce with the following operations
+ * Function to perform reduce with the following operations
  * - ARG_IDX_MAX: Index of the max value
  * - ARG_IDX_MIN: Index of the min value
  * - MEAN_SUM:    Mean of sum
@@ -992,7 +992,7 @@
 /** WinogradInputTransform
  *
  * Description:
- * Function to.
+ * Function to perform a Winograd transform on the input tensor.
  *
  * Equivalent Android NNAPI Op:
  * n/a

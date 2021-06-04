@@ -29,7 +29,7 @@ namespace arm_compute
 
 @section data_layout_support_supported_data_layout Supported Data Layouts
 
-Compute Library supports the follwing data layouts and
+Compute Library supports the following data layouts and
 the right-most letter represents the fastest changing dimension:
 
 - NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension

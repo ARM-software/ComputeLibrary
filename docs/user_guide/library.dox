@@ -94,13 +94,27 @@ There are different ways padding can be calculated:
 If you don't want to manually set the padding but still want to allocate your objects upfront then you can use auto_padding. It guarantees that the allocation will have enough padding to run any of the provided functions.
 
 @code{.cpp}
-Image     src, dst;
+Image       src{}, dst{};
+NEScale     scale{};
 
-// Use auto padding for the input:
-src.info()->init_auto_padding(TensorShape(640u,480u), Format::U8);
+// Create an empty grayscale 640x480 image
+src.allocator()->init(TensorInfo(640, 480, Format::U8));
 
-// Use manual padding for the destination image
-dst.info()->init(src.info()->tensor_shape(), Format::U8, strides_in_bytes, offset_first_element_in_bytes, total_size_in_bytes);
+constexpr int scale_factor = 2;
+TensorInfo dst_tensor_info(src.info()->dimension(0) / scale_factor, src.info()->dimension(1) / scale_factor,
+                           Format::U8);
+
+// Configure the destination image
+dst.allocator()->init(dst_tensor_info);
+
+// Configure Scale function object:
+scale.configure(&src, &dst, ScaleKernelInfo{
+            InterpolationPolicy::NEAREST_NEIGHBOR,
+            BorderMode::UNDEFINED,
+            PixelValue(),
+            SamplingPolicy::CENTER,
+            false
+});
 
 // Allocate all the images
 src.allocator()->allocate();
@@ -108,14 +122,11 @@ dst.allocator()->allocate();
 // Fill the input image with the content of the PPM image if a filename was provided:
 fill_image(src);
 
-NEGaussian3x3 gauss;
-
-// Apply a Gaussian 3x3 filter to the source image (Note: if the padding provided is not enough then the execution window and valid region of the output will be shrunk)
-gauss.configure(&src, &dst, BorderMode::UNDEFINED);
-
-//Execute the functions:
-gauss.run();
+// Run the scale operation:
+scale.run();
 @endcode
+
+The full example is provided in examples/neon_scale.cpp
 
 @warning Some kernels need up to 3 neighbor values to calculate the value of a given pixel. Therefore, to be safe, we use a 4-pixel padding all around the image. In addition, some kernels read and write up to 32 pixels at the same time. To cover that case as well we add an extra 32 pixels of padding at the end of each row. As a result auto padded buffers waste a lot of memory and are less cache friendly. It is therefore recommended to use accurate padding or manual padding wherever possible.
 
@@ -255,7 +266,7 @@ tmp2.allocator()->allocate();       // Flag that the lifetime of object tmp2 has
 tmp3.allocator()->allocate();       // Flag that the lifetime of object tmp3 has ended
 @endcode
 
-@warning The configuration step should be done sequentially by a single thread so that all the lifetimes are captured correclty.
+@warning The configuration step should be done sequentially by a single thread so that all the lifetimes are captured correctly.
 
 When configuration of all the operations is finished then the memory manager have to be populated:
 @code{.cpp}
@@ -339,7 +350,7 @@ However this process takes quite a lot of time, which is why it cannot be enable
 
 But, when the @ref CLTuner is disabled ( Target = 1 for the graph examples), the @ref graph::Graph will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not.
 
-@section architecture_cl_queue_prioritites OpenCL Queue Priorities
+@section architecture_cl_queue_priorities OpenCL Queue Priorities
 
 OpenCL 2.1 exposes the `cl_khr_priority_hints` extensions that if supported by an underlying implementation allows the user to specify priority hints to the created command queues.
 Is important to note that this does not specify guarantees or the explicit scheduling behavior, this is something that each implementation needs to expose.
@@ -432,7 +443,7 @@ Consequently, this will allow finer control of these services among pipelines wh
 This feature introduces some changes to our API.
 All the kernels/functions will now accept a Runtime Context object which will allow the function to use the mentioned services.
 
-Finally, we will try to adapt our code-base progressively to use the new mechanism but will continue supporting the legacy mechanism to allow a smooth transition. Changes will apply to all our three backends: Neon, OpenCL and OpenGL ES.
+Finally, we will try to adapt our code-base progressively to use the new mechanism but will continue supporting the legacy mechanism to allow a smooth transition. Changes will apply to all our backends: Neon™ and OpenCL.
 
 @subsection architecture_experimental_clvk CLVK
 
@@ -479,7 +490,7 @@ times under the same execution context
 - #AclPreferFastStart: Provides faster single execution. It can be used when the operators will be executed only once,
 thus reducing their latency is important (Currently, it is not implemented)
 
-@paragraph architecture_experimental_api_object_context_capabilitys AclTargetCapabilities
+@paragraph architecture_experimental_api_object_context_capabilities AclTargetCapabilities
 Context creation can also have a list of capabilities of hardware as one of its parameters. This is currently
 available only for the CPU backend. A list of architecture capabilities can be passed to influence the selection
 of the underlying kernels. Such capabilities can be for example the enablement of SVE or the dot product
