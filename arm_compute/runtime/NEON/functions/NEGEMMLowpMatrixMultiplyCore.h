@@ -171,8 +171,7 @@ private:
     bool _run_activation;
     bool _flip_signedness;
 
-    struct AsmGlueTensors;
-    std::unique_ptr<AsmGlueTensors> _asm_glue_tensors;
+    ITensorPack _asm_glue_tensors{};
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H */

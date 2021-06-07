@@ -38,7 +38,6 @@
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "src/core/helpers/MemoryHelpers.h"
 #include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 #include <cmath>
@@ -47,14 +46,6 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace arm_compute
 {
-using WorkspaceDataType = WorkspaceData<Tensor>;
-
-struct NEGEMM::AsmGlueTensors
-{
-    ITensorPack       tensors{};
-    WorkspaceDataType ws{};
-};
-
 namespace
 {
 cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
@@ -72,7 +63,7 @@ cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(std::make_unique<cpu::CpuGemmAssemblyDispatch>()), _ma_kernel(),
       _alpha_scale_func(nullptr), _add_bias(), _activation_func(), _tmp_a(), _tmp_b(), _tmp_d(), _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_alpha_scale(false),
-      _run_addition(false), _run_bias_addition(false), _run_activation(false), _reshape_b_only_on_first_run(false), _is_prepared(false), _asm_glue_tensors(std::make_unique<AsmGlueTensors>())
+      _run_addition(false), _run_bias_addition(false), _run_activation(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
 
@@ -103,15 +94,13 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
         _asm_glue->configure(a->info(), b->info(), c_info_to_use, d->info(), asm_info);
         ARM_COMPUTE_ERROR_ON(!_asm_glue->is_configured());
 
-        _asm_glue_tensors->tensors =
+        _asm_glue_tensors =
         {
             { ACL_SRC_0, a },
             { ACL_SRC_1, b },
             { ACL_SRC_2, c_to_use },
             { ACL_DST, d },
         };
-
-        _asm_glue_tensors->ws = manage_workspace<Tensor>(_asm_glue->workspace(), _memory_group, _asm_glue_tensors->tensors);
 
         // Scale product by alpha
         if(_run_alpha_scale)
@@ -334,7 +323,7 @@ void NEGEMM::run()
 
     if(_asm_glue->is_configured())
     {
-        _asm_glue->run(_asm_glue_tensors->tensors);
+        _asm_glue->run(_asm_glue_tensors);
         if(_run_alpha_scale)
         {
             _alpha_scale_func.run();
@@ -388,7 +377,7 @@ void NEGEMM::prepare()
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
-            _asm_glue->prepare(_asm_glue_tensors->tensors);
+            _asm_glue->prepare(_asm_glue_tensors);
             if(!original_b_managed_by_weights_manager)
             {
                 _original_b->mark_as_unused();

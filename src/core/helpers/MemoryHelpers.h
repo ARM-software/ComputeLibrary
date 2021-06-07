@@ -56,13 +56,12 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
             continue;
         }
 
-        const auto alignment = req.alignment;
-        const auto aux_info  = TensorInfo{ TensorShape(req.size + alignment), 1, DataType::U8 };
+        const auto aux_info = TensorInfo{ TensorShape(req.size), 1, DataType::U8 };
         workspace_memory.emplace_back(req.slot, std::make_unique<TensorType>());
 
         auto aux_tensor = workspace_memory.back().second.get();
         ARM_COMPUTE_ERROR_ON_NULLPTR(aux_tensor);
-        aux_tensor->allocator()->init(aux_info, alignment);
+        aux_tensor->allocator()->init(aux_info);
 
         if(req.lifetime == experimental::MemoryLifetime::Temporary)
         {
@@ -82,15 +81,6 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
     }
 
     return workspace_memory;
-}
-
-template <typename TensorType>
-WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirements &mem_reqs,
-                                           MemoryGroup                            &mgroup,
-                                           ITensorPack                            &run_pack)
-{
-    ITensorPack dummy_prep_pack{};
-    return manage_workspace<TensorType>(mem_reqs, mgroup, run_pack, dummy_prep_pack);
 }
 } // namespace arm_compute
 #endif /* SRC_COMMON_MEMORY_HELPERS_H */

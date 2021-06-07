@@ -42,17 +42,10 @@
 #include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
-#include "src/core/helpers/MemoryHelpers.h"
 #include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 namespace arm_compute
 {
-using WorkspaceDataType = WorkspaceData<Tensor>;
-struct NEGEMMLowpMatrixMultiplyCore::AsmGlueTensors
-{
-    ITensorPack       tensors{};
-    WorkspaceDataType ws{};
-};
 namespace
 {
 cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
@@ -73,11 +66,11 @@ using namespace arm_compute::misc::shape_calculator;
 NEGEMMLowpMatrixMultiplyCore::~NEGEMMLowpMatrixMultiplyCore() = default;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager), _weights_manager(weights_manager), _asm_glue(std::make_unique<cpu::CpuGemmAssemblyDispatch>(weights_manager)), _mm_kernel(), _mtx_a_reshape_kernel(),
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _asm_glue(std::make_unique<cpu::CpuGemmAssemblyDispatch>(memory_manager, weights_manager)), _mm_kernel(), _mtx_a_reshape_kernel(),
       _mtx_b_reshape_kernel(), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _offset_contribution_output_stage_kernel(), _activation_func(),
       _convert_to_signed_asymm(), _convert_from_signed_asymm(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _mm_result_s32(), _signed_a(), _signed_output(), _original_b(nullptr), _a_offset(0),
       _b_offset(0), _run_vector_matrix_multiplication(false), _assembly_path(false), _fused_assembly_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false), _fuse_output_stage(false),
-      _run_activation(false), _flip_signedness(false), _asm_glue_tensors(std::make_unique<AsmGlueTensors>())
+      _run_activation(false), _flip_signedness(false)
 {
 }
 
@@ -156,24 +149,18 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
                 auto c_info_to_use = c == nullptr ? nullptr : c->info();
                 _asm_glue->configure(a_to_use->info(), b->info(), c_info_to_use, output->info(), asm_info);
                 _fused_assembly_path = _asm_glue->is_configured();
-                _asm_glue_tensors->tensors.add_const_tensor(TensorType::ACL_SRC_2, c);
-                _asm_glue_tensors->tensors.add_tensor(TensorType::ACL_DST, output);
+                _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_2, c);
+                _asm_glue_tensors.add_tensor(TensorType::ACL_DST, output);
             }
             else
             {
                 auto output_to_use = (_fuse_output_stage ? &_mm_result_s32 : output);
                 _asm_glue->configure(a_to_use->info(), b->info(), nullptr, output_to_use->info(), asm_info);
-                _asm_glue_tensors->tensors.add_tensor(TensorType::ACL_DST, output_to_use);
+                _asm_glue_tensors.add_tensor(TensorType::ACL_DST, output_to_use);
             }
             _assembly_path = _asm_glue->is_configured();
-            _asm_glue_tensors->tensors.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
-            _asm_glue_tensors->tensors.add_const_tensor(TensorType::ACL_SRC_1, b);
-
-            if(_assembly_path)
-            {
-                _asm_glue_tensors->ws = manage_workspace<Tensor>(_asm_glue->workspace(), _memory_group, _asm_glue_tensors->tensors);
-            }
-
+            _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
+            _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_1, b);
             break;
         }
         default:
@@ -533,7 +520,7 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     // Run GEMM
     if(_asm_glue->is_configured())
     {
-        _asm_glue->run(_asm_glue_tensors->tensors);
+        _asm_glue->run(_asm_glue_tensors);
     }
     else
     {
@@ -603,7 +590,7 @@ void NEGEMMLowpMatrixMultiplyCore::prepare()
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
-            _asm_glue->prepare(_asm_glue_tensors->tensors);
+            _asm_glue->prepare(_asm_glue_tensors);
             if(!original_b_managed_by_weights_manager)
             {
                 _original_b->mark_as_unused();

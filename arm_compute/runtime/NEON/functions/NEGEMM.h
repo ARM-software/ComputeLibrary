@@ -146,8 +146,7 @@ private:
     bool           _reshape_b_only_on_first_run;
     bool           _is_prepared;
 
-    struct AsmGlueTensors;
-    std::unique_ptr<AsmGlueTensors> _asm_glue_tensors;
+    ITensorPack _asm_glue_tensors{};
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMM_H */
