@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
@@ -182,4 +182,4 @@ template void sve_softmax_logits_1d_float<float16_t>(const ITensor *in, const IT
                                                      ITensor *out, const float beta, bool is_log, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */

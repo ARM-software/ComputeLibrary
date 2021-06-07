@@ -110,14 +110,14 @@ void interleave_  ## ARCH ## _ ## TYPENAME ## _ ## KERN_ROWS ## x ## KERN_COLS #
 namespace arm_conv {
 namespace depthwise {
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 ADD_IMPLEMENTATION(sve, s8q, int8_t, SVE, 2, 3, 3)
 ADD_IMPLEMENTATION(sve, s8q, int8_t, SVE, 2, 5, 5)
 ADD_IMPLEMENTATION(sve, u8q, uint8_t, SVE, 2, 3, 3)
 ADD_IMPLEMENTATION(sve, u8q, uint8_t, SVE, 2, 5, 5)
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 
 ADD_IMPLEMENTATION(a64, s8q, int8_t, None, 2, 3, 3)
 ADD_IMPLEMENTATION(a64, s8q, int8_t, None, 2, 5, 5)

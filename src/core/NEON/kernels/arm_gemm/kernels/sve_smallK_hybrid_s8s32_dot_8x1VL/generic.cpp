@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef __ARM_FEATURE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SVE
 
 #include <algorithm>
 
@@ -8968,4 +8968,4 @@ void sve_smallK_hybrid_s8s32_dot_8x1VL(const int8_t *A, int lda, const int8_t *B
 
 } // namespace arm_gemm
 
-#endif // __ARM_FEATURE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE

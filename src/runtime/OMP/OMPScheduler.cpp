@@ -66,7 +66,7 @@ void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Win
     if(!kernel->is_parallelisable() || num_threads == 1)
     {
         ThreadInfo info;
-        info.cpu_info = &_cpu_info;
+        info.cpu_info = &cpu_info();
         kernel->run_op(tensors, max_window, info);
     }
     else
@@ -96,7 +96,7 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
     }
 
     ThreadInfo info;
-    info.cpu_info    = &_cpu_info;
+    info.cpu_info    = &cpu_info();
     info.num_threads = num_threads;
     #pragma omp parallel firstprivate(info) num_threads(num_threads)
     {

@@ -141,52 +141,36 @@ struct IndirectInputArg {
 };
 
 namespace utils {
-namespace {
-
-#ifdef __ARM_FEATURE_SVE
-template<size_t sz>
-inline unsigned long get_vector_length_sz() {
-    unsigned long v;
-
-    __asm (
-        "cntb	%0"
-        : "=r" (v)
-    );
-
-    return v / sz;
-}
-
-#define VEC_LEN_SPEC(sz, opcode) template <> inline unsigned long get_vector_length_sz<sz>() { unsigned long v; __asm ( opcode " %0" : "=r" (v)); return v; }
-
-VEC_LEN_SPEC(8, "cntd")
-VEC_LEN_SPEC(4, "cntw")
-VEC_LEN_SPEC(2, "cnth")
-VEC_LEN_SPEC(1, "cntb")
-#endif
-
-} // anonymous namespace
-
 template <typename T>
 inline unsigned long get_vector_length() {
-#ifdef __ARM_FEATURE_SVE
-    return get_vector_length_sz<sizeof(T)>();
-#else
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+    uint64_t vl;
+
+    __asm __volatile (
+        ".inst 0x0420e3e0\n" // CNTB X0, ALL, MUL #1
+        "mov %0, X0\n"
+        : "=r" (vl)
+        :
+        : "x0"
+    );
+
+    return vl / sizeof(T);
+#else // !defined(ARM_COMPUTE_ENABLE_SVE)
     return 16 / sizeof(T);
-#endif
+#endif // defined(ARM_COMPUTE_ENABLE_SVE)
 }
 
 template <typename T>
 inline unsigned long get_vector_length(VLType vl_type) {
   switch (vl_type) {
-#ifdef __ARM_FEATURE_SVE
+#if defined(ARM_COMPUTE_ENABLE_SVE)
     case VLType::SVE:
-      return get_vector_length_sz<sizeof(T)>();
-#endif
+      return get_vector_length<T>();
+#endif // defined(ARM_COMPUTE_ENABLE_SVE)
     default:
       return 16 / sizeof(T);
   }
 }
-
 } // utils namespace
 } // arm_gemm namespace
 

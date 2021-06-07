@@ -8,6 +8,7 @@ build/
 *.txt
 *.xml
 *.embed
+*.diff
 
 # Generated Android bp file
 Generated_Android.bp

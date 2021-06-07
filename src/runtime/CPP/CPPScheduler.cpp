@@ -493,7 +493,7 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
     }
     ThreadFeeder feeder(num_threads_to_use, workloads.size());
     ThreadInfo   info;
-    info.cpu_info          = &_cpu_info;
+    info.cpu_info          = &cpu_info();
     info.num_threads       = num_threads_to_use;
     unsigned int t         = 0;
     auto         thread_it = _impl->_threads.begin();

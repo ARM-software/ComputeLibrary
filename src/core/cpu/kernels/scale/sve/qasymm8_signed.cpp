@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
@@ -204,4 +204,4 @@ void qasymm8_signed_sve_scale(const ITensor *src, ITensor *dst, const ITensor *o
 } // namespace cpu
 } // namespace arm_compute
 
-#endif // ENABLE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE

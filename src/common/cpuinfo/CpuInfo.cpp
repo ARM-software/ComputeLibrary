@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
-#include "src/common/cpuinfo/target/CpuInfoSveUtils.h"
 #include "support/StringSupport.h"
 #include "support/ToolchainSupport.h"
 
@@ -260,6 +259,20 @@ int get_max_cpus()
     return max_cpus;
 }
 #endif /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
+
+#if defined(BARE_METAL) && defined(__aarch64__)
+uint64_t get_sve_feature_reg()
+{
+    uint64_t svefr0 = 0;
+    __asm __volatile(
+        ".inst 0xd5380483 // mrs x3, ID_AA64ZFR0_EL1\n"
+        "MOV  %0, X3"
+        : "=r"(svefr0)
+        :
+        : "x3");
+    return svefr0;
+}
+#endif /* defined(BARE_METAL) && defined(__aarch64__) */
 } // namespace
 
 CpuInfo::CpuInfo(CpuIsaInfo isa, std::vector<CpuModel> cpus)

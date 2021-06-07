@@ -28,10 +28,10 @@
 #include "pooling_depthfirst_generic_quantized.hpp"
 
 #if defined(__aarch64__)
-#if defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "kernels/sve_u8q_nhwc_avg_generic_depthfirst.hpp"
 #include "kernels/sve_u8q_nhwc_max_generic_depthfirst.hpp"
-#endif  // defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "kernels/a64_u8q_nhwc_avg_generic_depthfirst.hpp"
 #include "kernels/a64_u8q_nhwc_max_generic_depthfirst.hpp"
 #endif  // defined(__aarch64__)
@@ -43,12 +43,12 @@ namespace pooling {
 
 static const PoolingImplementation<uint8_t, uint8_t, Requantize32> pooling_u8_methods[] = {
 #if defined(__aarch64__)
-#if defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
   {
     PoolingMethod::DEPTHFIRST,
     "sve_u8q_nhwc_avg_generic_depthfirst",
     [] (const PoolingArgs &args, const Requantize32 &) -> bool {
-      return args.pool_type == PoolingType::AVERAGE;
+      return args.cpu_info->has_sve2() && args.pool_type == PoolingType::AVERAGE;
     },
     nullptr,
     [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t, Requantize32> * {
@@ -58,13 +58,13 @@ static const PoolingImplementation<uint8_t, uint8_t, Requantize32> pooling_u8_me
   {
     PoolingMethod::DEPTHFIRST,
     "sve_u8q_nhwc_max_generic_depthfirst",
-    [] (const PoolingArgs &args, const Requantize32 &) -> bool { return args.pool_type == PoolingType::MAX; },
+    [] (const PoolingArgs &args, const Requantize32 &) -> bool { return args.cpu_info->has_sve2() && args.pool_type == PoolingType::MAX; },
     nullptr,
     [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t, Requantize32> * {
       return new PoolingDepthfirstGenericQuantized<sve_u8q_nhwc_max_generic_depthfirst>(args, rq);
     },
   },
-#endif  // defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
   {
     PoolingMethod::DEPTHFIRST,
     "a64_u8q_nhwc_avg_generic_depthfirst",

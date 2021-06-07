@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace depthwise {
@@ -256,4 +256,4 @@ void sve_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst_imp
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

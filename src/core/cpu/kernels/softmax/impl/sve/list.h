@@ -24,7 +24,7 @@
 #ifndef SRC_CORE_SVE_KERNELS_SOFTMAX_LIST_H
 #define SRC_CORE_SVE_KERNELS_SOFTMAX_LIST_H
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/SVEMath.h"
@@ -42,7 +42,7 @@ template <typename ScalarType>
 void sve_softmax_logits_1d_float(const ITensor *in, const ITensor *max, void *const tmp,
                                  ITensor *out, const float beta, bool is_log, const Window &window);
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 template <typename ScalarType>
 void sve_softmax_logits_1d_quantized(const ITensor *in, const ITensor *max, void *const tmp,
                                      ITensor *out, float beta, bool is_log, const Window &window)
@@ -215,9 +215,9 @@ void sve_softmax_logits_1d_quantized(const ITensor *in, const ITensor *max, void
     },
     in_it, max_it, out_it);
 }
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 
 #endif /* SRC_CORE_SVE_KERNELS_SOFTMAX_LIST_H */

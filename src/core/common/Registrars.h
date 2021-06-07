@@ -26,17 +26,17 @@
 
 #if defined(ENABLE_FP16_KERNELS)
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #define REGISTER_FP16_SVE(func_name) &(func_name)
-#else /* !defined(ENABLE_SVE) */
+#else /* !defined(ARM_COMPUTE_ENABLE_SVE) */
 #define REGISTER_FP16_SVE(func_name) nullptr
-#endif /* defined(ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 
-#if defined(ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 #define REGISTER_FP16_NEON(func_name) &(func_name)
-#else /* !defined(ENABLE_NEON) */
+#else /* !defined(ARM_COMPUTE_ENABLE_NEON) */
 #define REGISTER_FP16_NEON(func_name) nullptr
-#endif /* defined(ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
 
 #else /* !defined(ENABLE_FP16_KERNELS) */
 #define REGISTER_FP16_NEON(func_name) nullptr
@@ -45,17 +45,17 @@
 
 #if defined(ENABLE_FP32_KERNELS)
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #define REGISTER_FP32_SVE(func_name) &(func_name)
-#else /* !defined(ENABLE_SVE) */
+#else /* !defined(ARM_COMPUTE_ENABLE_SVE) */
 #define REGISTER_FP32_SVE(func_name) nullptr
-#endif /* defined(ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 
-#if defined(ENABLE_NEON)
+#if defined(ARM_COMPUTE_ENABLE_NEON)
 #define REGISTER_FP32_NEON(func_name) &(func_name)
-#else /* !defined(ENABLE_NEON) */
+#else /* !defined(ARM_COMPUTE_ENABLE_NEON) */
 #define REGISTER_FP32_NEON(func_name) nullptr
-#endif /* defined(ENABLE_NEON) */
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 
 #else /* defined(ENABLE_FP32_KERNELS) */
 #define REGISTER_FP32_NEON(func_name) nullptr
@@ -66,11 +66,11 @@
 
 #define REGISTER_QASYMM8_SIGNED_NEON(func_name) &(func_name)
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #define REGISTER_QASYMM8_SIGNED_SVE(func_name) &(func_name)
-#else /* !defined(ENABLE_SVE) */
+#else /* !defined(ARM_COMPUTE_ENABLE_SVE) */
 #define REGISTER_QASYMM8_SIGNED_SVE(func_name) nullptr
-#endif /* defined(ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 
 #else /* defined(ENABLE_QASYMM8_SIGNED_KERNELS) */
 #define REGISTER_QASYMM8_SIGNED_NEON(func_name) nullptr
@@ -80,11 +80,11 @@
 #if defined(ENABLE_QASYMM8_KERNELS)
 #define REGISTER_QASYMM8_NEON(func_name) &(func_name)
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #define REGISTER_QASYMM8_SVE(func_name) &(func_name)
-#else /* !defined(ENABLE_SVE) */
+#else /* !defined(ARM_COMPUTE_ENABLE_SVE) */
 #define REGISTER_QASYMM8_SVE(func_name) nullptr
-#endif /* defined(ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 
 #else /* defined(ENABLE_QASYMM8_KERNELS) */
 #define REGISTER_QASYMM8_NEON(func_name) nullptr
@@ -95,11 +95,11 @@
 
 #define REGISTER_QSYMM16_NEON(func_name) &(func_name)
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #define REGISTER_QSYMM16_SVE(func_name) &(func_name)
-#else /* !defined(ENABLE_SVE) */
+#else /* !defined(ARM_COMPUTE_ENABLE_SVE) */
 #define REGISTER_QSYMM16_SVE(func_name) nullptr
-#endif /* defined(ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 
 #else /* defined(ENABLE_QSYMM16_KERNELS) */
 #define REGISTER_QSYMM16_NEON(func_name) nullptr
@@ -108,17 +108,17 @@
 
 #if defined(ENABLE_INTEGER_KERNELS)
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #define REGISTER_INTEGER_SVE(func_name) &(func_name)
-#else /* !defined(ENABLE_SVE) */
+#else /* !defined(ARM_COMPUTE_ENABLE_SVE) */
 #define REGISTER_INTEGER_SVE(func_name) nullptr
-#endif /* defined(ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 
-#if defined(ENABLE_NEON)
+#if defined(ARM_COMPUTE_ENABLE_NEON)
 #define REGISTER_INTEGER_NEON(func_name) &(func_name)
-#else /* !defined(ENABLE_NEON) */
+#else /* !defined(ARM_COMPUTE_ENABLE_NEON) */
 #define REGISTER_INTEGER_NEON(func_name) nullptr
-#endif /* defined(ENABLE_NEON) */
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 
 #else /* defined(ENABLE_INTEGER_KERNELS) */
 #define REGISTER_INTEGER_NEON(func_name) nullptr

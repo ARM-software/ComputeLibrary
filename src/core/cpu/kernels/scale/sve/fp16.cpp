@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
@@ -173,4 +173,4 @@ void fp16_sve_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, co
 } // namespace cpu
 } // namespace arm_compute
 
-#endif // ENABLE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE

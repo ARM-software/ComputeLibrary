@@ -215,8 +215,6 @@ protected:
      */
     void schedule_common(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors);
 
-    CPUInfo _cpu_info{};
-
 private:
     unsigned int _num_threads_hint = {};
 };

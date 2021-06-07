@@ -29,7 +29,7 @@
 
 #pragma once
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
 
 namespace arm_conv {
 namespace depthwise {
@@ -72,4 +72,4 @@ struct sve_u8q_nhwc_3x3_s1_output2x2_mla_depthfirst
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#endif  // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)

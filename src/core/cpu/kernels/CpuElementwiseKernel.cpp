@@ -43,7 +43,13 @@ namespace kernels
 {
 namespace
 {
-using ElementwiseSelector = std::add_pointer<bool(DataType)>::type;
+struct ElementwiseSelectorData
+{
+    DataType       dt;
+    const CPUInfo &ci;
+};
+
+using ElementwiseSelector = std::add_pointer<bool(const ElementwiseSelectorData &)>::type;
 using UKernelType         = CpuElementwiseKernel::ElementwiseFunction;
 struct ElementwiseKernel
 {
@@ -52,23 +58,6 @@ struct ElementwiseKernel
     UKernelType              *ukernel;
 };
 
-template <DataType dt>
-inline bool is_selected(DataType data_type)
-{
-    return dt == data_type;
-}
-
-template <DataType input_data_type, DataType output_data_type = input_data_type>
-static ElementwiseKernel generate_kernel(UKernelType *ukernel)
-{
-    std::string kernel_name("op_");
-    kernel_name += string_from_data_type(input_data_type) + "_";
-    kernel_name += string_from_data_type(input_data_type) + "_";
-    kernel_name += string_from_data_type(output_data_type);
-
-    return { kernel_name.c_str(), is_selected<input_data_type>, ukernel };
-}
-
 template <ArithmeticOperation op>
 std::function<void(const ITensor *, const ITensor *, ITensor *, const Window &)>
 configure_arithm_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
@@ -76,36 +65,85 @@ configure_arithm_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorI
     ARM_COMPUTE_UNUSED(src1, dst);
     static ElementwiseKernel kernels[] =
     {
-#if defined(ENABLE_SVE)
-        generate_kernel<DataType::F32>(REGISTER_FP32_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, float32_t>))),
-        generate_kernel<DataType::S32>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, int32_t>))),
-        generate_kernel<DataType::S16>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, int16_t>))),
-#endif /* defined(ENABLE_SVE) */
-#if defined(ENABLE_NEON)
-        generate_kernel<DataType::F32>(REGISTER_FP32_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float, 4>>))),
-        generate_kernel<DataType::S32>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int32_t, 4>>))),
-#endif /* defined(ENABLE_NEON) */
-#if defined(__ARM_FEATURE_SVE2)
-        generate_kernel<DataType::QASYMM8>(REGISTER_QASYMM8_SVE((arm_compute::cpu::elementwise_arithmetic_quantized_op<op, uint8_t>))),
-        generate_kernel<DataType::QASYMM8_SIGNED>(REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::elementwise_arithmetic_quantized_op<op, int8_t>))),
-#else  /* !defined(__ARM_FEATURE_SVE2) */
-        generate_kernel<DataType::QASYMM8>(REGISTER_QASYMM8_NEON((arm_compute::cpu::elementwise_arithm_op_quantized<op>))),
-        generate_kernel<DataType::QASYMM8_SIGNED>(REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::elementwise_arithm_op_quantized_signed<op>))),
-#endif /* defined(__ARM_FEATURE_SVE2) */
-#if defined(ENABLE_SVE)
-        generate_kernel<DataType::F16>(REGISTER_FP16_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, float16_t>))),
-#endif /* defined(ENABLE_SVE) */
-#if defined(ENABLE_NEON)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+        {
+            "sve_elementwise_fp32",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
+            REGISTER_FP32_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, float32_t>))
+        },
+        {
+            "sve_elementwise_s32",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32 && data.ci.has_sve(); },
+            REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, int32_t>))
+        },
+        {
+            "sve_elementwise_s16",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16 && data.ci.has_sve(); },
+            REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, int16_t>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+#if defined(ARM_COMPUTE_ENABLE_NEON)
+        {
+            "neon_elementwise_f32",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32; },
+            REGISTER_FP32_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float, 4>>))
+        },
+        {
+            "neon_elementwise_s32",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32; },
+            REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int32_t, 4>>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
+        {
+            "sve2_elementwise_qu8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
+            REGISTER_QASYMM8_SVE((arm_compute::cpu::elementwise_arithmetic_quantized_op<op, uint8_t>))
+        },
+        {
+            "sve2_elementwise_qs8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
+            REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::elementwise_arithmetic_quantized_op<op, int8_t>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
+#if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
+        {
+            "neon_elementwise_qu8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8; },
+            REGISTER_QASYMM8_NEON((arm_compute::cpu::elementwise_arithm_op_quantized<op>))
+        },
+        {
+            "neon_elementwise_qs8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+            REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::elementwise_arithm_op_quantized_signed<op>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON)  || defined(ARM_COMPUTE_ENABLE_SVE) */
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+        {
+            "sve_elementwise_f16",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
+            REGISTER_FP16_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, float16_t>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+#if defined(ARM_COMPUTE_ENABLE_NEON)
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
-        generate_kernel<DataType::F16>(REGISTER_FP16_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float16_t, 8>>))),
+        {
+            "neon_elementwise_f16",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
+            REGISTER_FP16_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float16_t, 8>>))
+        },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
-        generate_kernel<DataType::S16>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>>))),
-#endif /* defined(ENABLE_NEON) */
+        {
+            "neon_elementwise_s16",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16; },
+            REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
     };
 
     for(const auto &uk : kernels)
     {
-        if(uk.is_selected(src0->data_type()))
+        if(uk.is_selected({ src0->data_type(), CPUInfo::get() }))
         {
             return uk.ukernel;
         }
@@ -121,36 +159,93 @@ configure_comp_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInf
     ARM_COMPUTE_UNUSED(src1, dst);
     static ElementwiseKernel kernels[] =
     {
-#if defined(ENABLE_SVE)
-        generate_kernel<DataType::U8, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, uint8_t>))),
-        generate_kernel<DataType::F32, DataType::U8>(REGISTER_FP32_SVE((arm_compute::cpu::elementwise_comparison_op<op, float>))),
-        generate_kernel<DataType::S16, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, int16_t>))),
-        generate_kernel<DataType::S32, DataType::U8>(REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, int32_t>))),
-#endif /* defined(ENABLE_SVE) */
-#if defined(ENABLE_NEON)
-        generate_kernel<DataType::U8, DataType::U8>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_8<op, uint8_t, uint8x16_t>))),
-        generate_kernel<DataType::F32, DataType::U8>(REGISTER_FP32_NEON((arm_compute::cpu::elementwise_comp_op_32<op, float, float32x4_t>))),
-        generate_kernel<DataType::S16, DataType::U8>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_16<op, int16_t, int16x8_t>))),
-        generate_kernel<DataType::S32, DataType::U8>(REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_32<op, int32_t, int32x4_t>))),
-#endif /* defined(ENABLE_NEON) */
-#if defined(__ARM_FEATURE_SVE2)
-        generate_kernel<DataType::QASYMM8_SIGNED, DataType::U8>(REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::elementwise_comparison_quantized_op<op, int8_t>))),
-        generate_kernel<DataType::QASYMM8, DataType::U8>(REGISTER_QASYMM8_SVE((arm_compute::cpu::elementwise_comparison_quantized_op<op, uint8_t>))),
-#else  /* !defined(__ARM_FEATURE_SVE2) */
-        generate_kernel<DataType::QASYMM8_SIGNED, DataType::U8>(REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::elementwise_comp_op_quantized_signed<op>))),
-        generate_kernel<DataType::QASYMM8, DataType::U8>(REGISTER_QASYMM8_NEON((arm_compute::cpu::elementwise_comp_op_quantized<op>))),
-#endif /* defined(__ARM_FEATURE_SVE2) */
-#if defined(ENABLE_SVE)
-        generate_kernel<DataType::F16, DataType::U8>(REGISTER_FP16_SVE((arm_compute::cpu::elementwise_comparison_op<op, float16_t>))),
-#endif /* defined(ENABLE_SVE)  */
-#if defined(ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
-        generate_kernel<DataType::F16, DataType::U8>(REGISTER_FP16_NEON((arm_compute::cpu::elementwise_comp_op_16<op, float16_t, float16x8_t>))),
-#endif /* defined(ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+        {
+            "sve_comparison_u8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::U8 && data.ci.has_sve(); },
+            REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, uint8_t>))
+        },
+        {
+            "sve_comparison_f32",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
+            REGISTER_FP32_SVE((arm_compute::cpu::elementwise_comparison_op<op, float>))
+        },
+        {
+            "sve_comparison_s16",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16 && data.ci.has_sve(); },
+            REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, int16_t>))
+        },
+        {
+            "sve_comparison_s32",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32 && data.ci.has_sve(); },
+            REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, int32_t>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+#if defined(ARM_COMPUTE_ENABLE_NEON)
+        {
+            "neon_comparison_u8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::U8; },
+            REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_8<op, uint8_t, uint8x16_t>))
+        },
+        {
+            "neon_comparison_f32",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32; },
+            REGISTER_FP32_NEON((arm_compute::cpu::elementwise_comp_op_32<op, float, float32x4_t>))
+        },
+        {
+            "neon_comparison_s16",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16; },
+            REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_16<op, int16_t, int16x8_t>))
+        },
+        {
+            "neon_comparison_s32",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32; },
+            REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_32<op, int32_t, int32x4_t>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
+        {
+            "sve_comparison_qu8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
+            REGISTER_QASYMM8_SVE((arm_compute::cpu::elementwise_comparison_quantized_op<op, uint8_t>))
+        },
+        {
+            "sve_comparison_qs8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
+            REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::elementwise_comparison_quantized_op<op, int8_t>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
+#if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
+        {
+            "neon_comparison_qu8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8; },
+            REGISTER_QASYMM8_NEON((arm_compute::cpu::elementwise_comp_op_quantized<op>))
+        },
+        {
+            "neon_comparison_qs8",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+            REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::elementwise_comp_op_quantized_signed<op>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON)  || defined(ARM_COMPUTE_ENABLE_SVE) */
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+        {
+            "sve_comparison_f16",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
+            REGISTER_FP16_SVE((arm_compute::cpu::elementwise_comparison_op<op, float16_t>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE)  */
+#if defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+        {
+            "neon_comparison_f16",
+            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
+            REGISTER_FP16_NEON((arm_compute::cpu::elementwise_comp_op_16<op, float16_t, float16x8_t>))
+        },
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     };
 
     for(const auto &uk : kernels)
     {
-        if(uk.is_selected(src0->data_type()))
+        if(uk.is_selected({ src0->data_type(), CPUInfo::get() }))
         {
             return uk.ukernel;
         }

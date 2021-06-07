@@ -21,20 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_CPUINFO_TARGET_CPUINFO_SVE_UTILS_H
-#define SRC_COMMON_CPUINFO_TARGET_CPUINFO_SVE_UTILS_H
 
-#include <cstdint>
+/* As some of the merges need these headers, but are all included in the
+ * arm_gemm namespace, put these headers here.  */
+#include <algorithm>
 
-namespace arm_compute
-{
-namespace cpuinfo
-{
-/** Returns the contents of the SVE feature register (ID_AA64ZFR0_EL1)
- *
- * @return uint64_t The value of the register
- */
-uint64_t get_sve_feature_reg();
-} // namespace cpuinfo
-} // namespace arm_compute
-#endif /* SRC_COMMON_CPUINFO_CPUISAINFO_H */
+#include <arm_neon.h>
+
+#include "arm_gemm.hpp"
+#include "asmlib.hpp"
+#include "utils.hpp"
+
+#include "mergeresults.hpp"
+
+namespace arm_gemm {
+
+#include "merges/list-sve.hpp"
+
+} // namespace arm_gemm

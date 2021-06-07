@@ -45,7 +45,8 @@ namespace
 {
 struct ActivationSelectorData
 {
-    DataType dt;
+    DataType       dt;
+    const CPUInfo &ci;
 };
 
 using ActivationSelectorPtr = std::add_pointer<bool(const ActivationSelectorData &data)>::type;
@@ -60,19 +61,19 @@ struct ActivationKernel
 
 static const ActivationKernel available_kernels[] =
 {
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
     {
         "fp16_sve_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
+        [](const ActivationSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
         REGISTER_FP16_SVE(arm_compute::cpu::fp16_sve_activation)
     },
     {
         "fp32_sve_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
+        [](const ActivationSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
         REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_activation)
     },
-#endif /* defined(ENABLE_SVE)  */
-#if defined(ENABLE_NEON)
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE)  */
+#if defined(ARM_COMPUTE_ENABLE_NEON)
     {
         "fp16_neon_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
@@ -83,24 +84,24 @@ static const ActivationKernel available_kernels[] =
         [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_activation)
     },
-#endif /* defined(ENABLE_NEON)  */
-#if defined(__ARM_FEATURE_SVE2)
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON)  */
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     {
         "qasymm8_sve_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
         REGISTER_QASYMM8_SVE(arm_compute::cpu::qasymm8_sve_activation)
     },
     {
         "qasymm8_signed_sve_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
         REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::qasymm8_signed_sve_activation)
     },
     {
         "qsymm16_sve_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
+        [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16 && data.ci.has_sve2(); },
         REGISTER_QSYMM16_SVE(arm_compute::cpu::qsymm16_sve_activation)
     },
-#else  /* !defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     {
         "qasymm8_neon_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
@@ -116,7 +117,6 @@ static const ActivationKernel available_kernels[] =
         [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::qsymm16_neon_activation)
     },
-#endif /* defined(__ARM_FEATURE_SVE2)  */
 };
 
 const ActivationKernel *get_implementation(const ActivationSelectorData &data)
@@ -155,7 +155,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    const auto *uk = get_implementation(ActivationSelectorData{ src->data_type() });
+    const auto *uk = get_implementation(ActivationSelectorData{ src->data_type(), CPUInfo::get() });
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     const DataType                                data_type = src->data_type();
@@ -243,7 +243,7 @@ void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, con
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    const auto *uk = get_implementation(ActivationSelectorData{ src->info()->data_type() });
+    const auto *uk = get_implementation(ActivationSelectorData{ src->info()->data_type(), CPUInfo::get() });
 
     uk->ukernel(src, dst, _act_info, window);
 }

@@ -46,16 +46,16 @@
 namespace arm_gemm {
 
 static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
-#ifdef __ARM_FEATURE_SVE
-#ifdef MMLA_INT8
+#ifdef ARM_COMPUTE_ENABLE_SVE
+#ifdef ARM_COMPUTE_ENABLE_I8MM
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_s8s32_mmla_8x3VL",
-    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>8); },
+    [](const GemmArgs &args) { return args._ci->has_svei8mm() && (args._Ksize>8); },
     [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int32_t>(args); }
 },
-#endif
+#endif // ARM_COMPUTE_ENABLE_I8MM
 {
     GemmMethod::GEMM_HYBRID,
     "sve_smallK_hybrid_s8s32_dot_8x1VL",
@@ -78,15 +78,15 @@ static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_s8s32_dot_8x3VL, int8_t, int32_t>(args); }
 },
 #endif // SVE
-#ifdef MMLA_INT8
+#ifdef ARM_COMPUTE_ENABLE_I8MM
 {
     GemmMethod::GEMM_INTERLEAVED,
     "a64_interleaved_s8s32_mmla_8x12",
-    [](const GemmArgs &args) { return (args._Ksize>8); },
+    [](const GemmArgs &args) { return args._ci->has_svei8mm() && (args._Ksize>8); },
     nullptr,
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_interleaved_s8s32_mmla_8x12, int8_t, int32_t>(args); }
 },
-#endif
+#endif // ARM_COMPUTE_ENABLE_I8MM
 {
     GemmMethod::GEMM_HYBRID,
     "a64_smallK_hybrid_s8s32_dot_8x4",

@@ -24,7 +24,7 @@
 #ifndef SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 
 #include "src/core/NEON/wrapper/svtraits.h"
 #include "src/core/cpu/kernels/elementwise/sve/elementwise_list.h"
@@ -362,5 +362,5 @@ void elementwise_comparison_quantized_op(const ITensor *in1, const ITensor *in2,
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 #endif /* SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H */

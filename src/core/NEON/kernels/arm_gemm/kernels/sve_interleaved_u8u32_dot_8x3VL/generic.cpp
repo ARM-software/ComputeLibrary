@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef __ARM_FEATURE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SVE
 
 #include <cstdint>
 #include "../../asmlib.hpp"
@@ -326,4 +326,4 @@ void sve_interleaved_u8u32_dot_8x3VL(const uint8_t *Apanel, const uint8_t *Bpane
 
 } // namespace arm_gemm
 
-#endif // __ARM_FEATURE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE

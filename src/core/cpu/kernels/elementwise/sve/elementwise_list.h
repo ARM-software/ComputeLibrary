@@ -23,7 +23,7 @@
  */
 #ifndef SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
@@ -167,5 +167,5 @@ template <ComparisonOperation op, typename ScalarType, typename OutputScalarType
 void elementwise_comparison_op(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
-#endif // defined(ENABLE_SVE)
+#endif // defined(ARM_COMPUTE_ENABLE_SVE)
 #endif /* SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H */

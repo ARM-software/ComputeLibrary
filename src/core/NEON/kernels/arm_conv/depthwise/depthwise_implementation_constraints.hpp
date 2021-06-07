@@ -85,6 +85,18 @@ bool cpu_has_dot_product(const DepthwiseArgs &args, const void *)
   return args.cpu_info->has_dotprod();
 }
 
+bool cpu_has_sve(const DepthwiseArgs &args, const void *) __attribute__ ((unused));
+bool cpu_has_sve(const DepthwiseArgs &args, const void *)
+{
+  return args.cpu_info->has_sve();
+}
+
+bool cpu_has_sve2(const DepthwiseArgs &args, const void *) __attribute__ ((unused));
+bool cpu_has_sve2(const DepthwiseArgs &args, const void *)
+{
+  return args.cpu_info->has_sve2();
+}
+
 bool has_no_channel_multiplier(const DepthwiseArgs &args, const void *) __attribute__ ((unused));
 bool has_no_channel_multiplier(const DepthwiseArgs &args, const void *)
 {

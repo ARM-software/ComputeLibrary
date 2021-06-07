@@ -56,18 +56,23 @@ enum class CPUModel
 
 class CPUInfo final
 {
-public:
-    /** Constructor */
+protected:
     CPUInfo();
     ~CPUInfo();
 
-    /** Disable copy constructor and assignment operator to avoid copying the vector of CPUs each time
-     *  CPUInfo is initialized once in the IScheduler and ThreadInfo will get a pointer to it.
+public:
+    /** Access the KernelLibrary singleton.
+     * This method has been deprecated and will be removed in future releases
+     * @return The KernelLibrary instance.
      */
-    CPUInfo &operator=(const CPUInfo &cpuinfo) = delete;
-    CPUInfo(const CPUInfo &cpuinfo)            = delete;
-    CPUInfo &operator=(CPUInfo &&cpuinfo) = default;
-    CPUInfo(CPUInfo &&cpuinfo)            = default;
+    static CPUInfo &get();
+
+    /* Delete move and copy constructors and assignment operator
+    s */
+    CPUInfo(CPUInfo const &) = delete;            // Copy construct
+    CPUInfo(CPUInfo &&)      = delete;            // Move construct
+    CPUInfo &operator=(CPUInfo const &) = delete; // Copy assign
+    CPUInfo &operator=(CPUInfo &&) = delete;      // Move assign
 
     /** Checks if the cpu model supports fp16.
      *
@@ -79,16 +84,41 @@ public:
      * @return true of the cpu supports bf16, false otherwise
      */
     bool has_bf16() const;
+    /** Checks if the cpu model supports bf16.
+     *
+     * @return true of the cpu supports bf16, false otherwise
+     */
+    bool has_svebf16() const;
     /** Checks if the cpu model supports dot product.
      *
      * @return true of the cpu supports dot product, false otherwise
      */
     bool has_dotprod() const;
+    /** Checks if the cpu model supports floating-point matrix multiplication.
+     *
+     * @return true of the cpu supports floating-point matrix multiplication, false otherwise
+     */
+    bool has_svef32mm() const;
+    /** Checks if the cpu model supports integer matrix multiplication.
+     *
+     * @return true of the cpu supports integer matrix multiplication, false otherwise
+     */
+    bool has_i8mm() const;
+    /** Checks if the cpu model supports integer matrix multiplication.
+     *
+     * @return true of the cpu supports integer matrix multiplication, false otherwise
+     */
+    bool has_svei8mm() const;
     /** Checks if the cpu model supports sve.
      *
      * @return true of the cpu supports sve, false otherwise
      */
     bool has_sve() const;
+    /** Checks if the cpu model supports sve2.
+     *
+     * @return true of the cpu supports sve2, false otherwise
+     */
+    bool has_sve2() const;
     /** Gets the cpu model for a given cpuid.
      *
      * @param[in] cpuid the id of the cpu core to be retrieved,
@@ -111,17 +141,6 @@ public:
      * @return the size of the L1 cache
      */
     unsigned int get_L2_cache_size() const;
-    /** Set fp16 support
-     *
-     * @param[in] fp16 whether the cpu supports fp16.
-     */
-    void set_fp16(const bool fp16);
-    /** Set dot product support
-     *
-     * @param[in] dotprod whether the cpu supports dot product.
-     */
-    void set_dotprod(const bool dotprod);
-
     /** Return the maximum number of CPUs present
      *
      * @return Number of CPUs

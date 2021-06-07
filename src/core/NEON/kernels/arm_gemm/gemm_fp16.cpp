@@ -43,7 +43,7 @@
 namespace arm_gemm {
 
 static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_fp16_mla_6x4VL",

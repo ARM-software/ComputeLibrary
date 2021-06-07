@@ -28,7 +28,7 @@
 
 #pragma once
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace depthwise {
@@ -67,4 +67,4 @@ struct sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

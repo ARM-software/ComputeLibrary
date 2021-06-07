@@ -29,7 +29,7 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "src/core/NEON/SVEMath.h"
 #include "src/core/NEON/SVESymm.h"
 #include <arm_sve.h>
@@ -117,4 +117,4 @@ void qsymm16_sve_activation(const ITensor *src, ITensor *dst, const ActivationLa
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */

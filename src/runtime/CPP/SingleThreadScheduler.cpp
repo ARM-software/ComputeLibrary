@@ -49,7 +49,7 @@ void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     }
 
     ThreadInfo info;
-    info.cpu_info = &_cpu_info;
+    info.cpu_info = &cpu_info();
     kernel->run(kernel->window(), info);
 }
 
@@ -57,14 +57,14 @@ void SingleThreadScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, 
 {
     ARM_COMPUTE_UNUSED(hints);
     ThreadInfo info;
-    info.cpu_info = &_cpu_info;
+    info.cpu_info = &cpu_info();
     kernel->run_op(tensors, window, info);
 }
 
 void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
 {
     ThreadInfo info;
-    info.cpu_info = &_cpu_info;
+    info.cpu_info = &cpu_info();
     for(auto &wl : workloads)
     {
         wl(info);

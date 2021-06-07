@@ -44,11 +44,13 @@ struct CpuIsaInfo
     /* Data-type extensions support */
     bool fp16{ false };
     bool bf16{ false };
+    bool svebf16{ false };
 
     /* Instruction support */
     bool dot{ false };
-    bool immla{ false };
-    bool fmmla{ false };
+    bool i8mm{ false };
+    bool svei8mm{ false };
+    bool svef32mm{ false };
 };
 
 /** Identify ISA related information through system information

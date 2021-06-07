@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef __ARM_FEATURE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SVE
 
 #include "../../bfloat.hpp"
 #include "../../asmlib.hpp"
@@ -394,4 +394,4 @@ void sve_interleaved_bf16fp32_mmla_8x3VL(const bfloat16 *Apanel, const bfloat16 
 
 } // namespace arm_gemm
 
-#endif // __ARM_FEATURE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE

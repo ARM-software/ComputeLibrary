@@ -27,7 +27,7 @@
 namespace arm_conv {
 namespace depthwise {
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 class interleave_sve_u8q_3x3_dot
 {
@@ -71,7 +71,7 @@ class interleave_sve_s8q_5x5_mla
     static size_t get_packed_size(const DepthwiseArgs &);
 };
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 
 class interleave_a64_u8q_3x3_dot
 {

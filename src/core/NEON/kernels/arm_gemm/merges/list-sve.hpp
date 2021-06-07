@@ -21,20 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/common/cpuinfo/target/CpuInfoSveUtils.h"
 
-namespace arm_compute
-{
-namespace cpuinfo
-{
-uint64_t get_sve_feature_reg()
-{
-    uint64_t reg = 0;
-#if defined(ENABLE_SVE)
-    __asm __volatile("MRS %0, ID_AA64ZFR0_EL1"
-                     : "=r"(reg));
-#endif /* defined(DENABLE_SVE) */
-    return reg;
-}
-} // namespace cpuinfo
-} // namespace arm_compute
+#include "sve_merge_fp16_3VLx8.hpp"
+#include "sve_merge_fp32_3VLx8.hpp"
+#include "sve_merge_s32_3VLx8.hpp"
+#include "sve_merge_u32_3VLx8.hpp"

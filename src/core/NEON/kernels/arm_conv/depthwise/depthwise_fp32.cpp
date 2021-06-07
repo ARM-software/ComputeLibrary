@@ -33,7 +33,7 @@
 #include "depthwise_implementation_constraints.hpp"
 
 #if defined(__aarch64__)
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst.hpp"
 #include "kernels/sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst.hpp"
 #include "kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
@@ -43,7 +43,7 @@
 #include "kernels/sve_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst.hpp"
 #include "kernels/sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst.hpp"
 #include "kernels/sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst.hpp"
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/a64_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst.hpp"
 #include "kernels/a64_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst.hpp"
 #include "kernels/a64_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
@@ -85,12 +85,13 @@ namespace
 
 static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
 #if defined(__aarch64__)
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst",
     constraint(is_supported<sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst>,
-               has_no_channel_multiplier),
+               has_no_channel_multiplier,
+               cpu_has_sve),
     cycle_estimate<sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirst<sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst>(args);
@@ -100,7 +101,8 @@ static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst",
     constraint(is_supported<sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst>,
-               has_no_channel_multiplier),
+               has_no_channel_multiplier,
+               cpu_has_sve),
     cycle_estimate<sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirst<sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst>(args);
@@ -110,7 +112,8 @@ static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst",
     constraint(is_supported<sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst>,
-              has_no_channel_multiplier),
+              has_no_channel_multiplier,
+              cpu_has_sve),
     cycle_estimate<sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirst<sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst>(args);
@@ -120,7 +123,8 @@ static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst",
     constraint(is_supported<sve_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst>,
-               has_no_channel_multiplier),
+               has_no_channel_multiplier,
+               cpu_has_sve),
     cycle_estimate<sve_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirst<sve_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst>(args);
@@ -130,7 +134,8 @@ static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst",
     constraint(is_supported<sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst>,
-               has_no_channel_multiplier),
+               has_no_channel_multiplier,
+               cpu_has_sve),
     cycle_estimate<sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirst<sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst>(args);
@@ -139,7 +144,7 @@ static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_generic_output3x3_mla_depthfirst",
-    constraint(has_no_channel_multiplier),
+    constraint(has_no_channel_multiplier, cpu_has_sve),
     not_preferred,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirstGeneric<sve_fp32_nhwc_generic_output9_mla_depthfirst, 3, 3>(args);
@@ -148,7 +153,7 @@ static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst",
-    constraint(is_supported<sve_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst>),
+    constraint(is_supported<sve_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst>, cpu_has_sve),
     not_preferred_if_no_multiplier,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirstWithMultiplier<sve_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst>(args);
@@ -157,7 +162,7 @@ static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst",
-    constraint(is_supported<sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst>),
+    constraint(is_supported<sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst>, cpu_has_sve),
     not_preferred_if_no_multiplier,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirstWithMultiplier<sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst>(args);
@@ -166,13 +171,13 @@ static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_generic_with_multiplier_output2x8_mla_depthfirst",
-    nullptr,
+    constraint(cpu_has_sve),
     not_preferred_if_no_multiplier,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
       return new DepthwiseDepthfirstGenericWithMultiplier<sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst>(args);
     },
   },
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
   {
     DepthwiseMethod::DEPTHFIRST,
     "a64_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst",

@@ -90,67 +90,66 @@ AllocatorWrapper populate_allocator(AclAllocator *external_allocator)
     return is_valid ? AllocatorWrapper(*external_allocator) : AllocatorWrapper(default_allocator);
 }
 
-CpuCapabilities populate_capabilities_legacy(const CPUInfo &cpu_info)
+cpuinfo::CpuIsaInfo populate_capabilities_legacy(const CPUInfo &cpu_info)
 {
-    CpuCapabilities caps;
+    cpuinfo::CpuIsaInfo isa_caps;
 
     // Extract SIMD extension
-    caps.neon = true;
-#ifdef SVE2
-    caps.sve2 = true;
-#endif /* SVE2 */
+    isa_caps.neon = true;
+    isa_caps.sve  = cpu_info.has_sve();
+    isa_caps.sve2 = cpu_info.has_sve2();
+
     // Extract data-type support
-    caps.fp16 = cpu_info.has_fp16();
-#ifdef V8P6_BF
-    caps.bf16 = true;
-#endif /* V8P6_BF */
+    isa_caps.fp16    = cpu_info.has_fp16();
+    isa_caps.bf16    = cpu_info.has_bf16();
+    isa_caps.svebf16 = cpu_info.has_svebf16();
 
     // Extract ISA extensions
-    caps.dot = cpu_info.has_dotprod();
-#ifdef MMLA_FP32
-    caps.mmla_fp = true;
-#endif /* MMLA_FP32 */
-#ifdef MMLA_INT8
-    caps.mmla_int8 = true;
-#endif /* MMLA_INT8 */
+    isa_caps.dot      = cpu_info.has_dotprod();
+    isa_caps.i8mm     = cpu_info.has_i8mm();
+    isa_caps.svei8mm  = cpu_info.has_svei8mm();
+    isa_caps.svef32mm = cpu_info.has_svef32mm();
 
-    return caps;
+    return isa_caps;
 }
 
-CpuCapabilities populate_capabilities_flags(AclTargetCapabilities external_caps)
+cpuinfo::CpuIsaInfo populate_capabilities_flags(AclTargetCapabilities external_caps)
 {
-    CpuCapabilities caps;
+    cpuinfo::CpuIsaInfo isa_caps;
 
     // Extract SIMD extension
-    caps.neon = external_caps & AclCpuCapabilitiesNeon;
-    caps.sve  = external_caps & AclCpuCapabilitiesSve;
-    caps.sve2 = external_caps & AclCpuCapabilitiesSve2;
-    // Extract data-type support
-    caps.fp16 = external_caps & AclCpuCapabilitiesFp16;
-    caps.bf16 = external_caps & AclCpuCapabilitiesBf16;
-    // Extract ISA extensions
-    caps.dot       = external_caps & AclCpuCapabilitiesDot;
-    caps.mmla_fp   = external_caps & AclCpuCapabilitiesMmlaFp;
-    caps.mmla_int8 = external_caps & AclCpuCapabilitiesMmlaInt8;
+    isa_caps.neon = external_caps & AclCpuCapabilitiesNeon;
+    isa_caps.sve  = external_caps & AclCpuCapabilitiesSve;
+    isa_caps.sve2 = external_caps & AclCpuCapabilitiesSve2;
 
-    return caps;
+    // Extract data-type support
+    isa_caps.fp16 = external_caps & AclCpuCapabilitiesFp16;
+    isa_caps.bf16 = external_caps & AclCpuCapabilitiesBf16;
+
+    // Extract ISA extensions
+    isa_caps.dot      = external_caps & AclCpuCapabilitiesDot;
+    isa_caps.i8mm     = external_caps & AclCpuCapabilitiesMmlaInt8;
+    isa_caps.svef32mm = external_caps & AclCpuCapabilitiesMmlaFp;
+
+    return isa_caps;
 }
 
 CpuCapabilities populate_capabilities(AclTargetCapabilities external_caps,
                                       int32_t               max_threads)
 {
-    // Extract legacy structure
-    CPUInfo cpu_info;
-
     CpuCapabilities caps;
+
+    // Extract legacy structure
+    cpuinfo::CpuIsaInfo isa_caps;
     if(external_caps != AclCpuCapabilitiesAuto)
     {
-        caps = populate_capabilities_flags(external_caps);
+        isa_caps = populate_capabilities_flags(external_caps);
     }
     else
     {
-        caps = populate_capabilities_legacy(cpu_info);
+        isa_caps = populate_capabilities_legacy(CPUInfo::get());
     }
+    caps.cpu_info = cpuinfo::CpuInfo(isa_caps, {});
 
     // Set max number of threads
 #if defined(BARE_METAL)

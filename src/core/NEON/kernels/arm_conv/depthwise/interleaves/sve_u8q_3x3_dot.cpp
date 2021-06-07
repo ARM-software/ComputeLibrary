@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 #include "arm_gemm.hpp"
 #include "src/core/NEON/kernels/arm_gemm/utils.hpp"
@@ -133,4 +133,4 @@ void interleave_sve_u8q_3x3_dot::pack_parameters(unsigned int n_channels, void *
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

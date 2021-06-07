@@ -59,7 +59,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs &args) { return new GemvBatched<float, float>(args); }
 },
 #ifdef __aarch64__
-#ifdef __ARM_FEATURE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SVE
 {
     GemmMethod::GEMM_HYBRID,
     "sve_gemv_fp32_mla_8VL",
@@ -77,17 +77,17 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 
 // MMLA next due to higher throughput (SVE only)
-#if defined(__ARM_FEATURE_SVE) && defined(MMLA_FP32)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVEF32MM)
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_fp32_mmla_8x3VL",
-    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize>4); },
+    [](const GemmArgs &args) { return args._ci->has_svef32mm() && (args._Ksize>4); },
     [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_fp32_mmla_8x3VL, float, float>(args); }
 },
-#endif // __ARM_FEATURE_SVE && MMLA_FP32
+#endif // ARM_COMPUTE_ENABLE_SVE && ARM_COMPUTE_ENABLE_SVEF32MM
 
-#ifdef __ARM_FEATURE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SVE
 // SVE smallk / hybrid methods
 {
     GemmMethod::GEMM_HYBRID,
@@ -110,7 +110,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN && (((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8))); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_fp32_mla_6x4VL, float, float>(args); }
 },
-#endif // __ARM_FEATURE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE
 // Cortex-A35 specific kernel - use for any problem on A35, and never in any other cases.
 {
     GemmMethod::GEMM_INTERLEAVED,
@@ -148,7 +148,7 @@ GemmImplementation<float, float>::with_estimate(
     [](const GemmArgs &args) { return GemmHybridIndirect<cls_a64_hybrid_fp32_mla_6x16, float, float>::estimate_cycles(args, cls_a64_hybrid_fp32_mla_6x16::get_performance_parameters(args._ci)); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_a64_hybrid_fp32_mla_6x16, float, float>(args); }
 ),
-#ifdef __ARM_FEATURE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SVE
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_fp32_mla_8x3VL",
@@ -156,7 +156,7 @@ GemmImplementation<float, float>::with_estimate(
     [](const GemmArgs &args) { return args._ci->get_cpu_model() != CPUModel::KLEIN; },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_fp32_mla_8x3VL, float, float>(args); }
 },
-#endif // __ARM_FEATURE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE
 GemmImplementation<float, float>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_sgemm_8x12",

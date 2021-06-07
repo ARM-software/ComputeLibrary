@@ -25,7 +25,7 @@
 #include "pooling.hpp"
 #include <cstdint>
 
-#if defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
 
 namespace arm_conv {
 namespace pooling {
@@ -383,4 +383,4 @@ void sve_s8q_nhwc_max_generic_depthfirst_impl(
 }  // namespace pooling
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)

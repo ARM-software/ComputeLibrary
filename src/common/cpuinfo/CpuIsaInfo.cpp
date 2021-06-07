@@ -90,6 +90,10 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
     {
         isa.bf16 = true;
     }
+    if(hwcaps2 & ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEBF16)
+    {
+        isa.svebf16 = true;
+    }
 
     // Instruction extensions
     if(hwcaps & ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDDP)
@@ -98,11 +102,15 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
     }
     if(hwcaps2 & ARM_COMPUTE_CPU_FEATURE_HWCAP2_I8MM)
     {
-        isa.immla = true;
+        isa.i8mm = true;
+    }
+    if(hwcaps2 & ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEI8MM)
+    {
+        isa.svei8mm = true;
     }
     if(hwcaps2 & ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEF32MM)
     {
-        isa.fmmla = true;
+        isa.svef32mm = true;
     }
 }
 #else  /* defined(__aarch64__) */
@@ -133,6 +141,10 @@ void decode_regs(CpuIsaInfo &isa, const uint64_t isar0, const uint64_t isar1, co
     {
         isa.bf16 = true;
     }
+    if((svefr0 >> 20) & 0xf)
+    {
+        isa.svebf16 = true;
+    }
 
     // Instruction extensions
     if((isar0 >> 44) & 0xf)
@@ -141,11 +153,15 @@ void decode_regs(CpuIsaInfo &isa, const uint64_t isar0, const uint64_t isar1, co
     }
     if((isar1 >> 48) & 0xf)
     {
-        isa.immla = true;
+        isa.i8mm = true;
+    }
+    if((svefr0 >> 44) & 0xf)
+    {
+        isa.svei8mm = true;
     }
     if((svefr0 >> 52) & 0xf)
     {
-        isa.fmmla = true;
+        isa.svef32mm = true;
     }
 }
 

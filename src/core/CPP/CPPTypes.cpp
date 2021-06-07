@@ -36,6 +36,12 @@ struct CPUInfo::Impl
     unsigned int     L2_cache_size = 262144;
 };
 
+CPUInfo &CPUInfo::get()
+{
+    static CPUInfo _cpuinfo;
+    return _cpuinfo;
+}
+
 CPUInfo::CPUInfo()
     : _impl(std::make_unique<Impl>())
 {
@@ -49,11 +55,6 @@ unsigned int CPUInfo::get_cpu_num() const
     return _impl->info.num_cpus();
 }
 
-bool CPUInfo::has_sve() const
-{
-    return _impl->info.has_sve();
-}
-
 bool CPUInfo::has_fp16() const
 {
     return _impl->info.has_fp16();
@@ -64,9 +65,39 @@ bool CPUInfo::has_bf16() const
     return _impl->info.has_bf16();
 }
 
+bool CPUInfo::has_svebf16() const
+{
+    return _impl->info.has_svebf16();
+}
+
 bool CPUInfo::has_dotprod() const
 {
     return _impl->info.has_dotprod();
+}
+
+bool CPUInfo::has_svef32mm() const
+{
+    return _impl->info.has_svef32mm();
+}
+
+bool CPUInfo::has_i8mm() const
+{
+    return _impl->info.has_i8mm();
+}
+
+bool CPUInfo::has_svei8mm() const
+{
+    return _impl->info.has_svei8mm();
+}
+
+bool CPUInfo::has_sve() const
+{
+    return _impl->info.has_sve();
+}
+
+bool CPUInfo::has_sve2() const
+{
+    return _impl->info.has_sve2();
 }
 
 CPUModel CPUInfo::get_cpu_model() const

@@ -24,7 +24,7 @@
 #ifndef SRC_CORE_SVE_KERNELS_ADD_IMPL_H
 #define SRC_CORE_SVE_KERNELS_ADD_IMPL_H
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 
@@ -36,5 +36,5 @@ template <typename ScalarType>
 void add_same_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
-#endif // defined(ENABLE_SVE)
+#endif // defined(ARM_COMPUTE_ENABLE_SVE)
 #endif // SRC_CORE_SVE_KERNELS_ADD_IMPL_H

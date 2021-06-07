@@ -79,17 +79,25 @@ public:
     {
         return _isa.bf16;
     }
+    bool has_svebf16() const
+    {
+        return _isa.svebf16;
+    }
     bool has_dotprod() const
     {
         return _isa.dot;
     }
-    bool has_immla() const
+    bool has_i8mm() const
     {
-        return _isa.immla;
+        return _isa.i8mm;
     }
-    bool has_fmmla() const
+    bool has_svei8mm() const
     {
-        return _isa.fmmla;
+        return _isa.svei8mm;
+    }
+    bool has_svef32mm() const
+    {
+        return _isa.svef32mm;
     }
 
     CpuModel cpu_model(uint32_t cpuid) const;

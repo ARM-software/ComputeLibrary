@@ -25,7 +25,7 @@
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_UNARY_LIST_H
 
 #include "arm_compute/core/Types.h"
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_compute
 {
@@ -35,5 +35,5 @@ template <typename ScalarType>
 void elementwise_sve_op(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op);
 } // namespace cpu
 } // namespace arm_compute
-#endif // defined(ENABLE_SVE)
+#endif // defined(ARM_COMPUTE_ENABLE_SVE)
 #endif // SRC_CORE_NEON_KERNELS_ELEMENTWISE_UNARY_LIST_H

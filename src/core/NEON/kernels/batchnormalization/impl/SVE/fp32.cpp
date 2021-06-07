@@ -29,7 +29,7 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include <arm_sve.h>
 
 namespace arm_compute

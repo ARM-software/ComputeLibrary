@@ -32,7 +32,6 @@
 namespace arm_compute
 {
 IScheduler::IScheduler()
-    : _cpu_info()
 {
     // Work out the best possible number of execution threads
     _num_threads_hint = cpuinfo::num_threads_hint();
@@ -40,7 +39,7 @@ IScheduler::IScheduler()
 
 CPUInfo &IScheduler::cpu_info()
 {
-    return _cpu_info;
+    return CPUInfo::get();
 }
 
 void IScheduler::set_num_threads_with_affinity(unsigned int num_threads, BindFunc func)
@@ -111,7 +110,7 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
         if(!kernel->is_parallelisable() || num_threads == 1)
         {
             ThreadInfo info;
-            info.cpu_info = &_cpu_info;
+            info.cpu_info = &cpu_info();
             if(tensors.empty())
             {
                 kernel->run(max_window, info);

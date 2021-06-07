@@ -37,9 +37,13 @@ namespace arm_gemm {
 
 template<unsigned int twidth, unsigned int height, bool sve=false, typename Tin, typename Tout>
 void MergeResults(Tout * out, const Tin * in, int ldc, int y0, int ymax, int x0, int xmax, const Tout *bias, Activation act, bool append) {
+    // NOTE: The following code is disabled to avoid calling get_vector_length(), so templated MergeResults will not
+    // be correct for SVE cases.  This is OK as we have specialisations for all needed SVE cases anyway.
+    //
     // For SVE cases, multiply the width up by the vector length.
     // Use the *input* type to determine this, since this will be what the kernel operated on.
-    const int width = twidth * (sve ? get_vector_length<Tin>() : 1);
+    // const int width = twidth * (sve ? get_vector_length<Tin>() : 1);
+    const int width = twidth;
 
     const int full_y_blocks = (ymax - y0) / height;
     const int y_remainder = (ymax - y0) % height;

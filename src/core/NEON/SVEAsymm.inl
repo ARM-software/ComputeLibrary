@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 namespace arm_compute
 {
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 inline svuint8_t svmla_qasymm8_z(svbool_t pg, svuint8_t vd, svfloat32_t vs, svfloat32_t vo)
 {
     // Convert uint8 vectors to uint16 vectors
@@ -101,5 +101,5 @@ inline svint8_t svmla_qasymm8_signed_z(svbool_t pg, svint8_t vd, svfloat32_t vs,
     const auto res = svqxtnt_s16(svqxtnb_s16(vd_low_s16), vd_high_s16);
     return res;
 }
-#endif /* (__ARM_FEATURE_SVE2) */
+#endif /* (ARM_COMPUTE_ENABLE_SVE2) */
 } // namespace arm_compute

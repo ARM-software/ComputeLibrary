@@ -22,7 +22,7 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#ifdef __ARM_FEATURE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SVE
 
 #include "../std_transforms_sve.hpp"
 
@@ -80,4 +80,4 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
-#endif // __ARM_FEATURE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE

@@ -1,297 +1,1775 @@
 {
-    "common" : [
-        "src/common/cpuinfo/target/CpuInfoSveUtils.cpp",
-        "src/common/cpuinfo/CpuInfo.cpp",
-        "src/common/cpuinfo/CpuModel.cpp",
-        "src/common/cpuinfo/CpuIsaInfo.cpp",
-        "src/common/utils/LegacySupport.cpp",
-        "src/common/AllocatorWrapper.cpp",
-        "src/common/ITensorV2.cpp",
-        "src/common/TensorPack.cpp"
+  "common": [
+    "src/common/cpuinfo/CpuInfo.cpp",
+    "src/common/cpuinfo/CpuModel.cpp",
+    "src/common/cpuinfo/CpuIsaInfo.cpp",
+    "src/common/utils/LegacySupport.cpp",
+    "src/common/AllocatorWrapper.cpp",
+    "src/common/ITensorV2.cpp",
+    "src/common/TensorPack.cpp"
+  ],
+  "c_api": {
+    "cpu": [
+      "src/c/AclContext.cpp",
+      "src/c/AclQueue.cpp",
+      "src/c/AclTensor.cpp",
+      "src/c/AclTensorPack.cpp",
+      "src/c/AclVersion.cpp"
     ],
-    "c_api" :
-    {
-        "cpu":    [
-            "src/c/AclContext.cpp",
-            "src/c/AclQueue.cpp",
-            "src/c/AclTensor.cpp",
-            "src/c/AclTensorPack.cpp",
-            "src/c/AclVersion.cpp"
-        ],
-        "gpu": [
-            "src/c/cl/AclOpenClExt.cpp"
-        ]
-    },
-
-    "gpu" :
-    {
-        "core" :
-        {
-            "kernels" :
-            {
-                "high_priority" : [
-                    "src/core/gpu/cl/kernels/ClActivationKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClDirectConv2dKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClPermuteKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClPool2dKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClReshapeKernel.cpp"
-                ],
-                "all" : [
-                    "src/core/gpu/cl/kernels/ClBatchConcatenateKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClCastKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClConvertFullyConnectedWeightsKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClCopyKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClCropKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClDepthConcatenateKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClDequantizeKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClElementwiseKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClElementwiseUnaryKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClFillKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClFloorKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClHeightConcatenateKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClMulKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClQuantizeKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClScaleKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClSoftmaxKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClTransposeKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClWidthConcatenate2TensorsKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClWidthConcatenate4TensorsKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClWidthConcatenateKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClWinogradFilterTransformKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClWinogradInputTransformKernel.cpp",
-                    "src/core/gpu/cl/kernels/ClWinogradOutputTransformKernel.cpp",
-                    "src/core/CL/kernels/CLGenerateProposalsLayerKernel.cpp",
-                    "src/core/CL/kernels/CLArgMinMaxLayerKernel.cpp",
-                    "src/core/CL/kernels/CLBatchNormalizationLayerKernel.cpp",
-                    "src/core/CL/kernels/CLBatchToSpaceLayerKernel.cpp",
-                    "src/core/CL/kernels/CLBitwiseKernel.cpp",
-                    "src/core/CL/kernels/CLBoundingBoxTransformKernel.cpp",
-                    "src/core/CL/kernels/CLChannelShuffleLayerKernel.cpp",
-                    "src/core/CL/kernels/CLCol2ImKernel.cpp",
-                    "src/core/CL/kernels/CLComparisonKernel.cpp",
-                    "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.cpp",
-                    "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.cpp",
-                    "src/core/CL/kernels/CLDepthToSpaceLayerKernel.cpp",
-                    "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.cpp",
-                    "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.cpp",
-                    "src/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.cpp",
-                    "src/core/CL/kernels/CLFFTDigitReverseKernel.cpp",
-                    "src/core/CL/kernels/CLFFTRadixStageKernel.cpp",
-                    "src/core/CL/kernels/CLFFTScaleKernel.cpp",
-                    "src/core/CL/kernels/CLFillBorderKernel.cpp",
-                    "src/core/CL/kernels/CLFuseBatchNormalizationKernel.cpp",
-                    "src/core/CL/kernels/CLGatherKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.cpp",
-                    "src/core/CL/kernels/CLGEMMLowpReductionKernel.cpp",
-                    "src/core/CL/kernels/CLIm2ColKernel.cpp",
-                    "src/core/CL/kernels/CLInstanceNormalizationLayerKernel.cpp",
-                    "src/core/CL/kernels/CLL2NormalizeLayerKernel.cpp",
-                    "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.cpp",
-                    "src/core/CL/kernels/CLMeanStdDevNormalizationKernel.cpp",
-                    "src/core/CL/kernels/CLMinMaxLayerKernel.cpp",
-                    "src/core/CL/kernels/CLNormalizationLayerKernel.cpp",
-                    "src/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.cpp",
-                    "src/core/CL/kernels/CLPadLayerKernel.cpp",
-                    "src/core/CL/kernels/CLPriorBoxLayerKernel.cpp",
-                    "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.cpp",
-                    "src/core/CL/kernels/CLRangeKernel.cpp",
-                    "src/core/CL/kernels/CLReductionOperationKernel.cpp",
-                    "src/core/CL/kernels/CLRemapKernel.cpp",
-                    "src/core/CL/kernels/CLReorgLayerKernel.cpp",
-                    "src/core/CL/kernels/CLReverseKernel.cpp",
-                    "src/core/CL/kernels/CLROIAlignLayerKernel.cpp",
-                    "src/core/CL/kernels/CLROIPoolingLayerKernel.cpp",
-                    "src/core/CL/kernels/CLSelectKernel.cpp",
-                    "src/core/CL/kernels/CLSpaceToBatchLayerKernel.cpp",
-                    "src/core/CL/kernels/CLSpaceToDepthLayerKernel.cpp",
-                    "src/core/CL/kernels/CLStackLayerKernel.cpp",
-                    "src/core/CL/kernels/CLStridedSliceKernel.cpp",
-                    "src/core/CL/kernels/CLTileKernel.cpp",
-                    "src/core/CL/kernels/CLWeightsReshapeKernel.cpp"
-                ]
-            }
+    "gpu": [
+      "src/c/cl/AclOpenClExt.cpp"
+    ]
+  },
+  "gpu": {
+    "high_priority": [
+      "Activation",
+      "DepthwiseConv2d",
+      "DirectConv2d",
+      "Permute",
+      "Pool2d",
+      "Reshape"
+    ],
+    "operators": {
+      "Activation": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClActivation.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClActivationKernel.cpp"
+          ]
         }
-    },
-    "cpu" :
-    {
-        "runtime" :
-        {
-            "all" : [
-                "src/cpu/CpuContext.cpp",
-                "src/cpu/CpuQueue.cpp",
-                "src/cpu/CpuTensor.cpp"
-            ],
-            "operators" :
-            {
-                "high_priority" : [
-                    "src/runtime/cpu/operators/CpuActivation.cpp",
-                    "src/runtime/cpu/operators/CpuDepthwiseConv2d.cpp",
-                    "src/runtime/cpu/operators/CpuDepthwiseConv2dAssemblyDispatch.cpp",
-                    "src/runtime/cpu/operators/CpuDirectConv2d.cpp",
-                    "src/runtime/cpu/operators/CpuPermute.cpp",
-                    "src/runtime/cpu/operators/CpuPool2d.cpp"
-                ],
-                "internal" : [
-                    "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.cpp"
-                ],
-                "all" : [
-                    "src/runtime/cpu/operators/CpuAdd.cpp",
-                    "src/runtime/cpu/operators/CpuCast.cpp",
-                    "src/runtime/cpu/operators/CpuConcatenate.cpp",
-                    "src/runtime/cpu/operators/CpuConvertFullyConnectedWeights.cpp",
-                    "src/runtime/cpu/operators/CpuCopy.cpp",
-                    "src/runtime/cpu/operators/CpuDequantize.cpp",
-                    "src/runtime/cpu/operators/CpuElementwise.cpp",
-                    "src/runtime/cpu/operators/CpuElementwiseUnary.cpp",
-                    "src/runtime/cpu/operators/CpuFill.cpp",
-                    "src/runtime/cpu/operators/CpuFlatten.cpp",
-                    "src/runtime/cpu/operators/CpuFloor.cpp",
-                    "src/runtime/cpu/operators/CpuGemmDirectConv2d.cpp",
-                    "src/runtime/cpu/operators/CpuGemmLowpOutputStage.cpp",
-                    "src/runtime/cpu/operators/CpuMul.cpp",
-                    "src/runtime/cpu/operators/CpuQuantize.cpp",
-                    "src/runtime/cpu/operators/CpuReshape.cpp",
-                    "src/runtime/cpu/operators/CpuScale.cpp",
-                    "src/runtime/cpu/operators/CpuSoftmax.cpp",
-                    "src/runtime/cpu/operators/CpuSub.cpp",
-                    "src/runtime/cpu/operators/CpuTranspose.cpp"
-                ]
-            }
-        },
-        "core" :
-        {
-            "kernels" :
-            {
-                "high_priority" : [
-                    "src/core/cpu/kernels/CpuActivationKernel.cpp",
-                    "src/core/cpu/kernels/CpuDepthwiseConv2dNativeKernel.cpp",
-                    "src/core/cpu/kernels/CpuDirectConv2dKernel.cpp",
-                    "src/core/cpu/kernels/CpuDirectConv2dOutputStageKernel.cpp",
-                    "src/core/cpu/kernels/CpuPermuteKernel.cpp",
-                    "src/core/cpu/kernels/CpuPool2dKernel.cpp",
-                    "src/core/cpu/kernels/CpuReshapeKernel.cpp"
-                ],
-                "all" : [
-                    "src/core/cpu/kernels/CpuAddKernel.cpp",
-                    "src/core/cpu/kernels/CpuCastKernel.cpp",
-                    "src/core/cpu/kernels/CpuConcatenateBatchKernel.cpp",
-                    "src/core/cpu/kernels/CpuConcatenateDepthKernel.cpp",
-                    "src/core/cpu/kernels/CpuConcatenateHeightKernel.cpp",
-                    "src/core/cpu/kernels/CpuConcatenateWidthKernel.cpp",
-                    "src/core/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.cpp",
-                    "src/core/cpu/kernels/CpuCopyKernel.cpp",
-                    "src/core/cpu/kernels/CpuDequantizeKernel.cpp",
-                    "src/core/cpu/kernels/CpuElementwiseKernel.cpp",
-                    "src/core/cpu/kernels/CpuElementwiseUnaryKernel.cpp",
-                    "src/core/cpu/kernels/CpuFillKernel.cpp",
-                    "src/core/cpu/kernels/CpuFloorKernel.cpp",
-                    "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ScaleKernel.cpp",
-                    "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.cpp",
-                    "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.cpp",
-                    "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.cpp",
-                    "src/core/cpu/kernels/CpuMulKernel.cpp",
-                    "src/core/cpu/kernels/CpuQuantizeKernel.cpp",
-                    "src/core/cpu/kernels/CpuScaleKernel.cpp",
-                    "src/core/cpu/kernels/CpuSoftmaxKernel.cpp",
-                    "src/core/cpu/kernels/CpuSubKernel.cpp",
-                    "src/core/cpu/kernels/CpuTransposeKernel.cpp"
-                ]
-            },
-
-            "sve" :
-            {
-                "all" : [
-                    "src/core/cpu/kernels/add/sve/impl.cpp",
-                    "src/core/cpu/kernels/softmax/impl/sve/impl.cpp",
-                    "src/core/cpu/kernels/elementwise/sve/elementwise.cpp",
-                    "src/core/cpu/kernels/elementwise/sve/elementwise_unary.cpp"
-                ],
-                "fp32" : [
-                    "src/core/cpu/kernels/activation/sve/fp32.cpp",
-                    "src/core/cpu/kernels/scale/sve/fp32.cpp",
-                    "src/core/NEON/kernels/batchnormalization/impl/SVE/fp32.cpp"
-                ],
-                "fp16" : [
-                    "src/core/cpu/kernels/activation/sve/fp16.cpp",
-                    "src/core/cpu/kernels/scale/sve/fp16.cpp",
-                    "src/core/NEON/kernels/batchnormalization/impl/SVE/fp16.cpp"
-                ],
-                "qsymm16" : [
-                    "src/core/cpu/kernels/activation/sve/qsymm16.cpp",
-                    "src/core/cpu/kernels/add/sve/qsymm16.cpp"
-                ],
-                "qasymm8" : [
-                    "src/core/cpu/kernels/activation/sve/qasymm8.cpp",
-                    "src/core/cpu/kernels/add/sve/qasymm8.cpp",
-                    "src/core/cpu/kernels/scale/sve/qasymm8.cpp"
-                ],
-                "qasymm8_signed" : [
-                    "src/core/cpu/kernels/activation/sve/qasymm8_signed.cpp",
-                    "src/core/cpu/kernels/add/sve/qasymm8_signed.cpp",
-                    "src/core/cpu/kernels/scale/sve/qasymm8_signed.cpp"
-                ],
-                "integer" : [
-                    "src/core/cpu/kernels/add/sve/integer.cpp",
-                    "src/core/cpu/kernels/scale/sve/integer.cpp"
-                ]
-            },
-
-            "neon":
-            {
-                "nchw" : [
-                    "src/core/cpu/kernels/pooling/neon/nchw/all.cpp"
-                ],
-                "fp32" : [
-                    "src/core/cpu/kernels/activation/neon/fp32.cpp",
-                    "src/core/cpu/kernels/floor/neon/fp32.cpp",
-                    "src/core/cpu/kernels/pooling/neon/fp32.cpp",
-                    "src/core/NEON/kernels/batchnormalization/impl/NEON/fp32.cpp"
-                ],
-                "fp16" : [
-                    "src/core/cpu/kernels/activation/neon/fp16.cpp",
-                    "src/core/cpu/kernels/floor/neon/fp16.cpp",
-                    "src/core/cpu/kernels/pooling/neon/fp16.cpp",
-                    "src/core/cpu/kernels/scale/neon/fp16.cpp",
-                    "src/core/NEON/kernels/batchnormalization/impl/NEON/fp16.cpp"
-                ],
-                "qsymm16" : [
-                    "src/core/cpu/kernels/activation/neon/qsymm16.cpp",
-                    "src/core/cpu/kernels/add/neon/qsymm16.cpp",
-                    "src/core/cpu/kernels/sub/neon/qsymm16.cpp"
-
-                ],
-                "qasymm8" : [
-                    "src/core/cpu/kernels/activation/neon/qasymm8.cpp",
-                    "src/core/cpu/kernels/add/neon/qasymm8.cpp",
-                    "src/core/cpu/kernels/pooling/neon/qasymm8.cpp",
-                    "src/core/cpu/kernels/scale/neon/qasymm8.cpp",
-                    "src/core/cpu/kernels/sub/neon/qasymm8.cpp"
-                ],
-                "qasymm8_signed" : [
-                    "src/core/cpu/kernels/activation/neon/qasymm8_signed.cpp",
-                    "src/core/cpu/kernels/add/neon/qasymm8_signed.cpp",
-                    "src/core/cpu/kernels/pooling/neon/qasymm8_signed.cpp",
-                    "src/core/cpu/kernels/scale/neon/qasymm8_signed.cpp",
-                    "src/core/cpu/kernels/sub/neon/qasymm8_signed.cpp"
-                ],
-                "integer" : [
-                    "src/core/cpu/kernels/sub/neon/integer.cpp",
-                    "src/core/cpu/kernels/add/neon/integer.cpp"
-                ]
-            }
+      },
+      "Add": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClAdd.cpp"
+          ]
         }
+      },
+      "Cast": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClCast.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClCastKernel.cpp"
+          ]
+        }
+      },
+      "Concatenate": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClConcatenate.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClWidthConcatenate4TensorsKernel.cpp",
+            "src/core/gpu/cl/kernels/ClWidthConcatenate2TensorsKernel.cpp",
+            "src/core/gpu/cl/kernels/ClWidthConcatenateKernel.cpp",
+            "src/core/gpu/cl/kernels/ClHeightConcatenateKernel.cpp",
+            "src/core/gpu/cl/kernels/ClDepthConcatenateKernel.cpp",
+            "src/core/gpu/cl/kernels/ClBatchConcatenateKernel.cpp"
+          ]
+        }
+      },
+      "DirectConv2d": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClDirectConv2d.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClDirectConv2dKernel.cpp"
+          ]
+        }
+      },
+      "ConvertFullyConnectedWeights": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClConvertFullyConnectedWeights.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClConvertFullyConnectedWeightsKernel.cpp"
+          ]
+        }
+      },
+      "Permute": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClPermute.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClPermuteKernel.cpp"
+          ]
+        }
+      },
+      "Pool2d": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClPool2d.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClPool2dKernel.cpp"
+          ]
+        }
+      },
+      "PRelu": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClPRelu.cpp"
+          ]
+        }
+      },
+      "Reshape": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClReshape.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClReshapeKernel.cpp"
+          ]
+        }
+      },
+      "Copy": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClCopy.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClCopyKernel.cpp"
+          ]
+        }
+      },
+      "Crop": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClCrop.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClCropKernel.cpp"
+          ]
+        }
+      },
+      "Dequantize": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClDequantize.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClDequantizeKernel.cpp"
+          ]
+        }
+      },
+      "Elementwise": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClElementwiseOperations.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClElementwiseKernel.cpp"
+          ]
+        }
+      },
+      "ElementwiseUnary": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClElementwiseUnary.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClElementwiseUnaryKernel.cpp"
+          ]
+        }
+      },
+      "Fill": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClFill.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClFillKernel.cpp"
+          ]
+        }
+      },
+      "Flatten": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClFlatten.cpp"
+          ]
+        }
+      },
+      "Floor": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClFloor.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClFloorKernel.cpp"
+          ]
+        }
+      },
+      "GEMM": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClGemm.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.cpp",
+            "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.cpp",
+            "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeBifrost.cpp",
+            "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeMidgard.cpp",
+            "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeValhall.cpp",
+            "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.cpp",
+            "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedBifrost.cpp",
+            "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedValhall.cpp",
+            "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsKernel.cpp",
+            "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyBifrost.cpp",
+            "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyValhall.cpp",
+            "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.cpp"
+          ]
+        }
+      },
+      "Mul": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClMul.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClMulKernel.cpp"
+          ]
+        }
+      },
+      "Quantize": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClQuantize.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClQuantizeKernel.cpp"
+          ]
+        }
+      },
+      "Scale": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClScale.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClScaleKernel.cpp"
+          ]
+        }
+      },
+      "Softmax": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClSoftmax.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClSoftmaxKernel.cpp"
+          ]
+        }
+      },
+      "Sub": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClSub.cpp"
+          ]
+        }
+      },
+      "Transpose": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClTranspose.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClTransposeKernel.cpp"
+          ]
+        }
+      },
+      "GenerateProposals": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGenerateProposalsLayerKernel.cpp"
+          ]
+        }
+      },
+      "ArgMinMax": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLArgMinMaxLayerKernel.cpp"
+          ]
+        }
+      },
+      "BatchNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLBatchNormalizationLayerKernel.cpp"
+          ]
+        }
+      },
+      "BatchToSpace": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLBatchToSpaceLayerKernel.cpp"
+          ]
+        }
+      },
+      "Bitwise": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLBitwiseKernel.cpp"
+          ]
+        }
+      },
+      "BoundingBoxTransform": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLBoundingBoxTransformKernel.cpp"
+          ]
+        }
+      },
+      "ChannelShuffleLayer": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLChannelShuffleLayerKernel.cpp"
+          ]
+        }
+      },
+      "GEMMConv2d": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLCol2ImKernel.cpp",
+            "src/core/CL/kernels/CLIm2ColKernel.cpp"
+          ]
+        }
+      },
+      "Comparison": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLComparisonKernel.cpp"
+          ]
+        }
+      },
+      "DeconvolutionLayerUpsample": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.cpp"
+          ]
+        }
+      },
+      "DeconvolutionReshapeOutput": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.cpp"
+          ]
+        }
+      },
+      "DepthToSpace": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLDepthToSpaceLayerKernel.cpp"
+          ]
+        }
+      },
+      "DepthwiseConvolutionLayer3x3NCHW": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.cpp"
+          ]
+        }
+      },
+      "DepthwiseConvolutionLayer3x3NHWC": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.cpp"
+          ]
+        }
+      },
+      "DepthwiseConvolutionLayerNative": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.cpp"
+          ]
+        }
+      },
+      "FFTDigitReverse": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLFFTDigitReverseKernel.cpp"
+          ]
+        }
+      },
+      "FFTRadixStage": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLFFTRadixStageKernel.cpp"
+          ]
+        }
+      },
+      "FFTScale": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLFFTScaleKernel.cpp"
+          ]
+        }
+      },
+      "FillBorder": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLFillBorderKernel.cpp"
+          ]
+        }
+      },
+      "FuseBatchNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLFuseBatchNormalizationKernel.cpp"
+          ]
+        }
+      },
+      "Gather": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGatherKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpMatrixMultiplyNative": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpMatrixMultiplyReshaped": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpMatrixMultiplyReshapedOnlyRHS": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpOffsetContribution": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpOffsetContributionOutputStage": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpQuantizeDownInt32ScaleByFixedPoint": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpQuantizeDownInt32ScaleByFloat": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpQuantizeDownInt32Scale": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowpReduction": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLGEMMLowpReductionKernel.cpp"
+          ]
+        }
+      },
+      "InstanceNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLInstanceNormalizationLayerKernel.cpp"
+          ]
+        }
+      },
+      "L2Normalize": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLL2NormalizeLayerKernel.cpp"
+          ]
+        }
+      },
+      "LogicalNot": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClLogicalNot.cpp"
+          ]
+        }
+      },
+      "MaxUnpooling": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.cpp"
+          ]
+        }
+      },
+      "MeanStdDevNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLMeanStdDevNormalizationKernel.cpp"
+          ]
+        }
+      },
+      "MinMax": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLMinMaxLayerKernel.cpp"
+          ]
+        }
+      },
+      "Normalization": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLNormalizationLayerKernel.cpp"
+          ]
+        }
+      },
+      "NormalizePlanarYUV": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.cpp"
+          ]
+        }
+      },
+      "Pad": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLPadLayerKernel.cpp"
+          ]
+        }
+      },
+      "PriorBox": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLPriorBoxLayerKernel.cpp"
+          ]
+        }
+      },
+      "QLSTMLayerNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.cpp"
+          ]
+        }
+      },
+      "Range": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLRangeKernel.cpp"
+          ]
+        }
+      },
+      "ReductionOperation": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLReductionOperationKernel.cpp"
+          ]
+        }
+      },
+      "Remap": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLRemapKernel.cpp"
+          ]
+        }
+      },
+      "Reorg": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLReorgLayerKernel.cpp"
+          ]
+        }
+      },
+      "Reverse": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLReverseKernel.cpp"
+          ]
+        }
+      },
+      "ROIAlign": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLROIAlignLayerKernel.cpp"
+          ]
+        }
+      },
+      "ROIPooling": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLROIPoolingLayerKernel.cpp"
+          ]
+        }
+      },
+      "Select": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLSelectKernel.cpp"
+          ]
+        }
+      },
+      "SpaceToBatch": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLSpaceToBatchLayerKernel.cpp"
+          ]
+        }
+      },
+      "SpaceToDepth": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLSpaceToDepthLayerKernel.cpp"
+          ]
+        }
+      },
+      "Stack": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLStackLayerKernel.cpp"
+          ]
+        }
+      },
+      "StridedSlice": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLStridedSliceKernel.cpp"
+          ]
+        }
+      },
+      "Tile": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLTileKernel.cpp"
+          ]
+        }
+      },
+      "WeightsReshape": {
+        "files": {
+          "kernel": [
+            "src/core/CL/kernels/CLWeightsReshapeKernel.cpp"
+          ]
+        }
+      },
+      "WinogradConv2d": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClWinogradConv2d.cpp"
+          ],
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClWinogradFilterTransformKernel.cpp",
+            "src/core/gpu/cl/kernels/ClWinogradInputTransformKernel.cpp",
+            "src/core/gpu/cl/kernels/ClWinogradOutputTransformKernel.cpp"
+          ]
+        }
+      }
     }
+  },
+  "cpu": {
+    "all": [
+      "src/cpu/CpuContext.cpp",
+      "src/cpu/CpuQueue.cpp",
+      "src/cpu/CpuTensor.cpp"
+    ],
+    "high_priority": [
+      "Activation",
+      "DepthwiseConv2d",
+      "DirectConv2d",
+      "Permute",
+      "Pool2d",
+      "Reshape"
+    ],
+    "operators": {
+      "Activation": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuActivation.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuActivationKernel.cpp"
+          ],
+          "sve": {
+            "fp32": [
+              "src/core/cpu/kernels/activation/sve/fp32.cpp"
+            ],
+            "fp16": [
+              "src/core/cpu/kernels/activation/sve/fp16.cpp"
+            ],
+            "qsymm16": [
+              "src/core/cpu/kernels/activation/sve/qsymm16.cpp"
+            ],
+            "qasymm8": [
+              "src/core/cpu/kernels/activation/sve/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/core/cpu/kernels/activation/sve/qasymm8_signed.cpp"
+            ]
+          },
+          "neon": {
+            "fp32": [
+              "src/core/cpu/kernels/activation/neon/fp32.cpp"
+            ],
+            "fp16": [
+              "src/core/cpu/kernels/activation/neon/fp16.cpp"
+            ],
+            "qsymm16": [
+              "src/core/cpu/kernels/activation/neon/qsymm16.cpp"
+            ],
+            "qasymm8": [
+              "src/core/cpu/kernels/activation/neon/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/core/cpu/kernels/activation/neon/qasymm8_signed.cpp"
+            ]
+          }
+        }
+      },
+      "Add": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuAdd.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuAddKernel.cpp"
+          ],
+          "sve": {
+            "all": [
+              "src/core/cpu/kernels/add/sve/impl.cpp"
+            ],
+            "qsymm16": [
+              "src/core/cpu/kernels/add/sve/qsymm16.cpp"
+            ],
+            "qasymm8": [
+              "src/core/cpu/kernels/add/sve/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/core/cpu/kernels/add/sve/qasymm8_signed.cpp"
+            ],
+            "integer": [
+              "src/core/cpu/kernels/add/sve/integer.cpp"
+            ]
+          },
+          "neon": {
+            "qsymm16": [
+              "src/core/cpu/kernels/add/neon/qsymm16.cpp"
+            ],
+            "qasymm8": [
+              "src/core/cpu/kernels/add/neon/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/core/cpu/kernels/add/neon/qasymm8_signed.cpp"
+            ],
+            "integer": [
+              "src/core/cpu/kernels/add/neon/integer.cpp"
+            ]
+          }
+        }
+      },
+      "BatchNorm": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEBatchNormalizationLayerKernel.cpp"
+          ],
+          "sve": {
+            "fp32": [
+              "src/core/NEON/kernels/batchnormalization/impl/SVE/fp32.cpp"
+            ],
+            "fp16": [
+              "src/core/NEON/kernels/batchnormalization/impl/SVE/fp16.cpp"
+            ]
+          },
+          "neon": {
+            "fp32": [
+              "src/core/NEON/kernels/batchnormalization/impl/NEON/fp32.cpp"
+            ],
+            "fp16": [
+              "src/core/NEON/kernels/batchnormalization/impl/NEON/fp16.cpp"
+            ]
+          }
+        }
+      },
+      "BatchToSpace": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEBatchToSpaceLayerKernel.cpp"
+          ]
+        }
+      },
+      "BitwiseAnd": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEBitwiseAndKernel.cpp"
+          ]
+        }
+      },
+      "BitwiseNot": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEBitwiseNotKernel.cpp"
+          ]
+        }
+      },
+      "BitwiseOr": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEBitwiseOrKernel.cpp"
+          ]
+        }
+      },
+      "BitwiseXor": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEBitwiseXorKernel.cpp"
+          ]
+        }
+      },
+      "BoundingBoxTransform": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEBoundingBoxTransformKernel.cpp"
+          ]
+        }
+      },
+      "ChannelShuffleLayer": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEChannelShuffleLayerKernel.cpp"
+          ]
+        }
+      },
+      "Col2Im": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NECol2ImKernel.cpp"
+          ]
+        }
+      },
+      "Cast": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuCast.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuCastKernel.cpp"
+          ]
+        }
+      },
+      "Concatenate": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuConcatenate.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuConcatenateWidthKernel.cpp",
+            "src/core/cpu/kernels/CpuConcatenateBatchKernel.cpp",
+            "src/core/cpu/kernels/CpuConcatenateDepthKernel.cpp",
+            "src/core/cpu/kernels/CpuConcatenateHeightKernel.cpp"
+          ]
+        }
+      },
+      "ConvertFullyConnectedWeights": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuConvertFullyConnectedWeights.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.cpp"
+          ]
+        }
+      },
+      "ConvertQuantizedSignedness": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.cpp"
+          ]
+        }
+      },
+      "Copy": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuCopy.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuCopyKernel.cpp"
+          ]
+        }
+      },
+      "Crop": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NECropKernel.cpp"
+          ]
+        }
+      },
+      "DepthwiseConv2d": {
+        "deps": [
+          "Activation",
+          "Permute"
+        ],
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuDepthwiseConv2d.cpp",
+            "src/runtime/cpu/operators/CpuDepthwiseConv2dAssemblyDispatch.cpp",
+            "src/core/cpu/kernels/internal/CpuDepthwiseConv2dAssemblyWrapperKernel.cpp"
+          ],
+          "kernel": [
+            "src/core/NEON/kernels/convolution/common/padding.cpp",
+            "src/core/NEON/kernels/convolution/common/qasymm8.cpp",
+            "src/core/NEON/kernels/convolution/common/qsymm8.cpp",
+            "src/core/NEON/kernels/convolution/common/utils.cpp",
+            "src/core/cpu/kernels/CpuDepthwiseConv2dNativeKernel.cpp"
+          ],
+          "sve": {
+            "all": [
+              "src/core/NEON/kernels/arm_conv/depthwise/interleaves/sve_s8q_3x3_dot.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/interleaves/sve_u8q_3x3_dot.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst_strided/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_generic_output9_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_s8q_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_s8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_s8qs_nhwc_3x3_s1_output2x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8q_nhwc_3x3_s1_output2x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8q_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8s8u8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp"
+            ]
+          },
+          "neon": {
+            "estate64": [
+              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_fp16.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_fp32.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_s8q.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8q.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8s8u8q.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/interleaves/8b_mla.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/interleaves/a64_s8q_3x3_dot.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/interleaves/a64_u8q_3x3_dot.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_generic_output9_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_nhwc_generic_output9_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_nhwc_generic_output9_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8qs_nhwc_3x3_s1_output2x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_nhwc_3x3_s1_output2x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_nhwc_generic_output9_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_generic_output9_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp"
+            ]
+          }
+        }
+      },
+      "DepthToSpaceLayer": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.cpp"
+          ]
+        }
+      },
+      "Dequantize": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuDequantize.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuDequantizeKernel.cpp"
+          ]
+        }
+      },
+      "DirectConv2d": {
+        "deps": [
+          "Activation",
+          "FillBorder"
+        ],
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuDirectConv2d.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuDirectConv2dKernel.cpp",
+            "src/core/cpu/kernels/CpuDirectConv2dOutputStageKernel.cpp"
+          ]
+        }
+      },
+      "Elementwise": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuElementwise.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuElementwiseKernel.cpp"
+          ],
+          "sve": {
+            "all": [
+              "src/core/cpu/kernels/elementwise/sve/elementwise.cpp"
+            ]
+          }
+        }
+      },
+      "ElementwiseUnary": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuElementwiseUnary.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuElementwiseUnaryKernel.cpp"
+          ],
+          "sve": {
+            "all": [
+              "src/core/cpu/kernels/elementwise/sve/elementwise_unary.cpp"
+            ]
+          }
+        }
+      },
+      "FFT1D": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEFFTDigitReverseKernel.cpp",
+            "src/core/NEON/kernels/NEFFTRadixStageKernel.cpp",
+            "src/core/NEON/kernels/NEFFTScaleKernel.cpp"
+          ]
+        }
+      },
+      "FillBorder": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEFillBorderKernel.cpp"
+          ]
+        }
+      },
+      "Flatten": {
+        "deps: ": [
+          "Reshape"
+        ],
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuFlatten.cpp"
+          ]
+        }
+      },
+      "Fill": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuFill.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuFillKernel.cpp"
+          ]
+        }
+      },
+      "Floor": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuFloor.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuFloorKernel.cpp"
+          ],
+          "neon": {
+            "fp32": [
+              "src/core/cpu/kernels/floor/neon/fp32.cpp"
+            ],
+            "fp16": [
+              "src/core/cpu/kernels/floor/neon/fp16.cpp"
+            ]
+          }
+        }
+      },
+      "FuseBatchNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEFuseBatchNormalizationKernel.cpp"
+          ]
+        }
+      },
+      "GEMM": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.cpp",
+            "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.cpp",
+            "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.cpp",
+            "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.cpp"
+          ]
+        }
+      },
+      "GEMMLowp": {
+        "deps": [
+          "GemmAssemblyDispatch"
+        ],
+        "files": {
+          "operator" : ["src/runtime/cpu/operators/CpuGemmLowpOutputStage.cpp"],
+          "kernel": [
+            "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ScaleKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.cpp",
+            "src/core/NEON/kernels/NEGEMMLowpReductionKernel.cpp",
+            "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.cpp",
+            "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.cpp"
+          ]
+        }
+      },
+      "GEMMConvolution": {
+        "deps": [
+          "Activation",
+          "Col2Im",
+          "Reshape",
+          "Im2Col",
+          "GEMMLowpOffsetContributionOutputStage",
+          "ConvertQuantizedSignedness"
+        ],
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEWeightsReshapeKernel.cpp"
+          ]
+        }
+      },
+      "GemmAssemblyDispatch": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.cpp"
+          ],
+          "kernel": [
+            "src/core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
+            "src/core/NEON/kernels/arm_gemm/gemm_bf16.cpp",
+            "src/core/NEON/kernels/arm_gemm/gemm_fp32.cpp",
+            "src/core/NEON/kernels/arm_gemm/gemm_int16.cpp",
+            "src/core/NEON/kernels/arm_gemm/gemm_int8.cpp",
+            "src/core/NEON/kernels/arm_gemm/gemm_qint8.cpp",
+            "src/core/NEON/kernels/arm_gemm/gemm_quint8.cpp",
+            "src/core/NEON/kernels/arm_gemm/gemm_uint16.cpp",
+            "src/core/NEON/kernels/arm_gemm/gemm_uint8.cpp",
+            "src/core/NEON/kernels/arm_gemm/mergeresults.cpp",
+            "src/core/NEON/kernels/arm_gemm/interleave_indirect.cpp",
+            "src/core/NEON/kernels/arm_gemm/misc.cpp",
+            "src/core/NEON/kernels/arm_gemm/quantized.cpp",
+            "src/core/NEON/kernels/arm_gemm/rowsum_indirect_s8.cpp",
+            "src/core/NEON/kernels/arm_gemm/rowsum_indirect_u8.cpp"
+          ],
+          "neon": {
+            "estate32": [
+              "src/core/NEON/kernels/arm_gemm/kernels/a32_sgemm_8x6/a53.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a32_sgemm_8x6/a55r1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a32_sgemm_8x6/generic.cpp"
+            ],
+            "estate64": [
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_s16_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_s8_4x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_s8_8x12/a55r1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_s8_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_s8_8x12/x1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_u16_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_u8_4x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_u8_8x12/a55r1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_u8_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_u8_8x12/x1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_gemv_fp32_mla_32/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/a55r1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/x1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_bf16fp32_dot_6x16/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16_mla_6x32/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16_mla_6x32/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp32_mla_6x16/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp32_mla_6x16/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp32_mla_8x4/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp32_mla_8x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8qa_dot_4x16/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8qa_dot_4x16/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8qs_dot_6x16/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8qs_dot_6x16/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8s32_dot_6x16/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8s32_dot_6x16/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_u8qa_dot_4x16/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_u8qa_dot_4x16/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_u8u32_dot_6x16/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_u8u32_dot_6x16/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_interleaved_bf16fp32_dot_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_interleaved_bf16fp32_mmla_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_interleaved_s8s32_mmla_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_interleaved_u8u32_mmla_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x12/a53.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x12/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x12/a55r1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x12/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x12/x1.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemm_8x6/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemv_pretransposed/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_fp32_mla_6x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_fp32_mla_8x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_s8s32_dot_6x4/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_s8s32_dot_6x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_s8s32_dot_8x4/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_s8s32_dot_8x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_6x4/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_6x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_8x4/a55.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_8x4/generic.cpp"
+            ]
+          },
+          "sve": {
+            "all": [
+              "src/core/NEON/kernels/arm_gemm/mergeresults-sve.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_gemv_fp32_mla_8VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_bf16fp32_dot_6x4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp16_mla_6x4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp32_mla_6x4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp32_mla_8x1VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_s8qa_dot_4x4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_s8qs_dot_6x4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_s8s32_dot_6x4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_u8qa_dot_4x4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_u8u32_dot_6x4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_bf16fp32_dot_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_bf16fp32_mmla_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_fp16_mla_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_fp32_mla_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_fp32_mmla_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_s8s32_dot_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_s8s32_mmla_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_u8u32_dot_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_interleaved_u8u32_mmla_8x3VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_smallK_hybrid_fp32_mla_8x1VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_smallK_hybrid_s8s32_dot_8x1VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sve_smallK_hybrid_u8u32_dot_8x1VL/generic.cpp"
+            ]
+          }
+        }
+      },
+      "GemmDirectConv2d": {
+        "deps": [
+          "Activation",
+          "GemmAssemblyDispatch",
+          "Permute"
+        ],
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuGemmDirectConv2d.cpp"
+          ]
+        }
+      },
+      "Mul": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuMul.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuMulKernel.cpp"
+          ]
+        }
+      },
+      "Quantize": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuQuantize.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuQuantizeKernel.cpp"
+          ]
+        }
+      },
+      "Reshape": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuReshape.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuReshapeKernel.cpp"
+          ]
+        }
+      },
+      "Gather": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEGatherKernel.cpp"
+          ]
+        }
+      },
+      "GenerateProposalsLayer": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.cpp"
+          ]
+        }
+      },
+      "Im2Col": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEIm2ColKernel.cpp"
+          ]
+        }
+      },
+      "InstanceNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.cpp"
+          ]
+        }
+      },
+      "L2Normalize": {
+        "deps": [
+          "Reduction"
+        ],
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEL2NormalizeLayerKernel.cpp"
+          ]
+        }
+      },
+      "Logical": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NELogicalKernel.cpp"
+          ]
+        }
+      },
+      "MaxUnpooling": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.cpp"
+          ]
+        }
+      },
+      "MeanStdDevNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.cpp"
+          ]
+        }
+      },
+      "MinMax": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEMinMaxLayerKernel.cpp"
+          ]
+        }
+      },
+      "Normalization": {
+        "deps": [
+          "PixelWiseMultiplication"
+        ],
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NENormalizationLayerKernel.cpp"
+          ]
+        }
+      },
+      "Pad": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEPadLayerKernel.cpp"
+          ]
+        }
+      },
+      "Permute": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuPermute.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuPermuteKernel.cpp"
+          ]
+        }
+      },
+      "Pool2d": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuPool2d.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuPool2dKernel.cpp",
+            "src/core/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.cpp",
+            "src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_nhwc_1x1_stride_any_depthfirst/generic.cpp",
+            "src/core/NEON/kernels/arm_conv/pooling/pooling_fp16.cpp",
+            "src/core/NEON/kernels/arm_conv/pooling/pooling_fp32.cpp",
+            "src/core/NEON/kernels/arm_conv/pooling/pooling_s8.cpp",
+            "src/core/NEON/kernels/arm_conv/pooling/pooling_s8q.cpp",
+            "src/core/NEON/kernels/arm_conv/pooling/pooling_u8.cpp",
+            "src/core/NEON/kernels/arm_conv/pooling/pooling_u8q.cpp"
+          ],
+          "neon": {
+            "nchw": [
+              "src/core/cpu/kernels/pooling/neon/nchw/all.cpp"
+            ],
+            "fp32": [
+              "src/core/cpu/kernels/pooling/neon/fp32.cpp"
+            ],
+            "fp16": [
+              "src/core/cpu/kernels/pooling/neon/fp16.cpp"
+            ],
+            "qasymm8": [
+              "src/core/cpu/kernels/pooling/neon/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/core/cpu/kernels/pooling/neon/qasymm8_signed.cpp"
+            ],
+            "estate64": [
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp32_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp32_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_s8_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_s8_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_s8_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_s8q_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_s8q_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8q_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8q_nhwc_max_generic_depthfirst/generic.cpp"
+            ]
+          },
+          "sve": {
+            "all": [
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_fp32_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_fp32_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_fp32_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_fp16_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_fp16_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_fp16_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_s8_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_s8_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_s8_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_s8q_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_s8q_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8q_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8q_nhwc_max_generic_depthfirst/generic.cpp"
+            ]
+          }
+        }
+      },
+      "PriorBox": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEPriorBoxLayerKernel.cpp"
+          ]
+        }
+      },
+      "QLSTMLayerNormalization": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.cpp"
+          ]
+        }
+      },
+      "Range": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NERangeKernel.cpp"
+          ]
+        }
+      },
+      "ReductionOperation": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEReductionOperationKernel.cpp"
+          ]
+        }
+      },
+      "Remap": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NERemapKernel.cpp"
+          ]
+        }
+      },
+      "Reorg": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEReorgLayerKernel.cpp"
+          ]
+        }
+      },
+      "Reverse": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEReverseKernel.cpp"
+          ]
+        }
+      },
+      "ROIAlign": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEROIAlignLayerKernel.cpp"
+          ]
+        }
+      },
+      "ROIPooling": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEROIPoolingLayerKernel.cpp"
+          ]
+        }
+      },
+      "Select": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NESelectKernel.cpp"
+          ]
+        }
+      },
+      "SpaceToBatch": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NESpaceToBatchLayerKernel.cpp"
+          ]
+        }
+      },
+      "SpaceToDepth": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NESpaceToDepthLayerKernel.cpp"
+          ]
+        }
+      },
+      "Stack": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEStackLayerKernel.cpp"
+          ]
+        }
+      },
+      "StridedSlice": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEStridedSliceKernel.cpp"
+          ]
+        }
+      },
+      "Scale": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuScale.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuScaleKernel.cpp"
+          ],
+          "sve": {
+            "fp32": [
+              "src/core/cpu/kernels/scale/sve/fp32.cpp"
+            ],
+            "fp16": [
+              "src/core/cpu/kernels/scale/sve/fp16.cpp"
+            ],
+            "qasymm8": [
+              "src/core/cpu/kernels/scale/sve/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/core/cpu/kernels/scale/sve/qasymm8_signed.cpp"
+            ],
+            "integer": [
+              "src/core/cpu/kernels/scale/sve/integer.cpp"
+            ]
+          },
+          "neon": {
+            "fp16": [
+              "src/core/cpu/kernels/scale/neon/fp16.cpp"
+            ],
+            "qasymm8": [
+              "src/core/cpu/kernels/scale/neon/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/core/cpu/kernels/scale/neon/qasymm8_signed.cpp"
+            ],
+            "integer": [
+              "src/core/cpu/kernels/scale/neon/integer.cpp"
+            ]
+          }
+        }
+      },
+      "Softmax": {
+        "deps": [
+          "Permute"
+        ],
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuSoftmax.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuSoftmaxKernel.cpp"
+          ],
+          "sve": {
+            "all": [
+              "src/core/cpu/kernels/softmax/impl/sve/impl.cpp"
+            ]
+          }
+        }
+      },
+      "Sub": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuSub.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuSubKernel.cpp"
+          ],
+          "neon": {
+            "qsymm16": [
+              "src/core/cpu/kernels/sub/neon/qsymm16.cpp"
+            ],
+            "qasymm8": [
+              "src/core/cpu/kernels/sub/neon/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/core/cpu/kernels/sub/neon/qasymm8_signed.cpp"
+            ],
+            "integer": [
+              "src/core/cpu/kernels/sub/neon/integer.cpp"
+            ]
+          }
+        }
+      },
+      "Transpose": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuTranspose.cpp"
+          ],
+          "kernel": [
+            "src/core/cpu/kernels/CpuTransposeKernel.cpp"
+          ]
+        }
+      },
+      "Tile": {
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NETileKernel.cpp"
+          ]
+        }
+      },
+      "WinogradConvolution": {
+        "deps": [
+          "Activation",
+          "Permute"
+        ],
+        "files": {
+          "kernel": [
+            "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.cpp",
+            "src/core/NEON/kernels/convolution/winograd/padding.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/input_1x8_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/input_4x4_fp16_fp16_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/input_4x4_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/input_6x6_fp16_fp16_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/input_6x6_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/output_2_7_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/output_2x2_3x3_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/output_2x2_5x5_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/output_4_5_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/output_4x4_3x3_fp16_fp16_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/output_4x4_3x3_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/output_6_3_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_2_7_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_2x2_3x3_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_2x2_5x5_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_4_5_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_4x4_3x3_fp16_fp16_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_4x4_3x3_fp32_fp32_integers.cpp",
+            "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_6_3_fp32_fp32_integers.cpp"
+          ]
+        }
+      }
+    }
+  }
 }

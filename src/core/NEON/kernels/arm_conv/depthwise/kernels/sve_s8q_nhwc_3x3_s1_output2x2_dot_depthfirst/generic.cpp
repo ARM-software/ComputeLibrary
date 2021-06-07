@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 #include "arm_gemm.hpp"
 #include <cstdint>
@@ -454,4 +454,4 @@ void sve_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(const int8_t *const *cons
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

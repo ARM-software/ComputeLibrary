@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
-#include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/core/NEON/SVEMath.h"
+#include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include <arm_sve.h>
 
 namespace arm_compute
@@ -178,4 +178,4 @@ void add_qasymm8_signed_sve(const ITensor *src0, const ITensor *src1, ITensor *d
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
