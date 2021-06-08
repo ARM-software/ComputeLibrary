@@ -29,6 +29,7 @@ arm_compute_library_defaults {
             "-DEMBEDDED_KERNELS",
             "-DARM_COMPUTE_ASSERTS_ENABLED",
             "-DARM_COMPUTE_CPP_SCHEDULER",
+            "-DENABLE_NEON",
             "-Wno-unused-parameter",
             "-DNO_DOT_IN_TOOLCHAIN",
             "-no-integrated-as",
