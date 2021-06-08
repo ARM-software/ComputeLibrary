@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__ARM_FEATURE_SVE2)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
-#if defined(__ARM_FEATURE_SVE2)
 #include "src/core/NEON/SVEMath.h"
 #include <arm_sve.h>
 

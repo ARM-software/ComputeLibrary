@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__ARM_FEATURE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
@@ -109,3 +110,4 @@ template void elementwise_sve_op<float32_t>(const ITensor *in, ITensor *out, con
 template void elementwise_sve_op<int32_t>(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op);
 } // namespace cpu
 } // namespace arm_compute
+#endif /* defined(__ARM_FEATURE_SVE) */

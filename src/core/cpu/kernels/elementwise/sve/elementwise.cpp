@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__ARM_FEATURE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "src/core/cpu/kernels/elementwise/sve/elementwise_list.h"
@@ -307,3 +308,4 @@ template void elementwise_comparison_op<ComparisonOperation::LessEqual, int16_t>
 template void elementwise_comparison_op<ComparisonOperation::LessEqual, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
+#endif /* defined(__ARM_FEATURE_SVE) */

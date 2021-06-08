@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__ARM_FEATURE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
@@ -135,3 +136,4 @@ template void add_same_sve<int16_t>(const ITensor *src0, const ITensor *src1, IT
 template void add_same_sve<int32_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
+#endif /* defined(__ARM_FEATURE_SVE) */
