@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,21 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DEVICE_PROPERTIES_H
-#define ARM_COMPUTE_DEVICE_PROPERTIES_H
-
-#include "arm_compute/core/CPP/CPPTypes.h"
+#include "src/common/cpuinfo/target/CpuInfoSveUtils.h"
 
 namespace arm_compute
 {
-/** Device properties */
-struct DeviceProperties
+namespace cpuinfo
 {
-    std::string name{ "unknown" };
-    CPUInfo     cpu_info{}; // initialised upon creating in the constructor
-
-    DeviceProperties();
-};
-
+uint64_t get_sve_feature_reg()
+{
+    uint64_t reg = 0;
+#if defined(ENABLE_SVE)
+    __asm __volatile("MRS %0, ID_AA64ZFR0_EL1"
+                     : "=r"(reg));
+#endif /* defined(DENABLE_SVE) */
+    return reg;
+}
+} // namespace cpuinfo
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_DEVICE_PROPERTIES_H */

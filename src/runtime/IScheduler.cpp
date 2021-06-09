@@ -26,7 +26,7 @@
 #include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Window.h"
-#include "src/runtime/CPUUtils.h"
+#include "src/common/cpuinfo/CpuInfo.h"
 #include "src/runtime/SchedulerUtils.h"
 
 namespace arm_compute
@@ -34,9 +34,8 @@ namespace arm_compute
 IScheduler::IScheduler()
     : _cpu_info()
 {
-    utils::cpu::get_cpu_configuration(_cpu_info);
     // Work out the best possible number of execution threads
-    _num_threads_hint = utils::cpu::get_threads_hint();
+    _num_threads_hint = cpuinfo::num_threads_hint();
 }
 
 CPUInfo &IScheduler::cpu_info()

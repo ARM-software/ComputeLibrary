@@ -45,6 +45,7 @@
 #include "utils/TypePrinter.h"
 #endif /* ARM_COMPUTE_CL */
 #include "arm_compute/runtime/Scheduler.h"
+#include "src/common/cpuinfo/CpuModel.h"
 
 #include <fstream>
 #include <initializer_list>
@@ -235,13 +236,15 @@ int main(int argc, char **argv)
 #endif /* ARM_COMPUTE_CL */
                 const arm_compute::CPUInfo &cpu_info = Scheduler::get().cpu_info();
                 const unsigned int          num_cpus = cpu_info.get_cpu_num();
+                p->print_entry("cpu_has_sve", support::cpp11::to_string(cpu_info.has_sve()));
                 p->print_entry("cpu_has_fp16", support::cpp11::to_string(cpu_info.has_fp16()));
+                p->print_entry("cpu_has_bf16", support::cpp11::to_string(cpu_info.has_bf16()));
                 p->print_entry("cpu_has_dotprod", support::cpp11::to_string(cpu_info.has_dotprod()));
 
                 for(unsigned int j = 0; j < num_cpus; ++j)
                 {
                     const CPUModel model = cpu_info.get_cpu_model(j);
-                    p->print_entry("CPU" + support::cpp11::to_string(j), cpu_model_to_string(model));
+                    p->print_entry("CPU" + support::cpp11::to_string(j), cpuinfo::cpu_model_to_string(model));
                 }
                 p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
                 p->print_entry("Threads", support::cpp11::to_string(threads->value()));

@@ -26,7 +26,6 @@
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "src/cpu/CpuQueue.h"
 #include "src/cpu/CpuTensor.h"
-#include "src/runtime/CPUUtils.h"
 
 #include <cstdlib>
 #include <malloc.h>
@@ -142,7 +141,6 @@ CpuCapabilities populate_capabilities(AclTargetCapabilities external_caps,
 {
     // Extract legacy structure
     CPUInfo cpu_info;
-    arm_compute::utils::cpu::get_cpu_configuration(cpu_info);
 
     CpuCapabilities caps;
     if(external_caps != AclCpuCapabilitiesAuto)

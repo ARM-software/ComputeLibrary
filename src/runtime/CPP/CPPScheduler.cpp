@@ -29,7 +29,6 @@
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/Utility.h"
-#include "src/runtime/CPUUtils.h"
 #include "support/Mutex.h"
 
 #include <atomic>

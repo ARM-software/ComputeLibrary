@@ -27,7 +27,6 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
-#include "src/runtime/CPUUtils.h"
 #include <omp.h>
 
 namespace arm_compute

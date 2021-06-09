@@ -1,5 +1,9 @@
 {
     "common" : [
+        "src/common/cpuinfo/target/CpuInfoSveUtils.cpp",
+        "src/common/cpuinfo/CpuInfo.cpp",
+        "src/common/cpuinfo/CpuModel.cpp",
+        "src/common/cpuinfo/CpuIsaInfo.cpp",
         "src/common/utils/LegacySupport.cpp",
         "src/common/AllocatorWrapper.cpp",
         "src/common/ITensorV2.cpp",

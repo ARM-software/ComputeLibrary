@@ -127,9 +127,9 @@ public:
         }
 
     private:
-        unsigned int _split_dimension;
-        StrategyHint _strategy;
-        int          _threshold;
+        unsigned int _split_dimension{};
+        StrategyHint _strategy{};
+        int          _threshold{};
     };
     /** Signature for the workloads to execute */
     using Workload = std::function<void(const ThreadInfo &)>;
@@ -205,7 +205,6 @@ protected:
      * @param[in] workloads Array of workloads to run
      */
     virtual void run_workloads(std::vector<Workload> &workloads) = 0;
-    CPUInfo _cpu_info;
 
     /** Common scheduler logic to execute the given kernel
      *
@@ -215,6 +214,8 @@ protected:
      * @param[in] tensors Vector containing the tensors to operate on.
      */
     void schedule_common(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors);
+
+    CPUInfo _cpu_info{};
 
 private:
     unsigned int _num_threads_hint = {};

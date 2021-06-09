@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_RUNTIME_CPU_UTILS_H
-#define ARM_COMPUTE_RUNTIME_CPU_UTILS_H
+#ifndef SRC_COMMON_CPUINFO_TARGET_CPUINFO_SVE_UTILS_H
+#define SRC_COMMON_CPUINFO_TARGET_CPUINFO_SVE_UTILS_H
+
+#include <cstdint>
 
 namespace arm_compute
 {
-class CPUInfo;
-
-namespace utils
+namespace cpuinfo
 {
-namespace cpu
-{
-/** This function will try to detect the CPU configuration on the system and will fill
- *  the cpuinfo object accordingly to reflect this.
+/** Returns the contents of the SVE feature register (ID_AA64ZFR0_EL1)
  *
- * @param[out] cpuinfo @ref CPUInfo to be used to hold the system's cpu configuration.
+ * @return uint64_t The value of the register
  */
-void get_cpu_configuration(CPUInfo &cpuinfo);
-/** Some systems have both big and small cores, this fuction computes the minimum number of cores
- *  that are exactly the same on the system. To maximize performance the library attempts to process
- *  workloads concurrently using as many threads as big cores are available on the system.
- *
- * @return The minumum number of common cores.
- */
-unsigned int get_threads_hint();
-} // namespace cpu
-} // namespace utils
+uint64_t get_sve_feature_reg();
+} // namespace cpuinfo
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_RUNTIME_CPU_UTILS_H */
+#endif /* SRC_COMMON_CPUINFO_CPUISAINFO_H */

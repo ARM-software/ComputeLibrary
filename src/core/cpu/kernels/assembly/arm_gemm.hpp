@@ -25,6 +25,7 @@
 
 #include <cstring>
 #include <memory>
+#include <vector>
 
 #include "arm_gemm_local.hpp"
 #include "gemm_common.hpp"
