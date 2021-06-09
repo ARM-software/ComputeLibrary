@@ -55,7 +55,7 @@ void NEGEMMConv2d::configure(ITensor *input, const ITensor *weights, const ITens
     _impl->tensors.add_const_tensor(TensorType::ACL_SRC_2, biases);
     _impl->tensors.add_tensor(TensorType::ACL_DST, output);
 
-    _impl->op->configure(input->info(), weights->info(), biases->info(), output->info(), info);
+    _impl->op->configure(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), info);
 }
 
 Status NEGEMMConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const Conv2dInfo &info)
