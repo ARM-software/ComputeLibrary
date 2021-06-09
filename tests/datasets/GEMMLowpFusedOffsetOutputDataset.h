@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -167,15 +167,47 @@ class SmallGEMMLowpFusedOffsetOutputUint8Dataset final : public GEMMLowpFusedOff
 public:
     SmallGEMMLowpFusedOffsetOutputUint8Dataset()
     {
-        add_config(TensorShape(21U, 13U), TensorShape(1U, 21U), TensorShape(1U, 13U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -100, 2, 13, 10, 210));
-        add_config(TensorShape(52U, 13U), TensorShape(33U, 52U), TensorShape(33U, 13U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 100, 2, 13, 10, 210));
-        add_config(TensorShape(31U, 27U), TensorShape(23U, 31U), TensorShape(23U, 27U), 18, 23, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 200, 2, 13, 10, 210));
-        add_config(TensorShape(32U, 72U), TensorShape(16U, 32U), TensorShape(16U, 72U), -9, 1, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -100, 2, 13, 10, 210));
+        add_config(TensorShape(21U, 13U), TensorShape(1U, 21U), TensorShape(1U, 13U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -100, 2, 13, 10, 210));
+        add_config(TensorShape(52U, 13U), TensorShape(33U, 52U), TensorShape(33U, 13U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 100, 2, 13, 10, 210));
+        add_config(TensorShape(31U, 27U), TensorShape(23U, 31U), TensorShape(23U, 27U), 18, 23, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 200, 2, 13, 10, 210));
+        add_config(TensorShape(32U, 72U), TensorShape(16U, 32U), TensorShape(16U, 72U), -9, 1, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -100, 2, 13, 10, 210));
 
         add_config(TensorShape(21U, 1U), TensorShape(43U, 21U), TensorShape(43U, 1U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -2, 254601600, 10, 10, 210));
         add_config(TensorShape(31U, 3U), TensorShape(72U, 31U), TensorShape(72U, 3U), -2, 13, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 0, 254601600, 10, 10, 210));
         add_config(TensorShape(31U, 27U), TensorShape(23U, 31U), TensorShape(23U, 27U), 5, 13, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 2, 254601602, 10, 10, 210));
         add_config(TensorShape(32U, 72U), TensorShape(17U, 32U), TensorShape(17U, 72U), -9, 1, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -1, 254601602, 10, 10, 210));
+    }
+};
+
+class SmallGEMMLowpFusedOffsetOutputOutput3DUint8Dataset final : public GEMMLowpFusedOffsetOutputDataset
+{
+public:
+    SmallGEMMLowpFusedOffsetOutputOutput3DUint8Dataset()
+    {
+        add_config(TensorShape(21U, 1421U, 33U), TensorShape(34U, 21U), TensorShape(34U, 7U, 203U, 33U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -100, 2, 13, 10, 210));
+        add_config(TensorShape(31U, 102U, 55U), TensorShape(23U, 31U), TensorShape(23U, 1U, 102U, 55U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 100, 2, 13, 10, 210));
+        add_config(TensorShape(38U, 1200U, 77U), TensorShape(21U, 38U), TensorShape(21U, 4U, 300U, 77U), 18, 23, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 200, 2, 13, 10, 210));
+        add_config(TensorShape(32U, 103U, 99U), TensorShape(17U, 32U), TensorShape(17U, 1U, 103U, 99U), -9, 1, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -100, 2, 13, 10, 210));
+        add_config(TensorShape(16U, 1600U, 111U), TensorShape(8U, 16U), TensorShape(8U, 8U, 200U, 111U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -2, 254601600, 10, 10,
+                                                                                                                               210));
+        add_config(TensorShape(16U, 1600U, 113U), TensorShape(8U, 16U), TensorShape(8U, 8U, 200U, 113U), -2, 13, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 0, 254601600, 10, 10,
+                   210));
+    }
+};
+
+class SmallGEMMLowpFusedOffsetOutputInputOutput3DUint8Dataset final : public GEMMLowpFusedOffsetOutputDataset
+{
+public:
+    SmallGEMMLowpFusedOffsetOutputInputOutput3DUint8Dataset()
+    {
+        add_config(TensorShape(21U, 7U, 203U, 33U), TensorShape(34U, 21U), TensorShape(34U, 7U, 203U, 33U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -100, 2, 13, 10, 210));
+        add_config(TensorShape(31U, 1U, 102U, 55U), TensorShape(23U, 31U), TensorShape(23U, 1U, 102U, 55U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 100, 2, 13, 10, 210));
+        add_config(TensorShape(38U, 4U, 300U, 77U), TensorShape(21U, 38U), TensorShape(21U, 4U, 300U, 77U), 18, 23, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 200, 2, 13, 10, 210));
+        add_config(TensorShape(32U, 1U, 103U, 99U), TensorShape(17U, 32U), TensorShape(17U, 1U, 103U, 99U), -9, 1, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -100, 2, 13, 10, 210));
+        add_config(TensorShape(16U, 8U, 200U, 111U), TensorShape(8U, 16U), TensorShape(8U, 8U, 200U, 111U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -2, 254601600, 10, 10,
+                   210));
+        add_config(TensorShape(16U, 8U, 200U, 113U), TensorShape(8U, 16U), TensorShape(8U, 8U, 200U, 113U), -2, 13, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 0, 254601600, 10, 10,
+                   210));
     }
 };
 
@@ -214,10 +246,10 @@ class LargeGEMMLowpFusedOffsetOutputUint8Dataset final : public GEMMLowpFusedOff
 public:
     LargeGEMMLowpFusedOffsetOutputUint8Dataset()
     {
-        add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 429U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -100, 2, 18, 10, 210));
-        add_config(TensorShape(873U, 513U), TensorShape(784U, 873U), TensorShape(784U, 513U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 100, 2, 18, 10, 210));
-        add_config(TensorShape(1021U, 973U), TensorShape(783U, 1021U), TensorShape(783U, 973U), 5, 13, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 200, 2, 18, 10, 210));
-        add_config(TensorShape(941U, 1011U), TensorShape(623U, 941U), TensorShape(623U, 1011U), -9, 1, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -100, 2, 18, 10, 210));
+        add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 429U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -100, 2, 18, 10, 210));
+        add_config(TensorShape(873U, 513U), TensorShape(784U, 873U), TensorShape(784U, 513U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 100, 2, 18, 10, 210));
+        add_config(TensorShape(1021U, 973U), TensorShape(783U, 1021U), TensorShape(783U, 973U), 5, 13, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 200, 2, 18, 10, 210));
+        add_config(TensorShape(941U, 1011U), TensorShape(623U, 941U), TensorShape(623U, 1011U), -9, 1, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -100, 2, 18, 10, 210));
 
         add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 429U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, -1, 254601600, 15, 10, 210));
         add_config(TensorShape(873U, 513U), TensorShape(784U, 873U), TensorShape(784U, 513U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, 1, 254601600, 15, 10, 210));

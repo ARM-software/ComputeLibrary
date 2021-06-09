@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,16 +68,44 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFixture, framework:
 
 TEST_SUITE(FusedOffsetOutput)
 TEST_SUITE(QASYMM8)
-using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
-                       framework::dataset::make("DataType", { DataType::QASYMM8 })))
+using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture, framework::DatasetMode::ALL, combine(combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
+                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                       framework::dataset::make("reshape_b_only_on_first_run", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
-                       framework::dataset::make("DataType", { DataType::QASYMM8 })))
+TEST_SUITE(Output3D)
+using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputOutput3DUint8Fixture =
+    GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore, false, true>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputOutput3DUint8Fixture, framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallGEMMLowpFusedOffsetOutputOutput3DUint8Dataset(),
+                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                               framework::dataset::make("reshape_b_only_on_first_run", { true, false })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_quant);
+}
+TEST_SUITE_END() // Output3D
+
+TEST_SUITE(InputOutput3D)
+using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputInputOutput3DUint8Fixture =
+    GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore, true, true>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputInputOutput3DUint8Fixture, framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallGEMMLowpFusedOffsetOutputInputOutput3DUint8Dataset(),
+                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                               framework::dataset::make("reshape_b_only_on_first_run", { true, false })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_quant);
+}
+TEST_SUITE_END() // InputOutput3D
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
+                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                       framework::dataset::make("reshape_b_only_on_first_run", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);

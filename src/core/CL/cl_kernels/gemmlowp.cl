@@ -24,6 +24,7 @@
 #include "gemm_helpers.h"
 #include "helpers_asymm.h"
 #include "repeat.h"
+#include "tile_helpers.h"
 
 #if defined(DATA_TYPE) && defined(ACC_DATA_TYPE)
 
@@ -464,190 +465,10 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 
 #if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
-/** This OpenCL kernel computes the matrix multiplication between 2 matrices.
- *  The LHS matrix is NOT reshaped
- *  The RHS matrix is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is transposed
- *
- * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
- * @note The accumulator data type must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
- * @note The number of columns of LHS matrix must be passed at compile time using -DK (i.e. -DK=64)
- * @note The block's dimensions used for reshaping the RHS matrix (N0 and K0) must be passed at compile time using -DN0 and -DK0 (i.e. -DN0=8, -DK0=4).
- * @note The number of M0 rows to process must be passed at compile time using -DM0 (i.e. -DM0=2)
- * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (i.e. -DH0=2)
- * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
- * @note Only the following configurations of M0, N0 and K0 are currently supported:
- *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
- *  - N0 = 2, 3, 4, 8, 16
- *  - K0 = 2, 3, 4, 8, 16
- *  - H0 >= 1
- *
- * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
- *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
- *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
- *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
- *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
- *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns LHS matrix
- *
- * @param[in]  lhs_ptr                           Pointer to the LHS reshaped matrix. Supported data type: QASYMM8/QASYMM8_SIGNED
- * @param[in]  lhs_stride_x                      Stride of the LHS reshaped matrix in X dimension (in bytes)
- * @param[in]  lhs_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  lhs_stride_y                      Stride of the LHS reshaped matrix in Y dimension (in bytes)
- * @param[in]  lhs_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  lhs_offset_first_element_in_bytes The offset of the first element in the LHS reshaped matrix
- * @param[in]  rhs_ptr                           Pointer to the RHS reshaped matrix. Supported data type: same as @p lhs_ptr
- * @param[in]  rhs_stride_x                      Stride of the RHS reshaped matrix in X dimension (in bytes)
- * @param[in]  rhs_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  rhs_stride_y                      Stride of the RHS reshaped matrix in Y dimension (in bytes)
- * @param[in]  rhs_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  rhs_offset_first_element_in_bytes The offset of the first element in the RHS reshaped matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data type: S32
- * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
- * @param[in]  lhs_stride_z                      Stride of the LHS reshaped matrix in Z dimension (in bytes)
- * @param[in]  rhs_stride_z                      Stride of the RHS reshaped matrix in Z dimension (in bytes)
- * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  lhs_cross_plane_pad               (Optional) Bottom paddings for LHS matrix in unit of elements (only if defined REINTERPRET_INPUT_AS_3D)
- * @param[in]  dst_cross_plane_pad               (Optional) Bottom paddings for the output matrix in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
- */
-__kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
-                                              IMAGE_DECLARATION(rhs),
-                                              IMAGE_DECLARATION(dst),
-                                              uint lhs_stride_z,
-                                              uint rhs_stride_z,
-                                              uint dst_stride_z
-#if defined(REINTERPRET_INPUT_AS_3D)
-                                              ,
-                                              uint lhs_cross_plane_pad
-#endif // REINTERPRET_INPUT_AS_3D
-#if defined(REINTERPRET_OUTPUT_AS_3D)
-                                              ,
-                                              uint dst_cross_plane_pad
-#endif // REINTERPRET_OUTPUT_AS_3D
-                                             )
-{
-    // Block size
-#define RHS_BLOCK_SIZE ((K0) * (N0))
+#if defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT)
+#define FUSED_OUTPUT_STAGE_FIXED_POINT
+#endif // defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT)
 
-    // RHS offset and step X
-#if defined(RHS_INTERLEAVE)
-#define RHS_OFFSET_X (K0)
-#define RHS_STEP_X ((K0) * (H0))
-#define RHS_STEP_LOOP (1)
-#else // defined(RHS_INTERLEAVE)
-#define RHS_OFFSET_X (RHS_BLOCK_SIZE)
-#define RHS_STEP_X (K0)
-#define RHS_STEP_LOOP (H0)
-#endif // defined(RHS_INTERLEAVE)
-
-    uint x = get_global_id(0);
-    uint y = get_global_id(1);
-    uint z = get_global_id(2);
-
-#if defined(DUMMY_WORK_ITEMS)
-    if((x * N0 >= N) || (y * M0 >= M))
-    {
-        return;
-    }
-#endif // defined(DUMMY_WORK_ITEMS)
-
-    // Compute LHS matrix address
-    uint lhs_offset = lhs_offset_first_element_in_bytes + COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * (uint)lhs_stride_y;
-
-    // Compute RHS matrix address
-    uint rhs_offset = rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X + (x / (uint)H0) * rhs_stride_y;
-
-#if defined(MATRIX_B_DEPTH)
-    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
-    rhs_offset += (z % MATRIX_B_DEPTH) * rhs_stride_z;
-#else  // defined(MATRIX_B_DEPTH)
-    rhs_offset += z * rhs_stride_z;
-#endif // defined(MATRIX_B_DEPTH)
-
-    REPEAT_VAR_INIT_TO_CONST(8, uint, zlhs, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
-    REPEAT_VAR_INIT_TO_CONST(16, uint, zrhs, 0);
-
-#if defined(REINTERPRET_INPUT_AS_3D)
-    // The plane (zlhs) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zlhs, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
-
-    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
-    // multiply lhs_stride_z by DEPTH_GEMM3D
-    lhs_offset += z * lhs_stride_z * DEPTH_GEMM3D;
-
-#else // defined(REINTERPRET_INPUT_AS_3D)
-
-    // Add offset for batched GEMM
-    lhs_offset += z * lhs_stride_z;
-
-#endif // defined(REINTERPRET_INPUT_AS_3D)
-
-    // Initialize the accumulators
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(ACC_DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(ACC_DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(N0-1)=0;
-
-    int i = 0;
-    for(; i <= (K - K0); i += K0)
-    {
-        // Load values from LHS matrix
-        LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
-
-        // Load values from RHS matrix
-        LOAD_BLOCK(N0, K0, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
-
-        // Partial matrix multiplication M0,N0,K0
-        ARM_MM_K0XN0XM0(M0, N0, K0, a, b, c);
-
-        lhs_offset += K0;
-        rhs_offset += N0 * RHS_STEP_X * RHS_STEP_LOOP;
-    }
-    // Left-over accumulations
-    for(; i < K; ++i)
-    {
-        // Load values from LHS matrix
-        LOAD_BLOCK(M0, 1, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
-
-        // Load values from RHS reshaped matrix
-        LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
-
-        ARM_MM_K0XN0XM0(M0, N0, 1, a, b, c);
-        lhs_offset += 1;
-        rhs_offset += 1;
-    }
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(int)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * dst_stride_y);
-
-    REPEAT_VAR_INIT_TO_CONST(8, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
-
-#if defined(REINTERPRET_OUTPUT_AS_3D)
-    // The plane (zout) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zout, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
-
-    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
-    // multiply dst_stride_z by DEPTH_GEMM3D
-    dst_addr += z * dst_stride_z * DEPTH_GEMM3D;
-
-#else // defined(REINTERPRET_OUTPUT_AS_3D)
-
-    // Add offset for batched GEMM
-    dst_addr += z * dst_stride_z;
-
-#endif // defined(REINTERPRET_OUTPUT_AS_3D)
-
-    // Convert and store output block
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
-
-    // Store output block
-    REPEAT_VAR_INIT_CONVERT_SAT(M0, VEC_DATA_TYPE(int, N0), c, c_lp);
-    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
-
-#undef RHS_BLOCK_SIZE
-#undef RHS_OFFSET_X
-#undef RHS_STEP_X
-}
-
-#if defined(RESULT_OFFSET) && defined(RESULT_SHIFT) && defined(RESULT_MULTIPLIER)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices with fused output stage using fixed-point arithmetic.
  *  The LHS matrix is NOT reshaped
  *  The RHS matrix is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is transposed
@@ -727,164 +548,162 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
  * @param[in]  result_shifts_step_x                             (Optional) output_shifts_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  result_shifts_offset_first_element_in_bytes      (Optional) The offset of the first element in the output shifts vector
  */
-__kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAGE_DECLARATION(lhs),
-                                                                            IMAGE_DECLARATION(rhs),
-                                                                            IMAGE_DECLARATION(dst),
-                                                                            uint lhs_stride_z,
-                                                                            uint rhs_stride_z,
-                                                                            uint dst_stride_z
+#if defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+__kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint
+#else  // defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+__kernel void gemmlowp_mm_reshaped_only_rhs_t
+#endif // defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+(IMAGE_DECLARATION(lhs),
+ IMAGE_DECLARATION(rhs),
+ IMAGE_DECLARATION(dst),
+ uint lhs_stride_z,
+ uint rhs_stride_z,
+ uint dst_stride_z
 #if defined(REINTERPRET_INPUT_AS_3D)
-                                                                            ,
-                                                                            uint lhs_cross_plane_pad
+ ,
+ uint lhs_cross_plane_pad
 #endif // REINTERPRET_INPUT_AS_3D
 #if defined(REINTERPRET_OUTPUT_AS_3D)
-                                                                            ,
-                                                                            uint dst_cross_plane_pad
+ ,
+ uint dst_cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
 #if defined(A_OFFSET)
-                                                                            ,
-                                                                            IMAGE_DECLARATION(sum_col)
+ ,
+ IMAGE_DECLARATION(sum_col)
 #endif // defined(A_OFFSET)
 #if defined(B_OFFSET)
-                                                                            ,
-                                                                            IMAGE_DECLARATION(sum_row)
+ ,
+ IMAGE_DECLARATION(sum_row)
 #endif // defined(B_OFFSET)
 #if defined(ADD_BIAS)
-                                                                            ,
-                                                                            VECTOR_DECLARATION(biases)
+ ,
+ VECTOR_DECLARATION(biases)
 #endif // defined(ADD_BIAS)
 #if defined(PER_CHANNEL_QUANTIZATION)
-                                                                            ,
-                                                                            VECTOR_DECLARATION(result_multipliers),
-                                                                            VECTOR_DECLARATION(result_shifts)
+ ,
+ VECTOR_DECLARATION(result_multipliers),
+ VECTOR_DECLARATION(result_shifts)
 #endif // defined(PER_CHANNEL_QUANTIZATION)
-                                                                           )
+)
 {
-    // Block size
-#define RHS_BLOCK_SIZE ((K0) * (N0))
+    // @note: replace with (DIMENSION + PAD) once we pass the relevant info at compile time
+#define FULL_LHS_HEIGHT (lhs_stride_z / lhs_stride_y)
+#define FULL_DST_HEIGHT (dst_stride_z / dst_stride_y)
 
     // RHS offset and step X
 #if defined(RHS_INTERLEAVE)
 #define RHS_OFFSET_X (K0)
-#define RHS_STEP_X ((K0) * (H0))
-#define RHS_STEP_LOOP (1)
+#define RHS_STEP_X (K0 * H0)
 #else // defined(RHS_INTERLEAVE)
-#define RHS_OFFSET_X (RHS_BLOCK_SIZE)
+#define RHS_OFFSET_X (K0 * N0)
 #define RHS_STEP_X (K0)
-#define RHS_STEP_LOOP (H0)
 #endif // defined(RHS_INTERLEAVE)
+#define RHS_STEP_LOOP (N0 * K0 * H0)
 
-    uint x = get_global_id(0);
-    uint y = get_global_id(1);
-    uint z = get_global_id(2);
+    uint x  = GET_SPATIAL_IDX(0, 1, 1);
+    uint y  = GET_SPATIAL_IDX(1, M0, PARTIAL_STORE_M0);
+    uint z  = GET_SPATIAL_IDX(2, 1, 1);
+    int  xo = (x * N0);
 
 #if defined(DUMMY_WORK_ITEMS)
-    if((x * N0 >= N) || (y * M0 >= M))
+    if((xo >= N) || (y >= M))
     {
         return;
     }
 #endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
-    uint lhs_offset = lhs_offset_first_element_in_bytes + COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * (uint)lhs_stride_y;
+    uint lhs_y = y + z * FULL_LHS_HEIGHT;
 
     // Compute RHS matrix address
-    uint rhs_offset = rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X + (x / (uint)H0) * rhs_stride_y;
+    uint rhs_offset_x = (x % H0) * RHS_OFFSET_X;
+    uint rhs_offset_y = (x / H0) * rhs_stride_y;
 
 #if defined(MATRIX_B_DEPTH)
     // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
-    rhs_offset += (z % MATRIX_B_DEPTH) * rhs_stride_z;
+    rhs_offset_y += (z % MATRIX_B_DEPTH) * rhs_stride_z;
 #else  // defined(MATRIX_B_DEPTH)
-    rhs_offset += z * rhs_stride_z;
+    rhs_offset_y += z * rhs_stride_z;
 #endif // defined(MATRIX_B_DEPTH)
 
-    REPEAT_VAR_INIT_TO_CONST(8, uint, zlhs, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
-    REPEAT_VAR_INIT_TO_CONST(16, uint, zrhs, 0);
-
-#if defined(REINTERPRET_INPUT_AS_3D)
-    // The plane (zlhs) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zlhs, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
-
-    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
-    // multiply lhs_stride_z by DEPTH_GEMM3D
-    lhs_offset += z * lhs_stride_z * DEPTH_GEMM3D;
-
-#else // defined(REINTERPRET_INPUT_AS_3D)
-
-    // Add offset for batched GEMM
-    lhs_offset += z * lhs_stride_z;
-
-#endif // defined(REINTERPRET_INPUT_AS_3D)
-
     // Initialize the accumulators
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(ACC_DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(ACC_DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(N0-1)=0;
+    TILE(ACC_DATA_TYPE, M0, N0, c);
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        c[i].v = 0;
+    })
 
     int i = 0;
     for(; i <= (K - K0); i += K0)
     {
-        // Load values from LHS matrix
-        LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
+        TILE(DATA_TYPE, M0, K0, a);
+        TILE(DATA_TYPE, N0, K0, b);
 
-        // Load values from RHS matrix
-        LOAD_BLOCK(N0, K0, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
+        // Load values from LHS matrix
+        T_LOAD(DATA_TYPE, M0, K0, BUFFER, lhs, i, lhs_y, 1, lhs_stride_y, a);
+
+        // // Load values from RHS matrix
+        LOOP_UNROLLING(int, _i, 0, 1, N0,
+        {
+            b[_i].v = VLOAD(K0)(0, (__global DATA_TYPE *)(rhs_ptr + rhs_offset_first_element_in_bytes + rhs_offset_x + rhs_offset_y + _i * RHS_STEP_X));
+        })
 
         // Partial matrix multiplication M0,N0,K0
-        ARM_MM_K0XN0XM0(M0, N0, K0, a, b, c);
+        T_MMUL(DATA_TYPE, DATA_TYPE, ACC_DATA_TYPE, M0, N0, K0, NT, T, a, b, c);
 
-        lhs_offset += K0;
-        rhs_offset += N0 * RHS_STEP_X * RHS_STEP_LOOP;
+        rhs_offset_x += RHS_STEP_LOOP;
     }
+
+#if((K % K0) != 0)
+
     // Left-over accumulations
     for(; i < K; ++i)
     {
+        TILE(DATA_TYPE, M0, 1, a);
+        TILE(DATA_TYPE, N0, 1, b);
+
         // Load values from LHS matrix
-        LOAD_BLOCK(M0, 1, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
+        T_LOAD(DATA_TYPE, M0, 1, BUFFER, lhs, i, lhs_y, 1, lhs_stride_y, a);
 
-        // Load values from RHS reshaped matrix
-        LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
+        LOOP_UNROLLING(int, _i, 0, 1, N0,
+        {
+            b[_i].v = *(__global DATA_TYPE *)(rhs_ptr + rhs_offset_first_element_in_bytes + rhs_offset_x + rhs_offset_y + _i * RHS_STEP_X);
+        })
 
-        ARM_MM_K0XN0XM0(M0, N0, 1, a, b, c);
-        lhs_offset += 1;
-        rhs_offset += 1;
+        T_MMUL(DATA_TYPE, DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
+
+        rhs_offset_x += 1;
     }
-    // Result of MM is of type DATA_TYPE
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * dst_stride_y);
+#endif // ((K % K0) != 0)
 
-    REPEAT_VAR_INIT_TO_CONST(8, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
+#if defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
 
-#if defined(REINTERPRET_OUTPUT_AS_3D)
-    // The plane (zout) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
-    CALCULATE_Z_OFFSET(M0, uint, zout, COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0), HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
+    TILE(int, M0, N0, c_int);
+    TILE(int, M0, N0, offset_s32);
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        offset_s32[i].v = (VEC_DATA_TYPE(int, N0))K_OFFSET;
+    })
 
-    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
-    // multiply dst_stride_z by DEPTH_GEMM3D
-    dst_addr += z * dst_stride_z * DEPTH_GEMM3D;
-
-#else // defined(REINTERPRET_OUTPUT_AS_3D)
-
-    // Add offset for batched GEMM
-    dst_addr += z * dst_stride_z;
-
-#endif // defined(REINTERPRET_OUTPUT_AS_3D)
-
-    // Convert result of matrix multiplication to S32
-    REPEAT_VAR_INIT_CONVERT_SAT(M0, VEC_DATA_TYPE(int, N0), c, c_int);
-
-    // Offset contribution: c += (A_OFFSET * sum_col) + (B_OFFSET * sum_row) +  K_OFFSET;
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(int, N0), offset_s32_, K_OFFSET);
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        c_int[i].v = CONVERT_SAT(c[i].v, VEC_DATA_TYPE(int, N0));
+    })
 
 #if defined(A_OFFSET)
-    // Compute the offset contribution due to A_OFFSET
-    __global uchar *sum_col_addr = sum_col_ptr + sum_col_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(int);
 
 #if defined(SUM_COL_HAS_BATCHES)
-    sum_col_addr += z * sum_col_stride_y;
+    int sum_col_y = z;
+#else  // defined(SUM_COL_HAS_BATCHES)
+    int sum_col_y = 0;
 #endif // defined(SUM_COL_HAS_BATCHES)
-    VEC_DATA_TYPE(int, N0)
-    a_offset_s32 = VLOAD(N0)(0, (__global int *)sum_col_addr);
-    a_offset_s32 *= (VEC_DATA_TYPE(int, N0))A_OFFSET;
+    TILE(int, 1, N0, a_offset_s32);
 
-    REPEAT_ADD_VECTOR_TO_VAR(M0, offset_s32_, a_offset_s32);
+    T_LOAD(int, 1, N0, BUFFER, sum_col, xo, sum_col_y, 1, sum_col_stride_y, a_offset_s32);
+
+    a_offset_s32[0].v *= A_OFFSET;
+
+    T_ADD_BROADCAST_X(int, M0, 1, offset_s32, a_offset_s32, offset_s32);
 #endif // defined(A_OFFSET)
 
 #if defined(B_OFFSET)
@@ -892,68 +711,93 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint(IMAG
     // Note: The sum_row tensor is generated through CLGEMMLowpMatrixAReductionKernel which
     // does not introduce paddings. For this reason is safe to access the tensor in this manner
     // without considering that the coordinate "y" could come from an input 3D tensor
-    __global uchar *sum_row_addr = sum_row_ptr + sum_row_offset_first_element_in_bytes + (COMPUTE_M0_START_ROW(y, (uint)M0, PARTIAL_STORE_M0)) * sizeof(int) + z * sum_row_stride_y;
+    TILE(int, M0, N0, b_offset_s32);
 
-    LOAD_SCALAR_AS_VECTOR(M0, N0, int, b_offset_s32_, sum_row_addr, 0, sum_row_stride_x);
+    T_LOAD(int, M0, 1, BUFFER, sum_row, y + z * (sum_row_stride_y / sizeof(int)), 0, 1, sum_row_stride_x, b_offset_s32);
 
-    REPEAT_MLA_VAR_WITH_CONST_VEC(M0, offset_s32_, b_offset_s32_, (VEC_DATA_TYPE(int, N0))B_OFFSET);
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        offset_s32[i].v += b_offset_s32[i].v *B_OFFSET;
+    })
+
 #endif // defined(B_OFFSET)
 
 #if defined(ADD_BIAS)
-    // Add bias
-    __global uchar *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(int);
 
-    VEC_DATA_TYPE(int, N0)
-    bias_values = VLOAD(N0)(0, (__global int *)bias_addr);
-    REPEAT_ADD_VECTOR_TO_VAR(M0, offset_s32_, bias_values);
+    TILE(int, 1, N0, bias);
+
+    T_LOAD(int, 1, N0, BUFFER, biases, xo, 0, 1, 0, bias);
+
+    T_ADD_BROADCAST_X(ACC_DATA_TYPE, M0, 1, offset_s32, bias, offset_s32);
 #endif // defined(ADD_BIAS)
 
-    REPEAT_ADD_TWO_VARS(M0, c_int, offset_s32_);
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        c_int[i].v += offset_s32[i].v;
+    })
+
+    TILE(DATA_TYPE, M0, N0, c_lp);
 
     // Multiply by result_mult_int and shift
 #if defined(PER_CHANNEL_QUANTIZATION)
-    __global uchar *result_multipliers_addr = result_multipliers_ptr + result_multipliers_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(int);
-    __global uchar *result_shifts_addr      = result_shifts_ptr + result_shifts_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(int);
+    TILE(int, 1, N0, res_mul);
+    TILE(int, 1, N0, res_shift);
 
-    VEC_DATA_TYPE(int, N0)
-    res_mul = VLOAD(N0)(0, (__global int *)result_multipliers_addr);
-    VEC_DATA_TYPE(int, N0)
-    res_shift = VLOAD(N0)(0, (__global int *)result_shifts_addr);
+    T_LOAD(int, 1, N0, BUFFER, result_multipliers, xo, 0, 0, 0, res_mul);
+    T_LOAD(int, 1, N0, BUFFER, result_shifts, xo, 0, 0, 0, res_shift);
 
-    REPEAT_ASYMM_MULT_BY_QUANT_MULTIPLIER_PER_CHANNEL(M0, N0, c_int, res_mul, res_shift);
-#else // defined(PER_CHANNEL_QUANTIZATION)
-
-#if RESULT_SHIFT < 0
-    REPEAT_ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(M0, N0, c_int, RESULT_MULTIPLIER, RESULT_SHIFT);
-#else  // RESULT_SHIFT >= 0
-    REPEAT_ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(M0, N0, c_int, RESULT_MULTIPLIER, RESULT_SHIFT);
-#endif // RESULT_SHIFT < 0
-
+    T_QUANTIZE8(int, DATA_TYPE, PER_CHANNEL, M0, N0, RESULT_OFFSET, RESULT_SHIFT, RESULT_MULTIPLIER, c_int, res_mul, res_shift, c_lp);
+#else  // defined(PER_CHANNEL_QUANTIZATION)
+    T_QUANTIZE8(int, DATA_TYPE, PER_TENSOR, M0, N0, RESULT_OFFSET, RESULT_SHIFT, RESULT_MULTIPLIER, c_int, 0, 0, c_lp);
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
-    // Add the offset terms to GEMM's result
-    REPEAT_ADD_CONST_TO_VAR(M0, VEC_DATA_TYPE(int, N0), c_int, RESULT_OFFSET);
-
 #if defined(MIN_BOUND)
-    REPEAT_MAX_CONST_VAR(M0, VEC_DATA_TYPE(int, N0), c_int, MIN_BOUND);
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        c_lp[i].v = max(c_lp[i].v, (VEC_DATA_TYPE(DATA_TYPE, N0))MIN_BOUND);
+    })
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    REPEAT_MIN_CONST_VAR(M0, VEC_DATA_TYPE(int, N0), c_int, MAX_BOUND);
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        c_lp[i].v = min(c_lp[i].v, (VEC_DATA_TYPE(DATA_TYPE, N0))MAX_BOUND);
+    })
 #endif // defined(MAX_BOUND)
 
-    // Convert and store output block
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
+#else  // defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+    TILE(int, M0, N0, c_lp);
 
-    // Store output block
-    REPEAT_VAR_INIT_CONVERT_SAT(M0, VEC_DATA_TYPE(DATA_TYPE, N0), c_int, c_lp);
-    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c_lp, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        c_lp[i].v = CONVERT_SAT(c[i].v, VEC_DATA_TYPE(int, N0));
+    })
+#endif // defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
 
-#undef RHS_BLOCK_SIZE
+    TILE(uint, M0, 1, dst_indirect_y);
+
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+        dst_indirect_y[i].v = (uint)min((int)((y + i) % HEIGHT_GEMM3D), (int)HEIGHT_GEMM3D - 1);
+        dst_indirect_y[i].v += (uint)min((int)((y + i) / HEIGHT_GEMM3D), (int)DEPTH_GEMM3D - 1) * FULL_DST_HEIGHT;
+        dst_indirect_y[i].v += z *FULL_DST_HEIGHT *DEPTH_GEMM3D;
+#else  // (REINTERPRET_OUTPUT_AS_3D)
+        dst_indirect_y[i].v = (uint)min((int)y + i, (int)M - 1) + z *FULL_DST_HEIGHT;
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
+    })
+
+    const bool cond_x = (xo > (N - N0));
+
+#if defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+    T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, M0, N0, PARTIAL_STORE_N0, BUFFER, dst, xo, dst_stride_y, cond_x, c_lp, dst_indirect_y);
+#else  // defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+    T_STORE_INDIRECT_WIDTH_SELECT(int, M0, N0, PARTIAL_STORE_N0, BUFFER, dst, xo, dst_stride_y, cond_x, c_lp, dst_indirect_y);
+#endif // defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
+#undef RHS_STEP_LOOP
 }
-#endif // defined(RESULT_OFFSET) && defined(RESULT_SHIFT) && defined(RESULT_MULTIPLIER)
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 
 #if defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
