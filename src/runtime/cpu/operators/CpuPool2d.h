@@ -80,7 +80,7 @@ private:
 
     bool                             _is_global_pooling_layer;
     DataLayout                       _data_layout;
-    experimental::MemoryRequirements _mem_req;
+    experimental::MemoryRequirements _aux_mem{};
 };
 } // namespace cpu
 } // namespace arm_compute

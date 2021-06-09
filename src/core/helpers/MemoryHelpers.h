@@ -46,6 +46,15 @@ using WorkspaceData = std::vector<std::pair<int, std::unique_ptr<TensorType>>>;
 template <typename TensorType>
 WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirements &mem_reqs,
                                            MemoryGroup                            &mgroup,
+                                           ITensorPack                            &run_pack)
+{
+    ITensorPack dummy_pack = ITensorPack();
+    return manage_workspace<TensorType>(mem_reqs, mgroup, run_pack, dummy_pack);
+}
+
+template <typename TensorType>
+WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirements &mem_reqs,
+                                           MemoryGroup                            &mgroup,
                                            ITensorPack &run_pack, ITensorPack &prep_pack)
 {
     WorkspaceData<TensorType> workspace_memory;

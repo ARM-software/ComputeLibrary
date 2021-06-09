@@ -106,9 +106,6 @@ public:
 private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
-
-    /** Allocate workspace required by the operator */
-    void allocate_workspace();
 };
 
 using CLSoftmaxLayer    = CLSoftmaxLayerGeneric<false>;

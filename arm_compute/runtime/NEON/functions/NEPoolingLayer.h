@@ -95,8 +95,6 @@ public:
     void run() override;
 
 private:
-    MemoryGroup _memory_group;
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

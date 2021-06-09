@@ -30,6 +30,8 @@
 #include "src/core/cpu/kernels/CpuPool2dKernel.h"
 #include "src/core/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.h"
 
+using namespace arm_compute::experimental;
+
 namespace arm_compute
 {
 namespace cpu
@@ -40,7 +42,7 @@ CpuPool2d::CpuPool2d()
       _asm_glue(),
       _is_global_pooling_layer(false),
       _data_layout(DataLayout::NCHW),
-      _mem_req()
+      _aux_mem(1)
 {
 }
 
@@ -71,7 +73,7 @@ void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayer
         // Get kernel's memory requirements
         constexpr size_t alignment      = 4096;
         const size_t     workspace_size = pooling_wrapper->get_working_size(num_threads);
-        _mem_req.push_back({ TensorType::ACL_INT_0, workspace_size, alignment });
+        _aux_mem[0]                     = MemoryInfo(TensorType::ACL_INT_0, MemoryLifetime::Temporary, workspace_size, alignment);
 
         _asm_glue = std::move(pooling_wrapper);
     }
@@ -150,7 +152,7 @@ void CpuPool2d::run(ITensorPack &tensors)
 
 experimental::MemoryRequirements CpuPool2d::workspace() const
 {
-    return _mem_req;
+    return _aux_mem;
 }
 } // namespace cpu
 } // namespace arm_compute

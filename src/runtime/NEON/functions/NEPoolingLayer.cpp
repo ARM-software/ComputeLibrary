@@ -26,6 +26,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/runtime/cpu/operators/CpuPool2d.h"
 
 namespace arm_compute
@@ -35,15 +36,18 @@ struct NEPoolingLayer::Impl
     ITensor                        *src{ nullptr };
     ITensor                        *dst{ nullptr };
     ITensor                        *indices{ nullptr };
-    Tensor                          workspace{ nullptr };
     std::unique_ptr<cpu::CpuPool2d> op{ nullptr };
+    MemoryGroup                     memory_group{};
+    ITensorPack                     run_pack{};
+    WorkspaceData<Tensor>           workspace_tensors{};
 };
 
 NEPoolingLayer::~NEPoolingLayer() = default;
 
 NEPoolingLayer::NEPoolingLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _impl(std::make_unique<Impl>())
+    : _impl(std::make_unique<Impl>())
 {
+    _impl->memory_group = MemoryGroup(std::move(memory_manager));
 }
 
 void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info, ITensor *indices)
@@ -54,14 +58,8 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _impl->op      = std::make_unique<cpu::CpuPool2d>();
     _impl->op->configure(input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr);
 
-    // Allocate workspace based on kernel's memory requirements
-    const experimental::MemoryRequirements mem_req = _impl->op->workspace();
-    if(!mem_req.empty())
-    {
-        _impl->workspace.allocator()->init(TensorInfo(TensorShape{ (mem_req[0].size + mem_req[0].alignment) }, 1, DataType::S8), mem_req[0].alignment);
-        _memory_group.manage(&_impl->workspace);
-        _impl->workspace.allocator()->allocate();
-    }
+    _impl->run_pack          = { { TensorType::ACL_SRC, _impl->src }, { TensorType::ACL_DST_0, _impl->dst }, { TensorType::ACL_DST_1, _impl->indices } };
+    _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
 Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
@@ -71,11 +69,8 @@ Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 
 void NEPoolingLayer::run()
 {
-    ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST_0, _impl->dst);
-    pack.add_tensor(TensorType::ACL_DST_1, _impl->indices);
-    pack.add_tensor(TensorType::ACL_INT_0, &_impl->workspace);
-    _impl->op->run(pack);
+    MemoryGroupResourceScope scope_mg(_impl->memory_group);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);
+    _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute
