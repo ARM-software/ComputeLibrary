@@ -24,6 +24,7 @@
 #include "helpers.h"
 #include "warp_helpers.h"
 
+#ifndef DEPTH_OUT
 /** Performs a remapping of an input image to an output given two remapping image using nearest neighbor as interpolation.
  *
  * This kernel performs remapping with this method of pixel coordinate translation:
@@ -129,20 +130,20 @@ __kernel void remap_bilinear_nchw(
 
     vstore4(bilinear_interpolate(&in, clamp_to_border(map_coords, width, height), width, height), 0, out.ptr);
 }
-
+#else // DEPTH_OUT
 /** Performs a remapping of an input image to an output given two remapping image using nearest neighbor as interpolation.
  *  Also applies constant border value, "border_val", if "CONSTANT_BORDER" is set.
  *
  * This kernel performs remapping with this method of pixel coordinate translation:
  *     out(x,y) = in(mapx(x,y), mapy(x,y));
  *
- * @param[in]  in_ptr                             Pointer to the source image. Supported data types: U8.
+ * @param[in]  in_ptr                             Pointer to the source image. Supported data types: U8,F16.
  * @param[in]  in_stride_x                        Stride of the source image in X dimension (in bytes)
  * @param[in]  in_step_x                          in_stride_x * number of elements along X processed per work item (in bytes)
  * @param[in]  in_stride_y                        Stride of the source image in Y dimension (in bytes)
  * @param[in]  in_step_y                          in_stride_y * number of elements along Y processed per work item (in bytes)
  * @param[in]  in_offset_first_element_in_bytes   Offset of the first element in the source image
- * @param[out] out_ptr                            Pointer to the destination image. Supported data types: U8.
+ * @param[out] out_ptr                            Pointer to the destination image. Supported data types: U8,F16.
  * @param[in]  out_stride_x                       Stride of the destination image in X dimension (in bytes)
  * @param[in]  out_step_x                         out_stride_x * number of elements along X processed per work item (in bytes)
  * @param[in]  out_stride_y                       Stride of the destination image in Y dimension (in bytes)
@@ -162,10 +163,8 @@ __kernel void remap_bilinear_nchw(
  * @param[in]  mapy_offset_first_element_in_bytes Offset of the first element in the remapping image
  * @param[in]  width                              Width of the input image
  * @param[in]  height                             Height of the input image
+ * @param[in]  border_val                         Value to use for border around input tensor when in CONSTANT border is selected
  */
-
-#if defined(DEPTH_OUT)
-
 __kernel void remap_nearest_neighbour_nhwc(
     TENSOR4D_DECLARATION(in),
     TENSOR4D_DECLARATION(out),
@@ -206,13 +205,13 @@ __kernel void remap_nearest_neighbour_nhwc(
  * This kernel performs remapping with this method of pixel coordinate translation:
  *     out(x,y) = in(mapx(x,y), mapy(x,y));
  *
- * @param[in]  in_ptr                             Pointer to the source image. Supported data types: U8.
+ * @param[in]  in_ptr                             Pointer to the source image. Supported data types: U8,F16.
  * @param[in]  in_stride_x                        Stride of the source image in X dimension (in bytes)
  * @param[in]  in_step_x                          in_stride_x * number of elements along X processed per work item (in bytes)
  * @param[in]  in_stride_y                        Stride of the source image in Y dimension (in bytes)
  * @param[in]  in_step_y                          in_stride_y * number of elements along Y processed per work item (in bytes)
  * @param[in]  in_offset_first_element_in_bytes   Offset of the first element in the source image
- * @param[out] out_ptr                            Pointer to the destination image. Supported data types: U8.
+ * @param[out] out_ptr                            Pointer to the destination image. Supported data types: U8,F16.
  * @param[in]  out_stride_x                       Stride of the destination image in X dimension (in bytes)
  * @param[in]  out_step_x                         out_stride_x * number of elements along X processed per work item (in bytes)
  * @param[in]  out_stride_y                       Stride of the destination image in Y dimension (in bytes)
@@ -232,6 +231,7 @@ __kernel void remap_nearest_neighbour_nhwc(
  * @param[in]  mapy_offset_first_element_in_bytes Offset of the first element in the remapping image
  * @param[in]  width                              Width of the input image
  * @param[in]  height                             Height of the input image
+ * @param[in]  border_val                         Value to use for border around input tensor when in CONSTANT border is selected
  */
 __kernel void remap_bilinear_nhwc(
     TENSOR4D_DECLARATION(in),

@@ -36,6 +36,10 @@ namespace arm_compute
 {
 void NERemap::configure(ITensor *input, const ITensor *map_x, const ITensor *map_y, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(input, map_x, map_y, output, policy, border_mode, PixelValue{ constant_border_value });
+}
+void NERemap::configure(ITensor *input, const ITensor *map_x, const ITensor *map_y, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(map_x, 1, DataType::F32);
@@ -43,7 +47,7 @@ void NERemap::configure(ITensor *input, const ITensor *map_x, const ITensor *map
     ARM_COMPUTE_ERROR_ON_MSG(policy == InterpolationPolicy::AREA, "Area interpolation is not supported");
 
     auto k = std::make_unique<NERemapKernel>();
-    k->configure(input, map_x, map_y, output, policy, border_mode, constant_border_value);
+    k->configure(input, map_x, map_y, output, policy, border_mode, constant_border_value.get<uint8_t>());
     _kernel = std::move(k);
 }
 } // namespace arm_compute

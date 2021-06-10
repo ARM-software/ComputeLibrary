@@ -49,28 +49,22 @@ public:
     /** Initialize the kernel's input, output and border mode.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data types supported: U8.
+     * @param[in]  input           Source tensor. Data types supported: U8 (or F16 when layout is NHWC).
      * @param[in]  map_x           Map for X coordinates. Data types supported: F32.
      * @param[in]  map_y           Map for Y coordinates. Data types supported: F32.
-     * @param[out] output          Destination tensor. Data types supported: U8. All but the lowest two dimensions must be the same size as in the input tensor, i.e. remapping is only performed within the XY-plane.
+     * @param[out] output          Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. remapping is only performed within the XY-plane.
      * @param[in]  info            RemapInfo struct:
      *                                   - policy                   Interpolation policy to use. Only NEAREST and BILINEAR are supported.
      *                                   - border_mode              Border mode to use on the input tensor. Only CONSTANT and UNDEFINED are supported.
      *                                   - constant_border_value    Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, RemapInfo info);
-    /** Validate the kernel's input, output and border mode.
+    /** Checks if the kernel's input, output and border mode will lead to a valid configuration of @ref CLRemapKernel
      *
-     * @param[in]  input  Source tensor. Data types supported: U8.
-     * @param[in]  map_x  Map for X coordinates. Data types supported: F32.
-     * @param[in]  map_y  Map for Y coordinates. Data types supported: F32.
-     * @param[out] output Destination tensor. Data types supported: U8. All but the lowest two dimensions must be the same size as in the input tensor, i.e. remapping is only performed within the XY-plane.
-     * @param[in]  info   RemapInfo struct:
-     *                         - policy                   Interpolation policy to use. Only NEAREST and BILINEAR are supported.
-     *                         - border_mode              Border mode to use on the input tensor. Only CONSTANT and UNDEFINED are supported.
-     *                         - constant_border_value    Constant value to use for borders if border_mode is set to CONSTANT.
+     * Similar to @ref CLRemapKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, RemapInfo info)
+     *
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *map_x, const ITensorInfo *map_y, ITensorInfo *output, RemapInfo info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *map_x, const ITensorInfo *map_y, const ITensorInfo *output, RemapInfo info);
     /** Function to set the constant value on fill border kernel depending on type.
      *
      * @param[in] idx                   Index of the kernel argument to set.

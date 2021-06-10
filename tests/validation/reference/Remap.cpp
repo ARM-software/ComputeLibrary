@@ -99,13 +99,16 @@ SimpleTensor<T> remap(const SimpleTensor<T> &in, SimpleTensor<float> &map_x, Sim
             }
         }
     }
-
     return out;
 }
 
 template SimpleTensor<uint8_t> remap(const SimpleTensor<uint8_t> &src, SimpleTensor<float> &map_x, SimpleTensor<float> &map_y, SimpleTensor<uint8_t> &valid_mask, InterpolationPolicy policy,
                                      BorderMode border_mode,
                                      uint8_t    constant_border_value);
+
+template SimpleTensor<half> remap(const SimpleTensor<half> &src, SimpleTensor<float> &map_x, SimpleTensor<float> &map_y, SimpleTensor<half> &valid_mask, InterpolationPolicy policy,
+                                  BorderMode border_mode,
+                                  half       constant_border_value);
 } // namespace reference
 } // namespace validation
 } // namespace test
