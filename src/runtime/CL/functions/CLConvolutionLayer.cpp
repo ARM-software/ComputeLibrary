@@ -218,32 +218,46 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
         }
         else
         {
-            // SRGAN
+            const bool is_direct_valid = bool(CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info));
+            const bool is_wino_valid   = bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math));
+
+            // SRGAN case
             if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9) && (conv_info.pad_top() < 3)
-               && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+               && is_direct_valid)
             {
                 return ConvolutionMethod::DIRECT;
             }
-            if(gpu_target == GPUTarget::G71)
+
+            // Floating-point case: GeMM/Direct/Winograd
+            if(is_data_type_float(input->data_type()))
             {
-                if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) >= output->dimension(idx_c))
-                   && (CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)))
+                const bool is_large_kernel_sz = (weights->dimension(idx_w) >= 5) && (weights->dimension(idx_h) >= 5);
+
+                // Large kernel size with IFMs >= OFMs
+                if(is_large_kernel_sz)
                 {
-                    return ConvolutionMethod::FFT;
+                    // First check if we can use Winograd
+                    if(is_wino_valid)
+                    {
+                        return ConvolutionMethod::WINOGRAD;
+                    }
+
+                    if(is_direct_valid)
+                    {
+                        return ConvolutionMethod::DIRECT;
+                    }
+
+                    // Default implementation for floating-point-data-type
+                    return ConvolutionMethod::GEMM;
+                }
+                else // Small kernel size
+                {
+                    return is_wino_valid ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
                 }
             }
-            else if(is_data_type_float(input->data_type()))
-            {
-                if((weights->dimension(idx_h) >= 5) && (input->dimension(idx_c) >= output->dimension(idx_c)) && (CLDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
-                {
-                    return ConvolutionMethod::DIRECT;
-                }
-            }
-            if(input->dimension(idx_c) < 16)
-            {
-                return ConvolutionMethod::GEMM;
-            }
-            return bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+
+            // Generic case for quantized. Only GeMM
+            return ConvolutionMethod::GEMM;
         }
     }
 }
