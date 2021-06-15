@@ -117,6 +117,7 @@ namespace utils
 CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     : help(parser.add_option<ToggleOption>("help")),
       threads(parser.add_option<SimpleOption<int>>("threads", 1)),
+      batches(parser.add_option<SimpleOption<int>>("batches", 1)),
       target(),
       data_type(),
       data_layout(),
@@ -168,6 +169,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
 
     help->set_help("Show this help message");
     threads->set_help("Number of threads to use");
+    batches->set_help("Number of batches to use for the inputs");
     target->set_help("Target to execute on");
     data_type->set_help("Data type to use");
     data_layout->set_help("Data layout to use");
@@ -197,6 +199,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     CommonGraphParams common_params;
     common_params.help      = options.help->is_set() ? options.help->value() : false;
     common_params.threads   = options.threads->value();
+    common_params.batches   = options.batches->value();
     common_params.target    = options.target->value();
     common_params.data_type = options.data_type->value();
     if(options.data_layout->is_set())

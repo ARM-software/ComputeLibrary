@@ -82,7 +82,7 @@ public:
 
         // Create input descriptor
         const auto        operation_layout = common_params.data_layout;
-        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, operation_layout);
+        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, common_params.batches), DataLayout::NCHW, operation_layout);
         TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
 
         // Set weights trained layout
