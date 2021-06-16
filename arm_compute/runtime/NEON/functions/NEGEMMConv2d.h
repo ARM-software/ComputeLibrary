@@ -29,15 +29,12 @@
 #include "arm_compute/runtime/IMemoryManager.h"
 
 #include <memory>
+
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
 class ITensorInfo;
-namespace cpu
-{
-class CpuGemmAssemblyDispatch;
-}
 
 /** Basic function to compute the convolution layer. This function calls the following kernels/functions:
  *

@@ -70,7 +70,7 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
 
         auto aux_tensor = workspace_memory.back().second.get();
         ARM_COMPUTE_ERROR_ON_NULLPTR(aux_tensor);
-        aux_tensor->allocator()->init(aux_info);
+        aux_tensor->allocator()->init(aux_info, req.alignment);
 
         if(req.lifetime == experimental::MemoryLifetime::Temporary)
         {

@@ -41,14 +41,10 @@ using OperatorType = opencl::ClGemm;
 
 struct CLGEMM::Impl
 {
-    const ICLTensor              *a{ nullptr };
     const ICLTensor              *b{ nullptr };
-    const ICLTensor              *c{ nullptr };
-    ICLTensor                    *dst{ nullptr };
     std::unique_ptr<OperatorType> op{ nullptr };
     MemoryGroup                   memory_group{};
     IWeightsManager              *weights_manager{ nullptr };
-    CLTensor                      weights_transformed{};
     ITensorPack                   run_pack{};
     ITensorPack                   prep_pack{};
     MemoryRequirements            aux_mem_req{};
@@ -74,10 +70,7 @@ void CLGEMM::configure(const CLCompileContext &compile_context, const ICLTensor 
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
 
-    _impl->a           = a;
     _impl->b           = b;
-    _impl->c           = c;
-    _impl->dst         = output;
     _impl->op          = std::make_unique<OperatorType>();
     _impl->is_prepared = gemm_info.retain_internal_weights();
 
@@ -87,12 +80,12 @@ void CLGEMM::configure(const CLCompileContext &compile_context, const ICLTensor 
     // Manage/allocate auxilairy tensors
     if(_impl->is_prepared)
     {
-        _impl->run_pack.add_const_tensor(ACL_SRC_0, _impl->a);
-        _impl->run_pack.add_tensor(ACL_DST, _impl->dst);
+        _impl->run_pack.add_const_tensor(ACL_SRC_0, a);
+        _impl->run_pack.add_tensor(ACL_DST, output);
     }
     else
     {
-        _impl->run_pack  = { { ACL_SRC_0, _impl->a }, { ACL_SRC_2, _impl->c }, { ACL_DST, _impl->dst } };
+        _impl->run_pack  = { { ACL_SRC_0, a }, { ACL_SRC_2, c }, { ACL_DST, output } };
         _impl->prep_pack = { { ACL_SRC_1, _impl->b } };
 
         _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
@@ -110,7 +103,6 @@ void CLGEMM::run()
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
 
-    ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->a, _impl->b, _impl->dst);
     _impl->op->run(_impl->run_pack);
 }
 

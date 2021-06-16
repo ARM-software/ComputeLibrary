@@ -32,9 +32,14 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/MemoryHelpers.h"
 
+#include "arm_compute/core/ITensorPack.h"
+#include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
@@ -61,17 +66,58 @@ cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
 }
 } // namespace
 
+struct NEGEMMLowpMatrixMultiplyCore::Impl
+{
+    MemoryGroup                                                    memory_group{};
+    IWeightsManager                                               *weights_manager{ nullptr };
+    std::unique_ptr<cpu::CpuGemmAssemblyDispatch>                  asm_glue{ nullptr };
+    std::unique_ptr<NEGEMMLowpMatrixMultiplyKernel>                mm_kernel{ nullptr };
+    std::unique_ptr<NEGEMMInterleave4x4Kernel>                     mtx_a_reshape_kernel{ nullptr };
+    std::unique_ptr<NEGEMMTranspose1xWKernel>                      mtx_b_reshape_kernel{ nullptr };
+    std::unique_ptr<NEGEMMLowpMatrixAReductionKernel>              mtx_a_reduction_kernel{ nullptr };
+    std::unique_ptr<NEGEMMLowpMatrixBReductionKernel>              mtx_b_reduction_kernel{ nullptr };
+    std::unique_ptr<NEGEMMLowpOffsetContributionKernel>            offset_contribution_kernel{ nullptr };
+    std::unique_ptr<NEGEMMLowpOffsetContributionOutputStageKernel> offset_contribution_output_stage_kernel{ nullptr };
+    std::unique_ptr<NEActivationLayer>                             activation_func{ nullptr };
+    std::unique_ptr<NEConvertQuantizedSignednessKernel>            convert_to_signed_asymm{ nullptr };
+    std::unique_ptr<NEConvertQuantizedSignednessKernel>            convert_from_signed_asymm{ nullptr };
+
+    Tensor         vector_sum_col{};
+    Tensor         vector_sum_row{};
+    Tensor         tmp_a{};
+    Tensor         tmp_b{};
+    Tensor         mm_result_s32{};
+    Tensor         signed_a{};
+    Tensor         signed_output{};
+    const ITensor *original_b{ nullptr };
+    int32_t        a_offset{ 0 };
+    int32_t        b_offset{ 0 };
+
+    bool run_vector_matrix_multiplication{ false };
+    bool assembly_path{ false };
+    bool fused_assembly_path{ false };
+    bool reshape_b_only_on_first_run{ false };
+    bool is_prepared{ false };
+    bool fuse_output_stage{ false };
+    bool run_activation{ false };
+    bool flip_signedness{ false };
+
+    experimental::MemoryRequirements aux_mem_req{};
+    ITensorPack                      asm_glue_run_pack{};
+    ITensorPack                      asm_glue_prep_pack{};
+    WorkspaceData<Tensor>            asm_glue_workspace{};
+};
+
+using namespace arm_compute::experimental;
 using namespace arm_compute::misc::shape_calculator;
 
 NEGEMMLowpMatrixMultiplyCore::~NEGEMMLowpMatrixMultiplyCore() = default;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager), _weights_manager(weights_manager), _asm_glue(std::make_unique<cpu::CpuGemmAssemblyDispatch>(memory_manager, weights_manager)), _mm_kernel(), _mtx_a_reshape_kernel(),
-      _mtx_b_reshape_kernel(), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _offset_contribution_output_stage_kernel(), _activation_func(),
-      _convert_to_signed_asymm(), _convert_from_signed_asymm(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _mm_result_s32(), _signed_a(), _signed_output(), _original_b(nullptr), _a_offset(0),
-      _b_offset(0), _run_vector_matrix_multiplication(false), _assembly_path(false), _fused_assembly_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false), _fuse_output_stage(false),
-      _run_activation(false), _flip_signedness(false)
+    : _impl(std::make_unique<struct NEGEMMLowpMatrixMultiplyCore::Impl>())
 {
+    _impl->memory_group    = MemoryGroup(memory_manager);
+    _impl->weights_manager = weights_manager;
 }
 
 void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output, const GEMMInfo &gemm_info)
@@ -85,53 +131,55 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     GEMMInfo       info     = gemm_info;
 
     // Set internal variables
-    _a_offset                         = a->info()->quantization_info().uniform().offset;
-    _b_offset                         = b->info()->quantization_info().uniform().offset;
-    _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
-    _reshape_b_only_on_first_run      = info.reshape_b_only_on_first_run();
-    _is_prepared                      = false;
-    _fused_assembly_path              = false;
-    _flip_signedness                  = is_data_type_quantized_per_channel(b->info()->data_type()) && (a->info()->data_type() == DataType::QASYMM8) && _reshape_b_only_on_first_run;
-    _original_b                       = b;
+    _impl->a_offset                         = a->info()->quantization_info().uniform().offset;
+    _impl->b_offset                         = b->info()->quantization_info().uniform().offset;
+    _impl->run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
+    _impl->reshape_b_only_on_first_run      = info.reshape_b_only_on_first_run();
+    _impl->is_prepared                      = false;
+    _impl->fused_assembly_path              = false;
+    _impl->flip_signedness                  = is_data_type_quantized_per_channel(b->info()->data_type()) && (a->info()->data_type() == DataType::QASYMM8) && _impl->reshape_b_only_on_first_run;
+    _impl->original_b                       = b;
+
+    _impl->asm_glue = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
 
     const ITensor *a_to_use = a;
 
     // Convert to QASYMM8 -> QASYMM8_SIGNED and back
-    if(_flip_signedness)
+    if(_impl->flip_signedness)
     {
         const int32_t                 offset_correction = 128;
         const DataType                dt                = DataType::QASYMM8_SIGNED;
         const UniformQuantizationInfo iqinfo            = a_to_use->info()->quantization_info().uniform();
 
-        _signed_a.allocator()->init(a_to_use->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction)));
-        _memory_group.manage(&_signed_a);
-        _convert_to_signed_asymm = std::make_unique<NEConvertQuantizedSignednessKernel>();
-        _convert_to_signed_asymm->configure(a_to_use, &_signed_a);
-        a_to_use  = &_signed_a;
-        _a_offset = _signed_a.info()->quantization_info().uniform().offset;
+        _impl->signed_a.allocator()->init(a_to_use->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction)));
+        _impl->memory_group.manage(&_impl->signed_a);
+        _impl->convert_to_signed_asymm = std::make_unique<NEConvertQuantizedSignednessKernel>();
+        _impl->convert_to_signed_asymm->configure(a_to_use, &_impl->signed_a);
+        a_to_use        = &_impl->signed_a;
+        _impl->a_offset = _impl->signed_a.info()->quantization_info().uniform().offset;
 
         const UniformQuantizationInfo oqinfo = output->info()->quantization_info().uniform();
-        _memory_group.manage(&_signed_output);
-        _signed_output.allocator()->init(output->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(oqinfo.scale, oqinfo.offset - offset_correction)));
+        _impl->memory_group.manage(&_impl->signed_output);
+        _impl->signed_output.allocator()->init(output->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(oqinfo.scale, oqinfo.offset - offset_correction)));
 
         // Output stage correction
         GEMMLowpOutputStageInfo output_stage_corr = info.gemmlowp_output_stage();
-        output_stage_corr.gemmlowp_offset         = _signed_output.info()->quantization_info().uniform().offset;
+        output_stage_corr.gemmlowp_offset         = _impl->signed_output.info()->quantization_info().uniform().offset;
         output_stage_corr.gemmlowp_min_bound -= offset_correction;
         output_stage_corr.gemmlowp_max_bound -= offset_correction;
         info.set_gemmlowp_output_stage(output_stage_corr);
 
         // Update matrix a
-        matrix_a = &_signed_a;
+        matrix_a = &_impl->signed_a;
     }
 
     // If GEMMLowpOutputStage != NONE, fuse the offset contribution with the output stage
     if(info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE)
     {
-        _fuse_output_stage = true;
-        _memory_group.manage(&_mm_result_s32);
+        _impl->fuse_output_stage = true;
+        _impl->memory_group.manage(&_impl->mm_result_s32);
         TensorInfo info_mm_result_s32(output->info()->tensor_shape(), 1, DataType::S32);
-        _mm_result_s32.allocator()->init(info_mm_result_s32);
+        _impl->mm_result_s32.allocator()->init(info_mm_result_s32);
     }
 
     // Initialize assembly kernel meta-data
@@ -147,20 +195,28 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             if(is_data_type_quantized_asymmetric(a_to_use->info()->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
             {
                 auto c_info_to_use = c == nullptr ? nullptr : c->info();
-                _asm_glue->configure(a_to_use->info(), b->info(), c_info_to_use, output->info(), asm_info);
-                _fused_assembly_path = _asm_glue->is_configured();
-                _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_2, c);
-                _asm_glue_tensors.add_tensor(TensorType::ACL_DST, output);
+                _impl->asm_glue->configure(a_to_use->info(), b->info(), c_info_to_use, output->info(), asm_info);
+                _impl->fused_assembly_path = _impl->asm_glue->is_configured();
+                _impl->asm_glue_run_pack.add_const_tensor(TensorType::ACL_SRC_2, c);
+                _impl->asm_glue_run_pack.add_tensor(TensorType::ACL_DST, output);
             }
             else
             {
-                auto output_to_use = (_fuse_output_stage ? &_mm_result_s32 : output);
-                _asm_glue->configure(a_to_use->info(), b->info(), nullptr, output_to_use->info(), asm_info);
-                _asm_glue_tensors.add_tensor(TensorType::ACL_DST, output_to_use);
+                auto output_to_use = (_impl->fuse_output_stage ? &_impl->mm_result_s32 : output);
+                _impl->asm_glue->configure(a_to_use->info(), b->info(), nullptr, output_to_use->info(), asm_info);
+                _impl->asm_glue_run_pack.add_tensor(TensorType::ACL_DST, output_to_use);
             }
-            _assembly_path = _asm_glue->is_configured();
-            _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
-            _asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_1, b);
+            _impl->assembly_path = _impl->asm_glue->is_configured();
+
+            if(_impl->assembly_path)
+            {
+                _impl->asm_glue_run_pack.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
+
+                _impl->aux_mem_req        = _impl->asm_glue->workspace();
+                _impl->asm_glue_prep_pack = { { TensorType::ACL_SRC_1, b }, { TensorType::ACL_SRC_2, c } };
+
+                _impl->asm_glue_workspace = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->asm_glue_run_pack, _impl->asm_glue_prep_pack);
+            }
             break;
         }
         default:
@@ -170,142 +226,144 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         }
     }
 #endif /* __aarch64__ */
-    if(!(_assembly_path || _run_vector_matrix_multiplication))
+    if(!(_impl->assembly_path || _impl->run_vector_matrix_multiplication))
     {
-        matrix_a = &_tmp_a;
-        matrix_b = &_tmp_b;
+        matrix_a = &_impl->tmp_a;
+        matrix_b = &_impl->tmp_b;
 
         // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
         TensorInfo a_info(compute_interleaved_shape(*a_to_use->info()), 1, a_to_use->info()->data_type(), a_to_use->info()->quantization_info());
         // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
         TensorInfo b_info(compute_transpose1xW_shape(*b->info()), 1, b->info()->data_type(), b->info()->quantization_info());
-        _tmp_a.allocator()->init(a_info);
-        _tmp_b.allocator()->init(b_info);
-        _memory_group.manage(&_tmp_a);
-        if(!_reshape_b_only_on_first_run)
+        _impl->tmp_a.allocator()->init(a_info);
+        _impl->tmp_b.allocator()->init(b_info);
+        _impl->memory_group.manage(&_impl->tmp_a);
+        if(!_impl->reshape_b_only_on_first_run)
         {
-            _memory_group.manage(&_tmp_b);
+            _impl->memory_group.manage(&_impl->tmp_b);
         }
 
         // Configure interleave kernel
-        _mtx_a_reshape_kernel = std::make_unique<NEGEMMInterleave4x4Kernel>();
-        _mtx_a_reshape_kernel->configure(a_to_use, &_tmp_a);
+        _impl->mtx_a_reshape_kernel = std::make_unique<NEGEMMInterleave4x4Kernel>();
+        _impl->mtx_a_reshape_kernel->configure(a_to_use, &_impl->tmp_a);
 
         // Configure transpose kernel
-        _mtx_b_reshape_kernel = std::make_unique<NEGEMMTranspose1xWKernel>();
-        _mtx_b_reshape_kernel->configure(b, &_tmp_b);
+        _impl->mtx_b_reshape_kernel = std::make_unique<NEGEMMTranspose1xWKernel>();
+        _impl->mtx_b_reshape_kernel->configure(b, &_impl->tmp_b);
     }
 
-    if(!_fused_assembly_path)
+    if(!_impl->fused_assembly_path)
     {
         // Build reduction info
         const GEMMLowpReductionKernelInfo reduction_info(a_to_use->info()->dimension(0), false, 0, false);
 
-        // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
-        if(_a_offset != 0)
+        // Initialize matrix B reduction kernel only if _impl->a_offset is not equal to 0
+        if(_impl->a_offset != 0)
         {
             TensorInfo info_vector_sum_col(compute_reductionA_shape(*b->info()), 1, DataType::S32);
 
-            _vector_sum_col.allocator()->init(info_vector_sum_col);
-            if(!_reshape_b_only_on_first_run)
+            _impl->vector_sum_col.allocator()->init(info_vector_sum_col);
+            if(!_impl->reshape_b_only_on_first_run)
             {
-                _memory_group.manage(&_vector_sum_col);
+                _impl->memory_group.manage(&_impl->vector_sum_col);
             }
 
             // Configure Matrix B reduction kernel
-            _mtx_b_reduction_kernel = std::make_unique<NEGEMMLowpMatrixBReductionKernel>();
-            _mtx_b_reduction_kernel->configure(b, &_vector_sum_col, reduction_info);
+            _impl->mtx_b_reduction_kernel = std::make_unique<NEGEMMLowpMatrixBReductionKernel>();
+            _impl->mtx_b_reduction_kernel->configure(b, &_impl->vector_sum_col, reduction_info);
         }
 
-        // Initialize Matrix A reduction kernel only if _b_offset is not equal to 0
-        if(_b_offset != 0)
+        // Initialize Matrix A reduction kernel only if _impl->b_offset is not equal to 0
+        if(_impl->b_offset != 0)
         {
             TensorInfo info_vector_sum_row(compute_reductionB_shape(*a_to_use->info()), 1, DataType::S32);
 
-            _vector_sum_row.allocator()->init(info_vector_sum_row);
-            _memory_group.manage(&_vector_sum_row);
+            _impl->vector_sum_row.allocator()->init(info_vector_sum_row);
+            _impl->memory_group.manage(&_impl->vector_sum_row);
 
             // Configure matrix A reduction kernel
-            _mtx_a_reduction_kernel = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-            _mtx_a_reduction_kernel->configure(a_to_use, &_vector_sum_row, reduction_info);
+            _impl->mtx_a_reduction_kernel = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+            _impl->mtx_a_reduction_kernel->configure(a_to_use, &_impl->vector_sum_row, reduction_info);
         }
 
-        if(_fuse_output_stage)
+        if(_impl->fuse_output_stage)
         {
             // Configure matrix multiply kernel
-            if(!_assembly_path)
+            if(!_impl->assembly_path)
             {
-                _mm_kernel = std::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
-                _mm_kernel->configure(matrix_a, matrix_b, &_mm_result_s32);
+                _impl->mm_kernel = std::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
+                _impl->mm_kernel->configure(matrix_a, matrix_b, &_impl->mm_result_s32);
             }
 
-            _offset_contribution_output_stage_kernel = std::make_unique<NEGEMMLowpOffsetContributionOutputStageKernel>();
-            _offset_contribution_output_stage_kernel->configure(&_mm_result_s32,
-                                                                _a_offset == 0 ? nullptr : &_vector_sum_col,
-                                                                _b_offset == 0 ? nullptr : &_vector_sum_row, c,
-                                                                _flip_signedness ? &_signed_output : output,
-                                                                a->info()->dimension(0),
-                                                                _a_offset, _b_offset, info.gemmlowp_output_stage());
+            _impl->offset_contribution_output_stage_kernel = std::make_unique<NEGEMMLowpOffsetContributionOutputStageKernel>();
+            _impl->offset_contribution_output_stage_kernel->configure(&_impl->mm_result_s32,
+                                                                      _impl->a_offset == 0 ? nullptr : &_impl->vector_sum_col,
+                                                                      _impl->b_offset == 0 ? nullptr : &_impl->vector_sum_row, c,
+                                                                      _impl->flip_signedness ? &_impl->signed_output : output,
+                                                                      a->info()->dimension(0),
+                                                                      _impl->a_offset, _impl->b_offset, info.gemmlowp_output_stage());
 
-            if(_flip_signedness)
+            if(_impl->flip_signedness)
             {
-                _convert_from_signed_asymm = std::make_unique<NEConvertQuantizedSignednessKernel>();
-                _convert_from_signed_asymm->configure(&_signed_output, output);
+                _impl->convert_from_signed_asymm = std::make_unique<NEConvertQuantizedSignednessKernel>();
+                _impl->convert_from_signed_asymm->configure(&_impl->signed_output, output);
             }
         }
         else
         {
             // Configure matrix multiply kernel
-            if(!_assembly_path)
+            if(!_impl->assembly_path)
             {
-                _mm_kernel = std::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
-                _mm_kernel->configure(matrix_a, matrix_b, output);
+                _impl->mm_kernel = std::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
+                _impl->mm_kernel->configure(matrix_a, matrix_b, output);
             }
             // Configure offset contribution kernel
-            _offset_contribution_kernel = std::make_unique<NEGEMMLowpOffsetContributionKernel>();
-            _offset_contribution_kernel->configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a_to_use->info()->dimension(0), _a_offset, _b_offset);
+            _impl->offset_contribution_kernel = std::make_unique<NEGEMMLowpOffsetContributionKernel>();
+            _impl->offset_contribution_kernel->configure(output, _impl->a_offset == 0 ? nullptr : &_impl->vector_sum_col, _impl->b_offset == 0 ? nullptr : &_impl->vector_sum_row, a_to_use->info()->dimension(0),
+                                                         _impl->a_offset, _impl->b_offset);
         }
     }
     // Configure activation
     const ActivationLayerInfo &activation = gemm_info.activation_info();
-    _run_activation                       = activation.enabled() && (!_assembly_path || !cpu::CpuGemmAssemblyDispatch::is_activation_supported(activation));
-    if(_run_activation)
+    _impl->run_activation                 = activation.enabled() && (!_impl->assembly_path || !cpu::CpuGemmAssemblyDispatch::is_activation_supported(activation));
+    if(_impl->run_activation)
     {
-        _activation_func.configure(output, nullptr, activation);
+        _impl->activation_func = std::make_unique<NEActivationLayer>();
+        _impl->activation_func->configure(output, nullptr, activation);
     }
 
     // Allocate tensors
-    if(!_assembly_path && !_run_vector_matrix_multiplication)
+    if(!_impl->assembly_path && !_impl->run_vector_matrix_multiplication)
     {
-        _tmp_a.allocator()->allocate();
-        if(!_reshape_b_only_on_first_run)
+        _impl->tmp_a.allocator()->allocate();
+        if(!_impl->reshape_b_only_on_first_run)
         {
-            _tmp_b.allocator()->allocate();
+            _impl->tmp_b.allocator()->allocate();
         }
     }
 
-    if(!_fused_assembly_path)
+    if(!_impl->fused_assembly_path)
     {
-        if(_a_offset != 0 && !_reshape_b_only_on_first_run)
+        if(_impl->a_offset != 0 && !_impl->reshape_b_only_on_first_run)
         {
-            _vector_sum_col.allocator()->allocate();
+            _impl->vector_sum_col.allocator()->allocate();
         }
 
-        if(_b_offset != 0)
+        if(_impl->b_offset != 0)
         {
-            _vector_sum_row.allocator()->allocate();
+            _impl->vector_sum_row.allocator()->allocate();
         }
     }
 
-    if(_fuse_output_stage)
+    if(_impl->fuse_output_stage)
     {
-        _mm_result_s32.allocator()->allocate();
+        _impl->mm_result_s32.allocator()->allocate();
     }
 
-    if(_flip_signedness)
+    if(_impl->flip_signedness)
     {
-        _signed_a.allocator()->allocate();
-        _signed_output.allocator()->allocate();
+        _impl->signed_a.allocator()->allocate();
+        _impl->signed_output.allocator()->allocate();
     }
 }
 
@@ -509,118 +567,112 @@ void NEGEMMLowpMatrixMultiplyCore::run()
 {
     prepare();
 
-    MemoryGroupResourceScope scope_mg(_memory_group);
+    MemoryGroupResourceScope scope_mg(_impl->memory_group);
 
     // Convert QASYMM8->QASYMM8_SIGNED
-    if(_flip_signedness)
+    if(_impl->flip_signedness)
     {
-        NEScheduler::get().schedule(_convert_to_signed_asymm.get(), Window::DimY);
+        NEScheduler::get().schedule(_impl->convert_to_signed_asymm.get(), Window::DimY);
     }
 
     // Run GEMM
-    if(_asm_glue->is_configured())
+    if(_impl->asm_glue->is_configured())
     {
-        _asm_glue->run(_asm_glue_tensors);
+        _impl->asm_glue->run(_impl->asm_glue_run_pack);
     }
     else
     {
-        if(!_run_vector_matrix_multiplication)
+        if(!_impl->run_vector_matrix_multiplication)
         {
             // Run interleave kernel
-            NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
+            NEScheduler::get().schedule(_impl->mtx_a_reshape_kernel.get(), Window::DimY);
 
-            if(!_reshape_b_only_on_first_run)
+            if(!_impl->reshape_b_only_on_first_run)
             {
                 // Run transpose kernel
-                NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
+                NEScheduler::get().schedule(_impl->mtx_b_reshape_kernel.get(), Window::DimY);
             }
         }
-        NEScheduler::get().schedule(_mm_kernel.get(), Window::DimY);
+        NEScheduler::get().schedule(_impl->mm_kernel.get(), Window::DimY);
     }
 
-    if(!_fused_assembly_path)
+    if(!_impl->fused_assembly_path)
     {
-        // Run matrix A reduction kernel only if _b_offset is not equal to 0
-        if(_b_offset != 0)
+        // Run matrix A reduction kernel only if _impl->b_offset is not equal to 0
+        if(_impl->b_offset != 0)
         {
-            NEScheduler::get().schedule(_mtx_a_reduction_kernel.get(), Window::DimX);
+            NEScheduler::get().schedule(_impl->mtx_a_reduction_kernel.get(), Window::DimX);
         }
 
-        // Run matrix B reduction kernel only if _a_offset is not equal to 0
-        if(_a_offset != 0 && !_reshape_b_only_on_first_run)
+        // Run matrix B reduction kernel only if _impl->a_offset is not equal to 0
+        if(_impl->a_offset != 0 && !_impl->reshape_b_only_on_first_run)
         {
-            NEScheduler::get().schedule(_mtx_b_reduction_kernel.get(), Window::DimX);
+            NEScheduler::get().schedule(_impl->mtx_b_reduction_kernel.get(), Window::DimX);
         }
 
-        if(_fuse_output_stage)
+        if(_impl->fuse_output_stage)
         {
             // Run offset contribution kernel
-            NEScheduler::get().schedule(_offset_contribution_output_stage_kernel.get(), Window::DimY);
+            NEScheduler::get().schedule(_impl->offset_contribution_output_stage_kernel.get(), Window::DimY);
         }
         else
         {
             // Run offset contribution kernel
-            NEScheduler::get().schedule(_offset_contribution_kernel.get(), Window::DimY);
+            NEScheduler::get().schedule(_impl->offset_contribution_kernel.get(), Window::DimY);
         }
     }
 
     // Convert QASYMM8_SIGNED->QASYMM8
-    if(!_fused_assembly_path && _fuse_output_stage && _flip_signedness)
+    if(!_impl->fused_assembly_path && _impl->fuse_output_stage && _impl->flip_signedness)
     {
-        NEScheduler::get().schedule(_convert_from_signed_asymm.get(), Window::DimY);
+        NEScheduler::get().schedule(_impl->convert_from_signed_asymm.get(), Window::DimY);
     }
 
     // Run fused activation unless already run in the fused assembly
-    if(_run_activation)
+    if(_impl->run_activation)
     {
-        _activation_func.run();
+        _impl->activation_func->run();
     }
 }
 
 void NEGEMMLowpMatrixMultiplyCore::prepare()
 {
-    if(!_is_prepared)
+    if(!_impl->is_prepared)
     {
-        const bool original_b_managed_by_weights_manager = _weights_manager && _weights_manager->are_weights_managed(_original_b);
         // Run assembly reshape
-        if(_asm_glue->is_configured())
+        if(_impl->asm_glue->is_configured())
         {
-            if(!original_b_managed_by_weights_manager)
-            {
-                ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
-            }
+            _impl->asm_glue->prepare(_impl->asm_glue_prep_pack);
 
-            _asm_glue->prepare(_asm_glue_tensors);
-            if(!original_b_managed_by_weights_manager)
+            auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
+                                            _impl->aux_mem_req.end(),
+                                            [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
+
+            if(has_reshape != std::end(_impl->aux_mem_req))
             {
-                _original_b->mark_as_unused();
+                _impl->original_b->mark_as_unused();
+            }
+            else
+            {
+                _impl->asm_glue_run_pack.add_const_tensor(ACL_SRC_1, _impl->original_b);
             }
         }
         // Run non-assembly reshape
-        else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue->is_configured())
+        else if(_impl->reshape_b_only_on_first_run && !_impl->run_vector_matrix_multiplication && !_impl->asm_glue->is_configured())
         {
-            if(!original_b_managed_by_weights_manager)
-            {
-                ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
-            }
-
             // Run reshape kernel and mark original weights tensor as unused
-            _tmp_b.allocator()->allocate();
-            NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
-            if(!original_b_managed_by_weights_manager)
-            {
-                _original_b->mark_as_unused();
-            }
+            _impl->tmp_b.allocator()->allocate();
+            NEScheduler::get().schedule(_impl->mtx_b_reshape_kernel.get(), Window::DimY);
         }
 
-        // Run matrix B reduction kernel only if _a_offset is not equal to 0
-        if(!_fused_assembly_path && _a_offset != 0 && _reshape_b_only_on_first_run)
+        // Run matrix B reduction kernel only if _impl->a_offset is not equal to 0
+        if(!_impl->fused_assembly_path && _impl->a_offset != 0 && _impl->reshape_b_only_on_first_run)
         {
-            _vector_sum_col.allocator()->allocate();
-            NEScheduler::get().schedule(_mtx_b_reduction_kernel.get(), Window::DimX);
+            _impl->vector_sum_col.allocator()->allocate();
+            NEScheduler::get().schedule(_impl->mtx_b_reduction_kernel.get(), Window::DimX);
         }
 
-        _is_prepared = true;
+        _impl->is_prepared = true;
     }
 }
 } // namespace arm_compute

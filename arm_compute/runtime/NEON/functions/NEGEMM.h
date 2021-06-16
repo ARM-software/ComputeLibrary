@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "src/core/helpers/MemoryHelpers.h"
 
 #include <memory>
 
@@ -105,14 +106,7 @@ public:
     void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMM.
      *
-     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: BFLOAT16/F16/F32
-     * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
-     * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
-     * @param[out] output    Output tensor info. Data type supported: same as @p a
-     * @param[in]  alpha     Weight of the matrix product
-     * @param[in]  beta      Weight of matrix C
-     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
-     *                       if the reshape of matrix B should happen only for the first run
+     * Similar to @ref NEGEMM::configure()
      *
      * @return a status
      */
@@ -146,7 +140,10 @@ private:
     bool           _reshape_b_only_on_first_run;
     bool           _is_prepared;
 
-    ITensorPack _asm_glue_tensors{};
+    ITensorPack                      _asm_glue_run_pack;
+    ITensorPack                      _asm_glue_prep_pack;
+    WorkspaceData<Tensor>            _asm_glue_workspace;
+    experimental::MemoryRequirements _aux_mem_req;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMM_H */

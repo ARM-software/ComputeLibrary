@@ -96,20 +96,9 @@ public:
     void run() override;
     void prepare() override;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer
+    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradConvolutionLayer
      *
-     * @param[in] input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
-     *                             while every optional dimension from 4 and above represent a batch of inputs.
-     *                             Data types supported: F16/F32.
-     * @param[in] weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
-     *                             Currently only 3x3 and 5x5 kernels are supported.
-     * @param[in] biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[in] output           Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
-     *                             Data types supported: Same as @p input.
-     * @param[in] conv_info        Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
-     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
-     * @param[in] enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
-     *                              available which may introduce a drop of accuracy as well. Default is false
+     * Similar to @ref NEWinogradConvolutionLayer::configure()
      *
      * @return a status
      */

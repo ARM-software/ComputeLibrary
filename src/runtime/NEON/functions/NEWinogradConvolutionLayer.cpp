@@ -29,12 +29,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
-#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
-#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
-#include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 #include "src/core/NEON/kernels/convolution/common/utils.hpp"
 #include "src/core/NEON/kernels/convolution/winograd/winograd.hpp"
