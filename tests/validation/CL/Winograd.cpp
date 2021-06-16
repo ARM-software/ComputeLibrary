@@ -51,13 +51,11 @@ namespace
 {
 // *INDENT-OFF*
 // clang-format off
-constexpr AbsoluteTolerance<float> tolerance_f32(0.002f);
 const AbsoluteTolerance<half> tolerance_f16(half(1.f));
 constexpr AbsoluteTolerance<float> tolerance_convolution_layer_f32(0.1f);
 const AbsoluteTolerance<half> tolerance_convolution_layer_f16(half(0.4f));
 RelativeTolerance<half_float::half> rel_tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for FP16 data types */
 constexpr float                     tolerance_num   = 0.05f;  /**< Tolerance number */
-constexpr float                     abs_tolerance_f32_nightly = 0.003f; /**< Absolute Tolerance value */
 constexpr float                     abs_tolerance_convolution_layer_f16   = 2.5f;  /**< Tolerance number */
 constexpr float                      tolerance_num_f16 = 0.15f;                 /**< Tolerance number */
 
