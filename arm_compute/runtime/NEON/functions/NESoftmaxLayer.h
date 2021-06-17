@@ -24,8 +24,10 @@
 #ifndef ARM_COMPUTE_NESOFTMAXLAYER_H
 #define ARM_COMPUTE_NESOFTMAXLAYER_H
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "src/core/helpers/MemoryHelpers.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
 #include <memory>
 
 namespace arm_compute

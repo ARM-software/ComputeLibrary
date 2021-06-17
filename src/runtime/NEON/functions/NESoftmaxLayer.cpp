@@ -26,6 +26,7 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "src/core/cpu/kernels/CpuSoftmaxKernel.h"
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
 #include "src/runtime/cpu/operators/CpuSoftmax.h"
 
