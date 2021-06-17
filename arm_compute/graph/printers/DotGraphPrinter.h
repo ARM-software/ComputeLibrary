@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ public:
     void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override;
     void visit(NormalizationLayerNode &n) override;
     void visit(PoolingLayerNode &n) override;
-    void default_visit() override;
+    void default_visit(INode &n) override;
 
 private:
     std::string _info{};

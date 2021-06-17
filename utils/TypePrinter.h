@@ -77,7 +77,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimen
 
         for(unsigned int d = 1; d < dimensions.num_dimensions(); ++d)
         {
-            os << "x" << dimensions[d];
+            os << "," << dimensions[d];
         }
     }
 
