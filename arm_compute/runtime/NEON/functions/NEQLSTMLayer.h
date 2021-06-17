@@ -54,7 +54,7 @@ class NEGEMMLowpMatrixAReductionKernel;
  * -# @ref NEArithmeticSubtraction                               Elementwise subtraction
  * -# @ref NECopy                                                Copy kernel for copying output_state_out to output
  * -# @ref NEGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
- * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16
+ * -# @ref NEGEMMLowpOutputStage                                 Convert 32-bit integers into QSYMM16
  * -# @ref NEGEMMLowpMatrixAReductionKernel                      For precomputing effective biases to use
  * -# @ref NEPixelWiseMultiplication                             Elementwise multiplication
  * -# @ref NETranspose                                           Transpose function for reshaping the weights

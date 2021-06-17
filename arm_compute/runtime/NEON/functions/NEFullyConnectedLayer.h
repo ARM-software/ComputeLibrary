@@ -80,7 +80,7 @@ private:
  *  -# @ref NEIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref NETranspose (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref NEGEMMMatrixMultiplyKernel or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- *  -# @ref NEGEMMMatrixAdditionKernel or @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric) (if @p biases is not equal to nullptr)
+ *  -# @ref NEGEMMMatrixAdditionKernel or @ref NEGEMMLowpOutputStage (if quantized asymmetric) (if @p biases is not equal to nullptr)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */

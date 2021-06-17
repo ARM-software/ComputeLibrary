@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ScaleKernel.h"
+#include "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ScaleKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -37,14 +37,19 @@
 #include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
-#include <cstddef>
-#include <cstdint>
 
 namespace arm_compute
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo *output_stage)
+namespace cpu
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
+namespace kernels
+{
+namespace
+{
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, const GEMMLowpOutputStageInfo *output_stage)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::S32);
 
     ARM_COMPUTE_RETURN_ERROR_ON(output_stage->gemmlowp_max_bound > std::get<1>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type)));
     ARM_COMPUTE_RETURN_ERROR_ON(output_stage->gemmlowp_min_bound < std::get<0>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type))
@@ -53,19 +58,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     // Check biases if exist
     if(bias != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, bias);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
-        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != bias->dimension(0));
+        ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) != bias->dimension(0));
     }
 
-    if(output->total_size() != 0)
+    if(dst->total_size() != 0)
     {
-        if(output->data_type() != output_stage->output_data_type && (output_stage->output_data_type == DataType::QASYMM8 || output_stage->output_data_type == DataType::QASYMM8_SIGNED))
+        if(dst->data_type() != output_stage->output_data_type && (output_stage->output_data_type == DataType::QASYMM8 || output_stage->output_data_type == DataType::QASYMM8_SIGNED))
         {
             ARM_COMPUTE_RETURN_ERROR_MSG("Mismatching data types");
         }
 
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
     }
 
     return Status{};
@@ -129,11 +134,10 @@ inline typename wrapper::traits::neon_vector<T, 16>::type finalize_quantization(
 
     return out;
 }
-
-class Coordinates;
+} // namespace
 
 template <typename T>
-void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window)
+void CpuGemmLowpQuantizeDownInt32ScaleKernel::run_internal(const ITensor *src, const ITensor *bias, ITensor *dst, const Window &window)
 {
     using VectorType = typename wrapper::traits::neon_vector<T, 16>::type;
 
@@ -152,16 +156,16 @@ void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window)
     Window win(window);
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator in(_input, win);
-    Iterator out(_output, win);
+    Iterator in(src, win);
+    Iterator out(dst, win);
 
-    if(_bias != nullptr)
+    if(bias != nullptr)
     {
         Window win_biases;
         win_biases.set(Window::DimX, Window::Dimension(0, 1, 1));
         win_biases.set(Window::DimY, Window::Dimension(0, 1, 1));
 
-        Iterator bias(_bias, win_biases);
+        Iterator bias_i(bias, win_biases);
         execute_window_loop(win, [&](const Coordinates &)
         {
             // Compute 16 elements per iteration
@@ -181,10 +185,10 @@ void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window)
                 const int32x4x4_t bias_s32 =
                 {
                     {
-                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 0),
-                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 4),
-                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 8),
-                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 12)
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias_i.ptr()) + x + 0),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias_i.ptr()) + x + 4),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias_i.ptr()) + x + 8),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias_i.ptr()) + x + 12)
                     }
                 };
 
@@ -203,7 +207,7 @@ void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window)
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                const int bias_value = *(reinterpret_cast<const int *>(bias.ptr()) + x);
+                const int bias_value = *(reinterpret_cast<const int *>(bias_i.ptr()) + x);
                 int       in_value   = *(reinterpret_cast<const int *>(in.ptr()) + x);
 
                 // Quantize
@@ -213,7 +217,7 @@ void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window)
                 *(out.ptr() + x) = static_cast<T>(utility::clamp<int>(in_value, clamp_min, clamp_max));
             }
         },
-        in, bias, out);
+        in, bias_i, out);
     }
     else
     {
@@ -255,33 +259,26 @@ void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window)
     }
 }
 
-NEGEMMLowpQuantizeDownInt32ScaleKernel::NEGEMMLowpQuantizeDownInt32ScaleKernel()
-    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _output_stage(nullptr), _is_bounded_relu(false)
+void CpuGemmLowpQuantizeDownInt32ScaleKernel::configure(ITensorInfo *src, ITensorInfo *bias, ITensorInfo *dst, const GEMMLowpOutputStageInfo *output_stage)
 {
-}
-
-void NEGEMMLowpQuantizeDownInt32ScaleKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, const GEMMLowpOutputStageInfo *output_stage)
-{
+    ARM_COMPUTE_UNUSED(bias);
     // Perform validate step
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, output_stage);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst, output_stage);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(output_stage->output_data_type));
+    auto_init_if_empty(*dst, src->clone()->set_data_type(output_stage->output_data_type));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
-                                                  (bias != nullptr) ? bias->info() : nullptr,
-                                                  output->info(),
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src,
+                                                  bias,
+                                                  dst,
                                                   output_stage));
 
-    _input        = input;
-    _bias         = bias;
-    _output       = output;
     _output_stage = output_stage;
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
+    Window win = calculate_max_window(*src, Steps());
 
-    INEKernel::configure(win);
+    ICpuKernel::configure(win);
 
     // Check if we need to clamp the result using min and max
     _is_bounded_relu = ((_output_stage->gemmlowp_min_bound != _output_stage->gemmlowp_max_bound)
@@ -289,11 +286,11 @@ void NEGEMMLowpQuantizeDownInt32ScaleKernel::configure(const ITensor *input, con
                              && _output_stage->gemmlowp_max_bound == std::get<1>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type))));
     if(_output_stage->output_data_type == DataType::QASYMM8)
     {
-        _func = &NEGEMMLowpQuantizeDownInt32ScaleKernel::run<uint8_t>;
+        _func = &CpuGemmLowpQuantizeDownInt32ScaleKernel::run_internal<uint8_t>;
     }
     else if(_output_stage->output_data_type == DataType::QASYMM8_SIGNED)
     {
-        _func = &NEGEMMLowpQuantizeDownInt32ScaleKernel::run<int8_t>;
+        _func = &CpuGemmLowpQuantizeDownInt32ScaleKernel::run_internal<int8_t>;
     }
     else
     {
@@ -301,20 +298,29 @@ void NEGEMMLowpQuantizeDownInt32ScaleKernel::configure(const ITensor *input, con
     }
 }
 
-Status NEGEMMLowpQuantizeDownInt32ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo *output_stage)
+Status CpuGemmLowpQuantizeDownInt32ScaleKernel::validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, const GEMMLowpOutputStageInfo *output_stage)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, output_stage));
-
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, bias, dst, output_stage));
     return Status{};
 }
 
-void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window, const ThreadInfo &info)
+void CpuGemmLowpQuantizeDownInt32ScaleKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
 
-    (this->*_func)(window);
+    auto src  = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto bias = tensors.get_const_tensor(TensorType::ACL_BIAS);
+    auto dst  = tensors.get_tensor(TensorType::ACL_DST);
+    (this->*_func)(src, bias, dst, window);
 }
+
+const char *CpuGemmLowpQuantizeDownInt32ScaleKernel::name() const
+{
+    return "CpuGemmLowpQuantizeDownInt32ScaleKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

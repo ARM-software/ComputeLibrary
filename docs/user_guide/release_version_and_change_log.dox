@@ -609,7 +609,7 @@ v20.05 Public major release
      - @ref NEReduceMean
      - @ref NEArgMinMaxLayer
      - @ref NEDeconvolutionLayer
-     - @ref NEGEMMLowpQuantizeDownInt32ScaleKernel
+     - NEGEMMLowpQuantizeDownInt32ScaleKernel
      - @ref CPPBoxWithNonMaximaSuppressionLimit
      - @ref CPPDetectionPostProcessLayer
      - @ref CPPPermuteKernel
@@ -683,7 +683,7 @@ v20.02 Public major release
      - CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
  - New Arm® Neon™ kernels / functions:
      - @ref NEFill
-     - @ref NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
+     - NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
  - Deprecated Arm® Neon™ functions / interfaces:
      - CLDepthwiseConvolutionLayer3x3
      - NEDepthwiseConvolutionLayerOptimized
@@ -800,7 +800,7 @@ v19.08 Public major release
     - NEBatchConcatenateLayerKernel
     - @ref NEDepthToSpaceLayerKernel / @ref NEDepthToSpaceLayer
     - NEDepthwiseConvolutionLayerNativeKernel
-    - @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+    - NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
     - @ref NEMeanStdDevNormalizationKernel / @ref NEMeanStdDevNormalizationLayer
     - @ref NESpaceToDepthLayerKernel / @ref NESpaceToDepthLayer
  - New OpenCL kernels / functions:
@@ -1243,7 +1243,7 @@ v17.12 Public major release
     - arm_compute::NEHGEMMAArch64FP16Kernel
     - NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
     - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
-    - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+    - NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - NEWinogradLayer / NEWinogradLayerKernel
 
  - New OpenCL kernels / functions

@@ -155,7 +155,7 @@ private:
  * -# @ref NEIm2ColKernel
  * -# @ref NEGEMM (if the data type is BFLOAT16/FP16/FP32)
  * -# @ref NEGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
- * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8/QASYMM8_SIGNED)
+ * -# @ref NEGEMMLowpOutputStage (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEArithmeticAddition (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
  * -# @ref NECol2ImKernel (if NCHW data layout)
  *

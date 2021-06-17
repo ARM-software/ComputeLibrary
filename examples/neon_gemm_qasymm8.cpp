@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,8 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "utils/Utils.h"
 #include "support/ToolchainSupport.h"
+#include "utils/Utils.h"
 
 #include <cstdlib>
 
@@ -102,10 +102,10 @@ int main(int argc, char **argv)
     Tensor q_dst0;
     Tensor q_res;
     Tensor q_res_output;
-    size_t M = 4;
-    size_t N = 4;
-    size_t K = 4;
-    bool default_input = true;
+    size_t M             = 4;
+    size_t N             = 4;
+    size_t K             = 4;
+    bool   default_input = true;
 
     // Parse args
     if(argc < 3) /* case default matrix sizes */
@@ -144,15 +144,18 @@ int main(int argc, char **argv)
 
     // Fill in: one is the identity matrix, other is sequential values
     // src1: Identity matrix
-    for(size_t i = 0; i < M * K; i++) {
+    for(size_t i = 0; i < M * K; i++)
+    {
         src1_ptr[i] = 0;
     }
-    for(size_t i = 0; i < M; i++) {
+    for(size_t i = 0; i < M; i++)
+    {
         src1_ptr[i * K + i] = 1.0f;
     }
 
     // src2: Sequential values matrix
-    for(size_t i = 0; i < K * N; i++) {
+    for(size_t i = 0; i < K * N; i++)
+    {
         src2_ptr[i] = i * 1.123f;
     }
 
@@ -217,13 +220,22 @@ int main(int argc, char **argv)
     qgemm.configure(&q_src1, &q_src2, nullptr, &q_res);
 
     // Configure output stage after computing shift and multiplier parameters
-    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint gemmlowp_output_stage;
-    int output_multiplier;
-    int output_shift;
-    float multiplier = (src1_qinfo.uniform().scale * src2_qinfo.uniform().scale) / dst0_qinfo.uniform().scale;
+    NEGEMMLowpOutputStage gemmlowp_output_stage;
+    int                   output_multiplier;
+    int                   output_shift;
+    float                 multiplier = (src1_qinfo.uniform().scale * src2_qinfo.uniform().scale) / dst0_qinfo.uniform().scale;
     quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
     std::cout << "(q_multiplier, q_shift) = (" << output_multiplier << ", " << output_shift << ")\n\n";
-    gemmlowp_output_stage.configure(&q_res, nullptr, &q_res_output, output_multiplier, output_shift, dst0_qinfo.uniform().offset);
+
+    GEMMLowpOutputStageInfo info;
+    info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+    info.gemmlowp_multiplier = output_multiplier;
+    info.gemmlowp_shift      = output_shift;
+    info.gemmlowp_offset     = dst0_qinfo.uniform().offset;
+    info.output_data_type    = DataType::QASYMM8;
+    q_res_output.info()->set_data_type(DataType::QASYMM8);
+    q_res_output.info()->set_num_channels(1);
+    gemmlowp_output_stage.configure(&q_res, nullptr, &q_res_output, info);
 
     // Allocate all tensors
     q_src1.allocator()->allocate();

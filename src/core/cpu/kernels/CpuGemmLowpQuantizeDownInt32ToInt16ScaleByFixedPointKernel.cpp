@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
+#include "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -37,53 +37,41 @@
 #include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
-#include <cstddef>
-#include <cstdint>
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, int min, int max)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(min > max);
 
     // Check biases if exist
     if(bias != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, bias);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
-        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != bias->dimension(0));
+        ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) != bias->dimension(0));
     }
 
-    if(output->total_size() != 0)
+    if(dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QSYMM16);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, input);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QSYMM16);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, src);
     }
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_data_type(DataType::QSYMM16));
-
-    // Configure kernel window
-    Window win = calculate_max_window(*input, Steps());
-
-    // NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel doesn't need padding so update_window_and_padding() can be skipped
-
-    return std::make_pair(Status{}, win);
-}
 } // namespace
 
-class Coordinates;
-
 template <bool is_bounded_relu>
-void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window &window)
+void CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run_internal(const ITensor *src, const ITensor *bias, ITensor *dst, const Window &window)
 {
     const int16x8_t min_s16 = vdupq_n_s16(static_cast<int16_t>(_min));
     const int16x8_t max_s16 = vdupq_n_s16(static_cast<int16_t>(_max));
@@ -98,15 +86,15 @@ void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator in(_input, win_collapsed);
-    Iterator out(_output, win_collapsed);
-    if(_bias != nullptr)
+    Iterator in(src, win_collapsed);
+    Iterator out(dst, win_collapsed);
+    if(bias != nullptr)
     {
         Window win_biases;
         win_biases.set(Window::DimX, Window::Dimension(0, 1, 1));
         win_biases.set(Window::DimY, Window::Dimension(0, 1, 1));
 
-        Iterator bias(_bias, win_biases);
+        Iterator bias_i(bias, win_biases);
         execute_window_loop(win_collapsed, [&](const Coordinates &)
         {
             // Compute 16 elements per iteration
@@ -124,8 +112,8 @@ void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window
                 const int32x4x2_t bias_s32 =
                 {
                     {
-                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 0),
-                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 4)
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias_i.ptr()) + x + 0),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias_i.ptr()) + x + 4)
                     }
                 };
 
@@ -139,7 +127,7 @@ void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                const int32_t bias_value = *(reinterpret_cast<const int32_t *>(bias.ptr()) + x);
+                const int32_t bias_value = *(reinterpret_cast<const int32_t *>(bias_i.ptr()) + x);
                 int32_t       in_value   = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
 
                 // Add bias
@@ -149,7 +137,7 @@ void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window
                                                                                                              static_cast<int16_t>(_max));
             }
         },
-        in, out, bias);
+        in, out, bias_i);
     }
     else
     {
@@ -184,51 +172,56 @@ void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window
     }
 }
 
-NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel()
-    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_fixedpoint_multiplier(0), _result_shift(0), _min(0), _max(0)
-{
-}
-
-void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
-                                                                          int min, int max)
+void CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(ITensorInfo *src, ITensorInfo *bias, ITensorInfo *dst, int result_fixedpoint_multiplier, int result_shift,
+                                                                           int min, int max)
 {
     // Perform validate step
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), min, max));
+    ARM_COMPUTE_UNUSED(bias, dst);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, bias, dst, min, max));
 
-    _input                        = input;
-    _bias                         = bias;
-    _output                       = output;
     _result_fixedpoint_multiplier = result_fixedpoint_multiplier;
     _result_shift                 = result_shift;
     _min                          = min;
     _max                          = max;
 
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*src, src->clone()->set_data_type(DataType::QSYMM16));
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Window win_config = calculate_max_window(*src, Steps());
+    ICpuKernel::configure(win_config);
 
     // Check if we need to clamp the result using min and max
     const bool is_bounded_relu = !(min <= -32768 && max >= 32767);
-    _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run<false>;
+    _func                      = is_bounded_relu ? &CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run_internal<true> :
+                                 &CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run_internal<false>;
 }
 
-Status NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
-
     return Status{};
 }
 
-void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window &window, const ThreadInfo &info)
+void CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
 
-    (this->*_func)(window);
+    auto src  = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto bias = tensors.get_const_tensor(TensorType::ACL_BIAS);
+    auto dst  = tensors.get_tensor(TensorType::ACL_DST);
+
+    (this->*_func)(src, bias, dst, window);
 }
+
+const char *CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::name() const
+{
+    return "CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute
