@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -169,10 +169,15 @@ void JSONPrinter::print_info(const std::string &info)
     _infos.push_back(info);
 }
 
+void JSONPrinter::print_profiler_header(const std::string &header_data)
+{
+    print_separator(_first_test_entry);
+    *_stream << header_data;
+}
+
 void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
 {
     print_separator(_first_test_entry);
-
     *_stream << R"("measurements" : {)";
 
     for(auto i_it = measurements.cbegin(), i_end = measurements.cend(); i_it != i_end;)

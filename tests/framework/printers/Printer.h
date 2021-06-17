@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -124,6 +124,12 @@ public:
      * @param[in] info Description of the log.
      */
     virtual void print_info(const std::string &info) = 0;
+
+    /** Print header data.
+     *
+     * @param[in] header_data JSON formmated header data.
+     */
+    virtual void print_profiler_header(const std::string &header_data) = 0;
 
     /** Print measurements for a test.
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,12 +81,19 @@ void Profiler::test_stop()
         {
             _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
         }
+
+        _header_data = instrument->instrument_header();
     }
 }
 
 const Profiler::MeasurementsMap &Profiler::measurements() const
 {
     return _measurements;
+}
+
+const std::string &Profiler::header() const
+{
+    return _header_data;
 }
 } // namespace framework
 } // namespace test

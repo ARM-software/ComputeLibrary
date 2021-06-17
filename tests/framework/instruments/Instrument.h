@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,6 +115,15 @@ public:
     virtual MeasurementsMap measurements() const
     {
         return MeasurementsMap();
+    }
+
+    /** Return JSON formatted instrument header string.
+     *
+     * @return JSON formatted string
+     */
+    virtual std::string instrument_header() const
+    {
+        return std::string{};
     }
 
     /** Return the latest test measurements.

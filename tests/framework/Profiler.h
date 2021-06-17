@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,9 +87,16 @@ public:
      */
     const MeasurementsMap &measurements() const;
 
+    /** Return JSON formatted header data.
+     *
+     * @returns JSON formmated string
+     */
+    const std::string &header() const;
+
 private:
     std::vector<std::unique_ptr<Instrument>> _instruments{};
     MeasurementsMap                          _measurements{};
+    std::string                              _header_data{};
 };
 } // namespace framework
 } // namespace test

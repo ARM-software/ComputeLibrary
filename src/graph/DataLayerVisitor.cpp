@@ -91,8 +91,6 @@ void add_convolution_layer_method(DataLayerVisitor::LayerData &layer_data, T &no
 template <typename T>
 void add_generic_layer_data(DataLayerVisitor::LayerData &layer_data, T &node)
 {
-    // Add layer name
-    layer_data["layer_name"] = node.name();
     // Loop over each input tensor
     for(size_t tensor_no = 0; tensor_no < node.num_inputs(); ++tensor_no)
     {
