@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
+#include "src/core/cpu/kernels/CpuGemmLowpMatrixReductionKernel.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
@@ -32,68 +32,80 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments_matrix_a_reduction(const ITensorInfo *src, const ITensorInfo *dst, const GEMMLowpReductionKernelInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_ON_MSG(info.is_reshaped == true, "Not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
 
-    if(output->total_size() > 0)
+    if(dst->total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(0) != input->dimension(1), "Output vector must have length equal to the number of rows of the input matrix");
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->dimension(0) != src->dimension(1), "Output vector must have length equal to the number of rows of the input matrix");
     }
     return Status{};
 }
-Status validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments_matrix_b_reduction(const ITensorInfo *src, const ITensorInfo *dst, const GEMMLowpReductionKernelInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_ON_MSG(info.is_reshaped == true, "Not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
 
-    if(output->total_size() > 0)
+    if(dst->total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(0) != input->dimension(0), "Output vector must have length equal to the number of columns of the input matrix");
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->dimension(0) != src->dimension(0), "Output vector must have length equal to the number of columns of the input matrix");
     }
     return Status{};
 }
 } // namespace
 
-INEGEMMLowpReductionKernel::INEGEMMLowpReductionKernel()
-    : _input(), _output(), _k(0), _scalar(0), _mul_by_scalar(false)
-{
-}
-
-void NEGEMMLowpMatrixAReductionKernel::configure(const ITensor *mtx_a, ITensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
+void CpuGemmLowpMatrixAReductionKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const GEMMLowpReductionKernelInfo &info)
 {
     // Perform validate step
-    ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_a, vector_sum_row);
-    ARM_COMPUTE_ERROR_ON_MSG(info.is_reshaped == true, "Not supported");
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_a_reduction(mtx_a->info(), vector_sum_row->info()));
-    _input         = mtx_a;
-    _output        = vector_sum_row;
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_a_reduction(src, dst, info));
     _k             = info.k;
     _scalar        = info.scalar;
     _mul_by_scalar = info.mul_by_scalar;
 
+    switch(src->data_type())
+    {
+        case DataType::QASYMM8:
+            _func = &CpuGemmLowpMatrixAReductionKernel::run_internal<uint8_t>;
+            break;
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+            _func = &CpuGemmLowpMatrixAReductionKernel::run_internal<int8_t>;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type");
+    }
+
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*_output->info(), TensorShape(_input->info()->dimension(1)), 1, DataType::S32);
+    auto_init_if_empty(*dst, TensorShape(src->dimension(1)), 1, DataType::S32);
 
-    Window win = calculate_max_window(*_output->info(), Steps(1));
-
-    INEKernel::configure(win);
+    Window win = calculate_max_window(*dst, Steps(1));
+    ICpuKernel::configure(win);
 }
 
-Status NEGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
+Status CpuGemmLowpMatrixAReductionKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const GEMMLowpReductionKernelInfo &info)
 {
-    ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_a_reduction(mtx_a, vector_sum_row));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_a_reduction(src, dst, info));
     return Status{};
 }
 
 template <typename T>
-void NEGEMMLowpMatrixAReductionKernel::run_internal(const arm_compute::Window &window)
+void CpuGemmLowpMatrixAReductionKernel::run_internal(const ITensor *src, ITensor *dst, const arm_compute::Window &window)
 {
     // Intermediate and final accumulator types
     using TIAcc = wrapper::traits::promote_t<T>;
@@ -106,15 +118,15 @@ void NEGEMMLowpMatrixAReductionKernel::run_internal(const arm_compute::Window &w
     win_input.set(Window::DimY, Window::Dimension(0, 0, 0));
     win_input.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
-    Iterator in(_input, win_input);
-    Iterator out(_output, collapsed_window);
+    Iterator in(src, win_input);
+    Iterator out(dst, collapsed_window);
 
     execute_window_loop(collapsed_window, [&](const Coordinates & id)
     {
         auto vsum_row = wrapper::vdup_n(static_cast<TAcc>(0), wrapper::traits::vector_128_tag{});
         TAcc sum_row  = 0;
 
-        const T *matrix_a = reinterpret_cast<const T *>((in.ptr() + id.x() * _input->info()->strides_in_bytes()[1] + id.y() * _input->info()->strides_in_bytes()[2]));
+        const T *matrix_a = reinterpret_cast<const T *>((in.ptr() + id.x() * src->info()->strides_in_bytes()[1] + id.y() * src->info()->strides_in_bytes()[2]));
 
 #if __arm__
         asm volatile("PLD [%0, #128*4]" ::"r"(matrix_a));
@@ -160,36 +172,28 @@ void NEGEMMLowpMatrixAReductionKernel::run_internal(const arm_compute::Window &w
     in, out);
 }
 
-void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInfo &info)
+void CpuGemmLowpMatrixAReductionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    switch(_input->info()->data_type())
-    {
-        case DataType::QASYMM8:
-            run_internal<uint8_t>(window);
-            break;
-        case DataType::QASYMM8_SIGNED:
-        case DataType::QSYMM8:
-        case DataType::QSYMM8_PER_CHANNEL:
-            run_internal<int8_t>(window);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Unsupported data type");
-    }
+    auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    (this->*_func)(src, dst, window);
 }
 
-void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b, ITensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
+const char *CpuGemmLowpMatrixAReductionKernel::name() const
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_b, vector_sum_col);
-    ARM_COMPUTE_ERROR_ON_MSG(info.is_reshaped == true, "Not supported");
+    return "CpuGemmLowpMatrixAReductionKernel";
+}
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(mtx_b->info(), vector_sum_col->info()));
+void CpuGemmLowpMatrixBReductionKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const GEMMLowpReductionKernelInfo &info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(src, dst, info));
 
-    _input         = mtx_b;
-    _output        = vector_sum_col;
     _k             = info.k;
     _scalar        = info.scalar;
     _mul_by_scalar = info.mul_by_scalar;
@@ -197,24 +201,36 @@ void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b, ITensor *
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
+    switch(src->data_type())
+    {
+        case DataType::QASYMM8:
+            _func = &CpuGemmLowpMatrixBReductionKernel::run_internal<uint8_t>;
+            break;
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+            _func = &CpuGemmLowpMatrixBReductionKernel::run_internal<int8_t>;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type");
+    }
+
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*_output->info(), TensorShape(_input->info()->dimension(0)), 1, DataType::S32);
+    auto_init_if_empty(*dst, TensorShape(src->dimension(0)), 1, DataType::S32);
 
     // Configure kernel window
-    Window win = calculate_max_window_horizontal(*_output->info(), Steps(num_elems_processed_per_iteration));
-    INEKernel::configure(win);
+    Window win = calculate_max_window_horizontal(*dst, Steps(num_elems_processed_per_iteration));
+    ICpuKernel::configure(win);
 }
 
-Status NEGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
+Status CpuGemmLowpMatrixBReductionKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const GEMMLowpReductionKernelInfo &info)
 {
-    ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_b_reduction(mtx_b, vector_sum_col));
-
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_b_reduction(src, dst, info));
     return Status{};
 }
 
 template <typename T>
-void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const ThreadInfo &info)
+void CpuGemmLowpMatrixBReductionKernel::run_internal(const ITensor *src, ITensor *dst, const Window &window, const ThreadInfo &info)
 {
     // Intermediate and final accumulator types
     using TIAcc = wrapper::traits::promote_t<T>;
@@ -223,8 +239,8 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
     Window     collapsed_window = window.collapse_if_possible(IKernel::window(), Window::DimY);
     const auto vec_scalar       = wrapper::vdup_n(static_cast<TAcc>(_scalar), wrapper::traits::vector_128_tag{});
 
-    const auto width_matrix_b = static_cast<int>(_input->info()->dimension(0));
-    const auto in_b_stride    = static_cast<int>(_input->info()->strides_in_bytes()[1]);
+    const auto width_matrix_b = static_cast<int>(src->info()->dimension(0));
+    const auto in_b_stride    = static_cast<int>(src->info()->strides_in_bytes()[1]);
 
     // The implementation computes 16 elements per iteration
     const int window_start_x = 16 * info.thread_id;
@@ -239,8 +255,8 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
     win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
     win_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
-    Iterator inb(_input, win_in);
-    Iterator out(_output, win_out);
+    Iterator inb(src, win_in);
+    Iterator out(dst, win_out);
 
     execute_window_loop(win_out, [&](const Coordinates & id)
     {
@@ -258,7 +274,7 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
             wrapper::vdup_n(static_cast<TAcc>(0), wrapper::traits::vector_128_tag{})
         };
 
-        const auto *matrix_b = reinterpret_cast<const T *>(inb.ptr() + id.y() * _input->info()->strides_in_bytes()[2]);
+        const auto *matrix_b = reinterpret_cast<const T *>(inb.ptr() + id.y() * src->info()->strides_in_bytes()[2]);
 
 #if __arm__
         asm volatile("PLD [%0, #128*4]" ::"r"(matrix_b));
@@ -359,24 +375,22 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
     inb, out);
 }
 
-void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInfo &info)
+void CpuGemmLowpMatrixBReductionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    switch(_input->info()->data_type())
-    {
-        case DataType::QASYMM8:
-            run_internal<uint8_t>(window, info);
-            break;
-        case DataType::QASYMM8_SIGNED:
-        case DataType::QSYMM8:
-        case DataType::QSYMM8_PER_CHANNEL:
-            run_internal<int8_t>(window, info);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Unsupported data type");
-    }
+    auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    (this->*_func)(src, dst, window, info);
 }
+
+const char *CpuGemmLowpMatrixBReductionKernel::name() const
+{
+    return "CpuGemmLowpMatrixBReductionKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

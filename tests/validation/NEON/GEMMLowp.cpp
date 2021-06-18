@@ -26,6 +26,8 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/runtime/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -108,6 +110,105 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+
+/** Test case for memory injection in @ref cpu::CpuGemmLowpMatrixMultiplyCore.
+ *
+ * Configure the operator once and inject memory at run-time in multiple executions.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
+{
+    auto gemm     = std::make_unique<cpu::CpuGemmLowpMatrixMultiplyCore>();
+    auto a_info   = TensorInfo(TensorShape(32U, 72U), 1, DataType::QASYMM8);
+    auto b_info   = TensorInfo(TensorShape(17U, 32U), 1, DataType::QASYMM8);
+    auto dst_info = TensorInfo(TensorShape(17U, 72U), 1, DataType::S32);
+    a_info.set_quantization_info(QuantizationInfo(1.0f / 255, -9));
+    b_info.set_quantization_info(QuantizationInfo(1.0f / 255, 1));
+    const auto gemm_info = GEMMInfo{};
+    gemm->configure(&a_info, &b_info, nullptr, &dst_info, gemm_info);
+
+    // telhs are newly created every call of this lambda function
+    auto a   = create_tensor<Tensor>(a_info);
+    auto b   = create_tensor<Tensor>(b_info);
+    auto dst = create_tensor<Tensor>(dst_info);
+    a.allocator()->allocate();
+    b.allocator()->allocate();
+    dst.allocator()->allocate();
+
+    ITensorPack run_pack =
+    {
+        { TensorType::ACL_SRC_0, &a },
+        { TensorType::ACL_SRC_1, &b },
+        { TensorType::ACL_DST, &dst }
+    };
+    ITensorPack prep_pack =
+    {
+        { TensorType::ACL_SRC_1, &b },
+    };
+
+    auto mg = MemoryGroup{};
+    auto ws = manage_workspace<Tensor>(gemm->workspace(), mg, run_pack, prep_pack);
+
+    auto run_conv = [&]() -> Tensor
+    {
+        auto dst = create_tensor<Tensor>(dst_info);
+        dst.allocator()->allocate();
+        run_pack.add_tensor(TensorType::ACL_DST, &dst);
+
+        library->fill_tensor_value(Accessor(a), static_cast<uint8_t>(1));
+        library->fill_tensor_value(Accessor(b), static_cast<uint8_t>(2));
+        // This operator is configured once and captured by this lambda.
+        gemm->prepare(prep_pack);
+        gemm->run(run_pack);
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((uint8_t *)result_0.buffer())[i] == ((uint8_t *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
+/** Test case for memory injection in @ref NEGEMMLowpMatrixMultiplyCore.
+ *
+ * Make sure @ref NEGEMMLowpMatrixMultiplyCore still works through injecting the memory at configure time using the old API.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
+{
+    auto gemm     = std::make_unique<NEGEMMLowpMatrixMultiplyCore>();
+    auto a_info   = TensorInfo(TensorShape(32U, 72U), 1, DataType::QASYMM8);
+    auto b_info   = TensorInfo(TensorShape(17U, 32U), 1, DataType::QASYMM8);
+    auto dst_info = TensorInfo(TensorShape(17U, 72U), 1, DataType::S32);
+    a_info.set_quantization_info(QuantizationInfo(1.0f / 255, -9));
+    b_info.set_quantization_info(QuantizationInfo(1.0f / 255, 1));
+    const auto gemm_info = GEMMInfo{};
+    auto       run_conv  = [&]()
+    {
+        auto a   = create_tensor<Tensor>(a_info);
+        auto b   = create_tensor<Tensor>(b_info);
+        auto dst = create_tensor<Tensor>(dst_info);
+        gemm->configure(&a, &b, nullptr, &dst, gemm_info);
+        a.allocator()->allocate();
+        b.allocator()->allocate();
+        dst.allocator()->allocate();
+        library->fill_tensor_value(Accessor(a), static_cast<uint8_t>(1));
+        library->fill_tensor_value(Accessor(b), static_cast<uint8_t>(2));
+        gemm->run();
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((uint8_t *)result_0.buffer())[i] == ((uint8_t *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
 {

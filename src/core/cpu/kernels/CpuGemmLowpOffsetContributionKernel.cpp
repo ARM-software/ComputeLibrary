@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
+#include "src/core/cpu/kernels/CpuGemmLowpOffsetContributionKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -37,6 +37,10 @@
 #include <arm_neon.h>
 
 namespace arm_compute
+{
+namespace cpu
+{
+namespace kernels
 {
 namespace
 {
@@ -354,26 +358,16 @@ void run_offset_contribution(const Window &window,
 }
 } // namespace
 
-NEGEMMLowpOffsetContributionKernel::NEGEMMLowpOffsetContributionKernel()
-    : _vector_sum_col(nullptr), _vector_sum_row(nullptr), _mm_result(nullptr), _a_offset(0), _b_offset(0), _k_offset(0), _slide_vector_sum_col(true)
-{
-}
-
-void NEGEMMLowpOffsetContributionKernel::configure(ITensor *mm_result, const ITensor *vector_sum_col, const ITensor *vector_sum_row, int32_t k, int32_t a_offset, int32_t b_offset)
+void CpuGemmLowpOffsetContributionKernel::configure(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, int32_t k, int32_t a_offset, int32_t b_offset)
 {
     // Perform validate step
+    ARM_COMPUTE_UNUSED(vector_sum_row);
     ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result->info(),
-                                                  vector_sum_col != nullptr ? vector_sum_col->info() : nullptr, // NOLINT
-                                                  vector_sum_row != nullptr ? vector_sum_row->info() : nullptr, // NOLINT
-                                                  a_offset, b_offset));                                         // NOLINT
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result, vector_sum_col, vector_sum_row, a_offset, b_offset));
 
-    _vector_sum_col = vector_sum_col;
-    _vector_sum_row = vector_sum_row;
-    _mm_result      = mm_result;
-    _a_offset       = a_offset;
-    _b_offset       = b_offset;
-    _k_offset       = a_offset * b_offset * k;
+    _a_offset = a_offset;
+    _b_offset = b_offset;
+    _k_offset = a_offset * b_offset * k;
 
     // If a_offset == 0, vector_sum_col can be a nullptr
     if(a_offset != 0)
@@ -381,33 +375,43 @@ void NEGEMMLowpOffsetContributionKernel::configure(ITensor *mm_result, const ITe
         // Check if vector_sum_col_shape should be slidden or not
         // Don't slide vector_sum_col_shape along the y dimension if vector_sum_col_shape has just 1 dimension and vector_sum_row_shape more than 1
         // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-        _slide_vector_sum_col = vector_sum_col->info()->tensor_shape().num_dimensions() > 1;
+        _slide_vector_sum_col = vector_sum_col->tensor_shape().num_dimensions() > 1;
     }
 
     // Configure kernel window
-    Window win = calculate_max_window(*mm_result->info(), Steps());
-    INEKernel::configure(win);
+    Window win = calculate_max_window(*mm_result, Steps());
+    ICpuKernel::configure(win);
 }
 
-Status NEGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
-                                                    int32_t a_offset, int32_t b_offset)
+Status CpuGemmLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
+                                                     int32_t a_offset, int32_t b_offset)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, a_offset, b_offset));
-
     return Status{};
 }
 
-void NEGEMMLowpOffsetContributionKernel::run(const Window &window, const ThreadInfo &info)
+void CpuGemmLowpOffsetContributionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+
+    auto vector_sum_col = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    auto vector_sum_row = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    auto mm_result      = tensors.get_tensor(TensorType::ACL_DST);
 
     // Check if input is a 3D reinterpretation
-    const bool reinterpret_as_3d = _vector_sum_row != nullptr
-                                   && _mm_result->info()->num_dimensions() > 1
-                                   && _mm_result->info()->tensor_shape().y() != _vector_sum_row->info()->tensor_shape().x();
+    const bool reinterpret_as_3d = vector_sum_row != nullptr
+                                   && mm_result->info()->num_dimensions() > 1
+                                   && mm_result->info()->tensor_shape().y() != vector_sum_row->info()->tensor_shape().x();
 
-    run_offset_contribution(window, _mm_result, _vector_sum_col, _vector_sum_row, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, reinterpret_as_3d);
+    run_offset_contribution(window, mm_result, vector_sum_col, vector_sum_row, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, reinterpret_as_3d);
 }
+
+const char *CpuGemmLowpOffsetContributionKernel::name() const
+{
+    return "CpuGemmLowpOffsetContributionKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

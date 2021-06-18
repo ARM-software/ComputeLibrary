@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
+#include "src/core/cpu/kernels/CpuGemmLowpMatrixMultiplyKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -36,9 +36,11 @@
 
 #include <arm_neon.h>
 
-using namespace arm_compute;
-
 namespace arm_compute
+{
+namespace cpu
+{
+namespace kernels
 {
 namespace
 {
@@ -860,19 +862,16 @@ void inline matrix_multiply_s8(Iterator &ina, Iterator &inb, Iterator &out, int 
     },
     ina, inb, out);
 }
-} // namespace
 
-namespace
+Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
-Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S8, DataType::U8);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::S8, DataType::U8);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S8, DataType::U8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::S8, DataType::U8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
 
-    TensorShape in0_shape = input0->tensor_shape();
-    TensorShape in1_shape = input1->tensor_shape();
-    TensorShape out_shape = output->tensor_shape();
+    TensorShape in0_shape = src0->tensor_shape();
+    TensorShape in1_shape = src1->tensor_shape();
+    TensorShape out_shape = dst->tensor_shape();
 
     // Check vector-by-matrix case
     if(out_shape[1] == 1)
@@ -894,63 +893,58 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
 }
 } // namespace
 
-NEGEMMLowpMatrixMultiplyKernel::NEGEMMLowpMatrixMultiplyKernel()
-    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true)
+void CpuGemmLowpMatrixMultiplyKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
-}
+    ARM_COMPUTE_UNUSED(src0);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, dst));
 
-void NEGEMMLowpMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor *input1, ITensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
-
-    TensorShape in1_shape = input1->info()->tensor_shape();
+    TensorShape in1_shape = src1->tensor_shape();
     in1_shape.collapse(2);
 
-    _input0         = input0;
-    _input1         = input1;
-    _output         = output;
     _slide_matrix_b = in1_shape[2] != 1;
 
     constexpr unsigned int num_elems_processed_per_iteration_x = 16;
     constexpr unsigned int num_elems_processed_per_iteration_y = 4;
 
     Window win;
-
     // Check if the output tensor is a vector. If so,the kernel runs the vector-matrix multiplication
-    if((output->info()->dimension(1) == 1))
+    if((dst->dimension(1) == 1))
     {
         // Configure kernel window
-        win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x));
+        win = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x));
     }
     else
     {
-        win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+        win = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     }
 
-    INEKernel::configure(win);
+    ICpuKernel::configure(win);
 }
 
-Status NEGEMMLowpMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+Status CpuGemmLowpMatrixMultiplyKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
-
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src0, src1, dst));
     return Status{};
 }
 
-void NEGEMMLowpMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &info)
+void CpuGemmLowpMatrixMultiplyKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+
+    auto src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    auto src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    auto dst  = tensors.get_tensor(TensorType::ACL_DST);
 
     // Check if the output tensor is a vector. If so,the kernel runs the vector-matrix multiplication path
-    if((_output->info()->dimension(1) == 1))
+    if((dst->info()->dimension(1) == 1))
     {
-        const auto width_matrix_a = static_cast<int>(_input0->info()->dimension(0));
-        const auto width_matrix_b = static_cast<int>(_input1->info()->dimension(0));
-        const auto width_out      = static_cast<int>(_output->info()->dimension(0));
-        const auto in_b_stride    = static_cast<int>(_input1->info()->strides_in_bytes()[1] / data_size_from_type(_input1->info()->data_type()));
+        const auto width_matrix_a = static_cast<int>(src0->info()->dimension(0));
+        const auto width_matrix_b = static_cast<int>(src1->info()->dimension(0));
+        const auto width_out      = static_cast<int>(dst->info()->dimension(0));
+        const auto in_b_stride    = static_cast<int>(src1->info()->strides_in_bytes()[1] / data_size_from_type(src1->info()->data_type()));
 
         // The implementation computes 16 elements per iteration
         const int window_start_x = 16 * info.thread_id;
@@ -969,18 +963,18 @@ void NEGEMMLowpMatrixMultiplyKernel::run(const Window &window, const ThreadInfo 
         Window win_b;
         // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
         // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-        if(_input1->info()->num_dimensions() >= 3)
+        if(src1->info()->num_dimensions() >= 3)
         {
             win_b = window;
         }
         win_b.set(Window::DimX, Window::Dimension(window_start_x, window_end_x, window_step_x));
         win_b.set(Window::DimY, Window::Dimension(0, 1, 1));
 
-        Iterator ina(_input0, win_a);
-        Iterator inb(_input1, win_b);
-        Iterator out(_output, win_out);
+        Iterator ina(src0, win_a);
+        Iterator inb(src1, win_b);
+        Iterator out(dst, win_out);
 
-        switch(_input0->info()->data_type())
+        switch(src0->info()->data_type())
         {
             case DataType::S8:
             case DataType::QASYMM8_SIGNED:
@@ -1003,8 +997,8 @@ void NEGEMMLowpMatrixMultiplyKernel::run(const Window &window, const ThreadInfo 
     }
     else
     {
-        const size_t in_b_stride = _input1->info()->strides_in_bytes()[1];
-        const int    width_b     = _input1->info()->dimension(0);
+        const size_t in_b_stride = src1->info()->strides_in_bytes()[1];
+        const int    width_b     = src1->info()->dimension(0);
 
         // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the output matrix
         Window win_a(window);
@@ -1023,22 +1017,22 @@ void NEGEMMLowpMatrixMultiplyKernel::run(const Window &window, const ThreadInfo 
         win_b.set(Window::DimY, Window::Dimension(0, 0, 0));
 
         // The step x and step y for the output matrix has been already set using in configure()
-        Iterator ina(_input0, win_a);
-        Iterator inb(_input1, win_b);
-        Iterator out(_output, window);
+        Iterator ina(src0, win_a);
+        Iterator inb(src1, win_b);
+        Iterator out(dst, window);
 
-        switch(_input0->info()->data_type())
+        switch(src0->info()->data_type())
         {
             case DataType::S8:
             case DataType::QASYMM8_SIGNED:
             {
-                matrix_multiply_s8(ina, inb, out, width_b, *_output->info(), window);
+                matrix_multiply_s8(ina, inb, out, width_b, *dst->info(), window);
                 break;
             }
             case DataType::U8:
             case DataType::QASYMM8:
             {
-                matrix_multiply_u8(ina, inb, out, width_b, *_output->info(), window);
+                matrix_multiply_u8(ina, inb, out, width_b, *dst->info(), window);
                 break;
             }
             default:
@@ -1049,4 +1043,11 @@ void NEGEMMLowpMatrixMultiplyKernel::run(const Window &window, const ThreadInfo 
         }
     }
 }
+
+const char *CpuGemmLowpMatrixMultiplyKernel::name() const
+{
+    return "CpuGemmLowpMatrixMultiplyKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

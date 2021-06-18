@@ -243,17 +243,17 @@ v20.11 Public major release
    - NEDirectConvolutionLayerKernel
    - NEScaleKernel
    - NELocallyConnectedMatrixMultiplyKernel
-   - @ref NEGEMMLowpOffsetContributionKernel
+   - NEGEMMLowpOffsetContributionKernel
    - NEGEMMTranspose1xWKernel
    - NEPoolingLayerKernel
    - NEConvolutionKernel
    - NEDepthwiseConvolutionLayerNativeKernel
-   - @ref NEGEMMLowpMatrixMultiplyKernel
+   - NEGEMMLowpMatrixMultiplyKernel
    - NEGEMMMatrixMultiplyKernel
    - NEDirectConvolutionLayerOutputStageKernel
    - @ref NEReductionOperationKernel
-   - @ref NEGEMMLowpMatrixAReductionKernel
-   - @ref NEGEMMLowpMatrixBReductionKernel
+   - NEGEMMLowpMatrixAReductionKernel
+   - NEGEMMLowpMatrixBReductionKernel
  - Removed padding from OpenCL kernels:
    - CLBatchConcatenateLayerKernel
    - CLElementwiseOperationKernel
@@ -848,7 +848,7 @@ v19.05 Public major release
     - @ref NEFFTDigitReverseKernel
     - @ref NEFFTRadixStageKernel
     - @ref NEFFTScaleKernel
-    - @ref NEGEMMLowpOffsetContributionOutputStageKernel
+    - NEGEMMLowpOffsetContributionOutputStageKernel
     - NEHeightConcatenateLayerKernel
     - @ref NESpaceToBatchLayerKernel / @ref NESpaceToBatchLayer
     - @ref NEFFT1D
@@ -1242,7 +1242,7 @@ v17.12 Public major release
     - arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
     - arm_compute::NEHGEMMAArch64FP16Kernel
     - NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
-    - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
+    - NEGEMMLowpOffsetContributionKernel / NEGEMMLowpMatrixAReductionKernel / NEGEMMLowpMatrixBReductionKernel / NEGEMMLowpMatrixMultiplyCore
     - NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - NEWinogradLayer / NEWinogradLayerKernel
 
@@ -1364,7 +1364,7 @@ v17.03.1 First Major public release of the sources
    - NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
    - NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
    - NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
-   - @ref NEGEMMLowpMatrixMultiplyKernel / NEGEMMLowp
+   - NEGEMMLowpMatrixMultiplyKernel / NEGEMMLowp
 
 v17.03 Sources preview
  - New OpenCL kernels / functions:

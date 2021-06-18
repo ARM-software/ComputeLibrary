@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMM_INTERLEAVE4x4_KERNEL_H
-#define ARM_COMPUTE_CPU_GEMM_INTERLEAVE4x4_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_CONVERTQUANTIZEDSIGNEDNESS_KERNEL_H
+#define ARM_COMPUTE_CPU_CONVERTQUANTIZEDSIGNEDNESS_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -33,38 +33,21 @@ namespace cpu
 {
 namespace kernels
 {
-/** Kernel to interleave the elements of a matrix
- *
- * This function puts the values in a 4x4 block of Matrix A on the same row (Interleaved values)
- *
- * @f[
- * \left( \begin{array}{cccc}
- * a00 & a01 & a02 & a03 \\
- * a10 & a11 & a12 & a13 \\
- * a20 & a21 & a22 & a23 \\
- * a30 & a31 & a32 & a33 \\
- * \end{array} \right)
- * \rightarrow
- * \left( \begin{array}{ccccccccccccccccc}
- * a00 & a10 & a20 & a30 & a01 & a11 & a21 & a31 & a02 & a12 & a22 & a32 & a03 & a13 & a23 & a33 \\
- * \end{array} \right)
- * @f]
- *
- * After this operation, the dst matrix will have the following shape: [ height * 4, ceil(width / 4.0f) ]
- */
-class CpuGemmInterleave4x4Kernel : public ICpuKernel
+/** Kernel to convert asymmetric signed to asymmetric signed and vice-versa */
+class CpuConvertQuantizedSignednessKernel : public ICpuKernel
 {
 public:
-    CpuGemmInterleave4x4Kernel() = default;
-    /** Initialise the kernel's src and dst.
+    CpuConvertQuantizedSignednessKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuConvertQuantizedSignednessKernel);
+    /** Initialize the kernel input and output info.
      *
-     * @param[in]  src Input tensor info. Data types supported: All
-     * @param[out] dst Output tensor info which stores the interleaved matrix. Data type supported: same as @p src.
+     * @param[in]  src Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED.
+     * @param[out] dst Destination tensor info. Data types supported: opposite of @p src.
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuGemmInterleave4x4Kernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * Similar to @ref CpuGemmInterleave4x4Kernel::configure()
+     * Similar to CpuConvertQuantizedSignednessKernel::configure()
      *
      * @return a status
      */
@@ -77,4 +60,4 @@ public:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMM_INTERLEAVE4x4_KERNEL_H */
+#endif /*ARM_COMPUTE_CPU_CONVERTQUANTIZEDSIGNEDNESS_KERNEL_H */

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
+#include "src/core/cpu/kernels/CpuGemmLowpOffsetContributionOutputStageKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -37,11 +37,12 @@
 #include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
-#include <cstddef>
-#include <cstdint>
-#include <map>
 
 namespace arm_compute
+{
+namespace cpu
+{
+namespace kernels
 {
 namespace
 {
@@ -836,53 +837,22 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *output)
-{
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, mm_result->clone()->set_data_type(DataType::QASYMM8));
-
-    // Configure kernel window
-    Window win = calculate_max_window(*mm_result, Steps());
-
-    // Note: This kernel performs 16 elements per iteration.
-    // However, since we use a left-over for loop, we cannot have any read or write out of memory
-    // For this reason num_elems_processed_per_iteration is 1 and so update_window_and_padding() can be skipped
-
-    return std::make_pair(Status{}, win);
-}
 } // namespace
 
-NEGEMMLowpOffsetContributionOutputStageKernel::NEGEMMLowpOffsetContributionOutputStageKernel()
-    : _vector_sum_col(nullptr), _vector_sum_row(nullptr), _bias(nullptr), _mm_result(nullptr), _output(nullptr), _a_offset(0), _b_offset(0), _k_offset(0), _slide_vector_sum_col(true),
-      _output_stage(GEMMLowpOutputStageInfo())
-
+void CpuGemmLowpOffsetContributionOutputStageKernel::configure(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col,
+                                                               const ITensorInfo *vector_sum_row, const ITensorInfo *bias, ITensorInfo *dst,
+                                                               int32_t k, int32_t a_offset, int32_t b_offset,
+                                                               GEMMLowpOutputStageInfo output_stage)
 {
-}
-
-void NEGEMMLowpOffsetContributionOutputStageKernel::configure(const ITensor *mm_result, const ITensor *vector_sum_col,
-                                                              const ITensor *vector_sum_row, const ITensor *bias, ITensor *output,
-                                                              int32_t k, int32_t a_offset, int32_t b_offset,
-                                                              GEMMLowpOutputStageInfo output_stage)
-{
+    ARM_COMPUTE_UNUSED(vector_sum_row, bias);
     // Perform validate step
-    ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, dst, a_offset, b_offset, output_stage));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result->info(),
-                                                  vector_sum_col != nullptr ? vector_sum_col->info() : nullptr, // NOLINT
-                                                  vector_sum_row != nullptr ? vector_sum_row->info() : nullptr, // NOLINT
-                                                  bias != nullptr ? bias->info() : nullptr,                     // NOLINT
-                                                  output->info(), a_offset, b_offset, output_stage));           // NOLINT
-
-    _vector_sum_col = vector_sum_col;
-    _vector_sum_row = vector_sum_row;
-    _bias           = bias;
-    _mm_result      = mm_result;
-    _output         = output;
-    _a_offset       = a_offset;
-    _b_offset       = b_offset;
-    _k_offset       = a_offset * b_offset * k;
-    _output_stage   = output_stage;
+    _a_offset     = a_offset;
+    _b_offset     = b_offset;
+    _k_offset     = a_offset * b_offset * k;
+    _output_stage = output_stage;
 
     // If a_offset == 0, vector_sum_col can be a nullptr
     if(a_offset != 0)
@@ -890,40 +860,51 @@ void NEGEMMLowpOffsetContributionOutputStageKernel::configure(const ITensor *mm_
         // Check if vector_sum_col_shape should be slidden or not
         // Don't slide vector_sum_col_shape along the y dimension if vector_sum_col_shape has just 1 dimension and vector_sum_row_shape more than 1
         // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-        _slide_vector_sum_col = vector_sum_col->info()->tensor_shape().num_dimensions() > 1;
+        _slide_vector_sum_col = vector_sum_col->tensor_shape().num_dimensions() > 1;
     }
 
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*dst, mm_result->clone()->set_data_type(DataType::QASYMM8));
+
     // Configure kernel window
-    auto win_config = validate_and_configure_window(mm_result->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Window win = calculate_max_window(*mm_result, Steps());
+
+    // Note: This kernel performs 16 elements per iteration.
+    // However, since we use a left-over for loop, we cannot have any read or write out of memory
+    // For this reason num_elems_processed_per_iteration is 1 and so update_window_and_padding() can be skipped
+    ICpuKernel::configure(win);
 }
 
-Status NEGEMMLowpOffsetContributionOutputStageKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col,
-                                                               const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *output,
-                                                               int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage)
+Status CpuGemmLowpOffsetContributionOutputStageKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col,
+                                                                const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *output,
+                                                                int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, output, a_offset, b_offset, output_stage));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(mm_result->clone().get(), output->clone().get()).first);
     return Status{};
 }
 
-void NEGEMMLowpOffsetContributionOutputStageKernel::run(const Window &window, const ThreadInfo &info)
+void CpuGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+
+    auto mm_result      = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    auto vector_sum_col = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    auto vector_sum_row = tensors.get_const_tensor(TensorType::ACL_SRC_2);
+    auto bias           = tensors.get_const_tensor(TensorType::ACL_SRC_3);
+    auto dst            = tensors.get_tensor(TensorType::ACL_DST);
 
     PixelValue type_min{};
     PixelValue type_max{};
-    std::tie(type_min, type_max) = get_min_max(_output->info()->data_type());
+    std::tie(type_min, type_max) = get_min_max(dst->info()->data_type());
     int32_t type_min_int = type_min.get<int32_t>();
     int32_t type_max_int = type_max.get<int32_t>();
 
-    const bool reinterpret_as_3d = _vector_sum_row != nullptr
-                                   && _mm_result->info()->num_dimensions() > 1
-                                   && _mm_result->info()->tensor_shape().y() != _vector_sum_row->info()->tensor_shape().x();
+    const bool reinterpret_as_3d = vector_sum_row != nullptr
+                                   && mm_result->info()->num_dimensions() > 1
+                                   && mm_result->info()->tensor_shape().y() != vector_sum_row->info()->tensor_shape().x();
 
     const bool is_bounded_relu = !(_output_stage.gemmlowp_min_bound <= type_min_int && _output_stage.gemmlowp_max_bound >= type_max_int);
 
@@ -931,29 +912,35 @@ void NEGEMMLowpOffsetContributionOutputStageKernel::run(const Window &window, co
     const bool is_fixed_point = _output_stage.type != GEMMLowpOutputStageType::QUANTIZE_DOWN;
 
     // Check if symmetric per-channel execution
-    const bool is_signed = _output->info()->data_type() == DataType::QASYMM8_SIGNED;
+    const bool is_signed = dst->info()->data_type() == DataType::QASYMM8_SIGNED;
 
     // Check if symmetric per-channel execution
     const bool is_symm = _output_stage.is_quantized_per_channel;
 
     if(is_symm)
     {
-        run_offset_contribution_output_stage_symm(window, _mm_result, _vector_sum_col, _vector_sum_row, _bias, _output, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, _output_stage,
+        run_offset_contribution_output_stage_symm(window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, _output_stage,
                                                   reinterpret_as_3d, is_bounded_relu, is_fixed_point);
     }
     else
     {
         if(is_signed)
         {
-            run_offset_contribution_output_stage<int8_t>(window, _mm_result, _vector_sum_col, _vector_sum_row, _bias, _output, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, _output_stage,
+            run_offset_contribution_output_stage<int8_t>(window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, _output_stage,
                                                          reinterpret_as_3d, is_bounded_relu, is_fixed_point);
         }
         else
         {
-            run_offset_contribution_output_stage<uint8_t>(window, _mm_result, _vector_sum_col, _vector_sum_row, _bias, _output, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, _output_stage,
+            run_offset_contribution_output_stage<uint8_t>(window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset, _slide_vector_sum_col, _output_stage,
                                                           reinterpret_as_3d, is_bounded_relu, is_fixed_point);
         }
     }
 }
 
+const char *CpuGemmLowpOffsetContributionOutputStageKernel::name() const
+{
+    return "CpuGemmLowpOffsetContributionOutputStageKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

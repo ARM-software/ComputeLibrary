@@ -844,7 +844,7 @@
       "ConvertQuantizedSignedness": {
         "files": {
           "kernel": [
-            "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.cpp"
+            "src/core/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp"
           ]
         }
       },
@@ -1132,16 +1132,19 @@
           "GemmAssemblyDispatch"
         ],
         "files": {
-          "operator" : ["src/runtime/cpu/operators/CpuGemmLowpOutputStage.cpp"],
+          "operator" : [
+              "src/runtime/cpu/operators/CpuGemmLowpOutputStage.cpp",
+              "src/runtime/cpu/operators/CpuGemmLowpMatrixMultiplyCore.cpp"
+          ],
           "kernel": [
-            "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.cpp",
             "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ScaleKernel.cpp",
             "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.cpp",
             "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.cpp",
             "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.cpp",
-            "src/core/NEON/kernels/NEGEMMLowpReductionKernel.cpp",
-            "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.cpp",
-            "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.cpp"
+            "src/core/cpu/kernels/CpuGemmLowpMatrixMultiplyKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmLowpMatrixReductionKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmLowpOffsetContributionOutputStageKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmLowpOffsetContributionKernel.cpp"
           ]
         }
       },

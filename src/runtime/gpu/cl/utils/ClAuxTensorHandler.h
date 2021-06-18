@@ -41,6 +41,10 @@ public:
     CLAuxTensorHandler(int slot_id, TensorInfo &info, ITensorPack &pack, bool pack_inject = false)
         : _tensor()
     {
+        if(info.total_size() == 0)
+        {
+            return;
+        }
         _tensor.allocator()->soft_init(info);
 
         ICLTensor *packed_tensor = utils::cast::polymorphic_downcast<ICLTensor *>(pack.get_tensor(slot_id));

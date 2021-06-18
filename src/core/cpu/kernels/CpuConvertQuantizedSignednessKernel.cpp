@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "src/core/cpu/kernels/CpuConvertQuantizedSignednessKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -35,76 +35,73 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
 
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if(dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(input->tensor_shape(), output->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(src->tensor_shape(), dst->tensor_shape());
     }
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, ITensorInfo *dst)
 {
     // Output auto inizialitation if not yet initialized
     {
-        const bool                    is_input_signed   = input->data_type() == DataType::QASYMM8_SIGNED;
+        const bool                    is_input_signed   = src->data_type() == DataType::QASYMM8_SIGNED;
         const DataType                dt                = is_input_signed ? DataType::QASYMM8 : DataType::QASYMM8_SIGNED;
-        const UniformQuantizationInfo qinfo             = input->quantization_info().uniform();
+        const UniformQuantizationInfo qinfo             = src->quantization_info().uniform();
         const int                     offset_correction = is_input_signed ? -128 : 128;
         const QuantizationInfo        corrected_qinfo   = QuantizationInfo(qinfo.scale, qinfo.offset + offset_correction);
 
-        auto_init_if_empty(*output, input->clone()->set_data_type(dt).set_quantization_info(corrected_qinfo));
+        auto_init_if_empty(*dst, src->clone()->set_data_type(dt).set_quantization_info(corrected_qinfo));
     }
 
-    return std::make_pair(Status{}, calculate_max_window(*output));
+    return std::make_pair(Status{}, calculate_max_window(*dst));
 }
 } // namespace
 
-NEConvertQuantizedSignednessKernel::NEConvertQuantizedSignednessKernel()
-    : _input(nullptr), _output(nullptr)
+void CpuConvertQuantizedSignednessKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
-void NEConvertQuantizedSignednessKernel::configure(const ITensor *input, ITensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
-
-    _input  = input;
-    _output = output;
-
-    std::pair<Status, Window> win_config = validate_and_configure_window(input->info(), output->info());
+    std::pair<Status, Window> win_config = validate_and_configure_window(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    ICpuKernel::configure(win_config.second);
 }
 
-Status NEConvertQuantizedSignednessKernel::validate(const arm_compute::ITensorInfo *input, const arm_compute::ITensorInfo *output)
+Status CpuConvertQuantizedSignednessKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
     return Status{};
 }
 
-void NEConvertQuantizedSignednessKernel::run(const Window &window, const ThreadInfo &info)
+void CpuConvertQuantizedSignednessKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto dst = tensors.get_tensor(TensorType::ACL_DST);
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input(_input, win_collapsed);
-    Iterator output(_output, win_collapsed);
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
 
     const int  window_step_x  = 16;
     const auto window_start_x = static_cast<int>(window.x().start());
@@ -135,4 +132,11 @@ void NEConvertQuantizedSignednessKernel::run(const Window &window, const ThreadI
     },
     input, output);
 }
+
+const char *CpuConvertQuantizedSignednessKernel::name() const
+{
+    return "CpuConvertQuantizedSignednessKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

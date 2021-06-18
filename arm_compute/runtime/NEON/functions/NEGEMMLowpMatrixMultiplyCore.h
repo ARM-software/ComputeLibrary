@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H
 #define ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
@@ -33,19 +34,14 @@
 namespace arm_compute
 {
 class ITensor;
-/** Basic function to execute GEMMLowpMatrixMultiplyCore. This function calls the following kernels if the DOT product instruction is not available:
+class ITensorInfo;
+
+/** Function to run Gemm on quantized types.
  *
- *  -# @ref cpu::kernels::CpuGemmInterleave4x4Kernel
- *  -# @ref cpu::kernels::CpuGemmTranspose1xWKernel
- *  -# @ref NEGEMMLowpMatrixMultiplyKernel
- *  -# @ref NEGEMMLowpOffsetContributionKernel
- *  -# @ref NEActivationLayer
+ *  This function calls the following:
  *
- * otherwise if the DOT product instruction is available:
- *
- *  -# @ref NEGEMMLowpOffsetContributionKernel
- *
-*/
+ * -# @ref cpu::CpuGemmLowpMatrixMultiplyCore
+ */
 class NEGEMMLowpMatrixMultiplyCore : public IFunction
 {
 public:
@@ -114,7 +110,7 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr<struct Impl> _impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H */
