@@ -684,7 +684,8 @@
       "DirectConv2d",
       "Permute",
       "Pool2d",
-      "Reshape"
+      "Reshape",
+      "FillBorder"
     ],
     "operators": {
       "Activation": {

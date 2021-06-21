@@ -555,5 +555,16 @@ The responsibilities of the operators can be summarized as follows:
 - Providing information to the caller required by the computation (e.g., memory requirements)
 - Allocation of any required auxiliary memory if it isn't given by its caller explicitly
 
+@subsection architecture_experimental_build_fat_binary Build fat binary
+
+Selecting fat_binary when building Compute Library, will create a library that contains all the supported ISA features. 
+Based on the CPU support, the appropriate kernel will be selected at runtime for execution. Currently this option is
+only supported with armv8.2-a as the base architecture.
+
+@subsection architecture_experimental_build_high_priority_operators Build high priority operators
+
+Selecting high_priority when building Compute Library, one new library will be created: libarm_compute_hp and
+will contain a selected subset of the libary operators. Currently the operators are staticly set.
+
 */
 } // namespace arm_compute

@@ -65,6 +65,7 @@ vars.AddVariables(
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
+    BoolVariable("high_priority", "Generate a library containing only the high priority operators", False),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
     PathVariable("external_tests_dir", "Add examples, benchmarks and tests to the tests suite", "", PathVariable.PathAccept),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),

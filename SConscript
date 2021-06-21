@@ -24,8 +24,6 @@ import os.path
 import re
 import subprocess
 import zlib
-import base64
-import string
 import json
 
 VERSION = "v0.0-unreleased"
@@ -51,14 +49,12 @@ def build_sve_objs(sources):
     tmp_env = arm_compute_env.Clone()
     tmp_env.Append(CXXFLAGS = "-march=armv8.2-a+sve+fp16")
     obj = tmp_env.SharedObject(sources)
-    obj = install_lib(obj)
     Default(obj)
     return obj
 
 def build_objs(sources):
 
     obj = arm_compute_env.SharedObject(sources)
-    obj = install_lib(obj)
     Default(obj)
     return obj
 
@@ -271,15 +267,15 @@ core_files += Glob('src/core/utils/misc/*.cpp')
 if env["logging"]:
     core_files += Glob('src/core/utils/logging/*.cpp')
 
-runtime_files = Glob('src/runtime/*.cpp')
-runtime_files += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
-runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
+runtime_files_hp = Glob('src/runtime/*.cpp')
+runtime_files_hp += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
+runtime_files = Glob('src/runtime/CPP/functions/*.cpp')
 
 # C API files
-runtime_files += filelist['c_api']['cpu']
+runtime_files_hp += filelist['c_api']['cpu']
 
 if env['opencl']:
-    runtime_files += filelist['c_api']['gpu']
+    runtime_files_hp += filelist['c_api']['gpu']
 
 # Common backend files
 core_files += filelist['common']
@@ -289,16 +285,16 @@ core_files_hp = core_files
 core_files_sve_hp = []
 core_files = []
 
-runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
+runtime_files_hp += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 
 graph_files = Glob('src/graph/*.cpp')
 graph_files += Glob('src/graph/*/*.cpp')
 
 if env['cppthreads']:
-     runtime_files += Glob('src/runtime/CPP/CPPScheduler.cpp')
+     runtime_files_hp += Glob('src/runtime/CPP/CPPScheduler.cpp')
 
 if env['openmp']:
-     runtime_files += Glob('src/runtime/OMP/OMPScheduler.cpp')
+     runtime_files_hp += Glob('src/runtime/OMP/OMPScheduler.cpp')
 
 if env['opencl']:
     core_files += Glob('src/core/CL/*.cpp')
@@ -339,19 +335,20 @@ if env['neon']:
     # Load files based on user's options
     operators = filelist['cpu']['operators']
     for operator in operators:
-        runtime_files += get_cpu_runtime_files(operator)
         if operator in filelist['cpu']['high_priority']:
+            runtime_files_hp += get_cpu_runtime_files(operator)
             file_list, file_list_sve = get_cpu_kernel_files(operator)
             core_files_hp += file_list
             core_files_sve_hp += file_list_sve
         else:
+            runtime_files += get_cpu_runtime_files(operator)
             file_list, file_list_sve = get_cpu_kernel_files(operator)
             core_files += file_list
             core_files_sve += file_list_sve
 
-    runtime_files += Glob('src/runtime/NEON/*.cpp')
+    runtime_files_hp += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
-    runtime_files += filelist['cpu']['all']
+    runtime_files_hp += filelist['cpu']['all']
 
 bootcode_o = []
 if env['os'] == 'bare_metal':
@@ -359,35 +356,39 @@ if env['os'] == 'bare_metal':
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
-high_priority_o = build_objs(core_files_hp)
+high_priority_o = build_objs(core_files_hp + runtime_files_hp)
 high_priority_sve_o = []
 if (env['fat_binary']):
     sve_o = build_sve_objs(core_files_sve)
     high_priority_sve_o = build_sve_objs(core_files_sve_hp)
-    arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, core_files + high_priority_o + sve_o + high_priority_sve_o, static=True)
+    arm_compute_a = build_library('arm_compute_core-static', arm_compute_env, core_files + sve_o + high_priority_o + high_priority_sve_o + runtime_files, static=True)
 else:
     high_priority_o += build_objs(core_files_sve_hp)
-    arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, core_files + core_files_sve + high_priority_o, static=True)
-arm_compute_core_hp_a = build_library('arm_compute_core_hp-static', arm_compute_env, high_priority_o + high_priority_sve_o, static=True)
-Export('arm_compute_core_a')
-Export('arm_compute_core_hp_a')
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files, static=True)
+Export('arm_compute_a')
+if env['high_priority']:
+    arm_compute_hp_a = build_library('arm_compute_hp-static', arm_compute_env, high_priority_o + high_priority_sve_o, static=True)
+    Export('arm_compute_hp_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
     if (env['fat_binary']):
-        arm_compute_core_so = build_library('arm_compute_core', arm_compute_env, core_files + high_priority_o + sve_o + high_priority_sve_o, static=False)
+        arm_compute_so = build_library('arm_compute', arm_compute_env, core_files + sve_o + high_priority_sve_o + high_priority_o + runtime_files, static=False)
     else:
-        arm_compute_core_so = build_library('arm_compute_core', arm_compute_env, core_files + core_files_sve + high_priority_o, static=False)
-    arm_compute_core_so_hp = build_library('arm_compute_core_hp', arm_compute_env, high_priority_o + high_priority_sve_o, static=False)
-    Export('arm_compute_core_so')
-    Export('arm_compute_core_so_hp')
+        arm_compute_so = build_library('arm_compute', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files , static=False)
 
-arm_compute_a = build_library('arm_compute-static', arm_compute_env, runtime_files, static=True, libs = [ arm_compute_core_a ])
-Export('arm_compute_a')
+    Export('arm_compute_so')
+
+    if env['high_priority']:
+        arm_compute_hp_so = build_library('arm_compute_hp', arm_compute_env, high_priority_sve_o + high_priority_o, static=False)
+        Export('arm_compute_hp_so')
+
+# Generate dummy core lib for backwards compatibility
+arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
+Export('arm_compute_core_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_so = build_library('arm_compute', arm_compute_env, runtime_files, static=False, libs = [ "arm_compute_core" ])
-    Depends(arm_compute_so, arm_compute_core_so)
-    Export('arm_compute_so')
+    arm_compute_core_a_so = build_library('arm_compute_core', arm_compute_env, [], static=False)
+    Export('arm_compute_core_a_so')
 
 arm_compute_graph_env = arm_compute_env.Clone()
 
@@ -397,7 +398,7 @@ arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_grap
 Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_graph_so = build_library('arm_compute_graph', arm_compute_graph_env, graph_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
+    arm_compute_graph_so = build_library('arm_compute_graph', arm_compute_graph_env, graph_files, static=False, libs = [ "arm_compute" ])
     Depends(arm_compute_graph_so, arm_compute_so)
     Export('arm_compute_graph_so')
 
@@ -409,6 +410,6 @@ else:
 Default(alias)
 
 if env['standalone']:
-    Depends([alias,arm_compute_core_a], generate_embed)
+    Depends([alias], generate_embed)
 else:
-    Depends([alias,arm_compute_core_so, arm_compute_core_a], generate_embed)
+    Depends([alias], generate_embed)
