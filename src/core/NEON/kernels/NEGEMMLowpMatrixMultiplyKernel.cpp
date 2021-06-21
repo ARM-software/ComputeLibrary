@@ -686,7 +686,7 @@ void inline matrix_multiply_s8(Iterator &ina, Iterator &inb, Iterator &out, int 
     const auto   width_out  = static_cast<int>(out_info.dimension(0));
     const auto   height_out = static_cast<int>(out_info.dimension(1));
     const size_t out_stride = out_info.strides_in_bytes()[1] / out_info.element_size();
-    // The implementation assumes that the matrix A and Matrix B have been reshaped respectively with NEGEMMInterleave4x4 and NEGEMMTranspose1xW
+    // The implementation assumes that the matrix A and Matrix B have been reshaped respectively with CpuGemmInterleave4x4 and CpuGemmTranspose1xW
     // The reshaping of the matrices helps to have a cache friendly implementation and helps to avoid the data re-arrangements needed for computing 16x4 elements per iteration
     // All the values needed for computing a single 4x4 block will be read from consecutive memory positions
     execute_window_loop(window, [&](const Coordinates & id)

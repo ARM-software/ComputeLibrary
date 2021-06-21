@@ -32,7 +32,7 @@ class ITensor;
 
 /** Kernel to multiply two input matrices "A" and "B". All elements of the output matrix/vector will be multiplied by alpha after the matrix multiplication
  *
- * @note If the output tensor is a matrix, the implementation assumes that the input tensors @p input0 and @p input1 are both matrices and reshaped respectively with @ref NEGEMMInterleave4x4Kernel" and @ref NEGEMMTranspose1xWKernel
+ * @note If the output tensor is a matrix, the implementation assumes that the input tensors @p input0 and @p input1 are both matrices and reshaped respectively with @ref cpu::kernels::CpuGemmInterleave4x4Kernel and @ref cpu::kernels::CpuGemmTranspose1xWKernel
  * @note If the output tensor is a vector and the data type is F32, the implementation assumes that the first input tensor @p input0 is a vector and the second input tensor @p input1 a matrix. The implementation also assumes that both tensors have not been reshaped
  *
  */
@@ -55,7 +55,7 @@ public:
     NEGEMMMatrixMultiplyKernel &operator=(NEGEMMMatrixMultiplyKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @note If the output tensor is a matrix, the input matrices @p input0 and @p input1 should be the output of the kernels: @ref NEGEMMInterleave4x4Kernel and @ref NEGEMMTranspose1xWKernel
+     * @note If the output tensor is a matrix, the input matrices @p input0 and @p input1 should be the output of the kernels: @ref cpu::kernels::CpuGemmInterleave4x4Kernel and @ref cpu::kernels::CpuGemmTranspose1xWKernel
      *       These two kernels change the layout of the original matrices to be more cache-friendly.
      *
      * @param[in]  input0         Input tensor containing the interleaved Matrix A or the vector A. Data types supported: F16/F32
@@ -63,7 +63,7 @@ public:
      *                            If the output tensor is a vector, input1 must contain the matrix B not reshaped. Data type supported: same as @p input0
      * @param[out] output         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
      * @param[in]  alpha          Weight of the matrix product
-     * @param[in]  is_interleaved (Optional) True if input0 and input1 have been reshaped respectively using @ref NEGEMMInterleave4x4Kernel and @ref NEGEMMTranspose1xWKernel
+     * @param[in]  is_interleaved (Optional) True if input0 and input1 have been reshaped respectively using @ref cpu::kernels::CpuGemmInterleave4x4Kernel and @ref cpu::kernels::CpuGemmTranspose1xWKernel
      * @param[in]  reshape_info   (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      */
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output, float alpha, bool is_interleaved, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
@@ -74,7 +74,7 @@ public:
      *                           If the output tensor is a vector, input1 must contain the matrix B not reshaped. Data type supported: same as @p input0
      * @param[in] output         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
      * @param[in] alpha          Weight of the matrix product
-     * @param[in] is_interleaved (Optional) True if input0 and input1 have been reshaped respectively using @ref NEGEMMInterleave4x4Kernel and @ref NEGEMMTranspose1xWKernel
+     * @param[in] is_interleaved (Optional) True if input0 and input1 have been reshaped respectively using @ref cpu::kernels::CpuGemmInterleave4x4Kernel and @ref cpu::kernels::CpuGemmTranspose1xWKernel
      * @param[in] reshape_info   (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      *
      * @return a status

@@ -41,12 +41,12 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
-#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
-#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
+#include "src/core/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 #include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 namespace arm_compute
@@ -72,8 +72,8 @@ struct NEGEMMLowpMatrixMultiplyCore::Impl
     IWeightsManager                                               *weights_manager{ nullptr };
     std::unique_ptr<cpu::CpuGemmAssemblyDispatch>                  asm_glue{ nullptr };
     std::unique_ptr<NEGEMMLowpMatrixMultiplyKernel>                mm_kernel{ nullptr };
-    std::unique_ptr<NEGEMMInterleave4x4Kernel>                     mtx_a_reshape_kernel{ nullptr };
-    std::unique_ptr<NEGEMMTranspose1xWKernel>                      mtx_b_reshape_kernel{ nullptr };
+    std::unique_ptr<cpu::kernels::CpuGemmInterleave4x4Kernel>      mtx_a_reshape_kernel{ nullptr };
+    std::unique_ptr<cpu::kernels::CpuGemmTranspose1xWKernel>       mtx_b_reshape_kernel{ nullptr };
     std::unique_ptr<NEGEMMLowpMatrixAReductionKernel>              mtx_a_reduction_kernel{ nullptr };
     std::unique_ptr<NEGEMMLowpMatrixBReductionKernel>              mtx_b_reduction_kernel{ nullptr };
     std::unique_ptr<NEGEMMLowpOffsetContributionKernel>            offset_contribution_kernel{ nullptr };
@@ -82,6 +82,7 @@ struct NEGEMMLowpMatrixMultiplyCore::Impl
     std::unique_ptr<NEConvertQuantizedSignednessKernel>            convert_to_signed_asymm{ nullptr };
     std::unique_ptr<NEConvertQuantizedSignednessKernel>            convert_from_signed_asymm{ nullptr };
 
+    const ITensor *a_to_use{ nullptr };
     Tensor         vector_sum_col{};
     Tensor         vector_sum_row{};
     Tensor         tmp_a{};
@@ -142,20 +143,20 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
     _impl->asm_glue = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
 
-    const ITensor *a_to_use = a;
+    _impl->a_to_use = a;
 
     // Convert to QASYMM8 -> QASYMM8_SIGNED and back
     if(_impl->flip_signedness)
     {
         const int32_t                 offset_correction = 128;
         const DataType                dt                = DataType::QASYMM8_SIGNED;
-        const UniformQuantizationInfo iqinfo            = a_to_use->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iqinfo            = _impl->a_to_use->info()->quantization_info().uniform();
 
-        _impl->signed_a.allocator()->init(a_to_use->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction)));
+        _impl->signed_a.allocator()->init(_impl->a_to_use->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction)));
         _impl->memory_group.manage(&_impl->signed_a);
         _impl->convert_to_signed_asymm = std::make_unique<NEConvertQuantizedSignednessKernel>();
-        _impl->convert_to_signed_asymm->configure(a_to_use, &_impl->signed_a);
-        a_to_use        = &_impl->signed_a;
+        _impl->convert_to_signed_asymm->configure(_impl->a_to_use, &_impl->signed_a);
+        _impl->a_to_use = &_impl->signed_a;
         _impl->a_offset = _impl->signed_a.info()->quantization_info().uniform().offset;
 
         const UniformQuantizationInfo oqinfo = output->info()->quantization_info().uniform();
@@ -192,10 +193,10 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         case DataType::U8:
         case DataType::S8:
         {
-            if(is_data_type_quantized_asymmetric(a_to_use->info()->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
+            if(is_data_type_quantized_asymmetric(_impl->a_to_use->info()->data_type()) && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
             {
                 auto c_info_to_use = c == nullptr ? nullptr : c->info();
-                _impl->asm_glue->configure(a_to_use->info(), b->info(), c_info_to_use, output->info(), asm_info);
+                _impl->asm_glue->configure(_impl->a_to_use->info(), b->info(), c_info_to_use, output->info(), asm_info);
                 _impl->fused_assembly_path = _impl->asm_glue->is_configured();
                 _impl->asm_glue_run_pack.add_const_tensor(TensorType::ACL_SRC_2, c);
                 _impl->asm_glue_run_pack.add_tensor(TensorType::ACL_DST, output);
@@ -203,14 +204,14 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             else
             {
                 auto output_to_use = (_impl->fuse_output_stage ? &_impl->mm_result_s32 : output);
-                _impl->asm_glue->configure(a_to_use->info(), b->info(), nullptr, output_to_use->info(), asm_info);
+                _impl->asm_glue->configure(_impl->a_to_use->info(), b->info(), nullptr, output_to_use->info(), asm_info);
                 _impl->asm_glue_run_pack.add_tensor(TensorType::ACL_DST, output_to_use);
             }
             _impl->assembly_path = _impl->asm_glue->is_configured();
 
             if(_impl->assembly_path)
             {
-                _impl->asm_glue_run_pack.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
+                _impl->asm_glue_run_pack.add_const_tensor(TensorType::ACL_SRC_0, _impl->a_to_use);
 
                 _impl->aux_mem_req        = _impl->asm_glue->workspace();
                 _impl->asm_glue_prep_pack = { { TensorType::ACL_SRC_1, b }, { TensorType::ACL_SRC_2, c } };
@@ -232,7 +233,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         matrix_b = &_impl->tmp_b;
 
         // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
-        TensorInfo a_info(compute_interleaved_shape(*a_to_use->info()), 1, a_to_use->info()->data_type(), a_to_use->info()->quantization_info());
+        TensorInfo a_info(compute_interleaved_shape(*_impl->a_to_use->info()), 1, _impl->a_to_use->info()->data_type(), _impl->a_to_use->info()->quantization_info());
         // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
         TensorInfo b_info(compute_transpose1xW_shape(*b->info()), 1, b->info()->data_type(), b->info()->quantization_info());
         _impl->tmp_a.allocator()->init(a_info);
@@ -244,18 +245,18 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         }
 
         // Configure interleave kernel
-        _impl->mtx_a_reshape_kernel = std::make_unique<NEGEMMInterleave4x4Kernel>();
-        _impl->mtx_a_reshape_kernel->configure(a_to_use, &_impl->tmp_a);
+        _impl->mtx_a_reshape_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
+        _impl->mtx_a_reshape_kernel->configure(_impl->a_to_use->info(), _impl->tmp_a.info());
 
         // Configure transpose kernel
-        _impl->mtx_b_reshape_kernel = std::make_unique<NEGEMMTranspose1xWKernel>();
-        _impl->mtx_b_reshape_kernel->configure(b, &_impl->tmp_b);
+        _impl->mtx_b_reshape_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
+        _impl->mtx_b_reshape_kernel->configure(b->info(), _impl->tmp_b.info());
     }
 
     if(!_impl->fused_assembly_path)
     {
         // Build reduction info
-        const GEMMLowpReductionKernelInfo reduction_info(a_to_use->info()->dimension(0), false, 0, false);
+        const GEMMLowpReductionKernelInfo reduction_info(_impl->a_to_use->info()->dimension(0), false, 0, false);
 
         // Initialize matrix B reduction kernel only if _impl->a_offset is not equal to 0
         if(_impl->a_offset != 0)
@@ -276,14 +277,14 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         // Initialize Matrix A reduction kernel only if _impl->b_offset is not equal to 0
         if(_impl->b_offset != 0)
         {
-            TensorInfo info_vector_sum_row(compute_reductionB_shape(*a_to_use->info()), 1, DataType::S32);
+            TensorInfo info_vector_sum_row(compute_reductionB_shape(*_impl->a_to_use->info()), 1, DataType::S32);
 
             _impl->vector_sum_row.allocator()->init(info_vector_sum_row);
             _impl->memory_group.manage(&_impl->vector_sum_row);
 
             // Configure matrix A reduction kernel
             _impl->mtx_a_reduction_kernel = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-            _impl->mtx_a_reduction_kernel->configure(a_to_use, &_impl->vector_sum_row, reduction_info);
+            _impl->mtx_a_reduction_kernel->configure(_impl->a_to_use, &_impl->vector_sum_row, reduction_info);
         }
 
         if(_impl->fuse_output_stage)
@@ -319,7 +320,8 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             }
             // Configure offset contribution kernel
             _impl->offset_contribution_kernel = std::make_unique<NEGEMMLowpOffsetContributionKernel>();
-            _impl->offset_contribution_kernel->configure(output, _impl->a_offset == 0 ? nullptr : &_impl->vector_sum_col, _impl->b_offset == 0 ? nullptr : &_impl->vector_sum_row, a_to_use->info()->dimension(0),
+            _impl->offset_contribution_kernel->configure(output, _impl->a_offset == 0 ? nullptr : &_impl->vector_sum_col, _impl->b_offset == 0 ? nullptr : &_impl->vector_sum_row,
+                                                         _impl->a_to_use->info()->dimension(0),
                                                          _impl->a_offset, _impl->b_offset);
         }
     }
@@ -487,8 +489,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
             auto_init_if_empty(tmp_a_info, a_to_use->clone()->set_tensor_shape(shape_tmp_a));
             auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(shape_tmp_b));
 
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a_to_use, &tmp_a_info));
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &tmp_b_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmInterleave4x4Kernel::validate(a_to_use, &tmp_a_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmTranspose1xWKernel::validate(b, &tmp_b_info));
         }
     }
 
@@ -585,12 +587,14 @@ void NEGEMMLowpMatrixMultiplyCore::run()
         if(!_impl->run_vector_matrix_multiplication)
         {
             // Run interleave kernel
-            NEScheduler::get().schedule(_impl->mtx_a_reshape_kernel.get(), Window::DimY);
+            ITensorPack interleave_pack{ { ACL_SRC, _impl->a_to_use }, { ACL_DST, &_impl->tmp_a } };
+            NEScheduler::get().schedule_op(_impl->mtx_a_reshape_kernel.get(), Window::DimY, _impl->mtx_a_reshape_kernel->window(), interleave_pack);
 
             if(!_impl->reshape_b_only_on_first_run)
             {
                 // Run transpose kernel
-                NEScheduler::get().schedule(_impl->mtx_b_reshape_kernel.get(), Window::DimY);
+                ITensorPack reshape_b_pack{ { ACL_SRC, _impl->original_b }, { ACL_DST, &_impl->tmp_b } };
+                NEScheduler::get().schedule_op(_impl->mtx_b_reshape_kernel.get(), Window::DimY, _impl->mtx_b_reshape_kernel->window(), reshape_b_pack);
             }
         }
         NEScheduler::get().schedule(_impl->mm_kernel.get(), Window::DimY);
@@ -662,7 +666,8 @@ void NEGEMMLowpMatrixMultiplyCore::prepare()
         {
             // Run reshape kernel and mark original weights tensor as unused
             _impl->tmp_b.allocator()->allocate();
-            NEScheduler::get().schedule(_impl->mtx_b_reshape_kernel.get(), Window::DimY);
+            ITensorPack reshape_b_pack{ { ACL_SRC, _impl->original_b }, { ACL_DST, &_impl->tmp_b } };
+            NEScheduler::get().schedule_op(_impl->mtx_b_reshape_kernel.get(), Window::DimY, _impl->mtx_b_reshape_kernel->window(), reshape_b_pack);
         }
 
         // Run matrix B reduction kernel only if _impl->a_offset is not equal to 0

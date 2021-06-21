@@ -61,7 +61,7 @@ public:
     ~NEGEMMLowpMatrixMultiplyKernel() = default;
     /** Initialise the kernel's input and output.
      *
-     * The input matrices @p input0 and @p input1 must be the output of the kernels: @ref NEGEMMInterleave4x4Kernel and @ref NEGEMMTranspose1xWKernel. These two
+     * The input matrices @p input0 and @p input1 must be the output of the kernels: cpu::kernels::CpuGemmInterleave4x4Kernel and @ref cpu::kernels::CpuGemmTranspose1xWKernel. These two
      * kernels change the layout of the original matrices to be more cache-friendly.
      *
      * @param[in]  input0 Input tensor containing the interleaved Matrix A. Data type supported: U8/QASYMM8/S8/QASYMM8_SIGNED

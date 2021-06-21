@@ -35,8 +35,8 @@ namespace arm_compute
 class ITensor;
 /** Basic function to execute GEMMLowpMatrixMultiplyCore. This function calls the following kernels if the DOT product instruction is not available:
  *
- *  -# @ref NEGEMMInterleave4x4Kernel
- *  -# @ref NEGEMMTranspose1xWKernel
+ *  -# @ref cpu::kernels::CpuGemmInterleave4x4Kernel
+ *  -# @ref cpu::kernels::CpuGemmTranspose1xWKernel
  *  -# @ref NEGEMMLowpMatrixMultiplyKernel
  *  -# @ref NEGEMMLowpOffsetContributionKernel
  *  -# @ref NEActivationLayer

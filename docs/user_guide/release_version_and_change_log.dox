@@ -239,12 +239,12 @@ v20.11 Public major release
    - NEComplexPixelWiseMultiplicationKernel
    - NENonMaximaSuppression3x3Kernel
    - @ref NERemapKernel
-   - @ref NEGEMMInterleave4x4Kernel
+   - NEGEMMInterleave4x4Kernel
    - NEDirectConvolutionLayerKernel
    - NEScaleKernel
    - NELocallyConnectedMatrixMultiplyKernel
    - @ref NEGEMMLowpOffsetContributionKernel
-   - @ref NEGEMMTranspose1xWKernel
+   - NEGEMMTranspose1xWKernel
    - NEPoolingLayerKernel
    - NEConvolutionKernel
    - NEDepthwiseConvolutionLayerNativeKernel
@@ -1020,7 +1020,7 @@ v18.11 Public major release
  - Added the validate method in:
     - @ref NEDepthConvertLayer
     - @ref NEFloor / @ref CLFloor
-    - @ref NEGEMMMatrixAdditionKernel
+    - NEGEMMMatrixAdditionKernel
     - @ref NEReshapeLayer / @ref CLReshapeLayer
     - @ref CLScale
  - Added new examples:
@@ -1377,7 +1377,7 @@ v17.03 Sources preview
    - CLLaplacianPyramid, CLLaplacianReconstruct
  - New Arm® Neon™ kernels / functions:
    - NEActivationLayerKernel / @ref NEActivationLayer
-   - GEMM refactoring + FP16 support (Requires armv8.2 CPU): @ref NEGEMMInterleave4x4Kernel, @ref NEGEMMTranspose1xWKernel, @ref NEGEMMMatrixMultiplyKernel, @ref NEGEMMMatrixAdditionKernel / @ref NEGEMM
+   - GEMM refactoring + FP16 support (Requires armv8.2 CPU): NEGEMMInterleave4x4Kernel, NEGEMMTranspose1xWKernel, NEGEMMMatrixMultiplyKernel, NEGEMMMatrixAdditionKernel / @ref NEGEMM
    - NEPoolingLayerKernel / @ref NEPoolingLayer
 
 v17.02.1 Sources preview

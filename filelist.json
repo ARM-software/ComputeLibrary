@@ -1163,10 +1163,10 @@
       "GEMM": {
         "files": {
           "kernel": [
-            "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp",
             "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.cpp",
-            "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.cpp",
-            "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.cpp"
+            "src/core/cpu/kernels/CpuGemmTranspose1xWKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp"
           ]
         }
       },

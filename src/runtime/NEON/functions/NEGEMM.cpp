@@ -31,17 +31,18 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
-#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "src/core/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
+#include "src/core/cpu/kernels/CpuGemmMatrixAdditionKernel.h"
+#include "src/core/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
+#include "src/runtime/cpu/operators/CpuActivation.h"
+#include "src/runtime/cpu/operators/CpuAdd.h"
 #include "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
-
-#include <cmath>
 
 using namespace arm_compute::experimental;
 using namespace arm_compute::misc::shape_calculator;
@@ -62,96 +63,117 @@ cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
 }
 } // namespace
 
-NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager),
-      _weights_manager(weights_manager),
-      _interleave_kernel(),
-      _transpose_kernel(),
-      _mm_kernel(),
-      _asm_glue(std::make_unique<cpu::CpuGemmAssemblyDispatch>()),
-      _ma_kernel(),
-      _alpha_scale_func(nullptr),
-      _add_bias(),
-      _activation_func(),
-      _tmp_a(),
-      _tmp_b(),
-      _tmp_d(),
-      _original_b(nullptr),
-      _run_vector_matrix_multiplication(false),
-      _run_alpha_scale(false),
-      _run_addition(false),
-      _run_bias_addition(false),
-      _run_activation(false),
-      _reshape_b_only_on_first_run(false),
-      _is_prepared(false),
-      _asm_glue_run_pack(),
-      _asm_glue_prep_pack(),
-      _asm_glue_workspace(),
-      _aux_mem_req()
+struct NEGEMM::Impl
 {
+    MemoryGroup      memory_group{};
+    IWeightsManager *weights_manager{ nullptr };
+
+    std::unique_ptr<cpu::kernels::CpuGemmInterleave4x4Kernel>  interleave_kernel{ nullptr };
+    std::unique_ptr<cpu::kernels::CpuGemmTranspose1xWKernel>   transpose_kernel{ nullptr };
+    std::unique_ptr<NEGEMMMatrixMultiplyKernel>                mm_kernel{ nullptr };
+    std::unique_ptr<cpu::CpuGemmAssemblyDispatch>              asm_glue{ nullptr };
+    std::unique_ptr<cpu::kernels::CpuGemmMatrixAdditionKernel> ma_kernel{ nullptr };
+    std::unique_ptr<cpu::CpuActivation>                        alpha_scale_func{ nullptr };
+    std::unique_ptr<cpu::CpuAdd>                               add_bias{ nullptr };
+    std::unique_ptr<cpu::CpuActivation>                        activation_func{ nullptr };
+
+    const ITensor *a{ nullptr };
+    const ITensor *c{ nullptr };
+    ITensor       *d{ nullptr };
+    ITensor       *gemm_output_to_use{ nullptr };
+    Tensor         tmp_a{};
+    Tensor         tmp_b{};
+    Tensor         tmp_d{};
+    const ITensor *original_b{ nullptr };
+    bool           run_vector_matrix_multiplication{ false };
+    bool           run_alpha_scale{ false };
+    bool           run_addition{ false };
+    bool           run_bias_addition{ false };
+    bool           run_activation{ false };
+    bool           reshape_b_only_on_first_run{ false };
+    bool           is_prepared{ false };
+
+    ITensorPack                      asm_glue_run_pack{};
+    ITensorPack                      asm_glue_prep_pack{};
+    WorkspaceData<Tensor>            asm_glue_workspace{};
+    experimental::MemoryRequirements aux_mem_req{};
+};
+
+NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
+    : _impl(std::make_unique<Impl>())
+{
+    _impl->memory_group    = MemoryGroup(std::move(memory_manager));
+    _impl->weights_manager = weights_manager;
 }
 
 NEGEMM::~NEGEMM() = default;
 
 void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_ERROR_THROW_ON(NEGEMM::validate(a->info(), b->info(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta, gemm_info));
 
     const cpu::AsmGemmInfo asm_info      = init_assembly_metadata(gemm_info);
     const bool             is_c_bias     = gemm_info.reshape_b_only_on_first_run();
     bool                   run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a->info(), b->info(), (is_c_bias && c != nullptr) ? c->info() : nullptr, d->info(), asm_info));
 
+    _impl->a                  = a;
+    _impl->c                  = c;
+    _impl->d                  = d;
+    _impl->gemm_output_to_use = d;
     // Check if we need to reshape the matrix B only on the first run
-    _is_prepared                      = false;
-    _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
-    _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
-    _original_b                       = b;
-    _run_alpha_scale                  = alpha != 1.f;
-    _run_bias_addition                = c != nullptr && gemm_info.reshape_b_only_on_first_run();
-    _run_addition                     = beta != 0 && c != nullptr && !gemm_info.reshape_b_only_on_first_run();
-    _run_activation                   = gemm_info.activation_info().enabled() && (!run_optimised || (run_optimised && !cpu::CpuGemmAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
+    _impl->is_prepared                      = false;
+    _impl->reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
+    _impl->run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
+    _impl->original_b                       = b;
+    _impl->run_alpha_scale                  = alpha != 1.f;
+    _impl->run_bias_addition                = c != nullptr && gemm_info.reshape_b_only_on_first_run();
+    _impl->run_addition                     = beta != 0 && c != nullptr && !gemm_info.reshape_b_only_on_first_run();
+    _impl->run_activation                   = gemm_info.activation_info().enabled() && (!run_optimised || (run_optimised
+                                                                                                           && !cpu::CpuGemmAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
 
     if(run_optimised)
     {
         const ITensor     *c_to_use      = is_c_bias ? c : nullptr;
         const ITensorInfo *c_info_to_use = c_to_use != nullptr ? c_to_use->info() : nullptr;
-        _asm_glue->configure(a->info(), b->info(), c_info_to_use, d->info(), asm_info);
-        ARM_COMPUTE_ERROR_ON(!_asm_glue->is_configured());
+        _impl->asm_glue                  = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
+        _impl->asm_glue->configure(a->info(), b->info(), c_info_to_use, d->info(), asm_info);
+        ARM_COMPUTE_ERROR_ON(!_impl->asm_glue->is_configured());
 
-        _aux_mem_req = _asm_glue->workspace();
-        _asm_glue_run_pack =
+        _impl->aux_mem_req = _impl->asm_glue->workspace();
+        _impl->asm_glue_run_pack =
         {
             { ACL_SRC_0, a },
             { ACL_SRC_1, b },
             { ACL_SRC_2, c_to_use },
             { ACL_DST, d },
         };
-        _asm_glue_prep_pack = { { ACL_SRC_1, b }, { ACL_SRC_2, c_to_use } };
-        _asm_glue_workspace = manage_workspace<Tensor>(_aux_mem_req, _memory_group, _asm_glue_run_pack, _asm_glue_prep_pack);
+        _impl->asm_glue_prep_pack = { { ACL_SRC_1, b }, { ACL_SRC_2, c_to_use } };
+        _impl->asm_glue_workspace = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->asm_glue_run_pack, _impl->asm_glue_prep_pack);
 
         // Scale product by alpha
-        if(_run_alpha_scale)
+        if(_impl->run_alpha_scale)
         {
-            _alpha_scale_func.configure(d, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, alpha, 0.f));
+            _impl->alpha_scale_func = std::make_unique<cpu::CpuActivation>();
+            _impl->alpha_scale_func->configure(d->info(), nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, alpha, 0.f));
         }
     }
     else
     {
         // Pick output tensor in case bias addition should be performed
-        ITensor *gemm_output_to_use = d;
-        if(_run_bias_addition)
+        if(_impl->run_bias_addition)
         {
-            gemm_output_to_use = &_tmp_d;
-            _memory_group.manage(&_tmp_d);
+            _impl->gemm_output_to_use = &_impl->tmp_d;
+            _impl->memory_group.manage(&_impl->tmp_d);
         }
 
-        _mm_kernel = std::make_unique<NEGEMMMatrixMultiplyKernel>();
+        _impl->mm_kernel = std::make_unique<NEGEMMMatrixMultiplyKernel>();
 
         // Select between GEMV and GEMM
-        if(_run_vector_matrix_multiplication)
+        if(_impl->run_vector_matrix_multiplication)
         {
             // Configure the matrix multiply kernel
-            _mm_kernel->configure(a, b, gemm_output_to_use, alpha, false);
+            _impl->mm_kernel->configure(a, b, _impl->gemm_output_to_use, alpha, false);
         }
         else
         {
@@ -168,14 +190,14 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             TensorInfo info_a = a->info()->clone()->set_tensor_shape(shape_tmp_a).set_is_resizable(true);
             TensorInfo info_b = b->info()->clone()->set_tensor_shape(shape_tmp_b).set_is_resizable(true);
 
-            _tmp_a.allocator()->init(info_a);
-            _tmp_b.allocator()->init(info_b);
+            _impl->tmp_a.allocator()->init(info_a);
+            _impl->tmp_b.allocator()->init(info_b);
 
             // Manage intermediate buffers
-            _memory_group.manage(&_tmp_a);
-            if(!_reshape_b_only_on_first_run)
+            _impl->memory_group.manage(&_impl->tmp_a);
+            if(!_impl->reshape_b_only_on_first_run)
             {
-                _memory_group.manage(&_tmp_b);
+                _impl->memory_group.manage(&_impl->tmp_b);
             }
 
             int m = a->info()->dimension(1);
@@ -183,43 +205,45 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             int k = a->info()->dimension(0);
 
             // Configure interleave kernel
-            _interleave_kernel = std::make_unique<NEGEMMInterleave4x4Kernel>();
-            _interleave_kernel->configure(a, &_tmp_a);
+            _impl->interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
+            _impl->interleave_kernel->configure(a->info(), &info_a);
 
             // Configure transpose kernel
-            _transpose_kernel = std::make_unique<NEGEMMTranspose1xWKernel>();
-            _transpose_kernel->configure(b, &_tmp_b);
+            _impl->transpose_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
+            _impl->transpose_kernel->configure(b->info(), _impl->tmp_b.info());
 
             // Configure matrix multiplication kernel
-            _mm_kernel->configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, true, GEMMReshapeInfo(m, n, k));
+            _impl->mm_kernel->configure(&_impl->tmp_a, &_impl->tmp_b, _impl->gemm_output_to_use, alpha, true, GEMMReshapeInfo(m, n, k));
 
             // Allocate once the all configure methods have been called
-            _tmp_a.allocator()->allocate();
-            if(!_reshape_b_only_on_first_run)
+            _impl->tmp_a.allocator()->allocate();
+            if(!_impl->reshape_b_only_on_first_run)
             {
-                _tmp_b.allocator()->allocate();
+                _impl->tmp_b.allocator()->allocate();
             }
         }
 
-        if(_run_bias_addition)
+        if(_impl->run_bias_addition)
         {
-            _add_bias.configure(gemm_output_to_use, c, d, ConvertPolicy::SATURATE);
-            _tmp_d.allocator()->allocate();
+            _impl->add_bias = std::make_unique<cpu::CpuAdd>();
+            _impl->add_bias->configure(_impl->gemm_output_to_use->info(), c->info(), d->info(), ConvertPolicy::SATURATE);
+            _impl->tmp_d.allocator()->allocate();
         }
     }
 
     // Configure matrix addition kernel
-    if(_run_addition)
+    if(_impl->run_addition)
     {
-        _ma_kernel = std::make_unique<NEGEMMMatrixAdditionKernel>();
-        _ma_kernel->configure(c, d, beta);
+        _impl->ma_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixAdditionKernel>();
+        _impl->ma_kernel->configure(c->info(), d->info(), beta);
     }
 
     // Configure activation
     const ActivationLayerInfo &activation = gemm_info.activation_info();
-    if(_run_activation)
+    if(_impl->run_activation)
     {
-        _activation_func.configure(d, nullptr, activation);
+        _impl->activation_func = std::make_unique<cpu::CpuActivation>();
+        _impl->activation_func->configure(d->info(), nullptr, activation);
     }
 }
 
@@ -285,7 +309,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         const bool run_interleave_transpose = !run_vector_matrix_multiplication && !(gemm_info.reshape_b_only_on_first_run());
 
         // Arguments used by GEMMReshapeInfo
-        // If we pass the matrix A and matrix B reshaped to NEGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to NEGEMMReshapeInfo
+        // If we pass the matrix A and matrix B reshaped to NEGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to GEMMReshapeInfo
         // in order to know how the matrices have been reshaped
         const int m                         = a->dimension(1);
         const int n                         = b->dimension(0);
@@ -309,11 +333,11 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
             // Validate interleave kernel
             auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_interleaved_shape(*a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d())));
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a, &tmp_a_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmInterleave4x4Kernel::validate(a, &tmp_a_info));
 
             // Validate transpose kernel
             auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*b, mult_transpose1xW_width)));
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &tmp_b_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmTranspose1xWKernel::validate(b, &tmp_b_info));
         }
 
         // Validate matrix multiply
@@ -322,21 +346,21 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
         if(c != nullptr && gemm_info.reshape_b_only_on_first_run())
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&tmp_output_info, c, output, ConvertPolicy::SATURATE));
+            ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuAdd::validate(&tmp_output_info, c, output, ConvertPolicy::SATURATE));
         }
     }
 
     // Validate matrix addition kernel
     if(beta != 0 && c != nullptr && !is_c_bias)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixAdditionKernel::validate(c, output, beta));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmMatrixAdditionKernel::validate(c, output, beta));
     }
 
     // Validate activation
     const ActivationLayerInfo &activation = gemm_info.activation_info();
     if(activation.enabled())
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, activation));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuActivation::validate(output, nullptr, activation));
     }
 
     return Status{};
@@ -346,90 +370,97 @@ void NEGEMM::run()
 {
     prepare();
 
-    MemoryGroupResourceScope scope_mg(_memory_group);
+    MemoryGroupResourceScope scope_mg(_impl->memory_group);
 
-    if(_asm_glue->is_configured())
+    if(_impl->asm_glue->is_configured())
     {
-        _asm_glue->run(_asm_glue_run_pack);
-        if(_run_alpha_scale)
+        _impl->asm_glue->run(_impl->asm_glue_run_pack);
+        if(_impl->run_alpha_scale)
         {
-            _alpha_scale_func.run();
+            ITensorPack pack{ { ACL_SRC, _impl->d }, { ACL_DST, _impl->d } };
+            _impl->alpha_scale_func->run(pack);
         }
     }
     else
     {
-        if(!_run_vector_matrix_multiplication)
+        if(!_impl->run_vector_matrix_multiplication)
         {
             // Run interleave kernel
-            NEScheduler::get().schedule(_interleave_kernel.get(), Window::DimY);
+            ITensorPack interleave_pack{ { ACL_SRC, _impl->a }, { ACL_DST, &_impl->tmp_a } };
+            NEScheduler::get().schedule_op(_impl->interleave_kernel.get(), Window::DimY, _impl->interleave_kernel->window(), interleave_pack);
 
-            if(!_reshape_b_only_on_first_run)
+            if(!_impl->reshape_b_only_on_first_run)
             {
                 // Run transpose kernel
-                NEScheduler::get().schedule(_transpose_kernel.get(), Window::DimY);
+                ITensorPack transpose_pack{ { ACL_SRC, _impl->original_b }, { ACL_DST, &_impl->tmp_b } };
+                NEScheduler::get().schedule_op(_impl->transpose_kernel.get(), Window::DimY, _impl->transpose_kernel->window(), transpose_pack);
             }
         }
 
-        NEScheduler::get().schedule(_mm_kernel.get(), _run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
+        NEScheduler::get().schedule(_impl->mm_kernel.get(), _impl->run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
 
         // Run bias addition kernel
-        if(_run_bias_addition)
+        if(_impl->run_bias_addition)
         {
-            _add_bias.run();
+            ITensorPack pack{ { ACL_SRC_0, _impl->gemm_output_to_use }, { ACL_SRC_1, _impl->c }, { ACL_DST, _impl->d } };
+            _impl->add_bias->run(pack);
         }
     }
 
     // Run matrix addition kernel
-    if(_run_addition)
+    if(_impl->run_addition)
     {
-        NEScheduler::get().schedule(_ma_kernel.get(), Window::DimY);
+        ITensorPack c_add_pack{ { ACL_SRC, _impl->c }, { ACL_DST, _impl->d } };
+        NEScheduler::get().schedule_op(_impl->ma_kernel.get(), Window::DimY, _impl->ma_kernel->window(), c_add_pack);
     }
 
     // Run activation function
-    if(_run_activation)
+    if(_impl->run_activation)
     {
-        _activation_func.run();
+        ITensorPack pack{ { ACL_SRC, _impl->d }, { ACL_DST, _impl->d } };
+        _impl->activation_func->run(pack);
     }
 }
 
 void NEGEMM::prepare()
 {
-    if(!_is_prepared)
+    if(!_impl->is_prepared)
     {
-        const bool original_b_managed_by_weights_manager = _weights_manager && _weights_manager->are_weights_managed(_original_b);
-        if(_asm_glue->is_configured())
+        const bool original_b_managed_by_weights_manager = _impl->weights_manager && _impl->weights_manager->are_weights_managed(_impl->original_b);
+        if(_impl->asm_glue->is_configured())
         {
-            _asm_glue->prepare(_asm_glue_prep_pack);
+            _impl->asm_glue->prepare(_impl->asm_glue_prep_pack);
 
-            auto has_reshape = std::find_if(_aux_mem_req.begin(),
-                                            _aux_mem_req.end(),
+            auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
+                                            _impl->aux_mem_req.end(),
                                             [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
 
-            if(has_reshape != std::end(_aux_mem_req))
+            if(has_reshape != std::end(_impl->aux_mem_req))
             {
-                _original_b->mark_as_unused();
+                _impl->original_b->mark_as_unused();
             }
             else
             {
-                _asm_glue_run_pack.add_const_tensor(ACL_SRC_1, _original_b);
+                _impl->asm_glue_run_pack.add_const_tensor(ACL_SRC_1, _impl->original_b);
             }
         }
-        else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue->is_configured())
+        else if(_impl->reshape_b_only_on_first_run && !_impl->run_vector_matrix_multiplication && !_impl->asm_glue->is_configured())
         {
             if(!original_b_managed_by_weights_manager)
             {
-                ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+                ARM_COMPUTE_ERROR_ON(!_impl->original_b->is_used());
             }
 
-            _tmp_b.allocator()->allocate();
-            NEScheduler::get().schedule(_transpose_kernel.get(), Window::DimY);
+            _impl->tmp_b.allocator()->allocate();
+            ITensorPack transpose_pack{ { ACL_SRC, _impl->original_b }, { ACL_DST, &_impl->tmp_b } };
+            NEScheduler::get().schedule_op(_impl->transpose_kernel.get(), Window::DimY, _impl->transpose_kernel->window(), transpose_pack);
             if(!original_b_managed_by_weights_manager)
             {
-                _original_b->mark_as_unused();
+                _impl->original_b->mark_as_unused();
             }
         }
 
-        _is_prepared = true;
+        _impl->is_prepared = true;
     }
 }
 } // namespace arm_compute

@@ -21,16 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEGEMMTRANSPOSE1xWKERNEL_H
-#define ARM_COMPUTE_NEGEMMTRANSPOSE1xWKERNEL_H
+#ifndef ARM_COMPUTE_CPU_GEMM_TRANSPOSE1xW_KERNEL_H
+#define ARM_COMPUTE_CPU_GEMM_TRANSPOSE1xW_KERNEL_H
 
-#include "src/core/NEON/INESimpleKernel.h"
+#include "src/core/common/Macros.h"
+#include "src/core/cpu/ICpuKernel.h"
 
 namespace arm_compute
 {
-// Forward declarations
-class ITensor;
-
+namespace cpu
+{
+namespace kernels
+{
 /** Kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)
  *
  * Following an example of how the transposition1xW works when the input data is F32
@@ -66,42 +68,31 @@ class ITensor;
  * @note The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor)
  *
  */
-class NEGEMMTranspose1xWKernel : public INESimpleKernel
+class CpuGemmTranspose1xWKernel : public ICpuKernel
 {
 public:
-    const char *name() const override
-    {
-        return "NEGEMMTranspose1xWKernel";
-    }
     /** Constructor */
-    NEGEMMTranspose1xWKernel() = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEGEMMTranspose1xWKernel(const NEGEMMTranspose1xWKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEGEMMTranspose1xWKernel &operator=(const NEGEMMTranspose1xWKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEGEMMTranspose1xWKernel(NEGEMMTranspose1xWKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEGEMMTranspose1xWKernel &operator=(NEGEMMTranspose1xWKernel &&) = default;
-    /** Default destructor */
-    ~NEGEMMTranspose1xWKernel() = default;
-    /** Initialise the kernel's input and output.
+    CpuGemmTranspose1xWKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmTranspose1xWKernel);
+    /** Configure kernel for a given list of arguments
      *
-     * @param[in]  input  Input tensor. Data types supported: All
-     * @param[out] output Output tensor. Data type supported: same as @p input.
+     * @param[in]  src Input tensor info. Data types supported: All
+     * @param[out] dst Output tensor info. Data type supported: same as @p src.
      */
-    void configure(const ITensor *input, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMTranspose1xWKernel
+    void configure(const ITensorInfo *src, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuGemmTranspose1xWKernel
      *
-     * @param[in] input  Input tensor info. Data types supported: All
-     * @param[in] output Output tensor info. Data type supported: same as @p input.
+     * Similar to @ref CpuGemmTranspose1xWKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    const char *name() const override;
 };
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEGEMMTRANSPOSE1xWKERNEL_H */
+#endif /*ARM_COMPUTE_CPU_GEMM_TRANSPOSE1xW_KERNEL_H */
