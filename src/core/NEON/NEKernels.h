@@ -45,7 +45,6 @@
 #include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
-#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/NEON/kernels/NEGatherKernel.h"
 #include "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "src/core/NEON/kernels/NEIm2ColKernel.h"

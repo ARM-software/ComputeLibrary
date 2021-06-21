@@ -25,8 +25,8 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
+#include "src/core/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/core/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
@@ -113,15 +113,15 @@ bool validate_zero_padding_new(unsigned int dim0_value, unsigned int dim1_value)
 bool validate_gemm_zero_padding(const TensorShape shape0, const TensorShape shape1)
 {
     // Create tensors
-    Tensor in0 = create_tensor<Tensor>(shape0, DataType::F32);
-    Tensor in1 = create_tensor<Tensor>(shape1, DataType::F32);
-    Tensor dst;
+    TensorInfo in0(shape0, 1, DataType::F32);
+    TensorInfo in1(shape1, 1, DataType::F32);
+    TensorInfo dst;
 
     // Validate zero-padding
-    NEGEMMMatrixMultiplyKernel gemm;
+    cpu::kernels::CpuGemmMatrixMultiplyKernel gemm;
     gemm.configure(&in0, &in1, &dst, 1.0, false);
 
-    return in0.info()->padding().empty() && in1.info()->padding().empty() && dst.info()->padding().empty();
+    return in0.padding().empty() && in1.padding().empty() && dst.padding().empty();
 }
 } // namespace
 

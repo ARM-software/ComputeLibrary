@@ -34,9 +34,9 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "src/core/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/core/cpu/kernels/CpuGemmMatrixAdditionKernel.h"
+#include "src/core/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/core/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
@@ -70,7 +70,7 @@ struct NEGEMM::Impl
 
     std::unique_ptr<cpu::kernels::CpuGemmInterleave4x4Kernel>  interleave_kernel{ nullptr };
     std::unique_ptr<cpu::kernels::CpuGemmTranspose1xWKernel>   transpose_kernel{ nullptr };
-    std::unique_ptr<NEGEMMMatrixMultiplyKernel>                mm_kernel{ nullptr };
+    std::unique_ptr<cpu::kernels::CpuGemmMatrixMultiplyKernel> mm_kernel{ nullptr };
     std::unique_ptr<cpu::CpuGemmAssemblyDispatch>              asm_glue{ nullptr };
     std::unique_ptr<cpu::kernels::CpuGemmMatrixAdditionKernel> ma_kernel{ nullptr };
     std::unique_ptr<cpu::CpuActivation>                        alpha_scale_func{ nullptr };
@@ -167,13 +167,13 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             _impl->memory_group.manage(&_impl->tmp_d);
         }
 
-        _impl->mm_kernel = std::make_unique<NEGEMMMatrixMultiplyKernel>();
+        _impl->mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
 
         // Select between GEMV and GEMM
         if(_impl->run_vector_matrix_multiplication)
         {
             // Configure the matrix multiply kernel
-            _impl->mm_kernel->configure(a, b, _impl->gemm_output_to_use, alpha, false);
+            _impl->mm_kernel->configure(a->info(), b->info(), _impl->gemm_output_to_use->info(), alpha, false);
         }
         else
         {
@@ -213,7 +213,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             _impl->transpose_kernel->configure(b->info(), _impl->tmp_b.info());
 
             // Configure matrix multiplication kernel
-            _impl->mm_kernel->configure(&_impl->tmp_a, &_impl->tmp_b, _impl->gemm_output_to_use, alpha, true, GEMMReshapeInfo(m, n, k));
+            _impl->mm_kernel->configure(_impl->tmp_a.info(), _impl->tmp_b.info(), _impl->gemm_output_to_use->info(), alpha, true, GEMMReshapeInfo(m, n, k));
 
             // Allocate once the all configure methods have been called
             _impl->tmp_a.allocator()->allocate();
@@ -342,7 +342,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
         // Validate matrix multiply
         auto_init_if_empty(tmp_output_info, matrix_a_info->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, run_interleave_transpose, reshape_info)));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info));
 
         if(c != nullptr && gemm_info.reshape_b_only_on_first_run())
         {
@@ -383,6 +383,7 @@ void NEGEMM::run()
     }
     else
     {
+        ITensorPack mm_pack{ { ACL_SRC_0, _impl->a }, { ACL_SRC_1, _impl->original_b }, { ACL_DST, _impl->gemm_output_to_use } };
         if(!_impl->run_vector_matrix_multiplication)
         {
             // Run interleave kernel
@@ -395,9 +396,13 @@ void NEGEMM::run()
                 ITensorPack transpose_pack{ { ACL_SRC, _impl->original_b }, { ACL_DST, &_impl->tmp_b } };
                 NEScheduler::get().schedule_op(_impl->transpose_kernel.get(), Window::DimY, _impl->transpose_kernel->window(), transpose_pack);
             }
+
+            // Use reshaped matrices
+            mm_pack.add_const_tensor(ACL_SRC_0, &_impl->tmp_a);
+            mm_pack.add_const_tensor(ACL_SRC_1, &_impl->tmp_b);
         }
 
-        NEScheduler::get().schedule(_impl->mm_kernel.get(), _impl->run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
+        NEScheduler::get().schedule_op(_impl->mm_kernel.get(), _impl->run_vector_matrix_multiplication ? Window::DimX : Window::DimY, _impl->mm_kernel->window(), mm_pack);
 
         // Run bias addition kernel
         if(_impl->run_bias_addition)

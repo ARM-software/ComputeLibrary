@@ -249,7 +249,7 @@ v20.11 Public major release
    - NEConvolutionKernel
    - NEDepthwiseConvolutionLayerNativeKernel
    - @ref NEGEMMLowpMatrixMultiplyKernel
-   - @ref NEGEMMMatrixMultiplyKernel
+   - NEGEMMMatrixMultiplyKernel
    - NEDirectConvolutionLayerOutputStageKernel
    - @ref NEReductionOperationKernel
    - @ref NEGEMMLowpMatrixAReductionKernel

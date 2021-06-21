@@ -38,7 +38,7 @@ namespace kernels
  * @note [ MTX_OUT = MTX_0 + beta * MTX_1 ] with MTX_0 and MTX_1 of the same size
  *
  * @note This stage is used to finalize the GEMM result and it is computed if and only if beta != 0.0. In case this kernel is used for finalizing GEMM result, we have:
- *        - MTX_0 = A * B * alpha, where MTX_0 is the output of @ref NEGEMMMatrixMultiplyKernel
+ *        - MTX_0 = A * B * alpha, where MTX_0 is the output of @ref CpuGemmMatrixMultiplyKernel
  *        - MTX_1 = C
  */
 class CpuGemmMatrixAdditionKernel : public ICpuKernel
@@ -52,7 +52,7 @@ public:
      * @note The input and output tensor must have the same dimensions
      *
      * @param[in]      src  Input tensor info (Matrix C). Data types supported: F16/F32
-     * @param[in, out] dst  Output tensor info. If this kernel is used to finalize the GEMM result, output contains the result obtained by the kernel @ref NEGEMMMatrixMultiplyKernel. Data type supported: the same as @p src.
+     * @param[in, out] dst  Output tensor info. If this kernel is used to finalize the GEMM result, output contains the result obtained by the kernel @ref CpuGemmMatrixMultiplyKernel. Data type supported: the same as @p src.
      * @param[in]      beta Weight of matrix C
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, float beta);

@@ -1164,7 +1164,7 @@
         "files": {
           "kernel": [
             "src/core/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp",
-            "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.cpp",
+            "src/core/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp",
             "src/core/cpu/kernels/CpuGemmTranspose1xWKernel.cpp",
             "src/core/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp"
           ]

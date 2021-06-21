@@ -21,19 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
+#include "src/core/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/helpers/float_ops.h"
@@ -42,14 +37,18 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info, float alpha)
+void vector_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
-    const auto width_matrix_b  = static_cast<int>(output->info()->dimension(0));
-    const auto in_b_stride     = static_cast<int>(input1->info()->strides_in_bytes()[1] / input1->info()->element_size());
-    const auto num_elems_vec_a = static_cast<int>(input0->info()->dimension(0));
+    const auto width_matrix_b  = static_cast<int>(dst->info()->dimension(0));
+    const auto in_b_stride     = static_cast<int>(rhs->info()->strides_in_bytes()[1] / rhs->info()->element_size());
+    const auto num_elems_vec_a = static_cast<int>(lhs->info()->dimension(0));
 
     // The implementation computes 32 elements per iteration
     const int window_start_x = 32 * info.thread_id;
@@ -68,16 +67,16 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
     Window win_b;
     // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
     // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-    if(input1->info()->num_dimensions() >= 3)
+    if(rhs->info()->num_dimensions() >= 3)
     {
         win_b = window;
     }
     win_b.set(Window::DimX, Window::Dimension(0, 1, 1));
     win_b.set(Window::DimY, Window::Dimension(0, 1, 1));
 
-    Iterator ina(input0, win_a);
-    Iterator inb(input1, win_b);
-    Iterator out(output, win_out);
+    Iterator ina(lhs, win_a);
+    Iterator inb(rhs, win_b);
+    Iterator out(dst, win_out);
 
     const bool multiply_alpha = !(helpers::float_ops::is_one(alpha));
 
@@ -87,7 +86,7 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
     {
         int x = window_start_x;
         // Here we don't check for x lower equal than (window_end_x - window_step_x) because of
-        // window_end_x is computed above which may cause out-of-bound writes to the output.
+        // window_end_x is computed above which may cause out-of-bound writes to the dst.
         for(; x < (window_end_x - window_step_x); x += window_step_x)
         {
             if(x > width_matrix_b)
@@ -240,11 +239,11 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
 }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
-void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info, float alpha)
+void vector_matrix_multiply_f32(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
-    const auto width_matrix_b  = static_cast<int>(output->info()->dimension(0));
-    const auto in_b_stride     = static_cast<int>(input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type()));
-    const auto num_elems_vec_a = static_cast<int>(input0->info()->dimension(0));
+    const auto width_matrix_b  = static_cast<int>(dst->info()->dimension(0));
+    const auto in_b_stride     = static_cast<int>(rhs->info()->strides_in_bytes()[1] / data_size_from_type(rhs->info()->data_type()));
+    const auto num_elems_vec_a = static_cast<int>(lhs->info()->dimension(0));
 
     // The implementation computes 16 elements per iteration
     const int window_start_x = 16 * info.thread_id;
@@ -263,16 +262,16 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
     Window win_b;
     // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
     // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-    if(input1->info()->num_dimensions() >= 3)
+    if(rhs->info()->num_dimensions() >= 3)
     {
         win_b = window;
     }
     win_b.set(Window::DimX, Window::Dimension(0, 1, 1));
     win_b.set(Window::DimY, Window::Dimension(0, 1, 1));
 
-    Iterator ina(input0, win_a);
-    Iterator inb(input1, win_b);
-    Iterator out(output, win_out);
+    Iterator ina(lhs, win_a);
+    Iterator inb(rhs, win_b);
+    Iterator out(dst, win_out);
 
     const bool multiply_alpha = !(helpers::float_ops::is_one(alpha));
 
@@ -282,7 +281,7 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
     {
         int x = window_start_x;
         // Here we don't check for x lower equal than (window_end_x - window_step_x) because of
-        // window_end_x is computed above which may cause out-of-bound writes to the output.
+        // window_end_x is computed above which may cause out-of-bound writes to the dst.
         for(; x < (window_end_x - window_step_x); x += window_step_x)
         {
             if(x > width_matrix_b)
@@ -472,17 +471,18 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
     ina, inb, out);
 }
 
-void matrix_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, float alpha)
+void matrix_matrix_multiply_f32(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
-    const int    out_width            = static_cast<int>(output->info()->dimension(0));
-    const int    out_height           = static_cast<int>(output->info()->dimension(1));
-    const size_t in_b_stride          = input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type());
-    const size_t out_stride1          = output->info()->strides_in_bytes()[1] / data_size_from_type(output->info()->data_type());
+    ARM_COMPUTE_UNUSED(info);
+    const int    out_width            = static_cast<int>(dst->info()->dimension(0));
+    const int    out_height           = static_cast<int>(dst->info()->dimension(1));
+    const size_t in_b_stride          = rhs->info()->strides_in_bytes()[1] / data_size_from_type(rhs->info()->data_type());
+    const size_t out_stride1          = dst->info()->strides_in_bytes()[1] / data_size_from_type(dst->info()->data_type());
     const size_t out_stride2          = out_stride1 * 2;
     const size_t out_stride3          = out_stride1 * 3;
-    const int    num_elems_matrix_b_x = input1->info()->dimension(0);
+    const int    num_elems_matrix_b_x = rhs->info()->dimension(0);
 
-    // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the output matrix
+    // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the dst matrix
     Window win_a(window);
     win_a.set(Window::DimX, Window::Dimension(0, 0, 0));
     win_a.set(Window::DimY, Window::Dimension(window.y().start() / 4, std::max(window.y().end() / 4, 1), 1));
@@ -490,24 +490,24 @@ void matrix_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
     Window win_b;
     // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
     // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-    if(input1->info()->num_dimensions() >= 3)
+    if(rhs->info()->num_dimensions() >= 3)
     {
         win_b = window;
     }
-    // Set step_x and step_y for matrix B. Scale by a factor of 4 the X range as the input transposed matrix A has 4 times less the cols of the output matrix
+    // Set step_x and step_y for matrix B. Scale by a factor of 4 the X range as the input transposed matrix A has 4 times less the cols of the dst matrix
     // The step along the x direction is 2 times the in_b_stride because for each iteration we compute 2 blocks of size 4x4
     win_b.set(Window::DimX, Window::Dimension(window.x().start() / 4, window.x().end() / 4, 2 * in_b_stride));
     win_b.set(Window::DimY, Window::Dimension(0, 0, 0));
 
-    Iterator ina(input0, win_a);
-    Iterator inb(input1, win_b);
-    Iterator out(output, window);
+    Iterator ina(lhs, win_a);
+    Iterator inb(rhs, win_b);
+    Iterator out(dst, window);
 
     const bool multiply_alpha = !(helpers::float_ops::is_one(alpha));
 
     const float32x4_t alpha_f32 = vdupq_n_f32(alpha);
 
-    // The implementation assumes that the matrix A and Matrix B have been reshaped respectively with NEGEMMInterleave4x4 and NEGEMMTranspose1xW
+    // The implementation assumes that the matrix A and Matrix B have been reshaped respectively with CpuGemmInterleave4x4 and CpuGemmTranspose1xW
     // The reshaping of the matrices helps to have a cache friendly implementation and helps to avoid the data re-arrangements needed for computing 16x4 elements per iteration
     // All the values needed for computing a single 4x4 block will be read from consecutive memory positions
     execute_window_loop(window, [&](const Coordinates & id)
@@ -845,15 +845,16 @@ void matrix_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
 }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, float alpha)
+void matrix_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
-    const int    out_width            = static_cast<int>(output->info()->dimension(0));
-    const int    out_height           = static_cast<int>(output->info()->dimension(1));
-    const size_t in_b_stride          = input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type());
-    const size_t out_stride           = output->info()->strides_in_bytes()[1] / data_size_from_type(output->info()->data_type());
-    const int    num_elems_matrix_b_x = input1->info()->dimension(0);
+    ARM_COMPUTE_UNUSED(info);
+    const int    out_width            = static_cast<int>(dst->info()->dimension(0));
+    const int    out_height           = static_cast<int>(dst->info()->dimension(1));
+    const size_t in_b_stride          = rhs->info()->strides_in_bytes()[1] / data_size_from_type(rhs->info()->data_type());
+    const size_t out_stride           = dst->info()->strides_in_bytes()[1] / data_size_from_type(dst->info()->data_type());
+    const int    num_elems_matrix_b_x = rhs->info()->dimension(0);
 
-    // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the output matrix
+    // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the dst matrix
     Window win_a(window);
     win_a.set(Window::DimX, Window::Dimension(0, 0, 0));
     win_a.set(Window::DimY, Window::Dimension(window.y().start() / 4, std::max(window.y().end() / 4, 1), 1));
@@ -861,17 +862,17 @@ void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
     Window win_b;
     // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
     // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-    if(input1->info()->num_dimensions() >= 3)
+    if(rhs->info()->num_dimensions() >= 3)
     {
         win_b = window;
     }
-    // Set step_x and step_y for matrix B. Scale by a factor of 8 the X range as the input transposed matrix A has 8 times less the cols of the output matrix
+    // Set step_x and step_y for matrix B. Scale by a factor of 8 the X range as the input transposed matrix A has 8 times less the cols of the dst matrix
     win_b.set(Window::DimX, Window::Dimension(window.x().start() / 8, window.x().end() / 8, in_b_stride));
     win_b.set(Window::DimY, Window::Dimension(0, 1, 0));
 
-    Iterator ina(input0, win_a);
-    Iterator inb(input1, win_b);
-    Iterator out(output, window);
+    Iterator ina(lhs, win_a);
+    Iterator inb(rhs, win_b);
+    Iterator out(dst, window);
 
     const bool multiply_alpha = !(helpers::float_ops::is_one(alpha));
 
@@ -903,7 +904,7 @@ void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
              |a60 a61 a62 a63 | a64 a65 a66 a67|
              |a70 a71 a72 a73 | a74 a75 a76 a77|
 
-             After this operation, the output matrix will have the following shape: [ height * 4, width / 4 ]
+             After this operation, the dst matrix will have the following shape: [ height * 4, width / 4 ]
 
         B Matrix has been transposed as shown below
 
@@ -918,7 +919,7 @@ void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
             c.val[0][0] = a00*b00 + a01*b10 + a02*b20 + a03*b30
             c.val[0][1] = a00*b01 + a01*b11 + a02*b21 + a03*b31
 
-        The size of the output tensor's XY-plane must be the following shape [ width * 8, height / 8 ]. All other dimensions must have the same size.
+        The size of the dst tensor's XY-plane must be the following shape [ width * 8, height / 8 ]. All other dimensions must have the same size.
         */
         const float16_t *mtx_b0_end_addr = mtx_b0 + num_elems_matrix_b_x;
 
@@ -1022,23 +1023,23 @@ void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
 }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
-inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, float alpha, bool is_interleaved, const GEMMReshapeInfo &reshape_info)
+inline Status validate_arguments(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, float alpha, bool is_interleaved, const GEMMReshapeInfo &reshape_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(lhs);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs, dst);
 
     if(!is_interleaved)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != input1->dimension(1));
+        ARM_COMPUTE_RETURN_ERROR_ON(lhs->dimension(0) != rhs->dimension(1));
 
-        if(output->total_size() != 0)
+        if(dst->total_size() != 0)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON(input1->dimension(0) != output->dimension(0));
-            ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) != output->dimension(1));
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, output);
+            ARM_COMPUTE_RETURN_ERROR_ON(rhs->dimension(0) != dst->dimension(0));
+            ARM_COMPUTE_RETURN_ERROR_ON(lhs->dimension(1) != dst->dimension(1));
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, dst);
         }
     }
     else
@@ -1050,33 +1051,33 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
         const int mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
 
         /* Interleave */
-        TensorShape tensor_shape0{ input0->tensor_shape() };
+        TensorShape tensor_shape0{ lhs->tensor_shape() };
         tensor_shape0.set(0, k);
         tensor_shape0.set(1, m);
 
-        const TensorInfo tensor_info0          = input0->clone()->set_tensor_shape(tensor_shape0);
-        const TensorInfo tensor_info_reshaped0 = input0->clone()->set_tensor_shape(misc::shape_calculator::compute_interleaved_shape(tensor_info0, mult_interleave4x4_height));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input0, &tensor_info_reshaped0);
+        const TensorInfo tensor_info0          = lhs->clone()->set_tensor_shape(tensor_shape0);
+        const TensorInfo tensor_info_reshaped0 = lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_interleaved_shape(tensor_info0, mult_interleave4x4_height));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(lhs, &tensor_info_reshaped0);
 
         if(n != 0) /* Transpose */
         {
-            TensorShape tensor_shape1{ input1->tensor_shape() };
+            TensorShape tensor_shape1{ rhs->tensor_shape() };
             tensor_shape1.set(0, n);
             tensor_shape1.set(1, k);
 
-            const TensorInfo tensor_info1          = input1->clone()->set_tensor_shape(tensor_shape1);
-            const TensorInfo tensor_info_reshaped1 = input1->clone()->set_tensor_shape(misc::shape_calculator::compute_transpose1xW_with_element_size_shape(tensor_info1, mult_transpose1xW_width));
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, &tensor_info_reshaped1);
+            const TensorInfo tensor_info1          = rhs->clone()->set_tensor_shape(tensor_shape1);
+            const TensorInfo tensor_info_reshaped1 = rhs->clone()->set_tensor_shape(misc::shape_calculator::compute_transpose1xW_with_element_size_shape(tensor_info1, mult_transpose1xW_width));
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(rhs, &tensor_info_reshaped1);
         }
 
-        if(output->total_size() != 0)
+        if(dst->total_size() != 0)
         {
             if(n != 0)
             {
-                ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != static_cast<size_t>(n));
+                ARM_COMPUTE_RETURN_ERROR_ON(dst->dimension(0) != static_cast<size_t>(n));
             }
-            ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != static_cast<size_t>(m));
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, output);
+            ARM_COMPUTE_RETURN_ERROR_ON(dst->dimension(1) != static_cast<size_t>(m));
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, dst);
         }
     }
 
@@ -1084,79 +1085,52 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
 }
 } // namespace
 
-NEGEMMMatrixMultiplyKernel::NEGEMMMatrixMultiplyKernel()
-    : _input0(nullptr), _input1(nullptr), _output(nullptr), _alpha(1.0f)
+void CpuGemmMatrixMultiplyKernel::configure(const ITensorInfo *lhs, const ITensorInfo *rhs, ITensorInfo *dst, float alpha, bool is_interleaved, const GEMMReshapeInfo &reshape_info)
 {
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
 
-void NEGEMMMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor *input1, ITensor *output, float alpha, bool is_interleaved, const GEMMReshapeInfo &reshape_info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
+    // dst tensor auto inizialitation if not yet initialized
+    TensorShape tensor_shape{ lhs->tensor_shape() };
+    tensor_shape.set(0, is_interleaved ? reshape_info.n() : rhs->dimension(0));
+    tensor_shape.set(1, is_interleaved ? reshape_info.m() : lhs->dimension(1));
 
-    // Output tensor auto inizialitation if not yet initialized
-    TensorShape tensor_shape{ input0->info()->tensor_shape() };
-    tensor_shape.set(0, is_interleaved ? reshape_info.n() : input1->info()->dimension(0));
-    tensor_shape.set(1, is_interleaved ? reshape_info.m() : input0->info()->dimension(1));
-
-    auto_init_if_empty(*output->info(), input0->info()->clone()->set_tensor_shape(tensor_shape));
+    auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(tensor_shape));
 
     // Perform validate step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), alpha, is_interleaved, reshape_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(lhs, rhs, dst, alpha, is_interleaved, reshape_info));
 
-    _input0 = input0;
-    _input1 = input1;
-    _output = output;
-    _alpha  = alpha;
+    _alpha = alpha;
 
     // Configure kernel window
     Window win{};
 
-    // Check if the output tensor is a vector. If so,the kernel runs the vector-matrix multiplication
-    if((output->info()->dimension(1) == 1))
+    // Check if the dst tensor is a vector. If so,the kernel runs the vector-matrix multiplication
+    const bool is_dst_vector = (dst->dimension(1) == 1);
+    if(is_dst_vector)
     {
-        const unsigned int num_elems_processed_per_iteration_x = (input0->info()->data_type() == DataType::F32) ? 16 : 32;
+        const unsigned int num_elems_processed_per_iteration_x = (lhs->data_type() == DataType::F32) ? 16 : 32;
 
-        win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x));
+        win = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x));
     }
     else
     {
         constexpr unsigned int num_elems_processed_per_iteration_x = 8;
         constexpr unsigned int num_elems_processed_per_iteration_y = 4;
 
-        win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+        win = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     }
 
-    INEKernel::configure(win);
-}
-
-Status NEGEMMMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, float alpha, bool is_interleaved,
-                                            const GEMMReshapeInfo &reshape_info)
-{
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output, alpha, is_interleaved, reshape_info));
-
-    return Status{};
-}
-
-void NEGEMMMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &info)
-{
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-
-    // Check if the output tensor is a vector. If so,the kernel runs the vector-matrix multiplication
-    const bool is_output_vector = (_output->info()->dimension(1) == 1);
-    switch(_input0->info()->data_type())
+    switch(lhs->data_type())
     {
         case DataType::F32:
         {
-            is_output_vector ? vector_matrix_multiply_f32(_input0, _input1, _output, window, info, _alpha) :
-            matrix_matrix_multiply_f32(_input0, _input1, _output, window, _alpha);
+            _func = (is_dst_vector) ? vector_matrix_multiply_f32 : matrix_matrix_multiply_f32;
             break;
         }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {
-            is_output_vector ? vector_matrix_multiply_f16(_input0, _input1, _output, window, info, _alpha) :
-            matrix_matrix_multiply_f16(_input0, _input1, _output, window, _alpha);
+            _func = (is_dst_vector) ? vector_matrix_multiply_f16 : matrix_matrix_multiply_f16;
             break;
         }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -1166,5 +1140,35 @@ void NEGEMMMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &inf
             break;
         }
     }
+    ICPPKernel::configure(win);
 }
+
+Status CpuGemmMatrixMultiplyKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, float alpha, bool is_interleaved,
+                                             const GEMMReshapeInfo &reshape_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(lhs, rhs, dst, alpha, is_interleaved, reshape_info));
+
+    return Status{};
+}
+
+void CpuGemmMatrixMultiplyKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON(tensors.empty());
+    ARM_COMPUTE_ERROR_ON(_func == nullptr);
+
+    const ITensor *lhs = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    const ITensor *rhs = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    (*_func)(lhs, rhs, dst, window, info, _alpha);
+}
+
+const char *CpuGemmMatrixMultiplyKernel::name() const
+{
+    return "CpuGemmMatrixMultiplyKernel";
+}
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

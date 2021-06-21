@@ -42,7 +42,7 @@ namespace arm_compute
  * Else:
  *  -# @ref cpu::kernels::CpuGemmInterleave4x4Kernel (if the output tensor is a matrix)
  *  -# @ref cpu::kernels::CpuGemmTranspose1xWKernel (if the output tensor is a matrix)
- *  -# @ref NEGEMMMatrixMultiplyKernel
+ *  -# @ref cpu::kernels::CpuGemmMatrixMultiplyKernel
  * In both cases:
  *  -# @ref cpu::kernels::CpuGemmMatrixAdditionKernel (if c != nullptr and beta != 0.0 and is not reshaped once)
  * Else:
