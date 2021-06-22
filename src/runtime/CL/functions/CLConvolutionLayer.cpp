@@ -232,12 +232,13 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
             if(is_data_type_float(input->data_type()))
             {
                 const bool is_large_kernel_sz = (weights->dimension(idx_w) >= 5) && (weights->dimension(idx_h) >= 5);
+                const bool is_ifm_gt_eq_16    = input->dimension(idx_c) >= 16;
 
                 // Large kernel size with IFMs >= OFMs
                 if(is_large_kernel_sz)
                 {
                     // First check if we can use Winograd
-                    if(is_wino_valid)
+                    if(is_wino_valid && is_ifm_gt_eq_16)
                     {
                         return ConvolutionMethod::WINOGRAD;
                     }
@@ -252,7 +253,7 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
                 }
                 else // Small kernel size
                 {
-                    return is_wino_valid ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+                    return is_wino_valid && is_ifm_gt_eq_16 ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
                 }
             }
 
