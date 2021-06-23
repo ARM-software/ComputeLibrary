@@ -30,6 +30,7 @@ arm_compute_library_defaults {
             "-DARM_COMPUTE_ASSERTS_ENABLED",
             "-DARM_COMPUTE_CPP_SCHEDULER",
             "-DENABLE_NEON",
+            "-DARM_COMPUTE_ENABLE_NEON",
             "-Wno-unused-parameter",
             "-DNO_DOT_IN_TOOLCHAIN",
             "-no-integrated-as",
