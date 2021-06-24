@@ -100,6 +100,15 @@ public:
         return _isa.svef32mm;
     }
 
+    const CpuIsaInfo &isa() const
+    {
+        return _isa;
+    }
+    const std::vector<CpuModel> &cpus() const
+    {
+        return _cpus;
+    }
+
     CpuModel cpu_model(uint32_t cpuid) const;
     CpuModel cpu_model() const;
     uint32_t num_cpus() const;

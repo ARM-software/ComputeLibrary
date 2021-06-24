@@ -90,29 +90,6 @@ AllocatorWrapper populate_allocator(AclAllocator *external_allocator)
     return is_valid ? AllocatorWrapper(*external_allocator) : AllocatorWrapper(default_allocator);
 }
 
-cpuinfo::CpuIsaInfo populate_capabilities_legacy(const CPUInfo &cpu_info)
-{
-    cpuinfo::CpuIsaInfo isa_caps;
-
-    // Extract SIMD extension
-    isa_caps.neon = true;
-    isa_caps.sve  = cpu_info.has_sve();
-    isa_caps.sve2 = cpu_info.has_sve2();
-
-    // Extract data-type support
-    isa_caps.fp16    = cpu_info.has_fp16();
-    isa_caps.bf16    = cpu_info.has_bf16();
-    isa_caps.svebf16 = cpu_info.has_svebf16();
-
-    // Extract ISA extensions
-    isa_caps.dot      = cpu_info.has_dotprod();
-    isa_caps.i8mm     = cpu_info.has_i8mm();
-    isa_caps.svei8mm  = cpu_info.has_svei8mm();
-    isa_caps.svef32mm = cpu_info.has_svef32mm();
-
-    return isa_caps;
-}
-
 cpuinfo::CpuIsaInfo populate_capabilities_flags(AclTargetCapabilities external_caps)
 {
     cpuinfo::CpuIsaInfo isa_caps;
@@ -123,8 +100,9 @@ cpuinfo::CpuIsaInfo populate_capabilities_flags(AclTargetCapabilities external_c
     isa_caps.sve2 = external_caps & AclCpuCapabilitiesSve2;
 
     // Extract data-type support
-    isa_caps.fp16 = external_caps & AclCpuCapabilitiesFp16;
-    isa_caps.bf16 = external_caps & AclCpuCapabilitiesBf16;
+    isa_caps.fp16    = external_caps & AclCpuCapabilitiesFp16;
+    isa_caps.bf16    = external_caps & AclCpuCapabilitiesBf16;
+    isa_caps.svebf16 = isa_caps.bf16;
 
     // Extract ISA extensions
     isa_caps.dot      = external_caps & AclCpuCapabilitiesDot;
@@ -139,17 +117,15 @@ CpuCapabilities populate_capabilities(AclTargetCapabilities external_caps,
 {
     CpuCapabilities caps;
 
-    // Extract legacy structure
-    cpuinfo::CpuIsaInfo isa_caps;
+    // Populate capabilities with system information
+    caps.cpu_info = cpuinfo::CpuInfo::build();
     if(external_caps != AclCpuCapabilitiesAuto)
     {
-        isa_caps = populate_capabilities_flags(external_caps);
+        cpuinfo::CpuIsaInfo isa  = populate_capabilities_flags(external_caps);
+        auto                cpus = caps.cpu_info.cpus();
+
+        caps.cpu_info = cpuinfo::CpuInfo(isa, cpus);
     }
-    else
-    {
-        isa_caps = populate_capabilities_legacy(CPUInfo::get());
-    }
-    caps.cpu_info = cpuinfo::CpuInfo(isa_caps, {});
 
     // Set max number of threads
 #if defined(BARE_METAL)
