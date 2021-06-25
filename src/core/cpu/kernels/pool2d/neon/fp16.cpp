@@ -26,7 +26,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
-#include "src/core/cpu/kernels/pooling/neon/list.h"
+#include "src/core/cpu/kernels/pool2d/neon/list.h"
 #include "src/core/helpers/WindowHelpers.h"
 
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)

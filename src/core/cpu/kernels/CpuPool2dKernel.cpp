@@ -34,7 +34,7 @@
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/common/Registrars.h"
-#include "src/core/cpu/kernels/pooling/neon/list.h"
+#include "src/core/cpu/kernels/pool2d/neon/list.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/ToolchainSupport.h"

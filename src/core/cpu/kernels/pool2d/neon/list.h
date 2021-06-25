@@ -27,7 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/cpu/kernels/pooling/neon/quantized.h"
+#include "src/core/cpu/kernels/pool2d/neon/quantized.h"
 #include <arm_neon.h>
 
 namespace arm_compute

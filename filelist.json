@@ -1468,19 +1468,19 @@
           ],
           "neon": {
             "nchw": [
-              "src/core/cpu/kernels/pooling/neon/nchw/all.cpp"
+              "src/core/cpu/kernels/pool2d/neon/nchw/all.cpp"
             ],
             "fp32": [
-              "src/core/cpu/kernels/pooling/neon/fp32.cpp"
+              "src/core/cpu/kernels/pool2d/neon/fp32.cpp"
             ],
             "fp16": [
-              "src/core/cpu/kernels/pooling/neon/fp16.cpp"
+              "src/core/cpu/kernels/pool2d/neon/fp16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/pooling/neon/qasymm8.cpp"
+              "src/core/cpu/kernels/pool2d/neon/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/pooling/neon/qasymm8_signed.cpp"
+              "src/core/cpu/kernels/pool2d/neon/qasymm8_signed.cpp"
             ],
             "estate64": [
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
