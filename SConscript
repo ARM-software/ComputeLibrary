@@ -361,7 +361,7 @@ high_priority_sve_o = []
 if (env['fat_binary']):
     sve_o = build_sve_objs(core_files_sve)
     high_priority_sve_o = build_sve_objs(core_files_sve_hp)
-    arm_compute_a = build_library('arm_compute_core-static', arm_compute_env, core_files + sve_o + high_priority_o + high_priority_sve_o + runtime_files, static=True)
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + sve_o + high_priority_o + high_priority_sve_o + runtime_files, static=True)
 else:
     high_priority_o += build_objs(core_files_sve_hp)
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files, static=True)
