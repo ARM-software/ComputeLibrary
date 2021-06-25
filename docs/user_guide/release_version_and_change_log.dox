@@ -227,7 +227,7 @@ v20.11 Public major release
       - @ref CLLogSoftmaxLayer
       - GCSoftmaxLayer
  - New OpenCL kernels / functions:
-   - @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
+   - CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
    - @ref CLLogicalNot
    - @ref CLLogicalAnd
    - @ref CLLogicalOr
@@ -260,13 +260,13 @@ v20.11 Public major release
    - @ref CLBatchNormalizationLayerKernel
    - CLPoolingLayerKernel
    - CLWinogradInputTransformKernel
-   - @ref CLGEMMLowpMatrixMultiplyNativeKernel
-   - @ref CLGEMMLowpMatrixAReductionKernel
-   - @ref CLGEMMLowpMatrixBReductionKernel
-   - @ref CLGEMMLowpOffsetContributionOutputStageKernel
-   - @ref CLGEMMLowpOffsetContributionKernel
+   - CLGEMMLowpMatrixMultiplyNativeKernel
+   - CLGEMMLowpMatrixAReductionKernel
+   - CLGEMMLowpMatrixBReductionKernel
+   - CLGEMMLowpOffsetContributionOutputStageKernel
+   - CLGEMMLowpOffsetContributionKernel
    - CLWinogradOutputTransformKernel
-   - @ref CLGEMMLowpMatrixMultiplyReshapedKernel
+   - CLGEMMLowpMatrixMultiplyReshapedKernel
    - @ref CLFuseBatchNormalizationKernel
    - @ref CLDepthwiseConvolutionLayerNativeKernel
    - CLDepthConvertLayerKernel
@@ -281,11 +281,11 @@ v20.11 Public major release
    - CLLogits1DNormKernel
    - CLHeightConcatenateLayerKernel
    - CLGEMMMatrixMultiplyKernel
-   - @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
-   - @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
-   - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
+   - CLGEMMLowpQuantizeDownInt32ScaleKernel
+   - CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
+   - CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
    - CLDepthConcatenateLayerKernel
-   - @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
+   - CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
  - Removed OpenCL kernels / functions:
    - CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
    - CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel
@@ -596,9 +596,9 @@ v20.05 Public major release
      - @ref CLDeconvolutionLayer
      - @ref CLDirectDeconvolutionLayer
      - @ref CLGEMMDeconvolutionLayer
-     - @ref CLGEMMLowpMatrixMultiplyReshapedKernel
-     - @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
-     - @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
+     - CLGEMMLowpMatrixMultiplyReshapedKernel
+     - CLGEMMLowpQuantizeDownInt32ScaleKernel
+     - CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
      - @ref CLReductionOperation
      - @ref CLReduceMean
      - @ref NEScale
@@ -655,9 +655,9 @@ v20.02 Public major release
      - @ref CLDepthwiseConvolutionLayer
      - CLDepthwiseConvolutionLayer3x3
      - @ref CLGEMMConvolutionLayer
-     - @ref CLGEMMLowpMatrixMultiplyCore
-     - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
-     - @ref CLGEMMLowpMatrixMultiplyNativeKernel
+     - CLGEMMLowpMatrixMultiplyCore
+     - CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
+     - CLGEMMLowpMatrixMultiplyNativeKernel
      - @ref NEActivationLayer
      - NEComparisonOperationKernel
      - @ref NEConvolutionLayer
@@ -680,7 +680,7 @@ v20.02 Public major release
      - @ref NESplit
  - New OpenCL kernels / functions:
      - @ref CLFill
-     - CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
+     - CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
  - New Arm® Neon™ kernels / functions:
      - @ref NEFill
      - NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
@@ -861,7 +861,7 @@ v19.05 Public major release
     - @ref CLFFTDigitReverseKernel
     - @ref CLFFTRadixStageKernel
     - @ref CLFFTScaleKernel
-    - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
+    - CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
     - CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
     - CLHeightConcatenateLayerKernel
     - @ref CLDirectDeconvolutionLayer
@@ -953,7 +953,7 @@ v19.02 Public major release
     - @ref CLRangeKernel / @ref CLRange
     - @ref CLUnstack
     - @ref CLGatherKernel / @ref CLGather
-    - @ref CLGEMMLowpMatrixMultiplyReshapedKernel
+    - CLGEMMLowpMatrixMultiplyReshapedKernel
  - New CPP kernels / functions:
     - @ref CPPDetectionOutputLayer
     - @ref CPPTopKV / @ref CPPTopKVKernel
@@ -1247,8 +1247,8 @@ v17.12 Public major release
     - NEWinogradLayer / NEWinogradLayerKernel
 
  - New OpenCL kernels / functions
-    - @ref CLGEMMLowpOffsetContributionKernel / @ref CLGEMMLowpMatrixAReductionKernel / @ref CLGEMMLowpMatrixBReductionKernel / @ref CLGEMMLowpMatrixMultiplyCore
-    - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+    - CLGEMMLowpOffsetContributionKernel / CLGEMMLowpMatrixAReductionKernel / CLGEMMLowpMatrixBReductionKernel / CLGEMMLowpMatrixMultiplyCore
+    - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
 
  - New graph nodes for Arm® Neon™ and OpenCL
     - graph::BranchLayer

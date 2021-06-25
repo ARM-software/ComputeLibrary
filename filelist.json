@@ -229,6 +229,21 @@
           ]
         }
       },
+      "GEMMLowp": {
+        "files": {
+          "kernel": [
+            "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmLowpOffsetContributionKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmLowpOffsetContributionOutputStageKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFloatKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleKernel.cpp",
+            "src/core/gpu/cl/kernels/ClGemmLowpReductionKernel.cpp" 
+          ]
+        }
+      },
       "Mul": {
         "files": {
           "operator": [
@@ -417,69 +432,6 @@
         "files": {
           "kernel": [
             "src/core/CL/kernels/CLGatherKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpMatrixMultiplyNative": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpMatrixMultiplyReshaped": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpMatrixMultiplyReshapedOnlyRHS": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpOffsetContribution": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpOffsetContributionOutputStage": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpQuantizeDownInt32ScaleByFixedPoint": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpQuantizeDownInt32ScaleByFloat": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpQuantizeDownInt32Scale": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.cpp"
-          ]
-        }
-      },
-      "GEMMLowpReduction": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLGEMMLowpReductionKernel.cpp"
           ]
         }
       },

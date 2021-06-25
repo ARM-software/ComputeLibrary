@@ -34,17 +34,17 @@ class CLCompileContext;
 class IMemoryManager;
 class ICLTensor;
 class ITensorInfo;
-class CLGEMMLowpMatrixMultiplyNativeKernel;
-class CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel;
-class CLGEMMLowpOffsetContributionKernel;
-class CLGEMMLowpOffsetContributionOutputStageKernel;
-class CLGEMMLowpMatrixAReductionKernel;
-class CLGEMMLowpMatrixBReductionKernel;
 namespace opencl
 {
 namespace kernels
 {
 class ClGemmReshapeRhsMatrixKernel;
+class ClGemmLowpMatrixMultiplyNativeKernel;
+class ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel;
+class ClGemmLowpOffsetContributionKernel;
+class ClGemmLowpOffsetContributionOutputStageKernel;
+class ClGemmLowpMatrixAReductionKernel;
+class ClGemmLowpMatrixBReductionKernel;
 } // namespace kernels
 } // namespace opencl
 
@@ -150,14 +150,14 @@ private:
     MemoryGroup _memory_group;
 
     // Kernels used
-    std::unique_ptr<opencl::kernels::ClCastKernel>                 _weights_to_qasymm8;
-    std::unique_ptr<CLGEMMLowpMatrixMultiplyNativeKernel>          _mm_native_kernel;
-    std::unique_ptr<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel> _mm_reshaped_only_rhs_kernel;
-    std::unique_ptr<opencl::kernels::ClGemmReshapeRhsMatrixKernel> _mtx_b_reshape_kernel;
-    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel>              _mtx_a_reduction_kernel;
-    std::unique_ptr<CLGEMMLowpMatrixBReductionKernel>              _mtx_b_reduction_kernel;
-    std::unique_ptr<CLGEMMLowpOffsetContributionKernel>            _offset_contribution_kernel;
-    std::unique_ptr<CLGEMMLowpOffsetContributionOutputStageKernel> _offset_contribution_output_stage_kernel;
+    std::unique_ptr<opencl::kernels::ClCastKernel>                                  _weights_to_qasymm8;
+    std::unique_ptr<opencl::kernels::ClGemmLowpMatrixMultiplyNativeKernel>          _mm_native_kernel;
+    std::unique_ptr<opencl::kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel> _mm_reshaped_only_rhs_kernel;
+    std::unique_ptr<opencl::kernels::ClGemmReshapeRhsMatrixKernel>                  _mtx_b_reshape_kernel;
+    std::unique_ptr<opencl::kernels::ClGemmLowpMatrixAReductionKernel>              _mtx_a_reduction_kernel;
+    std::unique_ptr<opencl::kernels::ClGemmLowpMatrixBReductionKernel>              _mtx_b_reduction_kernel;
+    std::unique_ptr<opencl::kernels::ClGemmLowpOffsetContributionKernel>            _offset_contribution_kernel;
+    std::unique_ptr<opencl::kernels::ClGemmLowpOffsetContributionOutputStageKernel> _offset_contribution_output_stage_kernel;
 
     // Temporary tensors
     CLTensor _qasymm8_weights;
@@ -171,7 +171,8 @@ private:
     // Tensor pointers
     const ICLTensor *_matrix_a;
     const ICLTensor *_original_b;
-    const ICLTensor *_output;
+    const ICLTensor *_c;
+    ICLTensor       *_output;
 
     int32_t _a_offset;
     int32_t _b_offset;

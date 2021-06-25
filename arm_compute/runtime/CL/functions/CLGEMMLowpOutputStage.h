@@ -45,247 +45,28 @@ class ICLTensor;
 class ITensorInfo;
 struct GEMMLowpOutputStageInfo;
 
-/** Basic function to execute CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint on OpenCL.
- *
- *  CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint depends on 3 parameters:
- *
- *  result_fixedpoint_multiplier, result_shift, result_offset_after_shift
- *
- * The final result is:
- *
- * (FixedPointMul(input[i][k], result_fixedpoint_multiplier) >> result_shift) + result_offset_after_shift
- *
- * where FixedPointMul(x, y) is the nearest integer to the following
- * mathematical expression, evaluated without overflow or intermediate rounding:
- *
- * (x * y) / 2^31
- *
- * For more information: https://github.com/google/gemmlowp/blob/master/public/output_stages.h#L68
- *
- * In case the bias tensor is provided, the final result is:
- *
- * ((FixedPointMul(input[i][k] + bias[k], result_fixedpoint_multiplier)) >> result_shift) + result_offset_after_shift
- *
- *  This function calls the following OpenCL kernels:
- *
- * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
- *
- * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
- *       after the result is shifted right by result_shift
-*/
-class CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint : public ICLSimpleFunction
-{
-public:
-    /** Initialise the kernel's inputs, output
-     *
-     * @param[in]  input                        Input tensor. Data type supported: S32
-     * @param[in]  bias                         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
-     *                                          Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output                       Output tensor. Data type supported: QASYMM8
-     * @param[in]  result_fixedpoint_multiplier Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]  result_shift                 Number of bits to shift right the result after the fixed point multiplication
-     * @param[in]  result_offset_after_shift    Offset to be applied to result before converting it back to QASYMM8
-     * @param[in]  min                          (Optional) Min value used to saturate down the output result before converting back to QASYMM8. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-     *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     */
-    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
-                   int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-    /** Initialise the kernel's inputs, output
-     *
-     * @param[in]  compile_context              The compile context to be used.
-     * @param[in]  input                        Input tensor. Data type supported: S32
-     * @param[in]  bias                         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
-     *                                          Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output                       Output tensor. Data type supported: QASYMM8
-     * @param[in]  result_fixedpoint_multiplier Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]  result_shift                 Number of bits to shift right the result after the fixed point multiplication
-     * @param[in]  result_offset_after_shift    Offset to be applied to result before converting it back to QASYMM8
-     * @param[in]  min                          (Optional) Min value used to saturate down the output result before converting back to QASYMM8. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-     *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift,
-                   int result_offset_after_shift,
-                   int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
-     *
-     * @param[in] input  Input tensor. It is the output of @ref CLGEMMLowpMatrixMultiplyCore function. Data type supported: S32
-     * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-     *                   Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[in] output Output tensor. Data type supported: QASYMM8
-     * @param[in] min    (Optional) Min value used to saturate down the output result before converting back to QASYMM8. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-     *                            Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-};
-
-/** Basic function to execute CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint on OpenCL.
- *
- *  CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint depends on 3 parameters:
- *
- *  result_fixedpoint_multiplier, result_shift, result_offset_after_shift
- *
- * The final result is:
- *
- * (FixedPointMul(input[i][k], result_fixedpoint_multiplier) >> result_shift) + result_offset_after_shift
- *
- * where FixedPointMul(x, y) is the nearest integer to the following
- * mathematical expression, evaluated without overflow or intermediate rounding:
- *
- * (x * y) / 2^31
- *
- * For more information: https://github.com/google/gemmlowp/blob/master/public/output_stages.h#L68
- *
- * In case the bias tensor is provided, the final result is:
- *
- * ((FixedPointMul(input[i][k] + bias[k], result_fixedpoint_multiplier)) >> result_shift) + result_offset_after_shift
- *
- *  This function calls the following OpenCL kernels:
- *
- * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
- *
- * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
- *       after the result is shifted right by result_shift
-*/
-class CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint : public ICLSimpleFunction
-{
-public:
-    /** Initialise the kernel's inputs, output
-     *
-     * @param[in]  input                        Input tensor. Data type supported: S32
-     * @param[in]  bias                         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
-     *                                          Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output                       Output tensor. Data type supported: QASYMM8_SIGNED
-     * @param[in]  result_fixedpoint_multiplier Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]  result_shift                 Number of bits to shift right the result after the fixed point multiplication
-     * @param[in]  result_offset_after_shift    Offset to be applied to result before converting it back to QASYMM8_SIGNED
-     * @param[in]  min                          (Optional) Min value used to saturate down the output result before converting back to QASYMM8_SIGNED. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QASYMM8_SIGNED. Defaults to 0
-     *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     */
-    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
-                   int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-    /** Initialise the kernel's inputs, output
-     *
-     * @param[in]  compile_context              The compile context to be used.
-     * @param[in]  input                        Input tensor. Data type supported: S32
-     * @param[in]  bias                         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
-     *                                          Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output                       Output tensor. Data type supported: QASYMM8_SIGNED
-     * @param[in]  result_fixedpoint_multiplier Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]  result_shift                 Number of bits to shift right the result after the fixed point multiplication
-     * @param[in]  result_offset_after_shift    Offset to be applied to result before converting it back to QASYMM8_SIGNED
-     * @param[in]  min                          (Optional) Min value used to saturate down the output result before converting back to QASYMM8_SIGNED. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QASYMM8_SIGNED. Defaults to 0
-     *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift,
-                   int result_offset_after_shift,
-                   int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
-     *
-     * @param[in] input  Input tensor. It is the output of @ref CLGEMMLowpMatrixMultiplyCore function. Data type supported: S32
-     * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-     *                   Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[in] output Output tensor. Data type supported: QASYMM8_SIGNED
-     * @param[in] min    (Optional) Min value used to saturate down the output result before converting back to QASYMM8_SIGNED. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8_SIGNED. Defaults to 0
-     *                            Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-};
-
-/** Basic function to execute CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint on OpenCL.
- *
- *  CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint depends on 2 parameters:
- *
- *  result_fixedpoint_multiplier, result_shift
- *
- * The final result is:
- *
- * (FixedPointMul(input[i][k], result_fixedpoint_multiplier) >> result_shift)
- *
- * where FixedPointMul(x, y) is the nearest integer to the following
- * mathematical expression, evaluated without overflow or intermediate rounding:
- *
- * (x * y) / 2^31
- *
- * For more information: https://github.com/google/gemmlowp/blob/master/public/output_stages.h#L68
- *
- * In case the bias tensor is provided, the final result is:
- *
- * ((FixedPointMul(input[i][k] + bias[k], result_fixedpoint_multiplier)) >> result_shift) + result_offset_after_shift
- *
- *  This function calls the following CL kernels:
- *
- * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
- *
- * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
- *       after the result is shifted right by result_shift
-*/
-class CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint : public ICLSimpleFunction
-{
-public:
-    /** Initialise the kernel's inputs, output
-     *
-     * @param[in]  input                        Input tensor. Data type supported: S32
-     * @param[in]  bias                         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
-     *                                          Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output                       Output tensor. Data type supported: QSYMM16
-     * @param[in]  result_fixedpoint_multiplier Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]  result_shift                 Number of bits to shift right the result after the fixed point multiplication
-     * @param[in]  min                          (Optional) Min value used to saturate down the output result before converting back to QSYMM16. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QSYMM16.
-     *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     */
-    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift, int min = std::numeric_limits<int32_t>::lowest(),
-                   int max = std::numeric_limits<int32_t>::max());
-    /** Initialise the kernel's inputs, output
-     *
-     * @param[in]  compile_context              The compile context to be used.
-     * @param[in]  input                        Input tensor. Data type supported: S32
-     * @param[in]  bias                         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
-     *                                          Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output                       Output tensor. Data type supported: QSYMM16
-     * @param[in]  result_fixedpoint_multiplier Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]  result_shift                 Number of bits to shift right the result after the fixed point multiplication
-     * @param[in]  min                          (Optional) Min value used to saturate down the output result before converting back to QSYMM16. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QSYMM16.
-     *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift,
-                   int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint
-     *
-     * @param[in] input  Input tensor info. It is the output of @ref CLGEMMLowpMatrixMultiplyCore function. Data type supported: S32
-     * @param[in] bias   Biases tensor info. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-     *                   Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[in] output Output tensor info. Data type supported: QSYMM16
-     * @param[in] min    (Optional) Min value used to saturate down the output result before converting back to QSYMM16. Defaults to the minimum possible 32-bit signed integer.
-     * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QSYMM16,
-     *                            Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
-};
 /** Basic function to execute GEMMLowpQuantizeDown kernels on CL.
  *
  *  This function calls the following CL kernels:
  *
- * -# @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
- * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
- * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
+ * -# @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleKernel
+ * -# @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFloatKernel
+ * -# @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel
 */
-class CLGEMMLowpOutputStage : public ICLSimpleFunction
+class CLGEMMLowpOutputStage : public IFunction
 {
 public:
+    CLGEMMLowpOutputStage();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMLowpOutputStage(const CLGEMMLowpOutputStage &) = delete;
+    /** Default move constructor */
+    CLGEMMLowpOutputStage(CLGEMMLowpOutputStage &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMLowpOutputStage &operator=(const CLGEMMLowpOutputStage &) = delete;
+    /** Default move assignment operator */
+    CLGEMMLowpOutputStage &operator=(CLGEMMLowpOutputStage &&);
+    /** Default destructor */
+    ~CLGEMMLowpOutputStage();
     /** Initialise the kernel's inputs, output
      *
      * Valid data layouts:
@@ -315,7 +96,7 @@ public:
      * @param[in]  info            GEMMLowp output stage metadata.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel
      *
      * @param[in] input  Input tensor. It is the output of @ref CLGEMMLowpMatrixMultiplyCore function. Data type supported: S32
      * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
@@ -326,6 +107,15 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo &info);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    std::unique_ptr<ICLKernel> _kernel;
+    const ICLTensor           *_input;
+    const ICLTensor           *_bias;
+    ICLTensor                 *_output;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H */

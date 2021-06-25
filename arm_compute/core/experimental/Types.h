@@ -39,15 +39,24 @@ enum TensorType : int32_t
 {
     ACL_UNKNOWN = -1,
     ACL_SRC_DST = 0,
-    ACL_SRC     = 0,
-    ACL_SRC_0   = 0,
-    ACL_SRC_1   = 1,
-    ACL_SRC_2   = 2,
-    ACL_DST     = 30,
-    ACL_DST_0   = 30,
-    ACL_DST_1   = 31,
-    ACL_DST_2   = 32,
-    ACL_BIAS    = ACL_SRC_2,
+
+    // Src
+    ACL_SRC   = 0,
+    ACL_SRC_0 = 0,
+    ACL_SRC_1 = 1,
+    ACL_SRC_2 = 2,
+    ACL_SRC_3 = 3,
+    ACL_SRC_4 = 4,
+    ACL_SRC_5 = 5,
+    ACL_SRC_6 = 6,
+
+    // Dst
+    ACL_DST   = 30,
+    ACL_DST_0 = 30,
+    ACL_DST_1 = 31,
+    ACL_DST_2 = 32,
+
+    // Aux
     ACL_INT     = 50,
     ACL_INT_0   = 50,
     ACL_INT_1   = 51,
@@ -56,7 +65,17 @@ enum TensorType : int32_t
     ACL_INT_4   = 54,
     ACL_SRC_VEC = 256,
     ACL_DST_VEC = 512,
-    ACL_INT_VEC = 1024
+    ACL_INT_VEC = 1024,
+
+    // Aliasing Types
+    // Conv etc
+    ACL_BIAS = ACL_SRC_2,
+
+    // Gemm
+    ACL_VEC_ROW_SUM = ACL_SRC_3,
+    ACL_VEC_COL_SUM = ACL_SRC_4,
+    ACL_SHIFTS      = ACL_SRC_5,
+    ACL_MULTIPLIERS = ACL_SRC_6,
 };
 
 namespace experimental

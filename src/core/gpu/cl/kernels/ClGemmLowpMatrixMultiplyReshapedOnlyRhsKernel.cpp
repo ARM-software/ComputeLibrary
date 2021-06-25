@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -32,39 +32,44 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
-#include <cstddef>
-#include <cstdint>
 #include <tuple>
-
-using namespace arm_compute::misc::shape_calculator;
 
 namespace arm_compute
 {
+namespace opencl
+{
+namespace kernels
+{
+using namespace misc::shape_calculator;
+
 namespace
 {
 using ElementsProcessed = Steps;
 
-Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, const GEMMKernelInfo &gemm_info,
+Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, const GEMMKernelInfo &gemm_info,
                           const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
                           const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
-    if(input0->data_type() == DataType::QASYMM8)
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    if(src0->data_type() == DataType::QASYMM8)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::QASYMM8, DataType::QSYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 1, DataType::QASYMM8, DataType::QSYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL);
     }
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input0->num_dimensions() > 4, "The number of dimensions for the LHS matrix must be <= 4");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 3, "The number of dimensions for the RHS matrix must be <= 3");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->num_dimensions() > 4, "The number of dimensions for the LHS matrix must be <= 4");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->num_dimensions() > 3, "The number of dimensions for the RHS matrix must be <= 3");
 
     const GEMMRHSMatrixInfo       rhs_info     = gemm_info.rhs_info;
     const GEMMLHSMatrixInfo       lhs_info     = gemm_info.lhs_info;
@@ -79,36 +84,36 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     const int n = gemm_info.n;
     const int k = gemm_info.k;
 
-    TensorShape tensor_shape1{ input1->tensor_shape() };
+    TensorShape tensor_shape1{ src1->tensor_shape() };
     tensor_shape1.set(0, n);
     tensor_shape1.set(1, k);
 
-    const TensorInfo tensor_info1          = input1->clone()->set_tensor_shape(tensor_shape1);
-    const TensorInfo tensor_info_reshaped1 = input1->clone()->set_tensor_shape(compute_rhs_reshaped_shape(tensor_info1, rhs_info));
+    const TensorInfo tensor_info1          = src1->clone()->set_tensor_shape(tensor_shape1);
+    const TensorInfo tensor_info_reshaped1 = src1->clone()->set_tensor_shape(compute_rhs_reshaped_shape(tensor_info1, rhs_info));
 
-    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != static_cast<unsigned int>(k));
+    ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(0) != static_cast<unsigned int>(k));
     if(gemm_info.reinterpret_input_as_3d)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) * input0->dimension(2) != static_cast<unsigned int>(m));
+        ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) * src0->dimension(2) != static_cast<unsigned int>(m));
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) != static_cast<unsigned int>(m));
+        ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) != static_cast<unsigned int>(m));
     }
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, &tensor_info_reshaped1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src1, &tensor_info_reshaped1);
 
-    const TensorShape expected_output_shape = compute_mm_shape(*input0, *input1, gemm_info);
-    if(output->total_size() != 0)
+    const TensorShape expected_dst_shape = compute_mm_shape(*src0, *src1, gemm_info);
+    if(dst->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(expected_output_shape);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
+        const TensorInfo tensor_info_dst = dst->clone()->set_tensor_shape(expected_dst_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_dst);
         if(output_stage.type == GEMMLowpOutputStageType::NONE)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, dst);
         }
     }
 
@@ -116,20 +121,20 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
-        ARM_COMPUTE_RETURN_ERROR_ON(expected_output_shape[0] != bias->dimension(0));
+        ARM_COMPUTE_RETURN_ERROR_ON(expected_dst_shape[0] != bias->dimension(0));
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_stage.type == GEMMLowpOutputStageType::QUANTIZE_DOWN) || (output_stage.type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT),
                                     "Only GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT is supported");
 
-    // Checks performed if the output stage needs to be fused
+    // Checks performed if the dst stage needs to be fused
     if(output_stage.type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
     {
         // If a_offset == 0, vector_sum_col can be a nullptr
         if(gemm_info.a_offset != 0)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
-            ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_col->dimension(0) != expected_output_shape[0]);
+            ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_col->dimension(0) != expected_dst_shape[0]);
         }
 
         // If b_offset == 0, vector_sum_row can be a nullptr
@@ -138,23 +143,23 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
 
             // Check if mm result is a 3D reinterpretation
-            const bool reinterpret_as_3d = expected_output_shape.num_dimensions() > 1 && expected_output_shape.y() != vector_sum_row->tensor_shape().x();
+            const bool reinterpret_as_3d = expected_dst_shape.num_dimensions() > 1 && expected_dst_shape.y() != vector_sum_row->tensor_shape().x();
 
             // Validate input
-            ARM_COMPUTE_RETURN_ERROR_ON(reinterpret_as_3d && vector_sum_row->dimension(0) != (expected_output_shape[1] * expected_output_shape[2]));
-            ARM_COMPUTE_RETURN_ERROR_ON(!reinterpret_as_3d && vector_sum_row->dimension(0) != expected_output_shape[1]);
+            ARM_COMPUTE_RETURN_ERROR_ON(reinterpret_as_3d && vector_sum_row->dimension(0) != (expected_dst_shape[1] * expected_dst_shape[2]));
+            ARM_COMPUTE_RETURN_ERROR_ON(!reinterpret_as_3d && vector_sum_row->dimension(0) != expected_dst_shape[1]);
 
-            if(expected_output_shape.num_dimensions() > 1)
+            if(expected_dst_shape.num_dimensions() > 1)
             {
-                const unsigned int output_batch_idx = reinterpret_as_3d ? 3 : 2;
+                const unsigned int dst_batch_idx = reinterpret_as_3d ? 3 : 2;
 
                 TensorShape vector_sum_row_shape = vector_sum_row->tensor_shape();
                 vector_sum_row_shape.collapse_from(1);
-                TensorShape collapsed_output_shape(expected_output_shape);
-                collapsed_output_shape.collapse_from(output_batch_idx);
+                TensorShape collapsed_dst_shape(expected_dst_shape);
+                collapsed_dst_shape.collapse_from(dst_batch_idx);
 
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_row_shape[1] != collapsed_output_shape[output_batch_idx],
-                                                "vector_sum_row must have the same number of batches of output tensor");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_row_shape[1] != collapsed_dst_shape[dst_batch_idx],
+                                                "vector_sum_row must have the same number of batches of dst tensor");
 
                 if(gemm_info.a_offset != 0)
                 {
@@ -167,9 +172,9 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
             }
         }
 
-        if(output->total_size() != 0)
+        if(dst->total_size() != 0)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON(output_stage.output_data_type != output->data_type());
+            ARM_COMPUTE_RETURN_ERROR_ON(output_stage.output_data_type != dst->data_type());
         }
         ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
 
@@ -181,16 +186,16 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
             ARM_COMPUTE_RETURN_ERROR_ON(output_shifts->num_dimensions() > 1);
             if(output_stage.is_quantized_per_channel)
             {
-                ARM_COMPUTE_RETURN_ERROR_ON(expected_output_shape[0] != output_shifts->dimension(0));
-                ARM_COMPUTE_RETURN_ERROR_ON(expected_output_shape[0] != output_multipliers->dimension(0));
+                ARM_COMPUTE_RETURN_ERROR_ON(expected_dst_shape[0] != output_shifts->dimension(0));
+                ARM_COMPUTE_RETURN_ERROR_ON(expected_dst_shape[0] != output_multipliers->dimension(0));
             }
         }
     }
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output, const GEMMKernelInfo &gemm_info,
-                                                        ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, ITensorInfo *bias,
+std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, const GEMMKernelInfo &gemm_info,
+                                                        ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, ITensorInfo *bias,
                                                         ITensorInfo *output_multipliers, ITensorInfo *output_shifts, ElementsProcessed &num_elements_processed)
 {
     const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
@@ -204,31 +209,31 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     Window win_out{};
     bool   window_changed = false;
 
-    // In case both input and output have to be reinterpreted as 3D tensors,
+    // In case both input and dst have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
     if(reinterpret_input_as_3d == reinterpret_output_as_3d)
     {
         reinterpret_output_as_3d = false;
     }
 
-    // Output tensor auto initialization if not yet initialized
-    const TensorShape expected_output_shape = compute_mm_shape(*input0, *input1, gemm_info);
+    // dst tensor auto initialization if not yet initialized
+    const TensorShape expected_dst_shape = compute_mm_shape(*src0, *src1, gemm_info);
     if(output_stage.type != GEMMLowpOutputStageType::NONE)
     {
-        auto_init_if_empty(*output, input0->clone()->set_tensor_shape(expected_output_shape).set_data_type(output_stage.output_data_type));
+        auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(expected_dst_shape).set_data_type(output_stage.output_data_type));
     }
     else
     {
-        auto_init_if_empty(*output, input0->clone()->set_tensor_shape(expected_output_shape).set_data_type(DataType::S32));
+        auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(expected_dst_shape).set_data_type(DataType::S32));
     }
 
-    TensorInfo tmp_info(*output);
+    TensorInfo tmp_info(*dst);
 
     if(reinterpret_output_as_3d)
     {
-        // Since the output tensor has to be reinterpreted as 3D and the execute window is based on a 2D GEMM,
+        // Since the dst tensor has to be reinterpreted as 3D and the execute window is based on a 2D GEMM,
         // the window needs to be constructed on the 2D collapsed version of the tensor
-        TensorShape tmp_shape(output->tensor_shape());
+        TensorShape tmp_shape(dst->tensor_shape());
         tmp_shape.collapse(2U, 1U);
         tmp_info.set_tensor_shape(tmp_shape);
     }
@@ -238,7 +243,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     num_elems_processed_per_iteration_y = gemm_info.lhs_info.m0;
 
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-    win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    win_out = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
     if(output_stage.type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
     {
@@ -267,7 +272,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS
     Window             collapsed             = win;
-    const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(output->num_dimensions()), 2u);
+    const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(dst->num_dimensions()), 2u);
     collapsed                                = win.collapse(win, dimension_to_collapse);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -275,69 +280,32 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 }
 } // namespace
 
-CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel()
-    : _input0(nullptr),
-      _input1(nullptr),
-      _output(nullptr),
-      _vector_sum_col(nullptr),
-      _vector_sum_row(nullptr),
-      _bias(nullptr),
-      _output_multipliers(nullptr),
-      _output_shifts(nullptr),
-      _slide_matrix_b(true),
-      _reinterpret_input_as_3d(false),
-      _reinterpret_output_as_3d(false),
-      _use_dummy_work_items(false),
-      _is_quantized_per_channel(false),
-      _fuse_output_stage(false)
+ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel::ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel()
 {
     _type = CLKernelType::GEMM;
 }
 
-void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMKernelInfo &gemm_info,
-                                                              const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias,
-                                                              const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output, gemm_info, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts);
-}
-
-void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output,
+void ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst,
                                                               const GEMMKernelInfo &gemm_info,
-                                                              const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias,
-                                                              const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
+                                                              ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, ITensorInfo *bias,
+                                                              ITensorInfo *output_multipliers, ITensorInfo *output_shifts)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(),
-                                                  input1->info(),
-                                                  output->info(),
-                                                  gemm_info,
-                                                  vector_sum_col != nullptr ? vector_sum_col->info() : nullptr,
-                                                  vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
-                                                  bias != nullptr ? bias->info() : nullptr,
-                                                  output_multipliers != nullptr ? output_multipliers->info() : nullptr,
-                                                  output_shifts != nullptr ? output_shifts->info() : nullptr));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, dst, gemm_info, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts));
 
-    auto                          padding_info = get_padding_info({ input0, input1, output, vector_sum_row });
+    auto                          padding_info = get_padding_info({ src0, src1, dst, vector_sum_row });
     const GEMMRHSMatrixInfo       rhs_info     = gemm_info.rhs_info;
     const GEMMLHSMatrixInfo       lhs_info     = gemm_info.lhs_info;
     const GEMMLowpOutputStageInfo output_stage = gemm_info.output_stage;
     const int32_t                 a_offset     = gemm_info.a_offset;
     const int32_t                 b_offset     = gemm_info.b_offset;
 
-    _input0                   = input0;
-    _input1                   = input1;
-    _output                   = output;
-    _vector_sum_col           = vector_sum_col;
-    _vector_sum_row           = vector_sum_row;
-    _bias                     = bias;
-    _output_multipliers       = output_multipliers;
-    _output_shifts            = output_shifts;
     _reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d;
     _reinterpret_output_as_3d = (gemm_info.depth_output_gemm3d != 0);
     _use_dummy_work_items     = preferred_dummy_work_items_support(CLKernelLibrary::get().get_device());
     _is_quantized_per_channel = output_stage.is_quantized_per_channel;
 
-    // In case both input and output have to be reinterpreted as 3D tensors,
+    // In case both input and dst have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
     if(_reinterpret_input_as_3d == _reinterpret_output_as_3d)
     {
@@ -346,29 +314,20 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     }
 
     // Check if we need to slide the matrix B
-    const unsigned int num_dimensions_input0 = _input0->info()->num_dimensions();
-    _slide_matrix_b                          = (_input1->info()->num_dimensions() >= num_dimensions_input0);
+    const unsigned int num_dimensions_src0 = src0->num_dimensions();
+    _slide_matrix_b                        = (src1->num_dimensions() >= num_dimensions_src0);
 
     ElementsProcessed num_elements_processed{};
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input0->info(),
-                                                    input1->info(),
-                                                    output->info(),
-                                                    gemm_info,
-                                                    vector_sum_col != nullptr ? vector_sum_col->info() : nullptr,
-                                                    vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
-                                                    bias != nullptr ? bias->info() : nullptr,
-                                                    output_multipliers != nullptr ? output_multipliers->info() : nullptr,
-                                                    output_shifts != nullptr ? output_shifts->info() : nullptr,
-                                                    num_elements_processed);
+    auto win_config = validate_and_configure_window(src0, src1, dst, gemm_info, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts, num_elements_processed);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
     // If _reinterpret_input_as_3d = _reinterpret_output_as_3d = true,
     // we will dispatch a batched-GEMM to reduce the complexity of the address calculation within the OpenCL kernel.
-    // This means that the actual m used by the kernel is given by output->info()->dimension(1) and not by gemm_info.m
-    const unsigned int internal_m = _reinterpret_output_as_3d ? gemm_info.m : output->info()->dimension(1);
+    // This means that the actual m used by the kernel is given by dst->dimension(1) and not by gemm_info.m
+    const unsigned int internal_m = _reinterpret_output_as_3d ? gemm_info.m : dst->dimension(1);
 
     // Shrink M0 to be always <= M (internal_m) to prevent out-of-bounds reads.
     // NOTE: This might have implications on heuristics and performance
@@ -382,9 +341,9 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     CLBuildOptions build_opts;
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DREINTERPRET_OUTPUT_AS_3D");
-    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(1)));
-    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(2)));
-    build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
+    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(dst->dimension(1)));
+    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(dst->dimension(2)));
+    build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(src1->dimension(2)));
     build_opts.add_option_if(rhs_info.interleave, "-DRHS_INTERLEAVE");
     build_opts.add_option_if(_use_dummy_work_items, "-DDUMMY_WORK_ITEMS");
     build_opts.add_option("-DM=" + support::cpp11::to_string(internal_m));
@@ -396,8 +355,8 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     build_opts.add_option("-DH0=" + support::cpp11::to_string(rhs_info.h0));
     build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
     build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
-    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(input0->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src0->data_type()));
+    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(src0->data_type()));
 
     std::string kernel_name("gemmlowp_mm_reshaped_only_rhs_");
     kernel_name += rhs_info.transpose ? "t" : "nt";
@@ -410,11 +369,11 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
         if(a_offset != 0 && vector_sum_col != nullptr)
         {
             build_opts.add_option("-DA_OFFSET=" + support::cpp11::to_string(a_offset));
-            build_opts.add_option_if(vector_sum_col->info()->tensor_shape().num_dimensions() > 1, "-DSUM_COL_HAS_BATCHES");
+            build_opts.add_option_if(vector_sum_col->tensor_shape().num_dimensions() > 1, "-DSUM_COL_HAS_BATCHES");
         }
         // If b_offset == 0, vector_sum_row can be a nullptr
         build_opts.add_option_if(b_offset != 0, "-DB_OFFSET=" + support::cpp11::to_string(b_offset));
-        build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(a_offset * b_offset * input0->info()->dimension(0)));
+        build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(a_offset * b_offset * src0->dimension(0)));
         build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
         build_opts.add_option("-DRESULT_OFFSET=" + support::cpp11::to_string(output_stage.gemmlowp_offset));
         build_opts.add_option("-DRESULT_MULTIPLIER=" + support::cpp11::to_string(output_stage.gemmlowp_multipliers[0]));
@@ -426,7 +385,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
 
         PixelValue min_val{};
         PixelValue max_val{};
-        std::tie(min_val, max_val) = get_min_max(output->info()->data_type());
+        std::tie(min_val, max_val) = get_min_max(dst->data_type());
         build_opts.add_option_if(min != min_val.get<int32_t>(), "-DMIN_BOUND=" + support::cpp11::to_string(min));
         build_opts.add_option_if(max != max_val.get<int32_t>(), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     }
@@ -441,13 +400,13 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     _config_id += "_";
     _config_id += (_reinterpret_input_as_3d ? "3di_" : "");
     _config_id += (_reinterpret_output_as_3d ? "3do_" : "");
-    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += support::cpp11::to_string(dst->dimension(1));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += support::cpp11::to_string(dst->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(gemm_info.k);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(2));
+    _config_id += support::cpp11::to_string(dst->dimension(2));
     _config_id += "_";
     _config_id += support::cpp11::to_string(lhs_info.m0);
     _config_id += "_";
@@ -461,15 +420,15 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileCon
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, const GEMMKernelInfo &gemm_info,
+Status ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, const GEMMKernelInfo &gemm_info,
                                                                const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
                                                                const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
     ElementsProcessed num_elements_processed{};
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output, gemm_info, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(),
-                                                              input1->clone().get(),
-                                                              output->clone().get(),
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src0, src1, dst, gemm_info, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src0->clone().get(),
+                                                              src1->clone().get(),
+                                                              dst->clone().get(),
                                                               gemm_info,
                                                               vector_sum_col != nullptr ? vector_sum_col->clone().get() : nullptr,
                                                               vector_sum_row != nullptr ? vector_sum_row->clone().get() : nullptr,
@@ -482,15 +441,24 @@ Status CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::validate(const ITensorInfo
     return Status{};
 }
 
-void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    if(_input1->info()->num_dimensions() < 3)
+    const auto src0               = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const auto src1               = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const auto bias               = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_BIAS));
+    const auto vector_sum_col     = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_VEC_COL_SUM));
+    const auto vector_sum_row     = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_VEC_ROW_SUM));
+    const auto output_shifts      = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SHIFTS));
+    const auto output_multipliers = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_MULTIPLIERS));
+    auto       dst                = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+
+    if(src1->info()->num_dimensions() < 3)
     {
         // The stride_z for matrix B must be zero if we do not slice
-        ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != 0);
+        ARM_COMPUTE_ERROR_ON(src1->info()->strides_in_bytes()[3] != 0);
     }
 
     Window slice          = window.first_slice_window_3D();
@@ -503,15 +471,15 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::run(const Window &window, cl
     {
         // Pass bottom paddings to the kernel if the input has to be reinterpreted as 3D tensor
         const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3;
-        const unsigned int total_cross_plane_pad = _input0->info()->padding().top + _input0->info()->padding().bottom;
+        const unsigned int total_cross_plane_pad = src0->info()->padding().top + src0->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));
     }
 
     if(_reinterpret_output_as_3d)
     {
-        // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
+        // Pass bottom paddings to the kernel if the dst has to be reinterpreted as 3D tensor
         const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3 + (_reinterpret_input_as_3d ? 1 : 0);
-        const unsigned int total_cross_plane_pad = _output->info()->padding().top + _output->info()->padding().bottom;
+        const unsigned int total_cross_plane_pad = dst->info()->padding().top + dst->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));
     }
 
@@ -541,12 +509,12 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::run(const Window &window, cl
         }
 
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input0, slice);
-        add_2D_tensor_argument(idx, _input1, slice_b);
-        add_2D_tensor_argument(idx, _output, slice);
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input1->info()->strides_in_bytes()[2]));
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
+        add_2D_tensor_argument(idx, src0, slice);
+        add_2D_tensor_argument(idx, src1, slice_b);
+        add_2D_tensor_argument(idx, dst, slice);
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(src0->info()->strides_in_bytes()[2]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(src1->info()->strides_in_bytes()[2]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(dst->info()->strides_in_bytes()[2]));
         if(_reinterpret_input_as_3d)
         {
             // Pass bottom paddings to the kernel if the input has to be reinterpreted as 3D tensor
@@ -555,20 +523,22 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::run(const Window &window, cl
 
         if(_reinterpret_output_as_3d)
         {
-            // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
+            // Pass bottom paddings to the kernel if the dst has to be reinterpreted as 3D tensor
             idx++;
         }
 
         if(_fuse_output_stage)
         {
-            add_2D_tensor_argument_if((_vector_sum_col != nullptr), idx, _vector_sum_col, win_vector_sum_col);
-            add_2D_tensor_argument_if((_vector_sum_row != nullptr), idx, _vector_sum_row, win_vector_sum_row);
-            add_1D_tensor_argument_if((_bias != nullptr), idx, _bias, biases_slice);
-            add_1D_tensor_argument_if(_is_quantized_per_channel, idx, _output_multipliers, biases_slice);
-            add_1D_tensor_argument_if(_is_quantized_per_channel, idx, _output_shifts, biases_slice);
+            add_2D_tensor_argument_if((vector_sum_col != nullptr), idx, vector_sum_col, win_vector_sum_col);
+            add_2D_tensor_argument_if((vector_sum_row != nullptr), idx, vector_sum_row, win_vector_sum_row);
+            add_1D_tensor_argument_if((bias != nullptr), idx, bias, biases_slice);
+            add_1D_tensor_argument_if(_is_quantized_per_channel, idx, output_multipliers, biases_slice);
+            add_1D_tensor_argument_if(_is_quantized_per_channel, idx, output_shifts, biases_slice);
         }
         enqueue(queue, *this, slice, lws_hint(), _use_dummy_work_items);
     }
     while(window.slide_window_slice_3D(slice));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

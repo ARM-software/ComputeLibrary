@@ -959,7 +959,7 @@ protected:
         GEMMFunctionType       gemm;
         reshape_lhs.configure(lhs.info(), lhs_reshaped.info(), lhs_info);
         reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
+        gemm.configure(lhs_reshaped.info(), rhs_reshaped.info(), dst.info(), lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -988,7 +988,8 @@ protected:
         reshape_lhs.run(reshape_lhs_pack);
         ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
         reshape_rhs.run(reshape_rhs_pack);
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs_reshaped }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1113,7 +1114,7 @@ protected:
         GEMMFunctionType       gemm;
         reshape_lhs.configure(lhs.info(), lhs_reshaped.info(), lhs_info);
         reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
+        gemm.configure(lhs_reshaped.info(), rhs_reshaped.info(), dst.info(), lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1142,7 +1143,8 @@ protected:
         reshape_lhs.run(reshape_lhs_pack);
         ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
         reshape_rhs.run(reshape_rhs_pack);
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs_reshaped }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1266,7 +1268,7 @@ protected:
         ReshapeRHSOperatorType reshape_rhs;
         GEMMFunctionType       gemm;
         reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
-        gemm.configure(&lhs, &rhs_reshaped, &dst, gemm_info);
+        gemm.configure(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info);
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1291,7 +1293,8 @@ protected:
         // Compute GEMM
         ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
         reshape_rhs.run(reshape_rhs_pack);
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1412,7 +1415,7 @@ protected:
         ReshapeRHSOperatorType reshape_rhs;
         GEMMFunctionType       gemm;
         reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
-        gemm.configure(&lhs, &rhs_reshaped, &dst, gemm_info);
+        gemm.configure(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info);
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1437,7 +1440,8 @@ protected:
         // Compute GEMM
         ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
         reshape_rhs.run(reshape_rhs_pack);
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1527,7 +1531,7 @@ protected:
 
         // Create and configure function
         GEMMFunctionType gemm;
-        gemm.configure(&lhs, &rhs, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
+        gemm.configure(lhs.info(), rhs.info(), dst.info(), lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1548,7 +1552,8 @@ protected:
         fill(AccessorType(rhs), 1);
 
         // Compute GEMM
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1624,7 +1629,7 @@ protected:
 
         // Create and configure function
         GEMMFunctionType gemm;
-        gemm.configure(&lhs, &rhs, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
+        gemm.configure(lhs.info(), rhs.info(), dst.info(), lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1645,7 +1650,8 @@ protected:
         fill(AccessorType(rhs), 1);
 
         // Compute GEMM
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }

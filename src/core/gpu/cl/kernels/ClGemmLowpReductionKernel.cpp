@@ -21,76 +21,74 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmLowpReductionKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
+namespace opencl
+{
+namespace kernels
+{
 namespace
 {
-Status validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments_matrix_a_reduction(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8);
 
-    if(output->total_size() > 0)
+    if(dst->total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(0) != input->dimension(1), "Output vector must have length equal to the number of rows of the input matrix");
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->dimension(0) != src->dimension(1), "Output vector must have length equal to the number of rows of the input matrix");
     }
     return Status{};
 }
 
-Status validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments_matrix_b_reduction(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
 
-    if(output->total_size() > 0)
+    if(dst->total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(0) != input->dimension(0), "Output vector must have length equal to the number of columns of the input matrix");
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->dimension(0) != src->dimension(0), "Output vector must have length equal to the number of columns of the input matrix");
     }
     return Status{};
 }
 } // namespace
 
-ICLGEMMLowpReductionKernel::ICLGEMMLowpReductionKernel()
-    : _input(), _output()
+IClGemmLowpReductionKernel::IClGemmLowpReductionKernel()
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), mtx_a, vector_sum_row, info);
-}
-
-void CLGEMMLowpMatrixAReductionKernel::configure(const CLCompileContext &compile_context, const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
+void ClGemmLowpMatrixAReductionKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *mtx_a, ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_a, vector_sum_row);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_a_reduction(mtx_a->info(), vector_sum_row->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_a_reduction(mtx_a, vector_sum_row));
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*vector_sum_row->info(), TensorShape(mtx_a->info()->dimension(1)), 1, DataType::S32);
+    auto_init_if_empty(*vector_sum_row, TensorShape(mtx_a->dimension(1)), 1, DataType::S32);
 
     auto padding_info = get_padding_info({ mtx_a, vector_sum_row });
 
-    _input  = mtx_a;
-    _output = vector_sum_row;
-
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
-    build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(mtx_a->info()->dimension(0)));
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(mtx_a->info()->data_type()));
-    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_a->info()->data_type()));
+    build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(mtx_a->dimension(0)));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(mtx_a->data_type()));
+    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_a->data_type()));
     build_opts.add_option_if(info.mul_by_scalar, "-DSCALAR=" + support::cpp11::to_string(info.scalar));
 
     const bool is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
@@ -102,21 +100,21 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const CLCompileContext &compile
 
     // Configure kernel window
     // This kernel does not need padding
-    Window win = calculate_max_window(*vector_sum_row->info(), Steps());
+    Window win = calculate_max_window(*vector_sum_row, Steps());
     ICLKernel::configure_internal(win);
 
     _config_id = kernel_name;
     _config_id += "_";
-    _config_id += support::cpp11::to_string(_input->info()->dimension(0));
+    _config_id += support::cpp11::to_string(mtx_a->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(_input->info()->dimension(1));
+    _config_id += support::cpp11::to_string(mtx_a->dimension(1));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(_input->info()->dimension(2));
+    _config_id += support::cpp11::to_string(mtx_a->dimension(2));
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
+Status ClGemmLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_a_reduction(mtx_a, vector_sum_row));
@@ -124,10 +122,13 @@ Status CLGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, cons
     return Status{};
 }
 
-void CLGEMMLowpMatrixAReductionKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClGemmLowpMatrixAReductionKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimY);
     Window slice_in  = collapsed.first_slice_window_2D();
@@ -141,54 +142,46 @@ void CLGEMMLowpMatrixAReductionKernel::run(const Window &window, cl::CommandQueu
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice_in);
-        add_2D_tensor_argument(idx, _output, slice_out);
+        add_3D_tensor_argument(idx, src, slice_in);
+        add_2D_tensor_argument(idx, dst, slice_out);
         enqueue(queue, *this, slice_out, lws_hint());
     }
     while(collapsed.slide_window_slice_2D(slice_out));
 }
 
-void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), mtx_b, vector_sum_col, info);
-}
-
-void CLGEMMLowpMatrixBReductionKernel::configure(const CLCompileContext &compile_context, const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
+void ClGemmLowpMatrixBReductionKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *mtx_b, ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_b, vector_sum_col);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(mtx_b->info(), vector_sum_col->info()));
-
-    _input  = mtx_b;
-    _output = vector_sum_col;
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(mtx_b, vector_sum_col));
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*_output->info(), TensorShape(mtx_b->info()->dimension(0)), 1, DataType::S32);
+    auto_init_if_empty(*vector_sum_col, TensorShape(mtx_b->dimension(0)), 1, DataType::S32);
 
     auto padding_info = get_padding_info({ mtx_b, vector_sum_col });
 
-    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16, mtx_b->info()->dimension(0));
+    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16, mtx_b->dimension(0));
 
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(mtx_b->info()->dimension(0) % num_elems_processed_per_iteration));
-    build_opts.add_option("-DCOLS_B=" + support::cpp11::to_string(mtx_b->info()->dimension(0)));
-    build_opts.add_option("-DROWS_B=" + support::cpp11::to_string(mtx_b->info()->dimension(1)));
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(mtx_b->info()->data_type()));
-    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_b->info()->data_type()));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(mtx_b->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DCOLS_B=" + support::cpp11::to_string(mtx_b->dimension(0)));
+    build_opts.add_option("-DROWS_B=" + support::cpp11::to_string(mtx_b->dimension(1)));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(mtx_b->data_type()));
+    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_b->data_type()));
     build_opts.add_option_if(info.mul_by_scalar, "-DSCALAR=" + support::cpp11::to_string(info.scalar));
 
     // Create kernel
     _kernel = create_kernel(compile_context, "gemmlowp_matrix_b_reduction", build_opts.options());
 
     // Configure kernel window
-    Window win = calculate_max_window(*_output->info(), Steps(num_elems_processed_per_iteration));
-    ICLKernel::configure_internal(win);
+    Window win = calculate_max_window(*vector_sum_col, Steps(num_elems_processed_per_iteration));
+    IClKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
+Status ClGemmLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_b_reduction(mtx_b, vector_sum_col));
@@ -196,10 +189,13 @@ Status CLGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, cons
     return Status{};
 }
 
-void CLGEMMLowpMatrixBReductionKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClGemmLowpMatrixBReductionKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     Window collapsed = window.collapse_if_possible(IKernel::window(), Window::DimY);
 
@@ -212,10 +208,12 @@ void CLGEMMLowpMatrixBReductionKernel::run(const Window &window, cl::CommandQueu
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice_in);
-        add_2D_tensor_argument(idx, _output, slice_out);
+        add_3D_tensor_argument(idx, src, slice_in);
+        add_2D_tensor_argument(idx, dst, slice_out);
         enqueue(queue, *this, slice_out, lws_hint());
     }
     while(collapsed.slide_window_slice_2D(slice_out));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

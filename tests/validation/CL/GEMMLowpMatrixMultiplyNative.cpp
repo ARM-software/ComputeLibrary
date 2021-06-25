@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"
@@ -41,7 +41,7 @@ namespace validation
 using namespace arm_compute::misc::shape_calculator;
 
 // Create function for CLGEMMMatrixMultiplyNativeKernel
-using CLGEMMLowpMatrixMultiplyNative = CLSynthetizeFunction<CLGEMMLowpMatrixMultiplyNativeKernel>;
+using CLGEMMLowpMatrixMultiplyNative = CLSynthetizeOperator<opencl::kernels::ClGemmLowpMatrixMultiplyNativeKernel>;
 
 // Fixture for CLGEMMLowpMatrixMultiplyNative
 using CLGEMMLowpMatrixMultiplyNativeFixture = GEMMLowpMatrixMultiplyNativeValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyNative>;

@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.h"
 #include "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
@@ -49,7 +49,7 @@ using CLGEMMReshapeLHSMatrix = CLSynthetizeOperator<opencl::kernels::ClGemmResha
 using CLGEMMReshapeRHSMatrix = CLSynthetizeOperator<opencl::kernels::ClGemmReshapeRhsMatrixKernel>;
 
 // Create function for CLGEMMLowpMatrixMultiplyReshapedKernel
-using CLGEMMLowpMatrixMultiplyReshaped = CLSynthetizeFunction<CLGEMMLowpMatrixMultiplyReshapedKernel>;
+using CLGEMMLowpMatrixMultiplyReshaped = CLSynthetizeOperator<opencl::kernels::ClGemmLowpMatrixMultiplyReshapedKernel>;
 
 // Fixture for CLGEMMLowpMatrixMultiplyReshaped
 using CLGEMMLowpMatrixMultiplyReshapedFixture = GEMMLowpMatrixMultiplyReshapedValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshaped>;

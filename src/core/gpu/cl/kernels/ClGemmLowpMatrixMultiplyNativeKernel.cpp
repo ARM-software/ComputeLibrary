@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -32,34 +32,39 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
-using namespace misc::shape_calculator;
-
+namespace opencl
+{
+namespace kernels
+{
 namespace
 {
 using ElementsProcessed = Steps;
 
-Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
                           const GEMMReshapeInfo &gemm_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
-    if(input0->data_type() == DataType::QASYMM8)
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    if(src0->data_type() == DataType::QASYMM8)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::QASYMM8, DataType::QSYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 1, DataType::QASYMM8, DataType::QSYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL);
     }
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input0->num_dimensions() > 4, "The number of dimensions for the LHS matrix must be <= 4");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 3, "The number of dimensions for the RHS matrix must be <= 3");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->num_dimensions() > 4, "The number of dimensions for the LHS matrix must be <= 4");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->num_dimensions() > 3, "The number of dimensions for the RHS matrix must be <= 3");
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 != rhs_info.k0);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((lhs_info.k0 & (lhs_info.k0 - 1)) && lhs_info.k0 != 3), "Only 2,3,4,8,16 are supported for k0");
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 > 16);
@@ -75,56 +80,56 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     ARM_COMPUTE_UNUSED(n);
     ARM_COMPUTE_UNUSED(k);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != static_cast<unsigned int>(k));
-    ARM_COMPUTE_RETURN_ERROR_ON(input1->dimension(0) != static_cast<unsigned int>(n));
-    ARM_COMPUTE_RETURN_ERROR_ON(input1->dimension(1) != static_cast<unsigned int>(k));
+    ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(0) != static_cast<unsigned int>(k));
+    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(0) != static_cast<unsigned int>(n));
+    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(1) != static_cast<unsigned int>(k));
     if(gemm_info.reinterpret_input_as_3d())
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) * input0->dimension(2) != static_cast<unsigned int>(m));
+        ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) * src0->dimension(2) != static_cast<unsigned int>(m));
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) != static_cast<unsigned int>(m));
+        ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) != static_cast<unsigned int>(m));
     }
 
-    if(output->total_size() != 0)
+    if(dst->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(compute_mm_shape(*input0, *input1, gemm_info));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+        const TensorInfo tensor_info_dst = dst->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
     }
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *dst, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
                                                         const GEMMReshapeInfo &gemm_info, ElementsProcessed &num_elements_processed)
 {
     unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
     unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
     bool          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d();
-    bool          reinterpret_output_as_3d            = (gemm_info.depth_output_gemm3d() != 0);
+    bool          reinterpret_dst_as_3d               = (gemm_info.depth_output_gemm3d() != 0);
 
     Window win{};
     bool   window_changed = false;
 
-    // In case both input and output have to be reinterpreted as 3D tensors,
-    // force reinterpret_output_as_3d to be false.
-    if(reinterpret_input_as_3d == reinterpret_output_as_3d)
+    // In case both input and dst have to be reinterpreted as 3D tensors,
+    // force reinterpret_dst_as_3d to be false.
+    if(reinterpret_input_as_3d == reinterpret_dst_as_3d)
     {
-        reinterpret_output_as_3d = false;
+        reinterpret_dst_as_3d = false;
     }
 
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input0->clone()->set_tensor_shape(compute_mm_shape(*input0, *input1, gemm_info)).set_data_type(DataType::S32));
+    // dst tensor auto initialization if not yet initialized
+    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)).set_data_type(DataType::S32));
 
-    TensorInfo tmp_info(*output);
+    TensorInfo tmp_info(*dst);
 
-    if(reinterpret_output_as_3d)
+    if(reinterpret_dst_as_3d)
     {
-        // Since the output tensor has to be reinterpreted as 3D and the execute window is based on a 2D GEMM,
+        // Since the dst tensor has to be reinterpreted as 3D and the execute window is based on a 2D GEMM,
         // the window needs to be constructed on the 2D collapsed version of the tensor
-        TensorShape tmp_shape(output->tensor_shape());
+        TensorShape tmp_shape(dst->tensor_shape());
         tmp_shape.collapse(2U, 1U);
         tmp_info.set_tensor_shape(tmp_shape);
     }
@@ -136,16 +141,16 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     win = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
     // RHS matrix still needs padding on the X
-    AccessWindowStatic input1_access(input1, 0, 0,
-                                     ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
-                                     input1->dimension(1));
+    AccessWindowStatic src1_access(src1, 0, 0,
+                                   ceil_to_multiple(src1->dimension(0), num_elems_processed_per_iteration_x),
+                                   src1->dimension(1));
 
-    window_changed = update_window_and_padding(win, input1_access); // window used by the execute_window_loop
+    window_changed = update_window_and_padding(win, src1_access); // window used by the execute_window_loop
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS
     Window             collapsed             = win;
-    const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(output->num_dimensions()), 2u);
+    const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(dst->num_dimensions()), 2u);
     collapsed                                = win.collapse(win, dimension_to_collapse);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -153,38 +158,27 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 }
 } // namespace
 
-CLGEMMLowpMatrixMultiplyNativeKernel::CLGEMMLowpMatrixMultiplyNativeKernel()
-    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_input_as_3d(false), _reinterpret_output_as_3d(false), _use_dummy_work_items(false)
+ClGemmLowpMatrixMultiplyNativeKernel::ClGemmLowpMatrixMultiplyNativeKernel()
 {
     _type = CLKernelType::GEMM;
 }
 
-void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
-                                                     const GEMMReshapeInfo &gemm_info)
+void ClGemmLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *dst,
+                                                     const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const GEMMReshapeInfo &gemm_info)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output, lhs_info, rhs_info, gemm_info);
-}
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
-void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info,
-                                                     const GEMMRHSMatrixInfo &rhs_info,
-                                                     const GEMMReshapeInfo   &gemm_info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, dst, lhs_info, rhs_info, gemm_info));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), lhs_info, rhs_info, gemm_info));
-
-    _input0                   = input0;
-    _input1                   = input1;
-    _output                   = output;
     _reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d();
     _reinterpret_output_as_3d = (gemm_info.depth_output_gemm3d() != 0);
     _use_dummy_work_items     = preferred_dummy_work_items_support(CLKernelLibrary::get().get_device());
 
     // We still need padding on the X dimension for the RHS matrix
-    auto padding_info = get_padding_info({ input0, output });
+    auto padding_info = get_padding_info({ src0, dst });
 
-    // In case both input and output have to be reinterpreted as 3D tensors,
-    // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
+    // In case both input and dst have to be reinterpreted as 3D tensors,
+    // force reinterpret_input_as_3d and reinterpret_dst_as_3d to be false.
     if(_reinterpret_input_as_3d == _reinterpret_output_as_3d)
     {
         _reinterpret_input_as_3d  = false;
@@ -192,20 +186,20 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     }
 
     // Check if we need to slide the matrix B
-    const unsigned int num_dimensions_input0 = _input0->info()->num_dimensions();
-    _slide_matrix_b                          = (_input1->info()->num_dimensions() >= num_dimensions_input0);
+    const unsigned int num_dimensions_src0 = src0->num_dimensions();
+    _slide_matrix_b                        = (src1->num_dimensions() >= num_dimensions_src0);
 
     ElementsProcessed num_elements_processed{};
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info(), lhs_info, rhs_info, gemm_info, num_elements_processed);
+    auto win_config = validate_and_configure_window(src0, src1, dst, lhs_info, rhs_info, gemm_info, num_elements_processed);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
     // If _reinterpret_input_as_3d = _reinterpret_output_as_3d = true,
     // we will dispatch a batched-GEMM to reduce the complexity of the address calculation within the OpenCL kernel.
-    // This means that the actual m used by the kernel is given by output->info()->dimension(1) and not by gemm_info.m
-    const unsigned int internal_m = _reinterpret_output_as_3d ? gemm_info.m() : output->info()->dimension(1);
+    // This means that the actual m used by the kernel is given by dst->info()->dimension(1) and not by gemm_info.m
+    const unsigned int internal_m = _reinterpret_output_as_3d ? gemm_info.m() : dst->dimension(1);
     // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
     const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
     const unsigned int partial_store_n0 = gemm_info.n() % rhs_info.n0;
@@ -218,18 +212,18 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     CLBuildOptions build_opts;
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DREINTERPRET_OUTPUT_AS_3D");
-    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(1)));
-    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(2)));
-    build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
+    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(dst->dimension(1)));
+    build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(dst->dimension(2)));
+    build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(src1->dimension(2)));
     build_opts.add_option_if(_use_dummy_work_items, "-DDUMMY_WORK_ITEMS");
-    build_opts.add_option("-DM=" + support::cpp11::to_string(input0->info()->dimension(1)));
+    build_opts.add_option("-DM=" + support::cpp11::to_string(src0->dimension(1)));
     build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n()));
     build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k()));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(internal_m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
-    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(input0->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src0->data_type()));
+    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(src0->data_type()));
     build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
     build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
     std::string kernel_name("gemmlowp_mm_native");
@@ -244,13 +238,13 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     _config_id += "_";
     _config_id += (_reinterpret_input_as_3d ? "3di_" : "");
     _config_id += (_reinterpret_output_as_3d ? "3do_" : "");
-    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += support::cpp11::to_string(dst->dimension(1));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += support::cpp11::to_string(dst->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(gemm_info.k());
     _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(2));
+    _config_id += support::cpp11::to_string(dst->dimension(2));
     _config_id += "_";
     _config_id += support::cpp11::to_string(lhs_info.m0);
     _config_id += "_";
@@ -261,14 +255,14 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLGEMMLowpMatrixMultiplyNativeKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, const GEMMLHSMatrixInfo &lhs_info,
+Status ClGemmLowpMatrixMultiplyNativeKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, const GEMMLHSMatrixInfo &lhs_info,
                                                       const GEMMRHSMatrixInfo &rhs_info, const GEMMReshapeInfo &gemm_info)
 {
     ElementsProcessed num_elements_processed{};
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output, lhs_info, rhs_info, gemm_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(),
-                                                              input1->clone().get(),
-                                                              output->clone().get(),
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src0, src1, dst, lhs_info, rhs_info, gemm_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src0->clone().get(),
+                                                              src1->clone().get(),
+                                                              dst->clone().get(),
                                                               lhs_info,
                                                               rhs_info,
                                                               gemm_info,
@@ -278,15 +272,19 @@ Status CLGEMMLowpMatrixMultiplyNativeKernel::validate(const ITensorInfo *input0,
     return Status{};
 }
 
-void CLGEMMLowpMatrixMultiplyNativeKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClGemmLowpMatrixMultiplyNativeKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    if(_input1->info()->num_dimensions() < 3)
+    const auto src0 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const auto src1 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    auto       dst  = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+
+    if(src1->info()->num_dimensions() < 3)
     {
         // The stride_z for matrix B must be zero if we do not slice
-        ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != 0);
+        ARM_COMPUTE_ERROR_ON(src1->info()->strides_in_bytes()[3] != 0);
     }
 
     Window slice          = window.first_slice_window_3D();
@@ -299,7 +297,7 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::run(const Window &window, cl::Command
     {
         // Pass bottom paddings to the kernel if the input has to be reinterpreted as 3D tensor
         const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3;
-        const unsigned int total_cross_plane_pad = _input0->info()->padding().top + _input0->info()->padding().bottom;
+        const unsigned int total_cross_plane_pad = src0->info()->padding().top + src0->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));
     }
 
@@ -307,7 +305,7 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::run(const Window &window, cl::Command
     {
         // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
         const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3 + (_reinterpret_input_as_3d ? 1 : 0);
-        const unsigned int total_cross_plane_pad = _output->info()->padding().top + _output->info()->padding().bottom;
+        const unsigned int total_cross_plane_pad = dst->info()->padding().top + dst->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));
     }
 
@@ -322,14 +320,16 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::run(const Window &window, cl::Command
         }
 
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input0, slice);
-        add_2D_tensor_argument(idx, _input1, slice_b);
-        add_2D_tensor_argument(idx, _output, slice);
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input1->info()->strides_in_bytes()[2]));
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
+        add_2D_tensor_argument(idx, src0, slice);
+        add_2D_tensor_argument(idx, src1, slice_b);
+        add_2D_tensor_argument(idx, dst, slice);
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(src0->info()->strides_in_bytes()[2]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(src1->info()->strides_in_bytes()[2]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(dst->info()->strides_in_bytes()[2]));
         enqueue(queue, *this, slice, lws_hint(), _use_dummy_work_items);
     }
     while(window.slide_window_slice_3D(slice));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

@@ -33,7 +33,7 @@
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "examples/gemm_tuner/CommonGemmExampleOptions.h"
 #include "examples/gemm_tuner/GemmTunerHelpers.h"
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.h"
 #include "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "tests/CL/Helper.h"
 #include "utils/Utils.h"
@@ -168,8 +168,8 @@ GemmConfigs consume_gemm_configs(const GemmConfigOptions &options)
 
 } // namespace
 
-using CLGEMMReshapeLHSMatrix           = test::CLSynthetizeOperator<ClGemmReshapeLhsMatrixKernel>;
-using CLGEMMLowpMatrixMultiplyReshaped = test::CLSynthetizeFunction<CLGEMMLowpMatrixMultiplyReshapedKernel>;
+using ClGemmReshapeLHSMatrix           = test::CLSynthetizeOperator<ClGemmReshapeLhsMatrixKernel>;
+using ClGemmLowpMatrixMultiplyReshaped = test::CLSynthetizeOperator<ClGemmLowpMatrixMultiplyReshapedKernel>;
 
 class CLGEMMLowpMatrixMultiplyReshapedExample : public Example
 {
@@ -269,20 +269,20 @@ public:
         // Validate argments
         if(!reshape_lhs.validate(lhs.info(), lhs_reshaped.info(), lhs_info, gemm_info.reinterpret_input_as_3d()))
         {
-            std::cerr << "Invalid arguments for CLGEMMReshapeLHSMatrixKernel." << std::endl;
+            std::cerr << "Invalid arguments for ClGemmReshapeLHSMatrixKernel." << std::endl;
             return false;
         }
 
         if(!gemm.validate(lhs_reshaped.info(), rhs_reshaped.info(), dst.info(), lhs_info, rhs_info, gemm_info))
         {
-            std::cerr << "Invalid arguments for CLGEMMLowpMatrixMultiplyReshapedKernel." << std::endl;
+            std::cerr << "Invalid arguments for ClGemmLowpMatrixMultiplyReshapedKernel." << std::endl;
             return false;
         }
 
         // Configure functions
         reshape_lhs.configure(lhs.info(), lhs_reshaped.info(), lhs_info);
 
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, lhs_info, rhs_info, gemm_info);
+        gemm.configure(lhs_reshaped.info(), rhs_reshaped.info(), dst.info(), lhs_info, rhs_info, gemm_info);
 
         // Allocate tensors
         lhs.allocator()->allocate();
@@ -298,7 +298,8 @@ public:
         ITensorPack reshape_lsh_pack({ { ACL_SRC, &lhs }, { ACL_DST, &lhs_reshaped } });
         reshape_lhs.run(reshape_lsh_pack);
 
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs_reshaped }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         // Make sure all the OpenCL jobs are done executing:
         CLScheduler::get().sync();
@@ -315,8 +316,8 @@ private:
     CLTensor                         rhs_reshaped{};
     CLTensor                         dst{};
     CLTuner                          tuner{};
-    CLGEMMReshapeLHSMatrix           reshape_lhs{};
-    CLGEMMLowpMatrixMultiplyReshaped gemm{};
+    ClGemmReshapeLHSMatrix           reshape_lhs{};
+    ClGemmLowpMatrixMultiplyReshaped gemm{};
 };
 
 /** Main test program for gemmlowp reshaped
