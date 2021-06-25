@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,7 @@ enum class GPUTarget
     G51LIT        = 0x232,
     G52           = 0x240,
     G52LIT        = 0x241,
+    G31           = 0x242,
     G76           = 0x250,
     G77           = 0x310,
     G78           = 0x320,
