@@ -69,7 +69,7 @@ static const AddKernel available_kernels[] =
 {
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
     {
-        "add_qasymm8_sve",
+        "sve2_qu8_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == DataType::QASYMM8)) && data.ci.has_sve();
@@ -77,7 +77,7 @@ static const AddKernel available_kernels[] =
         REGISTER_QASYMM8_SVE(arm_compute::cpu::add_qasymm8_sve)
     },
     {
-        "add_qasymm8_signed_sve",
+        "sve2_qs8_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == DataType::QASYMM8_SIGNED)) && data.ci.has_sve();
@@ -85,7 +85,7 @@ static const AddKernel available_kernels[] =
         REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::add_qasymm8_signed_sve)
     },
     {
-        "add_qsymm16_sve",
+        "sve2_qs16_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == DataType::QSYMM16)) && data.ci.has_sve();
@@ -95,7 +95,7 @@ static const AddKernel available_kernels[] =
 #endif /* !defined(ARM_COMPUTE_ENABLE_SVE2) */
 #if defined(ARM_COMPUTE_ENABLE_SVE)
     {
-        "add_same_sve",
+        "sve_fp32_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == DataType::F32)) && data.ci.has_sve();
@@ -103,7 +103,7 @@ static const AddKernel available_kernels[] =
         REGISTER_FP32_SVE(arm_compute::cpu::add_same_sve<float>)
     },
     {
-        "add_same_sve",
+        "sve_fp16_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == DataType::F16)) && data.ci.has_sve();
@@ -111,7 +111,7 @@ static const AddKernel available_kernels[] =
         REGISTER_FP16_SVE(arm_compute::cpu::add_same_sve<float16_t>)
     },
     {
-        "add_same_sve",
+        "sve_u8_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == data.dt3) && (data.dt1 == DataType::U8)) && data.ci.has_sve();
@@ -119,7 +119,7 @@ static const AddKernel available_kernels[] =
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_same_sve<uint8_t>)
     },
     {
-        "add_same_sve",
+        "sve_s16_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == data.dt3) && (data.dt1 == DataType::S16)) && data.ci.has_sve();
@@ -127,7 +127,7 @@ static const AddKernel available_kernels[] =
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_same_sve<int16_t>)
     },
     {
-        "add_same_sve",
+        "sve_s32_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == data.dt3) && (data.dt1 == DataType::S32)) && data.ci.has_sve();
@@ -135,7 +135,7 @@ static const AddKernel available_kernels[] =
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_same_sve<int32_t>)
     },
     {
-        "add_u8_s16_s16_sve",
+        "sve_u8_s16_s16_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == DataType::U8) && (data.dt2 == DataType::S16)) && data.ci.has_sve();
@@ -143,7 +143,7 @@ static const AddKernel available_kernels[] =
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_u8_s16_s16_sve)
     },
     {
-        "add_s16_u8_s16_sve",
+        "sve_s16_u8_s16_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == DataType::S16) && (data.dt2 == DataType::U8)) && data.ci.has_sve();
@@ -151,7 +151,7 @@ static const AddKernel available_kernels[] =
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_s16_u8_s16_sve)
     },
     {
-        "add_u8_u8_s16_sve",
+        "sve_u8_u8_s16_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt3 == DataType::S16)) && data.ci.has_sve();
@@ -161,13 +161,13 @@ static const AddKernel available_kernels[] =
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 #if defined(ARM_COMPUTE_ENABLE_NEON)
     {
-        "add_same_neon",
+        "neon_fp32_add",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == DataType::F32)); },
         REGISTER_FP32_NEON(arm_compute::cpu::add_same_neon<float>)
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "add_same_neon",
+        "neon_fp16_add",
         [](const AddSelectorData & data)
         {
             return ((data.dt1 == data.dt2) && (data.dt1 == DataType::F16)) && data.ci.has_fp16();
@@ -176,49 +176,49 @@ static const AddKernel available_kernels[] =
     },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
-        "add_same_neon",
+        "neon_u8_add",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == data.dt3) && (data.dt1 == DataType::U8)); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_same_neon<uint8_t>)
     },
     {
-        "add_same_neon",
+        "neon_s16_add",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == data.dt3) && (data.dt1 == DataType::S16)); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_same_neon<int16_t>)
     },
     {
-        "add_same_neon",
+        "neon_s32_add",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == data.dt3) && (data.dt1 == DataType::S32)); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_same_neon<int32_t>)
     },
     {
-        "add_u8_s16_s16_neon",
+        "neon_u8_s16_s16_add",
         [](const AddSelectorData & data) { return ((data.dt1 == DataType::U8) && (data.dt2 == DataType::S16)); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_u8_s16_s16_neon)
     },
     {
-        "add_s16_u8_s16_neon",
+        "neon_s16_u8_s16_add",
         [](const AddSelectorData & data) { return ((data.dt1 == DataType::S16) && (data.dt2 == DataType::U8)); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_s16_u8_s16_neon)
     },
     {
-        "add_u8_u8_s16_neon",
+        "neon_u8_u8_s16_add",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt3 == DataType::S16)); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_u8_u8_s16_neon)
     },
 #endif /*  defined(ARM_COMPUTE_ENABLE_NEON) */
 #if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
     {
-        "add_qasymm8_neon",
+        "neon_qu8_add",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == DataType::QASYMM8)); },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::add_qasymm8_neon)
     },
     {
-        "add_qasymm8_signed_neon",
+        "neon_qs8_add",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == DataType::QASYMM8_SIGNED)); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::add_qasymm8_signed_neon)
     },
     {
-        "add_qsymm16_neon",
+        "neon_qs16_add",
         [](const AddSelectorData & data) { return ((data.dt1 == data.dt2) && (data.dt1 == DataType::QSYMM16)); },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::add_qsymm16_neon)
     },
@@ -339,7 +339,12 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
 
-    _policy = policy;
+    const auto uk = get_implementation(CPUInfo::get(), src0->data_type(), src1->data_type(), dst->data_type());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
+
+    _policy     = policy;
+    _run_method = uk->ukernel;
+    _name       = std::string("CpuAddKernel").append("/").append(uk->name);
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(*src0, *src1, *dst);
@@ -364,20 +369,18 @@ void CpuAddKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
     ARM_COMPUTE_ERROR_ON(tensors.empty());
+    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
     const ITensor *src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     const ITensor *src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
-    const auto *uk = get_implementation(CPUInfo::get(), src0->info()->data_type(), src1->info()->data_type(), dst->info()->data_type());
-    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
-
-    uk->ukernel(src0, src1, dst, _policy, window);
+    _run_method(src0, src1, dst, _policy, window);
 }
 
 const char *CpuAddKernel::name() const
 {
-    return "CpuAddKernel";
+    return _name.c_str();
 }
 } // namespace kernels
 } // namespace cpu

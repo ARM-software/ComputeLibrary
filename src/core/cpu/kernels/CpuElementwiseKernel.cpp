@@ -58,69 +58,68 @@ struct ElementwiseKernel
     UKernelType              *ukernel;
 };
 
-template <ArithmeticOperation op>
-std::function<void(const ITensor *, const ITensor *, ITensor *, const Window &)>
-configure_arithm_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
+template <ArithmeticOperation     op>
+CpuElementwiseKernel::UKernelInfo configure_arithm_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_UNUSED(src1, dst);
     static ElementwiseKernel kernels[] =
     {
 #if defined(ARM_COMPUTE_ENABLE_SVE)
         {
-            "sve_elementwise_fp32",
+            "sve_fp32_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
             REGISTER_FP32_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, float32_t>))
         },
         {
-            "sve_elementwise_s32",
+            "sve_s32_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32 && data.ci.has_sve(); },
             REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, int32_t>))
         },
         {
-            "sve_elementwise_s16",
+            "sve_s16_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16 && data.ci.has_sve(); },
             REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, int16_t>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 #if defined(ARM_COMPUTE_ENABLE_NEON)
         {
-            "neon_elementwise_f32",
+            "neon_fp32_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32; },
             REGISTER_FP32_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float, 4>>))
         },
         {
-            "neon_elementwise_s32",
+            "neon_s32_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32; },
             REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int32_t, 4>>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
         {
-            "sve2_elementwise_qu8",
+            "sve2_qu8_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
             REGISTER_QASYMM8_SVE((arm_compute::cpu::elementwise_arithmetic_quantized_op<op, uint8_t>))
         },
         {
-            "sve2_elementwise_qs8",
+            "sve2_qs8_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
             REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::elementwise_arithmetic_quantized_op<op, int8_t>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 #if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
         {
-            "neon_elementwise_qu8",
+            "neon_qu8_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8; },
             REGISTER_QASYMM8_NEON((arm_compute::cpu::elementwise_arithm_op_quantized<op>))
         },
         {
-            "neon_elementwise_qs8",
+            "neon_qs8_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
             REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::elementwise_arithm_op_quantized_signed<op>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_NEON)  || defined(ARM_COMPUTE_ENABLE_SVE) */
 #if defined(ARM_COMPUTE_ENABLE_SVE)
         {
-            "sve_elementwise_f16",
+            "sve_fp16_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
             REGISTER_FP16_SVE((arm_compute::cpu::elementwise_arithmetic_op<op, float16_t>))
         },
@@ -128,13 +127,13 @@ configure_arithm_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorI
 #if defined(ARM_COMPUTE_ENABLE_NEON)
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
         {
-            "neon_elementwise_f16",
+            "neon_fp16_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
             REGISTER_FP16_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float16_t, 8>>))
         },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
         {
-            "neon_elementwise_s16",
+            "neon_s16_elementwise",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16; },
             REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>>))
         },
@@ -145,98 +144,97 @@ configure_arithm_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorI
     {
         if(uk.is_selected({ src0->data_type(), CPUInfo::get() }))
         {
-            return uk.ukernel;
+            return { uk.name, uk.ukernel };
         }
     }
 
-    return nullptr;
+    return { "", nullptr };
 }
 
-template <ComparisonOperation op>
-std::function<void(const ITensor *, const ITensor *, ITensor *, const Window &)>
-configure_comp_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
+template <ComparisonOperation     op>
+CpuElementwiseKernel::UKernelInfo configure_comp_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_UNUSED(src1, dst);
     static ElementwiseKernel kernels[] =
     {
 #if defined(ARM_COMPUTE_ENABLE_SVE)
         {
-            "sve_comparison_u8",
+            "sve_u8_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::U8 && data.ci.has_sve(); },
             REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, uint8_t>))
         },
         {
-            "sve_comparison_f32",
+            "sve_fp32_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
             REGISTER_FP32_SVE((arm_compute::cpu::elementwise_comparison_op<op, float>))
         },
         {
-            "sve_comparison_s16",
+            "sve_s16_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16 && data.ci.has_sve(); },
             REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, int16_t>))
         },
         {
-            "sve_comparison_s32",
+            "sve_s32_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32 && data.ci.has_sve(); },
             REGISTER_INTEGER_SVE((arm_compute::cpu::elementwise_comparison_op<op, int32_t>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 #if defined(ARM_COMPUTE_ENABLE_NEON)
         {
-            "neon_comparison_u8",
+            "neon_u8_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::U8; },
             REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_8<op, uint8_t, uint8x16_t>))
         },
         {
-            "neon_comparison_f32",
+            "neon_fp32_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32; },
             REGISTER_FP32_NEON((arm_compute::cpu::elementwise_comp_op_32<op, float, float32x4_t>))
         },
         {
-            "neon_comparison_s16",
+            "neon_s16_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16; },
             REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_16<op, int16_t, int16x8_t>))
         },
         {
-            "neon_comparison_s32",
+            "neon_s32_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32; },
             REGISTER_INTEGER_NEON((arm_compute::cpu::elementwise_comp_op_32<op, int32_t, int32x4_t>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
         {
-            "sve_comparison_qu8",
+            "sve2_qu8_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
             REGISTER_QASYMM8_SVE((arm_compute::cpu::elementwise_comparison_quantized_op<op, uint8_t>))
         },
         {
-            "sve_comparison_qs8",
+            "sve2_qs8_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
             REGISTER_QASYMM8_SIGNED_SVE((arm_compute::cpu::elementwise_comparison_quantized_op<op, int8_t>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 #if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
         {
-            "neon_comparison_qu8",
+            "neon_qu8_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8; },
             REGISTER_QASYMM8_NEON((arm_compute::cpu::elementwise_comp_op_quantized<op>))
         },
         {
-            "neon_comparison_qs8",
+            "neon_qs8_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
             REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::elementwise_comp_op_quantized_signed<op>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_NEON)  || defined(ARM_COMPUTE_ENABLE_SVE) */
 #if defined(ARM_COMPUTE_ENABLE_SVE)
         {
-            "sve_comparison_f16",
+            "sve_fp16_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
             REGISTER_FP16_SVE((arm_compute::cpu::elementwise_comparison_op<op, float16_t>))
         },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE)  */
 #if defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
         {
-            "neon_comparison_f16",
+            "neon_fp16_comparison",
             [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
             REGISTER_FP16_NEON((arm_compute::cpu::elementwise_comp_op_16<op, float16_t, float16x8_t>))
         },
@@ -247,11 +245,11 @@ configure_comp_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInf
     {
         if(uk.is_selected({ src0->data_type(), CPUInfo::get() }))
         {
-            return uk.ukernel;
+            return { uk.name, uk.ukernel };
         }
     }
 
-    return nullptr;
+    return { "", nullptr };
 }
 } // namespace
 
@@ -278,6 +276,11 @@ void CpuElementwiseKernel::configure_common(const ITensorInfo *src0, const ITens
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
+    const auto uk = get_implementation(src0, src1, dst);
+
+    _run_method = uk.ukernel;
+    _name       = std::string("CpuElementwiseKernel").append("/").append(uk.name);
+
     // If any of shapes is dynamic, expect a configured window and dst at run-time.
     if(src0->is_dynamic() || src1->is_dynamic())
     {
@@ -292,22 +295,26 @@ void CpuElementwiseKernel::configure_common(const ITensorInfo *src0, const ITens
 void CpuElementwiseKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
     auto src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     auto src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto dst  = tensors.get_tensor(TensorType::ACL_DST);
 
-    auto function = get_implementation(src0->info(), src1->info(), dst->info());
-    ARM_COMPUTE_ERROR_ON(function == nullptr);
-    function(src0, src1, dst, window);
+    _run_method(src0, src1, dst, window);
+}
+
+const char *CpuElementwiseKernel::name() const
+{
+    return _name.c_str();
 }
 
 /** Arithmetic operators (min, max, squared_diff) */
 void CpuArithmeticKernel::configure(ArithmeticOperation op, const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
-    configure_common(src0, src1, dst);
     _op = op;
+    configure_common(src0, src1, dst);
 }
 
 Status CpuArithmeticKernel::validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
@@ -329,8 +336,7 @@ Status CpuArithmeticKernel::validate(ArithmeticOperation op, const ITensorInfo *
     return Status{};
 }
 
-std::function<CpuElementwiseKernel::ElementwiseFunction>
-CpuArithmeticKernel::get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
+CpuElementwiseKernel::UKernelInfo CpuArithmeticKernel::get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     switch(_op)
     {
@@ -349,7 +355,7 @@ CpuArithmeticKernel::get_implementation(const ITensorInfo *src0, const ITensorIn
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
-    return nullptr;
+    return { "", nullptr };
 }
 
 /** The division operator */
@@ -357,8 +363,8 @@ CpuArithmeticKernel::get_implementation(const ITensorInfo *src0, const ITensorIn
 void CpuDivisionKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
-    configure_common(src0, src1, dst);
     _op = ArithmeticOperation::DIV;
+    configure_common(src0, src1, dst);
 }
 
 Status CpuDivisionKernel::validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
@@ -378,8 +384,8 @@ Status CpuDivisionKernel::validate(const ITensorInfo *src0, const ITensorInfo *s
 void CpuPowerKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
-    configure_common(src0, src1, dst);
     _op = ArithmeticOperation::POWER;
+    configure_common(src0, src1, dst);
 }
 
 Status CpuPowerKernel::validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
@@ -399,8 +405,8 @@ Status CpuPowerKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1
 void CpuComparisonKernel::configure(ComparisonOperation op, const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
-    configure_common(src0, src1, dst);
     _op = op;
+    configure_common(src0, src1, dst);
 }
 
 Status CpuComparisonKernel::validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
@@ -422,8 +428,7 @@ Status CpuComparisonKernel::validate(ComparisonOperation op, const ITensorInfo *
     return Status{};
 }
 
-std::function<CpuElementwiseKernel::ElementwiseFunction>
-CpuComparisonKernel::get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
+CpuElementwiseKernel::UKernelInfo CpuComparisonKernel::get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     switch(_op)
     {
@@ -442,7 +447,7 @@ CpuComparisonKernel::get_implementation(const ITensorInfo *src0, const ITensorIn
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
-    return nullptr;
+    return { "", nullptr };
 }
 } // namespace kernels
 } // namespace cpu

@@ -49,12 +49,9 @@ public:
      * @param[in]      activation_info Activation layer information.
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuActivationKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src      Source tensor info. In case of @p dst tensor info = nullptr, this tensor will store the result
-     *                     of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
-     * @param[in] dst      Destination tensor info. Data type supported: same as @p src
-     * @param[in] act_info Activation layer information.
+     * Similar to CpuActivationKernel::configure()
      *
      * @return a status
      */
@@ -65,7 +62,12 @@ public:
     const char *name() const override;
 
 private:
+    using ActivationKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const ActivationLayerInfo &, const Window &)>::type;
+
+private:
     ActivationLayerInfo _act_info{};
+    ActivationKernelPtr _run_method{ nullptr };
+    std::string         _name{};
 };
 } // namespace kernels
 } // namespace cpu

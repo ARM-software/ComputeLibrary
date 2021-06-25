@@ -61,12 +61,9 @@ public:
      * @param[in]  policy Overflow policy.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuAddKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src0   First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in] src1   Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in] dst    The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
-     * @param[in] policy Overflow policy.
+     * Similar to CpuAddKernel::configure()
      *
      * @return a status
      */
@@ -77,7 +74,12 @@ public:
     const char *name() const override;
 
 private:
+    using AddKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+
+private:
     ConvertPolicy _policy{};
+    AddKernelPtr  _run_method{ nullptr };
+    std::string   _name{};
 };
 } // namespace kernels
 } // namespace cpu

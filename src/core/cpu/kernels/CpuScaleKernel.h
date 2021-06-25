@@ -39,7 +39,7 @@ class CpuScaleKernel : public ICpuKernel
 {
 public:
     /** Default constructor */
-    CpuScaleKernel();
+    CpuScaleKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuScaleKernel);
     /** Initialise the kernel's inputs, output and interpolation policy
      *
@@ -55,17 +55,11 @@ public:
      */
     void configure(const ITensorInfo *src, const ITensorInfo *dx, const ITensorInfo *dy, const ITensorInfo *offsets, ITensorInfo *dst,
                    const ScaleKernelInfo &info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuScaleKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
-     * @note Using @p policy Area only supports data layout NCHW and input data type U8.
+     * Similar to CpuScaleKernel::configure()
      *
-     * @param[in] src     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32.
-     * @param[in] dx      Distance x tensor info. Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
-     * @param[in] dy      Distance y tensor info. Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
-     * @param[in] offsets Offset tensor info. Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
-     * @param[in] dst     Destination tensor info. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in] info    @ref ScaleKernelInfo to use for validation
+     * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dx, const ITensorInfo *dy, const ITensorInfo *offsets, ITensorInfo *dst,
                            const ScaleKernelInfo &info);
@@ -96,14 +90,18 @@ private:
 
     /** Scale function to use for the particular function to use */
     using ScaleFunctionPtr = void (CpuScaleKernel::*)(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *, const Window &window);
+    using ScaleKernelPtr   = std::add_pointer<void(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *,
+                                                   InterpolationPolicy, BorderMode, PixelValue, float, bool, const Window &)>::type;
 
-    ScaleFunctionPtr    _func;
-    InterpolationPolicy _policy;
-    BorderMode          _border_mode;
-    PixelValue          _constant_border_value;
-    float               _sampling_offset;
-    bool                _align_corners;
-    DataLayout          _data_layout;
+    ScaleFunctionPtr    _func{ nullptr };
+    InterpolationPolicy _policy{};
+    BorderMode          _border_mode{};
+    PixelValue          _constant_border_value{};
+    float               _sampling_offset{ 0 };
+    bool                _align_corners{ false };
+    DataLayout          _data_layout{ DataLayout::UNKNOWN };
+    ScaleKernelPtr      _run_method{ nullptr };
+    std::string         _name{};
 };
 } // namespace kernels
 } // namespace cpu

@@ -54,18 +54,18 @@ struct FloorUKernel
 {
     const char            *name;
     const FloorSelectorPtr is_selected;
-    FloorUKernelPtr        func;
+    FloorUKernelPtr        ukernel;
 };
 
 static const FloorUKernel available_kernels[] =
 {
     {
-        "fp16_neon_floor",
+        "neon_fp16_floor",
         [](const FloorSelectorData & data) { return data.dt == DataType::F16; },
         REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_floor)
     },
     {
-        "f32_neon_floor",
+        "neon_fp32_floor",
         [](const FloorSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_floor)
     },
@@ -94,7 +94,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
     const auto *uk = get_implementation(FloorSelectorData{ src->data_type() });
-    ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->func == nullptr);
+    ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     // Validate in case of configured output
     if(dst->total_size() > 0)
@@ -110,12 +110,15 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 void CpuFloorKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
-    // Auto initialize output
     auto_init_if_empty(*dst, src->tensor_shape(), 1, src->data_type());
 
-    // Validate
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
+    const auto *uk = get_implementation(FloorSelectorData{ src->data_type() });
+    ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
+
+    _run_method = uk->ukernel;
+    _name       = std::string("CpuFloorKernel").append("/").append(uk->name);
 
     // Configure kernel window
     const Window win = calculate_max_window(*src, Steps());
@@ -146,12 +149,11 @@ void CpuFloorKernel::run_op(ITensorPack &tensors, const Window &window, const Th
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
     ARM_COMPUTE_ERROR_ON(tensors.empty());
+    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
-
-    const auto  len     = static_cast<int>(window.x().end()) - static_cast<int>(window.x().start());
-    const auto *ukernel = get_implementation(FloorSelectorData{ src->info()->data_type() });
+    const auto     len = static_cast<int>(window.x().end()) - static_cast<int>(window.x().start());
 
     Window win{ window };
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -161,14 +163,14 @@ void CpuFloorKernel::run_op(ITensorPack &tensors, const Window &window, const Th
 
     execute_window_loop(win, [&](const Coordinates &)
     {
-        ukernel->func(src_it.ptr(), dst_it.ptr(), len);
+        _run_method(src_it.ptr(), dst_it.ptr(), len);
     },
     src_it, dst_it);
 }
 
 const char *CpuFloorKernel::name() const
 {
-    return "CpuFloorKernel";
+    return _name.c_str();
 }
 } // namespace kernels
 } // namespace cpu

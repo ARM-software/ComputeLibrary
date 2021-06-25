@@ -43,25 +43,19 @@ namespace kernels
 class CpuElementwiseKernel : public ICpuKernel
 {
 public:
-    const char *name() const override
-    {
-        return "CpuElementwiseKernel";
-    }
-
     CpuElementwiseKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuElementwiseKernel);
 
-    /** Common signature for all the specialised arithmetic functions
-     *
-     * @param[in]  src0   First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
-     * @param[in]  src1   Second tensor input info. Data types supported: Same as @p src0.
-     * @param[out] dst    Output tensor info. Data types supported: Dependent on subclass.
-     * @param[in]  window Region on which to execute the kernel.
-     */
     using ElementwiseFunction = void(const ITensor *, const ITensor *, ITensor *, const Window &);
+    struct UKernelInfo
+    {
+        std::string                        name;
+        std::function<ElementwiseFunction> ukernel;
+    };
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    const char *name() const override;
 
 protected:
     /** Validate the argument passed to the kernel
@@ -85,7 +79,11 @@ protected:
      *
      * @return the function instance for the micro kernel
      */
-    virtual std::function<ElementwiseFunction> get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst) = 0;
+    virtual UKernelInfo get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst) = 0;
+
+protected:
+    std::function<ElementwiseFunction> _run_method{ nullptr };
+    std::string                        _name{};
 };
 
 class CpuArithmeticKernel : public CpuElementwiseKernel
@@ -103,14 +101,11 @@ public:
      */
     void configure(ArithmeticOperation op, const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] op   Arithmetic operation to be executed.
-     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
+     * Similar to CpuArithmeticKernel::configure()
      *
-     * @return a Status
+     * @return a status
      */
     static Status validate(ArithmeticOperation op, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 
@@ -129,7 +124,7 @@ private:
      *
      * @return the function instance for the micro kernel
      */
-    std::function<ElementwiseFunction> get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst) override;
+    UKernelInfo get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst) override;
 };
 
 class CpuDivisionKernel : public CpuArithmeticKernel
@@ -146,13 +141,11 @@ public:
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuDivisionKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src0 First tensor input info. Data types supported: S32/F16/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
+     * Similar to CpuDivisionKernel::configure()
      *
-     * @return a Status
+     * @return a status
      */
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 
@@ -175,13 +168,11 @@ public:
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuPowerKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src0 First tensor input info. Data types supported: F16/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
+     * Similar to CpuPowerKernel::configure()
      *
-     * @return a Status
+     * @return a status
      */
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 
@@ -205,14 +196,11 @@ public:
      */
     void configure(ComparisonOperation op, const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] op   Comparison operation to be executed.
-     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: U8.
+     * Similar to CpuComparisonKernel::configure()
      *
-     * @return a Status
+     * @return a status
      */
     static Status validate(ComparisonOperation op, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 
@@ -229,7 +217,7 @@ private:
      *
      * @return the function instance for the micro kernel
      */
-    std::function<ElementwiseFunction> get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst) override;
+    UKernelInfo get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst) override;
 
     ComparisonOperation _op{};
 };

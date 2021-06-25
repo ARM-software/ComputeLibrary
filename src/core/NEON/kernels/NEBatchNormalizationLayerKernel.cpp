@@ -66,12 +66,12 @@ static const BatchNormalizationKernel available_kernels[] =
 {
 #if defined(ARM_COMPUTE_ENABLE_SVE)
     {
-        "fp16_sve_batch_normalization",
+        "sve_fp16_batch_normalization",
         [](const BatchNormalizationSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
         REGISTER_FP16_SVE(arm_compute::cpu::fp16_sve_batch_normalization)
     },
     {
-        "f32_sve_batch_normalization",
+        "sve_fp32_batch_normalization",
         [](const BatchNormalizationSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
         REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_batch_normalization)
     },
@@ -79,13 +79,13 @@ static const BatchNormalizationKernel available_kernels[] =
 #if defined(ARM_COMPUTE_ENABLE_NEON)
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "fp16_neon_batch_normalization",
+        "neon_fp16_batch_normalization",
         [](const BatchNormalizationSelectorData & data) { return data.dt == DataType::F16; },
         REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_batch_normalization)
     },
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     {
-        "f32_neon_batch_normalization",
+        "neon_fp32_batch_normalization",
         [](const BatchNormalizationSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_batch_normalization)
     },

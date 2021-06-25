@@ -63,57 +63,57 @@ static const ActivationKernel available_kernels[] =
 {
 #if defined(ARM_COMPUTE_ENABLE_SVE)
     {
-        "fp16_sve_activation",
+        "sve_fp16_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
         REGISTER_FP16_SVE(arm_compute::cpu::fp16_sve_activation)
     },
     {
-        "fp32_sve_activation",
+        "sve_fp32_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
         REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_activation)
     },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE)  */
 #if defined(ARM_COMPUTE_ENABLE_NEON)
     {
-        "fp16_neon_activation",
+        "neon_fp16_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
         REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_activation)
     },
     {
-        "fp32_neon_activation",
+        "neon_fp32_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_activation)
     },
 #endif /* defined(ARM_COMPUTE_ENABLE_NEON)  */
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
     {
-        "qasymm8_sve_activation",
+        "sve_qu8_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
         REGISTER_QASYMM8_SVE(arm_compute::cpu::qasymm8_sve_activation)
     },
     {
-        "qasymm8_signed_sve_activation",
+        "sve_qs8_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
         REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::qasymm8_signed_sve_activation)
     },
     {
-        "qsymm16_sve_activation",
+        "sve_qs16_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16 && data.ci.has_sve2(); },
         REGISTER_QSYMM16_SVE(arm_compute::cpu::qsymm16_sve_activation)
     },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     {
-        "qasymm8_neon_activation",
+        "neon_qu8_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::qasymm8_neon_activation)
     },
     {
-        "qasymm8_signed_neon_activation",
+        "neon_qs8_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::qasymm8_signed_neon_activation)
     },
     {
-        "qsymm16_neon_activation",
+        "neon_qs16_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::qsymm16_neon_activation)
     },
@@ -206,10 +206,14 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, 
 void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
-
-    _act_info = activation_info;
-
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, activation_info));
+
+    const auto uk = get_implementation(ActivationSelectorData{ src->data_type(), CPUInfo::get() });
+    ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
+
+    _act_info   = activation_info;
+    _run_method = uk->ukernel;
+    _name       = std::string("CpuActivationKernel").append("/").append(uk->name);
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(src, dst);
@@ -239,18 +243,17 @@ void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, con
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
     ARM_COMPUTE_ERROR_ON(tensors.empty());
+    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    const auto *uk = get_implementation(ActivationSelectorData{ src->info()->data_type(), CPUInfo::get() });
-
-    uk->ukernel(src, dst, _act_info, window);
+    _run_method(src, dst, _act_info, window);
 }
 
 const char *CpuActivationKernel::name() const
 {
-    return "CpuActivationKernel";
+    return _name.c_str();
 }
 } // namespace kernels
 } // namespace cpu

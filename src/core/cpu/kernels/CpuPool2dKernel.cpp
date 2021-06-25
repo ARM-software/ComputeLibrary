@@ -72,92 +72,92 @@ struct PoolingKernel
 static const PoolingKernel available_kernels[] =
 {
     {
-        "poolingMxN_qasymm8_neon_nhwc",
+        "neon_qu8_nhwc_poolMxN",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::QASYMM8)); },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::poolingMxN_qasymm8_neon_nhwc)
     },
     {
-        "poolingMxN_qasymm8_signed_neon_nhwc",
+        "neon_qs8_nhwc_poolMxN",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::QASYMM8_SIGNED)); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::poolingMxN_qasymm8_signed_neon_nhwc)
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "poolingMxN_fp16_neon_nhwc",
+        "neon_f16_nhwc_poolMxN",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F16)); },
         REGISTER_FP16_NEON(arm_compute::cpu::poolingMxN_fp16_neon_nhwc)
     },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
-        "poolingMxN_fp32_neon_nhwc",
+        "neon_fp32_nhwc_poolMxN",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F32)); },
         REGISTER_FP32_NEON(arm_compute::cpu::poolingMxN_fp32_neon_nhwc)
     },
 #if defined(ENABLE_NCHW_KERNELS)
     {
-        "pooling2_qasymm8_neon_nchw",
+        "neon_qu8_nchw_pool2",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2) && (data.pool_stride_x < 3)); },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::pooling2_quantized_neon_nchw<uint8_t>)
     },
     {
-        "pooling3_qasymm8_neon_nchw",
+        "neon_qu8_nchw_pool3",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3) && (data.pool_stride_x < 3)); },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::pooling3_quantized_neon_nchw<uint8_t>)
     },
     {
-        "poolingMxN_qasymm8_neon_nchw",
+        "neon_qu8_nchw_poolMxN",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8)); },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::poolingMxN_quantized_neon_nchw<uint8_t>)
     },
     {
-        "pooling2_qasymm8_signed_neon_nchw",
+        "neon_qs8_nchw_pool2",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2) && (data.pool_stride_x < 3)); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::pooling2_quantized_neon_nchw<int8_t>)
     },
     {
-        "pooling3_qasymm8_signed_neon_nchw",
+        "neon_qs8_nchw_pool3",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3) && (data.pool_stride_x < 3)); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::pooling3_quantized_neon_nchw<int8_t>)
     },
     {
-        "poolingMxN_qasymm8_signed_neon_nchw",
+        "neon_qs8_nchw_poolMxN",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED)); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::poolingMxN_quantized_neon_nchw<int8_t>)
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "pooling2_fp16_neon_nchw",
+        "neon_fp16_nchw_pool2",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2)); },
         REGISTER_FP16_NEON(arm_compute::cpu::pooling2_fp16_neon_nchw)
     },
     {
-        "pooling3_fp16_neon_nchw",
+        "neon_fp16_nchw_pool3",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3)); },
         REGISTER_FP16_NEON(arm_compute::cpu::pooling3_fp16_neon_nchw)
     },
     {
-        "poolingMxN_fp16_neon_nchw",
+        "neon_fp16_nchw_poolMxN",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16)); },
         REGISTER_FP16_NEON(arm_compute::cpu::poolingMxN_fp16_neon_nchw)
     },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
-        "pooling2_fp32_neon_nchw",
+        "neon_fp32_nchw_pool2",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2)); },
         REGISTER_FP32_NEON(arm_compute::cpu::pooling2_fp32_neon_nchw)
     },
     {
-        "pooling3_fp32_neon_nchw",
+        "neon_fp32_nchw_pool3",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3)); },
         REGISTER_FP32_NEON(arm_compute::cpu::pooling3_fp32_neon_nchw)
     },
     {
-        "pooling7_fp32_neon_nchw",
+        "neon_fp32_nchw_pool7",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 7)); },
         REGISTER_FP32_NEON(arm_compute::cpu::pooling7_fp32_neon_nchw)
     },
     {
-        "poolingMxN_fp32_neon_nchw",
+        "neon_fp32_nchw_poolMxN",
         [](const PoolingSelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32)); },
         REGISTER_FP32_NEON(arm_compute::cpu::poolingMxN_fp32_neon_nchw)
     },
@@ -398,11 +398,16 @@ void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Poolin
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, pool_info, indices, pool_size));
 
+    const auto *uk = get_implementation(src->data_type(), src->data_layout(), pad_stride_info.stride().first, pool_size);
+    ARM_COMPUTE_ERROR_ON(uk == nullptr);
+
     // Set instance variables
     _pool_info     = pool_info;
     _data_layout   = src->data_layout();
     _pool_size     = pool_size;
     _pool_stride_x = pad_stride_info.stride().first;
+    _run_method    = uk->ukernel;
+    _name          = std::string("CpuPool2dKernel").append("/").append(uk->name);
 
     if(_data_layout == DataLayout::NHWC)
     {
@@ -451,6 +456,7 @@ void CpuPool2dKernel::run_op(ITensorPack &tensors, const Window &window, const T
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
     const ITensor *src     = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     ITensor       *dst     = tensors.get_tensor(TensorType::ACL_DST_0);
@@ -498,16 +504,12 @@ void CpuPool2dKernel::run_op(ITensorPack &tensors, const Window &window, const T
         window_src.set(Window::DimY, Window::Dimension(0, src->info()->dimension(1), pool_stride_x));
         window_src.set(Window::DimZ, Window::Dimension(0, src->info()->dimension(2), pool_stride_y));
     }
-
-    const auto *uk = get_implementation(src->info()->data_type(), _data_layout, _pool_stride_x, _pool_size);
-    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
-
-    uk->ukernel(src, dst, indices, _pool_info, window_src, window);
+    _run_method(src, dst, indices, _pool_info, window_src, window);
 }
 
 const char *CpuPool2dKernel::name() const
 {
-    return "CpuPool2dKernel";
+    return _name.c_str();
 }
 } // namespace kernels
 } // namespace cpu
