@@ -75,17 +75,6 @@ public:
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
-
-private:
-    /** Common signature for all the specialised gemm interleave 4x4 functions
-     *
-     * @param[in]  src    Input tensor. Data types supported: uint32_t, uint16_t and uint8_t
-     * @param[out] dst    Output tensor. Data types supported: uint32_t, uint16_t and uint8_t
-     * @param[in]  window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    using GEMMInterleaveFunctionPtr = void (*)(const ITensor *src, ITensor *dst, const Window &window);
-
-    GEMMInterleaveFunctionPtr _func{ nullptr };
 };
 } // namespace kernels
 } // namespace cpu
