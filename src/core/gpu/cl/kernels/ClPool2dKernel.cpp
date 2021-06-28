@@ -205,6 +205,7 @@ std::tuple<Status, Window, ClPoolingConfig> validate_and_configure_window(ITenso
 ClPool2dKernel::ClPool2dKernel()
     : _pool_info(), _data_layout(DataLayout::UNKNOWN), _border_size(0), _num_elems_processed_per_iteration(1)
 {
+    _type = CLKernelType::POOL;
 }
 
 BorderSize ClPool2dKernel::border_size() const

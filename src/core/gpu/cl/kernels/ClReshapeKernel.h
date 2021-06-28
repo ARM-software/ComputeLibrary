@@ -38,7 +38,7 @@ namespace kernels
 class ClReshapeKernel : public IClKernel
 {
 public:
-    ClReshapeKernel() = default;
+    ClReshapeKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClReshapeKernel);
     /** Set the src and dst of the kernel
      *

@@ -39,7 +39,7 @@ namespace kernels
 class ClGemmMatrixMultiplyNativeKernel : public IClKernel
 {
 public:
-    ClGemmMatrixMultiplyNativeKernel() = default;
+    ClGemmMatrixMultiplyNativeKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClGemmMatrixMultiplyNativeKernel);
     /** Initialise the kernel's input and dst.
      *

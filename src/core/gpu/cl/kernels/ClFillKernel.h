@@ -38,7 +38,7 @@ namespace kernels
 class ClFillKernel : public IClKernel
 {
 public:
-    ClFillKernel() = default;
+    ClFillKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClFillKernel);
     /** Initialise the kernel's tensor and filling value
      *

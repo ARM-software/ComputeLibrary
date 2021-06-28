@@ -61,6 +61,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 }
 } // namespace
 
+ClDequantizeKernel::ClDequantizeKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClDequantizeKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

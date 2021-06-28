@@ -68,6 +68,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 CLReorgLayerKernel::CLReorgLayerKernel()
     : _input(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLReorgLayerKernel::configure(const ICLTensor *input, ICLTensor *output, int32_t stride)

@@ -38,7 +38,7 @@ namespace kernels
 class ClFloorKernel : public IClKernel
 {
 public:
-    ClFloorKernel() = default;
+    ClFloorKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClFloorKernel);
     /** Configure kernel for a given list of arguments
      *

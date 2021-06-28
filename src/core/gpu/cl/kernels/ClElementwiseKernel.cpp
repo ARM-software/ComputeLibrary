@@ -98,7 +98,7 @@ Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &src
     return Status{};
 }
 
-Status validate_arguments_divide_operation(const ITensorInfo* src1, const ITensorInfo* src2, const ITensorInfo* dst)
+Status validate_arguments_divide_operation(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src1);
@@ -270,6 +270,11 @@ std::pair<Status, Window> validate_and_configure_window_for_division(ITensorInfo
     return configure_window_arithmetic_common(dst);
 }
 } // namespace
+
+ClElementwiseKernel::ClElementwiseKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
 
 void ClElementwiseKernel::configure_common(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
 {

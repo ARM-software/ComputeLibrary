@@ -92,6 +92,11 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
 }
 } // namespace
 
+ClMulKernel::ClMulKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
                             ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
@@ -128,7 +133,7 @@ void ClMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo
     else
     {
         if(src1->element_size() == 4 || src2->element_size() == 4)
-        {   
+        {
             // use 64 bit accumulator for 32-bit input
             acc_type = "long";
         }
@@ -315,6 +320,11 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
     return Status{};
 }
 } // namespace
+
+ClComplexMulKernel::ClComplexMulKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
 
 void ClComplexMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {

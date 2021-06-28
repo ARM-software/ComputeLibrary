@@ -101,6 +101,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
 CLComparisonKernel::CLComparisonKernel()
     : _input1(nullptr), _input2(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLComparisonKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)

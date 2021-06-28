@@ -66,6 +66,7 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
 
 ClWidthConcatenate4TensorsKernel::ClWidthConcatenate4TensorsKernel()
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 Status ClWidthConcatenate4TensorsKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *src3, const ITensorInfo *src4, const ITensorInfo *dst)

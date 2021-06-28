@@ -66,6 +66,11 @@ Status validate_arguments(const ITensorInfo &src, const ITensorInfo &dst, const 
 }
 } // namespace
 
+ClElementWiseUnaryKernel::ClElementWiseUnaryKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClElementWiseUnaryKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const ElementWiseUnary &op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

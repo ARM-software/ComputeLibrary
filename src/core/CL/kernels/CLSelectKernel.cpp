@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,7 @@ Status validate_arguments(const ITensorInfo *c, const ITensorInfo *x, const ITen
 CLSelectKernel::CLSelectKernel()
     : _c(nullptr), _x(nullptr), _y(nullptr), _output(nullptr), _has_same_rank(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLSelectKernel::configure(const CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)

@@ -45,7 +45,7 @@ namespace kernels
 class ClGemmMatrixMultiplyReshapedKernel : public IClKernel
 {
 public:
-    ClGemmMatrixMultiplyReshapedKernel() = default;
+    ClGemmMatrixMultiplyReshapedKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClGemmMatrixMultiplyReshapedKernel);
     /** Initialise the kernel's input and output.
      *

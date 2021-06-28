@@ -122,6 +122,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
+ClWinogradOutputTransformKernel::ClWinogradOutputTransformKernel()
+{
+    _type = CLKernelType::WINOGRAD;
+}
+
 void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *bias, ITensorInfo *dst, const WinogradInfo &winograd_info,
                                                 const ActivationLayerInfo &act_info)
 {

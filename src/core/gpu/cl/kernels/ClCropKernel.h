@@ -38,7 +38,7 @@ namespace kernels
 class ClCropKernel : public IClKernel
 {
 public:
-    ClCropKernel() = default;
+    ClCropKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClCropKernel);
     /** Configure kernel
      *

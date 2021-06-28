@@ -38,7 +38,7 @@ namespace kernels
 class ClTransposeKernel : public IClKernel
 {
 public:
-    ClTransposeKernel() = default;
+    ClTransposeKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClTransposeKernel);
     /** Set the src and dst of the kernel.
      *

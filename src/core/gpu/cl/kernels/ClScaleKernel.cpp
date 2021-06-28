@@ -140,6 +140,11 @@ Status ClScaleKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, c
     return Status{};
 }
 
+ClScaleKernel::ClScaleKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, info));

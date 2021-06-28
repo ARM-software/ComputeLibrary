@@ -103,6 +103,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 ClWinogradInputTransformKernel::ClWinogradInputTransformKernel()
     : _border_size(0), _data_layout(DataLayout::UNKNOWN), _num_tiles_x(0), _num_tiles_y(0), _step_z(1)
 {
+    _type = CLKernelType::WINOGRAD;
 }
 
 BorderSize ClWinogradInputTransformKernel::border_size() const

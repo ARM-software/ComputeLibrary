@@ -130,6 +130,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 CLGEMMLowpMatrixMultiplyReshapedKernel::CLGEMMLowpMatrixMultiplyReshapedKernel()
     : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_output_as_3d(false), _k(1), _use_dummy_work_items(false)
 {
+    _type = CLKernelType::GEMM;
 }
 
 void CLGEMMLowpMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,

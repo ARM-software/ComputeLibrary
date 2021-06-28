@@ -77,6 +77,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 }
 } // namespace
 
+ClPermuteKernel::ClPermuteKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClPermuteKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

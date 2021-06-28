@@ -37,6 +37,7 @@ namespace arm_compute
 CLRemapKernel::CLRemapKernel()
     : _input(nullptr), _output(nullptr), _map_x(nullptr), _map_y(nullptr), _data_layout(DataLayout::NCHW)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 BorderSize CLRemapKernel::border_size() const

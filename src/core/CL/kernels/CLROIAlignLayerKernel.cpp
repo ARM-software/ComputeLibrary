@@ -79,6 +79,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, ITe
 CLROIAlignLayerKernel::CLROIAlignLayerKernel()
     : _input(nullptr), _output(nullptr), _rois(nullptr), _pool_info(0, 0, 0.f)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)

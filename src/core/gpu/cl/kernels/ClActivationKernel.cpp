@@ -89,6 +89,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 ClActivationKernel::ClActivationKernel()
     : _run_in_place(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void ClActivationKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo act_info)

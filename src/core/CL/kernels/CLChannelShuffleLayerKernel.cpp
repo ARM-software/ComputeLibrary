@@ -97,6 +97,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 CLChannelShuffleLayerKernel::CLChannelShuffleLayerKernel()
     : _input(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLChannelShuffleLayerKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int num_groups)

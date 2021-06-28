@@ -69,6 +69,7 @@ class Coordinates;
 CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel()
     : _input(nullptr), _bias(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 Status CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,

@@ -65,6 +65,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 CLGEMMLowpQuantizeDownInt32ScaleKernel::CLGEMMLowpQuantizeDownInt32ScaleKernel()
     : _input(nullptr), _bias(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 Status CLGEMMLowpQuantizeDownInt32ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo *output_stage)

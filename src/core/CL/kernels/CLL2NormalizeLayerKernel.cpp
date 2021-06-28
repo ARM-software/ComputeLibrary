@@ -74,6 +74,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, cons
 CLL2NormalizeLayerKernel::CLL2NormalizeLayerKernel()
     : _input(nullptr), _sum(nullptr), _output(nullptr), _actual_axis(0), _epsilon(1e-12)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon)

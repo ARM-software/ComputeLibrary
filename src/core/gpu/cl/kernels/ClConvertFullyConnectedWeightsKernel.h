@@ -47,7 +47,7 @@ namespace kernels
 class ClConvertFullyConnectedWeightsKernel : public IClKernel
 {
 public:
-    ClConvertFullyConnectedWeightsKernel() = default;
+    ClConvertFullyConnectedWeightsKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClConvertFullyConnectedWeightsKernel);
     /** Set the src and dst tensor.
      *

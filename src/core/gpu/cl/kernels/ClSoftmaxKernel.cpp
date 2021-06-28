@@ -154,6 +154,11 @@ const unsigned int ClLogits1DMaxShiftExpSumKernel::_serial_vector_size = 8;
 /**< Vector size in the parallel case (obtained through auto-tuning, enables the best memory access pattern for Bifrost) .*/
 const unsigned int ClLogits1DMaxShiftExpSumKernel::_parallel_vector_size = 4;
 
+ClLogits1DMaxShiftExpSumKernel::ClLogits1DMaxShiftExpSumKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &max, ITensorInfo &dst, ITensorInfo &sum, const SoftmaxKernelInfo &info)
 {
     auto padding_info = get_padding_info({ &src, &max, &dst, &sum });
@@ -271,6 +276,11 @@ void ClLogits1DMaxShiftExpSumKernel::run_op(ITensorPack &tensors, const Window &
         enqueue(queue, *this, slice, lws_hint());
     }
     while(window_collapsed.slide_window_slice_3D(slice));
+}
+
+ClLogits1DNormKernel::ClLogits1DNormKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void ClLogits1DNormKernel::configure(const CLCompileContext &compile_context, const ITensorInfo &src, const ITensorInfo &sum, ITensorInfo &dst, const SoftmaxKernelInfo &info)

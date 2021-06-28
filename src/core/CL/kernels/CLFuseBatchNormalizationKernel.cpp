@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,6 +103,7 @@ CLFuseBatchNormalizationKernel::CLFuseBatchNormalizationKernel()
     : _input_weights(nullptr), _input_bias(nullptr), _bn_mean(nullptr), _bn_var(nullptr), _bn_gamma(nullptr), _bn_beta(nullptr), _fused_weights(nullptr), _fused_bias(nullptr), _epsilon(),
       _run_in_place_weights(false), _run_in_place_bias(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLFuseBatchNormalizationKernel::configure(const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var,

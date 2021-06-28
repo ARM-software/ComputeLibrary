@@ -142,6 +142,7 @@ CLDepthwiseConvolutionLayerNativeKernel::CLDepthwiseConvolutionLayerNativeKernel
       _export_to_cl_image(false),
       _is_quantized(false)
 {
+    _type = CLKernelType::DEPTHWISE;
 }
 
 void CLDepthwiseConvolutionLayerNativeKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,

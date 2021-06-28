@@ -40,7 +40,7 @@ class ClWinogradOutputTransformKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClWinogradOutputTransformKernel() = default;
+    ClWinogradOutputTransformKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClWinogradOutputTransformKernel);
     /** Set the input and output tensor.
      *

@@ -36,6 +36,7 @@ namespace arm_compute
 CLDeconvolutionLayerUpsampleKernel::CLDeconvolutionLayerUpsampleKernel()
     : _input(nullptr), _output(nullptr), _info(), _data_layout(DataLayout::UNKNOWN)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, const ITensorInfo *output,

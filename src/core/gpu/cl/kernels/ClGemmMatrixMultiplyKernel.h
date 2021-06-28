@@ -45,7 +45,7 @@ namespace kernels
 class ClGemmMatrixMultiplyKernel : public IClKernel
 {
 public:
-    ClGemmMatrixMultiplyKernel() = default;
+    ClGemmMatrixMultiplyKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClGemmMatrixMultiplyKernel);
     /** Initialise the kernel's input, output and alpha
      *

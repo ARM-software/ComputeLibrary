@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,6 +109,7 @@ std::pair<Status, Window> validate_and_configure_window_nchw(ITensorInfo *input,
 CLBatchNormalizationLayerKernel::CLBatchNormalizationLayerKernel()
     : _input(nullptr), _output(nullptr), _mean(nullptr), _var(nullptr), _beta(nullptr), _gamma(nullptr), _epsilon(0), _run_in_place(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma,

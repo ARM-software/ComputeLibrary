@@ -127,6 +127,7 @@ CLGEMMLowpOffsetContributionOutputStageKernel::CLGEMMLowpOffsetContributionOutpu
       _output_shifts(nullptr),
       _is_quantized_per_channel(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, ICLTensor *output,

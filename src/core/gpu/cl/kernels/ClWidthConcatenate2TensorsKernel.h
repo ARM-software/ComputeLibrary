@@ -41,7 +41,7 @@ class ClWidthConcatenate2TensorsKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClWidthConcatenate2TensorsKernel() = default;
+    ClWidthConcatenate2TensorsKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClWidthConcatenate2TensorsKernel);
     /** Initialise the kernel's sources and destination
      *

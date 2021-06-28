@@ -51,7 +51,7 @@ public:
     using ParallelReductionInfo = std::tuple<bool, unsigned int>;
 
     /** Default constructor */
-    ClLogits1DMaxShiftExpSumKernel() = default;
+    ClLogits1DMaxShiftExpSumKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClLogits1DMaxShiftExpSumKernel);
     /** Configure the kernel using the given information about tensors
      *
@@ -94,7 +94,7 @@ class ClLogits1DNormKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClLogits1DNormKernel() = default;
+    ClLogits1DNormKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClLogits1DNormKernel);
 
     /** Set the input and output tensors.

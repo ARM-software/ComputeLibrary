@@ -42,6 +42,11 @@ namespace opencl
 {
 namespace kernels
 {
+ClFillKernel::ClFillKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClFillKernel::configure(ITensorInfo      *tensor,
                              const PixelValue &constant_value,
                              Window           *window)

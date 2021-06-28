@@ -107,6 +107,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
 }
 } // namespace
 
+ClGemmReshapeRhsMatrixKernel::ClGemmReshapeRhsMatrixKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClGemmReshapeRhsMatrixKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const GEMMRHSMatrixInfo &rhs_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

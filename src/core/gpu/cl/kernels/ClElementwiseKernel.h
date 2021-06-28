@@ -45,7 +45,7 @@ class ClElementwiseKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClElementwiseKernel() = default;
+    ClElementwiseKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClElementwiseKernel);
 
     // Inherited methods overridden:
@@ -89,9 +89,15 @@ protected:
     ActivationLayerInfo _act_info{};
 
 private:
-    const ITensorInfo *_src1{ nullptr }; /**< Source tensor info 1 */
-    const ITensorInfo *_src2{ nullptr }; /**< Source tensor info 2 */
-    ITensorInfo       *_dst{ nullptr };  /**< Destination tensor info */
+    const ITensorInfo *_src1
+    {
+        nullptr
+    }; /**< Source tensor info 1 */
+    const ITensorInfo *_src2
+    {
+        nullptr
+    };                            /**< Source tensor info 2 */
+    ITensorInfo *_dst{ nullptr }; /**< Destination tensor info */
 };
 
 class ClLogicalBinaryKernel : public ClElementwiseKernel

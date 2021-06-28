@@ -194,6 +194,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src0, ITens
 }
 } // namespace
 
+ClGemmMatrixMultiplyNativeKernel::ClGemmMatrixMultiplyNativeKernel()
+{
+    _type = CLKernelType::GEMM;
+}
+
 void ClGemmMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float alpha,
                                                  float                    beta,
                                                  const GEMMLHSMatrixInfo &lhs_info,

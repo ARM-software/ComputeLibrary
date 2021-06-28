@@ -38,7 +38,7 @@ namespace kernels
 class ClCopyKernel : public IClKernel
 {
 public:
-    ClCopyKernel() = default;
+    ClCopyKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClCopyKernel);
     /** Initialize the kernel's src, dst.
      *

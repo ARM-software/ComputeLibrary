@@ -39,7 +39,7 @@ class ClDequantizeKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClDequantizeKernel() = default;
+    ClDequantizeKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClDequantizeKernel);
     /** Initialise the kernel's input and output
      *

@@ -288,6 +288,7 @@ Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size
 CLIm2ColKernel::CLIm2ColKernel()
     : _input(nullptr), _output(nullptr), _data_layout(DataLayout::UNKNOWN), _convolved_dims(), _num_elems_processed_per_iteration(1), _kernel_dims(), _conv_info(), _num_groups()
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,

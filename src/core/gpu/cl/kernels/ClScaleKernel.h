@@ -42,7 +42,7 @@ class ClScaleKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClScaleKernel() = default;
+    ClScaleKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClScaleKernel);
 
     /** Initialise the kernel's inputs, output and interpolation policy

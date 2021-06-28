@@ -91,6 +91,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
+ClWinogradFilterTransformKernel::ClWinogradFilterTransformKernel()
+{
+    _type = CLKernelType::WINOGRAD;
+}
+
 void ClWinogradFilterTransformKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

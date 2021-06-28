@@ -44,6 +44,7 @@ namespace arm_compute
 CLROIPoolingLayerKernel::CLROIPoolingLayerKernel()
     : _input(nullptr), _rois(nullptr), _output(nullptr), _pool_info(0, 0, 0.f)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 Status CLROIPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)

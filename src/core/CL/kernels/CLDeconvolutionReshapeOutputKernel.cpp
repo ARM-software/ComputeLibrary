@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,6 +113,7 @@ CLDeconvolutionReshapeOutputKernel::CLDeconvolutionReshapeOutputKernel()
     : _add_bias(false),
       _bias(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLDeconvolutionReshapeOutputKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info, const ITensorInfo *weights_info,

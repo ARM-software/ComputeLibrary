@@ -40,7 +40,7 @@ namespace kernels
 class ClGemmReshapeRhsMatrixKernel : public ICLKernel
 {
 public:
-    ClGemmReshapeRhsMatrixKernel() = default;
+    ClGemmReshapeRhsMatrixKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClGemmReshapeRhsMatrixKernel);
     /** Initialise the kernel's input and output.
      *

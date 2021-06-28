@@ -113,6 +113,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 CLNormalizationLayerKernel::CLNormalizationLayerKernel()
     : _input(nullptr), _output(nullptr), _border_size(0), _is_norm_across_width(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 BorderSize CLNormalizationLayerKernel::border_size() const

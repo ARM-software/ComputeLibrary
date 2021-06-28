@@ -377,6 +377,11 @@ BorderSize ClDirectConv2dKernel::border_size() const
     return _border_size;
 }
 
+ClDirectConv2dKernel::ClDirectConv2dKernel()
+{
+    _type = CLKernelType::DIRECT;
+}
+
 void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
                                      const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {

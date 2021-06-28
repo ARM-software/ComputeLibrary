@@ -72,6 +72,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
 }
 } // namespace
 
+ClCastKernel::ClCastKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClCastKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

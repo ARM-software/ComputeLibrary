@@ -37,6 +37,26 @@
 
 namespace arm_compute
 {
+namespace
+{
+bool is_same_lws(cl::NDRange lws0, cl::NDRange lws1)
+{
+    if(lws0.dimensions() != lws1.dimensions())
+    {
+        return false;
+    }
+
+    for(size_t i = 0; i < lws0.dimensions(); ++i)
+    {
+        if(lws0.get()[i] != lws1.get()[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+} // namespace
 template <typename T>
 class ICLArray;
 class ICLTensor;
@@ -64,6 +84,13 @@ private:
     {
         return 2 + 2 * dimension_size;
     }
+
+    cl::NDRange default_lws_tune(const Window &window)
+    {
+        ARM_COMPUTE_UNUSED(window);
+        return CLKernelLibrary::get().default_ndrange();
+    }
+
     using IKernel::configure; //Prevent children from calling IKernel::configure() directly
 protected:
     /** Configure the kernel's window and local workgroup size hint.
@@ -85,13 +112,19 @@ protected:
     void configure_internal(const Window &window, CLTuningParams tuning_params_hint = CLTuningParams(CLKernelLibrary::get().default_ndrange(), 0))
     {
         _tuning_params_hint = tuning_params_hint;
+
+        if(is_same_lws(_tuning_params_hint.get_lws(), CLKernelLibrary::get().default_ndrange()))
+        {
+            _tuning_params_hint.set_lws(default_lws_tune(window));
+        }
+
         IKernel::configure(window);
     }
 
 public:
     /** Constructor */
     ICLKernel()
-        : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _tuning_params_hint()
+        : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _type(CLKernelType::UNKNOWN), _tuning_params_hint()
     {
     }
     /** Returns a reference to the OpenCL kernel of this object.
@@ -101,6 +134,14 @@ public:
     cl::Kernel &kernel()
     {
         return _kernel;
+    }
+    /** Returns the CL kernel type
+     *
+     * @return The CL kernel type
+     */
+    CLKernelType type() const
+    {
+        return _type;
     }
     /** Add the passed 1D array's parameters to the object's kernel's arguments starting from the index idx.
      *
@@ -372,10 +413,11 @@ private:
     void add_tensor_argument(unsigned int &idx, const ICLTensor *tensor, const Window &window);
 
 protected:
-    cl::Kernel  _kernel;             /**< OpenCL kernel to run */
-    GPUTarget   _target;             /**< The targeted GPU */
-    std::string _config_id;          /**< Configuration ID */
-    size_t      _max_workgroup_size; /**< The maximum workgroup size for this kernel */
+    cl::Kernel   _kernel;             /**< OpenCL kernel to run */
+    GPUTarget    _target;             /**< The targeted GPU */
+    std::string  _config_id;          /**< Configuration ID */
+    size_t       _max_workgroup_size; /**< The maximum workgroup size for this kernel */
+    CLKernelType _type;               /**< The CL kernel type */
 private:
     CLTuningParams _tuning_params_hint; /**< Tuning parameters hint for the OpenCL kernel */
 };

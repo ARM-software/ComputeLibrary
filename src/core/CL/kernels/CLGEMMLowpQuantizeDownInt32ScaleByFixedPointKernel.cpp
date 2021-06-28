@@ -65,6 +65,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel()
     : _input(nullptr), _bias(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 Status CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,

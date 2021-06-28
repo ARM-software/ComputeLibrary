@@ -262,6 +262,11 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src0
 }
 } // namespace
 
+ClGemmMatrixMultiplyKernel::ClGemmMatrixMultiplyKernel()
+{
+    _type = CLKernelType::GEMM;
+}
+
 void ClGemmMatrixMultiplyKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float alpha,
                                            float beta,
                                            bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, bool fp_mixed_precision, const ActivationLayerInfo &activation_info)

@@ -78,6 +78,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 CLFFTRadixStageKernel::CLFFTRadixStageKernel()
     : _input(nullptr), _output(nullptr), _run_in_place(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLFFTRadixStageKernel::configure(ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config)

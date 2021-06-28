@@ -83,6 +83,7 @@ std::pair<Status, Window> validate_and_configure_window_nchw(ITensorInfo *input,
 CLNormalizePlanarYUVLayerKernel::CLNormalizePlanarYUVLayerKernel()
     : _input(nullptr), _output(nullptr), _mean(nullptr), _std(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)

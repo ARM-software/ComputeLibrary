@@ -40,7 +40,7 @@ class ClWinogradFilterTransformKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClWinogradFilterTransformKernel() = default;
+    ClWinogradFilterTransformKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClWinogradFilterTransformKernel);
     /** Set the input and output tensor.
      *

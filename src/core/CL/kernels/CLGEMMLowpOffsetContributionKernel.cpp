@@ -96,6 +96,7 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
 CLGEMMLowpOffsetContributionKernel::CLGEMMLowpOffsetContributionKernel()
     : _vector_sum_col(nullptr), _vector_sum_row(nullptr), _mm_result(nullptr), _bias(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, int32_t k, int32_t a_offset,

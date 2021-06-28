@@ -83,6 +83,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 CLCol2ImKernel::CLCol2ImKernel()
     : _input(nullptr), _output(nullptr), _convolved_dims()
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups)

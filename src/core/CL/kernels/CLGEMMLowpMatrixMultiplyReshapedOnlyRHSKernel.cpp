@@ -291,6 +291,7 @@ CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::CLGEMMLowpMatrixMultiplyReshapedO
       _is_quantized_per_channel(false),
       _fuse_output_stage(false)
 {
+    _type = CLKernelType::GEMM;
 }
 
 void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMKernelInfo &gemm_info,

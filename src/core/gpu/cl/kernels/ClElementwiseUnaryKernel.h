@@ -38,7 +38,7 @@ namespace kernels
 class ClElementWiseUnaryKernel : public IClKernel
 {
 public:
-    ClElementWiseUnaryKernel() = default;
+    ClElementWiseUnaryKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClElementWiseUnaryKernel);
     /** Initialise the kernel's srcs, dst.
      *

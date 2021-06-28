@@ -41,7 +41,7 @@ namespace kernels
 class ClCastKernel : public IClKernel
 {
 public:
-    ClCastKernel() = default;
+    ClCastKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClCastKernel);
     /** Set the src and dst of the kernel.
      *

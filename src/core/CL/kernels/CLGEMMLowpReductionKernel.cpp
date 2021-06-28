@@ -64,6 +64,7 @@ Status validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITe
 ICLGEMMLowpReductionKernel::ICLGEMMLowpReductionKernel()
     : _input(), _output()
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)

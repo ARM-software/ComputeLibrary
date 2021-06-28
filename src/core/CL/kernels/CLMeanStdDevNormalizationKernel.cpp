@@ -59,6 +59,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, f
 CLMeanStdDevNormalizationKernel::CLMeanStdDevNormalizationKernel()
     : _input(nullptr), _output(nullptr), _run_in_place(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLMeanStdDevNormalizationKernel::configure(ICLTensor *input, ICLTensor *output, float epsilon)

@@ -42,7 +42,7 @@ class ClPermuteKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClPermuteKernel() = default;
+    ClPermuteKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClPermuteKernel);
     /** Set the src and dst of the kernel.
      *

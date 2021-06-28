@@ -69,6 +69,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, c
 CLWeightsReshapeKernel::CLWeightsReshapeKernel()
     : _input(nullptr), _biases(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)

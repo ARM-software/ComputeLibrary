@@ -39,7 +39,7 @@ class ClMulKernel : public IClKernel
 {
 public:
     /** Default constructor */
-    ClMulKernel() = default;
+    ClMulKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClMulKernel);
     /** Initialise the kernel's src and dst.
      *
@@ -88,7 +88,7 @@ class ClComplexMulKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    ClComplexMulKernel() = default;
+    ClComplexMulKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClComplexMulKernel);
     /** Initialise the kernel's src and dst.
      *

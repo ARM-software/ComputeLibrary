@@ -62,6 +62,7 @@ Status validate_arguments(const ITensorInfo *src, unsigned int batch_offset, con
 ClBatchConcatenateKernel::ClBatchConcatenateKernel()
     : _batch_offset(0)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void ClBatchConcatenateKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int batch_offset, ITensorInfo *dst)

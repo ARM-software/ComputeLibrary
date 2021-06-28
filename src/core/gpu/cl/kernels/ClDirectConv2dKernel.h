@@ -38,7 +38,7 @@ namespace kernels
 class ClDirectConv2dKernel : public IClKernel
 {
 public:
-    ClDirectConv2dKernel() = default;
+    ClDirectConv2dKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClDirectConv2dKernel);
     /** Set the src, weights, biases and dst tensors info.
      *
