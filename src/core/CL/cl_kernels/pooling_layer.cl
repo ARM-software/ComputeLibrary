@@ -711,8 +711,8 @@ __kernel void pooling_layer_MxN_nhwc(
     int idx_out_h = GET_SPATIAL_IDX(2, 1, 0) % DST_HEIGHT;
     int idx_out_n = GET_SPATIAL_IDX(2, 1, 0) / DST_HEIGHT;
 #else  //DST_BATCH_SIZE != 1
-    int idx_out_h = GET_SPATIAL_IDX(2, 1, 0);
-    int idx_out_n = 0;
+    int idx_out_h   = GET_SPATIAL_IDX(2, 1, 0);
+    int idx_out_n   = 0;
 #endif // DST_BATCH_SIZE != 1
 
     __global unsigned char *in_base_ptr = input_ptr + input_offset_first_element_in_bytes + idx_out_c * sizeof(DATA_TYPE) + idx_out_n * input_stride_w;
@@ -726,10 +726,10 @@ __kernel void pooling_layer_MxN_nhwc(
     int idx_in_w = idx_out_w * STRIDE_X - PAD_X;
     int idx_in_h = idx_out_h * STRIDE_Y - PAD_Y;
 
-    int pool_x_s    = max((int)0, -idx_in_w);
-    int pool_x_e    = min((int)POOL_SIZE_X, (int)SRC_WIDTH - idx_in_w);
-    int pool_y_s    = max((int)0, -idx_in_h);
-    int pool_y_e    = min((int)POOL_SIZE_Y, (int)SRC_HEIGHT - idx_in_h);
+    int pool_x_s = max((int)0, -idx_in_w);
+    int pool_x_e = min((int)POOL_SIZE_X, (int)SRC_WIDTH - idx_in_w);
+    int pool_y_s = max((int)0, -idx_in_h);
+    int pool_y_e = min((int)POOL_SIZE_Y, (int)SRC_HEIGHT - idx_in_h);
 
 #if defined(EXCLUDE_PADDING)
     int filter_size = (pool_y_e - pool_y_s) * (pool_x_e - pool_x_s);
@@ -737,17 +737,27 @@ __kernel void pooling_layer_MxN_nhwc(
     int filter_size = POOL_SIZE_X * POOL_SIZE_Y;
 #endif // defined(EXCLUDE_PADDING)
 
+#if POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && PAD_X == 0 && PAD_Y == 0
+    // Global pooling path
+    for(int y = 0; y < POOL_SIZE_Y; ++y)
+    {
+#pragma unroll 8
+        for(int x = 0; x < POOL_SIZE_X; ++x)
+        {
+#else // POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && PAD_X == 0 && PAD_Y == 0
     for(int y = pool_y_s; y < pool_y_e; ++y)
     {
+#pragma unroll 8
         for(int x = pool_x_s; x < pool_x_e; ++x)
         {
+#endif // POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && PAD_X == 0 && PAD_Y == 0
             VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
             data0;
 #if defined(FP_MIXED_PRECISION)
             // In case of FP_MIXED_PRECISION, ACC_DATA_TYPE is != DATA_TYPE
             data0 = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z)), VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
 #else  // defined(FP_MIXED_PRECISION)
-            data0   = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z));
+            data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + (x + idx_in_w) * input_stride_y + (y + idx_in_h) * input_stride_z));
 #endif // defined(FP_MIXED_PRECISION)
 
 #if defined(POOL_L2)
@@ -757,9 +767,9 @@ __kernel void pooling_layer_MxN_nhwc(
             res0 = POOL_OP(res0, data0);
         }
     }
-    
+
 #if defined(POOL_AVG) || defined(POOL_L2)
-            res0 /= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))filter_size;
+    res0 /= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))filter_size;
 #endif // defined(POOL_AVG) || defined(POOL_L2)
 
 #if defined(POOL_L2)
