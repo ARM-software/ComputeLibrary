@@ -231,6 +231,9 @@
       },
       "GEMMLowp": {
         "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClGemmLowpOutputStage.cpp"
+          ],
           "kernel": [
             "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.cpp",
             "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.cpp",

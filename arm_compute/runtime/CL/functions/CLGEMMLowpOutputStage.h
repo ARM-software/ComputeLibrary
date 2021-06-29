@@ -112,10 +112,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<ICLKernel> _kernel;
-    const ICLTensor           *_input;
-    const ICLTensor           *_bias;
-    ICLTensor                 *_output;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H */
