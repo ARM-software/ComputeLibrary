@@ -136,11 +136,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(
                                                                                 ICLTensor *output, const PadStrideInfo &conv_info,
                                                                                 unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
     ARM_COMPUTE_ERROR_THROW_ON(CLDepthwiseConvolutionLayer::validate(input->info(),
                                                                      weights->info(),
                                                                      biases != nullptr ? biases->info() : nullptr,
-                                                                     output->info(),
+                                                                     output != nullptr ? output->info() : input->info(),
                                                                      conv_info,
                                                                      depth_multiplier,
                                                                      act_info,
@@ -220,6 +220,11 @@ Status CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::validate
                                                                                  const PadStrideInfo &conv_info,
                                                                                  unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
+    const bool in_place = input == output || output == nullptr;
+    if(in_place)
+    {
+        output = input;
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
@@ -254,6 +259,7 @@ Status CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::validate
 
     if(needs_permute)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(in_place, "In-place is supported only with NHWC data layout");
         TensorShape           permuted_input_shape   = input->tensor_shape();
         TensorShape           permuted_weights_shape = weights->tensor_shape();
         const ConvolutionInfo info{ conv_info, depth_multiplier, ActivationLayerInfo(), dilation };
@@ -309,7 +315,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
             _output_shifts.map();
             quantization::compute_quantized_multipliers_and_shifts(_input->info(),
                                                                    _original_weights->info(),
-                                                                   _output->info(),
+                                                                   _output != nullptr ? _output->info() : _input->info(),
                                                                    reinterpret_cast<int32_t *>(_output_multipliers.ptr_to_element(Coordinates(0))),
                                                                    reinterpret_cast<int32_t *>(_output_shifts.ptr_to_element(Coordinates(0))));
             _output_multipliers.unmap();
@@ -549,6 +555,11 @@ void CLDepthwiseConvolutionLayer::configure(const CLCompileContext &compile_cont
                                             unsigned int         depth_multiplier,
                                             ActivationLayerInfo act_info, const Size2D &dilation)
 {
+    if(output == nullptr)
+    {
+        // In-place
+        output = input;
+    }
     _depth_conv_func = get_depthwiseconvolution_function(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info,
                                                          dilation);
     switch(_depth_conv_func)

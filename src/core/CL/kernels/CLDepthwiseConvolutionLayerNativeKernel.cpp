@@ -46,7 +46,13 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
                           const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
     ARM_COMPUTE_UNUSED(dwc_info);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    bool in_place = false;
+    if(output == nullptr || output == input)
+    {
+        in_place = true;
+        output   = input;
+    }
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
@@ -57,6 +63,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_UNUSED(idx_c);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_c) != (input->dimension(idx_c) * depth_multiplier));
+
+    // In place restrictions
+    if(in_place)
+    {
+        const int weights_width_idx  = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH);
+        const int weights_height_idx = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::HEIGHT);
+        ARM_COMPUTE_RETURN_ERROR_ON(weights->tensor_shape()[weights_width_idx] != 1U || weights->tensor_shape()[weights_height_idx] != 1U);
+        ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier != 1U);
+        ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride() != std::make_pair(1U, 1U));
+        ARM_COMPUTE_RETURN_ERROR_ON(dilation != Size2D(1U, 1U));
+        ARM_COMPUTE_RETURN_ERROR_ON(conv_info.has_padding()); // Note that in princple padding can be supported with in_place but we choose not to support it
+    }
 
     const ConvolutionInfo info{ conv_info, depth_multiplier, ActivationLayerInfo(), dilation };
     const TensorShape     output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, info);
@@ -139,19 +157,24 @@ CLDepthwiseConvolutionLayerNativeKernel::CLDepthwiseConvolutionLayerNativeKernel
     _type = CLKernelType::DEPTHWISE;
 }
 
-void CLDepthwiseConvolutionLayerNativeKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const DWCWeightsKernelInfo &dwc_weights_info,
-                                                        const DWCKernelInfo &dwc_info, const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation,
+void CLDepthwiseConvolutionLayerNativeKernel::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                                        const DWCWeightsKernelInfo &dwc_weights_info, const DWCKernelInfo &dwc_info, const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation,
                                                         const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation, output_multipliers, output_shifts);
 }
 
-void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                                         const DWCWeightsKernelInfo &dwc_weights_info,
                                                         const DWCKernelInfo &dwc_info, const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation,
                                                         const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
+    if(output == nullptr)
+    {
+        // In-place
+        output = input;
+    }
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(),
                                                   dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation,
                                                   (output_multipliers != nullptr) ? output_multipliers->info() : nullptr, (output_shifts != nullptr) ? output_shifts->info() : nullptr));

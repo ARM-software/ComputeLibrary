@@ -262,6 +262,25 @@ public:
         add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 4, 4, 4, 4, DimensionRoundingType::CEIL), Size2D(2U, 2U));
     }
 };
+
+/** Dataset containing in-place 1x1 depthwise convolution shapes.
+ *
+ * For a depthwise convolution op to be in-place:
+ * * Output has the same shape as the input;
+ *      * 1x1 filter
+ *      * stride == 1
+ *      * dilations == 1
+ *      * No paddings
+*/
+class SmallInPlaceDepthwiseConvolutionLayerDataset final : public DepthwiseConvolutionLayerDataset
+{
+public:
+    SmallInPlaceDepthwiseConvolutionLayerDataset()
+    {
+        add_config(TensorShape(7U, 7U, 1U), Size2D(1U, 1U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(11U, 13U, 16U), Size2D(1U, 1U), PadStrideInfo(1, 1, 0, 0));
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

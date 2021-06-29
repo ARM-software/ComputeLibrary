@@ -23,9 +23,15 @@
  */
 #include "arm_compute/graph/mutators/InPlaceOperationMutator.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Logger.h"
+#include "arm_compute/graph/nodes/DepthwiseConvolutionLayerNode.h"
+#include "arm_compute/graph/nodes/FusedDepthwiseConvolutionBatchNormalizationNode.h"
+#include "support/Cast.h"
+
+using namespace arm_compute::utils::cast;
 
 namespace arm_compute
 {
@@ -80,6 +86,69 @@ void set_new_output_and_inherit_accessor(std::unique_ptr<INode> &node, Tensor *o
     new_output->set_accessor(orig_output->extract_accessor());
     // Update output
     node->set_output_tensor(new_output->id(), 0);
+}
+
+// Try to mutate the node to perform the depthwise in-place calculation
+void try_in_place_depthwiseconv(std::unique_ptr<INode> &node)
+{
+    // Get input edge
+    Edge *input_edge  = node->input_edge(0);
+    Edge *weight_edge = node->input_edge(1);
+    ARM_COMPUTE_ERROR_ON(input_edge == nullptr || weight_edge == nullptr);
+
+    auto input_tensor  = input_edge->tensor();
+    auto weight_tensor = weight_edge->tensor();
+    ARM_COMPUTE_ERROR_ON(input_tensor == nullptr || weight_tensor == nullptr);
+
+    const auto input_shape = input_tensor->desc().shape;
+    const auto qinfo_input = input_tensor->desc().quant_info;
+
+    const auto weight_shape  = weight_tensor->desc().shape;
+    const auto weight_layout = weight_tensor->desc().layout;
+
+    // Extract PadStrideInfo and depth multiplier
+    PadStrideInfo conv_info{};
+    unsigned int  depth_multiplier{};
+    if(node->type() == NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer)
+    {
+        conv_info        = polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node.get())->convolution_info();
+        depth_multiplier = polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node.get())->depth_multiplier();
+    }
+    else if(node->type() == NodeType::DepthwiseConvolutionLayer)
+    {
+        conv_info        = polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node.get())->convolution_info();
+        depth_multiplier = polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node.get())->depth_multiplier();
+    }
+
+    // Get current output tensor
+    auto current_output_tensor = node->output(0);
+    ARM_COMPUTE_ERROR_ON(current_output_tensor == nullptr);
+    const auto out_shape = current_output_tensor->desc().shape;
+    const auto qinfo_out = current_output_tensor->desc().quant_info;
+
+    bool input_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, input_shape, 0) && (qinfo_input == qinfo_out) && (input_tensor->accessor() == nullptr);
+
+    // Specify conditions with which input can be in-placed
+    input_can_in_place &= weight_layout == input_tensor->desc().layout && weight_layout == DataLayout::NHWC;
+
+    const int  weights_width_idx  = get_data_layout_dimension_index(weight_layout, DataLayoutDimension::WIDTH);
+    const int  weights_height_idx = get_data_layout_dimension_index(weight_layout, DataLayoutDimension::HEIGHT);
+    const bool is_1x1             = weight_shape[weights_width_idx] == 1U && weight_shape[weights_height_idx] == 1U;
+    input_can_in_place &= is_1x1;
+
+    input_can_in_place &= depth_multiplier == 1;
+    input_can_in_place &= conv_info.stride() == std::make_pair(1U, 1U);
+    input_can_in_place &= !conv_info.has_padding();
+    // NOTE: Dilation should also be (1, 1). However currently dilation is not supported in the depthwise conv node
+
+    if(input_can_in_place)
+    {
+        set_new_output_and_inherit_accessor(node, current_output_tensor, input_tensor);
+    }
+    else
+    {
+        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor or the quantization info are different.\n");
+    }
 }
 
 // Try to mutate the node to perform the elementwise in-place calculation
@@ -148,6 +217,8 @@ void InPlaceOperationMutator::mutate(Graph &g)
         NodeType::BatchNormalizationLayer,
         NodeType::EltwiseLayer,
         NodeType::UnaryEltwiseLayer,
+        NodeType::DepthwiseConvolutionLayer,
+        NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer,
         NodeType::PrintLayer
     };
 
@@ -165,6 +236,10 @@ void InPlaceOperationMutator::mutate(Graph &g)
                 if(node->type() == NodeType::EltwiseLayer)
                 {
                     try_in_place_elementwise(node);
+                }
+                else if(node->type() == NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer || node->type() == NodeType::DepthwiseConvolutionLayer)
+                {
+                    try_in_place_depthwiseconv(node);
                 }
                 else
                 {
