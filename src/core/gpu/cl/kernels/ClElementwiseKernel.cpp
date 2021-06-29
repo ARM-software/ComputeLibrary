@@ -75,12 +75,31 @@ std::string generate_id_for_tuning_common(const std::string &kernel_name, const 
     return config_id;
 }
 
+Status validate_in_place_output_shape(const bool in_place, const bool src1_in_place, const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst, const TensorShape &out_shape)
+{
+    if(in_place)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, src1_in_place ? src1.tensor_shape() : src2.tensor_shape(), 0),
+                                        "Wrong shape for dst, cannot do in_place calculation");
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
+                                        "Wrong shape for dst");
+    }
+    return Status{};
+}
+
 Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(&src1, &src2, &dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src1, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &src2);
+
+    // Check whether it is in_place calculation
+    const bool in_place      = (&src1 == &dst) || (&src2 == &dst);
+    const bool src1_in_place = in_place && (&src1 == &dst);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(src1.tensor_shape(), src2.tensor_shape());
 
@@ -91,8 +110,7 @@ Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &src
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, 1, DataType::F16, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
-                                        "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_in_place_output_shape(in_place, src1_in_place, src1, src2, dst, out_shape));
     }
 
     return Status{};
@@ -105,6 +123,10 @@ Status validate_arguments_divide_operation(const ITensorInfo *src1, const ITenso
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 1, DataType::F16, DataType::F32, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2);
 
+    // Check whether it is in_place calculation
+    const bool in_place      = (src1 == dst) || (src2 == dst);
+    const bool src1_in_place = in_place && (src1 == dst);
+
     const TensorShape out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
@@ -114,8 +136,7 @@ Status validate_arguments_divide_operation(const ITensorInfo *src1, const ITenso
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::F16, DataType::F32, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0),
-                                        "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_in_place_output_shape(in_place, src1_in_place, *src1, *src2, *dst, out_shape));
     }
 
     return Status{};
@@ -137,6 +158,10 @@ Status validate_arguments_with_arithmetic_rules(const ITensorInfo &src1, const I
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(in2_offset != 0, "For quantized symmetric, offset must be zero");
     }
 
+    // Check whether it is in_place calculation
+    const bool in_place      = (&src1 == &dst) || (&src2 == &dst);
+    const bool src1_in_place = in_place && (&src1 == &dst);
+
     const TensorShape out_shape = TensorShape::broadcast_shape(src1.tensor_shape(), src2.tensor_shape());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
 
@@ -145,6 +170,7 @@ Status validate_arguments_with_arithmetic_rules(const ITensorInfo &src1, const I
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0), "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_in_place_output_shape(in_place, src1_in_place, src1, src2, dst, out_shape));
 
         if(is_data_type_quantized_symmetric(dst.data_type()))
         {
@@ -181,6 +207,12 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &s
         build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oqinfo.scale));
     }
     build_opts.add_option_if(src1.data_type() == DataType::S32, "-DS32");
+
+    // Check whether it is in_place calculation
+    const bool in_place      = (&src1 == &dst) || (&src2 == &dst);
+    const bool src1_in_place = in_place && (&src1 == &dst);
+    build_opts.add_option_if(in_place, "-DIN_PLACE");
+    build_opts.add_option_if(src1_in_place, "-DSRC1_IN_PLACE");
 
     return build_opts;
 }
@@ -267,6 +299,8 @@ void ClElementwiseKernel::run_op(ITensorPack &tensors, const Window &window, ::c
     const auto src_1 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
     auto       dst   = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src_0, src_1, dst);
+
     const TensorShape &in_shape1 = src_0->info()->tensor_shape();
     const TensorShape &in_shape2 = src_1->info()->tensor_shape();
     const TensorShape &out_shape = dst->info()->tensor_shape();
@@ -291,12 +325,18 @@ void ClElementwiseKernel::run_op(ITensorPack &tensors, const Window &window, ::c
     Window slice      = collapsed.first_slice_window_3D();
     Window slice_src1 = slice.broadcast_if_dimension_le_one(in_shape1_collapsed);
     Window slice_src2 = slice.broadcast_if_dimension_le_one(in_shape2_collapsed);
+
+    // Check whether it is in_place calculation
+    const bool in_place = (src_0 == dst) || (src_1 == dst);
     do
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, src_0, slice_src1);
         add_3D_tensor_argument(idx, src_1, slice_src2);
-        add_3D_tensor_argument(idx, dst, slice);
+        if(!in_place)
+        {
+            add_3D_tensor_argument(idx, dst, slice);
+        }
 
         enqueue(queue, *this, slice, lws_hint());
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_src1));

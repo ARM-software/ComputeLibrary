@@ -86,8 +86,12 @@
  */
 __kernel void OP_FUN_NAME(OP)(
     TENSOR3D_DECLARATION(in1),
-    TENSOR3D_DECLARATION(in2),
-    TENSOR3D_DECLARATION(out))
+    TENSOR3D_DECLARATION(in2)
+#if !defined(IN_PLACE)
+    ,
+    TENSOR3D_DECLARATION(out)
+#endif // !defined(IN_PLACE)
+)
 {
 #if VEC_SIZE_IN1 == 1
     uint in1_x_offs = 0;
@@ -99,12 +103,23 @@ __kernel void OP_FUN_NAME(OP)(
 #else  // VEC_SIZE_IN2 == 1
     uint in2_x_offs = max((int)(get_global_id(0) * VEC_SIZE_IN2 - (VEC_SIZE_IN2 - VEC_SIZE_LEFTOVER) % VEC_SIZE_IN2), 0);
 #endif // VEC_SIZE_IN2 == 1
+#if !defined(IN_PLACE)
     uint out_x_offs = max((int)(get_global_id(0) * VEC_SIZE_OUT - (VEC_SIZE_OUT - VEC_SIZE_LEFTOVER) % VEC_SIZE_OUT), 0);
+#endif // !defined(IN_PLACE)
 
     // Get pixels pointer
     __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + in1_x_offs * sizeof(DATA_TYPE) + get_global_id(1) * in1_step_y + get_global_id(2) * in1_step_z;
     __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + in2_x_offs * sizeof(DATA_TYPE) + get_global_id(1) * in2_step_y + get_global_id(2) * in2_step_z;
-    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + out_x_offs * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
+    __global        uchar *
+#if !defined(IN_PLACE)
+    out_addr = out_ptr + out_offset_first_element_in_bytes + out_x_offs * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
+#else // !defined(IN_PLACE)
+#if defined(SRC1_IN_PLACE)
+    out_addr    = in1_addr;
+#else  //defined(SRC1_IN_PLACE)
+    out_addr = in2_addr;
+#endif //defined(SRC1_IN_PLACE)
+#endif // !defined(IN_PLACE)
 
     VEC_INT in_a = CONVERT((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE *)in1_addr)), VEC_INT);
     VEC_INT in_b = CONVERT((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE *)in2_addr)), VEC_INT);

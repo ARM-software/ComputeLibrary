@@ -71,6 +71,8 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
 });
+const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
+const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
 } // namespace
 
 TEST_SUITE(CL)
@@ -104,7 +106,8 @@ using CLElementwiseMinFixture = ElementwiseMinValidationFixture<CLTensor, CLAcce
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMinU8Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ElementwiseMinU8Dataset),
+                                                                                                              OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -112,7 +115,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<uint8_t>, framework::Da
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMinS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMinS16Dataset),
+                                                                                                        OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -125,33 +129,36 @@ using CLElementwiseMinQuantizedFixture = ElementwiseMinValidationQuantizedFixtur
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                        ElementwiseMinQASYMM8Dataset),
                                                                                                                        framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
                                                                                                                        framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                                                                                                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+                                                                                                                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })),
+                                                                                                                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
 }
 TEST_SUITE_END()
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                       ElementwiseMinQASYMM8SignedDataset),
                                                                                                                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
                                                                                                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                                                                                                      framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+                                                                                                                      framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })),
+                                                                                                                      OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END()
 TEST_SUITE(QSYMM16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                        ElementwiseMinQSYMM16Dataset),
                                                                                                                        framework::dataset::make("SrcQInfo0", { QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) })),
                                                                                                                        framework::dataset::make("SrcQInfo1", { QuantizationInfo(2.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) })),
-                                                                                                                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })))
+                                                                                                                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })),
+                                                                                                                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -164,13 +171,16 @@ using CLElementwiseMinFloatFixture = ElementwiseMinValidationFloatFixture<CLTens
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMinFP16Dataset), EmptyActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ElementwiseMinFP16Dataset),
+                                                                                                                  EmptyActivationFunctionsDataset),
+                                                                                                          OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMinFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ElementwiseMinFP16Dataset),
-                                                                                                                   ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMinFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapes(), ElementwiseMinFP16Dataset),
+                                                                                                                   ActivationFunctionsDataset),
+                                                                                                                   OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
@@ -178,14 +188,16 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMinFloatFixture<half>, fr
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMinFP32Dataset),
-                                                                                                           EmptyActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ElementwiseMinFP32Dataset),
+                                                                                                                   EmptyActivationFunctionsDataset),
+                                                                                                           OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMinFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ElementwiseMinFP32Dataset),
-                                                                                                                    ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMinFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapes(), ElementwiseMinFP32Dataset),
+                                                                                                                    ActivationFunctionsDataset),
+                                                                                                                    OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -193,16 +205,18 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMinFloatFixture<float>, f
 template <typename T>
 using CLElementwiseMinBroadcastFloatFixture = ElementwiseMinBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLElementwiseMin, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMinBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMinBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapesBroadcast(),
                        ElementwiseMinFP32Dataset),
-                       EmptyActivationFunctionsDataset))
+                       EmptyActivationFunctionsDataset),
+                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwiseMinBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwiseMinBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapesBroadcast(),
                        ElementwiseMinFP32Dataset),
-                       ActivationFunctionsDataset))
+                       ActivationFunctionsDataset),
+                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

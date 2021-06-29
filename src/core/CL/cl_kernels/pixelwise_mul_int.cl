@@ -76,7 +76,9 @@
 __kernel void pixelwise_mul_int(
     TENSOR3D_DECLARATION(in1),
     TENSOR3D_DECLARATION(in2),
+#if !defined(IN_PLACE)
     TENSOR3D_DECLARATION(out),
+#endif // !defined(IN_PLACE)
     const uint scale)
 {
     size_t x = max((int)(get_global_id(0) * VEC_SIZE_OUT - (VEC_SIZE_OUT - VEC_SIZE_LEFTOVER) % VEC_SIZE_OUT), 0);
@@ -85,7 +87,16 @@ __kernel void pixelwise_mul_int(
 
     __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x * in1_stride_x + y * in1_stride_y + z * in1_stride_z;
     __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + x * in2_stride_x + y * in2_stride_y + z * in2_stride_z;
-    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x * out_stride_x + y * out_stride_y + z * out_stride_z;
+    __global        uchar *
+#if !defined(IN_PLACE)
+    out_addr = out_ptr + out_offset_first_element_in_bytes + x * out_stride_x + y * out_stride_y + z * out_stride_z;
+#else // !defined(IN_PLACE)
+#if defined(SRC1_IN_PLACE)
+    out_addr            = in1_addr;
+#else  //defined(SRC1_IN_PLACE)
+    out_addr = in2_addr;
+#endif //defined(SRC1_IN_PLACE)
+#endif // !defined(IN_PLACE)
 
     // Load data
     VEC_ACC_TYPE in1_data = CONVERT((VEC_DATA_TYPE(DATA_TYPE_IN1, VEC_SIZE_OUT))VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_IN1 *)in1_addr), VEC_ACC_TYPE);
@@ -143,7 +154,9 @@ __kernel void pixelwise_mul_int(
 __kernel void pixelwise_mul_quantized(
     TENSOR3D_DECLARATION(in1),
     TENSOR3D_DECLARATION(in2),
+#if !defined(IN_PLACE)
     TENSOR3D_DECLARATION(out),
+#endif // !defined(IN_PLACE)
     const float scale)
 {
     size_t x = max((int)(get_global_id(0) * VEC_SIZE_OUT - (VEC_SIZE_OUT - VEC_SIZE_LEFTOVER) % VEC_SIZE_OUT), 0);
@@ -152,7 +165,16 @@ __kernel void pixelwise_mul_quantized(
 
     __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + x * in1_stride_x + y * in1_stride_y + z * in1_stride_z;
     __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + x * in2_stride_x + y * in2_stride_y + z * in2_stride_z;
-    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + x * out_stride_x + y * out_stride_y + z * out_stride_z;
+    __global        uchar *
+#if !defined(IN_PLACE)
+    out_addr = out_ptr + out_offset_first_element_in_bytes + x * out_stride_x + y * out_stride_y + z * out_stride_z;
+#else // !defined(IN_PLACE)
+#if defined(SRC1_IN_PLACE)
+    out_addr            = in1_addr;
+#else  //defined(SRC1_IN_PLACE)
+    out_addr = in2_addr;
+#endif //defined(SRC1_IN_PLACE)
+#endif // !defined(IN_PLACE)
 
     // Load data
     VEC_INT in_a = CONVERT((VEC_TYPE)(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_OUT *)in1_addr)), VEC_INT);

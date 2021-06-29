@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,8 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
 });
+const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
+const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
 } // namespace
 
 TEST_SUITE(CL)
@@ -96,29 +98,33 @@ using CLElementwisePowerBroadcastFloatFixture = ElementwisePowerBroadcastValidat
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwisePowerFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwisePowerFP16Dataset),
-                                                                                                            EmptyActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwisePowerFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ElementwisePowerFP16Dataset),
+                                                                                                                    EmptyActivationFunctionsDataset),
+                                                                                                            OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwisePowerFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ElementwisePowerFP16Dataset),
-                                                                                                                     ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwisePowerFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapes(), ElementwisePowerFP16Dataset),
+                                                                                                                     ActivationFunctionsDataset),
+                                                                                                                     OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwisePowerBroadcastFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwisePowerBroadcastFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapesBroadcast(),
                        ElementwisePowerFP16Dataset),
-                       EmptyActivationFunctionsDataset))
+                       EmptyActivationFunctionsDataset),
+                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwisePowerBroadcastFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwisePowerBroadcastFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapesBroadcast(),
                        ElementwisePowerFP16Dataset),
-                       ActivationFunctionsDataset))
+                       ActivationFunctionsDataset),
+                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
@@ -126,29 +132,33 @@ FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwisePowerBroadcastFl
 TEST_SUITE_END() //FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwisePowerFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwisePowerFP32Dataset),
-                                                                                                             EmptyActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwisePowerFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ElementwisePowerFP32Dataset),
+                                                                                                                     EmptyActivationFunctionsDataset),
+                                                                                                             OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwisePowerFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ElementwisePowerFP32Dataset),
-                                                                                                                      ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwisePowerFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapes(), ElementwisePowerFP32Dataset),
+                                                                                                                      ActivationFunctionsDataset),
+                                                                                                                      OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwisePowerBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwisePowerBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapesBroadcast(),
                        ElementwisePowerFP32Dataset),
-                       EmptyActivationFunctionsDataset))
+                       EmptyActivationFunctionsDataset),
+                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwisePowerBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwisePowerBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapesBroadcast(),
                        ElementwisePowerFP32Dataset),
-                       ActivationFunctionsDataset))
+                       ActivationFunctionsDataset),
+                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

@@ -180,6 +180,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<uint8_t
                        framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
                        framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
                        framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })),
+                       OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunTinyInPlace, CLArithmeticSubtractionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(datasets::TinyShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 255.f, 20) })),
                        InPlaceDataSet))
 {
     // Validate output
@@ -193,7 +204,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<int8_t>
                        framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 10) })),
                        framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
                        framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })),
-                       InPlaceDataSet))
+                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -277,6 +288,16 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLArithmeticSubtractionBroadcastFloatF
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                        EmptyActivationFunctionsDataset),
                        OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInplace, CLArithmeticSubtractionBroadcastFloatFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::TinyShapesBroadcastInplace(),
+                                                       framework::dataset::make("DataType", DataType::F32)),
+                                               framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                       EmptyActivationFunctionsDataset),
+                               InPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

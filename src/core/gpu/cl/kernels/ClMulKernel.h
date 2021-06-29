@@ -34,7 +34,11 @@ namespace opencl
 {
 namespace kernels
 {
-/** Interface for the pixelwise multiplication kernel. */
+/** Interface for the pixelwise multiplication kernel.
+ *
+ * For binary elementwise ops in-place cannot be enabled by passing nullptr to dst, it can only be enabled by passing either src1 or src2 to dst instead.
+ *
+*/
 class ClMulKernel : public IClKernel
 {
 public:

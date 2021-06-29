@@ -180,9 +180,11 @@ void try_in_place_elementwise(std::unique_ptr<INode> &node)
     ARM_COMPUTE_ERROR_ON(current_output_tensor == nullptr);
     const auto qinfo_out = current_output_tensor->desc().quant_info;
 
-    // Can do in place, if the input has same shape as output, has same quntisation info as output, and input doesn't have accessor.
-    bool input0_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, shape0, 0) && (qinfo0 == qinfo_out) && (input0_tensor->accessor() == nullptr);
-    bool input1_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, shape1, 0) && (qinfo1 == qinfo_out) && (input1_tensor->accessor() == nullptr);
+    // Can do in place, if the input has same shape as output, has same quntisation info as output, has same data type as output and input doesn't have accessor.
+    bool input0_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, shape0, 0) && (qinfo0 == qinfo_out)
+                               && (input0_tensor->desc().data_type == current_output_tensor->desc().data_type) && (input0_tensor->accessor() == nullptr);
+    bool input1_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, shape1, 0) && (qinfo1 == qinfo_out)
+                               && (input1_tensor->desc().data_type == current_output_tensor->desc().data_type) && (input1_tensor->accessor() == nullptr);
 
     if(input0_can_in_place)
     {

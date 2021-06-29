@@ -40,6 +40,8 @@ namespace kernels
  * Element-wise operation is computed by:
  * @f[ dst(x,y) = OP(src1(x,y), src2(x,y))@f]
  *
+ * For binary elementwise ops in-place cannot be enabled by passing nullptr to dst, it can only be enabled by passing either src1 or src2 to dst instead.
+ *
  */
 class ClElementwiseKernel : public IClKernel
 {

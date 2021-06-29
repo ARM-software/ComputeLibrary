@@ -57,6 +57,9 @@ const auto ArithmeticSubtractionQuantizationInfoDataset = combine(combine(framew
 const auto ArithmeticSubtractionQuantizationInfoSignedDataset = combine(combine(framework::dataset::make("QuantizationInfoIn1", { QuantizationInfo(0.5f, 10) }),
                                                                                 framework::dataset::make("QuantizationInfoIn2", { QuantizationInfo(0.5f, 20) })),
                                                                         framework::dataset::make("QuantizationInfoOut", { QuantizationInfo(0.5f, 50) }));
+const auto ArithmeticSubtractionQuantizationInfoSignedInPlaceDataset = combine(combine(framework::dataset::make("QuantizationInfoIn1", { QuantizationInfo(0.8f, 10) }),
+                                                                                       framework::dataset::make("QuantizationInfoIn2", { QuantizationInfo(0.8f, 10) })),
+                                                                               framework::dataset::make("QuantizationInfoOut", { QuantizationInfo(0.8f, 10) }));
 const auto ArithmeticSubtractionQuantizationInfoSymmetric = combine(combine(framework::dataset::make("QuantizationInfoIn1", { QuantizationInfo(0.3f, 0) }),
                                                                             framework::dataset::make("QuantizationInfoIn2", { QuantizationInfo(0.7f, 0) })),
                                                                     framework::dataset::make("QuantizationInfoOut", { QuantizationInfo(0.2f, 0) }));
@@ -179,7 +182,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQASYMM8Fixture, framewor
                                                                                                                      DataType::QASYMM8)),
                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                                                                                                                      ArithmeticSubtractionQuantizationInfoDataset),
-                                                                                                             InPlaceDataSet))
+                                                                                                             OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -191,18 +194,27 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQASYMM8SignedFixture, fr
                                                                                                                        datasets::SmallShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                                                                                                                    ArithmeticSubtractionQuantizationInfoSignedDataset),
-                                                                                                                   InPlaceDataSet))
+                                                                                                                   OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionQASYMM8SignedBroadcastFixture, framework::DatasetMode::ALL, combine(combine(combine(combine(
                            datasets::SmallShapesBroadcast(),
                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                        ArithmeticSubtractionQuantizationInfoSignedDataset),
                        OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEArithmeticSubtractionQASYMM8SignedBroadcastFixture, framework::DatasetMode::ALL, combine(combine(combine(combine(
+                           datasets::TinyShapesBroadcastInplace(),
+                           framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                       ArithmeticSubtractionQuantizationInfoSignedInPlaceDataset),
+                       InPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
