@@ -28,6 +28,8 @@
 #include "src/core/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/core/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/core/cpu/kernels/CpuGemmTranspose1xWKernel.h"
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/runtime/cpu/operators/CpuGemm.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -73,29 +75,6 @@ template <typename FunctionType>
 bool validate_zero_padding(unsigned int dim0_value, unsigned int dim1_value)
 {
     const TensorShape in_shape(dim0_value, dim1_value);
-
-    // Create tensors
-    Tensor in = create_tensor<Tensor>(in_shape, DataType::U32);
-    Tensor dst;
-
-    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Validate zero-padding
-    FunctionType func;
-
-    func.configure(&in, &dst);
-
-    return in.info()->padding().empty();
-}
-
-/** Zero padding test
- *
- * TODO(COMPMID-4402): merge with previous when all kernels have been ported
- */
-template <typename FunctionType>
-bool validate_zero_padding_new(unsigned int dim0_value, unsigned int dim1_value)
-{
-    const TensorShape in_shape(dim0_value, dim1_value);
     TensorInfo        in(in_shape, 1, DataType::U32);
     TensorInfo        dst;
 
@@ -128,6 +107,99 @@ bool validate_gemm_zero_padding(const TensorShape shape0, const TensorShape shap
 TEST_SUITE(NEON)
 TEST_SUITE(GEMM)
 
+/** Test case for memory injection in @ref cpu::CpuGemm.
+ *
+ * Configure the operator once and inject memory at run-time in multiple executions.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
+{
+    auto       gemm      = std::make_unique<cpu::CpuGemm>();
+    const auto lhs_info  = TensorInfo(TensorShape(3U, 3U), 1, DataType::F32);
+    const auto rhs_info  = TensorInfo(TensorShape(4U, 3U), 1, DataType::F32);
+    const auto c_info    = TensorInfo(TensorShape(4U, 3U), 1, DataType::F32);
+    auto       dst_info  = TensorInfo(TensorShape(4U, 3U), 1, DataType::F32);
+    const auto gemm_info = GEMMInfo{};
+    gemm->configure(&lhs_info, &rhs_info, &c_info, &dst_info, 1.f, 1.f, gemm_info);
+
+    // telhs are newly created every call of this lambda function
+    auto lhs = create_tensor<Tensor>(lhs_info);
+    auto rhs = create_tensor<Tensor>(rhs_info);
+    auto c   = create_tensor<Tensor>(c_info);
+    lhs.allocator()->allocate();
+    rhs.allocator()->allocate();
+    c.allocator()->allocate();
+
+    ITensorPack run_pack{ { TensorType::ACL_SRC_0, &lhs }, { TensorType::ACL_SRC_1, &rhs }, { TensorType::ACL_SRC_2, &c } };
+    ITensorPack prep_pack{ { TensorType::ACL_SRC_1, &rhs }, { TensorType::ACL_SRC_2, &c } };
+
+    auto mg = MemoryGroup{};
+    auto ws = manage_workspace<Tensor>(gemm->workspace(), mg, run_pack, prep_pack);
+
+    auto run_conv = [&]() -> Tensor
+    {
+        auto dst = create_tensor<Tensor>(dst_info);
+        dst.allocator()->allocate();
+        run_pack.add_tensor(TensorType::ACL_DST, &dst);
+
+        library->fill_tensor_value(Accessor(lhs), 1.f);
+        library->fill_tensor_value(Accessor(rhs), 2.f);
+        library->fill_tensor_value(Accessor(c), 3.f);
+        // This operator is configured once and captured by this lambda.
+        gemm->prepare(prep_pack);
+        gemm->run(run_pack);
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
+/** Test case for memory injection in @ref NEGEMM.
+ *
+ * Make sure @ref NEGEMM still works through injecting the memory at configure time using the old API.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
+{
+    auto       gemm      = std::make_unique<NEGEMM>();
+    const auto lhs_info  = TensorInfo(TensorShape(3U, 3U), 1, DataType::F32);
+    const auto rhs_info  = TensorInfo(TensorShape(4U, 3U), 1, DataType::F32);
+    const auto c_info    = TensorInfo(TensorShape(4U, 3U), 1, DataType::F32);
+    auto       dst_info  = TensorInfo(TensorShape(4U, 3U), 1, DataType::F32);
+    const auto gemm_info = GEMMInfo{};
+    auto       run_conv  = [&]()
+    {
+        auto lhs = create_tensor<Tensor>(lhs_info);
+        auto rhs = create_tensor<Tensor>(rhs_info);
+        auto c   = create_tensor<Tensor>(c_info);
+        auto dst = create_tensor<Tensor>(dst_info);
+        gemm->configure(&lhs, &rhs, &c, &dst, 1.f, 1.f, gemm_info);
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        c.allocator()->allocate();
+        dst.allocator()->allocate();
+        library->fill_tensor_value(Accessor(lhs), 1.f);
+        library->fill_tensor_value(Accessor(rhs), 2.f);
+        library->fill_tensor_value(Accessor(c), 3.f);
+        gemm->run();
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
 TEST_SUITE(TRANSPOSE_1XW)
 using CpuGemmTranspose1xW = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuGemmTranspose1xWKernel>;
 DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
@@ -135,7 +207,7 @@ DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
                    framework::dataset::make("K", { 1, 47, 29, 27 })),
                n_value, k_value)
 {
-    bool status = validate_zero_padding_new<CpuGemmTranspose1xW>(n_value, k_value);
+    bool status = validate_zero_padding<CpuGemmTranspose1xW>(n_value, k_value);
     ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
 }
 
@@ -176,7 +248,7 @@ DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
                    framework::dataset::make("K", { 1, 47, 29, 27 })),
                m_value, k_value)
 {
-    bool status = validate_zero_padding_new<cpu::kernels::CpuGemmInterleave4x4Kernel>(m_value, k_value);
+    bool status = validate_zero_padding<cpu::kernels::CpuGemmInterleave4x4Kernel>(m_value, k_value);
     ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
 }
 

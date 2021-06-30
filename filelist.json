@@ -1131,6 +1131,7 @@
       },
       "GEMM": {
         "files": {
+          "operator" : ["src/runtime/cpu/operators/CpuGemm.cpp"],
           "kernel": [
             "src/core/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp",
             "src/core/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp",

@@ -24,11 +24,9 @@
 #ifndef ARM_COMPUTE_NEGEMM_H
 #define ARM_COMPUTE_NEGEMM_H
 
-#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
-#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -36,19 +34,7 @@ namespace arm_compute
 {
 /** Basic function to execute GEMM. This function calls the following kernels:
  *
- * If optimized assembly is available:
- *  -# @ref cpu::CpuGemmAssemblyDispatch
- *  -# @ref cpu::CpuActivation (if alpha != 1.0)
- * Else:
- *  -# @ref cpu::kernels::CpuGemmInterleave4x4Kernel (if the output tensor is a matrix)
- *  -# @ref cpu::kernels::CpuGemmTranspose1xWKernel (if the output tensor is a matrix)
- *  -# @ref cpu::kernels::CpuGemmMatrixMultiplyKernel
- * In both cases:
- *  -# @ref cpu::kernels::CpuGemmMatrixAdditionKernel (if c != nullptr and beta != 0.0 and is not reshaped once)
- * Else:
- *  -# @ref cpu::CpuAdd (if c != nullptr and is reshaped once and not optimized assembly in place)
- *
- *  -# @ref cpu::CpuActivation (if activation is specified in GEMMInfo)
+ *  -# @ref cpu::CpuGemm
  */
 class NEGEMM : public IFunction
 {

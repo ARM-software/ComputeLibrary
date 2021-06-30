@@ -41,6 +41,10 @@ public:
     CpuAuxTensorHandler(int slot_id, TensorInfo &info, ITensorPack &pack, bool pack_inject = false)
         : _tensor()
     {
+        if(info.total_size() == 0)
+        {
+            return;
+        }
         _tensor.allocator()->soft_init(info);
 
         ITensor *packed_tensor = utils::cast::polymorphic_downcast<ITensor *>(pack.get_tensor(slot_id));
