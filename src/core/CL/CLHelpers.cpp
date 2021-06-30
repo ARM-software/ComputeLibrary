@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
@@ -426,44 +425,6 @@ void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint)
                                      &wbsm_hint);
     ARM_COMPUTE_UNUSED(err);
     ARM_COMPUTE_ERROR_ON(err != CL_SUCCESS);
-}
-
-bool export_weights_to_cl_image(const ITensorInfo *tensor)
-{
-    if(tensor->tensor_shape()[0] % 4)
-    {
-        return false;
-    }
-
-    // If not floating point
-    if(!is_data_type_float(tensor->data_type()))
-    {
-        return false;
-    }
-
-    // Check if the cl_khr_image2d_from_buffer extension is supported on the target platform
-    if(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
-    {
-        return false;
-    }
-
-    // Check cl image pitch alignment
-    if(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0)
-    {
-        return false;
-    }
-
-    const size_t image_w     = tensor->tensor_shape()[0] / 4;
-    const size_t image_h     = tensor->tensor_shape()[1] * tensor->tensor_shape()[2] * tensor->tensor_shape()[3];
-    const size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
-    const size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
-
-    if(image_w > max_image_w || image_h > max_image_h)
-    {
-        return false;
-    }
-
-    return true;
 }
 
 } // namespace arm_compute

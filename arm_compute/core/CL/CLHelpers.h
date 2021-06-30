@@ -236,13 +236,5 @@ bool get_wbsm_support_info(const cl::Device &device);
  */
 void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint);
 
-/* Helper function to check if we can export the weights to cl_image
- *
- * @param[in] tensor Weights tensor
- *
- * @return true if we can export the weights to cl_image
- */
-bool export_weights_to_cl_image(const ITensorInfo *tensor);
-
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHELPERS_H */

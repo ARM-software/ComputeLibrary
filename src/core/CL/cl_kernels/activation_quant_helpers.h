@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,12 +51,7 @@ inline TYPE lu_brelu_op(TYPE x)
 // Hard Swish Activation
 inline TYPE hard_swish_op(TYPE x)
 {
-    return (x * ((min(max((TYPE)(x + (TYPE)3.f), (TYPE)0.f), (TYPE)6.f)) * (TYPE)0.166666667f));
-}
-
-inline TYPE identiy_op(TYPE x)
-{
-    return x;
+    return  (x * ((min(max((TYPE)(x + (TYPE)3.f), (TYPE)0.f), (TYPE)6.f)) * (TYPE)0.166666667f));
 }
 
 #define ACTIVATION_OP2(op, x) op##_op(x)

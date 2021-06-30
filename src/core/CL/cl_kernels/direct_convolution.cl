@@ -32,9 +32,10 @@
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16/QASYMM8/QASYMM8_SIGNED
+ * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
  * @note The accumulation data type must be passed at compile time using -DACC_DATA_TYPE (e.g. -DDATA_TYPE_PROMOTED=half)
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
- * @note The convolution strides must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y (e.g. -DSTRIDE_X=2, -DSTRIDE_Y=2)
+ * @note The convolution strides must be passed at compile time using -DSTRIDE and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the weights must be passed at compile time using -DWEI_WIDTH and -DWEI_HEIGHT (e.g. -DWEI_WIDTH=9, -DWEI_HEIGHT=9)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The spatial dimensions of the destination tensor must be passed at compile time using -DDST_WIDTH and -DDST_HEIGHT (e.g. -DDST_WIDTH=96, -DDST_HEIGHT=64)

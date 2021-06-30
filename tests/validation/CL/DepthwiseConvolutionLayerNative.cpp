@@ -62,7 +62,7 @@ RelativeTolerance<half_float::half>  rel_tolerance_f16(half_float::half(0.01f));
 constexpr float                      abs_tolerance_f16(0.03f);
 
 /** Width values to test - Precommit */
-const auto width_values_precommit = framework::dataset::make("width", { 1U, 33U } );
+const auto width_values_precommit = framework::dataset::make("width", { 1U, 17U, 32U } );
 
 /** Width values to test - Nightly */
 const auto width_values_nightly = framework::dataset::make("width", { 53U, 47U } );
@@ -78,12 +78,6 @@ const auto channel_values_precommit = framework::dataset::make("channels", { 15U
 
 /** Channel values to test - Nightly */
 const auto channel_values_nightly = framework::dataset::make("channels", { 33U, 19U });
-
-/** Channel values to test with cl_image support - Precommit */
-const auto channel_values_export_to_cl_image_precommit = framework::dataset::make("channels", { 16U });
-
-/** Channel values to test with cl_image support - Nightly */
-const auto channel_values_export_to_cl_image_nightly = framework::dataset::make("channels", { 32U });
 
 /** Batch values to test - Precommit */
 const auto batch_values_precommit = framework::dataset::make("batch", { 1U, 2U });
@@ -121,17 +115,11 @@ const auto n0_values_precommit = framework::dataset::make("N0", {2, 4});
 /** N0 values to test - Nightly */
 const auto n0_values_nightly = framework::dataset::make("N0", {3, 8});
 
-/** N0 values to test with cl_image support - Precommit */
-const auto n0_values_export_to_cl_image_precommit = framework::dataset::make("N0", {4});
-
-/** N0 values to test with cl_image support - Nightly */
-const auto n0_values_export_to_cl_image_nightly = framework::dataset::make("N0", {8});
-
 /** Activation values to test */
 const auto act_values = framework::dataset::make("Activation",
 {
     ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.0f, 0.5f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
 });
 
 } // namespace
@@ -141,7 +129,7 @@ TEST_SUITE(DepthwiseConvolutionLayerNative)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_precommit,
                                                                                                 height_values_precommit),
                                                                                                 channel_values_precommit),
@@ -154,15 +142,14 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<fl
                                                                                                 framework::dataset::make("DataType", DataType::F32)),
                                                                                                 data_layout_values),
                                                                                                 act_values),
-                                                                                                n0_values_precommit),
-                                                                                                framework::dataset::make("ExportToCLImage", false)))
+                                                                                                n0_values_precommit))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_nightly,
                                                                                                 height_values_nightly),
                                                                                                 channel_values_nightly),
@@ -175,79 +162,16 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<fl
                                                                                                 framework::dataset::make("DataType", DataType::F32)),
                                                                                                 data_layout_values),
                                                                                                 act_values),
-                                                                                                n0_values_nightly),
-                                                                                                framework::dataset::make("ExportToCLImage", false)))
+                                                                                                n0_values_nightly))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
-
-TEST_SUITE(ExportWeightsToCLImage)
-FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_precommit,
-                                                                                                height_values_precommit),
-                                                                                                channel_values_export_to_cl_image_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                framework::dataset::make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                framework::dataset::make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                n0_values_export_to_cl_image_precommit),
-                                                                                                framework::dataset::make("ExportToCLImage", true)))
-{
-   // Validate output
-    if(_validate_output)
-    {
-        // Validate output
-        validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-
-FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_nightly,
-                                                                                                height_values_nightly),
-                                                                                                channel_values_export_to_cl_image_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                kernel_sz_values_nightly),
-                                                                                                framework::dataset::make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                framework::dataset::make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                n0_values_export_to_cl_image_nightly),
-                                                                                                framework::dataset::make("ExportToCLImage", true)))
-{
-   // Validate output
-    if(_validate_output)
-    {
-        // Validate output
-        validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-TEST_SUITE_END() // ExportWeightsToCLImage
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_precommit,
                                                                                                 height_values_precommit),
                                                                                                 channel_values_precommit),
@@ -260,15 +184,14 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<ha
                                                                                                 framework::dataset::make("DataType", DataType::F16)),
                                                                                                 data_layout_values),
                                                                                                 act_values),
-                                                                                                n0_values_precommit),
-                                                                                                framework::dataset::make("ExportToCLImage", false)))
+                                                                                                n0_values_precommit))
 {
     // Validate output
         validate(CLAccessor(_target), _reference, rel_tolerance_f16);
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_nightly,
                                                                                                 height_values_nightly),
                                                                                                 channel_values_nightly),
@@ -281,80 +204,18 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<ha
                                                                                                 framework::dataset::make("DataType", DataType::F16)),
                                                                                                 data_layout_values),
                                                                                                 act_values),
-                                                                                                n0_values_nightly),
-                                                                                                framework::dataset::make("ExportToCLImage", false)))
+                                                                                                n0_values_nightly))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
 }
-TEST_SUITE(ExportWeightsToCLImage)
-FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_precommit,
-                                                                                                height_values_precommit),
-                                                                                                channel_values_export_to_cl_image_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                framework::dataset::make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                framework::dataset::make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                n0_values_export_to_cl_image_precommit),
-                                                                                                framework::dataset::make("ExportToCLImage", true)))
-{
-   // Validate output
-    if(_validate_output)
-    {
-        // Validate output
-        validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-
-FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_nightly,
-                                                                                                height_values_nightly),
-                                                                                                channel_values_export_to_cl_image_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                kernel_sz_values_nightly),
-                                                                                                framework::dataset::make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                framework::dataset::make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                n0_values_export_to_cl_image_nightly),
-                                                                                                framework::dataset::make("ExportToCLImage", true)))
-{
-   // Validate output
-    if(_validate_output)
-    {
-        // Validate output
-        validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-TEST_SUITE_END() // ExportWeightsToCLImage
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 TEST_SUITE(DepthMultiplier)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_precommit,
                                                                                                 height_values_precommit),
                                                                                                 channel_values_precommit),
@@ -367,15 +228,14 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<fl
                                                                                                 framework::dataset::make("DataType", DataType::F32)),
                                                                                                 data_layout_values),
                                                                                                 act_values),
-                                                                                                framework::dataset::make("N0", 1)),
-                                                                                                framework::dataset::make("ExportToCLImage", false)))
+                                                                                                framework::dataset::make("N0", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_nightly,
                                                                                                 height_values_nightly),
                                                                                                 channel_values_nightly),
@@ -388,8 +248,7 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<fl
                                                                                                 framework::dataset::make("DataType", DataType::F32)),
                                                                                                 data_layout_values),
                                                                                                 act_values),
-                                                                                                framework::dataset::make("N0", 1)),
-                                                                                                framework::dataset::make("ExportToCLImage", false)))
+                                                                                                framework::dataset::make("N0", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
@@ -398,7 +257,7 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_precommit,
                                                                                                 height_values_precommit),
                                                                                                 channel_values_precommit),
@@ -411,15 +270,14 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<ha
                                                                                                 framework::dataset::make("DataType", DataType::F16)),
                                                                                                 data_layout_values),
                                                                                                 act_values),
-                                                                                                framework::dataset::make("N0", 1)),
-                                                                                                framework::dataset::make("ExportToCLImage", false)))
+                                                                                                framework::dataset::make("N0", 1)))
 {
     // Validate output
         validate(CLAccessor(_target), _reference, rel_tolerance_f16);
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                 width_values_nightly,
                                                                                                 height_values_nightly),
                                                                                                 channel_values_nightly),
@@ -432,8 +290,7 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<ha
                                                                                                 framework::dataset::make("DataType", DataType::F16)),
                                                                                                 data_layout_values),
                                                                                                 act_values),
-                                                                                                framework::dataset::make("N0", 1)),
-                                                                                                framework::dataset::make("ExportToCLImage", false)))
+                                                                                                framework::dataset::make("N0", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);

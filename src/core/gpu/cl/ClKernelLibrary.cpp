@@ -223,13 +223,23 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "crop_tensor", "crop_tensor.cl" },
     { "deconvolution_reshape", "deconvolution_layer.cl" },
     { "deconvolution_upsample", "deconvolution_layer.cl" },
+    { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_nhwc", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_nhwc_stride1", "depthwise_convolution.cl" },
+    { "dwc_MxN_native_fp_nhwc", "depthwise_convolution.cl" },
+    { "dwc_MxN_native_quantized8_nhwc", "depthwise_convolution_quantized.cl" },
+    { "dwc_3x3_native_quantized8_nchw", "depthwise_convolution_quantized.cl" },
+    { "dwc_3x3_native_quantized8_dot8_nchw", "depthwise_convolution_quantized.cl" },
     { "depth_to_space_nchw", "depth_to_space.cl" },
     { "depth_to_space_nhwc", "depth_to_space.cl" },
+    { "depthwise_convolution_3x3_stridex1_stridey1_f16", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_stridex2_stridey2_f16", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_stridex1_stridey1_f32", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_stridex2_stridey2_f32", "depthwise_convolution.cl" },
     { "dequantization_layer", "dequantization_layer.cl" },
     { "dequantization_layer_per_channel_nhwc", "dequantization_layer.cl" },
     { "dequantization_layer_per_channel_nchw", "dequantization_layer.cl" },
-    { "dwc_native_fp_nhwc", "dwc_native_fp_nhwc.cl" },
-    { "dwc_native_quantized_nhwc", "dwc_native_quantized_nhwc.cl" },
     { "direct_convolution_nhwc", "direct_convolution.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
     { "direct_convolution1x1_f32_bifrost", "direct_convolution1x1.cl" },
@@ -565,6 +575,14 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/depth_to_space.clembed"
     },
     {
+        "depthwise_convolution.cl",
+#include "./cl_kernels/depthwise_convolution.clembed"
+    },
+    {
+        "depthwise_convolution_quantized.cl",
+#include "./cl_kernels/depthwise_convolution_quantized.clembed"
+    },
+    {
         "dequantization_layer.cl",
 #include "./cl_kernels/dequantization_layer.clembed"
     },
@@ -587,14 +605,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "direct_convolution.cl",
 #include "./cl_kernels/direct_convolution.clembed"
-    },
-    {
-        "dwc_native_fp_nhwc.cl",
-#include "./cl_kernels/dwc_native_fp_nhwc.clembed"
-    },
-    {
-        "dwc_native_quantized_nhwc.cl",
-#include "./cl_kernels/dwc_native_quantized_nhwc.clembed"
     },
     {
         "elementwise_operation.cl",

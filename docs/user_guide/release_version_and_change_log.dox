@@ -62,7 +62,7 @@ v21.05 Public major release
   - @ref NEDeconvolutionLayer
  - Remove padding from OpenCL kernels:
    - @ref CLL2NormalizeLayerKernel
-   - CLDepthwiseConvolutionLayer3x3NHWCKernel
+   - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
    - @ref CLNormalizationLayerKernel
    - @ref CLNormalizePlanarYUVLayerKernel
    - @ref opencl::kernels::ClMulKernel
@@ -271,7 +271,7 @@ v20.11 Public major release
    - @ref CLDepthwiseConvolutionLayerNativeKernel
    - CLDepthConvertLayerKernel
    - CLCopyKernel
-   - CLDepthwiseConvolutionLayer3x3NHWCKernel
+   - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
    - CLActivationLayerKernel
    - CLWinogradFilterTransformKernel
    - CLWidthConcatenateLayerKernel
@@ -1032,10 +1032,10 @@ v18.11 Public major release
     - CLWidthConcatenateLayer
     - CLFlattenLayer
     - @ref CLSoftmaxLayer
- - Add dot product support for CLDepthwiseConvolutionLayer3x3NHWCKernel non-unit stride
+ - Add dot product support for @ref CLDepthwiseConvolutionLayer3x3NHWCKernel non-unit stride
  - Add SVE support
  - Fused batch normalization into convolution layer weights in @ref CLFuseBatchNormalization
- - Fuses activation in CLDepthwiseConvolutionLayer3x3NCHWKernel, CLDepthwiseConvolutionLayer3x3NHWCKernel and @ref NEGEMMConvolutionLayer
+ - Fuses activation in @ref CLDepthwiseConvolutionLayer3x3NCHWKernel, @ref CLDepthwiseConvolutionLayer3x3NHWCKernel and @ref NEGEMMConvolutionLayer
  - Added NHWC data layout support to:
     - @ref CLChannelShuffleLayer
     - @ref CLDeconvolutionLayer
@@ -1045,7 +1045,7 @@ v18.11 Public major release
     - NEDepthwiseConvolutionLayer3x3Kernel
     - CLPixelWiseMultiplicationKernel
  - Added FP16 support to the following kernels:
-    - CLDepthwiseConvolutionLayer3x3NHWCKernel
+    - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
     - NEDepthwiseConvolutionLayer3x3Kernel
     - @ref CLNormalizePlanarYUVLayerKernel
     - @ref CLWinogradConvolutionLayer (5x5 kernel)
@@ -1286,7 +1286,7 @@ v17.09 Public major release
     - NEReshapeLayerKernel / @ref NEReshapeLayer
 
  - New OpenCL kernels / functions:
-    - CLDepthwiseConvolutionLayer3x3NCHWKernel CLDepthwiseConvolutionLayer3x3NHWCKernel CLDepthwiseIm2ColKernel CLDepthwiseVectorToTensorKernel CLDepthwiseWeightsReshapeKernel / CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer CLDepthwiseSeparableConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer3x3NCHWKernel @ref CLDepthwiseConvolutionLayer3x3NHWCKernel CLDepthwiseIm2ColKernel CLDepthwiseVectorToTensorKernel CLDepthwiseWeightsReshapeKernel / CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer CLDepthwiseSeparableConvolutionLayer
     - CLDequantizationLayerKernel / CLDequantizationLayer
     - CLDirectConvolutionLayerKernel / @ref CLDirectConvolutionLayer
     - CLFlattenLayer

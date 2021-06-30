@@ -275,7 +275,7 @@ public:
 
         if(padding_valid)
         {
-            _conv_info = PadStrideInfo(stride.width, stride.height);
+            _conv_info = PadStrideInfo();
         }
         else
         {
@@ -399,15 +399,14 @@ class DepthwiseConvolutionLayerNativeConfigurableValidationFixture : public Dept
 public:
     template <typename...>
     void setup(size_t width, size_t height, size_t channel, size_t batch, Size2D kernel_size, size_t depth_multiplier, Size2D dilation, Size2D stride, bool padding_valid, DataType data_type,
-               DataLayout data_layout, const ActivationLayerInfo &act_info, unsigned int n0, bool export_to_cl_image)
+               DataLayout data_layout, const ActivationLayerInfo &act_info, unsigned int n0)
     {
-        _dilation           = dilation;
-        _depth_multiplier   = depth_multiplier;
-        _data_type          = data_type;
-        _data_layout        = data_layout;
-        _act_info           = act_info;
-        _n0                 = n0;
-        _export_to_cl_image = export_to_cl_image;
+        _dilation         = dilation;
+        _depth_multiplier = depth_multiplier;
+        _data_type        = data_type;
+        _data_layout      = data_layout;
+        _act_info         = act_info;
+        _n0               = n0;
 
         _input_shape   = TensorShape(width, height, channel, batch);
         _weights_shape = TensorShape(kernel_size.width, kernel_size.height, channel * _depth_multiplier);
@@ -415,11 +414,11 @@ public:
 
         if(padding_valid)
         {
-            _conv_info = calculate_same_pad(_input_shape, _weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, _dilation);
+            _conv_info = PadStrideInfo();
         }
         else
         {
-            _conv_info = PadStrideInfo(stride.width, stride.height);
+            _conv_info = calculate_same_pad(_input_shape, _weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, _dilation);
         }
     }
 
@@ -440,26 +439,14 @@ public:
         _biases  = create_tensor<TensorType>(_biases_shape, _data_type, 1, QuantizationInfo(), _data_layout);
         _target  = create_tensor<TensorType>(TensorShape(), _data_type, 1, QuantizationInfo(), _data_layout);
 
-        DWCComputeKernelInfo dwc_info;
-        dwc_info.n0                         = _n0;
-        dwc_info.m0                         = _conv_info.stride().first == 1 && _dilation.x() == 1 ? 8 : 1;
-        dwc_info.export_weights_to_cl_image = _export_to_cl_image;
+        DWCWeightsKernelInfo dwc_weights_info;
+        dwc_weights_info.n0 = _n0;
 
-#if defined(ARM_COMPUTE_OPENCL_ENABLED)
-        if(_export_to_cl_image)
-        {
-            _validate_output |= image2d_from_buffer_supported(CLKernelLibrary::get().get_device());
-            _validate_output |= (get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) != 0);
-        }
-#endif // ARM_COMPUTE_OPENCL_ENABLED
-
-        const ConvolutionInfo conv_kernel_info
-        {
-            _conv_info, _depth_multiplier, _act_info, _dilation
-        };
+        DWCKernelInfo dwc_info;
+        dwc_info.activation_info = _act_info;
 
         // Create Depthwise Convolution configure function
-        _dwc.configure(&_src, &_weights, &_biases, &_target, dwc_info, conv_kernel_info);
+        _dwc.configure(&_src, &_weights, &_biases, &_target, dwc_weights_info, dwc_info, _conv_info, _depth_multiplier, _dilation);
 
         ARM_COMPUTE_ASSERT(_src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(_weights.info()->is_resizable());
@@ -469,8 +456,7 @@ public:
 
     void allocate_and_run_target()
     {
-        add_padding_x({ &_src, &_biases, &_target }, _data_layout);
-        add_padding_x({ &_weights }, _data_layout, _export_to_cl_image); // Don't add left padding if cl image will be used
+        add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
 
         // Allocate tensors
         _src.allocator()->allocate();
@@ -493,10 +479,7 @@ public:
         _target.info()->set_data_layout(_data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
 
         // Compute function
-        if(_validate_output)
-        {
-            _dwc.run();
-        }
+        _dwc.run();
 
         // Reinstating original data layout for the test suite to properly check the values
         _target.info()->set_data_layout(_data_layout);
@@ -514,10 +497,7 @@ public:
 
         const ConvolutionInfo info{ _conv_info, _depth_multiplier, _act_info, _dilation };
         const TensorShape     dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), info);
-        if(_validate_output)
-        {
-            _reference = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
-        }
+        _reference                      = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
     }
 
 protected:
@@ -561,8 +541,6 @@ protected:
     Size2D              _dilation{};
     unsigned int        _depth_multiplier{};
     unsigned int        _n0{};
-    bool                _export_to_cl_image{};
-    bool                _validate_output{ true };
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>

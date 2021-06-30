@@ -25,40 +25,6 @@
 // *INDENT-OFF*
 // clang-format off
 
-#define TILE_VECTOR_SIZE1 1
-#define TILE_VECTOR_SIZE2 2
-#define TILE_VECTOR_SIZE3 3
-#define TILE_VECTOR_SIZE4 4
-#define TILE_VECTOR_SIZE5 8
-#define TILE_VECTOR_SIZE6 8
-#define TILE_VECTOR_SIZE7 8
-#define TILE_VECTOR_SIZE8 8
-#define TILE_VECTOR_SIZE9 16
-#define TILE_VECTOR_SIZE10 16
-#define TILE_VECTOR_SIZE11 16
-#define TILE_VECTOR_SIZE12 16
-#define TILE_VECTOR_SIZE13 16
-#define TILE_VECTOR_SIZE14 16
-#define TILE_VECTOR_SIZE15 16
-#define TILE_VECTOR_SIZE16 16
-
-#define TILE_VECTOR_TYPE1(DATA_TYPE) DATA_TYPE##1
-#define TILE_VECTOR_TYPE2(DATA_TYPE) DATA_TYPE##2
-#define TILE_VECTOR_TYPE3(DATA_TYPE) DATA_TYPE##3
-#define TILE_VECTOR_TYPE4(DATA_TYPE) DATA_TYPE##4
-#define TILE_VECTOR_TYPE5(DATA_TYPE) DATA_TYPE##8
-#define TILE_VECTOR_TYPE6(DATA_TYPE) DATA_TYPE##8
-#define TILE_VECTOR_TYPE7(DATA_TYPE) DATA_TYPE##8
-#define TILE_VECTOR_TYPE8(DATA_TYPE) DATA_TYPE##8
-#define TILE_VECTOR_TYPE9(DATA_TYPE) DATA_TYPE##16
-#define TILE_VECTOR_TYPE10(DATA_TYPE) DATA_TYPE##16
-#define TILE_VECTOR_TYPE11(DATA_TYPE) DATA_TYPE##16
-#define TILE_VECTOR_TYPE12(DATA_TYPE) DATA_TYPE##16
-#define TILE_VECTOR_TYPE13(DATA_TYPE) DATA_TYPE##16
-#define TILE_VECTOR_TYPE14(DATA_TYPE) DATA_TYPE##16
-#define TILE_VECTOR_TYPE15(DATA_TYPE) DATA_TYPE##16
-#define TILE_VECTOR_TYPE16(DATA_TYPE) DATA_TYPE##16
-
 /** Tile object
  *  A tile object is a 2D memory block and can be accessed using the following syntax:
  *  -# a[m0].v    = access the the vector at row "m0" (OpenCL vector)
@@ -72,8 +38,8 @@
 #define TILE(DATA_TYPE, H, W, BASENAME) TILE_STR(DATA_TYPE, H, W, BASENAME)
 #define TILE_STR(DATA_TYPE, H, W, BASENAME) \
     union {                                 \
-        DATA_TYPE                      s[TILE_VECTOR_SIZE##W];                  \
-        TILE_VECTOR_TYPE##W(DATA_TYPE) v;                     \
+        DATA_TYPE    s[W];                  \
+        DATA_TYPE##W v;                     \
     } BASENAME[H]
 
 #define TENSOR4D_IMAGE(name)          \
@@ -269,86 +235,51 @@
  *
  *  @note Performs: c += dot(a, b)
  *
- * @param[in] A_DATA_TYPE A (lhs) data type
- * @param[in] B_DATA_TYPE B (rhs) data type
- * @param[in] C_DATA_TYPE C (accumulator) data type
- * @param[in] K0          Number of accumulations
- * @param[in] a           OpenCL vector a
- * @param[in] b           OpenCL vector b
- * @param[in] c           Scalar variable c
+ * @param[in] DST_DATA_TYPE Accumulator data type
+ * @param[in] K0            Number of accumulations
+ * @param[in] a             OpenCL vector a
+ * @param[in] b             OpenCL vector b
+ * @param[in] c             Scalar variable c
  */
-#define DOT_PRODUCT_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, K0, a, b, c) DOT_PRODUCT_INTEGER8_STR(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, K0, a, b, c)
-#define DOT_PRODUCT_INTEGER8_STR(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, K0, a, b, c) DOT_PRODUCT##K0##_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c)
-#define DOT_PRODUCT1_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
+#define DOT_PRODUCT_INTEGER8(DST_DATA_TYPE, K0, a, b, c) DOT_PRODUCT_INTEGER8_STR(DST_DATA_TYPE, K0, a, b, c)
+#define DOT_PRODUCT_INTEGER8_STR(DST_DATA_TYPE, K0, a, b, c) DOT_PRODUCT##K0##_INTEGER8(DST_DATA_TYPE, a, b, c)
+#define DOT_PRODUCT1_INTEGER8(DST_DATA_TYPE, a, b, c) \
     ({                                                \
-        c += (C_DATA_TYPE)(a) * (C_DATA_TYPE)(b);     \
+        c += (DST_DATA_TYPE)a * (DST_DATA_TYPE)b;     \
+    })
+#define DOT_PRODUCT2_INTEGER8(DST_DATA_TYPE, a, b, c)   \
+    ({                                                  \
+        c += (DST_DATA_TYPE)a.s0 * (DST_DATA_TYPE)b.s0; \
+        c += (DST_DATA_TYPE)a.s1 * (DST_DATA_TYPE)b.s1; \
+    })
+#define DOT_PRODUCT3_INTEGER8(DST_DATA_TYPE, a, b, c)   \
+    ({                                                  \
+        DOT_PRODUCT2_INTEGER8(DST_DATA_TYPE, a, b, c);  \
+        c += (DST_DATA_TYPE)a.s2 * (DST_DATA_TYPE)b.s2; \
     })
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
-#define DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c = arm_dot_acc((A_DATA_TYPE##4)((a).s01, (A_DATA_TYPE##2)(0)), (B_DATA_TYPE##4)(((b).s01), (B_DATA_TYPE##2)(0)), (c));
-#define DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c = arm_dot_acc((A_DATA_TYPE##4)((a).s012, (A_DATA_TYPE)0), (B_DATA_TYPE##4)(((b).s012), (B_DATA_TYPE)0), (c));
-#define DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c = arm_dot_acc((a), (b), (c));
+#define DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, x, y, val) val = arm_dot_acc((x), (y), (val));
 #elif defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8) // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
-#define DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += arm_dot((A_DATA_TYPE##4)((a).s01, (A_DATA_TYPE##2)(0), ), (B_DATA_TYPE##4)(((b).s01), (B_DATA_TYPE##2)(0));
-#define DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += arm_dot((A_DATA_TYPE##4)((a).s012, (A_DATA_TYPE)0), (B_DATA_TYPE##4)(((b).s012), (B_DATA_TYPE)0);
-#define DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += arm_dot((a), (b));
+#define DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, x, y, val) val += arm_dot((x), (y));
 #else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
-#define DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c)   \
-    ({                                                  \
-        c += (C_DATA_TYPE)(a).s0 * (C_DATA_TYPE)(b).s0; \
-        c += (C_DATA_TYPE)(a).s1 * (C_DATA_TYPE)(b).s1; \
-    })
-#define DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c)   \
-    ({                                                  \
-        DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c);  \
-        c += (C_DATA_TYPE)(a).s2 * (C_DATA_TYPE)(b).s2; \
-    })
-#define DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, x, y, val)   \
+#define DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, x, y, val)   \
     ({                                                    \
-        val += (C_DATA_TYPE)(x).s0 * (C_DATA_TYPE)(y).s0; \
-        val += (C_DATA_TYPE)(x).s1 * (C_DATA_TYPE)(y).s1; \
-        val += (C_DATA_TYPE)(x).s2 * (C_DATA_TYPE)(y).s2; \
-        val += (C_DATA_TYPE)(x).s3 * (C_DATA_TYPE)(y).s3; \
+        val += (DST_DATA_TYPE)x.s0 * (DST_DATA_TYPE)y.s0; \
+        val += (DST_DATA_TYPE)x.s1 * (DST_DATA_TYPE)y.s1; \
+        val += (DST_DATA_TYPE)x.s2 * (DST_DATA_TYPE)y.s2; \
+        val += (DST_DATA_TYPE)x.s3 * (DST_DATA_TYPE)y.s3; \
     })
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
-#define DOT_PRODUCT5_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
-    ({                                                \
-        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s0123), ((b).s0123), c);     \
-        DOT_PRODUCT1_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s4), ((b).s4), c);     \
+#define DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, a, b, c)            \
+    ({                                                           \
+        DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, (a.lo), (b.lo), c); \
+        DOT_PRODUCT4_INTEGER8(DST_DATA_TYPE, (a.hi), (b.hi), c); \
     })
-#define DOT_PRODUCT6_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
-    ({                                                \
-        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s0123), ((b).s0123), c);     \
-        DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s45), ((b).s45), c);     \
+#define DOT_PRODUCT16_INTEGER8(DST_DATA_TYPE, a, b, c)           \
+    ({                                                           \
+        DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, (a.lo), (b.lo), c); \
+        DOT_PRODUCT8_INTEGER8(DST_DATA_TYPE, (a.hi), (b.hi), c); \
     })
-#define DOT_PRODUCT7_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
-    ({                                                \
-        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s0123), ((b).s0123), c);     \
-        DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s456), ((b).s456), c);     \
-    })
-#define DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
-    ({                                                \
-        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).lo), ((b).lo), c);     \
-        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).hi), ((b).hi), c);     \
-    })
-#define DOT_PRODUCT16_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
-    ({                                                 \
-        DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).lo), ((b).lo), c);      \
-        DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).hi), ((b).hi), c);      \
-    })
-
-/** Dot product integet 8bit function
- *
- *  @note Performs: c += dot(a, b)
- *
- * @param[in] A_DATA_TYPE A (lhs) data type
- * @param[in] B_DATA_TYPE B (rhs) data type
- * @param[in] C_DATA_TYPE C (accumulator) data type
- * @param[in] K0          Number of accumulations
- * @param[in] a           OpenCL vector a
- * @param[in] c           Scalar variable c
- */
-#define REDUCE_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, K0, a, c) REDUCE_INTEGER8_STR(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, K0, a, c)
-#define REDUCE_INTEGER8_STR(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, K0, a, c) DOT_PRODUCT_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, K0, a, (TILE_VECTOR_TYPE##K0(B_DATA_TYPE))1, c)
 
 /** Load a vector from global memory (tensor)
  *
@@ -365,7 +296,7 @@
 #define V_LOAD_STR(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, Y, STRIDE_Y) V_LOAD_##TENSOR_TYPE(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y)
 #define V_LOAD_BUFFER(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y) \
     VLOAD(WIDTH)                                                \
-    (0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (Y) * (STRIDE_Y)))
+    (0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (Y)*STRIDE_Y))
 #define V_LOAD_IMAGE(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y) READ_IMAGE2D(DATA_TYPE, CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(WIDTH), TENSOR##_img, (X) / 4, (Y))
 
 /** Load a tile from global memory (tensor)
@@ -446,51 +377,6 @@
                 }                                                                                                                                     \
             })                                                                                                                                        \
         })                                                                                                                                            \
-    })
-
-/** Load a tile from global memory (tensor) when the tensor is stored using a NHWC layout with dilation for the X and Y increments
- *
- * @param[in]  DATA_TYPE      Data type
- * @param[in]  TILE_HEIGHT    Number of elements to load from Y (height) dimension
- * @param[in]  TILE_WIDTH     Number of elements to load from X (width) dimension
- * @param[in]  TILE_CHANNELS  Number of elements to load from C (channel) dimension
- * @param[in]  TENSOR_TYPE    Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image). Currently BUFFER only is supported
- *                            In case of cl_image, only TILE_CHANNELS multiples of 4 are supported (4, 8, 16)
- * @param[in]  TENSOR         Tensor basename
- * @param[in]  B              Starting batch index
- * @param[in]  Y              Starting Y index
- * @param[in]  X              Starting X index
- * @param[in]  C              Starting C index
- * @param[in]  TENSOR_HEIGHT  Number of elements to load from Y (height) dimension
- * @param[in]  TENSOR_WIDTH   Number of elements to load from X (width) dimension
- * @param[in]  DILATION_X     Dilation for the X increment
- * @param[in]  DILATION_Y     Dilation for the Y increment
- * @param[in]  STRIDE_Y       Stride Y (in bytes)
- * @param[in]  BOUNDARY_CHECK Boundary check flag. If true, it checks for any out-of-bound reads
- * @param[out] dst            Output tile
- */
-#define T_LOAD_NHWC_WITH_DILATION(DATA_TYPE, TILE_HEIGHT, TILE_WIDTH, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, DILATION_X, DILATION_Y, STRIDE_Y, BOUNDARY_CHECK, dst)         \
-    ({ \
-        LOOP_UNROLLING(int, _yk, 0, 1, TILE_HEIGHT, \
-        { \
-            LOOP_UNROLLING(int, _xk, 0, 1, TILE_WIDTH, \
-            { \
-                int _src_y = (X) + _xk * (DILATION_X) + ((Y) + _yk * (DILATION_Y)) * (TENSOR_WIDTH); \
-                _src_y    += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT); \
-                bool _src_valid_y = (((X) + _xk * (DILATION_X)) >= 0) && (((X) + _xk * (DILATION_X)) < (int)(TENSOR_WIDTH)) && (((Y) + _yk * (DILATION_Y)) >= 0) && (((Y) + _yk * (DILATION_Y)) < (int)(TENSOR_HEIGHT)); \
-                if(!(BOUNDARY_CHECK)) \
-                { \
-                    dst[_xk + _yk * (TILE_WIDTH)].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y); \
-                } \
-                else \
-                { \
-                    if(_src_valid_y) \
-                    { \
-                        dst[_xk + _yk * (TILE_WIDTH)].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y); \
-                    }                                                                                                                                                                                                 \
-                } \
-            })                                                                                                                                                                                                             \
-        })                                                                                                                                                                                                             \
     })
 
 /** Load a tile from global memory (tensor) when the tensor is stored using a NHWC layout using indirect X and Y coordinates
@@ -593,160 +479,40 @@
                     dst[_m0].s[_n0] += ((ACC_DATA_TYPE)rhs[_n0].s[_k0] * (ACC_DATA_TYPE)SRC_OFFSET); \
                 })                                                                                   \
             })                                                                                       \
-        })                                                                                          \
+        });                                                                                          \
     })
 
-/** 8-bit quantization with fixed-point scale
- *
- * @param[in]  SRC_DATA_TYPE     SRC data type
- * @param[in]  DST_DATA_TYPE     DST data type
- * @param[in]  QUANTIZATION_TYPE Quantization type (PER_TENSOR or PER_CHANNEL)
- * @param[in]  M0                Number of src/dst rows
- * @param[in]  N0                Number of src/dst columns
- * @param[in]  DST_OFFSET        Quantization offset used for both the per-tensor and per-channel quantization
- * @param[in]  DST_SHIFT         Quantization shift for the per-tensor quantization
- * @param[in]  DST_MULTIPLIER    Quantization multiplier for the per-tensor quantization
- * @param[in]  src               Input tile
- * @param[in]  dst_multipliers   Output multipliers tile for the per-channel quantization
- * @param[in]  dst_shifts        Output shift tile for the per-channel quantization
- * @param[out] dst               Output tile
- */
-#define T_QUANTIZE8(SRC_DATA_TYPE, DST_DATA_TYPE, QUANTIZATION_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst_multipliers, dst_shifts, dst) T_QUANTIZE8_STR(SRC_DATA_TYPE, DST_DATA_TYPE, QUANTIZATION_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst_multipliers, dst_shifts, dst)
-#define T_QUANTIZE8_STR(SRC_DATA_TYPE, DST_DATA_TYPE, QUANTIZATION_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst_multipliers, dst_shifts, dst) T_QUANTIZE8_##QUANTIZATION_TYPE(SRC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst_multipliers, dst_shifts, dst)
-
-/** 8-bit per-tensor quantization with fixed-point scale
- *
- * @param[in]  SRC_DATA_TYPE   SRC data type
- * @param[in]  DST_DATA_TYPE   DST data type
- * @param[in]  M0              Number of src/dst rows
- * @param[in]  N0              Number of src/dst columns
- * @param[in]  DST_OFFSET      Quantization offset
- * @param[in]  DST_SHIFT       Quantization shift for the per-tensor quantization
- * @param[in]  DST_MULTIPLIER  Quantization multiplier for the per-tensor quantization
- * @param[in]  src             Input tile
- * @param[in]  dst_multipliers (unused)
- * @param[in]  dst_shifts      (unused)
- * @param[out] dst             Output tile
- */
-#define T_QUANTIZE8_PER_TENSOR(SRC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst_multipliers, dst_shifts, dst)                          \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, 1, M0, \
-        { \
-            LOOP_UNROLLING(int, _n0, 0, 1, N0, \
-            { \
-                SRC_DATA_TYPE _tmp = 0; \
-                SRC_DATA_TYPE _src = src[_m0].s[_n0]; \
-                _src *= select((SRC_DATA_TYPE)1, ((SRC_DATA_TYPE)1 << (SRC_DATA_TYPE)(-DST_SHIFT)), ((SRC_DATA_TYPE)DST_SHIFT < (SRC_DATA_TYPE)0)); \
-                SRC_DATA_TYPE overflow = _src == DST_MULTIPLIER && _src == INT_MIN; \
-                long a_64 = (long)(_src); \
-                long b_64 = (long)(DST_MULTIPLIER); \
-                long ab_64 = a_64 * b_64; \
-                long mask1 = 1 << 30; \
-                long mask2 = 1 - (1 << 30); \
-                long is_positive_or_zero = ab_64 >= 0; \
-                long nudge = select(mask2, mask1, is_positive_or_zero); \
-                SRC_DATA_TYPE ab_x2_high32 = CONVERT((ab_64 + nudge) / (long)(1ll << 31), SRC_DATA_TYPE); \
-                _tmp = select(ab_x2_high32, (SRC_DATA_TYPE)INT_MAX, overflow); \
-                if(DST_SHIFT >= 0) \
-                { \
-                    long mask = ((((int)1) << DST_SHIFT) - (int)1); \
-                    long threshold = _tmp < (int)0 ? (mask >> 1) + (long)1 : (mask >> 1) + 0; \
-                    _tmp = (_tmp & mask) > threshold ? (_tmp >> DST_SHIFT) + (int)1 : (_tmp >> DST_SHIFT); \
-                } \
-                _tmp += DST_OFFSET; \
-                dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
-            })                                                                                                                                          \
-        })                                                                                                                                          \
-    })
-
-/** 8-bit per-channel quantization with fixed-point scale
- *
- * @param[in]  SRC_DATA_TYPE   SRC data type
- * @param[in]  DST_DATA_TYPE   DST data type
- * @param[in]  M0              Number of src/dst rows
- * @param[in]  N0              Number of src/dst columns
- * @param[in]  DST_OFFSET      Quantization offset
- * @param[in]  DST_SHIFT       (unused)
- * @param[in]  DST_MULTIPLIER  (unused)
- * @param[in]  src             Input tile
- * @param[in]  dst_multipliers Output multipliers tile for the per-channel quantization
- * @param[in]  dst_shifts      Output shift tile for the per-channel quantization
- * @param[out] dst             Output tile
- */
-#define T_QUANTIZE8_PER_CHANNEL(SRC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst_multipliers, dst_shifts, dst)                          \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, 1, M0, \
-        { \
-            LOOP_UNROLLING(int, _n0, 0, 1, N0, \
-            { \
-                SRC_DATA_TYPE _tmp = 0; \
-                SRC_DATA_TYPE _src = src[_m0].s[_n0]; \
-                SRC_DATA_TYPE _dst_multiplier = dst_multipliers[0].s[_n0]; \
-                SRC_DATA_TYPE _dst_shift = dst_shifts[0].s[_n0]; \
-                _src *= select((SRC_DATA_TYPE)1, ((SRC_DATA_TYPE)1 << (SRC_DATA_TYPE)(-_dst_shift)), ((SRC_DATA_TYPE)_dst_shift < (SRC_DATA_TYPE)0)); \
-                SRC_DATA_TYPE overflow = _src == _dst_multiplier && _src == INT_MIN; \
-                long a_64 = (long)(_src); \
-                long b_64 = (long)(_dst_multiplier); \
-                long ab_64 = a_64 * b_64; \
-                long mask1 = 1 << 30; \
-                long mask2 = 1 - (1 << 30); \
-                long is_positive_or_zero = ab_64 >= 0; \
-                long nudge = select(mask2, mask1, is_positive_or_zero); \
-                SRC_DATA_TYPE ab_x2_high32 = CONVERT((ab_64 + nudge) / (long)(1ll << 31), SRC_DATA_TYPE); \
-                _tmp = select(ab_x2_high32, (SRC_DATA_TYPE)INT_MAX, overflow); \
-                if(_dst_shift >= 0) \
-                { \
-                    long mask = ((((int)1) << _dst_shift) - (int)1); \
-                    long threshold = _tmp < (int)0 ? (mask >> 1) + (long)1 : (mask >> 1) + 0; \
-                    _tmp = (_tmp & mask) > threshold ? (_tmp >> _dst_shift) + (int)1 : (_tmp >> _dst_shift); \
-                } \
-                _tmp += DST_OFFSET; \
-                dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
-            })                                                                                                                                          \
-        })                                                                                                                                         \
-    })
-
-/** Quantized the 8-bit tile with fixed-point scale for asymmetric
+/** Quantized the tile (ASYMMETRIC) with fixed-point scale
  *
  * @param[in]  SRC_DATA_TYPE  SRC data type
  * @param[in]  DST_DATA_TYPE  DST data type
  * @param[in]  M0             Number of src/dst rows
  * @param[in]  N0             Number of src/dst columns
- * @param[in]  DST_OFFSET     Quantization offset used for both the per-tensor and per-channel quantization
- * @param[in]  DST_SHIFT      Quantization shift for the per-tensor quantization
- * @param[in]  DST_MULTIPLIER Quantization multiplier for the per-tensor quantization
+ * @param[in]  DST_OFFSET     Quantization offset
+ * @param[in]  DST_SHIFT      Quantization shift
+ * @param[in]  DST_MULTIPLIER Quantization multiplier
  * @param[in]  src            Input tile
  * @param[out] dst            Output tile
  */
-#define T_QUANTIZE8_ASYMMETRIC(SRC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst)                          \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, 1, M0, \
-        { \
-            LOOP_UNROLLING(int, _n0, 0, 1, N0, \
-            { \
-                SRC_DATA_TYPE _tmp = 0; \
-                SRC_DATA_TYPE _src = src[_m0].s[_n0]; \
-                _src *= select((SRC_DATA_TYPE)1, ((SRC_DATA_TYPE)1 << (SRC_DATA_TYPE)(-DST_SHIFT)), ((SRC_DATA_TYPE)DST_SHIFT < (SRC_DATA_TYPE)0)); \
-                SRC_DATA_TYPE overflow = _src == DST_MULTIPLIER && _src == INT_MIN; \
-                long a_64 = (long)(_src); \
-                long b_64 = (long)(DST_MULTIPLIER); \
-                long ab_64 = a_64 * b_64; \
-                long mask1 = 1 << 30; \
-                long mask2 = 1 - (1 << 30); \
-                long is_positive_or_zero = ab_64 >= 0; \
-                long nudge = select(mask2, mask1, is_positive_or_zero); \
-                SRC_DATA_TYPE ab_x2_high32 = CONVERT((ab_64 + nudge) / (long)(1ll << 31), SRC_DATA_TYPE); \
-                _tmp = select(ab_x2_high32, (SRC_DATA_TYPE)INT_MAX, overflow); \
-                if(DST_SHIFT >= 0) \
-                { \
-                    long mask = ((((int)1) << DST_SHIFT) - (int)1); \
-                    long threshold = _tmp < (int)0 ? (mask >> 1) + (long)1 : (mask >> 1) + 0; \
-                    _tmp = (_tmp & mask) > threshold ? (_tmp >> DST_SHIFT) + (int)1 : (_tmp >> DST_SHIFT); \
-                } \
-                _tmp += DST_OFFSET; \
-                dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
-            })                                                                                                                                          \
-        })                                                                                                                                          \
+#define T_QUANTIZE8_ASYMMETRIC(SRC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, src, dst)      \
+    ({                                                                                                                     \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                                                                                 \
+        {                                                                                                                  \
+            LOOP_UNROLLING(int, _n0, 0, 1, N0,                                                                             \
+            {                                                                                                              \
+                SRC_DATA_TYPE _tmp = 0;                                                                                    \
+                if(DST_SHIFT < 0)                                                                                          \
+                {                                                                                                          \
+                    _tmp = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(src[_m0].s[_n0], DST_MULTIPLIER, DST_SHIFT, 1); \
+                }                                                                                                          \
+                else                                                                                                       \
+                {                                                                                                          \
+                    _tmp = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(src[_m0].s[_n0], DST_MULTIPLIER, DST_SHIFT, 1);    \
+                }                                                                                                          \
+                _tmp += DST_OFFSET;                                                                                        \
+                dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                        \
+            })                                                                                                             \
+        })                                                                                                                 \
     })
 
 /** Conditional rowset (memset by row)
@@ -771,7 +537,7 @@
         })                                                                                                                                                 \
     })
 
-/** Element-wise activation for floating point types
+/** Element-wise activation
  *
  * @note Performs: activation(LHS) = DST
  *
@@ -790,42 +556,6 @@
         {                                                                                      \
             dst[_m0].v = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, N0, src[_m0].v, A_VAL, B_VAL); \
         })                                                                                     \
-    })
-
-// RELU Activation
-#define relu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (max((DATA_TYPE)ZERO_VALUE, x))
-// Bounded RELU Activation
-#define brelu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (min((DATA_TYPE)A_VAL, max((DATA_TYPE)ZERO_VALUE, x)))
-// Lower Upper Bounded RELU Activation
-#define lu_brelu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (min(max(x, (DATA_TYPE)B_VAL), (DATA_TYPE)A_VAL))
-// Hard Swish Activation
-#define hard_swish_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (x * ((min(max((DATA_TYPE)(x + (DATA_TYPE)3.f), (DATA_TYPE)0.f), (DATA_TYPE)6.f)) * (DATA_TYPE)0.166666667f))
-// Identity Activation
-#define identity_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (x)
-
-#define ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) op##_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
-#define ACTIVATION_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
-
-/** Element-wise activation for quantized types
- *
- * @note Performs: activation(LHS) = DST
- *
- * @param[in]  DATA_TYPE       SRC/DST data type
- * @param[in]  M0              Number of SRC/DST rows
- * @param[in]  N0              Number of SRC/DST columns
- * @param[in]  ACTIVATION_TYPE Activation type
- * @param[in]  ZERO_VALUE      The zero value to consider in the computation
- * @param[in]  A_VAL           A value used for the activation (e.g. tanh_op, brelu,..)
- * @param[in]  B_VAL           B value used for the activation (e.g. tanh_op, brelu,..)
- * @param[out] src             SRC tile
- * @param[out] dst             DST tile
- */
-#define T_ACTIVATION_QUANTIZED(DATA_TYPE, M0, N0, ACTIVATION_TYPE, ZERO_VALUE, A_VAL, B_VAL, src, dst)               \
-    ({ \
-        LOOP_UNROLLING(int, _m0, 0, 1, M0, \
-        { \
-            dst[_m0].v = ACTIVATION_QUANTIZED(ACTIVATION_TYPE, DATA_TYPE, N0, ZERO_VALUE, A_VAL, B_VAL, src[_m0].v); \
-        })                                                                                          \
     })
 
 /** Element-wise addition with a constant value
@@ -887,13 +617,13 @@
  * @param[in, out] dst           DST tile
  */
 #define T_MMUL(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, LHS_LAYOUT, RHS_LAYOUT, lhs, rhs, dst) T_MMUL_##LHS_LAYOUT##_##RHS_LAYOUT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_T(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_T_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_T_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_T_char_char_int(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_T_uchar_uchar_uint(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_T_uchar_uchar_int(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
+#define T_MMUL_NT_T(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_T_float_float_float(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_FLOAT(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_T_half_half_half(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_FLOAT(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_T_char_char_int(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_T_uchar_uchar_uint(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_T_uchar_uchar_int(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_T_FLOAT(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
     {                                                                                     \
         LOOP_UNROLLING(int, _m, 0, 1, M0,                                                 \
         {                                                                                 \
@@ -906,14 +636,16 @@
             })                                                                            \
         })                                                                                \
     }
-
-#define T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                            \
-    ({ \
-        LOOP_UNROLLING(int, _m, 0, 1, M0, \
-        { \
-            LOOP_UNROLLING(int, _n, 0, 1, N0, \
-            { \
-                DOT_PRODUCT_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, K0, (lhs[_m].v), (rhs[_n].v), dst[_m].s[_n]); \
-            })                                                                                             \
-        })                                                                                             \
+#define T_MMUL_NT_T_INTEGER8(DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                            \
+    ({                                                                                            \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                         \
+        {                                                                                         \
+            LOOP_UNROLLING(int, _n, 0, 1, N0,                                                     \
+            {                                                                                     \
+                DOT_PRODUCT_INTEGER8(DST_DATA_TYPE, K0, (lhs[_m].v), (rhs[_n].v), dst[_m].s[_n]); \
+            })                                                                                    \
+        })                                                                                        \
     })
+
+// clang-format on
+// *INDENT-ON*

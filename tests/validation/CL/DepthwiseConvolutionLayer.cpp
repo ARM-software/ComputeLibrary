@@ -48,12 +48,13 @@ constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                  /**<
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
 constexpr float                      tolerance_num = 0.05f;                 /**< Tolerance number */
 
-const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 5 });
+const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 2, 5 });
 const auto large_depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5, 8 });
 
 //Activation Functions
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
+    ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f, 0.f)
 });
@@ -354,7 +355,7 @@ FIXTURE_DATA_TEST_CASE_NEW(RunMixedDataLayout, CLDepthwiseConvolutionLayerMixedD
                                                    framework::dataset::make("DataType",
                                                                             DataType::F32)),
                                            framework::dataset::make("DataLayout", DataLayout::NHWC)),
-                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo())))
+                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo())))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
