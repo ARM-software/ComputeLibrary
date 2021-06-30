@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEIm2ColKernel.h"
+#include "src/core/cpu/kernels/CpuIm2ColKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -42,9 +42,13 @@
 #include <cstring>
 #include <tuple>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace misc::shape_calculator;
-
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
@@ -73,33 +77,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     }
 
     return Status{};
-}
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                                                        bool has_bias, const Size2D &dilation)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false)));
-
-    const DataLayout   data_layout = input->data_layout();
-    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
-
-    std::pair<unsigned int, unsigned int> convolved_dims = scaled_dimensions(input->dimension(width_idx), input->dimension(height_idx),
-                                                                             kernel_dims.width, kernel_dims.height,
-                                                                             conv_info, dilation);
-
-    Window win = calculate_max_window(*input, Steps());
-    win.set(width_idx, Window::Dimension(0, convolved_dims.first, 1));
-    win.set(height_idx, Window::Dimension(0, convolved_dims.second, 1));
-    win.set(channel_idx, Window::Dimension(0, 1, 1));
-
-    // The NEIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
-
-    return std::make_pair(Status{}, win);
 }
 
 template <typename T, bool has_pads>
@@ -272,26 +249,26 @@ inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
 } // namespace
 
 template <typename T, bool has_pads, bool is_nchw>
-void NEIm2ColKernel::run_im2col(const Window &window)
+void CpuIm2ColKernel::run_im2col(const ITensor *src, ITensor *dst, const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
     const unsigned int width_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
     const unsigned int channel_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
 
-    const int input_w        = _input->info()->dimension(width_idx);
-    const int input_h        = _input->info()->dimension(height_idx);
-    const int input_c        = _input->info()->dimension(channel_idx);
-    const int input_stride_x = _input->info()->strides_in_bytes().x();
-    const int input_stride_y = _input->info()->strides_in_bytes().y();
-    const int input_stride_z = _input->info()->strides_in_bytes().z();
+    const int input_w        = src->info()->dimension(width_idx);
+    const int input_h        = src->info()->dimension(height_idx);
+    const int input_c        = src->info()->dimension(channel_idx);
+    const int input_stride_x = src->info()->strides_in_bytes().x();
+    const int input_stride_y = src->info()->strides_in_bytes().y();
+    const int input_stride_z = src->info()->strides_in_bytes().z();
     const int pad_left       = _conv_info.pad_left();
     const int pad_top        = _conv_info.pad_top();
     const int stride_x       = _conv_info.stride().first;
     const int stride_y       = _conv_info.stride().second;
-    const int pad_value      = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().uniform().offset : 0;
+    const int pad_value      = is_data_type_quantized(src->info()->data_type()) ? src->info()->quantization_info().uniform().offset : 0;
 
     Window window_in_out(window);
     // The first three dimensions of the input and output are increased by the inner loops
@@ -300,8 +277,8 @@ void NEIm2ColKernel::run_im2col(const Window &window)
     window_in_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     // Create iterators
-    Iterator in(_input, window_in_out);
-    Iterator out(_output, window_in_out);
+    Iterator in(src, window_in_out);
+    Iterator out(dst, window_in_out);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -310,7 +287,7 @@ void NEIm2ColKernel::run_im2col(const Window &window)
 
         // Get pointers
         const uint8_t *const input_ptr  = in.ptr();
-        auto                 output_ptr = reinterpret_cast<T *>(out.ptr() + (id[width_idx] + id[height_idx] * _convolved_dims.first) * _output->info()->strides_in_bytes().y());
+        auto                 output_ptr = reinterpret_cast<T *>(out.ptr() + (id[width_idx] + id[height_idx] * _convolved_dims.first) * dst->info()->strides_in_bytes().y());
 
         // Linearize volume
         if(is_nchw)
@@ -354,53 +331,47 @@ void NEIm2ColKernel::run_im2col(const Window &window)
     in, out);
 }
 
-NEIm2ColKernel::NEIm2ColKernel()
-    : _func(), _input(nullptr), _output(nullptr), _convolved_dims(), _conv_info(), _kernel_width(0), _kernel_height(0), _has_bias(false), _dilation(1U, 1U), _data_layout(DataLayout::UNKNOWN)
+void CpuIm2ColKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
+                                bool has_bias, const Size2D &dilation, unsigned int num_groups)
 {
-}
-
-void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                               bool has_bias, const Size2D &dilation, unsigned int num_groups)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, num_groups));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups));
     ARM_COMPUTE_UNUSED(num_groups);
 
-    _data_layout                  = input->info()->data_layout();
-    const unsigned int width_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    _data_layout                   = src->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
 
-    _input          = input;
-    _output         = output;
     _conv_info      = conv_info;
     _kernel_width   = kernel_dims.width;
     _kernel_height  = kernel_dims.height;
     _dilation       = dilation;
-    _convolved_dims = scaled_dimensions(input->info()->dimension(width_idx), input->info()->dimension(height_idx),
+    _convolved_dims = scaled_dimensions(src->dimension(width_idx), dst->dimension(height_idx),
                                         _kernel_width, _kernel_height,
                                         _conv_info, _dilation);
     _has_bias = has_bias;
 
     if(_data_layout == DataLayout::NCHW)
     {
-        switch(_input->info()->data_type())
+        switch(src->data_type())
         {
             case DataType::F32:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float, false, true> : &NEIm2ColKernel::run_im2col<float, true, true>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<float, false, true> : &CpuIm2ColKernel::run_im2col<float, true, true>;
                 break;
 #if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
             case DataType::BFLOAT16:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<bfloat16, false, true> : &NEIm2ColKernel::run_im2col<bfloat16, true, true>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<bfloat16, false, true> : &CpuIm2ColKernel::run_im2col<bfloat16, true, true>;
                 break;
 #endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float16_t, false, true> : &NEIm2ColKernel::run_im2col<float16_t, true, true>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<float16_t, false, true> : &CpuIm2ColKernel::run_im2col<float16_t, true, true>;
                 break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::QASYMM8_SIGNED:
             case DataType::QASYMM8:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<qasymm8_t, false, true> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, true>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<qasymm8_t, false, true> : &CpuIm2ColKernel::run_im2col<qasymm8_t, true, true>;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data type not supported");
@@ -409,26 +380,26 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
     }
     else
     {
-        switch(_input->info()->data_type())
+        switch(src->data_type())
         {
             case DataType::F32:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float, false, false> : &NEIm2ColKernel::run_im2col<float, true, false>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<float, false, false> : &CpuIm2ColKernel::run_im2col<float, true, false>;
                 break;
 #if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
             case DataType::BFLOAT16:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<bfloat16, false, false> : &NEIm2ColKernel::run_im2col<bfloat16, true, false>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<bfloat16, false, false> : &CpuIm2ColKernel::run_im2col<bfloat16, true, false>;
                 break;
 #endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float16_t, false, false> : &NEIm2ColKernel::run_im2col<float16_t, true, false>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<float16_t, false, false> : &CpuIm2ColKernel::run_im2col<float16_t, true, false>;
                 break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::QASYMM8:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<uint8_t, false, false> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, false>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<uint8_t, false, false> : &CpuIm2ColKernel::run_im2col<qasymm8_t, true, false>;
                 break;
             case DataType::QASYMM8_SIGNED:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<int8_t, false, false> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, false>;
+                _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<int8_t, false, false> : &CpuIm2ColKernel::run_im2col<qasymm8_t, true, false>;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data type not supported");
@@ -436,25 +407,42 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
         }
     }
 
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_im2col_conv_shape(src, kernel_dims, conv_info, has_bias, dilation, false)));
+
+    std::pair<unsigned int, unsigned int> convolved_dims = scaled_dimensions(src->dimension(width_idx), src->dimension(height_idx),
+                                                                             kernel_dims.width, kernel_dims.height,
+                                                                             conv_info, dilation);
+
+    Window win = calculate_max_window(*src, Steps());
+    win.set(width_idx, Window::Dimension(0, convolved_dims.first, 1));
+    win.set(height_idx, Window::Dimension(0, convolved_dims.second, 1));
+    win.set(channel_idx, Window::Dimension(0, 1, 1));
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    ICpuKernel::configure(win);
 }
 
-Status NEIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                                bool has_bias, const Size2D &dilation, unsigned int num_groups)
+Status CpuIm2ColKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
+                                 bool has_bias, const Size2D &dilation, unsigned int num_groups)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, dilation, num_groups));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), kernel_dims, conv_info, has_bias, dilation).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups));
     return Status{};
 }
 
-void NEIm2ColKernel::run(const Window &window, const ThreadInfo &info)
+void CpuIm2ColKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
-    (this->*_func)(window);
+    auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto dst = tensors.get_tensor(TensorType::ACL_DST);
+    (this->*_func)(src, dst, window);
 }
+const char *CpuIm2ColKernel::name() const
+{
+    return "CpuIm2ColKernel";
+}
+} // namespace kernels
+} // namespace cpu
+} // namespace arm_compute

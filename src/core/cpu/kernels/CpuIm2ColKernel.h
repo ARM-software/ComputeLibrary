@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEIM2COLKERNEL_H
-#define ARM_COMPUTE_NEIM2COLKERNEL_H
+#ifndef ARM_COMPUTE_CPU_IM2COL_KERNEL_H
+#define ARM_COMPUTE_CPU_IM2COL_KERNEL_H
 
-#include "src/core/NEON/INEKernel.h"
+#include "arm_compute/core/Size2D.h"
+#include "src/core/common/Macros.h"
+#include "src/core/cpu/ICpuKernel.h"
 
 namespace arm_compute
 {
 class ITensor;
-class Size2D;
-
+namespace cpu
+{
+namespace kernels
+{
 /** Interface for the im2col reshape kernel.
  *
  * Rearranges image blocks into columns. It is used to strip out each convolution block to a single column.
@@ -54,86 +58,66 @@ class Size2D;
  * \end{array} \right)
  * @f]
  */
-class NEIm2ColKernel : public INEKernel
+class CpuIm2ColKernel : public ICpuKernel
 {
 public:
-    const char *name() const override
-    {
-        return "NEIm2ColKernel";
-    }
     /** Default constructor */
-    NEIm2ColKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEIm2ColKernel(const NEIm2ColKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEIm2ColKernel &operator=(const NEIm2ColKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEIm2ColKernel(NEIm2ColKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEIm2ColKernel &operator=(NEIm2ColKernel &&) = default;
-    /** Default destructor */
-    ~NEIm2ColKernel() = default;
-
+    CpuIm2ColKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuIm2ColKernel);
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     * @param[in]  src         The input tensor info to convert. 3 lower dimensions represent a single input [width, height, IFM],
      *                         while every optional dimension from 4 and above represent a batch of inputs.
      *                         Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32
      *                         Note: QASYMM8/QASYMM8_SIGNED works only for has_bias = false
-     * @param[out] output      The output tensor. Data types supported: Same as @p input
+     * @param[out] dst         The output tensor info. Data types supported: Same as @p input
      * @param[in]  kernel_dims The kernel dimensions (width and height).
      * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
      * @param[in]  dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      */
-    void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
+    void configure(ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
                    bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEIm2ColKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                        while every optional dimension from 4 and above represent a batch of inputs.
-     *                        Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32
-     *                        Note: QASYMM8/QASYMM8_SIGNED works only for has_bias = false
-     * @param[in] output      The output tensor. Data types supported: Same as @p input
-     * @param[in] kernel_dims The kernel dimensions (width and height).
-     * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in] has_bias    In case biases are provided expands the matrix with 1.
-     * @param[in] dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in] num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
+     * Similar to CpuIm2ColKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
                            bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    const char *name() const override;
 
 private:
     /** Template function to run im2col
      *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     * @param[in]  src    The input tensor info
+     * @param[out] dst    The output tensor info
+     * @param[in]  window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
     template <typename T, bool has_pads, bool is_nchw>
-    void run_im2col(const Window &window);
+    void run_im2col(const ITensor *src, ITensor *dst, const Window &window);
 
     /** Common signature for all the specialised im2col functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using Im2ColFunctionPtr = void (NEIm2ColKernel::*)(const Window &window);
+    using Im2ColFunctionPtr = void (CpuIm2ColKernel::*)(const ITensor *src, ITensor *dst, const Window &window);
 
-    Im2ColFunctionPtr _func;
-    const ITensor    *_input;
-    ITensor          *_output;
-    std::pair<unsigned int, unsigned int> _convolved_dims;
-    PadStrideInfo _conv_info;
-    unsigned int  _kernel_width;
-    unsigned int  _kernel_height;
-    bool          _has_bias;
-    Size2D        _dilation;
-    DataLayout    _data_layout;
+    Im2ColFunctionPtr _func{ nullptr };
+    std::pair<unsigned int, unsigned int> _convolved_dims{};
+    PadStrideInfo _conv_info{};
+    unsigned int  _kernel_width{ 0 };
+    unsigned int  _kernel_height{ 0 };
+    bool          _has_bias{ false };
+    Size2D        _dilation{ 1U, 1U };
+    DataLayout    _data_layout{ DataLayout::UNKNOWN };
 };
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEIM2COLKERNEL_H */
+#endif /*ARM_COMPUTE_CPU_IM2COL_KERNEL_H */

@@ -77,7 +77,7 @@ private:
 } // namespace weights_transformations
 
 /** Basic function to compute a Fully Connected layer. This function calls the following kernels:
- *  -# @ref NEIm2ColKernel (called when the input comes from a convolutional layer)
+ *  -# @ref cpu::kernels::CpuIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref NETranspose (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref NEGEMM or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
  *  -# @ref cpu::kernels::CpuGemmMatrixAdditionKernel or @ref NEGEMMLowpOutputStage (if quantized asymmetric) (if @p biases is not equal to nullptr)

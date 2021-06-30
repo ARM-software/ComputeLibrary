@@ -47,7 +47,6 @@
 #include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 #include "src/core/NEON/kernels/NEGatherKernel.h"
 #include "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
-#include "src/core/NEON/kernels/NEIm2ColKernel.h"
 #include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "src/core/NEON/kernels/NELogicalKernel.h"

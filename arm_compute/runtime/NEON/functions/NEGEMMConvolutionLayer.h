@@ -41,8 +41,14 @@ namespace arm_compute
 {
 class ITensor;
 class NECol2ImKernel;
-class NEIm2ColKernel;
 class NEWeightsReshapeKernel;
+namespace cpu
+{
+namespace kernels
+{
+class CpuIm2ColKernel;
+} // namespace kernels
+} // namespace cpu
 
 /** Function to reshape the weights. This function calls the following kernel:
  * -# @ref NEWeightsReshapeKernel
@@ -152,7 +158,7 @@ private:
 
 /** Basic function to compute the convolution layer. This function calls the following kernels/functions:
  *
- * -# @ref NEIm2ColKernel
+ * -# @ref cpu::kernels::CpuIm2ColKernel
  * -# @ref NEGEMM (if the data type is BFLOAT16/FP16/FP32)
  * -# @ref NEGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEGEMMLowpOutputStage (if the data type is QASYMM8/QASYMM8_SIGNED)
@@ -283,12 +289,13 @@ private:
     IWeightsManager                                                   *_weights_manager;
     NEConvolutionLayerReshapeWeights                                   _reshape_weights;
     weights_transformations::NEConvolutionLayerReshapeWeightsTransform _reshape_weights_managed;
-    std::unique_ptr<NEIm2ColKernel>                                    _im2col_kernel;
+    std::unique_ptr<cpu::kernels::CpuIm2ColKernel>                     _im2col_kernel;
     NEGEMM                                                             _mm_gemm;
     NEGEMMLowpMatrixMultiplyCore                                       _mm_gemmlowp;
     std::unique_ptr<NECol2ImKernel>                                    _col2im_kernel;
     NEReshapeLayer                                                     _reshape_layer;
 
+    const ITensor *_input;
     const ITensor *_original_weights;
     const ITensor *_original_output;
 

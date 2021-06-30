@@ -31,8 +31,8 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/core/NEON/kernels/NECol2ImKernel.h"
-#include "src/core/NEON/kernels/NEIm2ColKernel.h"
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
+#include "src/core/cpu/kernels/CpuIm2ColKernel.h"
 
 #include <set>
 #include <tuple>
@@ -99,7 +99,7 @@ NEGEMMConvolutionLayer::~NEGEMMConvolutionLayer() = default;
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager),
-      _col2im_kernel(), _reshape_layer(), _original_weights(nullptr), _original_output(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _gemm_output_3d(), _tmp_output(),
+      _col2im_kernel(), _reshape_layer(), _input(nullptr), _original_weights(nullptr), _original_output(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _gemm_output_3d(), _tmp_output(),
       _data_layout(DataLayout::NCHW), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _is_prepared(false)
 {
 }
@@ -269,6 +269,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     const unsigned int kernel_width  = weights->info()->dimension(idx_width);
     const unsigned int kernel_height = weights->info()->dimension(idx_height);
 
+    _input            = input;
     _is_prepared      = weights_info.retain_internal_weights();
     _original_weights = weights;
     _original_output  = output;
@@ -332,8 +333,8 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         _memory_group.manage(&_im2col_output);
 
         // Configure
-        _im2col_kernel = std::make_unique<NEIm2ColKernel>();
-        _im2col_kernel->configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, false, dilation);
+        _im2col_kernel = std::make_unique<cpu::kernels::CpuIm2ColKernel>();
+        _im2col_kernel->configure(input->info(), _im2col_output.info(), Size2D(kernel_width, kernel_height), conv_info, false, dilation);
 
         // Update GEMM input
         gemm_input_to_use = &_im2col_output;
@@ -521,7 +522,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
         im2col_reshaped_info = TensorInfo(shape_im2col, 1, data_type);
         im2col_reshaped_info.set_quantization_info(input->quantization_info());
-        ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuIm2ColKernel::validate(input, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation));
         gemm_input_to_use = &im2col_reshaped_info;
     }
 
@@ -563,7 +564,12 @@ void NEGEMMConvolutionLayer::run()
     {
         // Run input reshaping
         unsigned int y_dim = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-        NEScheduler::get().schedule(_im2col_kernel.get(), y_dim);
+        ITensorPack  pack =
+        {
+            { TensorType::ACL_SRC, _input },
+            { TensorType::ACL_DST, &_im2col_output }
+        };
+        NEScheduler::get().schedule_op(_im2col_kernel.get(), y_dim, _im2col_kernel->window(), pack);
     }
 
     // Handle the case where output has top/bottom padding

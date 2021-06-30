@@ -1330,7 +1330,7 @@
       "Im2Col": {
         "files": {
           "kernel": [
-            "src/core/NEON/kernels/NEIm2ColKernel.cpp"
+            "src/core/cpu/kernels/CpuIm2ColKernel.cpp"
           ]
         }
       },

@@ -585,7 +585,7 @@ v20.05 Public major release
  - Added Bfloat16 support in:
      - @ref NEWeightsReshapeKernel
      - @ref NEConvolutionLayerReshapeWeights
-     - @ref NEIm2ColKernel
+     - NEIm2ColKernel
      - NEIm2Col
      - NEDepthConvertLayerKernel
      - @ref NEDepthConvertLayer
@@ -1362,7 +1362,7 @@ v17.03.1 First Major public release of the sources
    - @ref NENormalizationLayerKernel / @ref NENormalizationLayer
    - NETransposeKernel / @ref NETranspose
    - NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
-   - @ref NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
+   - NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
    - NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
    - @ref NEGEMMLowpMatrixMultiplyKernel / NEGEMMLowp
 
