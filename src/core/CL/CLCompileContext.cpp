@@ -271,7 +271,7 @@ std::string CLCompileContext::generate_build_options(const StringSet &build_opti
         const std::regex  ddk_regex("r([0-9]*)p[0-9]");
         std::smatch       ddk_match;
 
-        if(std::regex_search(device_vers, ddk_match, ddk_regex) && std::stoi(ddk_match[1]) >= 9)
+        if(std::regex_search(device_vers, ddk_match, ddk_regex) && std::stoi(ddk_match[1]) >= 11)
         {
             concat_str += " -DUNROLL_WITH_PRAGMA ";
         }
