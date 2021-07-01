@@ -798,7 +798,7 @@
       "Col2Im": {
         "files": {
           "kernel": [
-            "src/core/NEON/kernels/NECol2ImKernel.cpp"
+            "src/core/cpu/kernels/CpuCol2ImKernel.cpp"
           ]
         }
       },

@@ -30,8 +30,8 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-#include "src/core/NEON/kernels/NECol2ImKernel.h"
 #include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
+#include "src/core/cpu/kernels/CpuCol2ImKernel.h"
 #include "src/core/cpu/kernels/CpuIm2ColKernel.h"
 
 #include <set>
@@ -388,8 +388,8 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         if(_data_layout == DataLayout::NCHW)
         {
             // Configure col2im
-            _col2im_kernel = std::make_unique<NECol2ImKernel>();
-            _col2im_kernel->configure(gemm_output_to_use, output, Size2D(conv_w, conv_h));
+            _col2im_kernel = std::make_unique<cpu::kernels::CpuCol2ImKernel>();
+            _col2im_kernel->configure(gemm_output_to_use->info(), output->info(), Size2D(conv_w, conv_h));
         }
         else
         {
@@ -546,7 +546,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     // Validate Col2Im/ReshapeLayer
     if(!skip_col2im && (data_layout == DataLayout::NCHW))
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NECol2ImKernel::validate(gemm_output_to_use, output, Size2D(conv_w, conv_h)));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuCol2ImKernel::validate(gemm_output_to_use, output, Size2D(conv_w, conv_h)));
     }
 
     return Status{};
@@ -594,7 +594,12 @@ void NEGEMMConvolutionLayer::run()
     {
         if(_data_layout == DataLayout::NCHW)
         {
-            NEScheduler::get().schedule(_col2im_kernel.get(), Window::DimY);
+            ITensorPack pack =
+            {
+                { TensorType::ACL_SRC, &_gemm_output },
+                { TensorType::ACL_DST, _original_output }
+            };
+            NEScheduler::get().schedule_op(_col2im_kernel.get(), Window::DimY, _col2im_kernel->window(), pack);
         }
         else
         {

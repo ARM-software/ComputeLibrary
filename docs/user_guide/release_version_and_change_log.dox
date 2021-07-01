@@ -1362,7 +1362,7 @@ v17.03.1 First Major public release of the sources
    - @ref NENormalizationLayerKernel / @ref NENormalizationLayer
    - NETransposeKernel / @ref NETranspose
    - NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
-   - NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
+   - NEIm2ColKernel, NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
    - NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
    - NEGEMMLowpMatrixMultiplyKernel / NEGEMMLowp
 

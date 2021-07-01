@@ -40,13 +40,13 @@
 namespace arm_compute
 {
 class ITensor;
-class NECol2ImKernel;
 class NEWeightsReshapeKernel;
 namespace cpu
 {
 namespace kernels
 {
 class CpuIm2ColKernel;
+class CpuCol2ImKernel;
 } // namespace kernels
 } // namespace cpu
 
@@ -163,7 +163,7 @@ private:
  * -# @ref NEGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEGEMMLowpOutputStage (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEArithmeticAddition (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
- * -# @ref NECol2ImKernel (if NCHW data layout)
+ * -# @ref cpu::kernels::CpuCol2ImKernel (if NCHW data layout)
  *
  */
 class NEGEMMConvolutionLayer : public IFunction
@@ -292,12 +292,12 @@ private:
     std::unique_ptr<cpu::kernels::CpuIm2ColKernel>                     _im2col_kernel;
     NEGEMM                                                             _mm_gemm;
     NEGEMMLowpMatrixMultiplyCore                                       _mm_gemmlowp;
-    std::unique_ptr<NECol2ImKernel>                                    _col2im_kernel;
+    std::unique_ptr<cpu::kernels::CpuCol2ImKernel>                     _col2im_kernel;
     NEReshapeLayer                                                     _reshape_layer;
 
     const ITensor *_input;
     const ITensor *_original_weights;
-    const ITensor *_original_output;
+    ITensor       *_original_output;
 
     Tensor _im2col_output;
     Tensor _weights_reshaped;
