@@ -27,11 +27,6 @@
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
-#include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMM.h"
-
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -40,13 +35,12 @@ namespace arm_compute
 {
 // Forward declarations
 class ITensor;
-class ICPPKernel;
 
 /** Basic function to simulate a convolution layer. This function calls the following kernels:
  *
- * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
- * -# @ref NEWinogradLayerTransformInputKernel
- * -# @ref NEWinogradLayerTransformOutputKernel
+ * -# @ref cpu::CpuWinogradConv2dTransformWeightsKernel (executed only once in the first call to the run() method )
+ * -# @ref cpu::CpuWinogradConv2dTransformInputKernel
+ * -# @ref cpu::CpuWinogradConv2dTransformOutputKernel
  * -# @ref cpu::CpuGemmAssemblyDispatch
  * -# @ref CPPPermute (three times: weights, input and output)
  *
@@ -57,12 +51,16 @@ class NEWinogradConvolutionLayer : public IFunction
 public:
     /** Constructor */
     NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    NEWinogradConvolutionLayer(NEWinogradConvolutionLayer &&) = delete;
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    NEWinogradConvolutionLayer &operator=(NEWinogradConvolutionLayer &&) = delete;
-    /** Default destructor */
-    ~NEWinogradConvolutionLayer() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEWinogradConvolutionLayer(const NEWinogradConvolutionLayer &) = delete;
+    /** Default move constructor */
+    NEWinogradConvolutionLayer(NEWinogradConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEWinogradConvolutionLayer &operator=(const NEWinogradConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    NEWinogradConvolutionLayer &operator=(NEWinogradConvolutionLayer &&) = default;
+    /** Destructor */
+    ~NEWinogradConvolutionLayer();
 
     /** Set the input and output tensors.
      *
@@ -105,36 +103,9 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
 
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradConvolutionLayer(const NEWinogradConvolutionLayer &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradConvolutionLayer &operator=(const NEWinogradConvolutionLayer &) = delete;
-
 private:
-    MemoryGroup                 _memory_group;
-    NEGEMM                      _gemm_function;
-    std::unique_ptr<ICPPKernel> _transform_input_kernel;
-    std::unique_ptr<ICPPKernel> _transform_output_kernel;
-    std::unique_ptr<ICPPKernel> _transform_weights_kernel;
-    NEActivationLayer           _activationlayer_function;
-
-    CPPPermute     _permute_input;
-    CPPPermute     _permute_weights;
-    CPPPermute     _permute_output;
-    Tensor         _input_transformed;
-    Tensor         _output_transformed;
-    Tensor         _input_workspace;
-    Tensor         _output_workspace;
-    Tensor         _kernel_storage;
-    Tensor         _input_nhwc;
-    Tensor         _output_nhwc;
-    Tensor         _weights_hwio;
-    const ITensor *_input;
-    const ITensor *_weights;
-    ITensor       *_output;
-    bool           _is_prepared;
-    bool           _is_activationlayer_enabled;
-    DataLayout     _data_layout;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H */

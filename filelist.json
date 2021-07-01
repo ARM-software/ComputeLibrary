@@ -1682,8 +1682,11 @@
           "Permute"
         ],
         "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuWinogradConv2d.cpp"
+          ],
           "kernel": [
-            "src/core/NEON/kernels/NEWinogradConvolutionLayerKernel.cpp",
+            "src/core/cpu/kernels/CpuWinogradConv2dKernel.cpp",
             "src/core/NEON/kernels/convolution/winograd/padding.cpp",
             "src/core/NEON/kernels/convolution/winograd/winograd.cpp",
             "src/core/NEON/kernels/convolution/winograd/winograd_transforms/input_1x8_fp32_fp32_integers.cpp",

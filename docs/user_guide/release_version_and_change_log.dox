@@ -639,9 +639,9 @@ v20.05 Public major release
  - Removed NEDepthwiseConvolutionLayerOptimized
  - Added support for Winograd 3x3,4x4 on Arm® Neon™ FP16:
      - @ref NEWinogradConvolutionLayer
-     - @ref NEWinogradLayerTransformInputKernel
-     - @ref NEWinogradLayerTransformOutputKernel
-     - @ref NEWinogradLayerTransformWeightsKernel
+     - CpuWinogradConv2dTransformInputKernel
+     - CpuWinogradConv2dTransformOutputKernel
+     - CpuWinogradConv2dTransformWeightsKernel
  - Added CLCompileContext
  - Added Arm® Neon™ GEMM kernel with 2D window support
 
@@ -1171,9 +1171,9 @@ v18.02 Public major release
     - Added name() method to all kernels.
     - Added support for Winograd 5x5.
     - NEPermuteKernel / @ref NEPermute
-    - @ref NEWinogradLayerTransformInputKernel / NEWinogradLayer
-    - @ref NEWinogradLayerTransformOutputKernel / NEWinogradLayer
-    - @ref NEWinogradLayerTransformWeightsKernel / NEWinogradLayer
+    - CpuWinogradConv2dTransformInputKernel / NEWinogradLayer
+    - CpuWinogradConv2dTransformOutputKernel / NEWinogradLayer
+    - CpuWinogradConv2dTransformWeightsKernel / NEWinogradLayer
     - Renamed NEWinogradLayerKernel into NEWinogradLayerBatchedGEMMKernel
  - New GLES kernels / functions:
     - GCTensorShiftKernel / GCTensorShift

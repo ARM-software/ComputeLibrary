@@ -21,22 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEGEMMWINOGRADCONVOLUTIONLAYERKERNEL_H
-#define ARM_COMPUTE_NEGEMMWINOGRADCONVOLUTIONLAYERKERNEL_H
+#ifndef ARM_COMPUTE_CPUWINOGRADCONV2DKERNEL_H
+#define ARM_COMPUTE_CPUWINOGRADCONV2DKERNEL_H
 
-#include "src/core/NEON/INEKernel.h"
 #include "src/core/NEON/kernels/convolution/common/convolution.hpp"
 #include "src/core/NEON/kernels/convolution/common/tensor.hpp"
+#include "src/core/cpu/ICpuKernel.h"
 
 #include "src/core/NEON/kernels/convolution/winograd/winograd_layer.hpp"
 
 namespace arm_compute
 {
-// Forward declarations
-class ITensor;
-
+namespace cpu
+{
 /** Interface for the kernel to perform Winograd input transform. */
-class INEWinogradLayerTransformInputKernel : public INEKernel
+class ICpuWinogradConv2dTransformInputKernel : public ICpuKernel
 {
 public:
     /** Get the working space required to perform the transformation.
@@ -87,30 +86,30 @@ public:
      * @param[in]  matrix_stride Stride between output matrices.
      * @param[in]  workspace     Tensor to be used as the working space during the computation.
      */
-    virtual void configure(const ITensor *input_nhwc, const int num_batches, const int num_rows, const int num_cols, const int num_channels,
-                           const PaddingType padding, ITensor *output, const int matrix_stride, ITensor *workspace) = 0;
+    virtual void configure(const ITensorInfo *input_nhwc, const int num_batches, const int num_rows, const int num_cols, const int num_channels,
+                           const PaddingType padding, ITensorInfo *output, const int matrix_stride, ITensorInfo *workspace) = 0;
 
     /** Destructor */
-    virtual ~INEWinogradLayerTransformInputKernel()
+    virtual ~ICpuWinogradConv2dTransformInputKernel()
     {
     }
 };
 
 /** Kernel to perform Winograd input transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-class NEWinogradLayerTransformInputKernel : public INEWinogradLayerTransformInputKernel
+class CpuWinogradConv2dTransformInputKernel : public ICpuWinogradConv2dTransformInputKernel
 {
 public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayerTransformInputKernel(const NEWinogradLayerTransformInputKernel &) = delete;
+    CpuWinogradConv2dTransformInputKernel(const CpuWinogradConv2dTransformInputKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayerTransformInputKernel &operator=(const NEWinogradLayerTransformInputKernel &) = delete;
+    CpuWinogradConv2dTransformInputKernel &operator=(const CpuWinogradConv2dTransformInputKernel &) = delete;
     /** Allow instances of this class to be moved */
-    NEWinogradLayerTransformInputKernel(NEWinogradLayerTransformInputKernel &&) = default;
+    CpuWinogradConv2dTransformInputKernel(CpuWinogradConv2dTransformInputKernel &&) = default;
     /** Allow instances of this class to be moved */
-    NEWinogradLayerTransformInputKernel &operator=(NEWinogradLayerTransformInputKernel &&) = default;
+    CpuWinogradConv2dTransformInputKernel &operator=(CpuWinogradConv2dTransformInputKernel &&) = default;
     /** Default destructor */
-    ~NEWinogradLayerTransformInputKernel() = default;
+    ~CpuWinogradConv2dTransformInputKernel() = default;
 
     /** Determine how much memory (in units of TIn) to allocate for the
      * transformed input.
@@ -160,11 +159,11 @@ public:
         bool same_padding) const override;
 
     /** Default constructor */
-    NEWinogradLayerTransformInputKernel();
+    CpuWinogradConv2dTransformInputKernel();
 
     const char *name() const override
     {
-        return "NEWinogradLayerTransformInputKernel";
+        return "CpuWinogradConv2dTransformInputKernel";
     }
 
     /** Configure the output transform kernel.
@@ -180,25 +179,25 @@ public:
      * @param[in]  workspace     Tensor to be used as the working space during the computation.
      */
     void configure(
-        const ITensor    *input_nhwc,
-        const int         num_batches,
-        const int         num_rows,
-        const int         num_cols,
-        const int         num_channels,
-        const PaddingType padding,
-        ITensor          *output,
-        const int         matrix_stride,
-        ITensor          *workspace) override;
+        const ITensorInfo *input_nhwc,
+        const int          num_batches,
+        const int          num_rows,
+        const int          num_cols,
+        const int          num_channels,
+        const PaddingType  padding,
+        ITensorInfo       *output,
+        const int          matrix_stride,
+        ITensorInfo       *workspace) override;
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
     /** Winograd base kernel */
     using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols, winograd::WinogradRoots::Integers>;
     /** Winograd convolution kernel */
     using WinogradConv = typename WinogradBase::template Convolution<T, T>;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformInputKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuWinogradConv2dTransformInputKernel
      *
      * @param[in] input         First tensor input info. Data types supported: F16/F32.
      * @param[in] output        Output tensor info. Data types supported: same as @p input.
@@ -212,23 +211,12 @@ private:
     using InputTransform = typename WinogradBase::template InputTransform<T, T>;
 
     std::unique_ptr<InputTransform> _transform{ nullptr };
-    const ITensor                  *_input_nhwc;
-    int                             _num_batches;    /**< Number of batches in input tensor. */
-    int                             _num_rows;       /**< Number of rows in input tensor. */
-    int                             _num_cols;       /**< Number of columns in input tensor. */
-    int                             _num_channels;   /**< Number of channels in input tensor. */
-    PaddingType                     _padding;        /**< Padding type. */
-    ITensor                        *_output;         /**< Base of output matrices. */
-    int                             _matrix_stride;  /**< Stride between output matrices. */
-    int                             _padding_top;    /**< Padding to apply to the top of the image. */
-    int                             _padding_left;   /**< Padding to apply to the left of the image. */
-    int                             _padding_right;  /**< Padding to apply to the right of the image. */
-    int                             _padding_bottom; /**< Padding to apply to the bottom of the image. */
-    ITensor                        *_workspace;
+    int                             _num_channels;  /**< Number of channels in input tensor. */
+    int                             _matrix_stride; /**< Stride between output matrices. */
 };
 
 /** Interface for the kernel to perform Winograd output transform. */
-class INEWinogradLayerTransformOutputKernel : public INEKernel
+class ICpuWinogradConv2dTransformOutputKernel : public ICpuKernel
 {
 public:
     /** Get the working space required to perform the transformation.
@@ -294,44 +282,44 @@ public:
      * @param[in]  activation         Activation to be used
      */
     virtual void configure(
-        const ITensor              *biases,
-        const ITensor              *transformed_output,
+        const ITensorInfo          *biases,
+        const ITensorInfo          *transformed_output,
         const int                   matrix_stride,
-        ITensor                    *output_nhwc,
+        ITensorInfo                *output_nhwc,
         const int                   num_batches,
         const int                   num_rows,
         const int                   num_cols,
         const int                   num_channels,
-        ITensor                    *workspace,
+        ITensorInfo                *workspace,
         const arm_gemm::Activation &activation) = 0;
 
-    virtual ~INEWinogradLayerTransformOutputKernel()
+    virtual ~ICpuWinogradConv2dTransformOutputKernel()
     {
     }
 };
 
 /** Kernel to perform Winograd output transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-class NEWinogradLayerTransformOutputKernel : public INEWinogradLayerTransformOutputKernel
+class CpuWinogradConv2dTransformOutputKernel : public ICpuWinogradConv2dTransformOutputKernel
 {
 public:
     const char *name() const override
     {
-        return "NEWinogradLayerTransformOutputKernel";
+        return "CpuWinogradConv2dTransformOutputKernel";
     }
     /** Constructor */
-    NEWinogradLayerTransformOutputKernel();
+    CpuWinogradConv2dTransformOutputKernel();
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayerTransformOutputKernel(const NEWinogradLayerTransformOutputKernel &) = delete;
+    CpuWinogradConv2dTransformOutputKernel(const CpuWinogradConv2dTransformOutputKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayerTransformOutputKernel &operator=(const NEWinogradLayerTransformOutputKernel &) = delete;
+    CpuWinogradConv2dTransformOutputKernel &operator=(const CpuWinogradConv2dTransformOutputKernel &) = delete;
     /** Allow instances of this class to be moved */
-    NEWinogradLayerTransformOutputKernel(NEWinogradLayerTransformOutputKernel &&) = default;
+    CpuWinogradConv2dTransformOutputKernel(CpuWinogradConv2dTransformOutputKernel &&) = default;
     /** Allow instances of this class to be moved */
-    NEWinogradLayerTransformOutputKernel &operator=(NEWinogradLayerTransformOutputKernel &&) = default;
+    CpuWinogradConv2dTransformOutputKernel &operator=(CpuWinogradConv2dTransformOutputKernel &&) = default;
     /** Default destructor */
-    ~NEWinogradLayerTransformOutputKernel() = default;
+    ~CpuWinogradConv2dTransformOutputKernel() = default;
 
     // Inherited methods overridden:
     /** Determine how much memory (in units of TOut) to allocate for the
@@ -395,20 +383,20 @@ public:
      * @param[in]  activation         Activation to be used
      */
     void configure(
-        const ITensor              *biases,
-        const ITensor              *transformed_output,
+        const ITensorInfo          *biases,
+        const ITensorInfo          *transformed_output,
         const int                   matrix_stride,
-        ITensor                    *output_nhwc,
+        ITensorInfo                *output_nhwc,
         const int                   num_batches,
         const int                   num_rows,
         const int                   num_cols,
         const int                   num_channels,
-        ITensor                    *workspace,
+        ITensorInfo                *workspace,
         const arm_gemm::Activation &activation) override;
 
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformOutputKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuWinogradConv2dTransformOutputKernel
      *
      * @param[in] input         Source tensor info with shape [C, N, 16, batches] or [C, N, 36, batches]. Data types supported: F16/F32.
      * @param[in] bias          Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
@@ -425,35 +413,27 @@ private:
     using OutputTransform = typename WinogradBase::template OutputTransform<T, T>;
 
     std::unique_ptr<OutputTransform> _transform{ nullptr };
-    const ITensor                   *_biases;
-    const ITensor                   *_transformed_output;
-    ITensor                         *_workspace;
     int                              _matrix_stride;
     int                              _matrix_row_stride;
-    ITensor                         *_output_nhwc;
-    int                              _num_batches;
-    int                              _num_rows;
-    int                              _num_cols;
-    int                              _num_channels;
 };
 
 /** Interface for the kernel to perform Winograd weights transform. */
-class INEWinogradLayerTransformWeightsKernel : public INEKernel
+class ICpuWinogradConv2dTransformWeightsKernel : public ICpuKernel
 {
 public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    INEWinogradLayerTransformWeightsKernel(const INEWinogradLayerTransformWeightsKernel &) = default;
+    ICpuWinogradConv2dTransformWeightsKernel(const ICpuWinogradConv2dTransformWeightsKernel &) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    INEWinogradLayerTransformWeightsKernel &operator=(const INEWinogradLayerTransformWeightsKernel &) = default;
+    ICpuWinogradConv2dTransformWeightsKernel &operator=(const ICpuWinogradConv2dTransformWeightsKernel &) = default;
     /** Allow instances of this class to be moved */
-    INEWinogradLayerTransformWeightsKernel(INEWinogradLayerTransformWeightsKernel &&) = default;
+    ICpuWinogradConv2dTransformWeightsKernel(ICpuWinogradConv2dTransformWeightsKernel &&) = default;
     /** Allow instances of this class to be moved */
-    INEWinogradLayerTransformWeightsKernel &operator=(INEWinogradLayerTransformWeightsKernel &&) = default;
+    ICpuWinogradConv2dTransformWeightsKernel &operator=(ICpuWinogradConv2dTransformWeightsKernel &&) = default;
 
-    INEWinogradLayerTransformWeightsKernel()
+    ICpuWinogradConv2dTransformWeightsKernel()
     {
     }
-    virtual ~INEWinogradLayerTransformWeightsKernel()
+    virtual ~ICpuWinogradConv2dTransformWeightsKernel()
     {
     }
     /** Determine how much memory (in units of T) to allocate for the
@@ -476,16 +456,16 @@ public:
 
     /** Configure the weights transform kernel.
      *
-     * @param[in]  weights_hwio        Pointer to the weights tensor
+     * @param[in]  weights_hwio        Pointer to the weights tensor info
      * @param[out] output              Pointer to working space for the output tensor in the Winograd domain.
      * @param[in]  matrix_stride       Stride across matrices in the output workspace.
      * @param[in]  num_output_channels Number of filters.
      * @param[in]  num_input_channels  Number of channels in each filter.
      */
 
-    virtual void configure(const ITensor *weights_hwio, ITensor *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) = 0;
+    virtual void configure(const ITensorInfo *weights_hwio, ITensorInfo *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) = 0;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformWeightsKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuWinogradConv2dTransformWeightsKernel
      *
      * @param[in] input   First tensor input info. Data types supported: F16/F32.
      * @param[in] weights Weights tensor info. Data types supported: same as @p input.
@@ -497,28 +477,28 @@ public:
 
 /** Kernel to perform Winograd weights transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-class NEWinogradLayerTransformWeightsKernel final : public INEWinogradLayerTransformWeightsKernel
+class CpuWinogradConv2dTransformWeightsKernel final : public ICpuWinogradConv2dTransformWeightsKernel
 {
 public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayerTransformWeightsKernel(const NEWinogradLayerTransformWeightsKernel &) = delete;
+    CpuWinogradConv2dTransformWeightsKernel(const CpuWinogradConv2dTransformWeightsKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayerTransformWeightsKernel &operator=(const NEWinogradLayerTransformWeightsKernel &) = delete;
+    CpuWinogradConv2dTransformWeightsKernel &operator=(const CpuWinogradConv2dTransformWeightsKernel &) = delete;
     /** Allow instances of this class to be moved */
-    NEWinogradLayerTransformWeightsKernel(NEWinogradLayerTransformWeightsKernel &&) = default;
+    CpuWinogradConv2dTransformWeightsKernel(CpuWinogradConv2dTransformWeightsKernel &&) = default;
     /** Allow instances of this class to be moved */
-    NEWinogradLayerTransformWeightsKernel &operator=(NEWinogradLayerTransformWeightsKernel &&) = default;
+    CpuWinogradConv2dTransformWeightsKernel &operator=(CpuWinogradConv2dTransformWeightsKernel &&) = default;
     /** Default destructor */
-    ~NEWinogradLayerTransformWeightsKernel() = default;
+    ~CpuWinogradConv2dTransformWeightsKernel() = default;
 
     /** Default constructor. */
-    NEWinogradLayerTransformWeightsKernel();
+    CpuWinogradConv2dTransformWeightsKernel();
     const char *name() const override
     {
-        return "NEWinogradLayerTransformWeightsKernel";
+        return "CpuWinogradConv2dTransformWeightsKernel";
     }
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformWeightsKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CpuWinogradConv2dTransformWeightsKernel
      *
      * @param[in] input         Source tensor info. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
      *                          kernel_x must be 3 and equal to kernel_y. Data types supported: F16/F32.
@@ -534,13 +514,13 @@ public:
 #ifndef DOXYGEN_SKIP_THIS
     /** Configure the weights transform kernel.
      *
-     * @param[in]  weights_hwio        Pointer to the weights tensor
+     * @param[in]  weights_hwio        Pointer to the weights tensor info
      * @param[out] output              Pointer to working space for the output tensor in the Winograd domain.
      * @param[in]  matrix_stride       Stride across matrices in the output workspace.
      * @param[in]  num_output_channels Number of filters.
      * @param[in]  num_input_channels  Number of channels in each filter.
      */
-    void configure(const ITensor *weights_hwio, ITensor *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) override;
+    void configure(const ITensorInfo *weights_hwio, ITensorInfo *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) override;
 #endif /* DOXYGEN_SKIP_THIS */
 
     /** Determine how much memory (in units of T) to allocate for the
@@ -561,7 +541,7 @@ public:
      * @return Stride expressed in bytes.
      */
     int get_matrix_stride(int num_output_channels, int num_input_channels) const override;
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:
@@ -570,16 +550,13 @@ private:
     using WeightsTransform = typename WinogradBase::template WeightsTransform<T, T>;
 
     std::unique_ptr<WeightsTransform> _transform{ nullptr };
-    const ITensor                    *_weights_hwio;
-    ITensor                          *_output;
-    int                               _matrix_stride;
     int                               _num_output_channels;
-    int                               _num_input_channels;
+    int                               _matrix_stride;
 };
 
 /** Kernel to perform Winograd. */
 template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-class NEWinogradLayerConfiguration
+class CpuWinogradConv2dConfiguration
 {
 public:
     /** Winograd base kernel */
@@ -588,10 +565,11 @@ public:
 
     using WinogradConv = typename WinogradBase::template Convolution<TIn, TOut>;
 
-    using TransformInputKernel   = NEWinogradLayerTransformInputKernel<TIn, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
-    using TransformWeightsKernel = NEWinogradLayerTransformWeightsKernel<TIn, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
-    using TransformOutputKernel  = NEWinogradLayerTransformOutputKernel<TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    using TransformInputKernel   = CpuWinogradConv2dTransformInputKernel<TIn, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    using TransformWeightsKernel = CpuWinogradConv2dTransformWeightsKernel<TIn, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    using TransformOutputKernel  = CpuWinogradConv2dTransformOutputKernel<TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
 };
 
+} // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEGEMMWINOGRADCONVOLUTIONLAYERKERNEL_H*/
+#endif /*ARM_COMPUTE_CPUWINOGRADCONV2DKERNEL_H*/

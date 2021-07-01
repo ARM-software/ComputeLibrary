@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
+#include "src/runtime/cpu/operators/CpuWinogradConv2d.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"
@@ -157,6 +158,108 @@ using NEWinogradConvolutionLayerMixedDataLayoutFixture = WinogradConvolutionLaye
 
 template <typename T>
 using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, T, false>;
+
+/** Test case for memory injection in @ref cpu::CpuWinogradConv2d.
+ *
+ * Configure the operator once and inject memory at run-time in multiple executions.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
+{
+    auto                winograd = std::make_unique<cpu::CpuWinogradConv2d>();
+    const auto          src_info = TensorInfo(TensorShape(8U, 8U, 32U), 1, DataType::F32);
+    const auto          w_info   = TensorInfo(TensorShape(1U), 1, DataType::F32);
+    const auto          b_info   = TensorInfo(TensorShape(1U, 3U, 32U, 1U), 1, DataType::F32);
+    auto                dst_info = TensorInfo(TensorShape(8U, 6U, 1U), 1, DataType::F32);
+    const PadStrideInfo pad_info{};
+
+    winograd->configure(&src_info, &b_info, &w_info, &dst_info, pad_info);
+
+    // telhs are newly created every call of this lambda function
+    auto a = create_tensor<Tensor>(src_info);
+    auto b = create_tensor<Tensor>(b_info);
+    auto c = create_tensor<Tensor>(w_info);
+    a.allocator()->allocate();
+    b.allocator()->allocate();
+    c.allocator()->allocate();
+
+    ITensorPack run_pack{ { TensorType::ACL_SRC_0, &a }, { TensorType::ACL_SRC_1, &b }, { TensorType::ACL_SRC_2, &c } };
+    ITensorPack prep_pack{ { TensorType::ACL_SRC_1, &b }, { TensorType::ACL_SRC_2, &c } };
+
+    auto mg       = MemoryGroup{};
+    auto ws       = manage_workspace<Tensor>(winograd->workspace(), mg, run_pack, prep_pack);
+    auto run_conv = [&]() -> Tensor
+    {
+        auto dst = create_tensor<Tensor>(dst_info);
+        dst.allocator()->allocate();
+
+        run_pack.add_tensor(TensorType::ACL_DST, &dst);
+        library->fill_tensor_value(Accessor(a), 1.f);
+        library->fill_tensor_value(Accessor(b), 2.f);
+        library->fill_tensor_value(Accessor(c), 3.f);
+
+        // This operator is configured once and captured by this lambda.
+        winograd->prepare(prep_pack);
+        winograd->run(run_pack);
+        return dst;
+    };
+
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
+/** Test case for memory injection in @ref NEWinogradConvolutionLayer.
+ *
+ * Make sure @ref NEWinogradConvolutionLayer still works through injecting the memory at configure time using the old API.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
+{
+    auto                gemm     = std::make_unique<NEWinogradConvolutionLayer>();
+    const auto          src_info = TensorInfo(TensorShape(8U, 8U, 32U), 1, DataType::F32);
+    const auto          w_info   = TensorInfo(TensorShape(1U), 1, DataType::F32);
+    const auto          b_info   = TensorInfo(TensorShape(1U, 3U, 32U, 1U), 1, DataType::F32);
+    auto                dst_info = TensorInfo(TensorShape(8U, 6U, 1U), 1, DataType::F32);
+    const PadStrideInfo pad_info{};
+
+    auto run_conv = [&]()
+    {
+        auto src = create_tensor<Tensor>(src_info);
+        auto w   = create_tensor<Tensor>(w_info);
+        auto b   = create_tensor<Tensor>(b_info);
+        auto dst = create_tensor<Tensor>(dst_info);
+
+        gemm->configure(&src, &b, &w, &dst, pad_info);
+
+        src.allocator()->allocate();
+        b.allocator()->allocate();
+        w.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        library->fill_tensor_value(Accessor(src), 1.f);
+        library->fill_tensor_value(Accessor(b), 2.f);
+        library->fill_tensor_value(Accessor(w), 3.f);
+        gemm->run();
+        return dst;
+    };
+
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
 
 TEST_SUITE(FP32)
 
