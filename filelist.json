@@ -708,9 +708,6 @@
             ],
             "qasymm8_signed": [
               "src/core/cpu/kernels/add/sve/qasymm8_signed.cpp"
-            ],
-            "integer": [
-              "src/core/cpu/kernels/add/sve/integer.cpp"
             ]
           },
           "neon": {
@@ -722,9 +719,6 @@
             ],
             "qasymm8_signed": [
               "src/core/cpu/kernels/add/neon/qasymm8_signed.cpp"
-            ],
-            "integer": [
-              "src/core/cpu/kernels/add/neon/integer.cpp"
             ]
           }
         }
@@ -1661,9 +1655,6 @@
             ],
             "qasymm8_signed": [
               "src/core/cpu/kernels/sub/neon/qasymm8_signed.cpp"
-            ],
-            "integer": [
-              "src/core/cpu/kernels/sub/neon/integer.cpp"
             ]
           }
         }

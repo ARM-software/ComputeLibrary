@@ -127,50 +127,29 @@ Status validate_arguments_with_arithmetic_rules(const ITensorInfo &src1, const I
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::S16, DataType::QSYMM16, DataType::F16,
                                                          DataType::S32, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src2);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
-                                                         DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &src2);
 
-    const bool is_quantized = is_data_type_quantized(src1.data_type()) || is_data_type_quantized(src2.data_type());
-    if(is_quantized)
+    if(is_data_type_quantized_symmetric(src1.data_type()))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &src2);
-
-        if(is_data_type_quantized_symmetric(src1.data_type()))
-        {
-            const int32_t in1_offset = src1.quantization_info().uniform().offset;
-            const int32_t in2_offset = src2.quantization_info().uniform().offset;
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_offset != 0, "For quantized symmetric, offset must be zero");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(in2_offset != 0, "For quantized symmetric, offset must be zero");
-        }
+        const int32_t in1_offset = src1.quantization_info().uniform().offset;
+        const int32_t in2_offset = src2.quantization_info().uniform().offset;
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_offset != 0, "For quantized symmetric, offset must be zero");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(in2_offset != 0, "For quantized symmetric, offset must be zero");
     }
 
     const TensorShape out_shape = TensorShape::broadcast_shape(src1.tensor_shape(), src2.tensor_shape());
-
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
 
     // Validate in case of configured dst
     if(dst.total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                             DataType::S16, DataType::QSYMM16, DataType::F16,
-                                                             DataType::S32, DataType::F32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((dst.data_type() == DataType::U8) && ((src1.data_type() != DataType::U8) || (src2.data_type() != DataType::U8)),
-                                        "dst can only be U8 if both inputs are U8");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
-                                        "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0), "Wrong shape for dst");
 
-        if(is_quantized)
+        if(is_data_type_quantized_symmetric(dst.data_type()))
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &dst);
-
-            if(is_data_type_quantized_symmetric(dst.data_type()))
-            {
-                const int32_t offset = dst.quantization_info().uniform().offset;
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(offset != 0, "For quantized symmetric, offset must be zero");
-            }
+            const int32_t offset = dst.quantization_info().uniform().offset;
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(offset != 0, "For quantized symmetric, offset must be zero");
         }
     }
     return Status{};
@@ -182,9 +161,7 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &s
 
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / dst.element_size(), dst.dimension(0));
 
-    build_opts.add_option("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(src1.data_type()));
-    build_opts.add_option("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(src2.data_type()));
-    build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(dst.data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src1.data_type()));
     build_opts.add_option("-DVEC_SIZE_IN1=" + support::cpp11::to_string(src1.dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
     build_opts.add_option("-DVEC_SIZE_IN2=" + support::cpp11::to_string(src2.dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
     build_opts.add_option("-DVEC_SIZE_OUT=" + support::cpp11::to_string(num_elems_processed_per_iteration));
@@ -220,32 +197,7 @@ std::pair<Status, Window> validate_and_configure_window_for_arithmetic_operators
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(src1, src2);
     const TensorShape &out_shape = broadcast_pair.first;
 
-    set_shape_if_empty(dst, out_shape);
-
-    if(src1.data_type() == DataType::S16 || src2.data_type() == DataType::S16)
-    {
-        set_format_if_unknown(dst, Format::S16);
-    }
-    else if(src1.data_type() == DataType::F16 || src2.data_type() == DataType::F16)
-    {
-        set_format_if_unknown(dst, Format::F16);
-    }
-    else if(src1.data_type() == DataType::F32 || src2.data_type() == DataType::F32)
-    {
-        set_format_if_unknown(dst, Format::F32);
-    }
-    else if(src1.data_type() == DataType::QASYMM8 || src2.data_type() == DataType::QASYMM8)
-    {
-        set_data_type_if_unknown(dst, DataType::QASYMM8);
-    }
-    else if(src1.data_type() == DataType::QASYMM8_SIGNED || src2.data_type() == DataType::QASYMM8_SIGNED)
-    {
-        set_data_type_if_unknown(dst, DataType::QASYMM8_SIGNED);
-    }
-    else if(src1.data_type() == DataType::QSYMM16 || src2.data_type() == DataType::QSYMM16)
-    {
-        set_data_type_if_unknown(dst, DataType::QSYMM16);
-    }
+    auto_init_if_empty(dst, out_shape, 1, src1.data_type());
 
     return configure_window_arithmetic_common(dst);
 }
@@ -258,7 +210,6 @@ std::pair<Status, Window> validate_and_configure_window_for_logical_binary_opera
     set_shape_if_empty(dst, out_shape);
     set_data_type_if_unknown(dst, DataType::U8);
 
-    // The arithmetic utility functions can be share
     return configure_window_arithmetic_common(dst);
 }
 
@@ -266,7 +217,9 @@ std::pair<Status, Window> validate_and_configure_window_for_division(ITensorInfo
 {
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(src1, src2);
     const TensorShape &out_shape = broadcast_pair.first;
+
     auto_init_if_empty(dst, out_shape, 1, src1.data_type());
+
     return configure_window_arithmetic_common(dst);
 }
 } // namespace

@@ -42,9 +42,6 @@ namespace cpu
 DECLARE_ADD_KERNEL(add_qasymm8_sve);
 DECLARE_ADD_KERNEL(add_qasymm8_signed_sve);
 DECLARE_ADD_KERNEL(add_qsymm16_sve);
-DECLARE_ADD_KERNEL(add_s16_u8_s16_sve);
-DECLARE_ADD_KERNEL(add_u8_s16_s16_sve);
-DECLARE_ADD_KERNEL(add_u8_u8_s16_sve);
 
 #undef DECLARE_ADD_KERNEL
 

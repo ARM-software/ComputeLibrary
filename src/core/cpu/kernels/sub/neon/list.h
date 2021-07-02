@@ -38,9 +38,6 @@ namespace cpu
 DECLARE_SUB_KERNEL(sub_qasymm8_neon);
 DECLARE_SUB_KERNEL(sub_qasymm8_signed_neon);
 DECLARE_SUB_KERNEL(sub_qsymm16_neon);
-DECLARE_SUB_KERNEL(sub_s16_u8_s16_neon);
-DECLARE_SUB_KERNEL(sub_u8_s16_s16_neon);
-DECLARE_SUB_KERNEL(sub_u8_u8_s16_neon);
 
 #undef DECLARE_SUB_KERNEL
 

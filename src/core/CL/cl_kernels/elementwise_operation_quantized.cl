@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 #define MAX(x, y) max((x), (y))
 #define MIN(x, y) min((x), (y))
 #define SQUARED_DIFF(x, y) (x - y) * (x - y)
-#define PRELU(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE_OUT)0), SELECT_VEC_DATA_TYPE(float, VEC_SIZE_OUT))))
+#define PRELU(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE)0), SELECT_VEC_DATA_TYPE(float, VEC_SIZE_OUT))))
 #define DIV(x, y) (x / y)
 
 #define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
@@ -37,11 +37,11 @@
 #define OP_FUN_NAME_STR(op) elementwise_operation_##op##_quantized
 #define OP_FUN_NAME(op) OP_FUN_NAME_STR(op)
 
-#if defined(OP) && defined(VEC_SIZE_IN1) && defined(VEC_SIZE_IN2) && defined(VEC_SIZE_OUT) && defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT)
+#if defined(OP) && defined(VEC_SIZE_IN1) && defined(VEC_SIZE_IN2) && defined(VEC_SIZE_OUT) && defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE)
 
 #define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE_OUT)
 #define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE_OUT)
-#define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT)
+#define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_OUT)
 
 /** This function executes an element-wise operation among two tensors.
  *
@@ -57,7 +57,7 @@
  * @note To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
  * @note The element-wise operation to be executed has to be passed at compile time using -DOP (e.g., -DOP=ADD)
  * @note For QSYMM16 operations OFFSET_IN1, OFFSET_IN2 and OFFSET_OUT must be set to zero
- * @note The data type must be passed at compile time using -DDATA_TYPE_OUT, i.e. -DDATA_TYPE_OUT=uchar
+ * @note The data type must be passed at compile time using -DDATA_TYPE, i.e. -DDATA_TYPE=uchar
  *
  * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/QSYMM16
  * @param[in]  in1_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -102,12 +102,12 @@ __kernel void OP_FUN_NAME(OP)(
     uint out_x_offs = max((int)(get_global_id(0) * VEC_SIZE_OUT - (VEC_SIZE_OUT - VEC_SIZE_LEFTOVER) % VEC_SIZE_OUT), 0);
 
     // Get pixels pointer
-    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + in1_x_offs * sizeof(DATA_TYPE_OUT) + get_global_id(1) * in1_step_y + get_global_id(2) * in1_step_z;
-    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + in2_x_offs * sizeof(DATA_TYPE_OUT) + get_global_id(1) * in2_step_y + get_global_id(2) * in2_step_z;
-    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + out_x_offs * sizeof(DATA_TYPE_OUT) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
+    __global uchar *in1_addr = in1_ptr + in1_offset_first_element_in_bytes + in1_x_offs * sizeof(DATA_TYPE) + get_global_id(1) * in1_step_y + get_global_id(2) * in1_step_z;
+    __global uchar *in2_addr = in2_ptr + in2_offset_first_element_in_bytes + in2_x_offs * sizeof(DATA_TYPE) + get_global_id(1) * in2_step_y + get_global_id(2) * in2_step_z;
+    __global uchar *out_addr = out_ptr + out_offset_first_element_in_bytes + out_x_offs * sizeof(DATA_TYPE) + get_global_id(1) * out_step_y + get_global_id(2) * out_step_z;
 
-    VEC_INT in_a = CONVERT((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE_OUT *)in1_addr)), VEC_INT);
-    VEC_INT in_b = CONVERT((VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE_OUT *)in2_addr)), VEC_INT);
+    VEC_INT in_a = CONVERT((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN1)(0, (__global DATA_TYPE *)in1_addr)), VEC_INT);
+    VEC_INT in_b = CONVERT((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_OUT))(VLOAD(VEC_SIZE_IN2)(0, (__global DATA_TYPE *)in2_addr)), VEC_INT);
 
     in_a = SUB(in_a, (VEC_INT)((int)OFFSET_IN1));
     in_b = SUB(in_b, (VEC_INT)((int)OFFSET_IN2));
@@ -118,6 +118,6 @@ __kernel void OP_FUN_NAME(OP)(
     const VEC_TYPE  res0    = CONVERT_SAT(CONVERT_DOWN(qresf32, VEC_INT), VEC_TYPE);
 
     // Store result
-    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE_OUT, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
+    STORE_VECTOR_SELECT(res, DATA_TYPE, out_addr, VEC_SIZE_OUT, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif /* defined(OP) && defined(VEC_SIZE_IN1) && defined(VEC_SIZE_IN2) && defined(VEC_SIZE_OUT) && defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT) */
+#endif /* defined(OP) && defined(VEC_SIZE_IN1) && defined(VEC_SIZE_IN2) && defined(VEC_SIZE_OUT) && defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE) */

@@ -44,9 +44,6 @@ public:
      * Valid configurations (src0,src1) -> dst :
      *
      *   - (U8,U8)           -> U8
-     *   - (U8,U8)           -> S16
-     *   - (S16,U8)          -> S16
-     *   - (U8,S16)          -> S16
      *   - (S16,S16)         -> S16
      *   - (S32,S32)         -> S32
      *   - (F16,F16)         -> F16
