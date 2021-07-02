@@ -146,11 +146,6 @@ Status validate_arguments(const ITensorInfo *src, unsigned int batch_offset, con
 }
 } // namespace
 
-CpuConcatenateBatchKernel::CpuConcatenateBatchKernel()
-    : _func(nullptr), _batch_offset(0)
-{
-}
-
 void CpuConcatenateBatchKernel::configure(const ITensorInfo *src, unsigned int batch_offset, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

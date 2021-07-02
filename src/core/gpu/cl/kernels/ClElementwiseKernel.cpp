@@ -276,20 +276,11 @@ ClElementwiseKernel::ClElementwiseKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClElementwiseKernel::configure_common(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
-{
-    configure_common(CLKernelLibrary::get().get_compile_context(), src1, src2, dst);
-}
-
 void ClElementwiseKernel::configure_common(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
 {
     // Configure kernel window
     auto win_config = validate_and_configure_window(*src1, *src2, *dst);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-
-    _src1 = src1;
-    _src2 = src2;
-    _dst  = dst;
 
     std::string kernel_name = "elementwise_operation_" + name();
     if(is_data_type_quantized(src1->data_type()))

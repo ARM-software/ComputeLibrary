@@ -39,7 +39,6 @@ namespace kernels
 class ClWinogradInputTransformKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClWinogradInputTransformKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClWinogradInputTransformKernel);
     /** Set the input and output of the kernel.
@@ -76,13 +75,13 @@ public:
 private:
     using WinogradKey = std::pair<std::pair<int, int>, std::pair<int, int>>;
 
-    BorderSize   _border_size;
-    DataLayout   _data_layout;
-    int          _num_tiles_x;
-    int          _num_tiles_y;
-    unsigned int _step_z;
+    BorderSize   _border_size{ 0 };
+    DataLayout   _data_layout{ DataLayout::UNKNOWN };
+    int          _num_tiles_x{ 0 };
+    int          _num_tiles_y{ 0 };
+    unsigned int _step_z{ 1 };
 };
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_WINOGRAD_INPUT_TRANSFORM_KERNEL_H */
+#endif /* ARM_COMPUTE_CL_WINOGRAD_INPUT_TRANSFORM_KERNEL_H */

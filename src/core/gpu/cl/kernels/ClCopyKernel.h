@@ -48,11 +48,9 @@ public:
      * @param[in]  dst_window      (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, Window *dst_window = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClCopyKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src        Source tensor info. Data types supported: All.
-     * @param[in] dst        Destination tensor info. Data types supported: same as @p src.
-     * @param[in] dst_window (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
+     * Similar to @ref ClCopyKernel::configure()
      *
      * @return a status
      */
@@ -68,4 +66,4 @@ private:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_COPY_KERNEL_H */
+#endif /* ARM_COMPUTE_CL_COPY_KERNEL_H */

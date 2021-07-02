@@ -42,7 +42,6 @@ namespace opencl
 class ClDirectConv2d : public IClOperator
 {
 public:
-    /** Constructor */
     ClDirectConv2d() = default;
     /** Set the src and dst tensors.
      *

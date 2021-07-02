@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMMLOWP_OUTPUTSTAGE_H
-#define ARM_COMPUTE_CPU_GEMMLOWP_OUTPUTSTAGE_H
+#ifndef ARM_COMPUTE_CPU_GEMMLOWP_OUTPUT_STAGE_H
+#define ARM_COMPUTE_CPU_GEMMLOWP_OUTPUT_STAGE_H
 
 #include "arm_compute/core/Types.h"
 #include "src/runtime/cpu/ICpuOperator.h"
@@ -51,10 +51,6 @@ namespace cpu
 class CpuGemmLowpOutputStage : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuGemmLowpOutputStage() = default;
-    /** Default destructor */
-    ~CpuGemmLowpOutputStage() = default;
     /** Initialise the kernel's inputs, output
      *
      * Valid data layouts:
@@ -87,4 +83,4 @@ public:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMMLOWP_OUTPUTSTAGE_H */
+#endif /* ARM_COMPUTE_CPU_GEMMLOWP_OUTPUT_STAGE_H */

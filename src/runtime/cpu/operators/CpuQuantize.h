@@ -34,8 +34,6 @@ namespace cpu
 class CpuQuantize : public ICpuOperator
 {
 public:
-    /** Default Constructor */
-    CpuQuantize() = default;
     /** Set the input and output tensors.
      *
      * @param[in]  src Source tensor info. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.

@@ -41,7 +41,6 @@ namespace kernels
 class ClQuantizeKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClQuantizeKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClQuantizeKernel);
     /** Set the input, output.

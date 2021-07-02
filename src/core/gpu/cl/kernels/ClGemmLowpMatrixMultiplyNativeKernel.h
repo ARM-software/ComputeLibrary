@@ -78,4 +78,4 @@ private:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_NATIVE_KERNEL_H*/
+#endif /* ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_NATIVE_KERNEL_H */

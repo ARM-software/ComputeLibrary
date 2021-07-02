@@ -38,7 +38,6 @@ namespace kernels
 class ClPool2dKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClPool2dKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClPool2dKernel);
 
@@ -65,10 +64,10 @@ public:
     BorderSize border_size() const override;
 
 public:
-    PoolingLayerInfo _pool_info;
-    DataLayout       _data_layout;
-    BorderSize       _border_size;
-    unsigned int     _num_elems_processed_per_iteration;
+    PoolingLayerInfo _pool_info{};
+    DataLayout       _data_layout{ DataLayout::UNKNOWN };
+    BorderSize       _border_size{ 0 };
+    unsigned int     _num_elems_processed_per_iteration{ 1 };
 };
 } // namespace kernels
 } // namespace opencl

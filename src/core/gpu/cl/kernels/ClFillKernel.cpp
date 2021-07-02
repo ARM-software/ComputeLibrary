@@ -47,13 +47,6 @@ ClFillKernel::ClFillKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClFillKernel::configure(ITensorInfo      *tensor,
-                             const PixelValue &constant_value,
-                             Window           *window)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), tensor, constant_value, window);
-}
-
 void ClFillKernel::configure(const CLCompileContext &compile_context, ITensorInfo *tensor,
                              const PixelValue &constant_value,
                              Window           *window)

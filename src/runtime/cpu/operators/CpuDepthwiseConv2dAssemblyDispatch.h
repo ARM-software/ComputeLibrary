@@ -35,10 +35,8 @@ namespace cpu
 class CpuDepthwiseConv2dAssemblyDispatch : public ICpuOperator
 {
 public:
-    /** Default constructor */
     CpuDepthwiseConv2dAssemblyDispatch();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDepthwiseConv2dAssemblyDispatch);
-    /** Default destructor */
     ~CpuDepthwiseConv2dAssemblyDispatch();
     /** Initialize the function's source, destination, kernels and border_size.
      *
@@ -67,6 +65,7 @@ public:
      * @return True if activation is supported else false
      */
     static bool is_activation_supported(const ActivationLayerInfo &activation);
+
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
     void prepare(ITensorPack &tensors) override;

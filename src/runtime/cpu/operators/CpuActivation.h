@@ -34,8 +34,6 @@ namespace cpu
 class CpuActivation : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuActivation() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in]  input           Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
@@ -43,11 +41,9 @@ public:
      * @param[in]  activation_info Activation layer parameters.
      */
     void configure(const ITensorInfo *input, ITensorInfo *output, const ActivationLayerInfo &activation_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuActivation
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] input    Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
-     * @param[in] output   Destination tensor info. Data type supported: same as @p src
-     * @param[in] act_info Activation layer information.
+     * Similar to @ref CpuActivation::configure()
      *
      * @return a status
      */

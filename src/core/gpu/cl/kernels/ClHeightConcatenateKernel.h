@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_HEIGHT_CONCATENATE_LAYER_KERNEL_H
-#define ARM_COMPUTE_CL_HEIGHT_CONCATENATE_LAYER_KERNEL_H
+#ifndef ARM_COMPUTE_CL_HEIGHT_CONCATENATE_KERNEL_H
+#define ARM_COMPUTE_CL_HEIGHT_CONCATENATE_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
@@ -40,7 +40,6 @@ namespace kernels
 class ClHeightConcatenateKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClHeightConcatenateKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClHeightConcatenateKernel);
     /** Initialise the kernel's source and destination
@@ -52,11 +51,9 @@ public:
      *
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int height_offset, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref ClHeightConcatenateKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src           Source tensor info. Data types supported: All.
-     * @param[in] height_offset The starting offset on the Y axis for the dst tensor.
-     * @param[in] dst           Destination tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClHeightConcatenateKernel::configure()
      *
      * @return a status
      */
@@ -71,4 +68,4 @@ private:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_HEIGHT_CONCATENATE_LAYER_KERNEL_H */
+#endif /* ARM_COMPUTE_CL_HEIGHT_CONCATENATE_KERNEL_H */

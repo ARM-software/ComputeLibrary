@@ -34,8 +34,6 @@ namespace cpu
 class CpuCast : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuCast() = default;
     /** Configure operator for a given list of arguments
      *
      * Input data type must be different than output data type.

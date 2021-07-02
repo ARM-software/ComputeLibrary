@@ -46,10 +46,8 @@ namespace cpu
 class CpuPool2d : public ICpuOperator
 {
 public:
-    /** Constructor */
     CpuPool2d();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPool2d);
-    /** Default destructor */
     ~CpuPool2d();
     /** Set the src and dst tensors.
      *

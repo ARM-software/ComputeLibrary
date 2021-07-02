@@ -38,7 +38,6 @@ namespace kernels
 class CpuScaleKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuScaleKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuScaleKernel);
     /** Initialise the kernel's inputs, output and interpolation policy
@@ -106,4 +105,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_SCALEKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_SCALEKERNEL_H */

@@ -44,7 +44,6 @@ namespace kernels
 class CpuGemmMatrixAdditionKernel : public ICpuKernel
 {
 public:
-    /** Constructor */
     CpuGemmMatrixAdditionKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmMatrixAdditionKernel);
     /** Initialise the kernel's input and output.

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPUADDKERNEL_H
-#define ARM_COMPUTE_CPUADDKERNEL_H
+#ifndef ARM_COMPUTE_CPU_ADD_KERNEL_H
+#define ARM_COMPUTE_CPU_ADD_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -84,4 +84,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPUADDKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_ADD_KERNEL_H */

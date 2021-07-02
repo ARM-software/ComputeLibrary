@@ -42,7 +42,6 @@ namespace kernels
 class CpuGemmMatrixMultiplyKernel : public ICpuKernel
 {
 public:
-    /** Constructor */
     CpuGemmMatrixMultiplyKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmMatrixMultiplyKernel);
     /** Initialise the kernel's input and output.
@@ -89,4 +88,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_GEMM_MATRIX_MULTIPLY_KERNEL_H*/
+#endif /* ARM_COMPUTE_CPU_GEMM_MATRIX_MULTIPLY_KERNEL_H */

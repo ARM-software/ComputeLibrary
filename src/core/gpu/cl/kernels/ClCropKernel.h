@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCROPKERNEL_H
-#define ARM_COMPUTE_CLCROPKERNEL_H
+#ifndef ARM_COMPUTE_CL_CROP_KERNEL_H
+#define ARM_COMPUTE_CL_CROP_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
@@ -44,19 +44,6 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in]  src                 Source tensor info. Data type supported: All. Data layouts supported: NHWC.
-     * @param[out] dst                 Destination tensor info. Data type supported: F32
-     * @param[in]  start               Coordinates of where to start cropping the image.
-     * @param[in]  end                 Coordinates of where to end cropping the image.
-     * @param[in]  batch_index         Fourth dimension index of the 3D image to crop in @p src.
-     * @param[in]  extrapolation_value Value to be used for values outside of the image. Default is 0.
-     * @param[in]  dst_window          Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
-     */
-    void configure(const ITensorInfo *src, ITensorInfo *dst, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0, Window *dst_window = nullptr);
-    /** Configure kernel
-     *
-     * @note Supported tensor rank: up to 4
-     *
      * @param[in]  compile_context     The compile context to be used.
      * @param[in]  src                 Source tensor info. Data type supported: All. Data layouts supported: NHWC.
      * @param[out] dst                 Destination tensor info. Data type supported: F32
@@ -68,18 +55,11 @@ public:
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0,
                    Window *dst_window = nullptr);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSliceKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note Supported tensor rank: up to 4
+     * Similar to @ref ClCropKernel::configure()
      *
-     * @param[in] src                 Source tensor info. Data type supported: All. Data layouts supported: NHWC.
-     * @param[in] dst                 Destination tensor info. Data type supported: F32
-     * @param[in] start               Coordinates of where to start cropping the image.
-     * @param[in] end                 Coordinates of where to end cropping the image.
-     * @param[in] batch_index         Fourth dimension index of the 3D image to crop in @p src.
-     * @param[in] extrapolation_value Value to be used for values outside of the image. Default is 0.
-     * @param[in] dst_window          Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
+     * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0,
                            Window *dst_window = nullptr);
@@ -95,4 +75,4 @@ private:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLCROPKERNEL_H */
+#endif /* ARM_COMPUTE_CL_CROP_KERNEL_H */

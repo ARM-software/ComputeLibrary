@@ -35,8 +35,6 @@ namespace opencl
 class ClQuantize : public IClOperator
 {
 public:
-    /** Constructor */
-    ClQuantize() = default;
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.

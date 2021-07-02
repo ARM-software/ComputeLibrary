@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DIRECTCONV2D_KERNEL_H
-#define ARM_COMPUTE_CPU_DIRECTCONV2D_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_DIRECT_CONV2D_KERNEL_H
+#define ARM_COMPUTE_CPU_DIRECT_CONV2D_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
 
 namespace arm_compute
 {
-class ITensor;
 namespace cpu
 {
 namespace kernels
@@ -38,7 +37,6 @@ namespace kernels
 class CpuDirectConv2dKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuDirectConv2dKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDirectConv2dKernel);
     /** Set the src, weights, and dst tensors.

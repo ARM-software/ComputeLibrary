@@ -803,11 +803,6 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
 }
 } // namespace
 
-CpuDepthwiseConv2dNativeKernel::CpuDepthwiseConv2dNativeKernel()
-    : _func(), _conv_info(), _depth_multiplier(1), _dilation(), _output_multiplier(), _output_shift(), _has_biases()
-{
-}
-
 void CpuDepthwiseConv2dNativeKernel::configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
@@ -944,6 +939,11 @@ void CpuDepthwiseConv2dNativeKernel::run_op(ITensorPack &tensors, const Window &
     const auto biases  = tensors.get_const_tensor(TensorType::ACL_SRC_2);
     auto       dst     = tensors.get_tensor(TensorType::ACL_DST);
     (this->*_func)(src, weights, biases, dst, window, _has_biases);
+}
+
+const char *CpuDepthwiseConv2dNativeKernel::name() const
+{
+    return "CpuDepthwiseConv2dNativeKernel";
 }
 } // namespace kernels
 } // namespace cpu

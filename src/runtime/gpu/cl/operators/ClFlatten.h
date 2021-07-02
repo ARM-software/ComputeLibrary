@@ -35,8 +35,6 @@ namespace opencl
 class ClFlatten : public IClOperator
 {
 public:
-    /** Constructor */
-    ClFlatten() = default;
     /** Configure operator for a given list of arguments
      *
      * Valid data layouts:

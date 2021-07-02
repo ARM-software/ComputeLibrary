@@ -35,8 +35,6 @@ namespace opencl
 class ClCast : public IClOperator
 {
 public:
-    /** Constructor */
-    ClCast() = default;
     /** Configure operator for a given list of arguments
      *
      * @note Input data type must be different than output data type.

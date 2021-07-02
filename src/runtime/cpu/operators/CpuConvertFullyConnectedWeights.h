@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_CONVERTFULLYCONNECTEDWEIGHTS_H
-#define ARM_COMPUTE_CPU_CONVERTFULLYCONNECTEDWEIGHTS_H
+#ifndef ARM_COMPUTE_CPU_CONVERT_FULLYCONNECTED_WEIGHTS_H
+#define ARM_COMPUTE_CPU_CONVERT_FULLYCONNECTED_WEIGHTS_H
 
 #include "src/runtime/cpu/ICpuOperator.h"
 
@@ -34,8 +34,6 @@ namespace cpu
 class CpuConvertFullyConnectedWeights : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuConvertFullyConnectedWeights() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in]  src                Source tensor to permute. Data types supported: All
@@ -44,12 +42,9 @@ public:
      * @param[in]  data_layout        The data layout the weights have been trained in.
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuConvertFullyConnectedWeights
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src                Source tensor to permute. Data types supported: All
-     * @param[in] dst                Destination tensor. Data types supported: Same as @p dst
-     * @param[in] original_src_shape Shape of the original src tensor (the one entering fully connected layer).
-     * @param[in] data_layout        The data layout the weights have been trained in.
+     * Similar to @ref CpuConvertFullyConnectedWeights::configure()
      *
      * @return a status
      */
@@ -59,4 +54,4 @@ public:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_CONVERTFULLYCONNECTEDWEIGHTS_H */
+#endif /* ARM_COMPUTE_CPU_CONVERT_FULLYCONNECTED_WEIGHTS_H */

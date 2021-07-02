@@ -34,18 +34,15 @@ namespace cpu
 class CpuFloor : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuFloor() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in] src Source tensor info. Data types supported: F16/F32.
      * @param[in] dst Destination tensor info. Data type supported: same as @p src
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuFloor
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data type supported: same as @p src
+     * Similar to @ref CpuFloor::configure()
      *
      * @return a status
      */

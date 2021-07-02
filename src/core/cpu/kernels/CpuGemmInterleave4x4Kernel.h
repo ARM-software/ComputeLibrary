@@ -55,7 +55,6 @@ namespace kernels
 class CpuGemmInterleave4x4Kernel : public ICpuKernel
 {
 public:
-    /** Default Constructor */
     CpuGemmInterleave4x4Kernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmInterleave4x4Kernel);
     /** Initialise the kernel's src and dst.
@@ -79,4 +78,4 @@ public:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_GEMM_INTERLEAVE4x4_KERNEL_H*/
+#endif /* ARM_COMPUTE_CPU_GEMM_INTERLEAVE4x4_KERNEL_H */

@@ -47,11 +47,9 @@ public:
      * @param[out] dst             Destination tensor info. Same as @p src
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref ClFloorKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data type supported: F16/F32.
-     * @param[in] dst Destination tensor info. Same as @p src
+     * Similar to @ref ClFloorKernel::configure()
      *
      * @return a status
      */

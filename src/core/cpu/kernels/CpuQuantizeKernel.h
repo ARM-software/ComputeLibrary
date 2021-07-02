@@ -40,7 +40,6 @@ namespace kernels
 class CpuQuantizeKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuQuantizeKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuQuantizeKernel);
     /** Set the input, output.

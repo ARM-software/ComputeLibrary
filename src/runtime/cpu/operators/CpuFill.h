@@ -34,8 +34,6 @@ namespace cpu
 class CpuFill : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuFill() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in,out] tensor         Tensor to fill. Supported data types: All

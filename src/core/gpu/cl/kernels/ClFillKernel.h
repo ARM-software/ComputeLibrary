@@ -42,24 +42,15 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClFillKernel);
     /** Initialise the kernel's tensor and filling value
      *
-     * @param[in,out] tensor         Input tensor info. Supported data types: All.
-     * @param[in]     constant_value The value used to fill the planes of the tensor
-     * @param[in]     window         Window to be used in case setting only part of a tensor. Default is nullptr.
-     */
-    void configure(ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
-    /** Initialise the kernel's tensor and filling value
-     *
      * @param[in]     compile_context The compile context to be used.
      * @param[in,out] tensor          Input tensor info. Supported data types: All.
      * @param[in]     constant_value  The value used to fill the planes of the tensor
      * @param[in]     window          Window to be used in case setting only part of a tensor. Default is nullptr.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClFillKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] tensor         Source tensor info. Data types supported: All.
-     * @param[in] constant_value The value used to fill the planes of the tensor
-     * @param[in] window         Window to be used in case setting only part of a tensor. Default is nullptr.
+     * Similar to @ref ClFillKernel::configure()
      *
      * @return a status
      */
@@ -74,4 +65,4 @@ private:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLMEMSETRKERNEL_H */
+#endif /* ARM_COMPUTE_CL_FILL_KERNEL_H */

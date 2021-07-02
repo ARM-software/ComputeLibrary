@@ -42,11 +42,6 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuConcatenate::CpuConcatenate()
-    : _concat_kernels(), _num_srcs(0), _axis(0)
-{
-}
-
 void CpuConcatenate::configure(const std::vector<const ITensorInfo *> &srcs_vector, ITensorInfo *dst, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(dst == nullptr);

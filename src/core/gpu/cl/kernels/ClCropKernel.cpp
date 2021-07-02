@@ -41,11 +41,6 @@ namespace opencl
 {
 namespace kernels
 {
-void ClCropKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value, Window *dst_window)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), src, dst, start, end, batch_index, extrapolation_value, dst_window);
-}
-
 ClCropKernel::ClCropKernel()
 {
     _type = CLKernelType::ELEMENTWISE;

@@ -51,15 +51,13 @@ public:
      * @param[in]  src             Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32 for Softmax and F16/F32 for Log Softmax
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src
      * @param[in]  info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
-     *
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &dst, const SoftmaxKernelInfo &info);
-    /** Static function to check if the given info will lead to a valid configuration
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in]  src  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32 for Softmax and F16/F32 for Log Softmax
-     * @param[out] dst  Destination tensor info. Data types supported: same as @p src
-     * @param[in]  info Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
+     * Similar to ClSoftmax::configure()
      *
+     * @return a status
      */
     static Status validate(const ITensorInfo &src, const ITensorInfo &dst, const SoftmaxKernelInfo &info);
     // Inherited methods overridden:

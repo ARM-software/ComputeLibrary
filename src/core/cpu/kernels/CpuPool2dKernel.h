@@ -38,7 +38,6 @@ namespace kernels
 class CpuPool2dKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuPool2dKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPool2dKernel);
     /** Configure kernel for a given list of arguments
@@ -80,4 +79,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_POOL2D_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_POOL2D_KERNEL_H */

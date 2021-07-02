@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWNINT32TOINT8_SCALEBYFIXEDPOINT_KERNEL_H
-#define ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWNINT32TOINT8_SCALEBYFIXEDPOINT_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWN_INT32TOINT8_SCALEBYFIXEDPOINT_KERNEL_H
+#define ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWN_INT32TOINT8_SCALEBYFIXEDPOINT_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/common/Macros.h"
@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+// Forward declaration
 class ITensor;
 namespace cpu
 {
@@ -51,7 +52,6 @@ namespace kernels
 class CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel);
     /** Initialise the kernel's input and output.
@@ -111,4 +111,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWNINT32TOINT8_SCALEBYFIXEDPOINT_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWN_INT32TOINT8_SCALEBYFIXEDPOINT_KERNEL_H */

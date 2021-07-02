@@ -51,13 +51,9 @@ public:
      * @param[in]     info            @ref ScaleKernelInfo descriptor to be used to configure
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref ClScale
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src  Source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32.
-     * @param[in] dst  Output tensor info. Data type supported: Same as @p src
-     *                 All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in] info @ref ScaleKernelInfo descriptor to be used to validate
+     * Similar to ClScale::configure()
      *
      * @return a status
      */
@@ -71,4 +67,4 @@ protected:
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLSCALE_H */
+#endif /* ARM_COMPUTE_CLSCALE_H */

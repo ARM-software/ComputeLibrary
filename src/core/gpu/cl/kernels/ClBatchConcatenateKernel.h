@@ -40,7 +40,6 @@ namespace kernels
 class ClBatchConcatenateKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClBatchConcatenateKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClBatchConcatenateKernel);
     /** Initialise the kernel's source and destination
@@ -55,11 +54,9 @@ public:
      *
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int batch_offset, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref ClBatchConcatenateKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src          Input tensor info. Data types supported: All.
-     * @param[in] batch_offset The offset on axis # 3.
-     * @param[in] dst          Destination tensor info. Data types supported: Same as @p src.
+     * Similar to @ref ClBatchConcatenateKernel::configure()
      *
      * @return a status
      */
@@ -69,7 +66,7 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue) override;
 
 private:
-    unsigned int _batch_offset;
+    unsigned int _batch_offset{ 0 };
 };
 } // namespace kernels
 } // namespace opencl

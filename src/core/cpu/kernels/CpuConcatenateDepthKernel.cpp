@@ -146,11 +146,6 @@ Status validate_arguments(const ITensorInfo *input, unsigned int depth_offset, c
 }
 } // namespace
 
-CpuConcatenateDepthKernel::CpuConcatenateDepthKernel()
-    : _func(nullptr), _depth_offset(0)
-{
-}
-
 void CpuConcatenateDepthKernel::configure(const ITensorInfo *src, unsigned int depth_offset, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

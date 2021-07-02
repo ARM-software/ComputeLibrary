@@ -39,7 +39,6 @@ namespace kernels
 class ClWinogradOutputTransformKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClWinogradOutputTransformKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClWinogradOutputTransformKernel);
     /** Set the input and output tensor.
@@ -64,7 +63,6 @@ public:
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *bias, ITensorInfo *dst, const WinogradInfo &winograd_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClWinogradOutputTransformKernel::configure()
@@ -84,4 +82,4 @@ private:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_WINOGRAD_OUTPUT_TRANSFORM_KERNEL_H */
+#endif /* ARM_COMPUTE_CL_WINOGRAD_OUTPUT_TRANSFORM_KERNEL_H */

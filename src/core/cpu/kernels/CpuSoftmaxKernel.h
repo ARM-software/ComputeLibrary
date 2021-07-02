@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_SOFTMAXKERNEL_H
-#define ARM_COMPUTE_CPU_SOFTMAXKERNEL_H
+#ifndef ARM_COMPUTE_CPU_SOFTMAX_KERNEL_H
+#define ARM_COMPUTE_CPU_SOFTMAX_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -37,7 +37,6 @@ namespace kernels
 class CpuLogits1DMaxKernel : public ICpuKernel
 {
 public:
-    /** Constructor */
     CpuLogits1DMaxKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuLogits1DMaxKernel);
     /** Set the input and output tensors.
@@ -71,7 +70,6 @@ template <bool IS_LOG = false>
 class CpuLogits1DSoftmaxKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuLogits1DSoftmaxKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuLogits1DSoftmaxKernel);
 
@@ -110,4 +108,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_SOFTMAXKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_SOFTMAX_KERNEL_H */

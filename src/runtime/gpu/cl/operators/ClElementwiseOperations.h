@@ -39,8 +39,6 @@ namespace opencl
 class ClElementwiseDivision : public IClOperator
 {
 public:
-    /** Default Constructor */
-    ClElementwiseDivision() = default;
     /** Configure function for a given list of arguments.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -50,12 +48,9 @@ public:
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref ClElementwiseDivision
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src1     First source tensor info. Data types supported: F16/F32.
-     * @param[in] src2     Second source tensor info. Data types supported: same as @p src1.
-     * @param[in] dst      Destination tensor info. Data types supported: same as @p src1.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClElementwiseDivision::configure()
      *
      * @return a status
      */
@@ -70,8 +65,6 @@ public:
 class ClElementwiseMax : public IClOperator
 {
 public:
-    /** Default Constructor */
-    ClElementwiseMax() = default;
     /** Configure function for a given list of arguments.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -81,12 +74,9 @@ public:
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for max
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src1     First source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
-     * @param[in] src2     Second source tensor info. Data types supported: same as @p src1.
-     * @param[in] dst      Destination tensor info. Data types supported: same as @p src1.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClElementwiseMax::configure()
      *
      * @return a status
      */
@@ -101,8 +91,6 @@ public:
 class ClElementwiseMin : public IClOperator
 {
 public:
-    /** Default Constructor */
-    ClElementwiseMin() = default;
     /** Configure function for a given list of arguments.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -112,12 +100,9 @@ public:
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for min
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src1     First source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
-     * @param[in] src2     Second source tensor info. Data types supported: same as @p src1.
-     * @param[in] dst      Destination tensor info. Data types supported: same as @p src1.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClElementwiseMin::configure()
      *
      * @return a status
      */
@@ -132,8 +117,6 @@ public:
 class ClElementwiseSquaredDiff : public IClOperator
 {
 public:
-    /** Default Constructor */
-    ClElementwiseSquaredDiff() = default;
     /** Configure function for a given list of arguments.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -143,12 +126,9 @@ public:
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for squared difference
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src1     First source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
-     * @param[in] src2     Second source tensor info. Data types supported: same as @p src1.
-     * @param[in] dst      Destination tensor info. Data types supported: same as @p src1.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClElementwiseSquaredDiff::configure()
      *
      * @return a status
      */
@@ -163,8 +143,6 @@ public:
 class ClElementwisePower : public IClOperator
 {
 public:
-    /** Default Constructor */
-    ClElementwisePower() = default;
     /** Configure function for a given list of arguments.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -174,12 +152,9 @@ public:
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for power
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src1     First source tensor info. Data types supported: F16/F32.
-     * @param[in] src2     Second source tensor info. Data types supported: F16/F32.
-     * @param[in] dst      Destination tensor info. Data types supported: F16/F32.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClElementwisePower::configure()
      *
      * @return a status
      */

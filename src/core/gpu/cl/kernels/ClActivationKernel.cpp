@@ -87,7 +87,6 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 } // namespace
 
 ClActivationKernel::ClActivationKernel()
-    : _run_in_place(false)
 {
     _type = CLKernelType::ELEMENTWISE;
 }

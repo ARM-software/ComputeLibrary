@@ -37,7 +37,6 @@ namespace kernels
 class CpuDequantizeKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuDequantizeKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDequantizeKernel);
     /** Set input, output tensors.

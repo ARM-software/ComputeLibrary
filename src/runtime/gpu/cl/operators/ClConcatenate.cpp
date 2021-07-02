@@ -42,13 +42,6 @@ namespace arm_compute
 {
 namespace opencl
 {
-ClConcatenate::ClConcatenate()
-    : _concat_kernels(),
-      _num_inputs(0),
-      _axis(Window::DimX)
-{
-}
-
 void ClConcatenate::configure(const CLCompileContext &compile_context, const std::vector<ITensorInfo *> &src_vector, ITensorInfo *dst, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(dst == nullptr);

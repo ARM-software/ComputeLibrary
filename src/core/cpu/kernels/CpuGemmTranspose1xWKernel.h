@@ -71,7 +71,6 @@ namespace kernels
 class CpuGemmTranspose1xWKernel : public ICpuKernel
 {
 public:
-    /** Constructor */
     CpuGemmTranspose1xWKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmTranspose1xWKernel);
     /** Configure kernel for a given list of arguments
@@ -95,4 +94,4 @@ public:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_GEMM_TRANSPOSE1xW_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_GEMM_TRANSPOSE1xW_KERNEL_H */

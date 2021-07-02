@@ -36,8 +36,6 @@ namespace opencl
 class ClFill : public IClOperator
 {
 public:
-    /** Constructor */
-    ClFill() = default;
     /** Initialise the kernel's tensor and filling value
      *
      * @param[in]     compile_context The compile context to be used.
@@ -46,11 +44,9 @@ public:
      * @param[in]     window          Window to be used in case setting only part of a tensor. Default is nullptr.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref kernels::ClFillKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] tensor         Source tensor info. Data types supported: All.
-     * @param[in] constant_value The value used to fill the planes of the tensor.
-     * @param[in] window         Window to be used in case setting only part of a tensor. Default is nullptr.
+     * Similar to ClFill::configure()
      *
      * @return a status
      */

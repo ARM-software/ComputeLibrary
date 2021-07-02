@@ -40,8 +40,6 @@ namespace cpu
 class CpuScale : public ICpuOperator
 {
 public:
-    /** Default Constructor */
-    CpuScale();
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
      * @param[in, out] src  Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
@@ -49,11 +47,9 @@ public:
      * @param[in]      info @ref ScaleKernelInfo to be used for configuration
      */
     void configure(ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEScale
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src  Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
-     * @param[in] dst  Destination tensor info. Data type supported: Same as @p src. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in] info @ref ScaleKernelInfo to be used for validation
+     * Similar to @ref CpuScale::configure()
      *
      * @return a status
      */
@@ -64,10 +60,10 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    ScaleKernelInfo _scale_info;
-    DataLayout      _data_layout;
-    bool            _is_prepared;
+    ScaleKernelInfo _scale_info{ InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED };
+    DataLayout      _data_layout{ DataLayout::UNKNOWN };
+    bool            _is_prepared{ false };
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_SCALE_H */
+#endif /* ARM_COMPUTE_CPU_SCALE_H */

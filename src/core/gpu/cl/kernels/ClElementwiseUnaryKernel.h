@@ -48,11 +48,9 @@ public:
      * @param[in]  op              Element wise unary operation to perform.
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const ElementWiseUnary &op);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClElementWiseUnaryKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
-     * @param[in] op  Element wise unary operation to perform.
+     * Similar to @ref ClElementWiseUnaryKernel::configure()
      *
      * @return a status
      */

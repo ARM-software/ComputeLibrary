@@ -30,7 +30,6 @@
 
 namespace arm_compute
 {
-class ITensor;
 namespace cpu
 {
 namespace kernels
@@ -39,19 +38,11 @@ namespace kernels
  *
  * Element-wise operation is computed by:
  * @f[ dst(x) = OP(src(x))@f]
- *
  */
 class CpuElementwiseUnaryKernel : public ICpuKernel
 {
 public:
-    const char *name() const override
-    {
-        return "CpuElementwiseUnaryKernel";
-    }
-    /** Default constructor */
-    CpuElementwiseUnaryKernel();
-    /** Default destructor */
-    ~CpuElementwiseUnaryKernel() = default;
+    CpuElementwiseUnaryKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuElementwiseUnaryKernel);
 
     /** Function to configure the @ref CpuElementwiseUnaryKernel
@@ -61,19 +52,17 @@ public:
      * @param[out] dst Output tensor. Data types supported: Same as @p src.
      */
     void configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuElementwiseUnaryKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] op  Arithmetic operation to be executed.
-     * @param[in] src First tensor input info. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
-     * @param[in] dst Output tensor info. Data types supported: Same as @p src.
+     * Similar to CpuElementwiseUnaryKernel::configure()
      *
-     * @return a Status
+     * @return a status
      */
     static Status validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    const char *name() const override;
 
     /** Common signature for all the specialised elementwise unary micro-kernels
      *
@@ -82,7 +71,7 @@ public:
     using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary)>::type;
 
 private:
-    ElementWiseUnary _op;
+    ElementWiseUnary _op{};
 };
 } // namespace kernels
 } // namespace cpu

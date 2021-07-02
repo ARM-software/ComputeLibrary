@@ -35,8 +35,6 @@ namespace opencl
 class ClPermute : public IClOperator
 {
 public:
-    /** Constructor */
-    ClPermute() = default;
     /** Initialise the kernel's inputs and outputs and permute vector
      *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4
@@ -47,13 +45,9 @@ public:
      * @param[in] perm            Permutation vector
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
-    /**  Static function to check if given info will lead to a valid configuration of @ref kernels::ClPermuteKernel.
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
-     *
-     * @param[in] src  First tensor src info. Data types supported: All.
-     * @param[in] dst  Output tensor info. Data types supported: same as @p src.
-     * @param[in] perm Permutation vector
+     * Similar to ClPermute::configure()
      *
      * @return a status
      */

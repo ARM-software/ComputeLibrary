@@ -38,7 +38,6 @@ namespace kernels
 class ClDequantizeKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClDequantizeKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClDequantizeKernel);
     /** Initialise the kernel's input and output

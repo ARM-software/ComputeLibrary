@@ -31,8 +31,6 @@
 
 namespace arm_compute
 {
-class ICLTensor;
-
 namespace opencl
 {
 namespace kernels
@@ -41,10 +39,8 @@ namespace kernels
 class ClScaleKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClScaleKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClScaleKernel);
-
     /** Initialise the kernel's inputs, output and interpolation policy
      *
      * @param[in]  compile_context The compile context to be used.
@@ -54,13 +50,9 @@ public:
      * @param[in]  info            @ref ScaleKernelInfo Kernel descriptor to be used to configure.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref ClScaleKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src  Source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in] dst  Destination tensor info. Data types supported: Same as @p src
-     *                 All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in] info @ref ScaleKernelInfo Kernel descriptor to be used to validate
+     * Similar to @ref ClScaleKernel::configure()
      *
      * @return a status
      */
@@ -71,9 +63,9 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    DataLayout _data_layout = DataLayout::UNKNOWN;
+    DataLayout _data_layout{ DataLayout::UNKNOWN };
 };
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLSCALEKERNEL_H */
+#endif /* ARM_COMPUTE_CL_SCALE_KERNEL_H */

@@ -47,10 +47,9 @@ public:
      * @param[in] dst             The dst tensor info. Data types supported: Same as @p src
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClTransposeKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src The src tensor info. Data types supported: All.
-     * @param[in] dst The dst tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClTransposeKernel::configure()
      *
      * @return a status
      */
@@ -62,4 +61,4 @@ public:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_TRANSPOSE_KERNEL_H */
+#endif /* ARM_COMPUTE_CL_TRANSPOSE_KERNEL_H */

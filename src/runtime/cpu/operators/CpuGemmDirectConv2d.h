@@ -41,10 +41,8 @@ namespace cpu
 class CpuGemmDirectConv2d : public ICpuOperator
 {
 public:
-    /** Constructor */
     CpuGemmDirectConv2d();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmDirectConv2d);
-    /** Destructor */
     ~CpuGemmDirectConv2d();
     /** Set the input and output tensors.
      *

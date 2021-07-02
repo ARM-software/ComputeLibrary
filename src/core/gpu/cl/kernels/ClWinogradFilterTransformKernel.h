@@ -39,7 +39,6 @@ namespace kernels
 class ClWinogradFilterTransformKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClWinogradFilterTransformKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClWinogradFilterTransformKernel);
     /** Set the input and output tensor.
@@ -75,4 +74,4 @@ public:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_WINOGRAD_FILTER_TRANSFORM_KERNEL_H */
+#endif /* ARM_COMPUTE_CL_WINOGRAD_FILTER_TRANSFORM_KERNEL_H */

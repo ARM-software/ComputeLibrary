@@ -29,7 +29,6 @@
 
 namespace arm_compute
 {
-class ITensor;
 namespace cpu
 {
 namespace kernels
@@ -89,7 +88,6 @@ protected:
 class CpuArithmeticKernel : public CpuElementwiseKernel
 {
 public:
-    /** Default constructor */
     CpuArithmeticKernel() = default;
 
     /** Configure kernel
@@ -130,7 +128,6 @@ private:
 class CpuDivisionKernel : public CpuArithmeticKernel
 {
 public:
-    /** Default constructor */
     CpuDivisionKernel() = default;
 
     /** Configure kernel
@@ -157,7 +154,6 @@ protected:
 class CpuPowerKernel : public CpuArithmeticKernel
 {
 public:
-    /** Default constructor */
     CpuPowerKernel() = default;
 
     /** Configure kernel
@@ -184,7 +180,6 @@ protected:
 class CpuComparisonKernel : public CpuElementwiseKernel
 {
 public:
-    /** Default constructor */
     CpuComparisonKernel() = default;
 
     /** Configure kernel

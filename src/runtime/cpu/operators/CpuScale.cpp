@@ -86,22 +86,18 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
 }
 } // namespace
 
-CpuScale::CpuScale()
-    : _scale_info(InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED), _data_layout(DataLayout::UNKNOWN), _is_prepared(false)
-{
-}
-
 void CpuScale::configure(ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(CpuScale::validate(src, dst, info));
 
-    _scale_info = info;
+    _scale_info  = info;
+    _is_prepared = false;
 
     // Get data layout and width/height indices
-    _data_layout = _scale_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : _scale_info.data_layout;
-    const int        idx_width   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
-    const int        idx_height  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    _data_layout         = _scale_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : _scale_info.data_layout;
+    const int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
 
     // Compute the ratio between source width/height and destination width/height
     const bool is_align_corners_used = _scale_info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(_scale_info.sampling_policy);
@@ -205,8 +201,8 @@ void CpuScale::prepare(ITensorPack &tensors)
         auto       offsets = tensors.get_tensor(TensorType::ACL_INT_2);
 
         // Get data layout and width/height indices
-        const int        idx_width   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
-        const int        idx_height  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+        const int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+        const int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
 
         // Compute the ratio between source width/height and destination width/height
         const bool is_align_corners_used = _scale_info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(_scale_info.sampling_policy);

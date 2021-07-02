@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DEPTHWISECONV2D_H
-#define ARM_COMPUTE_CPU_DEPTHWISECONV2D_H
+#ifndef ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_H
+#define ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_H
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/experimental/Types.h"
@@ -45,7 +45,7 @@ class CpuDepthwiseConv2d : public ICpuOperator
 {
 public:
     /** Default constructor */
-    CpuDepthwiseConv2d();
+    CpuDepthwiseConv2d() = default;
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * @param[in, out] src     Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
@@ -57,7 +57,6 @@ public:
      * @param[in]      info    Depthwise convolution meta-data.
      */
     void configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info);
-
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuDepthwiseConv2d::configure()
@@ -65,7 +64,6 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info);
-
     /** Static function to choose the best depthwise convolution function for @ref CpuDepthwiseConv2d
      *
      * @param[in] src     Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
@@ -100,7 +98,7 @@ private:
     {
     public:
         /** Default constructor */
-        CpuDepthwiseConv2dOptimizedInternal();
+        CpuDepthwiseConv2dOptimizedInternal() = default;
         /** Prevent instances of this class from being copied (As this class contains pointers) */
         CpuDepthwiseConv2dOptimizedInternal(const CpuDepthwiseConv2dOptimizedInternal &) = delete;
         /** Default move constructor */
@@ -121,7 +119,6 @@ private:
          * @param[in]      info    Depthwise convolution meta-data.
          */
         void configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info);
-
         /** Static function to check if given info will lead to a valid configuration
          *
          * Similar to CpuDepthwiseConv2dOptimizedInternal::configure()
@@ -157,7 +154,7 @@ private:
     {
     public:
         /** Default constructor */
-        CpuDepthwiseConv2dGeneric();
+        CpuDepthwiseConv2dGeneric() = default;
         /** Prevent instances of this class from being copied (As this class contains pointers) */
         CpuDepthwiseConv2dGeneric(const CpuDepthwiseConv2dGeneric &) = delete;
         /** Default move constructor */
@@ -203,10 +200,10 @@ private:
         bool                                                     _is_activationlayer_enabled{ false };
     };
 
-    DepthwiseConvolutionFunction        _depth_conv_func;
-    CpuDepthwiseConv2dOptimizedInternal _func_optimized;
-    CpuDepthwiseConv2dGeneric           _func_generic;
+    DepthwiseConvolutionFunction        _depth_conv_func{ DepthwiseConvolutionFunction::GENERIC };
+    CpuDepthwiseConv2dOptimizedInternal _func_optimized{};
+    CpuDepthwiseConv2dGeneric           _func_generic{};
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_DEPTHWISECONV2D_H */
+#endif /* ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_H */

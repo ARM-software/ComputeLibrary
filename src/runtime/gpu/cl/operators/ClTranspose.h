@@ -35,8 +35,6 @@ namespace opencl
 class ClTranspose : public IClOperator
 {
 public:
-    /** Constructor */
-    ClTranspose() = default;
     /** Initialise the kernel's inputs and outputs
      *
      * @param[in] compile_context The compile context to be used.
@@ -44,10 +42,9 @@ public:
      * @param[in] dst             The dst tensor info. Data types supported: Same as @p src
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref kernels::ClTransposeKernel.
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First tensor src info. Data types supported: All.
-     * @param[in] dst Output tensor info. Data types supported: same as @p src.
+     * Similar to ClTranspose::configure()
      *
      * @return a status
      */

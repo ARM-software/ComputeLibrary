@@ -44,7 +44,6 @@ namespace kernels
 class ClElementwiseKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClElementwiseKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClElementwiseKernel);
 
@@ -80,30 +79,14 @@ protected:
     /** Commmon configure function for element-wise operators with no additional options (e.g., Div, Min, Max, SquaredDiff)
      *
      */
-    void configure_common(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
-    /** Commmon configure function for element-wise operators with no additional options (e.g., Div, Min, Max, SquaredDiff)
-     *
-     */
     void configure_common(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
 
     ActivationLayerInfo _act_info{};
-
-private:
-    const ITensorInfo *_src1
-    {
-        nullptr
-    }; /**< Source tensor info 1 */
-    const ITensorInfo *_src2
-    {
-        nullptr
-    };                            /**< Source tensor info 2 */
-    ITensorInfo *_dst{ nullptr }; /**< Destination tensor info */
 };
 
 class ClLogicalBinaryKernel : public ClElementwiseKernel
 {
 public:
-    /** Default constructor */
     ClLogicalBinaryKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClLogicalBinaryKernel);
     /** Function to configure kernel
@@ -115,12 +98,11 @@ public:
      * @param[in] dst             Destination tensor info. Data types supported: same as @p src1.
      */
     void configure(const ClCompileContext &compile_context, LogicalOperation op, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
-    /** Static function to check if the given configuration is valid for this kernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] op   Logical binary operation to be executed.
-     * @param[in] src1 First source tensor info. Data types supported: U8.
-     * @param[in] src2 Second source tensor info. Data types supported: same as @p src1.
-     * @param[in] dst  Destination tensor info. Data types supported: same as @p src1.
+     * Similar to @ref ClLogicalBinaryKernel::configure()
+     *
+     * @return a status
      */
     static Status validate(LogicalOperation op, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst);
 
@@ -153,16 +135,11 @@ public:
     void configure(const ClCompileContext &compile_context, ArithmeticOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ConvertPolicy &policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
-    /** Static function to check if given info will lead to a valid configuration of @ref ClSaturatedArithmeticKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] op       Arithmetic operation to be executed.
-     * @param[in] input1   First tensor input info info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
-     * @param[in] input2   Second tensor input info info. Data types supported: Same as @p input1.
-     * @param[in] output   Output tensor info info. Data types supported: Same as @p input1.
-     * @param[in] policy   Policy to use to handle overflow.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClSaturatedArithmeticKernel::configure()
      *
-     * @return a Status
+     * @return a status
      */
     static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
@@ -197,15 +174,11 @@ public:
     void configure(const ClCompileContext &compile_context, ArithmeticOperation op, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
-    /** Static function to check if given info will lead to a valid configuration of @ref ClArithmeticKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] op       Arithmetic operation to be executed.
-     * @param[in] src1     First source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
-     * @param[in] src2     Second source tensor info. Data types supported: same as @p src1.
-     * @param[in] dst      Destination tensor info. Data types supported: same as @p src1.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClArithmeticKernel::configure()
      *
-     * @return a Status
+     * @return a status
      */
     static Status validate(ArithmeticOperation op, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 

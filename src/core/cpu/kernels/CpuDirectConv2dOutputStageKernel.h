@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DIRECTCONV2D_OUTPUTSTAGE_KERNEL_H
-#define ARM_COMPUTE_CPU_DIRECTCONV2D_OUTPUTSTAGE_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_DIRECT_CONV2D_OUTPUT_STAGE_KERNEL_H
+#define ARM_COMPUTE_CPU_DIRECT_CONV2D_OUTPUT_STAGE_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/common/Macros.h"
@@ -30,7 +30,6 @@
 
 namespace arm_compute
 {
-class ITensor;
 namespace cpu
 {
 namespace kernels
@@ -44,7 +43,6 @@ namespace kernels
 class CpuDirectConv2dOutputStageKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuDirectConv2dOutputStageKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDirectConv2dOutputStageKernel);
     /** Set the accumulate buffer and the biases of the kernel.
@@ -84,4 +82,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_DIRECTCONV2D_OUTPUTSTAGE_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_DIRECT_CONV2D_OUTPUT_STAGE_KERNEL_H */

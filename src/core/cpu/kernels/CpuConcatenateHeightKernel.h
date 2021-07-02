@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_CONCATENATEHEIGHT_KERNEL_H
-#define ARM_COMPUTE_CPU_CONCATENATEHEIGHT_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_CONCATENATE_HEIGHT_KERNEL_H
+#define ARM_COMPUTE_CPU_CONCATENATE_HEIGHT_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -39,7 +39,7 @@ namespace kernels
 class CpuConcatenateHeightKernel : public ICpuKernel
 {
 public:
-    CpuConcatenateHeightKernel();
+    CpuConcatenateHeightKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuConcatenateHeightKernel);
     /** Configure kernel for a given list of arguments
      *
@@ -49,11 +49,9 @@ public:
      *
      */
     void configure(const ITensorInfo *src, unsigned int height_offset, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref CpuConcatenateHeightKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src           Source tensor info. Data types supported: All
-     * @param[in] height_offset The starting offset on the Y axis for the output tensor.
-     * @param[in] dst           Destination tensor info. Data types supported: Same as @p src.
+     * Similar to @ref CpuConcatenateHeightKernel::configure()
      *
      * @return a status
      */
@@ -64,9 +62,9 @@ public:
     const char *name() const override;
 
 private:
-    unsigned int _height_offset;
+    unsigned int _height_offset{ 0 };
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_CONCATENATEHEIGHT_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_CONCATENATE_HEIGHT_KERNEL_H */

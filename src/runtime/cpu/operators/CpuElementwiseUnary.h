@@ -43,9 +43,7 @@ public:
     void configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst);
     /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] op  Unary operation to execute
-     * @param[in] src First tensor input info. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
-     * @param[in] dst Output tensor info. Data types supported: Same as @p input.
+     * Similar to @ref CpuElementwiseUnary::configure()
      *
      * @return a status
      */

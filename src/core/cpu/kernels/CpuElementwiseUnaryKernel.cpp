@@ -105,11 +105,6 @@ const ElementwiseUnaryKernel *get_implementation(DataType dt)
 }
 } // namespace
 
-CpuElementwiseUnaryKernel::CpuElementwiseUnaryKernel()
-    : _op()
-{
-}
-
 void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(op, src, dst));
@@ -168,6 +163,11 @@ void CpuElementwiseUnaryKernel::run_op(ITensorPack &tensors, const Window &windo
     auto func = get_implementation(src->info()->data_type())->ukernel;
     ARM_COMPUTE_ERROR_ON(func == nullptr);
     func(src, dst, window, _op);
+}
+
+const char *CpuElementwiseUnaryKernel::name() const
+{
+    return "CpuElementwiseUnaryKernel";
 }
 } // namespace kernels
 } // namespace cpu

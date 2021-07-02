@@ -34,19 +34,15 @@ namespace cpu
 class CpuReshape : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuReshape() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in]  src Source tensor info. Data type supported: All
      * @param[out] dst Destination info. Data type supported: Same as @p src
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuReshape
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data type supported: All
-     * @param[in] dst Destination tensor info. Data type supported: Same as @p src
+     * Similar to @ref CpuReshape::configure()
      *
      * @return a status
      */

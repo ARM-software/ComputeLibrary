@@ -55,9 +55,7 @@ namespace cpu
 class CpuDirectConv2d : public ICpuOperator
 {
 public:
-    /** Constructor */
     CpuDirectConv2d(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-    /** Destructor */
     ~CpuDirectConv2d();
     /** Set the input, weights, biases and output tensors.
      *

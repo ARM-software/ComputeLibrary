@@ -40,7 +40,6 @@ namespace kernels
 class ClDepthConcatenateKernel : public IClKernel
 {
 public:
-    /** Default constructor */
     ClDepthConcatenateKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClDepthConcatenateKernel);
     /** Initialise the kernel's source and destination
@@ -55,11 +54,9 @@ public:
      *
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int depth_offset, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref ClDepthConcatenateKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src          Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
-     * @param[in] depth_offset The offset on the Z axis.
-     * @param[in] dst          Destination tensor info. Data types supported: Same as @p src.
+     * Similar to @ref ClDepthConcatenateKernel::configure()
      *
      * @return a status
      */

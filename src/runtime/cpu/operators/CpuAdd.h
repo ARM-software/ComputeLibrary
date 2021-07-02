@@ -34,8 +34,6 @@ namespace cpu
 class CpuAdd : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuAdd() = default;
     /** Initialise the kernel's input, dst and border mode.
      *
      * Valid configurations (src0,src1) -> dst :
@@ -60,13 +58,9 @@ public:
      *
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuAdd
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src0     First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in] src1     Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in] dst      The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
-     * @param[in] policy   Overflow policy.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
+     * Similar to @ref CpuAdd::configure()
      *
      * @return a status
      */

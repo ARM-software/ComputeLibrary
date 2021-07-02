@@ -44,8 +44,7 @@ namespace opencl
 class ClConcatenate : public IClOperator
 {
 public:
-    /** Default constructor */
-    ClConcatenate();
+    ClConcatenate() = default;
     /** Initialise the kernel's inputs vector and dst.
      *
      * @note Input and dst tensor dimensions preconditions defer depending on the concatenation axis.
@@ -59,15 +58,9 @@ public:
      * @param[in]     axis            Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
     void configure(const ClCompileContext &compile_context, const std::vector<ITensorInfo *> &src_vector, ITensorInfo *dst, size_t axis);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClConcatenate
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note Input and dst tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref kernels::ClWidthConcatenateKernel,
-     *       @ref kernels::ClHeightConcatenateKernel and @ref kernels::ClDepthConcatenateKernel.
-     *
-     * @param[in] src_vector The vectors containing all the tensors info to concatenate. Data types supported: All
-     * @param[in] dst        Destination tensor info. Data types supported: same as @p src_vector.
-     * @param[in] axis       Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
+     * Similar to @ref ClConcatenate::configure()
      *
      * @return a status
      */
@@ -77,9 +70,9 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::vector<std::unique_ptr<IClKernel>> _concat_kernels;
-    unsigned int                            _num_inputs;
-    unsigned int                            _axis;
+    std::vector<std::unique_ptr<IClKernel>> _concat_kernels{};
+    unsigned int                            _num_inputs{ 0 };
+    unsigned int                            _axis{ 0 };
 };
 } // namespace opencl
 } // namespace arm_comPUTE

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DEPTHWISECONV2DNATIVEKERNEL_H
-#define ARM_COMPUTE_CPU_DEPTHWISECONV2DNATIVEKERNEL_H
+#ifndef ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_NATIVE_KERNEL_H
+#define ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_NATIVE_KERNEL_H
 
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/common/Macros.h"
@@ -43,12 +43,7 @@ namespace kernels
 class CpuDepthwiseConv2dNativeKernel : public ICpuKernel
 {
 public:
-    const char *name() const override
-    {
-        return "CpuDepthwiseConv2dNativeKernel";
-    }
-    /** Default constructor */
-    CpuDepthwiseConv2dNativeKernel();
+    CpuDepthwiseConv2dNativeKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDepthwiseConv2dNativeKernel);
 
     /** Initialize the function's source, destination and parameters.
@@ -75,6 +70,7 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    const char *name() const override;
 
 private:
     template <typename T>
@@ -95,15 +91,15 @@ private:
      */
     using DepthwiseFunctionPtr = void (CpuDepthwiseConv2dNativeKernel::*)(const ITensor *src, const ITensor *weights, const ITensor *bias, ITensor *dst, const Window &window, bool has_biases);
 
-    DepthwiseFunctionPtr _func;
-    PadStrideInfo        _conv_info;
-    unsigned int         _depth_multiplier;
-    Size2D               _dilation;
-    std::vector<int>     _output_multiplier;
-    std::vector<int>     _output_shift;
-    bool                 _has_biases;
+    DepthwiseFunctionPtr _func{ nullptr };
+    PadStrideInfo        _conv_info{};
+    unsigned int         _depth_multiplier{ 1 };
+    Size2D               _dilation{};
+    std::vector<int>     _output_multiplier{};
+    std::vector<int>     _output_shift{};
+    bool                 _has_biases{ false };
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_DEPTHWISECONV2DNATIVEKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_NATIVE_KERNEL_H */

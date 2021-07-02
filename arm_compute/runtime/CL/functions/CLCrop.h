@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_CROP_H
-#define ARM_COMPUTE_CL_CROP_H
+#ifndef ARM_COMPUTE_CLCROP_H
+#define ARM_COMPUTE_CLCROP_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
@@ -111,4 +111,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_CROP_H */
+#endif /*ARM_COMPUTE_CLCROP_H */

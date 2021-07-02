@@ -34,11 +34,6 @@ namespace cpu
 {
 namespace kernels
 {
-CpuConvertFullyConnectedWeightsKernel::CpuConvertFullyConnectedWeightsKernel()
-    : _factor1(0), _factor2(0)
-{
-}
-
 void CpuConvertFullyConnectedWeightsKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_input_shape,
                                                       DataLayout data_layout)
 

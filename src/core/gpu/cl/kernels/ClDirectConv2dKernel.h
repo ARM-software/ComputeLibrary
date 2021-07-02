@@ -86,4 +86,4 @@ public:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_DIRECT_CONV2D_KERNEL_H */
+#endif /* ARM_COMPUTE_CL_DIRECT_CONV2D_KERNEL_H */

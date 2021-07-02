@@ -57,7 +57,6 @@ template <bool IS_LOG = false>
 class CpuSoftmaxGeneric : public ICpuOperator
 {
 public:
-    /** Constructor */
     CpuSoftmaxGeneric();
     /** Set the input and output tensors.
      *
@@ -69,14 +68,9 @@ public:
      *                       axis=1, softmax will be applied to 4x6=24 vectors of size 5. Defaults to 0
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, float beta = 1.0f, int32_t axis = 0);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuSoftmax
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] dst  Destination tensor info. Data types supported: same as @p input
-     * @param[in] beta (Optional) A scaling factor for the exponent.
-     * @param[in] axis (Optional) The dimension in which to apply the function. E.g. for input of shape 4x5x6 and
-     *                       axis=1, softmax will be applied to 4x6=24 vectors of size 5. Defaults to 0
+     * Similar to @ref CpuSoftmaxGeneric::configure()
      *
      * @return a status
      */

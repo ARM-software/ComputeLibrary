@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_CPU_CONCATENATEWIDTH_KERNEL_H
-#define ARM_COMPUTE_CPU_CONCATENATEWIDTH_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_CONCATENATE_WIDTH_KERNEL_H
+#define ARM_COMPUTE_CPU_CONCATENATE_WIDTH_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -40,7 +40,7 @@ namespace kernels
 class CpuConcatenateWidthKernel : public ICPPKernel
 {
 public:
-    CpuConcatenateWidthKernel();
+    CpuConcatenateWidthKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuConcatenateWidthKernel);
     /** Configure kernel for a given list of arguments
      *
@@ -49,11 +49,9 @@ public:
      * @param[in,out] dst          Destination tensor info. Data types supported: Same as @p src.
      */
     void configure(const ITensorInfo *src, unsigned int width_offset, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref CpuConcatenateWidthKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src          Source tensor info. Data types supported: All
-     * @param[in] width_offset The offset on the X axis.
-     * @param[in] dst          Destination tensor info. Data types supported: Same as @p src.
+     * Similar to @ref CpuConcatenateWidthKernel::configure()
      *
      * @return a status
      */
@@ -64,9 +62,9 @@ public:
     const char *name() const override;
 
 private:
-    unsigned int _width_offset;
+    unsigned int _width_offset{ 0 };
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_CONCATENATEWIDTH_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_CONCATENATE_WIDTH_KERNEL_H */

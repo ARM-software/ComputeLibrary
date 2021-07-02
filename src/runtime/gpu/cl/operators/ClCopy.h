@@ -36,8 +36,6 @@ namespace opencl
 class ClCopy : public IClOperator
 {
 public:
-    /** Constructor */
-    ClCopy() = default;
     /** Initialise the function's source and destination.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -47,11 +45,9 @@ public:
      *
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, Window *dst_window = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref kernels::ClCopyKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src        Source tensor info. Data types supported: All.
-     * @param[in] dst        Output tensor info. Data types supported: Same as @p src.
-     * @param[in] dst_window (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
+     * Similar to @ref ClCopy::configure()
      *
      * @return a status
      */

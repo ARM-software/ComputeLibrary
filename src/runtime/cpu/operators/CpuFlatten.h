@@ -34,8 +34,6 @@ namespace cpu
 class CpuFlatten : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuFlatten() = default;
     /** Configure operator for a given list of arguments
      *
      * Valid data layouts:

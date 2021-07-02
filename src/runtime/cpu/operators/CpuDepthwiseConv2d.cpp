@@ -71,12 +71,6 @@ Status validate_arguments_optimized(const ITensorInfo *src, const ITensorInfo *w
 }
 } // namespace
 
-CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::CpuDepthwiseConv2dOptimizedInternal()
-    : _dwc_optimized_func(nullptr), _permute_input(nullptr), _permute_weights(nullptr), _permute_output(nullptr), _activationlayer_function(nullptr), _has_bias(false), _is_quantized(false),
-      _is_nchw(true), _permute(false), _is_activationlayer_enabled(false), _is_prepared(false)
-{
-}
-
 void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::configure(ITensorInfo           *src,
                                                                         const ITensorInfo     *weights,
                                                                         const ITensorInfo     *biases,
@@ -264,12 +258,6 @@ void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::prepare(ITensorPac
     }
 }
 
-CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::CpuDepthwiseConv2dGeneric()
-    : _depthwise_conv_kernel(nullptr), _permute_input(nullptr), _permute_weights(nullptr), _permute_output(nullptr), _activationlayer_function(nullptr), _is_nchw(true), _is_prepared(false),
-      _is_activationlayer_enabled(false)
-{
-}
-
 void CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
@@ -430,11 +418,6 @@ void CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::prepare(ITensorPack &tensors
         weights->mark_as_unused();
         _is_prepared = true;
     }
-}
-
-CpuDepthwiseConv2d::CpuDepthwiseConv2d()
-    : _depth_conv_func(DepthwiseConvolutionFunction::GENERIC), _func_optimized(), _func_generic()
-{
 }
 
 void CpuDepthwiseConv2d::configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info)

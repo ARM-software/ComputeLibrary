@@ -35,8 +35,6 @@ namespace opencl
 class ClMul : public IClOperator
 {
 public:
-    /** Default Constructor */
-    ClMul() = default;
     /** Initialise the kernel's sources, dst and convertion policy.
      *
      * Valid configurations (src1,src2) -> Output :
@@ -81,8 +79,6 @@ public:
 class ClComplexMul : public IClOperator
 {
 public:
-    /** Default Constructor */
-    ClComplexMul() = default;
     /** Initialise the kernel's sources, dst.
      *
      * @param[in]      compile_context The compile context to be used.

@@ -46,10 +46,9 @@ public:
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuReshapeKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data type supported: All
-     * @param[in] dst Destination tensor info. Data type supported: Same as @p src
+     * Similar to @ref CpuReshapeKernel::configure()
      *
      * @return a status
      */

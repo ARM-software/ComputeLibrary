@@ -34,8 +34,6 @@ namespace cpu
 class CpuDequantize : public ICpuOperator
 {
 public:
-    /** Default Constructor */
-    CpuDequantize() = default;
     /** Configure the kernel.
      *
      * @param[in]  src Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.

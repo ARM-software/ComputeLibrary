@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTSKERNEL_H
-#define ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTSKERNEL_H
+#ifndef ARM_COMPUTE_CL_CONVERT_FULLYCONNECTED_WEIGHTS_KERNEL_H
+#define ARM_COMPUTE_CL_CONVERT_FULLYCONNECTED_WEIGHTS_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/gpu/cl/ClCompileContext.h"
@@ -30,8 +30,6 @@
 
 namespace arm_compute
 {
-class ICLTensor;
-
 /** Interface to convert the 2D Fully Connected weights from NCHW to NHWC or vice versa.
  *
  * @note This function can be applied to the 2D weights used by a Fully Connected layer if:
@@ -58,12 +56,11 @@ public:
      * @param[in]  data_layout        The data layout the weights have been trained in.
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClConvertFullyConnectedWeightsKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src                Source weights tensor info to convert. Must be 2 dimensional. Data types supported: All.
-     * @param[in] dst                The converted weights tensor info. Shape and Data Type: Same as @p src.
-     * @param[in] original_src_shape Shape of the original src tensor (the one entering fully connected layer).
-     * @param[in] data_layout        The data layout the weights have been trained in.
+     * Similar to @ref ClConvertFullyConnectedWeightsKernel::configure()
+     *
+     * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout);
 
@@ -73,4 +70,4 @@ public:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTSKERNEL_H */
+#endif /* ARM_COMPUTE_CL_CONVERT_FULLYCONNECTED_WEIGHTS_KERNEL_H */

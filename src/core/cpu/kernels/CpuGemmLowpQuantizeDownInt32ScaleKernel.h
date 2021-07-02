@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWNINT32_SCALE_KERNEL_H
-#define ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWNINT32_SCALE_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWN_INT32_SCALE_KERNEL_H
+#define ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWN_INT32_SCALE_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/common/Macros.h"
@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 namespace cpu
 {
@@ -53,7 +54,6 @@ namespace kernels
 class CpuGemmLowpQuantizeDownInt32ScaleKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuGemmLowpQuantizeDownInt32ScaleKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuGemmLowpQuantizeDownInt32ScaleKernel);
     /** Initialise the kernel's input and output.
@@ -104,4 +104,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWNINT32_SCALE_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWN_INT32_SCALE_KERNEL_H */
