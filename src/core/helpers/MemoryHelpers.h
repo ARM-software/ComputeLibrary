@@ -116,5 +116,25 @@ void release_prepare_tensors(WorkspaceData<TensorType> &workspace, ITensorPack &
     }),
     workspace.end());
 }
+
+/** Utility function to release tensors with lifetime marked as Prepare */
+template <typename TensorType>
+void release_temporaries(const experimental::MemoryRequirements &mem_reqs,
+                         WorkspaceData<TensorType>              &workspace)
+{
+    for(auto &ws : workspace)
+    {
+        const int slot = ws.slot;
+        for(auto &m : mem_reqs)
+        {
+            if(m.slot == slot && m.lifetime == experimental::MemoryLifetime::Prepare)
+            {
+                auto tensor = ws.tensor.get();
+                tensor->allocator()->free();
+                break;
+            }
+        }
+    }
+}
 } // namespace arm_compute
 #endif /* SRC_COMMON_MEMORY_HELPERS_H */

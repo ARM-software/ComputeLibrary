@@ -97,19 +97,7 @@ void NEWinogradConvolutionLayer::prepare()
         _impl->original_weights->mark_as_unused();
 
         // Release temporary tensors that are only used in prepare stage
-        for(auto &ws : _impl->workspace)
-        {
-            const int slot = ws.slot;
-            for(auto &m : _impl->aux_mem_req)
-            {
-                if(m.slot == slot && m.lifetime == MemoryLifetime::Prepare)
-                {
-                    auto tensor = ws.tensor.get();
-                    tensor->allocator()->free();
-                    break;
-                }
-            }
-        }
+        release_temporaries<Tensor>(_impl->aux_mem_req, _impl->workspace);
 
         _impl->is_prepared = true;
     }

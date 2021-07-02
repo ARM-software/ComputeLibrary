@@ -108,19 +108,7 @@ void NEGEMMLowpMatrixMultiplyCore::prepare()
         }
 
         // Release temporary tensors that are only used in prepare stage
-        for(auto &ws : _impl->workspace_tensors)
-        {
-            const int slot = ws.slot;
-            for(auto &m : _impl->aux_mem_req)
-            {
-                if(m.slot == slot && m.lifetime == MemoryLifetime::Prepare)
-                {
-                    auto tensor = ws.tensor.get();
-                    tensor->allocator()->free();
-                    break;
-                }
-            }
-        }
+        release_temporaries<Tensor>(_impl->aux_mem_req, _impl->workspace_tensors);
         _impl->is_prepared = true;
     }
 }

@@ -641,6 +641,7 @@ cc_library_static {
         "src/runtime/cpu/operators/CpuFill.cpp",
         "src/runtime/cpu/operators/CpuFlatten.cpp",
         "src/runtime/cpu/operators/CpuFloor.cpp",
+        "src/runtime/cpu/operators/CpuFullyConnected.cpp",
         "src/runtime/cpu/operators/CpuGemm.cpp",
         "src/runtime/cpu/operators/CpuGemmConvolution.cpp",
         "src/runtime/cpu/operators/CpuGemmDirectConv2d.cpp",

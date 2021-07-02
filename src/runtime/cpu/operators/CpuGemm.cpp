@@ -128,7 +128,7 @@ void CpuGemm::configure(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         {
             _add_bias = std::make_unique<cpu::CpuAdd>();
             _add_bias->configure(gemm_output_to_use, c, d, ConvertPolicy::SATURATE);
-            _aux_mem[TempResult] = MemoryInfo(offset_int_vec(TempResult), MemoryLifetime::Persistent, _tmp_d.total_size());
+            _aux_mem[TempResult] = MemoryInfo(offset_int_vec(TempResult), MemoryLifetime::Temporary, _tmp_d.total_size());
         }
     }
 

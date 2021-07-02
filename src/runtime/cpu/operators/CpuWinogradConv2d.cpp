@@ -71,164 +71,164 @@ arm_gemm::Activation arm_gemm_activation_from_acl_activation(const ActivationLay
     }
 }
 
-inline Status validate_kernel_3x3(const Size2D input_dims, const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
-                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+inline Status validate_kernel_3x3(const Size2D input_dims, const ITensorInfo *src, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
 
-    if(input->data_type() == DataType::F32)
+    if(src->data_type() == DataType::F32)
     {
         if(input_dims.width > 4 && input_dims.height > 4)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 4, 4, 3, 3>::validate(input, input0, winograd_info)));
+            ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 4, 4, 3, 3>::validate(src, input0, winograd_info)));
             ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 4, 4, 3, 3>::validate(weights, input1, winograd_info)));
-            ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 4, 4, 3, 3>::validate(batched_mm_output, biases, output, winograd_info)));
+            ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 4, 4, 3, 3>::validate(batched_mm_output, biases, dst, winograd_info)));
         }
         else
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 2, 2, 3, 3>::validate(input, input0, winograd_info)));
+            ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 2, 2, 3, 3>::validate(src, input0, winograd_info)));
             ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 2, 2, 3, 3>::validate(weights, input1, winograd_info)));
-            ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 2, 2, 3, 3>::validate(batched_mm_output, biases, output, winograd_info)));
+            ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 2, 2, 3, 3>::validate(batched_mm_output, biases, dst, winograd_info)));
         }
     }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    else if(input->data_type() == DataType::F16)
+    else if(src->data_type() == DataType::F16)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<__fp16, 4, 4, 3, 3>::validate(input, input0, winograd_info)));
+        ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<__fp16, 4, 4, 3, 3>::validate(src, input0, winograd_info)));
         ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<__fp16, 4, 4, 3, 3>::validate(weights, input1, winograd_info)));
-        ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<__fp16, 4, 4, 3, 3>::validate(batched_mm_output, biases, output, winograd_info)));
+        ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<__fp16, 4, 4, 3, 3>::validate(batched_mm_output, biases, dst, winograd_info)));
     }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
     if(act_info.enabled())
     {
-        CpuActivation::validate(output, nullptr, act_info);
+        CpuActivation::validate(dst, nullptr, act_info);
     }
     return Status{};
 }
 
-inline Status validate_kernel_5x5(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
-                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+inline Status validate_kernel_5x5(const ITensorInfo *src, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 2, 2, 5, 5>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 2, 2, 5, 5>::validate(src, input0, winograd_info)));
     ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 2, 2, 5, 5>::validate(weights, input1, winograd_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 2, 2, 5, 5>::validate(batched_mm_output, biases, output, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 2, 2, 5, 5>::validate(batched_mm_output, biases, dst, winograd_info)));
     if(act_info.enabled())
     {
-        CpuActivation::validate(output, nullptr, act_info);
+        CpuActivation::validate(dst, nullptr, act_info);
     }
     return Status{};
 }
 
-inline Status validate_kernel_3x1(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
-                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+inline Status validate_kernel_3x1(const ITensorInfo *src, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 1, 6, 1, 3>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 1, 6, 1, 3>::validate(src, input0, winograd_info)));
     ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 1, 6, 1, 3>::validate(weights, input1, winograd_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 1, 6, 1, 3>::validate(batched_mm_output, biases, output, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 1, 6, 1, 3>::validate(batched_mm_output, biases, dst, winograd_info)));
     if(act_info.enabled())
     {
-        CpuActivation::validate(output, nullptr, act_info);
+        CpuActivation::validate(dst, nullptr, act_info);
     }
     return Status{};
 }
 
-inline Status validate_kernel_1x3(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
-                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+inline Status validate_kernel_1x3(const ITensorInfo *src, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 6, 1, 3, 1>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 6, 1, 3, 1>::validate(src, input0, winograd_info)));
     ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 6, 1, 3, 1>::validate(weights, input1, winograd_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 6, 1, 3, 1>::validate(batched_mm_output, biases, output, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 6, 1, 3, 1>::validate(batched_mm_output, biases, dst, winograd_info)));
 
     if(act_info.enabled())
     {
-        CpuActivation::validate(output, nullptr, act_info);
+        CpuActivation::validate(dst, nullptr, act_info);
     }
     return Status{};
 }
 
-inline Status validate_kernel_5x1(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
-                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+inline Status validate_kernel_5x1(const ITensorInfo *src, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 1, 4, 1, 5>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 1, 4, 1, 5>::validate(src, input0, winograd_info)));
     ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 1, 4, 1, 5>::validate(weights, input1, winograd_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 1, 4, 1, 5>::validate(batched_mm_output, biases, output, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 1, 4, 1, 5>::validate(batched_mm_output, biases, dst, winograd_info)));
     if(act_info.enabled())
     {
-        CpuActivation::validate(output, nullptr, act_info);
+        CpuActivation::validate(dst, nullptr, act_info);
     }
     return Status{};
 }
-inline Status validate_kernel_1x5(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
-                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+inline Status validate_kernel_1x5(const ITensorInfo *src, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 4, 1, 5, 1>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 4, 1, 5, 1>::validate(src, input0, winograd_info)));
     ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 4, 1, 5, 1>::validate(weights, input1, winograd_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 4, 1, 5, 1>::validate(batched_mm_output, biases, output, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 4, 1, 5, 1>::validate(batched_mm_output, biases, dst, winograd_info)));
     if(act_info.enabled())
     {
-        CpuActivation::validate(output, nullptr, act_info);
+        CpuActivation::validate(dst, nullptr, act_info);
     }
     return Status{};
 }
 
-inline Status validate_kernel_7x1(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
-                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+inline Status validate_kernel_7x1(const ITensorInfo *src, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 1, 2, 1, 7>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 1, 2, 1, 7>::validate(src, input0, winograd_info)));
     ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 1, 2, 1, 7>::validate(weights, input1, winograd_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 1, 2, 1, 7>::validate(batched_mm_output, biases, output, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 1, 2, 1, 7>::validate(batched_mm_output, biases, dst, winograd_info)));
     if(act_info.enabled())
     {
-        CpuActivation::validate(output, nullptr, act_info);
+        CpuActivation::validate(dst, nullptr, act_info);
     }
     return Status{};
 }
 
-inline Status validate_kernel_1x7(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
-                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+inline Status validate_kernel_1x7(const ITensorInfo *src, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 2, 1, 7, 1>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformInputKernel<float, 2, 1, 7, 1>::validate(src, input0, winograd_info)));
     ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformWeightsKernel<float, 2, 1, 7, 1>::validate(weights, input1, winograd_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 2, 1, 7, 1>::validate(batched_mm_output, biases, output, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((CpuWinogradConv2dTransformOutputKernel<float, 2, 1, 7, 1>::validate(batched_mm_output, biases, dst, winograd_info)));
 
     if(act_info.enabled())
     {
-        CpuActivation::validate(output, nullptr, act_info);
+        CpuActivation::validate(dst, nullptr, act_info);
     }
     return Status{};
 }
 
-inline Tensor4DShape internal_get_input_shape(const ITensorInfo *input)
+inline Tensor4DShape internal_get_input_shape(const ITensorInfo *src)
 {
-    const DataLayout data_layout = input->data_layout();
-    const int        in_width    = input->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH));
-    const int        in_height   = input->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT));
-    const int        in_channels = input->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL));
-    const int        in_batches  = input->dimension(3);
+    const DataLayout data_layout = src->data_layout();
+    const int        in_width    = src->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH));
+    const int        in_height   = src->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT));
+    const int        in_channels = src->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL));
+    const int        in_batches  = src->dimension(3);
 
     return Tensor4DShape{ in_batches, in_height, in_width, in_channels };
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_UNUSED(dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd layer only supports unit strides.");
     if(biases != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
-    return ICpuWinogradConv2dTransformWeightsKernel::validate(input, weights);
+    return ICpuWinogradConv2dTransformWeightsKernel::validate(src, weights);
 }
 Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims, DataType data_type)
 {
@@ -647,20 +647,20 @@ void CpuWinogradConv2d::configure(const ITensorInfo *src, const ITensorInfo *wei
     _aux_mem[OutputWorkspace]    = MemoryInfo(offset_int_vec(OutputWorkspace), MemoryLifetime::Persistent, output_workspace_size);
 }
 
-Status CpuWinogradConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+Status CpuWinogradConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
                                    const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info));
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, conv_info));
 
     // Get indices for the width and height
-    const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_width  = get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_height = get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::HEIGHT);
 
     // Input shape, kernel size and output tile
-    const Size2D   input_dims  = Size2D(input->dimension(idx_width), input->dimension(idx_height));
+    const Size2D   input_dims  = Size2D(src->dimension(idx_width), src->dimension(idx_height));
     const Size2D   kernel_size = Size2D(weights->dimension(idx_width), weights->dimension(idx_height));
-    const DataType data_type   = input->data_type();
+    const DataType data_type   = src->data_type();
     const Size2D   output_tile = winograd_output_tile(input_dims, kernel_size, data_type);
 
     // Check if the Winograd configuration requires fast math
@@ -674,11 +674,11 @@ Status CpuWinogradConv2d::validate(const ITensorInfo *input, const ITensorInfo *
                                                     kernel_size,
                                                     input_dims,
                                                     conv_info,
-                                                    input->data_layout());
+                                                    src->data_layout());
 
     // Validate input transform
-    const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
-    const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
+    const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*src, winograd_info);
+    const TensorInfo  input0       = src->clone()->set_tensor_shape(input0_shape);
     // Validate filter transform
     const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, winograd_info);
     const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
@@ -696,7 +696,7 @@ Status CpuWinogradConv2d::validate(const ITensorInfo *input, const ITensorInfo *
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != conv_info.pad_left(), "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != conv_info.pad_bottom(), "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != conv_info.pad_left(), "Only SAME or VALID padding supported");
-        return validate_kernel_3x3(input_dims, input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+        return validate_kernel_3x3(input_dims, src, &input0, &input1, &batched_mm_output, weights, biases, dst, winograd_info, act_info);
     }
     else if(kernel_size == Size2D(5, 5))
     {
@@ -707,49 +707,49 @@ Status CpuWinogradConv2d::validate(const ITensorInfo *input, const ITensorInfo *
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != conv_info.pad_left(), "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != conv_info.pad_bottom(), "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != conv_info.pad_left(), "Only SAME or VALID padding supported");
-        return validate_kernel_5x5(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+        return validate_kernel_5x5(src, &input0, &input1, &batched_mm_output, weights, biases, dst, winograd_info, act_info);
     }
     if(kernel_size == Size2D(3, 1))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_left() != 1, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != 0u && conv_info.pad_right() != 1, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_bottom() != 0, "Only SAME or VALID padding supported");
-        return validate_kernel_3x1(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+        return validate_kernel_3x1(src, &input0, &input1, &batched_mm_output, weights, biases, dst, winograd_info, act_info);
     }
     else if(kernel_size == Size2D(1, 3))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_top() != 1, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_bottom() != 0u && conv_info.pad_bottom() != 1, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_right() != 0, "Only SAME or VALID padding supported");
-        return validate_kernel_1x3(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+        return validate_kernel_1x3(src, &input0, &input1, &batched_mm_output, weights, biases, dst, winograd_info, act_info);
     }
     else if(kernel_size == Size2D(5, 1))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_left() != 2, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != 0u && conv_info.pad_right() != 2, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_bottom() != 0, "Only SAME or VALID padding supported");
-        return validate_kernel_5x1(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+        return validate_kernel_5x1(src, &input0, &input1, &batched_mm_output, weights, biases, dst, winograd_info, act_info);
     }
     else if(kernel_size == Size2D(1, 5))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_top() != 2, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_bottom() != 0u && conv_info.pad_bottom() != 2, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_right() != 0, "Only SAME or VALID padding supported");
-        return validate_kernel_1x5(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+        return validate_kernel_1x5(src, &input0, &input1, &batched_mm_output, weights, biases, dst, winograd_info, act_info);
     }
     else if(kernel_size == Size2D(7, 1))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_left() != 3, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != 0u && conv_info.pad_right() != 3, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_bottom() != 0, "Only SAME or VALID padding supported");
-        return validate_kernel_7x1(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+        return validate_kernel_7x1(src, &input0, &input1, &batched_mm_output, weights, biases, dst, winograd_info, act_info);
     }
     else if(kernel_size == Size2D(1, 7))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_top() != 3, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_bottom() != 0u && conv_info.pad_bottom() != 3, "Only SAME or VALID padding supported");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_right() != 0, "Only SAME or VALID padding supported");
-        return validate_kernel_1x7(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+        return validate_kernel_1x7(src, &input0, &input1, &batched_mm_output, weights, biases, dst, winograd_info, act_info);
     }
     else
     {

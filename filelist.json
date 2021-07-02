@@ -1139,6 +1139,22 @@
           }
         }
       },
+      "FullyConnected": {
+        "deps": [
+          "CpuFlatten",
+          "CpuConvertFullyConnectedWeights",
+          "CpuGemm",
+          "CpuGemmLowpMatrixMultiplyCore"
+        ],
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuFullyConnected.cpp"
+          ]
+        },
+        "kernel": [
+          "CpuTransposeKernel"
+        ]
+      },
       "FuseBatchNormalization": {
         "files": {
           "kernel": [
