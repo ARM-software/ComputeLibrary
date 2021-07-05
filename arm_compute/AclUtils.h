@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACLUTILS_H_
-#define ARM_COMPUTE_ACLUTILS_H_
+#ifndef ARM_COMPUTE_ACL_UTILS_H_
+#define ARM_COMPUTE_ACL_UTILS_H_
 
 #include "arm_compute/AclTypes.h"
 
@@ -60,4 +60,4 @@ AclStatus AclGetTensorDescriptor(AclTensor tensor, AclTensorDescriptor *desc);
 }
 #endif /* __cplusplus */
 
-#endif /* ARM_COMPUTE_ACLUTILS_H_ */
+#endif /* ARM_COMPUTE_ACL_UTILS_H_ */

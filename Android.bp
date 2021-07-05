@@ -54,6 +54,7 @@ cc_library_static {
     export_include_dirs: [".", "./include"],
     srcs: [
         "src/c/AclContext.cpp",
+        "src/c/AclOperator.cpp",
         "src/c/AclQueue.cpp",
         "src/c/AclTensor.cpp",
         "src/c/AclTensorPack.cpp",

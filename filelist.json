@@ -11,6 +11,7 @@
   "c_api": {
     "cpu": [
       "src/c/AclContext.cpp",
+      "src/c/AclOperator.cpp",
       "src/c/AclQueue.cpp",
       "src/c/AclTensor.cpp",
       "src/c/AclTensorPack.cpp",

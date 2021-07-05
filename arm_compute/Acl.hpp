@@ -749,6 +749,30 @@ public:
         return detail::as_enum<StatusCode>(AclPackTensors(_object.get(), tensors.data(), slots.data(), size));
     }
 };
+
+/** Operator class
+ *
+ * Operators are the basic algorithmic blocks responsible for performing distinct operations
+ */
+class Operator : public detail::ObjectBase<AclOperator_>
+{
+public:
+    /** Run an operator on a given input list
+     *
+     * @param[in,out] queue Queue to scheduler the operator on
+     * @param pack  Tensor list to be used as input
+     *
+     * @return Status Code
+     */
+    StatusCode run(Queue &queue, TensorPack &pack)
+    {
+        return detail::as_cenum<StatusCode>(AclRunOperator(_object.get(), queue.get(), pack.get()));
+    }
+
+protected:
+    /** Constructor */
+    Operator() = default;
+};
 } // namespace acl
 #undef ARM_COMPUTE_IGNORE_UNUSED
 #endif /* ARM_COMPUTE_ACL_HPP_ */

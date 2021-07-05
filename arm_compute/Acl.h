@@ -34,6 +34,10 @@ extern "C" {
 #include "arm_compute/AclUtils.h"
 #include "arm_compute/AclVersion.h"
 
+/* Operator headers */
+#include "arm_compute/AclDescriptors.h"
+#include "arm_compute/AclOperators.h"
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
