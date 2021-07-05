@@ -43,7 +43,12 @@ namespace kernels
 {
 namespace
 {
-using ElementwiseUnarySelector = std::add_pointer<bool(DataType)>::type;
+struct ElementwiseUnarySelectorData
+{
+    DataType       dt;
+    const CPUInfo &ci;
+};
+using ElementwiseUnarySelector = std::add_pointer<bool(const ElementwiseUnarySelectorData &)>::type;
 
 struct ElementwiseUnaryKernel
 {
@@ -56,37 +61,37 @@ static const ElementwiseUnaryKernel available_kernels[] =
 {
 #if defined(ARM_COMPUTE_ENABLE_SVE)
     {
-        "fp32_sve_elementwise_unary",
-        [](DataType dt) { return dt == DataType::F32; },
+        "sve_fp32_elementwise_unary",
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_SVE(arm_compute::cpu::elementwise_sve_op<float>),
     },
     {
-        "fp16_sve_elementwise_unary",
-        [](DataType dt) { return dt == DataType::F16; },
+        "sve_fp16_elementwise_unary",
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F16; },
         REGISTER_FP16_SVE(arm_compute::cpu::elementwise_sve_op<__fp16>),
     },
     {
-        "s32_sve_elementwise_unary",
-        [](DataType dt) { return dt == DataType::S32; },
+        "sve_s32_elementwise_unary",
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::S32; },
         REGISTER_INTEGER_SVE(arm_compute::cpu::elementwise_sve_op<int32_t>),
     },
 #endif // defined(ARM_COMPUTE_ENABLE_SVE)
 #if defined(ARM_COMPUTE_ENABLE_NEON)
     {
-        "fp32_neon_elementwise_unary",
-        [](DataType dt) { return dt == DataType::F32; },
+        "neon_fp32_elementwise_unary",
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<float>),
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "fp16_neon_elementwise_unary",
-        [](DataType dt) { return dt == DataType::F16; },
+        "neon_fp16_elementwise_unary",
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F16; },
         REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<__fp16>),
     },
 #endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "s32_neon_elementwise_unary",
-        [](DataType dt) { return dt == DataType::S32; },
+        "neon_s32_elementwise_unary",
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::S32; },
         REGISTER_INTEGER_NEON(arm_compute::cpu::elementwise_op<int32_t>),
     },
 #endif // defined(ARM_COMPUTE_ENABLE_NEON)
@@ -96,7 +101,7 @@ const ElementwiseUnaryKernel *get_implementation(DataType dt)
 {
     for(const auto &uk : available_kernels)
     {
-        if(uk.is_selected(dt))
+        if(uk.is_selected({ dt, CPUInfo::get() }))
         {
             return &uk;
         }
@@ -108,8 +113,12 @@ const ElementwiseUnaryKernel *get_implementation(DataType dt)
 void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(op, src, dst));
+    const auto uk = get_implementation(src.data_type());
+    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
-    _op = op;
+    _op         = op;
+    _run_method = uk->ukernel;
+    _name       = std::string("CpuElementwiseUnaryKernel").append("/").append(uk->name);
 
     // If input shape is dynamic, expect a configured window and dst at run-time.
     if(src.is_dynamic())
@@ -158,16 +167,15 @@ void CpuElementwiseUnaryKernel::run_op(ITensorPack &tensors, const Window &windo
 {
     ARM_COMPUTE_UNUSED(info);
 
-    auto src  = tensors.get_const_tensor(TensorType::ACL_SRC);
-    auto dst  = tensors.get_tensor(TensorType::ACL_DST);
-    auto func = get_implementation(src->info()->data_type())->ukernel;
-    ARM_COMPUTE_ERROR_ON(func == nullptr);
-    func(src, dst, window, _op);
+    auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    _run_method(src, dst, window, _op);
 }
 
 const char *CpuElementwiseUnaryKernel::name() const
 {
-    return "CpuElementwiseUnaryKernel";
+    return _name.c_str();
 }
 } // namespace kernels
 } // namespace cpu

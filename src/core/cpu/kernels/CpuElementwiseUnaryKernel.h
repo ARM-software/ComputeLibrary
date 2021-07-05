@@ -71,7 +71,9 @@ public:
     using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary)>::type;
 
 private:
-    ElementWiseUnary _op{};
+    ElementWiseUnary           _op{};
+    ElementwiseUnaryUkernelPtr _run_method{ nullptr };
+    std::string                _name{};
 };
 } // namespace kernels
 } // namespace cpu
