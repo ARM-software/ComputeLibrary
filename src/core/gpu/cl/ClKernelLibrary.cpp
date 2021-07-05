@@ -177,484 +177,508 @@ namespace opencl
 {
 const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
 {
-    { "activation_layer", "activation_layer.cl" },
-    { "activation_layer_quant", "activation_layer_quant.cl" },
-    { "activation_layer_quant_f32", "activation_layer_quant.cl" },
-    { "arg_min_max_x", "arg_min_max.cl" },
-    { "arg_min_max_y", "arg_min_max.cl" },
-    { "arg_min_max_z", "arg_min_max.cl" },
-    { "arg_min_max_w", "arg_min_max.cl" },
-    { "batch_to_space_nchw", "batch_to_space.cl" },
-    { "batch_to_space_static_nchw", "batch_to_space.cl" },
-    { "batch_to_space_nhwc", "batch_to_space.cl" },
-    { "batch_to_space_static_nhwc", "batch_to_space.cl" },
-    { "batchnormalization_layer_nchw", "batchnormalization_layer.cl" },
-    { "batchnormalization_layer_nhwc", "batchnormalization_layer.cl" },
-    { "bitwise_or", "bitwise_op.cl" },
-    { "bitwise_and", "bitwise_op.cl" },
-    { "bitwise_xor", "bitwise_op.cl" },
-    { "bitwise_not", "bitwise_op.cl" },
-    { "bounding_box_transform", "bounding_box_transform.cl" },
-    { "bounding_box_transform_quantized", "bounding_box_transform_quantized.cl" },
-    { "channel_shuffle_nchw", "channel_shuffle.cl" },
-    { "channel_shuffle_nhwc", "channel_shuffle.cl" },
-    { "compare_equal", "comparisons.cl" },
-    { "compare_equal_quantized", "comparisons.cl" },
-    { "compare_notequal", "comparisons.cl" },
-    { "compare_notequal_quantized", "comparisons.cl" },
-    { "compare_greater", "comparisons.cl" },
-    { "compare_greater_quantized", "comparisons.cl" },
-    { "compare_greaterequal", "comparisons.cl" },
-    { "compare_greaterequal_quantized", "comparisons.cl" },
-    { "compare_less", "comparisons.cl" },
-    { "compare_less_quantized", "comparisons.cl" },
-    { "compare_lessequal", "comparisons.cl" },
-    { "compare_lessequal_quantized", "comparisons.cl" },
-    { "concatenate", "concatenate.cl" },
-    { "concatenate_width", "concatenate.cl" },
-    { "concatenate_height", "concatenate.cl" },
-    { "concatenate_width_x2", "concatenate.cl" },
-    { "concatenate_width_x4", "concatenate.cl" },
-    { "col2im", "col2im.cl" },
-    { "cast_down", "cast.cl" },
-    { "cast_up", "cast.cl" },
-    { "convert_fc_weights", "convert_fc_weights.cl" },
-    { "copy_tensor", "copy_tensor.cl" },
-    { "crop_tensor", "crop_tensor.cl" },
-    { "deconvolution_reshape", "deconvolution_layer.cl" },
-    { "deconvolution_upsample", "deconvolution_layer.cl" },
-    { "depth_to_space_nchw", "depth_to_space.cl" },
-    { "depth_to_space_nhwc", "depth_to_space.cl" },
-    { "dequantization_layer", "dequantization_layer.cl" },
-    { "dequantization_layer_per_channel_nhwc", "dequantization_layer.cl" },
-    { "dequantization_layer_per_channel_nchw", "dequantization_layer.cl" },
-    { "dwc_native_fp_nhwc", "dwc_native_fp_nhwc.cl" },
-    { "dwc_native_quantized_nhwc", "dwc_native_quantized_nhwc.cl" },
-    { "direct_convolution_nhwc", "direct_convolution.cl" },
-    { "direct_convolution1x1", "direct_convolution1x1.cl" },
-    { "direct_convolution1x1_f32_bifrost", "direct_convolution1x1.cl" },
-    { "direct_convolution3x3", "direct_convolution3x3.cl" },
-    { "direct_convolution3x3_f32_bifrost", "direct_convolution3x3.cl" },
-    { "direct_convolution5x5", "direct_convolution5x5.cl" },
-    { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
-    { "direct_convolution_quantized", "direct_convolution_quantized.cl" },
-    { "elementwise_operation_ADD", "elementwise_operation.cl" },
-    { "elementwise_operation_SUB", "elementwise_operation.cl" },
-    { "elementwise_operation_MAX", "elementwise_operation.cl" },
-    { "elementwise_operation_MIN", "elementwise_operation.cl" },
-    { "elementwise_operation_DIV", "elementwise_operation.cl" },
-    { "elementwise_operation_SQUARED_DIFF", "elementwise_operation.cl" },
-    { "elementwise_operation_POWER", "elementwise_operation.cl" },
-    { "elementwise_operation_PRELU", "elementwise_operation.cl" },
-    { "elementwise_operation_AND", "elementwise_operation.cl" },
-    { "elementwise_operation_OR", "elementwise_operation.cl" },
-    { "elementwise_operation_ADD_quantized", "elementwise_operation_quantized.cl" },
-    { "elementwise_operation_SUB_quantized", "elementwise_operation_quantized.cl" },
-    { "elementwise_operation_MAX_quantized", "elementwise_operation_quantized.cl" },
-    { "elementwise_operation_MIN_quantized", "elementwise_operation_quantized.cl" },
-    { "elementwise_operation_DIV_quantized", "elementwise_operation_quantized.cl" },
-    { "elementwise_operation_SQUARED_DIFF_quantized", "elementwise_operation_quantized.cl" },
-    { "elementwise_operation_PRELU_quantized", "elementwise_operation_quantized.cl" },
-    { "elementwise_unary", "elementwise_unary.cl" },
-    { "fft_digit_reverse_axis_0", "fft_digit_reverse.cl" },
-    { "fft_digit_reverse_axis_1", "fft_digit_reverse.cl" },
-    { "fft_radix_2_first_stage_axis_0", "fft.cl" },
-    { "fft_radix_2_first_stage_axis_1", "fft.cl" },
-    { "fft_radix_2_axis_0", "fft.cl" },
-    { "fft_radix_2_axis_1", "fft.cl" },
-    { "fft_radix_3_first_stage_axis_0", "fft.cl" },
-    { "fft_radix_3_first_stage_axis_1", "fft.cl" },
-    { "fft_radix_3_axis_0", "fft.cl" },
-    { "fft_radix_3_axis_1", "fft.cl" },
-    { "fft_radix_4_first_stage_axis_0", "fft.cl" },
-    { "fft_radix_4_first_stage_axis_1", "fft.cl" },
-    { "fft_radix_4_axis_0", "fft.cl" },
-    { "fft_radix_4_axis_1", "fft.cl" },
-    { "fft_radix_5_first_stage_axis_0", "fft.cl" },
-    { "fft_radix_5_first_stage_axis_1", "fft.cl" },
-    { "fft_radix_5_axis_0", "fft.cl" },
-    { "fft_radix_5_axis_1", "fft.cl" },
-    { "fft_radix_7_first_stage_axis_0", "fft.cl" },
-    { "fft_radix_7_first_stage_axis_1", "fft.cl" },
-    { "fft_radix_7_axis_0", "fft.cl" },
-    { "fft_radix_7_axis_1", "fft.cl" },
-    { "fft_radix_8_first_stage_axis_0", "fft.cl" },
-    { "fft_radix_8_first_stage_axis_1", "fft.cl" },
-    { "fft_radix_8_axis_0", "fft.cl" },
-    { "fft_radix_8_axis_1", "fft.cl" },
-    { "fft_scale_conj", "fft_scale.cl" },
-    { "fill_image_borders_constant", "fill_border.cl" },
-    { "fill_image_borders_replicate", "fill_border.cl" },
-    { "floor_layer", "floor.cl" },
-    { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
-    { "gather", "gather.cl" },
-    { "gemm_ma_f16", "gemm.cl" },
-    { "gemm_ma_f32", "gemm.cl" },
-    { "gemm_mv", "gemv.cl" },
-    { "gemm_mv_quantized", "gemv.cl" },
-    { "gemm_mm_interleaved_transposed_f16", "gemm_v1.cl" },
-    { "gemm_mm_interleaved_transposed_f16_acc32", "gemm_v1.cl" },
-    { "gemm_mm_interleaved_transposed_f16_bifrost", "gemm_v1.cl" },
-    { "gemm_mm_interleaved_transposed_f32", "gemm_v1.cl" },
-    { "gemm_mm_interleaved_transposed_f32_bifrost", "gemm_v1.cl" },
-    { "gemm_mm_floating_point", "gemm_v1.cl" },
-    { "gemm_mm_floating_point_f16_bifrost", "gemm_v1.cl" },
-    { "gemm_mm_floating_point_f16_bifrost_acc32", "gemm_v1.cl" },
-    { "gemm_mm_floating_point_f32_bifrost", "gemm_v1.cl" },
-    { "gemm_mm_floating_point_f32_bifrost_1000", "gemm_v1.cl" },
-    { "gemm_mm_native", "gemm.cl" },
-    { "gemm_mm_reshaped_lhs_nt_rhs_t", "gemm.cl" },
-    { "gemm_mm_reshaped_lhs_nt_rhs_t_texture", "gemm.cl" },
-    { "gemm_mm_reshaped_lhs_t_rhs_nt", "gemm.cl" },
-    { "gemm_mm_reshaped_lhs_t_rhs_nt_texture", "gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_nt", "gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_nt_texture", "gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_t", "gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_t_texture", "gemm.cl" },
-    { "gemm_lc_vm_f32", "gemm.cl" },
-    { "gemm_reshape_lhs_matrix_nt", "gemm.cl" },
-    { "gemm_reshape_lhs_matrix_t", "gemm.cl" },
-    { "gemm_reshape_rhs_matrix_nt", "gemm.cl" },
-    { "gemm_reshape_rhs_matrix_t", "gemm.cl" },
-    { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
-    { "gemmlowp_matrix_a_reduction_dot8", "gemmlowp.cl" },
-    { "gemmlowp_matrix_b_reduction", "gemmlowp.cl" },
-    { "gemmlowp_mm_native", "gemmlowp.cl" },
-    { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "gemmlowp.cl" },
-    { "gemmlowp_mm_reshaped_only_rhs_t", "gemmlowp.cl" },
-    { "gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint", "gemmlowp.cl" },
-    { "gemmlowp_offset_contribution", "gemmlowp.cl" },
-    { "gemmlowp_offset_contribution_quantize_down", "gemmlowp.cl" },
-    { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "gemmlowp.cl" },
-    { "gemmlowp_output_stage_quantize_down", "gemmlowp.cl" },
-    { "gemmlowp_output_stage_quantize_down_fixedpoint", "gemmlowp.cl" },
-    { "gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16", "gemmlowp.cl" },
-    { "gemmlowp_output_stage_quantize_down_float", "gemmlowp.cl" },
-    { "generate_proposals_compute_all_anchors", "generate_proposals.cl" },
-    { "generate_proposals_compute_all_anchors_quantized", "generate_proposals_quantized.cl" },
-    { "im2col1x1_stridex1_nchw", "im2col.cl" },
-    { "im2col3x3_nchw", "im2col.cl" },
-    { "im2col5x5_nchw", "im2col.cl" },
-    { "im2col11x11_padx0_pady0_nchw", "im2col.cl" },
-    { "im2col_generic_nchw", "im2col.cl" },
-    { "im2col_generic_padx0_pady0_nchw", "im2col.cl" },
-    { "im2col3x3_nhwc", "im2col.cl" },
-    { "im2col9x9_nhwc", "im2col.cl" },
-    { "im2col_generic_nhwc", "im2col.cl" },
-    { "instance_normalization", "instance_normalization.cl" },
-    { "compute_mean_var", "instance_normalization.cl" },
-    { "l2_normalize_x", "l2_normalize.cl" },
-    { "l2_normalize_y", "l2_normalize.cl" },
-    { "l2_normalize_z", "l2_normalize.cl" },
-    { "max_unpooling_layer_2", "unpooling_layer.cl" },
-    { "mean_stddev_normalization", "mean_stddev_normalization.cl" },
-    { "memset", "memset.cl" },
-    { "minmax_layer", "minmax_layer.cl" },
-    { "non_max_suppression", "nonmax.cl" },
-    { "normalization_layer_cross_map_nchw", "normalization_layer.cl" },
-    { "normalization_layer_cross_map_nhwc", "normalization_layer.cl" },
-    { "normalization_layer_in_map_nchw", "normalization_layer.cl" },
-    { "normalization_layer_in_map_nhwc", "normalization_layer.cl" },
-    { "normalize_planar_yuv_layer_nchw", "normalize_planar_yuv_layer.cl" },
-    { "normalize_planar_yuv_layer_nhwc", "normalize_planar_yuv_layer.cl" },
-    { "normalize_planar_yuv_layer_q8_nchw", "normalize_planar_yuv_layer_quantized.cl" },
-    { "normalize_planar_yuv_layer_q8_nhwc", "normalize_planar_yuv_layer_quantized.cl" },
-    { "pad_layer_constant", "pad_layer.cl" },
-    { "pad_layer_symmetric_reflect", "pad_layer.cl" },
-    { "permute", "permute.cl" },
-    { "pixelwise_mul_complex", "pixelwise_mul_float.cl" },
-    { "pixelwise_mul_float", "pixelwise_mul_float.cl" },
-    { "pixelwise_mul_int", "pixelwise_mul_int.cl" },
-    { "pixelwise_mul_quantized", "pixelwise_mul_int.cl" },
-    { "pooling_layer_2", "pooling_layer.cl" },
-    { "pooling_layer_3", "pooling_layer.cl" },
-    { "pooling_layer_optimized_3", "pooling_layer.cl" },
-    { "pooling_layer_7", "pooling_layer.cl" },
-    { "pooling_layer_MxN_nchw", "pooling_layer.cl" },
-    { "pooling_layer_MxN_nhwc", "pooling_layer.cl" },
-    { "pooling_layer_2x2_nhwc", "pooling_layer.cl" },
-    { "pooling_layer_2_nchw_indices_fp32", "pooling_layer.cl" },
-    { "pooling_layer_2_nchw_indices_fp16", "pooling_layer.cl" },
-    { "pooling_layer_MxN_quantized_nhwc", "pooling_layer_quantized.cl" },
-    { "pooling_layer_MxN_quantized_nchw", "pooling_layer_quantized.cl" },
-    { "prior_box_layer_nchw", "prior_box_layer.cl" },
-    { "qlstm_layer_normalization", "qlstm_layer_normalization.cl" },
-    { "quantization_layer", "quantization_layer.cl" },
-    { "range", "range.cl" },
-    { "range_quantized", "range.cl" },
-    { "reduction_operation_x", "reduction_operation.cl" },
-    { "reduction_operation_non_parallel_x", "reduction_operation.cl" },
-    { "reduction_operation_y", "reduction_operation.cl" },
-    { "reduction_operation_z", "reduction_operation.cl" },
-    { "reduction_operation_w", "reduction_operation.cl" },
-    { "remap_nearest_neighbour_nchw", "remap.cl" },
-    { "remap_bilinear_nchw", "remap.cl" },
-    { "remap_nearest_neighbour_nhwc", "remap.cl" },
-    { "remap_bilinear_nhwc", "remap.cl" },
-    { "reorg_layer_nchw", "reorg_layer.cl" },
-    { "reorg_layer_nhwc", "reorg_layer.cl" },
-    { "reshape_layer", "reshape_layer.cl" },
-    { "reshape_to_columns", "convolution_layer.cl" },
-    { "reverse", "reverse.cl" },
-    { "roi_align_layer", "roi_align_layer.cl" },
-    { "roi_align_layer_quantized", "roi_align_layer_quantized.cl" },
-    { "roi_pooling_layer", "roi_pooling_layer.cl" },
-    { "scale_nearest_neighbour_nchw", "scale.cl" },
-    { "scale_nearest_neighbour_nhwc", "scale.cl" },
-    { "scale_bilinear_nchw", "scale.cl" },
-    { "scale_bilinear_nhwc", "scale.cl" },
-    { "scale_bilinear_quantized_nchw", "scale_quantized.cl" },
-    { "scale_bilinear_quantized_nhwc", "scale_quantized.cl" },
-    { "select_same_rank", "select.cl" },
-    { "select_different_rank_2", "select.cl" },
-    { "select_different_rank_n", "select.cl" },
-    { "softmax_layer_norm", "softmax_layer.cl" },
-    { "softmax_layer_norm_quantized", "softmax_layer_quantized.cl" },
-    { "softmax_layer_max_shift_exp_sum_quantized_serial", "softmax_layer_quantized.cl" },
-    { "softmax_layer_max_shift_exp_sum_quantized_parallel", "softmax_layer_quantized.cl" },
-    { "softmax_layer_max_shift_exp_sum_serial", "softmax_layer.cl" },
-    { "space_to_batch_nchw", "space_to_batch.cl" },
-    { "space_to_batch_static_nchw", "space_to_batch.cl" },
-    { "space_to_batch_nhwc", "space_to_batch.cl" },
-    { "space_to_batch_static_nhwc", "space_to_batch.cl" },
-    { "space_to_depth_nchw", "space_to_depth.cl" },
-    { "space_to_depth_nhwc", "space_to_depth.cl" },
-    { "softmax_layer_max_shift_exp_sum_parallel", "softmax_layer.cl" },
-    { "stack_layer", "stack_layer.cl" },
-    { "strided_slice", "slice_ops.cl" },
-    { "tile", "tile.cl" },
-    { "transpose", "transpose.cl" },
-    { "upsample_layer_nchw", "upsample_layer.cl" },
-    { "upsample_layer_nhwc", "upsample_layer.cl" },
-    { "winograd_filter_transform_2x2_3x3_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_2x1_3x1_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x2_1x3_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x4_3x3_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x1_3x1_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x4_1x3_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x4_5x5_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x1_5x1_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x4_1x5_nchw", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x1_3x1_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x4_1x3_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x4_3x3_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x4_5x5_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x1_5x1_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x4_1x5_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_2x2_7x7_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_2x1_7x1_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x2_1x7_nhwc", "winograd_filter_transform.cl" },
-    { "winograd_input_transform_2x2_3x3_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_2x2_3x3_stepz2_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_2x1_3x1_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_2x1_3x1_stepz2_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_1x2_1x3_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_1x2_1x3_stepz2_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_4x4_3x3_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_4x1_3x1_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_1x4_1x3_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_4x4_5x5_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_4x1_5x1_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_1x4_1x5_stepz1_nchw", "winograd_input_transform.cl" },
-    { "winograd_input_transform_4x1_3x1_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_input_transform_1x4_1x3_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_input_transform_4x4_3x3_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_input_transform_4x4_5x5_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_input_transform_4x1_5x1_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_input_transform_1x4_1x5_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_input_transform_2x2_7x7_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_input_transform_2x1_7x1_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_input_transform_1x2_1x7_stepz1_nhwc", "winograd_input_transform.cl" },
-    { "winograd_output_transform_2x2_3x3_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_2x1_3x1_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_1x2_1x3_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_4x4_3x3_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_4x1_3x1_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_1x4_1x3_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_4x4_5x5_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_4x1_5x1_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_1x4_1x5_nchw", "winograd_output_transform.cl" },
-    { "winograd_output_transform_4x1_3x1_nhwc", "winograd_output_transform.cl" },
-    { "winograd_output_transform_1x4_1x3_nhwc", "winograd_output_transform.cl" },
-    { "winograd_output_transform_4x4_3x3_nhwc", "winograd_output_transform.cl" },
-    { "winograd_output_transform_4x4_5x5_nhwc", "winograd_output_transform.cl" },
-    { "winograd_output_transform_4x1_5x1_nhwc", "winograd_output_transform.cl" },
-    { "winograd_output_transform_1x4_1x5_nhwc", "winograd_output_transform.cl" },
-    { "winograd_output_transform_2x2_7x7_nhwc", "winograd_output_transform.cl" },
-    { "winograd_output_transform_2x1_7x1_nhwc", "winograd_output_transform.cl" },
-    { "winograd_output_transform_1x2_1x7_nhwc", "winograd_output_transform.cl" },
+    { "activation_layer", "common/activation_layer.cl" },
+    { "activation_layer_quant", "common/activation_layer_quant.cl" },
+    { "activation_layer_quant_f32", "common/activation_layer_quant.cl" },
+    { "arg_min_max_x", "common/arg_min_max.cl" },
+    { "arg_min_max_y", "common/arg_min_max.cl" },
+    { "arg_min_max_z", "common/arg_min_max.cl" },
+    { "arg_min_max_w", "common/arg_min_max.cl" },
+    { "batch_to_space_nchw", "nchw/batch_to_space.cl" },
+    { "batch_to_space_static_nchw", "nchw/batch_to_space.cl" },
+    { "batch_to_space_nhwc", "nhwc/batch_to_space.cl" },
+    { "batch_to_space_static_nhwc", "nhwc/batch_to_space.cl" },
+    { "batchnormalization_layer_nchw", "nchw/batchnormalization_layer.cl" },
+    { "batchnormalization_layer_nhwc", "nhwc/batchnormalization_layer.cl" },
+    { "bitwise_or", "common/bitwise_op.cl" },
+    { "bitwise_and", "common/bitwise_op.cl" },
+    { "bitwise_xor", "common/bitwise_op.cl" },
+    { "bitwise_not", "common/bitwise_op.cl" },
+    { "bounding_box_transform", "common/bounding_box_transform.cl" },
+    { "bounding_box_transform_quantized", "common/bounding_box_transform_quantized.cl" },
+    { "channel_shuffle_nchw", "nchw/channel_shuffle.cl" },
+    { "channel_shuffle_nhwc", "nhwc/channel_shuffle.cl" },
+    { "compare_equal", "common/comparisons.cl" },
+    { "compare_equal_quantized", "common/comparisons.cl" },
+    { "compare_notequal", "common/comparisons.cl" },
+    { "compare_notequal_quantized", "common/comparisons.cl" },
+    { "compare_greater", "common/comparisons.cl" },
+    { "compare_greater_quantized", "common/comparisons.cl" },
+    { "compare_greaterequal", "common/comparisons.cl" },
+    { "compare_greaterequal_quantized", "common/comparisons.cl" },
+    { "compare_less", "common/comparisons.cl" },
+    { "compare_less_quantized", "common/comparisons.cl" },
+    { "compare_lessequal", "common/comparisons.cl" },
+    { "compare_lessequal_quantized", "common/comparisons.cl" },
+    { "concatenate", "common/concatenate.cl" },
+    { "concatenate_width", "common/concatenate.cl" },
+    { "concatenate_height", "common/concatenate.cl" },
+    { "concatenate_width_x2", "common/concatenate.cl" },
+    { "concatenate_width_x4", "common/concatenate.cl" },
+    { "col2im", "common/col2im.cl" },
+    { "cast_down", "common/cast.cl" },
+    { "cast_up", "common/cast.cl" },
+    { "convert_fc_weights", "common/convert_fc_weights.cl" },
+    { "copy_tensor", "common/copy_tensor.cl" },
+    { "crop_tensor", "common/crop_tensor.cl" },
+    { "deconvolution_reshape", "common/deconvolution_layer.cl" },
+    { "deconvolution_upsample", "common/deconvolution_layer.cl" },
+    { "depth_to_space_nchw", "nchw/depth_to_space.cl" },
+    { "depth_to_space_nhwc", "nhwc/depth_to_space.cl" },
+    { "dequantization_layer", "common/dequantization_layer.cl" },
+    { "dequantization_layer_per_channel_nhwc", "nhwc/dequantization_layer.cl" },
+    { "dequantization_layer_per_channel_nchw", "nchw/dequantization_layer.cl" },
+    { "dwc_native_fp_nhwc", "nhwc/dwc_native_fp_nhwc.cl" },
+    { "dwc_native_quantized_nhwc", "nhwc/dwc_native_quantized_nhwc.cl" },
+    { "direct_convolution_nhwc", "nhwc/direct_convolution.cl" },
+    { "direct_convolution1x1", "nchw/direct_convolution1x1.cl" },
+    { "direct_convolution1x1_f32_bifrost", "nchw/direct_convolution1x1.cl" },
+    { "direct_convolution3x3", "nchw/direct_convolution3x3.cl" },
+    { "direct_convolution3x3_f32_bifrost", "nchw/direct_convolution3x3.cl" },
+    { "direct_convolution5x5", "nchw/direct_convolution5x5.cl" },
+    { "direct_convolution5x5_f32_bifrost", "nchw/direct_convolution5x5.cl" },
+    { "direct_convolution_quantized", "nchw/direct_convolution_quantized.cl" },
+    { "elementwise_operation_ADD", "common/elementwise_operation.cl" },
+    { "elementwise_operation_SUB", "common/elementwise_operation.cl" },
+    { "elementwise_operation_MAX", "common/elementwise_operation.cl" },
+    { "elementwise_operation_MIN", "common/elementwise_operation.cl" },
+    { "elementwise_operation_DIV", "common/elementwise_operation.cl" },
+    { "elementwise_operation_SQUARED_DIFF", "common/elementwise_operation.cl" },
+    { "elementwise_operation_POWER", "common/elementwise_operation.cl" },
+    { "elementwise_operation_PRELU", "common/elementwise_operation.cl" },
+    { "elementwise_operation_AND", "common/elementwise_operation.cl" },
+    { "elementwise_operation_OR", "common/elementwise_operation.cl" },
+    { "elementwise_operation_ADD_quantized", "common/elementwise_operation_quantized.cl" },
+    { "elementwise_operation_SUB_quantized", "common/elementwise_operation_quantized.cl" },
+    { "elementwise_operation_MAX_quantized", "common/elementwise_operation_quantized.cl" },
+    { "elementwise_operation_MIN_quantized", "common/elementwise_operation_quantized.cl" },
+    { "elementwise_operation_DIV_quantized", "common/elementwise_operation_quantized.cl" },
+    { "elementwise_operation_SQUARED_DIFF_quantized", "common/elementwise_operation_quantized.cl" },
+    { "elementwise_operation_PRELU_quantized", "common/elementwise_operation_quantized.cl" },
+    { "elementwise_unary", "common/elementwise_unary.cl" },
+    { "fft_digit_reverse_axis_0", "common/fft_digit_reverse.cl" },
+    { "fft_digit_reverse_axis_1", "common/fft_digit_reverse.cl" },
+    { "fft_radix_2_first_stage_axis_0", "common/fft.cl" },
+    { "fft_radix_2_first_stage_axis_1", "common/fft.cl" },
+    { "fft_radix_2_axis_0", "common/fft.cl" },
+    { "fft_radix_2_axis_1", "common/fft.cl" },
+    { "fft_radix_3_first_stage_axis_0", "common/fft.cl" },
+    { "fft_radix_3_first_stage_axis_1", "common/fft.cl" },
+    { "fft_radix_3_axis_0", "common/fft.cl" },
+    { "fft_radix_3_axis_1", "common/fft.cl" },
+    { "fft_radix_4_first_stage_axis_0", "common/fft.cl" },
+    { "fft_radix_4_first_stage_axis_1", "common/fft.cl" },
+    { "fft_radix_4_axis_0", "common/fft.cl" },
+    { "fft_radix_4_axis_1", "common/fft.cl" },
+    { "fft_radix_5_first_stage_axis_0", "common/fft.cl" },
+    { "fft_radix_5_first_stage_axis_1", "common/fft.cl" },
+    { "fft_radix_5_axis_0", "common/fft.cl" },
+    { "fft_radix_5_axis_1", "common/fft.cl" },
+    { "fft_radix_7_first_stage_axis_0", "common/fft.cl" },
+    { "fft_radix_7_first_stage_axis_1", "common/fft.cl" },
+    { "fft_radix_7_axis_0", "common/fft.cl" },
+    { "fft_radix_7_axis_1", "common/fft.cl" },
+    { "fft_radix_8_first_stage_axis_0", "common/fft.cl" },
+    { "fft_radix_8_first_stage_axis_1", "common/fft.cl" },
+    { "fft_radix_8_axis_0", "common/fft.cl" },
+    { "fft_radix_8_axis_1", "common/fft.cl" },
+    { "fft_scale_conj", "common/fft_scale.cl" },
+    { "fill_image_borders_constant", "common/fill_border.cl" },
+    { "fill_image_borders_replicate", "common/fill_border.cl" },
+    { "floor_layer", "common/floor.cl" },
+    { "fuse_batchnormalization_layer", "common/batchnormalization_layer.cl" },
+    { "gather", "common/gather.cl" },
+    { "gemm_ma_f16", "common/gemm.cl" },
+    { "gemm_ma_f32", "common/gemm.cl" },
+    { "gemm_mv", "common/gemv.cl" },
+    { "gemm_mv_quantized", "common/gemv.cl" },
+    { "gemm_mm_interleaved_transposed_f16", "common/gemm_v1.cl" },
+    { "gemm_mm_interleaved_transposed_f16_acc32", "common/gemm_v1.cl" },
+    { "gemm_mm_interleaved_transposed_f16_bifrost", "common/gemm_v1.cl" },
+    { "gemm_mm_interleaved_transposed_f32", "common/gemm_v1.cl" },
+    { "gemm_mm_interleaved_transposed_f32_bifrost", "common/gemm_v1.cl" },
+    { "gemm_mm_floating_point", "common/gemm_v1.cl" },
+    { "gemm_mm_floating_point_f16_bifrost", "common/gemm_v1.cl" },
+    { "gemm_mm_floating_point_f16_bifrost_acc32", "common/gemm_v1.cl" },
+    { "gemm_mm_floating_point_f32_bifrost", "common/gemm_v1.cl" },
+    { "gemm_mm_floating_point_f32_bifrost_1000", "common/gemm_v1.cl" },
+    { "gemm_mm_native", "common/gemm.cl" },
+    { "gemm_mm_reshaped_lhs_nt_rhs_t", "common/gemm.cl" },
+    { "gemm_mm_reshaped_lhs_nt_rhs_t_texture", "common/gemm.cl" },
+    { "gemm_mm_reshaped_lhs_t_rhs_nt", "common/gemm.cl" },
+    { "gemm_mm_reshaped_lhs_t_rhs_nt_texture", "common/gemm.cl" },
+    { "gemm_mm_reshaped_only_rhs_nt", "common/gemm.cl" },
+    { "gemm_mm_reshaped_only_rhs_nt_texture", "common/gemm.cl" },
+    { "gemm_mm_reshaped_only_rhs_t", "common/gemm.cl" },
+    { "gemm_mm_reshaped_only_rhs_t_texture", "common/gemm.cl" },
+    { "gemm_lc_vm_f32", "common/gemm.cl" },
+    { "gemm_reshape_lhs_matrix_nt", "common/gemm.cl" },
+    { "gemm_reshape_lhs_matrix_t", "common/gemm.cl" },
+    { "gemm_reshape_rhs_matrix_nt", "common/gemm.cl" },
+    { "gemm_reshape_rhs_matrix_t", "common/gemm.cl" },
+    { "gemmlowp_matrix_a_reduction", "common/gemmlowp.cl" },
+    { "gemmlowp_matrix_a_reduction_dot8", "common/gemmlowp.cl" },
+    { "gemmlowp_matrix_b_reduction", "common/gemmlowp.cl" },
+    { "gemmlowp_mm_native", "common/gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "common/gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_only_rhs_t", "common/gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint", "common/gemmlowp.cl" },
+    { "gemmlowp_offset_contribution", "common/gemmlowp.cl" },
+    { "gemmlowp_offset_contribution_quantize_down", "common/gemmlowp.cl" },
+    { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "common/gemmlowp.cl" },
+    { "gemmlowp_output_stage_quantize_down", "common/gemmlowp.cl" },
+    { "gemmlowp_output_stage_quantize_down_fixedpoint", "common/gemmlowp.cl" },
+    { "gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16", "common/gemmlowp.cl" },
+    { "gemmlowp_output_stage_quantize_down_float", "common/gemmlowp.cl" },
+    { "generate_proposals_compute_all_anchors", "common/generate_proposals.cl" },
+    { "generate_proposals_compute_all_anchors_quantized", "common/generate_proposals_quantized.cl" },
+    { "im2col1x1_stridex1_nchw", "nchw/im2col.cl" },
+    { "im2col3x3_nchw", "nchw/im2col.cl" },
+    { "im2col5x5_nchw", "nchw/im2col.cl" },
+    { "im2col11x11_padx0_pady0_nchw", "nchw/im2col.cl" },
+    { "im2col_generic_nchw", "nchw/im2col.cl" },
+    { "im2col_generic_padx0_pady0_nchw", "nchw/im2col.cl" },
+    { "im2col3x3_nhwc", "nhwc/im2col.cl" },
+    { "im2col9x9_nhwc", "nhwc/im2col.cl" },
+    { "im2col_generic_nhwc", "nhwc/im2col.cl" },
+    { "instance_normalization", "common/instance_normalization.cl" },
+    { "compute_mean_var", "common/instance_normalization.cl" },
+    { "l2_normalize_x", "common/l2_normalize.cl" },
+    { "l2_normalize_y", "common/l2_normalize.cl" },
+    { "l2_normalize_z", "common/l2_normalize.cl" },
+    { "max_unpooling_layer_2", "common/unpooling_layer.cl" },
+    { "mean_stddev_normalization", "common/mean_stddev_normalization.cl" },
+    { "memset", "common/memset.cl" },
+    { "minmax_layer", "common/minmax_layer.cl" },
+    { "non_max_suppression", "common/nonmax.cl" },
+    { "normalization_layer_cross_map_nchw", "nchw/normalization_layer.cl" },
+    { "normalization_layer_cross_map_nhwc", "nhwc/normalization_layer.cl" },
+    { "normalization_layer_in_map_nchw", "nchw/normalization_layer.cl" },
+    { "normalization_layer_in_map_nhwc", "nhwc/normalization_layer.cl" },
+    { "normalize_planar_yuv_layer_nchw", "nchw/normalize_planar_yuv_layer.cl" },
+    { "normalize_planar_yuv_layer_nhwc", "nhwc/normalize_planar_yuv_layer.cl" },
+    { "normalize_planar_yuv_layer_q8_nchw", "nchw/normalize_planar_yuv_layer_quantized.cl" },
+    { "normalize_planar_yuv_layer_q8_nhwc", "nhwc/normalize_planar_yuv_layer_quantized.cl" },
+    { "pad_layer_constant", "common/pad_layer.cl" },
+    { "pad_layer_symmetric_reflect", "common/pad_layer.cl" },
+    { "permute", "common/permute.cl" },
+    { "pixelwise_mul_complex", "common/pixelwise_mul_float.cl" },
+    { "pixelwise_mul_float", "common/pixelwise_mul_float.cl" },
+    { "pixelwise_mul_int", "common/pixelwise_mul_int.cl" },
+    { "pixelwise_mul_quantized", "common/pixelwise_mul_int.cl" },
+    { "pooling_layer_2", "common/pooling_layer.cl" },
+    { "pooling_layer_3", "common/pooling_layer.cl" },
+    { "pooling_layer_optimized_3", "common/pooling_layer.cl" },
+    { "pooling_layer_7", "common/pooling_layer.cl" },
+    { "pooling_layer_MxN_nchw", "nchw/pooling_layer.cl" },
+    { "pooling_layer_MxN_nhwc", "nhwc/pooling_layer.cl" },
+    { "pooling_layer_2x2_nhwc", "nhwc/pooling_layer.cl" },
+    { "pooling_layer_2_nchw_indices_fp32", "nchw/pooling_layer.cl" },
+    { "pooling_layer_2_nchw_indices_fp16", "nchw/pooling_layer.cl" },
+    { "pooling_layer_MxN_quantized_nhwc", "nhwc/pooling_layer_quantized.cl" },
+    { "pooling_layer_MxN_quantized_nchw", "nchw/pooling_layer_quantized.cl" },
+    { "prior_box_layer_nchw", "nchw/prior_box_layer.cl" },
+    { "qlstm_layer_normalization", "common/qlstm_layer_normalization.cl" },
+    { "quantization_layer", "common/quantization_layer.cl" },
+    { "range", "common/range.cl" },
+    { "range_quantized", "common/range.cl" },
+    { "reduction_operation_x", "common/reduction_operation.cl" },
+    { "reduction_operation_non_parallel_x", "common/reduction_operation.cl" },
+    { "reduction_operation_y", "common/reduction_operation.cl" },
+    { "reduction_operation_z", "common/reduction_operation.cl" },
+    { "reduction_operation_w", "common/reduction_operation.cl" },
+    { "remap_nearest_neighbour_nchw", "nchw/remap.cl" },
+    { "remap_bilinear_nchw", "nchw/remap.cl" },
+    { "remap_nearest_neighbour_nhwc", "nhwc/remap.cl" },
+    { "remap_bilinear_nhwc", "nhwc/remap.cl" },
+    { "reorg_layer_nchw", "nchw/reorg_layer.cl" },
+    { "reorg_layer_nhwc", "nhwc/reorg_layer.cl" },
+    { "reshape_layer", "common/reshape_layer.cl" },
+    { "reshape_to_columns", "common/convolution_layer.cl" },
+    { "reverse", "common/reverse.cl" },
+    { "roi_align_layer", "common/roi_align_layer.cl" },
+    { "roi_align_layer_quantized", "common/roi_align_layer_quantized.cl" },
+    { "roi_pooling_layer", "common/roi_pooling_layer.cl" },
+    { "scale_nearest_neighbour_nchw", "nchw/scale.cl" },
+    { "scale_nearest_neighbour_nhwc", "nhwc/scale.cl" },
+    { "scale_bilinear_nchw", "nchw/scale.cl" },
+    { "scale_bilinear_nhwc", "nhwc/scale.cl" },
+    { "scale_bilinear_quantized_nchw", "nchw/scale_quantized.cl" },
+    { "scale_bilinear_quantized_nhwc", "nhwc/scale_quantized.cl" },
+    { "select_same_rank", "common/select.cl" },
+    { "select_different_rank_2", "common/select.cl" },
+    { "select_different_rank_n", "common/select.cl" },
+    { "softmax_layer_norm", "common/softmax_layer.cl" },
+    { "softmax_layer_norm_quantized", "common/softmax_layer_quantized.cl" },
+    { "softmax_layer_max_shift_exp_sum_quantized_serial", "common/softmax_layer_quantized.cl" },
+    { "softmax_layer_max_shift_exp_sum_quantized_parallel", "common/softmax_layer_quantized.cl" },
+    { "softmax_layer_max_shift_exp_sum_serial", "common/softmax_layer.cl" },
+    { "space_to_batch_nchw", "nchw/space_to_batch.cl" },
+    { "space_to_batch_static_nchw", "nchw/space_to_batch.cl" },
+    { "space_to_batch_nhwc", "nhwc/space_to_batch.cl" },
+    { "space_to_batch_static_nhwc", "nhwc/space_to_batch.cl" },
+    { "space_to_depth_nchw", "nchw/space_to_depth.cl" },
+    { "space_to_depth_nhwc", "nhwc/space_to_depth.cl" },
+    { "softmax_layer_max_shift_exp_sum_parallel", "common/softmax_layer.cl" },
+    { "stack_layer", "common/stack_layer.cl" },
+    { "strided_slice", "common/slice_ops.cl" },
+    { "tile", "common/tile.cl" },
+    { "transpose", "common/transpose.cl" },
+    { "upsample_layer_nchw", "nchw/upsample_layer.cl" },
+    { "upsample_layer_nhwc", "nhwc/upsample_layer.cl" },
+    { "winograd_filter_transform_2x2_3x3_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_2x1_3x1_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x2_1x3_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_3x3_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_3x1_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x3_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_5x5_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_5x1_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x5_nchw", "nchw/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_3x1_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x3_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_3x3_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_5x5_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_5x1_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x5_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_2x2_7x7_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_2x1_7x1_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x2_1x7_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_input_transform_2x2_3x3_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_2x2_3x3_stepz2_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_2x1_3x1_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_2x1_3x1_stepz2_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x2_1x3_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x2_1x3_stepz2_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_3x3_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_3x1_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x3_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_5x5_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_5x1_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x5_stepz1_nchw", "nchw/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_3x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x3_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_3x3_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_5x5_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_5x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x5_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_2x2_7x7_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_2x1_7x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x2_1x7_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_output_transform_2x2_3x3_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_2x1_3x1_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_1x2_1x3_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_4x4_3x3_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_4x1_3x1_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_1x4_1x3_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_4x4_5x5_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_4x1_5x1_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_1x4_1x5_nchw", "nchw/winograd_output_transform.cl" },
+    { "winograd_output_transform_4x1_3x1_nhwc", "nhwc/winograd_output_transform.cl" },
+    { "winograd_output_transform_1x4_1x3_nhwc", "nhwc/winograd_output_transform.cl" },
+    { "winograd_output_transform_4x4_3x3_nhwc", "nhwc/winograd_output_transform.cl" },
+    { "winograd_output_transform_4x4_5x5_nhwc", "nhwc/winograd_output_transform.cl" },
+    { "winograd_output_transform_4x1_5x1_nhwc", "nhwc/winograd_output_transform.cl" },
+    { "winograd_output_transform_1x4_1x5_nhwc", "nhwc/winograd_output_transform.cl" },
+    { "winograd_output_transform_2x2_7x7_nhwc", "nhwc/winograd_output_transform.cl" },
+    { "winograd_output_transform_2x1_7x1_nhwc", "nhwc/winograd_output_transform.cl" },
+    { "winograd_output_transform_1x2_1x7_nhwc", "nhwc/winograd_output_transform.cl" },
 };
 
 const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 {
 #ifdef EMBEDDED_KERNELS
     {
-        "activation_layer.cl",
-#include "./cl_kernels/activation_layer.clembed"
+        "common/activation_layer.cl",
+#include "./cl_kernels/common/activation_layer.clembed"
     },
     {
-        "activation_layer_quant.cl",
-#include "./cl_kernels/activation_layer_quant.clembed"
+        "common/activation_layer_quant.cl",
+#include "./cl_kernels/common/activation_layer_quant.clembed"
     },
     {
-        "arg_min_max.cl",
-#include "./cl_kernels/arg_min_max.clembed"
+        "common/arg_min_max.cl",
+#include "./cl_kernels/common/arg_min_max.clembed"
     },
     {
-        "batch_to_space.cl",
-#include "./cl_kernels/batch_to_space.clembed"
+        "nchw/batch_to_space.cl",
+#include "./cl_kernels/nchw/batch_to_space.clembed"
     },
     {
-        "bitwise_op.cl",
-#include "./cl_kernels/bitwise_op.clembed"
+        "nhwc/batch_to_space.cl",
+#include "./cl_kernels/nhwc/batch_to_space.clembed"
     },
     {
-        "bounding_box_transform.cl",
-#include "./cl_kernels/bounding_box_transform.clembed"
+        "common/bitwise_op.cl",
+#include "./cl_kernels/common/bitwise_op.clembed"
     },
     {
-        "bounding_box_transform_quantized.cl",
-#include "./cl_kernels/bounding_box_transform_quantized.clembed"
+        "common/bounding_box_transform.cl",
+#include "./cl_kernels/common/bounding_box_transform.clembed"
     },
     {
-        "channel_shuffle.cl",
-#include "./cl_kernels/channel_shuffle.clembed"
+        "common/bounding_box_transform_quantized.cl",
+#include "./cl_kernels/common/bounding_box_transform_quantized.clembed"
     },
     {
-        "col2im.cl",
-#include "./cl_kernels/col2im.clembed"
+        "nchw/channel_shuffle.cl",
+#include "./cl_kernels/nchw/channel_shuffle.clembed"
     },
     {
-        "comparisons.cl",
-#include "./cl_kernels/comparisons.clembed"
+        "nhwc/channel_shuffle.cl",
+#include "./cl_kernels/nhwc/channel_shuffle.clembed"
     },
     {
-        "concatenate.cl",
-#include "./cl_kernels/concatenate.clembed"
+        "common/col2im.cl",
+#include "./cl_kernels/common/col2im.clembed"
     },
     {
-        "convert_fc_weights.cl",
-#include "./cl_kernels/convert_fc_weights.clembed"
+        "common/comparisons.cl",
+#include "./cl_kernels/common/comparisons.clembed"
     },
     {
-        "convolution_layer.cl",
-#include "./cl_kernels/convolution_layer.clembed"
+        "common/concatenate.cl",
+#include "./cl_kernels/common/concatenate.clembed"
     },
     {
-        "copy_tensor.cl",
-#include "./cl_kernels/copy_tensor.clembed"
+        "common/convert_fc_weights.cl",
+#include "./cl_kernels/common/convert_fc_weights.clembed"
     },
     {
-        "crop_tensor.cl",
-#include "./cl_kernels/crop_tensor.clembed"
+        "common/convolution_layer.cl",
+#include "./cl_kernels/common/convolution_layer.clembed"
     },
     {
-        "upsample_layer.cl",
-#include "./cl_kernels/upsample_layer.clembed"
+        "common/copy_tensor.cl",
+#include "./cl_kernels/common/copy_tensor.clembed"
     },
     {
-        "deconvolution_layer.cl",
-#include "./cl_kernels/deconvolution_layer.clembed"
+        "common/crop_tensor.cl",
+#include "./cl_kernels/common/crop_tensor.clembed"
     },
     {
-        "cast.cl",
-#include "./cl_kernels/cast.clembed"
+        "nchw/upsample_layer.cl",
+#include "./cl_kernels/nchw/upsample_layer.clembed"
     },
     {
-        "depth_to_space.cl",
-#include "./cl_kernels/depth_to_space.clembed"
+        "nhwc/upsample_layer.cl",
+#include "./cl_kernels/nhwc/upsample_layer.clembed"
     },
     {
-        "dequantization_layer.cl",
-#include "./cl_kernels/dequantization_layer.clembed"
+        "common/deconvolution_layer.cl",
+#include "./cl_kernels/common/deconvolution_layer.clembed"
     },
     {
-        "direct_convolution1x1.cl",
-#include "./cl_kernels/direct_convolution1x1.clembed"
+        "common/cast.cl",
+#include "./cl_kernels/common/cast.clembed"
     },
     {
-        "direct_convolution3x3.cl",
-#include "./cl_kernels/direct_convolution3x3.clembed"
+        "nchw/depth_to_space.cl",
+#include "./cl_kernels/nchw/depth_to_space.clembed"
     },
     {
-        "direct_convolution5x5.cl",
-#include "./cl_kernels/direct_convolution5x5.clembed"
+        "nhwc/depth_to_space.cl",
+#include "./cl_kernels/nhwc/depth_to_space.clembed"
     },
     {
-        "direct_convolution_quantized.cl",
-#include "./cl_kernels/direct_convolution_quantized.clembed"
+        "common/dequantization_layer.cl",
+#include "./cl_kernels/common/dequantization_layer.clembed"
     },
     {
-        "direct_convolution.cl",
-#include "./cl_kernels/direct_convolution.clembed"
+        "nchw/dequantization_layer.cl",
+#include "./cl_kernels/nchw/dequantization_layer.clembed"
     },
     {
-        "dwc_native_fp_nhwc.cl",
-#include "./cl_kernels/dwc_native_fp_nhwc.clembed"
+        "nhwc/dequantization_layer.cl",
+#include "./cl_kernels/nhwc/dequantization_layer.clembed"
     },
     {
-        "dwc_native_quantized_nhwc.cl",
-#include "./cl_kernels/dwc_native_quantized_nhwc.clembed"
+        "nchw/direct_convolution1x1.cl",
+#include "./cl_kernels/nchw/direct_convolution1x1.clembed"
     },
     {
-        "elementwise_operation.cl",
-#include "./cl_kernels/elementwise_operation.clembed"
+        "nchw/direct_convolution3x3.cl",
+#include "./cl_kernels/nchw/direct_convolution3x3.clembed"
     },
     {
-        "elementwise_operation_quantized.cl",
-#include "./cl_kernels/elementwise_operation_quantized.clembed"
+        "nchw/direct_convolution5x5.cl",
+#include "./cl_kernels/nchw/direct_convolution5x5.clembed"
     },
     {
-        "elementwise_unary.cl",
-#include "./cl_kernels/elementwise_unary.clembed"
+        "nchw/direct_convolution_quantized.cl",
+#include "./cl_kernels/nchw/direct_convolution_quantized.clembed"
     },
     {
-        "fft.cl",
-#include "./cl_kernels/fft.clembed"
+        "nhwc/direct_convolution.cl",
+#include "./cl_kernels/nhwc/direct_convolution.clembed"
     },
     {
-        "fft_digit_reverse.cl",
-#include "./cl_kernels/fft_digit_reverse.clembed"
+        "nhwc/dwc_native_fp_nhwc.cl",
+#include "./cl_kernels/nhwc/dwc_native_fp_nhwc.clembed"
     },
     {
-        "fft_scale.cl",
-#include "./cl_kernels/fft_scale.clembed"
+        "nhwc/dwc_native_quantized_nhwc.cl",
+#include "./cl_kernels/nhwc/dwc_native_quantized_nhwc.clembed"
     },
     {
-        "fill_border.cl",
-#include "./cl_kernels/fill_border.clembed"
+        "common/elementwise_operation.cl",
+#include "./cl_kernels/common/elementwise_operation.clembed"
     },
     {
-        "floor.cl",
-#include "./cl_kernels/floor.clembed"
+        "common/elementwise_operation_quantized.cl",
+#include "./cl_kernels/common/elementwise_operation_quantized.clembed"
     },
     {
-        "gather.cl",
-#include "./cl_kernels/gather.clembed"
+        "common/elementwise_unary.cl",
+#include "./cl_kernels/common/elementwise_unary.clembed"
     },
     {
-        "gemm.cl",
-#include "./cl_kernels/gemm.clembed"
+        "common/fft.cl",
+#include "./cl_kernels/common/fft.clembed"
     },
     {
-        "gemm_v1.cl",
-#include "./cl_kernels/gemm_v1.clembed"
+        "common/fft_digit_reverse.cl",
+#include "./cl_kernels/common/fft_digit_reverse.clembed"
     },
     {
-        "gemmlowp.cl",
-#include "./cl_kernels/gemmlowp.clembed"
+        "common/fft_scale.cl",
+#include "./cl_kernels/common/fft_scale.clembed"
     },
     {
-        "gemv.cl",
-#include "./cl_kernels/gemv.clembed"
+        "common/fill_border.cl",
+#include "./cl_kernels/common/fill_border.clembed"
     },
     {
-        "generate_proposals.cl",
-#include "./cl_kernels/generate_proposals.clembed"
+        "common/floor.cl",
+#include "./cl_kernels/common/floor.clembed"
     },
     {
-        "generate_proposals_quantized.cl",
-#include "./cl_kernels/generate_proposals_quantized.clembed"
+        "common/gather.cl",
+#include "./cl_kernels/common/gather.clembed"
+    },
+    {
+        "common/gemm.cl",
+#include "./cl_kernels/common/gemm.clembed"
+    },
+    {
+        "common/gemm_v1.cl",
+#include "./cl_kernels/common/gemm_v1.clembed"
+    },
+    {
+        "common/gemmlowp.cl",
+#include "./cl_kernels/common/gemmlowp.clembed"
+    },
+    {
+        "common/gemv.cl",
+#include "./cl_kernels/common/gemv.clembed"
+    },
+    {
+        "common/generate_proposals.cl",
+#include "./cl_kernels/common/generate_proposals.clembed"
+    },
+    {
+        "common/generate_proposals_quantized.cl",
+#include "./cl_kernels/common/generate_proposals_quantized.clembed"
     },
     {
         "helpers.h",
@@ -665,184 +689,256 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/helpers_asymm.hembed"
     },
     {
-        "im2col.cl",
-#include "./cl_kernels/im2col.clembed"
+        "nchw/im2col.cl",
+#include "./cl_kernels/nchw/im2col.clembed"
     },
     {
-        "instance_normalization.cl",
-#include "./cl_kernels/instance_normalization.clembed"
+        "nhwc/im2col.cl",
+#include "./cl_kernels/nhwc/im2col.clembed"
     },
     {
-        "l2_normalize.cl",
-#include "./cl_kernels/l2_normalize.clembed"
+        "common/instance_normalization.cl",
+#include "./cl_kernels/common/instance_normalization.clembed"
     },
     {
-        "mean_stddev_normalization.cl",
-#include "./cl_kernels/mean_stddev_normalization.clembed"
+        "common/l2_normalize.cl",
+#include "./cl_kernels/common/l2_normalize.clembed"
     },
     {
-        "memset.cl",
-#include "./cl_kernels/memset.clembed"
+        "common/mean_stddev_normalization.cl",
+#include "./cl_kernels/common/mean_stddev_normalization.clembed"
     },
     {
-        "minmax_layer.cl",
-#include "./cl_kernels/minmax_layer.clembed"
+        "common/memset.cl",
+#include "./cl_kernels/common/memset.clembed"
     },
     {
-        "nonmax.cl",
-#include "./cl_kernels/nonmax.clembed"
+        "common/minmax_layer.cl",
+#include "./cl_kernels/common/minmax_layer.clembed"
     },
     {
-        "normalization_layer.cl",
-#include "./cl_kernels/normalization_layer.clembed"
+        "common/nonmax.cl",
+#include "./cl_kernels/common/nonmax.clembed"
     },
     {
-        "normalize_planar_yuv_layer.cl",
-#include "./cl_kernels/normalize_planar_yuv_layer.clembed"
+        "nchw/normalization_layer.cl",
+#include "./cl_kernels/nchw/normalization_layer.clembed"
     },
     {
-        "normalize_planar_yuv_layer_quantized.cl",
-#include "./cl_kernels/normalize_planar_yuv_layer_quantized.clembed"
+        "nhwc/normalization_layer.cl",
+#include "./cl_kernels/nhwc/normalization_layer.clembed"
     },
     {
-        "batchnormalization_layer.cl",
-#include "./cl_kernels/batchnormalization_layer.clembed"
+        "nchw/normalize_planar_yuv_layer.cl",
+#include "./cl_kernels/nchw/normalize_planar_yuv_layer.clembed"
     },
     {
-        "pad_layer.cl",
-#include "./cl_kernels/pad_layer.clembed"
+        "nhwc/normalize_planar_yuv_layer.cl",
+#include "./cl_kernels/nhwc/normalize_planar_yuv_layer.clembed"
     },
     {
-        "permute.cl",
-#include "./cl_kernels/permute.clembed"
+        "nchw/normalize_planar_yuv_layer_quantized.cl",
+#include "./cl_kernels/nchw/normalize_planar_yuv_layer_quantized.clembed"
     },
     {
-        "pixelwise_mul_float.cl",
-#include "./cl_kernels/pixelwise_mul_float.clembed"
+        "nhwc/normalize_planar_yuv_layer_quantized.cl",
+#include "./cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.clembed"
     },
     {
-        "pixelwise_mul_int.cl",
-#include "./cl_kernels/pixelwise_mul_int.clembed"
+        "common/batchnormalization_layer.cl",
+#include "./cl_kernels/common/batchnormalization_layer.clembed"
     },
     {
-        "pooling_layer.cl",
-#include "./cl_kernels/pooling_layer.clembed"
+        "nchw/batchnormalization_layer.cl",
+#include "./cl_kernels/nchw/batchnormalization_layer.clembed"
     },
     {
-        "pooling_layer_quantized.cl",
-#include "./cl_kernels/pooling_layer_quantized.clembed"
+        "nhwc/batchnormalization_layer.cl",
+#include "./cl_kernels/nhwc/batchnormalization_layer.clembed"
     },
     {
-        "prior_box_layer.cl",
-#include "./cl_kernels/prior_box_layer.clembed"
+        "common/pad_layer.cl",
+#include "./cl_kernels/common/pad_layer.clembed"
     },
     {
-        "qlstm_layer_normalization.cl",
-#include "./cl_kernels/qlstm_layer_normalization.clembed"
+        "common/permute.cl",
+#include "./cl_kernels/common/permute.clembed"
     },
     {
-        "quantization_layer.cl",
-#include "./cl_kernels/quantization_layer.clembed"
+        "common/pixelwise_mul_float.cl",
+#include "./cl_kernels/common/pixelwise_mul_float.clembed"
     },
     {
-        "range.cl",
-#include "./cl_kernels/range.clembed"
+        "common/pixelwise_mul_int.cl",
+#include "./cl_kernels/common/pixelwise_mul_int.clembed"
     },
     {
-        "reduction_operation.cl",
-#include "./cl_kernels/reduction_operation.clembed"
+        "common/pooling_layer.cl",
+#include "./cl_kernels/common/pooling_layer.clembed"
     },
     {
-        "remap.cl",
-#include "./cl_kernels/remap.clembed"
+        "nchw/pooling_layer.cl",
+#include "./cl_kernels/nchw/pooling_layer.clembed"
     },
     {
-        "reorg_layer.cl",
-#include "./cl_kernels/reorg_layer.clembed"
+        "nhwc/pooling_layer.cl",
+#include "./cl_kernels/nhwc/pooling_layer.clembed"
     },
     {
-        "reshape_layer.cl",
-#include "./cl_kernels/reshape_layer.clembed"
+        "nchw/pooling_layer_quantized.cl",
+#include "./cl_kernels/nchw/pooling_layer_quantized.clembed"
     },
     {
-        "reverse.cl",
-#include "./cl_kernels/reverse.clembed"
+        "nhwc/pooling_layer_quantized.cl",
+#include "./cl_kernels/nhwc/pooling_layer_quantized.clembed"
     },
     {
-        "roi_align_layer.cl",
-#include "./cl_kernels/roi_align_layer.clembed"
+        "nchw/prior_box_layer.cl",
+#include "./cl_kernels/nchw/prior_box_layer.clembed"
     },
     {
-        "roi_align_layer_quantized.cl",
-#include "./cl_kernels/roi_align_layer_quantized.clembed"
+        "common/qlstm_layer_normalization.cl",
+#include "./cl_kernels/common/qlstm_layer_normalization.clembed"
     },
     {
-        "roi_pooling_layer.cl",
-#include "./cl_kernels/roi_pooling_layer.clembed"
+        "common/quantization_layer.cl",
+#include "./cl_kernels/common/quantization_layer.clembed"
     },
     {
-        "scale.cl",
-#include "./cl_kernels/scale.clembed"
+        "common/range.cl",
+#include "./cl_kernels/common/range.clembed"
     },
     {
-        "scale_quantized.cl",
-#include "./cl_kernels/scale_quantized.clembed"
+        "common/reduction_operation.cl",
+#include "./cl_kernels/common/reduction_operation.clembed"
     },
     {
-        "select.cl",
-#include "./cl_kernels/select.clembed"
+        "nchw/remap.cl",
+#include "./cl_kernels/nchw/remap.clembed"
     },
     {
-        "softmax_layer.cl",
-#include "./cl_kernels/softmax_layer.clembed"
+        "nhwc/remap.cl",
+#include "./cl_kernels/nhwc/remap.clembed"
     },
     {
-        "softmax_layer_quantized.cl",
-#include "./cl_kernels/softmax_layer_quantized.clembed"
+        "nchw/reorg_layer.cl",
+#include "./cl_kernels/nchw/reorg_layer.clembed"
     },
     {
-        "slice_ops.cl",
-#include "./cl_kernels/slice_ops.clembed"
+        "nhwc/reorg_layer.cl",
+#include "./cl_kernels/nhwc/reorg_layer.clembed"
     },
     {
-        "space_to_batch.cl",
-#include "./cl_kernels/space_to_batch.clembed"
+        "common/reshape_layer.cl",
+#include "./cl_kernels/common/reshape_layer.clembed"
     },
     {
-        "space_to_depth.cl",
-#include "./cl_kernels/space_to_depth.clembed"
+        "common/reverse.cl",
+#include "./cl_kernels/common/reverse.clembed"
     },
     {
-        "stack_layer.cl",
-#include "./cl_kernels/stack_layer.clembed"
+        "common/roi_align_layer.cl",
+#include "./cl_kernels/common/roi_align_layer.clembed"
     },
     {
-        "tile.cl",
-#include "./cl_kernels/tile.clembed"
+        "common/roi_align_layer_quantized.cl",
+#include "./cl_kernels/common/roi_align_layer_quantized.clembed"
     },
     {
-        "transpose.cl",
-#include "./cl_kernels/transpose.clembed"
+        "common/roi_pooling_layer.cl",
+#include "./cl_kernels/common/roi_pooling_layer.clembed"
+    },
+    {
+        "nchw/scale.cl",
+#include "./cl_kernels/nchw/scale.clembed"
+    },
+    {
+        "nhwc/scale.cl",
+#include "./cl_kernels/nhwc/scale.clembed"
+    },
+    {
+        "nchw/scale_quantized.cl",
+#include "./cl_kernels/nchw/scale_quantized.clembed"
+    },
+    {
+        "nhwc/scale_quantized.cl",
+#include "./cl_kernels/nhwc/scale_quantized.clembed"
+    },
+    {
+        "common/select.cl",
+#include "./cl_kernels/common/select.clembed"
+    },
+    {
+        "common/softmax_layer.cl",
+#include "./cl_kernels/common/softmax_layer.clembed"
+    },
+    {
+        "common/softmax_layer_quantized.cl",
+#include "./cl_kernels/common/softmax_layer_quantized.clembed"
+    },
+    {
+        "common/slice_ops.cl",
+#include "./cl_kernels/common/slice_ops.clembed"
+    },
+    {
+        "nchw/space_to_batch.cl",
+#include "./cl_kernels/nchw/space_to_batch.clembed"
+    },
+    {
+        "nhwc/space_to_batch.cl",
+#include "./cl_kernels/nhwc/space_to_batch.clembed"
+    },
+    {
+        "nchw/space_to_depth.cl",
+#include "./cl_kernels/nchw/space_to_depth.clembed"
+    },
+    {
+        "nhwc/space_to_depth.cl",
+#include "./cl_kernels/nhwc/space_to_depth.clembed"
+    },
+    {
+        "common/stack_layer.cl",
+#include "./cl_kernels/common/stack_layer.clembed"
+    },
+    {
+        "common/tile.cl",
+#include "./cl_kernels/common/tile.clembed"
+    },
+    {
+        "common/transpose.cl",
+#include "./cl_kernels/common/transpose.clembed"
     },
     {
         "types.h",
 #include "./cl_kernels/types.hembed"
     },
     {
-        "unpooling_layer.cl",
-#include "./cl_kernels/unpooling_layer.clembed"
+        "common/unpooling_layer.cl",
+#include "./cl_kernels/common/unpooling_layer.clembed"
     },
     {
-        "winograd_filter_transform.cl",
-#include "./cl_kernels/winograd_filter_transform.clembed"
+        "nchw/winograd_filter_transform.cl",
+#include "./cl_kernels/nchw/winograd_filter_transform.clembed"
     },
     {
-        "winograd_input_transform.cl",
-#include "./cl_kernels/winograd_input_transform.clembed"
+        "nhwc/winograd_filter_transform.cl",
+#include "./cl_kernels/nhwc/winograd_filter_transform.clembed"
     },
     {
-        "winograd_output_transform.cl",
-#include "./cl_kernels/winograd_output_transform.clembed"
+        "nchw/winograd_input_transform.cl",
+#include "./cl_kernels/nchw/winograd_input_transform.clembed"
+    },
+    {
+        "nhwc/winograd_input_transform.cl",
+#include "./cl_kernels/nhwc/winograd_input_transform.clembed"
+    },
+    {
+        "nchw/winograd_output_transform.cl",
+#include "./cl_kernels/nchw/winograd_output_transform.clembed"
+    },
+    {
+        "nhwc/winograd_output_transform.cl",
+#include "./cl_kernels/nhwc/winograd_output_transform.clembed"
     },
 #endif /* EMBEDDED_KERNELS */
 };
