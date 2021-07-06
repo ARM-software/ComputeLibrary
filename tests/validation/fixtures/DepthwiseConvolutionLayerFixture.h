@@ -113,6 +113,13 @@ public:
             target_to_use = &_target;
         }
 
+        add_padding_x({ &_src, &_biases }, _data_layout);
+        add_padding_x({ &_weights }, _data_layout, true);
+        if(!_in_place)
+        {
+            add_padding_x({ &_target }, _data_layout);
+        }
+
         // Create Depthwise Convolution configure function
         _dwc.configure(&_src, &_weights, &_biases, target_to_use, _pad_stride_info, _depth_multiplier, _act_info, _dilation);
 
@@ -124,12 +131,6 @@ public:
 
     void allocate_and_run_target()
     {
-        add_padding_x({ &_src, &_weights, &_biases }, _data_layout);
-        if(!_in_place)
-        {
-            add_padding_x({ &_target }, _data_layout);
-        }
-
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();
@@ -317,6 +318,10 @@ public:
         _biases  = create_tensor<TensorType>(_biases_shape, _data_type, 1, QuantizationInfo(), _data_layout);
         _target  = create_tensor<TensorType>(TensorShape(), _data_type, 1, QuantizationInfo(), _data_layout);
 
+        add_padding_x({ &_src, &_biases, &_target }, _data_layout);
+        add_padding_x({ &_weights }, _data_layout, true);
+        add_padding_y({ &_src, &_target }, _data_layout);
+
         // Create Depthwise Convolution configure function
         const ConvolutionInfo info
         {
@@ -332,9 +337,6 @@ public:
 
     void allocate_and_run_target()
     {
-        add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
-        add_padding_y({ &_src, &_target }, _data_layout);
-
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();
@@ -482,6 +484,9 @@ public:
             _conv_info, _depth_multiplier, _act_info, _dilation
         };
 
+        add_padding_x({ &_src, &_biases, &_target }, _data_layout);
+        add_padding_x({ &_weights }, _data_layout, _export_to_cl_image); // Don't add left padding if cl image will be used
+
         // Create Depthwise Convolution configure function
         _dwc.configure(&_src, &_weights, &_biases, target_to_use, dwc_info, conv_kernel_info);
 
@@ -493,9 +498,6 @@ public:
 
     void allocate_and_run_target()
     {
-        add_padding_x({ &_src, &_biases, &_target }, _data_layout);
-        add_padding_x({ &_weights }, _data_layout, _export_to_cl_image); // Don't add left padding if cl image will be used
-
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();

@@ -46,6 +46,9 @@ enum class DataType;
 /** Max vector width of an OpenCL vector */
 static constexpr unsigned int max_cl_vector_width = 16;
 
+/** Max number of manual loop unrolling */
+static constexpr int max_manual_loop_unrolling = 128;
+
 /** Translates a tensor data type to the appropriate OpenCL type.
  *
  * @param[in] dt @ref DataType to be translated to OpenCL type.
@@ -243,6 +246,16 @@ void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint);
  * @return true if we can export the weights to cl_image
  */
 bool export_weights_to_cl_image(const ITensorInfo *tensor);
+
+/* Helper function to force unroll with pragma when any of the input values (iterations) are greater than @ref max_manual_loop_unrolling
+ *
+ * This function passes UNROLL_WITH_PRAGMA at compile time when any of the input values are greater than @ref max_manual_loop_unrolling
+ *
+ * @param[in] built_opts OpenCL kernel build options
+ * @param[in] values     Input values (iterations)
+ *
+ */
+void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<int> values);
 
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHELPERS_H */

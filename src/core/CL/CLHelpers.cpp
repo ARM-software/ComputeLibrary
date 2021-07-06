@@ -466,4 +466,16 @@ bool export_weights_to_cl_image(const ITensorInfo *tensor)
     return true;
 }
 
+void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<int> values)
+{
+    for(const int value : values)
+    {
+        if(value > max_manual_loop_unrolling)
+        {
+            built_opts.add_option("-DUNROLL_WITH_PRAGMA");
+            return;
+        }
+    }
+}
+
 } // namespace arm_compute

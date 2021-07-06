@@ -83,7 +83,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     }
 
     const ConvolutionInfo info{ conv_info.pad_stride_info, conv_info.depth_multiplier, ActivationLayerInfo(), conv_info.dilation };
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info);
+    const TensorShape     output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info);
 
     const bool is_quantized = is_data_type_quantized(input->data_type());
 
@@ -237,9 +237,16 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
     build_opts.add_option("-DDILATION_Y=" + support::cpp11::to_string(conv_info.dilation.y()));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
-    build_opts.add_option("-DM0_A=" + support::cpp11::to_string(weights->info()->dimension(1) + m0 - 1));
+    build_opts.add_option("-DM0_A=" + support::cpp11::to_string(_weights->info()->dimension(1) + m0 - 1));
     build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(_input->info()->dimension(0) % n0));
     build_opts.add_option_if(_input->info()->num_dimensions() > 3, "-DBATCHED_EXECUTION");
+
+    // Force unroll with pragma when any of the following values exceed the maximum number of manual unroll
+    set_unroll_with_pragma(build_opts, { static_cast<int>(_weights->info()->dimension(1) + m0 - 1),
+                                         static_cast<int>(_weights->info()->dimension(1)),
+                                         static_cast<int>(_weights->info()->dimension(2))
+                                       });
+
     if(biases != nullptr)
     {
         build_opts.add_option(std::string("-DHAS_BIAS"));

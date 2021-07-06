@@ -155,6 +155,16 @@ public:
     }
 };
 
+/** Dataset containing large kernel size for generic depthwise convolution. */
+class LargeKernelSizeDepthwiseConvolutionLayerNHWCDataset final : public DepthwiseConvolutionLayerDataset
+{
+public:
+    LargeKernelSizeDepthwiseConvolutionLayerNHWCDataset()
+    {
+        add_config(TensorShape(6U, 210U, 8U), Size2D(4U, 194U), PadStrideInfo(1, 1, 0, 0));
+    }
+};
+
 /** Dataset containing small, 3x3 depthwise convolution shapes. */
 class SmallDepthwiseConvolutionLayerDataset3x3 final : public DepthwiseConvolutionLayerDataset
 {

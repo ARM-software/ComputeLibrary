@@ -382,6 +382,7 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerFixture<float>, 
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+
 TEST_SUITE(Dilation)
 
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::ALL,
@@ -418,12 +419,24 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerFixture<float>, 
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
                            large_depth_multipliers),
                            framework::dataset::make("DataType",
                                                     DataType::F32)),
                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                            ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE_NEW(RunLargeKernelSize, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::ALL,
+                           combine(combine(combine(combine(datasets::LargeKernelSizeDepthwiseConvolutionLayerNHWCDataset(),
+                                                           framework::dataset::make("DepthMultiplier", { 1 })),
+                                                   framework::dataset::make("DataType",
+                                                                            DataType::F32)),
+                                           framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                   ActivationFunctionsDataset))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
