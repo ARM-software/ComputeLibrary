@@ -583,8 +583,8 @@ v20.05 Public major release
  - Updated recommended gcc version to Linaro 6.3.1.
  - Added Bfloat16 type support
  - Added Bfloat16 support in:
-     - @ref NEWeightsReshapeKernel
-     - @ref NEConvolutionLayerReshapeWeights
+     - NEWeightsReshapeKernel
+     - NEConvolutionLayerReshapeWeights
      - NEIm2ColKernel
      - NEIm2Col
      - NEDepthConvertLayerKernel
@@ -1321,7 +1321,7 @@ v17.06 Public major release
     - NEDepthConcatenateLayerKernel / NEDepthConcatenateLayer
     - NEDirectConvolutionLayerKernel / @ref NEDirectConvolutionLayer
     - NELocallyConnectedMatrixMultiplyKernel / NELocallyConnectedLayer
-    - @ref NEWeightsReshapeKernel / @ref NEConvolutionLayerReshapeWeights
+    - NEWeightsReshapeKernel / NEConvolutionLayerReshapeWeights
 
 v17.05 Public bug fixes release
  - Various bug fixes

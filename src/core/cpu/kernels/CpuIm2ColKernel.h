@@ -77,7 +77,7 @@ public:
      * @param[in]  dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      */
-    void configure(ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
+    void configure(const ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
                    bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration
      *

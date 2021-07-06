@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/helpers/MemoryHelpers.h"
+#include "src/runtime/cpu/operators/CpuGemmConvolution.h"
 #include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
 #include "src/runtime/cpu/operators/CpuWinogradConv2d.h"
 #include "tests/NEON/Accessor.h"
@@ -508,6 +509,101 @@ template <typename T>
 using NEGEMMConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 template <typename T>
 using NEGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
+
+/** Test case for memory injection in @ref cpu::CpuGemmConvolution.
+ *
+ * Configure the operator once and inject memory at run-time in multiple executions.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
+{
+    auto        conv        = std::make_unique<cpu::CpuGemmConvolution>();
+    const auto  src_info    = TensorInfo(TensorShape(1U, 5U, 2U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  weight_info = TensorInfo(TensorShape(1U, 3U, 2U, 3U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  bias_info   = TensorInfo(TensorShape(3U), 1, DataType::F32, DataLayout::NCHW);
+    auto        dst_info    = TensorInfo(TensorShape(1U, 7U, 3U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  conv_info   = PadStrideInfo(1, 1, 0, 0, 2, 2, DimensionRoundingType::FLOOR);
+    WeightsInfo weights_info(false, 3U, 3U, 1U);
+    conv->configure(&src_info, &weight_info, &bias_info, &dst_info, conv_info, weights_info);
+
+    // tensors are newly created every call of this lambda function
+    auto src    = create_tensor<Tensor>(src_info);
+    auto weight = create_tensor<Tensor>(weight_info);
+    auto bias   = create_tensor<Tensor>(bias_info);
+    src.allocator()->allocate();
+    weight.allocator()->allocate();
+    bias.allocator()->allocate();
+
+    ITensorPack run_pack{ { TensorType::ACL_SRC_0, &src }, { TensorType::ACL_SRC_1, &weight }, { TensorType::ACL_SRC_2, &bias } };
+    ITensorPack prep_pack{ { TensorType::ACL_SRC_1, &weight }, { TensorType::ACL_SRC_2, &bias } };
+
+    auto mg = MemoryGroup{};
+    auto ws = manage_workspace<Tensor>(conv->workspace(), mg, run_pack, prep_pack);
+
+    auto run_conv = [&]() -> Tensor
+    {
+        auto dst = create_tensor<Tensor>(dst_info);
+        dst.allocator()->allocate();
+        run_pack.add_tensor(TensorType::ACL_DST, &dst);
+
+        library->fill_tensor_value(Accessor(src), 1.f);
+        library->fill_tensor_value(Accessor(weight), 2.f);
+        library->fill_tensor_value(Accessor(bias), 3.f);
+        // This operator is configured once and captured by this lambda.
+        conv->prepare(prep_pack);
+        conv->run(run_pack);
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
+/** Test case for memory injection in @ref NEGEMMConvolutionLayer.
+ *
+ * Make sure @ref NEGEMMConvolutionLayer still works through injecting the memory at configure time using the old API.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
+{
+    auto        conv        = std::make_unique<NEGEMMConvolutionLayer>();
+    const auto  src_info    = TensorInfo(TensorShape(1U, 5U, 2U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  weight_info = TensorInfo(TensorShape(1U, 3U, 2U, 3U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  bias_info   = TensorInfo(TensorShape(3U), 1, DataType::F32, DataLayout::NCHW);
+    auto        dst_info    = TensorInfo(TensorShape(1U, 7U, 3U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  conv_info   = PadStrideInfo(1, 1, 0, 0, 2, 2, DimensionRoundingType::FLOOR);
+    WeightsInfo weights_info(false, 3U, 3U, 1U);
+    auto        run_conv = [&]()
+    {
+        auto src    = create_tensor<Tensor>(src_info);
+        auto weight = create_tensor<Tensor>(weight_info);
+        auto bias   = create_tensor<Tensor>(bias_info);
+        auto dst    = create_tensor<Tensor>(dst_info);
+        conv->configure(&src, &weight, &bias, &dst, conv_info, weights_info);
+        src.allocator()->allocate();
+        weight.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+        library->fill_tensor_value(Accessor(src), 1.f);
+        library->fill_tensor_value(Accessor(weight), 2.f);
+        library->fill_tensor_value(Accessor(bias), 3.f);
+        conv->run();
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
 
 TEST_SUITE(Float)
 #if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)

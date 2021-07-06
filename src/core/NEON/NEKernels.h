@@ -65,6 +65,5 @@
 #include "src/core/NEON/kernels/NEStackLayerKernel.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 #include "src/core/NEON/kernels/NETileKernel.h"
-#include "src/core/NEON/kernels/NEWeightsReshapeKernel.h"
 
 #endif /* ARM_COMPUTE_NEKERNELS_H */

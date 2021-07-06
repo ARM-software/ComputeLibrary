@@ -21,15 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H
-#define ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H
+#ifndef ARM_COMPUTE_CPU_WEIGHTSRESHAPE_KERNEL_H
+#define ARM_COMPUTE_CPU_WEIGHTSRESHAPE_KERNEL_H
 
-#include "src/core/NEON/INEKernel.h"
+#include "src/core/common/Macros.h"
+#include "src/core/cpu/ICpuKernel.h"
 
 namespace arm_compute
 {
-class ITensor;
-
+namespace cpu
+{
+namespace kernels
+{
 /** Kernel to perform reshaping on the weights used by convolution and locally connected layer
  *
  * Rearranges each 3-dimensional kernel to a single row leading to a matrix with linearized kernels.
@@ -53,57 +56,36 @@ class ITensor;
  * \end{array} \right)
  * @f]
  */
-class NEWeightsReshapeKernel : public INEKernel
+class CpuWeightsReshapeKernel : public ICpuKernel
 {
 public:
-    const char *name() const override
-    {
-        return "NEWeightsReshapeKernel";
-    }
-    /** Constructor.*/
-    NEWeightsReshapeKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWeightsReshapeKernel(const NEWeightsReshapeKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWeightsReshapeKernel &operator=(const NEWeightsReshapeKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEWeightsReshapeKernel(NEWeightsReshapeKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEWeightsReshapeKernel &operator=(NEWeightsReshapeKernel &&) = default;
-    /** Default destructor */
-    ~NEWeightsReshapeKernel() = default;
+    /** Default constructor */
+    CpuWeightsReshapeKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuWeightsReshapeKernel);
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
+     * @param[in]  src    The input tensor info to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
      *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared.
      *                    Data types supported: All
-     * @param[in]  bias   The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
+     * @param[in]  biases The shared biases tensor info to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
      *                    dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
      *                    @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
-     * @param[out] output The output tensor. Data types supported: Same as @p input
+     * @param[out] dst    The output tensor info. Data types supported: Same as @p src
      */
-    void configure(const ITensor *input, const ITensor *bias, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEWeightsReshapeKernel
+    void configure(const ITensorInfo *src, const ITensorInfo *biases, ITensorInfo *dst);
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                   and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared.
-     *                   Data types supported: All
-     * @param[in] biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
-     *                   dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
-     *                   @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
-     * @param[in] output The output tensor. Should be a 2D Tensor. Data types supported: Same as @p input
+     * Similar to CpuWeightsReshapeKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *biases, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
-
-private:
-    const ITensor *_input;
-    const ITensor *_bias;
-    ITensor       *_output;
+    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    const char *name() const override;
 };
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H */
+#endif /* ARM_COMPUTE_CPU_WEIGHTSRESHAPE_KERNEL_H */

@@ -331,7 +331,7 @@ void CpuIm2ColKernel::run_im2col(const ITensor *src, ITensor *dst, const Window 
     in, out);
 }
 
-void CpuIm2ColKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
+void CpuIm2ColKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
                                 bool has_bias, const Size2D &dilation, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

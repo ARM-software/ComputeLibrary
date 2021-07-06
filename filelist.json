@@ -1187,8 +1187,11 @@
           "ConvertQuantizedSignedness"
         ],
         "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuGemmConvolution.cpp"
+          ],
           "kernel": [
-            "src/core/NEON/kernels/NEWeightsReshapeKernel.cpp"
+            "src/core/cpu/kernels/CpuWeightsReshapeKernel.cpp"
           ]
         }
       },
