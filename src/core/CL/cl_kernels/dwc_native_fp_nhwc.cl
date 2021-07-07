@@ -146,7 +146,11 @@ __kernel void dwc_native_fp_nhwc(
             c[i].v = 0;
         })
 
+#if _IWEI_HEIGHT <= 5
         LOOP_UNROLLING(int, yk, 0, 1, _IWEI_HEIGHT,
+#else // _IWEI_HEIGHT <= 5
+        for(int yk = 0; yk < _IWEI_HEIGHT; yk++)
+#endif // _IWEI_HEIGHT <= 5
         {
             TILE(SRC_DATA_TYPE, _IM0_A, _IN0_A, a);
 
@@ -169,10 +173,13 @@ __kernel void dwc_native_fp_nhwc(
             {
                 LOOP_UNROLLING(int, xk, 0, 1, _IWEI_WIDTH,
                 {
-                    c[m0].v += a[xk + m0].v *b[xk].v;
+                    c[m0].v += a[xk + m0].v * b[xk].v;
                 })
             })
-        })
+        }
+#if _IWEI_HEIGHT <= 5
+        )
+#endif // _IWEI_HEIGHT <= 5
 
 #if defined(HAS_BIAS)
         TILE(BIA_DATA_TYPE, 1, N0, bias0);
@@ -195,7 +202,7 @@ __kernel void dwc_native_fp_nhwc(
             {
                 int xi_out = min(xo + M0 - 1 - m0, (int)(_IDST_WIDTH) - 1);
                 VSTORE_PARTIAL(N0, PARTIAL_N0)
-                (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + ((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + xi_out * dst_stride_y + yo * dst_stride_z + bout * dst_stride_w));
+                (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + (uint)((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
             })
         }
         else
@@ -204,7 +211,7 @@ __kernel void dwc_native_fp_nhwc(
             {
                 int xi_out = min(xo + M0 - 1 - m0, (int)(_IDST_WIDTH) - 1);
                 VSTORE(N0)
-                (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + ((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + xi_out * dst_stride_y + yo * dst_stride_z + bout * dst_stride_w));
+                (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + (uint)((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
             })
         }
     }

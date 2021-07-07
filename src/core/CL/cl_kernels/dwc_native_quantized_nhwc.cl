@@ -177,7 +177,11 @@ __kernel void dwc_native_quantized_nhwc(
             c[i].v = 0;
         })
 
+#if _IWEI_HEIGHT <= 5
         LOOP_UNROLLING(int, yk, 0, 1, _IWEI_HEIGHT,
+#else // _IWEI_HEIGHT <= 5
+        for(int yk = 0; yk < _IWEI_HEIGHT; yk++)
+#endif // _IWEI_HEIGHT <= 5
         {
             TILE(SRC_DATA_TYPE, _IM0_A, _IN0_A, a);
 
@@ -227,7 +231,10 @@ __kernel void dwc_native_quantized_nhwc(
 #endif // _IWEI_WIDTH <= 16
                 })
             })
-        })
+        }
+#if _IWEI_HEIGHT <= 5
+        )
+#endif // _IWEI_HEIGHT <= 5
 
 #if _IWEI_WIDTH <= 16
         T_ADD_CONSTANT(ACC_DATA_TYPE, M0, N0, c, (_IWEI_WIDTH * _IWEI_HEIGHT * SRC_OFFSET * (ACC_DATA_TYPE)(WEI_OFFSET - (ACC_DATA_TYPE)WEI_OFFSET_CORRECTION)), c);
@@ -260,7 +267,7 @@ __kernel void dwc_native_quantized_nhwc(
             {
                 int xi_out = min(xo + M0 - 1 - m0, (int)(_IDST_WIDTH) - 1);
                 VSTORE_PARTIAL(N0, PARTIAL_N0)
-                (cq[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + ((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + xi_out * dst_stride_y + yo * dst_stride_z + bout * dst_stride_w));
+                (cq[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + (uint)((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
             })
         }
         else
@@ -269,7 +276,7 @@ __kernel void dwc_native_quantized_nhwc(
             {
                 int xi_out = min(xo + M0 - 1 - m0, (int)(_IDST_WIDTH) - 1);
                 VSTORE(N0)
-                (cq[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + ((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + xi_out * dst_stride_y + yo * dst_stride_z + bout * dst_stride_w));
+                (cq[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + (uint)((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
             })
         }
     }
