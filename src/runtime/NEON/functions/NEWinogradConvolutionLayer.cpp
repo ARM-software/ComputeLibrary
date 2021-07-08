@@ -99,12 +99,12 @@ void NEWinogradConvolutionLayer::prepare()
         // Release temporary tensors that are only used in prepare stage
         for(auto &ws : _impl->workspace)
         {
-            const int slot = ws.first;
+            const int slot = ws.slot;
             for(auto &m : _impl->aux_mem_req)
             {
                 if(m.slot == slot && m.lifetime == MemoryLifetime::Prepare)
                 {
-                    auto tensor = ws.second.get();
+                    auto tensor = ws.tensor.get();
                     tensor->allocator()->free();
                     break;
                 }

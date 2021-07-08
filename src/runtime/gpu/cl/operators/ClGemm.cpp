@@ -37,6 +37,8 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/gpu/cl/IClKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
@@ -744,6 +746,8 @@ void ClGemm::prepare(ITensorPack &constants)
     // If memory for RHS is persistent and src1 is provided re-transform else assume that RHS is transformed
     if((_aux_mem[AuxTensorIdx::RhsReshape].lifetime == MemoryLifetime::Persistent) && (src1 != nullptr && rhs_aux != nullptr) && rhs_aux)
     {
+        ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL("Transforming RHS Matrix!");
+
         CLAuxTensorHandler rhs_reshaped(_tmp_b, *rhs_aux);
         ARM_COMPUTE_ERROR_ON(rhs_reshaped.get()->cl_buffer().get() == nullptr);
 

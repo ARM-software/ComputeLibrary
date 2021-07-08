@@ -41,7 +41,15 @@ inline int offset_int_vec(int offset)
 }
 
 template <typename TensorType>
-using WorkspaceData = std::vector<std::pair<int, std::unique_ptr<TensorType>>>;
+struct WorkspaceDataElement
+{
+    int                          slot{ -1 };
+    experimental::MemoryLifetime lifetime{ experimental::MemoryLifetime::Temporary };
+    std::unique_ptr<TensorType>  tensor{ nullptr };
+};
+
+template <typename TensorType>
+using WorkspaceData = std::vector<WorkspaceDataElement<TensorType>>;
 
 template <typename TensorType>
 WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirements &mem_reqs,
@@ -66,9 +74,9 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
         }
 
         const auto aux_info = TensorInfo{ TensorShape(req.size), 1, DataType::U8 };
-        workspace_memory.emplace_back(req.slot, std::make_unique<TensorType>());
+        workspace_memory.emplace_back(WorkspaceDataElement<TensorType> { req.slot, req.lifetime, std::make_unique<TensorType>() });
 
-        auto aux_tensor = workspace_memory.back().second.get();
+        auto aux_tensor = workspace_memory.back().tensor.get();
         ARM_COMPUTE_ERROR_ON_NULLPTR(aux_tensor);
         aux_tensor->allocator()->init(aux_info, req.alignment);
 
@@ -85,11 +93,28 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
 
     for(auto &mem : workspace_memory)
     {
-        auto tensor = mem.second.get();
+        auto tensor = mem.tensor.get();
         tensor->allocator()->allocate();
     }
 
     return workspace_memory;
+}
+
+template <typename TensorType>
+void release_prepare_tensors(WorkspaceData<TensorType> &workspace, ITensorPack &prep_pack)
+{
+    workspace.erase(std::remove_if(workspace.begin(),
+                                   workspace.end(),
+                                   [&prep_pack](auto & wk)
+    {
+        const bool to_erase = wk.lifetime == experimental::MemoryLifetime::Prepare;
+        if(to_erase)
+        {
+            prep_pack.remove_tensor(wk.slot);
+        }
+        return to_erase;
+    }),
+    workspace.end());
 }
 } // namespace arm_compute
 #endif /* SRC_COMMON_MEMORY_HELPERS_H */

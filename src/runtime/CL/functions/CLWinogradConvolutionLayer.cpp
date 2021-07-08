@@ -41,7 +41,6 @@ struct CLWinogradConvolutionLayer::Impl
     ICLTensor                                *dst{ nullptr };
     std::unique_ptr<opencl::ClWinogradConv2d> op{ nullptr };
     ITensorPack                               run_pack{};
-    ITensorPack                               prep_pack{};
     MemoryGroup                               memory_group{};
     WorkspaceData<CLTensor>                   workspace_tensors{};
     bool                                      is_prepared{ false };
@@ -80,9 +79,7 @@ void CLWinogradConvolutionLayer::configure(const CLCompileContext &compile_conte
         { TensorType::ACL_SRC_2, _impl->biases },
         { TensorType::ACL_DST, _impl->dst }
     };
-
-    _impl->prep_pack         = { { TensorType::ACL_SRC_1, _impl->weights } };
-    _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->run_pack);
 }
 
 Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
@@ -102,7 +99,11 @@ void CLWinogradConvolutionLayer::prepare()
 {
     if(!_impl->is_prepared)
     {
-        _impl->op->prepare(_impl->prep_pack);
+        _impl->op->prepare(_impl->run_pack);
+
+        // Release Preparation tensors
+        release_prepare_tensors(_impl->workspace_tensors, _impl->run_pack);
+        _impl->run_pack.remove_tensor(TensorType::ACL_SRC_1);
         _impl->is_prepared = true;
     }
 }
