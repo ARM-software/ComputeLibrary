@@ -27,6 +27,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
+
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/core/gpu/cl/IClKernel.h"
 #include "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyKernel.h"

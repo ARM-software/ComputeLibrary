@@ -21,38 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
-#define ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
+#ifndef ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_CORE_H
+#define ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_CORE_H
 
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/runtime/CL/CLTypes.h"
 
-#include <memory>
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/runtime/gpu/cl/IClOperator.h"
 
 namespace arm_compute
 {
-class CLCompileContext;
-class IMemoryManager;
-class ICLTensor;
-class ITensorInfo;
+namespace opencl
+{
+namespace kernels
+{
+// Forward declarations
+class ClCastKernel;
+class ClGemmLowpMatrixMultiplyNativeKernel;
+class ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel;
+class ClGemmReshapeRhsMatrixKernel;
+class ClGemmLowpMatrixAReductionKernel;
+class ClGemmLowpMatrixBReductionKernel;
+class ClGemmLowpOffsetContributionKernel;
+class ClGemmLowpOffsetContributionOutputStageKernel;
+} // namespace kernels
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. */
-class CLGEMMLowpMatrixMultiplyCore : public IFunction
+class ClGemmLowpMatrixMultiplyCore : public IClOperator
 {
 public:
-    /** Constructor */
-    CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMLowpMatrixMultiplyCore(const CLGEMMLowpMatrixMultiplyCore &) = delete;
-    /** Default move constructor */
-    CLGEMMLowpMatrixMultiplyCore(CLGEMMLowpMatrixMultiplyCore &&) = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMLowpMatrixMultiplyCore &operator=(const CLGEMMLowpMatrixMultiplyCore &) = delete;
-    /** Default move assignment operator */
-    CLGEMMLowpMatrixMultiplyCore &operator=(CLGEMMLowpMatrixMultiplyCore &&) = default;
-    /** Default destructor */
-    ~CLGEMMLowpMatrixMultiplyCore();
+    ClGemmLowpMatrixMultiplyCore();
+    ~ClGemmLowpMatrixMultiplyCore();
     /** Initialise the kernel's inputs, output
      *
      * Valid data layouts:
@@ -83,24 +83,6 @@ public:
      *  -# Compute the matrix product of the resulting a * b in int32.
      *  -# Quantize to uint8 if gemm_info.gemmlowp_output_stage != NONE
      *
-     * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
-     * @param[in]  b         Second input tensor (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
-     * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
-     * @param[out] output    Output tensor. Data type supported: S32 or QASYMM8/QASYMM8_SIGNED if gemm_info.gemmlowp_output_stage != NONE
-     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
-     *                       if the reshape of matrix B should be executed only for the first run
-     */
-    void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info = GEMMInfo());
-    /** Initialise the kernel's inputs, output
-     *
-     * @note GEMMLowp:  low precision GEMM kernel. [A * B + C]
-     *  This kernel performs the following computations:
-     *
-     *  -# Convert a values from 8-bit quantized to int32 and add a_offset to each of them.
-     *  -# Convert b values from 8-bit quantized to int32 and add b_offset to each of them.
-     *  -# Compute the matrix product of the resulting a * b in int32.
-     *  -# Quantize to uint8 if gemm_info.gemmlowp_output_stage != NONE
-     *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  a               First input tensor  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
      * @param[in]  b               Second input tensor (Matrix B). Data type supported: same as @p a
@@ -109,27 +91,65 @@ public:
      * @param[in]  gemm_info       (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info = GEMMInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyCore
+    void configure(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] a         First input tensor info (Matrix A). Data type supported: QASYMM8.
-     * @param[in] b         Second input tensor info (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
-     * @param[in] c         Third input tensor info (Matrix C). It can be a nullptr. Data type supported: S32
-     * @param[in] output    Output tensor info. Data type supported: S32 or QASYMM8/QASYMM8_SIGNED if gemm_info.gemmlowp_output_stage != NONE
-     * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
-     *                      if the reshape of matrix B should be executed only for the first run
+     * Similar to ClGemmLowpMatrixMultiplyCore::configure()
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
-    void run() override;
-    void prepare() override;
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &constants) override;
+    experimental::MemoryRequirements workspace() const override;
 
 private:
-    struct Impl;
-    std::unique_ptr<Impl> _impl;
+    enum AuxTensorIdx
+    {
+        VecSumCol = 0,
+        VecSumRow,
+        RhsQAsymm8,
+        RhsReshape,
+        ResultS32,
+        Multipliers,
+        Shifts,
+        Count
+    };
+
+private:
+    // Kernels used
+    std::unique_ptr<kernels::ClCastKernel>                                  _weights_to_qasymm8;
+    std::unique_ptr<kernels::ClGemmLowpMatrixMultiplyNativeKernel>          _mm_native_kernel;
+    std::unique_ptr<kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel> _mm_reshaped_only_rhs_kernel;
+    std::unique_ptr<kernels::ClGemmReshapeRhsMatrixKernel>                  _mtx_b_reshape_kernel;
+    std::unique_ptr<kernels::ClGemmLowpMatrixAReductionKernel>              _mtx_a_reduction_kernel;
+    std::unique_ptr<kernels::ClGemmLowpMatrixBReductionKernel>              _mtx_b_reduction_kernel;
+    std::unique_ptr<kernels::ClGemmLowpOffsetContributionKernel>            _offset_contribution_kernel;
+    std::unique_ptr<kernels::ClGemmLowpOffsetContributionOutputStageKernel> _offset_contribution_output_stage_kernel;
+
+    // Temporary tensors
+    TensorInfo _qasymm8_weights{};
+    TensorInfo _vector_sum_col{};
+    TensorInfo _vector_sum_row{};
+    TensorInfo _tmp_b{};
+    TensorInfo _mm_result_s32{};
+    TensorInfo _gemm_output_stage_multipliers{};
+    TensorInfo _gemm_output_stage_shifts{};
+
+    int32_t  _a_offset{ 0 };
+    int32_t  _b_offset{ 0 };
+    bool     _is_gemm_reshaped{ true };
+    bool     _reshape_b_only_on_first_run{ false };
+    bool     _run_output_stage{ false };
+    bool     _convert_to_qasymm8{ false };
+    bool     _run_offset_contribution{ false };
+    bool     _is_prepared{ false };
+    GEMMInfo _gemm_info{};
+
+    experimental::MemoryRequirements _aux_mem{};
 };
+} // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H */
+#endif /* ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_CORE_H */
