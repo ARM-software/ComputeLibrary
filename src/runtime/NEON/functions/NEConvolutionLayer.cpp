@@ -180,9 +180,10 @@ ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *
     }
     else
     {
+        const auto input_layout = input->data_layout();
         // SRGAN
         // Output might not be initialized when it is an internal tensor of the layer using the convolution
-        if(input->total_size() > 1e7 && (weights->dimension(idx_h) > 7)
+        if(input_layout == DataLayout::NHWC && input->total_size() > 1e7 && (weights->dimension(idx_h) > 7)
            && (NEDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
         {
             return ConvolutionMethod::DIRECT;
