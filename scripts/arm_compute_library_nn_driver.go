@@ -14,11 +14,16 @@ import (
 func globalFlags(ctx android.BaseContext) []string {
     var cppflags []string
 
-   if ctx.AConfig().PlatformVersionName() == "Q" || ctx.AConfig().PlatformVersionName() == "10" || 
+   if ctx.AConfig().PlatformVersionName() == "Q" || ctx.AConfig().PlatformVersionName() == "10" ||
       ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11" ||
       ctx.AConfig().PlatformVersionName() == "S" || ctx.AConfig().PlatformVersionName() == "12" {
         cppflags = append(cppflags, "-fno-addrsig")
     }
+
+   if (ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11") &&
+      (ctx.AConfig().DevicePrimaryArchType().String() == "armv8-2a") {
+        cppflags = append(cppflags, "-march=armv8.2-a+fp16")
+      }
 
     data_types := strings.Split(ctx.AConfig().GetenvWithDefault("COMPUTE_LIB_DATA_TYPE", "ALL"), ",")
 
