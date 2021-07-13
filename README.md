@@ -22,7 +22,6 @@ Related projects:
 
 Tutorials:
 
-- [Tutorial: Cartoonifying Images on Raspberry Pi with the Compute Library](https://community.arm.com/graphics/b/blog/posts/cartoonifying-images-on-raspberry-pi-with-the-compute-library)
 - [Tutorial: Running AlexNet on Raspberry Pi with Compute Library](https://community.arm.com/processors/b/blog/posts/running-alexnet-on-raspberry-pi-with-compute-library)
 
 Documentation (API, changelogs, build guide, contribution guide, errata, etc.) available at https://github.com/ARM-software/ComputeLibrary/wiki/Documentation.
