@@ -272,7 +272,7 @@ runtime_files_hp += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
 runtime_files = Glob('src/runtime/CPP/functions/*.cpp')
 
 # C API files
-runtime_files_hp += filelist['c_api']['cpu']
+runtime_files_hp += filelist['c_api']['common']
 
 if env['opencl']:
     runtime_files_hp += filelist['c_api']['gpu']
@@ -297,25 +297,16 @@ if env['openmp']:
      runtime_files_hp += Glob('src/runtime/OMP/OMPScheduler.cpp')
 
 if env['opencl']:
-    core_files += Glob('src/core/CL/*.cpp')
-    core_files += Glob('src/core/gpu/cl/*.cpp')
-
-    runtime_files += Glob('src/runtime/CL/*.cpp')
+    runtime_files_hp += filelist['gpu']['common']
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
-    runtime_files += Glob('src/runtime/CL/gemm/*.cpp')
-    runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
-    runtime_files += Glob('src/runtime/gpu/cl/*.cpp')
-    runtime_files += Glob('src/runtime/CL/mlgo/*.cpp')
-    runtime_files += Glob('src/runtime/CL/gemm_auto_heuristics/*.cpp')
-
-    runtime_files += Glob('src/gpu/cl/*.cpp')
-    graph_files += Glob('src/graph/backends/CL/*.cpp')
 
     operators = filelist['gpu']['operators']
     for operator in operators:
         runtime_files += get_gpu_runtime_files(operator)
         if "kernel" in operators[operator]["files"]:
             core_files += operators[operator]["files"]["kernel"]
+
+    graph_files += Glob('src/graph/backends/CL/*.cpp')
 
 sve_o = []
 core_files_sve = []
@@ -329,8 +320,6 @@ if env['neon']:
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
                                       "src/core/cpu/kernels/assembly/",])
-
-    graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
     # Load files based on user's options
     operators = filelist['cpu']['operators']
@@ -346,9 +335,11 @@ if env['neon']:
             core_files += file_list
             core_files_sve += file_list_sve
 
+    runtime_files_hp += filelist['cpu']['common']
     runtime_files_hp += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
-    runtime_files_hp += filelist['cpu']['all']
+
+    graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
 bootcode_o = []
 if env['os'] == 'bare_metal':

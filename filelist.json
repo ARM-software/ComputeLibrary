@@ -9,7 +9,7 @@
     "src/common/TensorPack.cpp"
   ],
   "c_api": {
-    "cpu": [
+    "common": [
       "src/c/AclContext.cpp",
       "src/c/AclOperator.cpp",
       "src/c/AclQueue.cpp",
@@ -17,11 +17,61 @@
       "src/c/AclTensorPack.cpp",
       "src/c/AclVersion.cpp"
     ],
+    "cpu": [
+    ],
     "gpu": [
       "src/c/cl/AclOpenClExt.cpp"
     ]
   },
   "gpu": {
+    "common": [
+      "src/core/CL/CLCompileContext.cpp",
+      "src/core/CL/CLHelpers.cpp",
+      "src/core/CL/CLKernelLibrary.cpp",
+      "src/core/CL/CLUtils.cpp",
+      "src/core/CL/ICLKernel.cpp",
+      "src/core/CL/ICLSimple2DKernel.cpp",
+      "src/core/CL/ICLSimple3DKernel.cpp",
+      "src/core/CL/ICLSimpleKernel.cpp",
+      "src/core/CL/ICLTensor.cpp",
+      "src/core/CL/OpenCL.cpp",
+      "src/core/gpu/cl/ClKernelLibrary.cpp",
+      "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.cpp",
+      "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeBifrost.cpp",
+      "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeMidgard.cpp",
+      "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeValhall.cpp",
+      "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedBifrost.cpp",
+      "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedValhall.cpp",
+      "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyBifrost.cpp",
+      "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyValhall.cpp",
+      "src/core/CL/kernels/CLFillBorderKernel.cpp",
+      "src/gpu/cl/ClContext.cpp",
+      "src/gpu/cl/ClQueue.cpp",
+      "src/gpu/cl/ClTensor.cpp",
+      "src/runtime/CL/CLBufferAllocator.cpp",
+      "src/runtime/CL/CLGEMMHeuristicsHandle.cpp",
+      "src/runtime/CL/CLHelpers.cpp",
+      "src/runtime/CL/CLMemory.cpp",
+      "src/runtime/CL/CLMemoryRegion.cpp",
+      "src/runtime/CL/CLOperator.cpp",
+      "src/runtime/CL/CLRuntimeContext.cpp",
+      "src/runtime/CL/CLScheduler.cpp",
+      "src/runtime/CL/CLSubTensor.cpp",
+      "src/runtime/CL/CLTensor.cpp",
+      "src/runtime/CL/CLTensorAllocator.cpp",
+      "src/runtime/CL/CLTuner.cpp",
+      "src/runtime/CL/ICLSimpleFunction.cpp",
+      "src/runtime/CL/Utils.cpp",
+      "src/runtime/CL/gemm/CLGEMMDefaultTypeBifrost.cpp",
+      "src/runtime/CL/gemm/CLGEMMDefaultTypeMidgard.cpp",
+      "src/runtime/CL/gemm/CLGEMMDefaultTypeValhall.cpp",
+      "src/runtime/CL/gemm_auto_heuristics/CLGEMMAutoHeuristics.cpp",
+      "src/runtime/CL/mlgo/HeuristicTree.cpp",
+      "src/runtime/CL/mlgo/MLGOHeuristics.cpp",
+      "src/runtime/CL/mlgo/MLGOParser.cpp",
+      "src/runtime/CL/mlgo/Utils.cpp",
+      "src/runtime/CL/tuners/CLTuningParametersList.cpp"
+    ],
     "high_priority": [
       "Activation",
       "DepthwiseConv2d",
@@ -214,16 +264,8 @@
           ],
           "kernel": [
             "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.cpp",
-            "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.cpp",
-            "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeBifrost.cpp",
-            "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeMidgard.cpp",
-            "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeValhall.cpp",
             "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.cpp",
-            "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedBifrost.cpp",
-            "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedValhall.cpp",
             "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsKernel.cpp",
-            "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyBifrost.cpp",
-            "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyValhall.cpp",
             "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyKernel.cpp",
             "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.cpp",
             "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.cpp"
@@ -415,13 +457,6 @@
         "files": {
           "kernel": [
             "src/core/CL/kernels/CLFFTScaleKernel.cpp"
-          ]
-        }
-      },
-      "FillBorder": {
-        "files": {
-          "kernel": [
-            "src/core/CL/kernels/CLFillBorderKernel.cpp"
           ]
         }
       },
@@ -629,7 +664,7 @@
     }
   },
   "cpu": {
-    "all": [
+    "common": [
       "src/cpu/CpuContext.cpp",
       "src/cpu/CpuQueue.cpp",
       "src/cpu/CpuTensor.cpp"

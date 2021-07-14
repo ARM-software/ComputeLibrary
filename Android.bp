@@ -378,8 +378,6 @@ cc_library_static {
         "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedValhall.cpp",
         "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyBifrost.cpp",
         "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyValhall.cpp",
-        "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultReshapedRhsOnlyBifrost.cpp",
-        "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultReshapedRhsOnlyValhall.cpp",
         "src/core/helpers/SoftmaxHelpers.cpp",
         "src/core/helpers/WindowHelpers.cpp",
         "src/core/utils/AssemblyUtils.cpp",
