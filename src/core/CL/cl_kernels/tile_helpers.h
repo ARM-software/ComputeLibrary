@@ -288,7 +288,7 @@
 #define DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c = arm_dot_acc((A_DATA_TYPE##4)((a).s012, (A_DATA_TYPE)0), (B_DATA_TYPE##4)(((b).s012), (B_DATA_TYPE)0), (c));
 #define DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c = arm_dot_acc((a), (b), (c));
 #elif defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8) // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
-#define DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += arm_dot((A_DATA_TYPE##4)((a).s01, (A_DATA_TYPE##2)(0), ), (B_DATA_TYPE##4)(((b).s01), (B_DATA_TYPE##2)(0)));
+#define DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += arm_dot((A_DATA_TYPE##4)((a).s01, (A_DATA_TYPE##2)(0)), (B_DATA_TYPE##4)(((b).s01), (B_DATA_TYPE##2)(0)));
 #define DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += arm_dot((A_DATA_TYPE##4)((a).s012, (A_DATA_TYPE)0), (B_DATA_TYPE##4)(((b).s012), (B_DATA_TYPE)0));
 #define DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += arm_dot((a), (b));
 #else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
