@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/CL/kernels/CLCol2ImKernel.h"
+#include "src/core/gpu/cl/kernels/ClCol2ImKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -32,47 +32,51 @@
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 
 #include <cmath>
 
-using namespace arm_compute::misc::shape_calculator;
-
 namespace arm_compute
+{
+using namespace misc::shape_calculator;
+namespace opencl
+{
+namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims, unsigned int num_groups)
+Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &convolved_dims, unsigned int num_groups)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if(dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_col2im_shape(*input, convolved_dims, true, num_groups));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_layout() != DataLayout::NCHW, "Col2Im output's data layout must always be NCHW");
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), compute_col2im_shape(*src, convolved_dims, true, num_groups));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->data_layout() != DataLayout::NCHW, "Col2Im output's data layout must always be NCHW");
     }
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const Size2D &convolved_dims, unsigned int num_groups)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITensorInfo *dst, const Size2D &convolved_dims, unsigned int num_groups)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_col2im_shape(*input, convolved_dims, true, num_groups)).set_data_layout(DataLayout::NCHW));
+    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_col2im_shape(*src, convolved_dims, true, num_groups)).set_data_layout(DataLayout::NCHW));
 
     constexpr unsigned int num_elems_read_per_iteration = 8;
 
     // Configure window
-    Window win = calculate_max_window(*input, Steps(num_elems_read_per_iteration));
+    Window win = calculate_max_window(*src, Steps(num_elems_read_per_iteration));
 
     // Update window and padding just for the input tensor as we cannot access out-of-bounds elements in the output one
-    AccessWindowHorizontal input_access(input, 0, num_elems_read_per_iteration);
+    AccessWindowHorizontal input_access(src, 0, num_elems_read_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -80,78 +84,74 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-CLCol2ImKernel::CLCol2ImKernel()
-    : _input(nullptr), _output(nullptr), _convolved_dims()
+ClCol2ImKernel::ClCol2ImKernel()
+    : _convolved_dims()
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups)
+void ClCol2ImKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const Size2D &convolved_dims, unsigned int num_groups)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, convolved_dims, num_groups);
-}
-
-void CLCol2ImKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), convolved_dims, num_groups));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, convolved_dims, num_groups));
 
-    _input          = input;
-    _output         = output;
     _convolved_dims = convolved_dims;
 
-    const DataType data_type = input->info()->data_type();
+    const DataType data_type = src->data_type();
 
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
-    build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
-    build_opts.add_option("-DWIDTH_INPUT=" + support::cpp11::to_string(input->info()->dimension(0)));
+    build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(src->element_size()));
+    build_opts.add_option("-DWIDTH_INPUT=" + support::cpp11::to_string(src->dimension(0)));
     build_opts.add_option("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.width));
     build_opts.add_option("-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
 
     _kernel = create_kernel(compile_context, "col2im", build_opts.options());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), _convolved_dims, num_groups);
+    auto win_config = validate_and_configure_window(src, dst, _convolved_dims, num_groups);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    IClKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "col2im_";
-    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += lower_string(string_from_data_type(src->data_type()));
     _config_id += "_";
     _config_id += support::cpp11::to_string(num_groups);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += support::cpp11::to_string(src->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += support::cpp11::to_string(src->dimension(1));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += support::cpp11::to_string(dst->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += support::cpp11::to_string(dst->dimension(1));
 }
 
-Status CLCol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims, unsigned int num_groups)
+Status ClCol2ImKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &convolved_dims, unsigned int num_groups)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims, num_groups));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), convolved_dims, num_groups).first);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, convolved_dims, num_groups));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get(), convolved_dims, num_groups).first);
     return Status{};
 }
 
-void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
+void ClCol2ImKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(IClKernel::window(), window);
 
     bool is_collapsed     = false;
     bool is_collapsed_out = false;
 
+    auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+
     Window out_window;
-    out_window.use_tensor_dimensions(_output->info()->tensor_shape());
+    out_window.use_tensor_dimensions(dst->info()->tensor_shape());
 
     Window collapsed     = window.collapse_if_possible(ICLKernel::window(), Window::DimZ, &is_collapsed);
     Window collapsed_out = out_window.collapse_if_possible(out_window, 3, &is_collapsed_out);
@@ -164,10 +164,12 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         // Set inputs
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
-        add_4D_tensor_argument(idx, _output, slice_out);
+        add_3D_tensor_argument(idx, src, slice);
+        add_4D_tensor_argument(idx, dst, slice_out);
         enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice) && collapsed_out.slide_window_slice_4D(slice_out));
 }
+} // namespace kernels
+} // namespace opencl
 } // namespace arm_compute

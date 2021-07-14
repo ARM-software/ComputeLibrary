@@ -31,7 +31,6 @@
 #include "src/core/CL/kernels/CLBitwiseKernel.h"
 #include "src/core/CL/kernels/CLBoundingBoxTransformKernel.h"
 #include "src/core/CL/kernels/CLChannelShuffleLayerKernel.h"
-#include "src/core/CL/kernels/CLCol2ImKernel.h"
 #include "src/core/CL/kernels/CLComparisonKernel.h"
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"

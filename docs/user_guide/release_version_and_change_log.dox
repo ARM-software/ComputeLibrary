@@ -1384,7 +1384,7 @@ v17.02.1 Sources preview
  - New OpenCL kernels / functions:
    - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, CLLogits1DNormKernel / @ref CLSoftmaxLayer
    - CLPoolingLayerKernel / @ref CLPoolingLayer
-   - @ref CLIm2ColKernel, @ref CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / CLConvolutionLayer
+   - @ref CLIm2ColKernel, CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / CLConvolutionLayer
    - @ref CLRemapKernel / @ref CLRemap
    - CLGaussianPyramidHorKernel, CLGaussianPyramidVertKernel / CLGaussianPyramid, CLGaussianPyramidHalf, CLGaussianPyramidOrb
    - CLMinMaxKernel, CLMinMaxLocationKernel / CLMinMaxLocation

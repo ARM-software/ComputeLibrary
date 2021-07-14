@@ -218,6 +218,39 @@ private:
     CLFillBorderKernel         _border_handler{}; /**< Kernel to handle  borders */
     std::unique_ptr<ICLKernel> _kernel{};         /**< Kernel to run */
 };
+
+/** As above but this also setups a Zero border on the input tensor of the kernel's bordersize */
+template <typename K>
+class ClSynthetizeOperatorWithBorder : public opencl::IClOperator
+{
+public:
+    /** Configure the kernel.
+     *
+     * @param[in] first First configuration argument.
+     * @param[in] args  Rest of the configuration arguments.
+     */
+    template <typename T, typename... Args>
+    void configure(T first, Args &&... args)
+    {
+        auto k = std::make_unique<K>();
+        k->configure(CLKernelLibrary::get().get_compile_context(), first, std::forward<Args>(args)...);
+        _kernel = std::move(k);
+
+        auto b = std::make_unique<CLFillBorderKernel>();
+        b->configure(CLKernelLibrary::get().get_compile_context(), first, BorderSize(_kernel->border_size()), BorderMode::CONSTANT, PixelValue());
+        _border_handler = std::move(b);
+    }
+
+    void run(ITensorPack &tensors) override
+    {
+        CLScheduler::get().enqueue(*_border_handler);
+        CLScheduler::get().enqueue_op(*_kernel, tensors);
+    }
+
+private:
+    std::unique_ptr<ICLKernel> _border_handler{ nullptr }; /**< Kernel to handle  borders */
+    std::unique_ptr<ICLKernel> _kernel{};                  /**< Kernel to run */
+};
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_CL_HELPER_H */

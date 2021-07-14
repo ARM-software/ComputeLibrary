@@ -41,7 +41,13 @@
 
 namespace arm_compute
 {
-class CLCol2ImKernel;
+namespace opencl
+{
+namespace kernels
+{
+class ClCol2ImKernel;
+} // namespace kernels
+} // namespace opencl
 class CLIm2ColKernel;
 class CLWeightsReshapeKernel;
 class ICLTensor;
@@ -171,7 +177,7 @@ private:
  * -# @ref CLGEMM (if the data type is FP32 or FP16)
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref CLGEMMLowpOutputStage with QUANTIZE_DOWN_FIXEDPOINT type of quantization (if the data type is QASYMM8/QASYMM8_SIGNED)
- * -# @ref CLCol2ImKernel (if NCHW data layout)
+ * -# @ref opencl::kernels::ClCol2ImKernel (if NCHW data layout)
  */
 class CLGEMMConvolutionLayer : public IFunction
 {
@@ -318,10 +324,12 @@ private:
     std::unique_ptr<CLIm2ColKernel>                                    _im2col_kernel;
     CLGEMM                                                             _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                                       _mm_gemmlowp;
-    std::unique_ptr<CLCol2ImKernel>                                    _col2im_kernel;
+    std::unique_ptr<opencl::kernels::ClCol2ImKernel>                   _col2im_kernel;
     CLActivationLayer                                                  _activationlayer_function;
 
     const ICLTensor *_original_weights;
+    const ICLTensor *_gemm_output_to_use;
+    ICLTensor       *_output;
 
     CLTensor _im2col_output;
     CLTensor _weights_reshaped;

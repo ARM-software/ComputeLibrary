@@ -30,9 +30,9 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLCol2ImKernel.h"
 #include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
+#include "src/core/gpu/cl/kernels/ClCol2ImKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "support/Cast.h"
 
@@ -106,8 +106,8 @@ void CLConvolutionLayerReshapeWeights::run()
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(std::make_unique<CLIm2ColKernel>()), _mm_gemm(memory_manager,
-            weights_manager), _mm_gemmlowp(memory_manager), _col2im_kernel(std::make_unique<CLCol2ImKernel>()), _activationlayer_function(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(),
-      _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _is_prepared(false)
+            weights_manager), _mm_gemmlowp(memory_manager), _col2im_kernel(nullptr), _activationlayer_function(), _original_weights(nullptr), _gemm_output_to_use(nullptr), _output(nullptr), _im2col_output(),
+      _weights_reshaped(), _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _is_prepared(false)
 {
 }
 
@@ -238,7 +238,6 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
 
     // Set the GPU target for im2col and col2im
     _im2col_kernel->set_target(CLScheduler::get().target());
-    _col2im_kernel->set_target(CLScheduler::get().target());
 
     const ICLTensor *gemm_input_to_use  = input;
     ICLTensor       *gemm_output_to_use = output;
@@ -395,9 +394,14 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
 
     if(!_skip_col2im)
     {
+        // Set the GPU target for col2im
+        _col2im_kernel = std::make_unique<opencl::kernels::ClCol2ImKernel>();
+        _col2im_kernel->set_target(CLScheduler::get().target());
         // Configure and tune Col2Im
-        _col2im_kernel->configure(compile_context, gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups);
+        _col2im_kernel->configure(compile_context, gemm_output_to_use->info(), output->info(), Size2D(conv_w, conv_h), num_groups);
         CLScheduler::get().tune_kernel_static(*_col2im_kernel.get());
+        _gemm_output_to_use = gemm_output_to_use;
+        _output             = output;
     }
 
     if(!_skip_col2im)
@@ -595,7 +599,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     // Validate Col2Im
     if(!skip_col2im)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups));
+        ARM_COMPUTE_RETURN_ON_ERROR(opencl::kernels::ClCol2ImKernel::validate(gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups));
     }
 
     //Validate Activation Layer
@@ -634,7 +638,12 @@ void CLGEMMConvolutionLayer::run()
     // Reshape output matrix
     if(!_skip_col2im)
     {
-        CLScheduler::get().enqueue(*_col2im_kernel.get(), false);
+        ITensorPack pack =
+        {
+            { TensorType::ACL_SRC, _gemm_output_to_use },
+            { TensorType::ACL_DST, _output }
+        };
+        CLScheduler::get().enqueue_op(*_col2im_kernel.get(), pack, false);
     }
 
     //Run Activation Layer if we cannot fuse in GEMM
