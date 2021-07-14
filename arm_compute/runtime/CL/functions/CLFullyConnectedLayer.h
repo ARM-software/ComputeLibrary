@@ -96,7 +96,7 @@ private:
 
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLIm2ColKernel (called when the input comes from a convolutional layer)
+ *  -# @ref opencl::kernels::ClIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref CLTranspose (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref opencl::kernels::ClGemmMatrixMultiplyKernel or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
  *

@@ -400,7 +400,7 @@
         "files": {
           "kernel": [
             "src/core/gpu/cl/kernels/ClCol2ImKernel.cpp",
-            "src/core/CL/kernels/CLIm2ColKernel.cpp"
+            "src/core/gpu/cl/kernels/ClIm2ColKernel.cpp"
           ]
         }
       },

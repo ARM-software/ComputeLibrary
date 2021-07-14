@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@ namespace arm_compute
 /** OpenCL kernel to perform reshaping on the weights used by convolution and locally connected layer
  *
  * Rearranges each 3-dimensional kernel to a single row leading to a matrix with linearized kernels.
- * In combination with the @ref CLIm2ColKernel can transform a convolution to a matrix multiplication.
+ * In combination with the @ref opencl::kernels::ClIm2ColKernel can transform a convolution to a matrix multiplication.
  *
  * For example assuming a 3D weight kernel of 3x3 dimensions and depth of 2 we have:
  * @f[

@@ -567,7 +567,7 @@ v20.08 Public major release
       The default "axis" value for @ref NESoftmaxLayer, @ref NELogSoftmaxLayer is changed from 1 to 0.
       Only axis 0 is supported.
  - The support for quantized data types has been removed from @ref CLLogSoftmaxLayer due to implementation complexity.
- - Removed padding requirement for the input (e.g. LHS of GEMM) and output in CLGEMMMatrixMultiplyNativeKernel, CLGEMMMatrixMultiplyReshapedKernel, CLGEMMMatrixMultiplyReshapedOnlyRHSKernel and @ref CLIm2ColKernel (NHWC only)
+ - Removed padding requirement for the input (e.g. LHS of GEMM) and output in CLGEMMMatrixMultiplyNativeKernel, CLGEMMMatrixMultiplyReshapedKernel, CLGEMMMatrixMultiplyReshapedOnlyRHSKernel and CLIm2ColKernel (NHWC only)
    - This change allows to use @ref CLGEMMConvolutionLayer without extra padding for the input and output.
    - Only the weights/bias of @ref CLGEMMConvolutionLayer could require padding for the computation.
    - Only on Arm® Mali™ Midgard GPUs, @ref CLGEMMConvolutionLayer could require padding since CLGEMMMatrixMultiplyKernel is called and currently requires padding.
@@ -1064,7 +1064,7 @@ v18.08 Public major release
     - @ref CLDirectConvolutionLayer
     - @ref CLConvolutionLayer
     - @ref CLScale
-    - @ref CLIm2ColKernel
+    - CLIm2ColKernel
  - New Arm® Neon™ kernels / functions:
     - @ref NERNNLayer
  - New OpenCL kernels / functions:
@@ -1384,7 +1384,7 @@ v17.02.1 Sources preview
  - New OpenCL kernels / functions:
    - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, CLLogits1DNormKernel / @ref CLSoftmaxLayer
    - CLPoolingLayerKernel / @ref CLPoolingLayer
-   - @ref CLIm2ColKernel, CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / CLConvolutionLayer
+   - CLIm2ColKernel, CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / CLConvolutionLayer
    - @ref CLRemapKernel / @ref CLRemap
    - CLGaussianPyramidHorKernel, CLGaussianPyramidVertKernel / CLGaussianPyramid, CLGaussianPyramidHalf, CLGaussianPyramidOrb
    - CLMinMaxKernel, CLMinMaxLocationKernel / CLMinMaxLocation

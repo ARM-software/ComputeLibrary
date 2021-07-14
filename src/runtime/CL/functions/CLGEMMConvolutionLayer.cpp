@@ -30,9 +30,9 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "src/core/gpu/cl/kernels/ClCol2ImKernel.h"
+#include "src/core/gpu/cl/kernels/ClIm2ColKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "support/Cast.h"
 
@@ -105,8 +105,8 @@ void CLConvolutionLayerReshapeWeights::run()
 }
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(std::make_unique<CLIm2ColKernel>()), _mm_gemm(memory_manager,
-            weights_manager), _mm_gemmlowp(memory_manager), _col2im_kernel(nullptr), _activationlayer_function(), _original_weights(nullptr), _gemm_output_to_use(nullptr), _output(nullptr), _im2col_output(),
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _reshape_weights(), _reshape_weights_managed(), _im2col_kernel(nullptr), _mm_gemm(memory_manager, weights_manager),
+      _mm_gemmlowp(memory_manager), _col2im_kernel(nullptr), _activationlayer_function(), _original_weights(nullptr), _input(nullptr), _gemm_output_to_use(nullptr), _output(nullptr), _im2col_output(),
       _weights_reshaped(), _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _is_prepared(false)
 {
 }
@@ -229,15 +229,13 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
 
     _is_prepared      = weights_info.retain_internal_weights();
     _original_weights = weights;
+    _input            = input;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
     _skip_im2col      = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
     _skip_col2im      = data_layout == DataLayout::NHWC;
 
     // Only for quantize there are few cases where we cannot fuse the activation function in GEMM
     _fuse_activation = true;
-
-    // Set the GPU target for im2col and col2im
-    _im2col_kernel->set_target(CLScheduler::get().target());
 
     const ICLTensor *gemm_input_to_use  = input;
     ICLTensor       *gemm_output_to_use = output;
@@ -299,7 +297,11 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
         _memory_group.manage(&_im2col_output);
 
         // Configure and tune im2col. im2col output shape is auto-initialized
-        _im2col_kernel->configure(compile_context, input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation, num_groups);
+        _im2col_kernel = std::make_unique<opencl::kernels::ClIm2ColKernel>();
+
+        // Set the GPU target for im2col
+        _im2col_kernel->set_target(CLScheduler::get().target());
+        _im2col_kernel->configure(compile_context, input->info(), _im2col_output.info(), Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation, num_groups);
 
         // Set quantization info
         _im2col_output.info()->set_quantization_info(input->info()->quantization_info());
@@ -525,7 +527,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
         auto_init_if_empty(im2col_reshaped_info, input->clone()->set_tensor_shape(expected_output_shape));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(CLIm2ColKernel::validate(input, &im2col_reshaped_info, kernel_dims, conv_info, append_bias, dilation, num_groups));
+        ARM_COMPUTE_RETURN_ON_ERROR(opencl::kernels::ClIm2ColKernel::validate(input, &im2col_reshaped_info, kernel_dims, conv_info, append_bias, dilation, num_groups));
         gemm_input_to_use = &im2col_reshaped_info;
     }
 
@@ -620,7 +622,12 @@ void CLGEMMConvolutionLayer::run()
     // Run im2col
     if(!_skip_im2col)
     {
-        CLScheduler::get().enqueue(*_im2col_kernel);
+        ITensorPack pack =
+        {
+            { TensorType::ACL_SRC, _input },
+            { TensorType::ACL_DST, &_im2col_output }
+        };
+        CLScheduler::get().enqueue_op(*_im2col_kernel, pack, false);
     }
 
     // Runs CLGEMM or CLGEMMLowpMatrixMultiplyCore functions

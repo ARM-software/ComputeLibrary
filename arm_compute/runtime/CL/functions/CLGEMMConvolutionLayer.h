@@ -41,16 +41,16 @@
 
 namespace arm_compute
 {
+class CLWeightsReshapeKernel;
+class ICLTensor;
 namespace opencl
 {
 namespace kernels
 {
+class ClIm2ColKernel;
 class ClCol2ImKernel;
 } // namespace kernels
 } // namespace opencl
-class CLIm2ColKernel;
-class CLWeightsReshapeKernel;
-class ICLTensor;
 
 /** Function to reshape and transpose the weights. This function calls the following kernels:
  * -# @ref CLWeightsReshapeKernel
@@ -173,7 +173,7 @@ private:
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
  *
- * -# @ref CLIm2ColKernel
+ * -# @ref opencl::kernels::ClIm2ColKernel
  * -# @ref CLGEMM (if the data type is FP32 or FP16)
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref CLGEMMLowpOutputStage with QUANTIZE_DOWN_FIXEDPOINT type of quantization (if the data type is QASYMM8/QASYMM8_SIGNED)
@@ -321,13 +321,14 @@ private:
     IWeightsManager                                                   *_weights_manager;
     CLConvolutionLayerReshapeWeights                                   _reshape_weights;
     weights_transformations::CLConvolutionLayerReshapeWeightsTransform _reshape_weights_managed;
-    std::unique_ptr<CLIm2ColKernel>                                    _im2col_kernel;
+    std::unique_ptr<opencl::kernels::ClIm2ColKernel>                   _im2col_kernel;
     CLGEMM                                                             _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                                       _mm_gemmlowp;
     std::unique_ptr<opencl::kernels::ClCol2ImKernel>                   _col2im_kernel;
     CLActivationLayer                                                  _activationlayer_function;
 
     const ICLTensor *_original_weights;
+    const ICLTensor *_input;
     const ICLTensor *_gemm_output_to_use;
     ICLTensor       *_output;
 

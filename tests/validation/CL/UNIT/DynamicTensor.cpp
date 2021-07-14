@@ -29,7 +29,6 @@
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "src/core/CL/kernels/CLWeightsReshapeKernel.h"

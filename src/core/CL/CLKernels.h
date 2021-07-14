@@ -43,7 +43,6 @@
 #include "src/core/CL/kernels/CLFuseBatchNormalizationKernel.h"
 #include "src/core/CL/kernels/CLGatherKernel.h"
 #include "src/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
-#include "src/core/CL/kernels/CLIm2ColKernel.h"
 #include "src/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"

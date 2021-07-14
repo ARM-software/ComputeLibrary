@@ -37,7 +37,7 @@ namespace kernels
 {
 /** Interface for the col2im reshaping kernel.
  *
- * Rearranges each matrix column into image blocks. It's the inverse operation of @ref CLIm2ColKernel.
+ * Rearranges each matrix column into image blocks. It's the inverse operation of @ref opencl::kernels::ClIm2ColKernel.
  *
  * For example, a vector of 9 elements can be reshaped to a block(image) of 3x3:
  *
