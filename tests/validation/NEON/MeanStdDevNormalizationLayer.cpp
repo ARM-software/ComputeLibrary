@@ -47,7 +47,7 @@ namespace
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 RelativeTolerance<half> tolerance_f16(half(0.2f));
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-RelativeTolerance<float> tolerance_f32(1e-8f);
+RelativeTolerance<float> tolerance_f32(1e-4f);
 } // namespace
 
 TEST_SUITE(NEON)
