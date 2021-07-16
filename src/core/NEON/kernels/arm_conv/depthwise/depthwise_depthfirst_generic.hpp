@@ -30,6 +30,8 @@
 #include "profiler.hpp"
 #endif
 
+#include <limits>
+
 namespace arm_conv {
 namespace depthwise {
 
