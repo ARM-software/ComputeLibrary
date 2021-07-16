@@ -260,7 +260,8 @@
       "GEMM": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClGemm.cpp"
+            "src/runtime/gpu/cl/operators/ClGemm.cpp",
+            "src/runtime/gpu/cl/operators/ClGemmConvolution.cpp"
           ],
           "kernel": [
             "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.cpp",
@@ -646,7 +647,7 @@
       "WeightsReshape": {
         "files": {
           "kernel": [
-            "src/core/CL/kernels/CLWeightsReshapeKernel.cpp"
+            "src/core/gpu/cl/kernels/ClWeightsReshapeKernel.cpp"
           ]
         }
       },

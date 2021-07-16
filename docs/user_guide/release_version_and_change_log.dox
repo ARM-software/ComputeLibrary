@@ -1313,7 +1313,7 @@ v17.06 Public major release
     - CLDepthConcatenateLayerKernel / CLDepthConcatenateLayer
     - CLHOGOrientationBinningKernel CLHOGBlockNormalizationKernel, CLHOGDetectorKernel / CLHOGDescriptor CLHOGDetector CLHOGGradient CLHOGMultiDetection
     - CLLocallyConnectedMatrixMultiplyKernel / CLLocallyConnectedLayer
-    - @ref CLWeightsReshapeKernel / @ref CLConvolutionLayerReshapeWeights
+    - CLWeightsReshapeKernel / CLConvolutionLayerReshapeWeights
  - New C++ kernels:
     - CPPDetectionWindowNonMaximaSuppressionKernel
  - New Arm® Neon™ kernels / functions:

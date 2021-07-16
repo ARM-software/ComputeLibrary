@@ -129,8 +129,8 @@ private:
     TensorInfo                                                          _tmp_b;
     bool                                                                _reshape_b_only_on_first_run;
     CLGEMMKernelType                                                    _gemm_kernel_type;
-
-    experimental::MemoryRequirements _aux_mem{};
+    bool                                                                _is_prepared;
+    experimental::MemoryRequirements                                    _aux_mem{};
 };
 } // namespace opencl
 } // namespace arm_compute

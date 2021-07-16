@@ -66,6 +66,5 @@
 #include "src/core/CL/kernels/CLStackLayerKernel.h"
 #include "src/core/CL/kernels/CLStridedSliceKernel.h"
 #include "src/core/CL/kernels/CLTileKernel.h"
-#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 
 #endif /* ARM_COMPUTE_CLKERNELS_H */

@@ -65,7 +65,7 @@ public:
      * @param[in]     bias         (Optional) The biases have one dimension. Data type supported: Should match @p input data type, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type
      * @param[out]    output       Output tensor. The output has the same number of dimensions as the @p input.
      * @param[in]     deconv_info  Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo.
-     * @param[in]     weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref CLWeightsReshapeKernel.
+     * @param[in]     weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref opencl::kernels::ClWeightsReshapeKernel.
      *
      */
     void configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info, const WeightsInfo &weights_info = WeightsInfo());
@@ -77,7 +77,7 @@ public:
      * @param[in]     bias            (Optional) The biases have one dimension. Data type supported: Should match @p input data type, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type
      * @param[out]    output          Output tensor. The output has the same number of dimensions as the @p input.
      * @param[in]     deconv_info     Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo.
-     * @param[in]     weights_info    (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref CLWeightsReshapeKernel.
+     * @param[in]     weights_info    (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref opencl::kernels::ClWeightsReshapeKernel.
      *
      */
     void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
@@ -89,7 +89,7 @@ public:
      * @param[in] bias         (Optional) The biases have one dimension. Data type supported: Should match @p input data type, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type
      * @param[in] output       Output tensor info. The output has the same number of dimensions as the @p input.
      * @param[in] deconv_info  Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo.
-     * @param[in] weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref CLWeightsReshapeKernel.
+     * @param[in] weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref opencl::kernels::ClWeightsReshapeKernel.
      *
      * @return a status
      */

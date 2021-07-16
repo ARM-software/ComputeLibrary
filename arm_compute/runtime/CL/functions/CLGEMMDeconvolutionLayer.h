@@ -26,6 +26,8 @@
 
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLGEMM.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"

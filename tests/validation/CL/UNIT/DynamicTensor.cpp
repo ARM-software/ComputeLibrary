@@ -31,7 +31,6 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
-#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"
