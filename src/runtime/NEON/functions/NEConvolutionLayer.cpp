@@ -67,7 +67,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
         case ConvolutionMethod::GEMM:
         {
             auto f = std::make_unique<NEGEMMConvolutionLayer>(_memory_manager);
-            f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info);
+            f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math);
             _function = std::move(f);
             break;
         }

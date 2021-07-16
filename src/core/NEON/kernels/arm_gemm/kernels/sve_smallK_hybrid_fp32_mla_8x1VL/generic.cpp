@@ -18804,4 +18804,4 @@ void sve_smallK_hybrid_fp32_mla_8x1VL(const float *A, int lda, const float *B, f
 
 } // namespace arm_gemm
 
-#endif // ARM_COMPUTE_ENABLE_SVE
+#endif // __ARM_FEATURE_SVE

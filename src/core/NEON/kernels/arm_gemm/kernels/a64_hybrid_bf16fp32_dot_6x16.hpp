@@ -22,10 +22,11 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#ifdef __aarch64__
 
+#ifdef __aarch64__
 #include "../std_transforms_fixed.hpp"
 #include "../bfloat.hpp"
+#include "../performance_parameters.hpp"
 
 #define ARGLIST  \
     unsigned int, const unsigned int *, \
@@ -43,7 +44,8 @@ void a64_hybrid_bf16fp32_dot_6x16( ARGLIST );
 class cls_a64_hybrid_bf16fp32_dot_6x16
 {
 public:
-    typedef bfloat16 operand_type;
+    typedef bfloat16 lhs_operand_type;
+    typedef bfloat16 rhs_operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -69,7 +71,23 @@ public:
         return true;
     }
 
-    StdTransformsFixed<operand_type, result_type, 6, 16, 2> transforms = {};
+    StdTransformsFixed<rhs_operand_type, result_type, 6, 16, 2> transforms = {};
+    template<typename T>
+    static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    {
+        if (std::is_same<T, bfloat16>::value) {
+            switch (ci->get_cpu_model()) {
+                default:
+                    return { 15.83 };
+                case CPUModel::A510:
+                    return { 7.28 };
+                case CPUModel::V1:
+                    return { 27.34 };
+            }
+        }
+
+        return { 1.0 };
+    }
 
     // Default to the generic kernel
     kern_type kernel=a64_hybrid_bf16fp32_dot_6x16;
@@ -81,4 +99,5 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
+
 #endif // __aarch64__

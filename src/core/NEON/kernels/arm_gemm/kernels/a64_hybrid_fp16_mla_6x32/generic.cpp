@@ -92,9 +92,6 @@ void a64_hybrid_fp16_mla_6x32 (
             break;
     }
     __asm__ __volatile__(
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-      ".arch  armv8.2-a+fp16\n"
-#endif
       "1:"  // Row loop
       "cmp %x[M], #0x6\n"
       "bge 246f\n"
@@ -4068,12 +4065,12 @@ void a64_hybrid_fp16_mla_6x32 (
       "ld1 { v16.8h }, [x23], #0x10\n"
       "ld1 { v20.8h }, [x22], #0x10\n"
       "ld1 { v24.8h }, [x21], #0x10\n"
-      "ld1 { v28.8h }, [x20], #0x10\n"
       "ld1 { v9.8h }, [x28], #0x10\n"
       "ld1 { v13.8h }, [x24], #0x10\n"
       "ld1 { v17.8h }, [x23], #0x10\n"
       "ld1 { v21.8h }, [x22], #0x10\n"
       "ld1 { v25.8h }, [x21], #0x10\n"
+      "ld1 { v28.8h }, [x20], #0x10\n"
       "ld1 { v29.8h }, [x20], #0x10\n"
       "tbz x11, #3, 252f\n"
       "ld1 { v10.8h }, [x28], #0x10\n"

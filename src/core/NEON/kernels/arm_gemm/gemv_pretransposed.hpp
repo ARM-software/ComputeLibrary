@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,12 +36,55 @@
 
 namespace arm_gemm {
 
+namespace {
+
+template<typename OutputStage>
+class run_gemv_kernel {
+public:
+    template<typename strategy, typename To, typename Tr>
+    static void run (
+        const strategy &strat,
+        const To *A_ptr, const To *B_ptr, Tr *c_ptr,
+        size_t N, size_t K,
+        const Tr *bias, const Activation &act, bool Accumulate,
+        const OutputStage &os, const int32_t *col_bias, unsigned int col_base
+    );
+};
+
+template<>
+template<typename strategy, typename To, typename Tr>
+void run_gemv_kernel<Nothing>::run(
+        const strategy &strat,
+        const To *A_ptr, const To *B_ptr, Tr *C_ptr,
+        size_t N, size_t K,
+        const Tr *bias, const Activation &act, bool Accumulate,
+        const Nothing &, const int32_t *, unsigned int
+    ) {
+
+    strat.kernel(A_ptr, B_ptr, C_ptr, N, K, bias, act, Accumulate);
+}
+
+template<>
+template<typename strategy, typename To, typename Tr>
+void run_gemv_kernel<Requantize32>::run(
+        const strategy &strat,
+        const To *A_ptr, const To *B_ptr, Tr *C_ptr,
+        size_t N, size_t K,
+        const Tr *, const Activation &, bool,
+        const Requantize32 &qp, const int32_t *col_bias, unsigned int col_base
+    ) {
+
+    strat.kernel(A_ptr, B_ptr, C_ptr, N, K, &qp, col_bias + col_base, col_base);
+}
+
+} // anonymous namespace
+
 // Implementation of the GemmCommon abstract class.
 //
 // This is implementation is for GEMV with pretransposition.
 //
 // batches are not supported as a batched GEMV makes no sense (can be converted to a GEMM).
-template<typename strategy, typename To, typename Tr>
+template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing>
 class GemvPretransposed : public GemmCommon<To, Tr> {
     typedef typename strategy::operand_type Toi;
     typedef typename strategy::result_type Tri;
@@ -55,13 +98,28 @@ class GemvPretransposed : public GemmCommon<To, Tr> {
 
     const Toi *_B_pretransposed = nullptr;
 
+    OutputStage _os;
+
+    // Pointer to the column sums (for quantized cases)
+    int32_t *col_bias = nullptr;
+
+    // Get size of the column sums
+    unsigned int get_col_sum_size() const {
+        if(std::is_same<OutputStage, Requantize32>::value) {
+            return _args._Nsize * _args._nmulti * sizeof(int32_t);
+        } else {
+            return 0;
+        }
+    }
+
 public:
     GemvPretransposed(GemvPretransposed &) = delete;
     GemvPretransposed & operator= (GemvPretransposed &) = delete;
 
-    GemvPretransposed(const GemmArgs &args)
+    GemvPretransposed(const GemmArgs &args, const OutputStage &os = {})
                       : _args(args),
-                        _buffer_per_multi(args._Ksize * roundup(args._Nsize, strategy::out_width())) {
+                        _buffer_per_multi(roundup(args._Ksize, strategy::k_unroll()) * roundup(args._Nsize, strategy::out_width())),
+                        _os(os) {
         /* For now don't do any blocking. TODO: figure out if we should. */
         if (strategy::supports_accumulate() && args._cfg && args._cfg->inner_block_size) {
             k_block = args._cfg->inner_block_size;
@@ -117,12 +175,13 @@ public:
 #ifdef CYCLE_PROFILING
                     auto p = prof.ScopedProfiler(PROFILE_KERNEL, (kmax-k0) * (nmax-n));
 #endif
-                    strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + k0,
+                    run_gemv_kernel<OutputStage>::run(strat, this->_Aptr + (multi * this->_A_multi_stride) + k0,
                                  _B_pretransposed + (multi * _buffer_per_multi) + (n * roundup(_args._Ksize, strategy::k_unroll())) + (k0 * strategy::out_width()),
                                  this->_Cptr + (multi * this->_C_multi_stride) + n,
                                  (nmax - n), (kmax-k0),
                                  this->_bias ? this->_bias + (multi * this->_bias_multi_stride) + n : nullptr,
-                                 _args._act, (k0 != 0));
+                                 _args._act, (k0 != 0),
+                                 _os, col_bias, n + (_args._Nsize * multi));
                 }
             }
         }
@@ -139,11 +198,26 @@ public:
     }
 
     size_t get_B_pretransposed_array_size() const override {
-        return _buffer_per_multi * _args._nmulti * sizeof(To);
+        return _buffer_per_multi * _args._nmulti * sizeof(To) + get_col_sum_size();
     }
 
     void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) override {
-        Toi *B_buffer = reinterpret_cast<Toi *>(buffer);
+        // Column sums go on the front of the pretransposed buffer in requantized cases.
+        // We could optimize here in case we don't actually need to sum the columns, but this code is only run on setup.
+        if (std::is_same<OutputStage, Requantize32>::value) {
+            col_bias = reinterpret_cast<int32_t *>(buffer);
+
+            Requantize32 *qp_ptr = reinterpret_cast<Requantize32 *>(&_os);
+
+            for (unsigned int i=0; i<_args._nmulti; i++) {
+                compute_col_sums(*qp_ptr, _args._Nsize, _args._Ksize, B + (i * B_multi_stride), ldb, col_bias + (i * _args._Nsize), _args._Ksize, i, 0);
+            }
+        }
+
+        // The actual transposed buffer goes after the column sums (if any)
+        uintptr_t buffer_int = reinterpret_cast<uintptr_t>(buffer);
+        Toi *B_buffer = reinterpret_cast<Toi *>(buffer_int + get_col_sum_size());
+
         strategy strat(_args._ci);
 
         for (unsigned int multi=0; multi<_args._nmulti; multi++) {
@@ -155,6 +229,17 @@ public:
 
     void set_pretransposed_B_data(void *buffer) override {
         _B_pretransposed = reinterpret_cast<Toi *>(buffer);
+    }
+
+    GemmConfig get_config() override {
+        GemmConfig c;
+
+        c.method = GemmMethod::GEMV_PRETRANSPOSED;
+        c.inner_block_size = k_block;
+        c.outer_block_size = n_block;
+        c.filter = get_type_name<strategy>();
+
+        return c;
     }
 };
 

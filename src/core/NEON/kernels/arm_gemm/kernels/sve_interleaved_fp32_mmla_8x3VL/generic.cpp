@@ -394,4 +394,4 @@ void sve_interleaved_fp32_mmla_8x3VL(const float *Apanel, const float *Bpanel, f
 
 } // namespace arm_gemm
 
-#endif // ARM_COMPUTE_ENABLE_SVE
+#endif // __ARM_FEATURE_SVE

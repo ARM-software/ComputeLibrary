@@ -22,8 +22,8 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#ifdef ARM_COMPUTE_ENABLE_SVE
 
+#ifdef ARM_COMPUTE_ENABLE_SVE
 #include "../std_transforms_sve.hpp"
 
 #define ARGLIST  \
@@ -38,11 +38,13 @@ namespace arm_gemm
 {
 // Actual kernel implementations
 void sve_hybrid_fp32_mla_8x1VL( ARGLIST );
+void sve_hybrid_fp32_mla_8x1VL_a64fx( ARGLIST );
 
 class cls_sve_hybrid_fp32_mla_8x1VL
 {
 public:
-    typedef float operand_type;
+    typedef float lhs_operand_type;
+    typedef float rhs_operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -68,16 +70,24 @@ public:
         return true;
     }
 
-    StdTransformsSVE<operand_type, result_type, 8, 1, 1> transforms = {};
+    StdTransformsSVE<rhs_operand_type, result_type, 8, 1, 1> transforms = {};
 
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_fp32_mla_8x1VL;
-    cls_sve_hybrid_fp32_mla_8x1VL(const CPUInfo *)
+    cls_sve_hybrid_fp32_mla_8x1VL(const CPUInfo *ci)
     {
+        switch(ci->get_cpu_model()) {
+            default:
+                break;
+            case CPUModel::A64FX:
+                kernel=sve_hybrid_fp32_mla_8x1VL_a64fx;
+                break;
+        }
     }
 };
 
 } // namespace arm_gemm
 
 #undef ARGLIST
+
 #endif // ARM_COMPUTE_ENABLE_SVE

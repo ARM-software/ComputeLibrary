@@ -50,8 +50,10 @@ bool model_supports_fp16(CpuModel model)
         case CpuModel::GENERIC_FP16:
         case CpuModel::GENERIC_FP16_DOT:
         case CpuModel::A55r1:
+        case CpuModel::A510:
         case CpuModel::X1:
-        case CpuModel::KLEIN:
+        case CpuModel::V1:
+        case CpuModel::A64FX:
             return true;
         default:
             return false;
@@ -64,8 +66,10 @@ bool model_supports_dot(CpuModel model)
     {
         case CpuModel::GENERIC_FP16_DOT:
         case CpuModel::A55r1:
+        case CpuModel::A510:
         case CpuModel::X1:
-        case CpuModel::KLEIN:
+        case CpuModel::V1:
+        case CpuModel::A64FX:
             return true;
         default:
             return false;
@@ -76,7 +80,9 @@ bool model_supports_sve(CpuModel model)
 {
     switch(model)
     {
-        case CpuModel::KLEIN:
+        case CpuModel::A510:
+        case CpuModel::V1:
+        case CpuModel::A64FX:
             return true;
         default:
             return false;
@@ -92,9 +98,9 @@ CpuModel midr_to_model(uint32_t midr)
     const int variant     = (midr >> 20) & 0xF;
     const int cpunum      = (midr >> 4) & 0xFFF;
 
+    // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
     if(implementer == 0x41) // Arm CPUs
     {
-        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
         switch(cpunum)
         {
             case 0xd03: // A53
@@ -134,11 +140,26 @@ CpuModel midr_to_model(uint32_t midr)
             case 0xd4a: // E1
                 model = CpuModel::GENERIC_FP16_DOT;
                 break;
+            case 0xd40: // V1
+                model = CpuModel::V1;
+                break;
             case 0xd44: // X1
                 model = CpuModel::X1;
                 break;
             case 0xd46:
-                model = CpuModel::KLEIN;
+                model = CpuModel::A510;
+                break;
+            default:
+                model = CpuModel::GENERIC;
+                break;
+        }
+    }
+    else if(implementer == 0x46)
+    {
+        switch(cpunum)
+        {
+            case 0x001: // A64FX
+                model = CpuModel::A64FX;
                 break;
             default:
                 model = CpuModel::GENERIC;
@@ -147,7 +168,6 @@ CpuModel midr_to_model(uint32_t midr)
     }
     else if(implementer == 0x48)
     {
-        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
         switch(cpunum)
         {
             case 0xd40: // A76
@@ -160,7 +180,6 @@ CpuModel midr_to_model(uint32_t midr)
     }
     else if(implementer == 0x51)
     {
-        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
         switch(cpunum)
         {
             case 0x800: // A73

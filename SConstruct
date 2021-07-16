@@ -309,7 +309,8 @@ if env['fat_binary']:
     if env['arch'] != 'armv8.2-a':
         print("Currently fat binary is only supported with armv8.2-a")
         Exit(1)
-    env.Append(CXXFLAGS = ['-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE'])
+    env.Append(CXXFLAGS = ['-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE',
+                           '-DARM_COMPUTE_ENABLE_BF16', '-DARM_COMPUTE_ENABLE_I8MM', '-DARM_COMPUTE_ENABLE_SVEF32MM'])
     env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON'])
 
 if env['data_type_support']:

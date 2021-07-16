@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -197,6 +197,19 @@ public:
     void set_quantized_bias(const int32_t *bias, size_t bias_multi_stride) override {
         _params.bias = bias;
         _params.bias_multi_stride = bias_multi_stride;
+    }
+
+    GemmConfig get_config() override {
+        GemmConfig c = _subgemm->get_config();
+
+        std::string n = "quantize_wrapper[";
+        n.append(c.filter);
+        n.append("]");
+
+        c.method = GemmMethod::QUANTIZE_WRAPPER;
+        c.filter = n;
+
+        return c;
     }
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -10,64 +10,103 @@
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
  */
 #pragma once
 
 #ifdef __aarch64__
-
-#include <cstdint>
 #include "../std_transforms_fixed.hpp"
+#include "../performance_parameters.hpp"
 
-namespace arm_gemm {
+#define ARGLIST  \
+    const int8_t *, const int8_t *, \
+    int32_t *, int, int, int
 
+namespace arm_gemm
+{
 // Actual kernel implementations
-void a64_interleaved_s8s32_mmla_8x12(const int8_t *, const int8_t *, int32_t *, int, int, int);
+void a64_interleaved_s8s32_mmla_8x12( ARGLIST );
 
-class cls_a64_interleaved_s8s32_mmla_8x12 {
+class cls_a64_interleaved_s8s32_mmla_8x12
+{
 public:
     typedef int8_t operand_type;
     typedef int32_t result_type;
 
-    typedef void (*kern_type)(const int8_t *, const int8_t *, int32_t *, int, int, int);
+    typedef void (*kern_type)( ARGLIST );
 
     /* Kernel blocking parameters */
+    static constexpr unsigned int out_height()
+    {
+        return 8;
+    }
+
     static unsigned int out_width()
     {
         return 12;
     }
 
-    static unsigned int out_height()
+    static unsigned int stripe_width()
+    {
+        return 4;
+    }
+
+    static constexpr unsigned int k_unroll()
     {
         return 8;
     }
 
-    static unsigned int k_unroll()
-    {
-        return 8;
-    }
 
-    // Use the standard fixed size transforms.
     StdTransformsFixed<operand_type, result_type, 8, 12, 8> transforms = {};
     StdTransformsFixed<operand_type, result_type, 8, 12, 8, true> transforms_quantized = {};
-
-    kern_type kernel=a64_interleaved_s8s32_mmla_8x12;
-
-    cls_a64_interleaved_s8s32_mmla_8x12(const CPUInfo *)
+    template<typename T>
+    static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {
 
+        if (std::is_same<T, int32_t>::value) {
+            switch (ci->get_cpu_model()) {
+                default:
+                    return { 62.57, 4.08, 8.01 };
+                case CPUModel::A510:
+                    return { 48.25, 3.53, 3.71 };
+                case CPUModel::V1:
+                    return { 117.02, 4.98, 10.87 };
+            }
+        }
+
+
+        if (std::is_same<T, int8_t>::value) {
+            switch (ci->get_cpu_model()) {
+                default:
+                    return { 62.53, 3.70, 0.50 };
+                case CPUModel::A510:
+                    return { 48.22, 2.49, 0.29 };
+                case CPUModel::V1:
+                    return { 116.76, 4.67, 0.60 };
+            }
+        }
+
+        return { 1.0 };
+    }
+
+    // Default to the generic kernel
+    kern_type kernel=a64_interleaved_s8s32_mmla_8x12;
+    cls_a64_interleaved_s8s32_mmla_8x12(const CPUInfo *)
+    {
     }
 };
 
 } // namespace arm_gemm
+
+#undef ARGLIST
 
 #endif // __aarch64__

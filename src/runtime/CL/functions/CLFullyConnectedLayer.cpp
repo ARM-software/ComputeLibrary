@@ -101,6 +101,7 @@ Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const I
                                          fc_info.retain_internal_weights, // retain_internal_weights
                                          gemmlowp_output_stage,           // gemmlowp_output_stage
                                          fc_info.fp_mixed_precision,      // fp_mixed_precision
+                                         false,                           // fast_math
                                          true,                            // broadcast_bias
                                          ActivationLayerInfo());          // activation_info
 
@@ -151,6 +152,7 @@ void CLFullyConnectedLayer::configure_mm(const CLCompileContext &compile_context
                                          fc_info.retain_internal_weights, // retain_internal_weights
                                          gemmlowp_output_stage,           // gemmlowp_output_stage
                                          fc_info.fp_mixed_precision,      // fp_mixed_precision
+                                         false,                           // fast_math
                                          true,                            // broadcast_bias
                                          fc_info.activation_info,         // activation_info
                                          fc_info.constant_weights);       // constant_weights

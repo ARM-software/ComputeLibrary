@@ -128,6 +128,7 @@ void CLGEMMConvolutionLayer::configure_mm(const CLCompileContext &compile_contex
                                          false,                 // retain_internal_weights
                                          gemmlowp_output_stage, // gemmlowp_output_stage
                                          false,                 // fp_mixed_precision
+                                         false,                 // fast_math
                                          true,                  // broadcast_bias
                                          act_info);             // activation_info
 
@@ -167,6 +168,7 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
                                          false,                 // retain_internal_weights
                                          gemmlowp_output_stage, // gemmlowp_output_stage
                                          false,                 // fp_mixed_precision
+                                         false,                 // fast_math
                                          true,                  // broadcast_bias
                                          act_info);             // activation_info
 

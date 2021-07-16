@@ -34,13 +34,15 @@ namespace arm_compute
     X(GENERIC)                     \
     X(GENERIC_FP16)                \
     X(GENERIC_FP16_DOT)            \
-    X(A35)                         \
     X(A53)                         \
     X(A55r0)                       \
     X(A55r1)                       \
+    X(A35)                         \
     X(A73)                         \
-    X(KLEIN)                       \
-    X(X1)
+    X(A510)                        \
+    X(X1)                          \
+    X(V1)                          \
+    X(A64FX)
 
 /** CPU models types
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,29 @@
 // #define UNREACHABLE(why)   assert(0 && why)
 
 namespace arm_gemm {
+
+template<typename T>
+std::string get_type_name() {
+#ifdef __GNUC__
+    std::string s = __PRETTY_FUNCTION__;
+
+    auto start = s.find("cls_");
+
+    if (start==std::string::npos) {
+        return "(unknown)";
+    }
+
+    for(size_t x = start+4; x<s.size(); x++) {
+        if (s[x] == ';' || s[x] == ']') {
+            return s.substr(start+4, x-(start+4));
+        }
+    }
+
+    return "(unknown)";
+#else
+    return "(unsupported)";
+#endif
+}
 
 template<typename T>
 inline T iceildiv(const T a, const T b) {

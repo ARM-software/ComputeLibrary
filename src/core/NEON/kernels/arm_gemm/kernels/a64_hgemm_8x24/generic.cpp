@@ -66,10 +66,6 @@ void a64_hgemm_asimd_8x24(const __fp16 *Apanel, const __fp16 *Bpanel, __fp16 *Cp
             register float16x8_t b2a asm("v7");
 
             __asm __volatile (
-                // Enable FP16 instruction support (but only if it's not already on).
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                ".arch	armv8.2-a+fp16\n"
-#endif
                 // Initialize result registers, load initial operands, prime prefetches.
                 "movi	v8.8h, #0x0\n"
                 "ldr	%q[a0], [%[a_ptr]]\n"

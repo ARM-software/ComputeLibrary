@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2021 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,6 @@
 /* As some of the merges need these headers, but are all included in the
  * arm_gemm namespace, put these headers here.  */
 #include <algorithm>
-#include <limits>
 
 #include <arm_neon.h>
 

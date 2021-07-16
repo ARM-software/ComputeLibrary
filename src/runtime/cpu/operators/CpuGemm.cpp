@@ -48,6 +48,7 @@ cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
     asm_info.reinterpret_input_as_3d = info.reinterpret_input_as_3d();
     asm_info.depth_output_gemm3d     = info.depth_output_gemm3d();
     asm_info.activation_info         = info.activation_info();
+    asm_info.fast_mode               = info.fast_math();
 
     return asm_info;
 }

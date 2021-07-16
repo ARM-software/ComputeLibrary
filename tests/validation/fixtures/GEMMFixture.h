@@ -98,7 +98,7 @@ protected:
                        (disable_c) ? nullptr : &c,
                        &dst,
                        alpha, beta,
-                       GEMMInfo(false, false, false, (reinterpret_output_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), false, (reinterpret_input_as_3d
+                       GEMMInfo(false, false, false, (reinterpret_output_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), false, false, (reinterpret_input_as_3d
                                 || reinterpret_output_as_3d)));
         ARM_COMPUTE_ASSERT(a.info()->is_resizable());
         ARM_COMPUTE_ASSERT(b.info()->is_resizable());

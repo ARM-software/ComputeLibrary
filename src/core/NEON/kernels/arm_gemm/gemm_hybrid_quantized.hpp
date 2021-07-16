@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,11 +81,42 @@ class GemmHybridQuantized : public GemmCommon<To, Tr> {
     static unsigned int compute_k_block(const GemmArgs &args) {
         // We don't support K blocks as we only temporarily store 32 bit results.
         return args._Ksize;
+
+        if (args._cfg && args._cfg->inner_block_size) {
+            return args._cfg->inner_block_size;
+        }
+
+        const unsigned int L1_size = args._ci->get_L1_cache_size();
+
+        // k_block: Find out how much of the larger array can be loaded into half the cache.
+        // This should account for associative caches.
+        unsigned int k_block = (L1_size / 2) / (sizeof(Toi) * (std::max(strategy::out_width(), strategy::out_height())));
+
+        // Needs to be (at least a single) multiple of the K unroll level.
+        k_block /= strategy::k_unroll();
+        k_block = std::max(k_block, 1U) * strategy::k_unroll();
+
+        // Now tune to presented problem size; this is how many blocks we need.
+        unsigned int numk_blocks = iceildiv(args._Ksize, k_block);
+
+        // So divide the space equally into that many blocks.
+        k_block = iceildiv(args._Ksize, numk_blocks);
+
+        // And round UP to the K unroll level required.
+        k_block = roundup(k_block, strategy::k_unroll());
+
+        return k_block;
     }
 
     static unsigned int compute_n_block(const GemmArgs &args) {
         if (args._cfg && args._cfg->outer_block_size) {
-            return args._cfg->outer_block_size;
+            unsigned int n_block = args._cfg->outer_block_size;
+
+            // Needs to be (at least a single) multiple of the kernel output width.
+            n_block /= strategy::out_width();
+            n_block = std::max(n_block, 1u) * strategy::out_width();
+
+            return n_block;
         }
 
         const unsigned int k_block = compute_k_block(args);
@@ -278,6 +309,17 @@ public:
     void set_quantized_bias(const int32_t *bias, size_t bias_multi_stride) override {
         _qp.bias = bias;
         _qp.bias_multi_stride = bias_multi_stride;
+    }
+
+    GemmConfig get_config() override {
+        GemmConfig c;
+
+        c.method = GemmMethod::GEMM_HYBRID;
+        c.inner_block_size = _k_block;
+        c.outer_block_size = _n_block;
+        c.filter = get_type_name<strategy>();
+
+        return c;
     }
 };
 

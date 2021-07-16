@@ -44,9 +44,7 @@ enum class GemmMethod
     GEMM_INTERLEAVED_2D,
     QUANTIZE_WRAPPER,
     QUANTIZE_WRAPPER_2D,
-    GEMM_HYBRID_QUANTIZED,
-    INDIRECT_GEMM,
-    CONVOLUTION_GEMM
+    GEMM_HYBRID_QUANTIZED
 };
 
 struct KernelDescription
@@ -113,13 +111,15 @@ public:
     bool              _indirect_input;
     Activation        _act;
     int               _maxthreads;
+    bool              _fast_mode;
     const GemmConfig *_cfg;
 
     GemmArgs(const CPUInfo *ci, unsigned int M, unsigned int N,
              unsigned int K, unsigned int Ksections, unsigned int nbatches,
              unsigned int nmulti, bool indirect_input, Activation act, const int maxthreads,
-             const GemmConfig *cfg = nullptr)
-        : _ci(ci), _Msize(M), _Nsize(N), _Ksize(K), _Ksections(Ksections), _nbatches(nbatches), _nmulti(nmulti), _indirect_input(indirect_input), _act(act), _maxthreads(maxthreads), _cfg(cfg)
+             bool fast_mode = false, const GemmConfig *cfg = nullptr)
+        : _ci(ci), _Msize(M), _Nsize(N), _Ksize(K), _Ksections(Ksections), _nbatches(nbatches), _nmulti(nmulti), _indirect_input(indirect_input), _act(act), _maxthreads(maxthreads), _fast_mode(fast_mode),
+          _cfg(cfg)
     {
     }
 };

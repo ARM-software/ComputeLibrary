@@ -30,6 +30,9 @@
 
 namespace arm_gemm
 {
+// Avoid circular dependency with arm_gemm.hpp
+struct GemmConfig;
+
 // Abstract class for the GEMM/GEMV functions.
 //
 // GEMM implementations may be "native" (never require any input
@@ -136,6 +139,10 @@ public:
     virtual void set_convolution_parameters(ConvolutionParameters)
     {
     }
+
+    /*** Introspection interface ***/
+    /* Get the configuration of this GEMM */
+    virtual GemmConfig get_config() = 0;
 
     // Destructor
     virtual ~IGemmCommon()

@@ -66,7 +66,7 @@ void CpuGemmConvolution::configure_mm(const ITensorInfo *src, const ITensorInfo 
     // Create GEMMInfo structure
     const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
                                          gemm_3d_depth, _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */,
-                                         false, GEMMLowpOutputStageInfo(), false, false, act_info);
+                                         false, GEMMLowpOutputStageInfo(), false, false, false, act_info);
 
     // Supported activations in GEMM
     const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
@@ -115,7 +115,7 @@ void CpuGemmConvolution::configure_mm(const ITensorInfo *src, const ITensorInfo 
         quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
 
         _mm_gemmlowp = std::make_unique<CpuGemmLowpMatrixMultiplyCore>();
-        _mm_gemmlowp->configure(&tmp_src, &tmp_weights, biases, dst, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info, false, false, act_info));
+        _mm_gemmlowp->configure(&tmp_src, &tmp_weights, biases, dst, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info, false, false, false, act_info));
 
         auto mm_mem_req = _mm_gemmlowp->workspace();
         for(unsigned int cont = 0; cont < mm_mem_req.size(); ++cont)
@@ -146,7 +146,7 @@ Status CpuGemmConvolution::validate_mm(const ITensorInfo *src, const ITensorInfo
     // Create GEMMInfo structure
     const GEMMInfo gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
                                         gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */,
-                                        false, GEMMLowpOutputStageInfo(), false, false, act_info);
+                                        false, GEMMLowpOutputStageInfo(), false, false, false, act_info);
 
     if(is_quantized)
     {
@@ -186,7 +186,8 @@ Status CpuGemmConvolution::validate_mm(const ITensorInfo *src, const ITensorInfo
         std::unique_ptr<ITensorInfo> weights_qa = weights->clone();
         input_qa->set_quantization_info(QuantizationInfo(iqinfo.uniform().scale, -iqinfo.uniform().offset));
         weights_qa->set_quantization_info(QuantizationInfo(wqinfo.uniform().scale, -wqinfo.uniform().offset));
-        return CpuGemmLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), biases, dst, GEMMInfo(false, false, true, gemm_3d_depth, skip_im2col, false, output_info, false, false, act_info));
+        return CpuGemmLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), biases, dst, GEMMInfo(false, false, true, gemm_3d_depth, skip_im2col, false, output_info, false, false, false,
+                                                                                                               act_info));
     }
     else
     {

@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "a32_merge_float_8x6.hpp"
-#include "a64_merge_fp16_24x8.hpp"
 #include "a64_merge_fp32_12x8.hpp"
 #include "a64_merge_s32_12x8.hpp"
 #include "a64_merge_s32_4x4.hpp"

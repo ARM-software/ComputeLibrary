@@ -542,7 +542,7 @@ void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_ge
     const CPUInfo &ci          = NEScheduler::get().cpu_info();
     unsigned int   num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fast_mode);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput>>();
@@ -556,11 +556,11 @@ void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &
                            arm_gemm::Activation activation, const AsmGemmInfo &info)
 {
     ARM_COMPUTE_UNUSED(activation);
-    Params         p           = extract_parameters(a, b, d, info);
-    const CPUInfo &ci          = NEScheduler::get().cpu_info();
-    unsigned int   num_threads = NEScheduler::get().num_threads();
+    Params             p           = extract_parameters(a, b, d, info);
+    const CPUInfo     &ci          = NEScheduler::get().cpu_info();
+    const unsigned int num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fast_mode);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();

@@ -1948,6 +1948,7 @@ public:
           _reinterpret_input_as_3d(false),
           _retain_internal_weights(false),
           _gemmlowp_output_stage(),
+          _fast_math(false),
           _fp_mixed_precision(false),
           _broadcast_bias(false),
           _pretranpose_B(true),
@@ -1967,12 +1968,13 @@ public:
      * @param[in] retain_internal_weights     (Optional) Retain the weights tensor from previous run
      * @param[in] gemmlowp_output_stage       (Optional) GEMMLowp Output stage info
      * @param[in] fp_mixed_precision          (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] fast_math                   (Optional) Use a data type of shorter width to improve performance
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
      * @param[in] constant_weights            (Optional) Weights have constant values throughout multiple executions
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
-             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool broadcast_bias = false,
+             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
              const ActivationLayerInfo &activation_info = ActivationLayerInfo(), bool constant_weights = true) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
@@ -1981,6 +1983,7 @@ public:
           _reinterpret_input_as_3d(reinterpret_input_as_3d),
           _retain_internal_weights(retain_internal_weights),
           _gemmlowp_output_stage(gemmlowp_output_stage),
+          _fast_math(fast_math),
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
           _pretranpose_B(reshape_b_only_on_first_run),
@@ -2062,6 +2065,14 @@ public:
     {
         return _fp_mixed_precision;
     };
+    /** Flag which specifies if a shorter accumulator to be used.
+     *
+     * @return True if a shorter accumulator has to be used
+     */
+    bool fast_math() const
+    {
+        return _fast_math;
+    };
     /** Flag which specifies whether to broadcast the shape of the bias tensor.
      *
      * @return True if the shape of the bias tensor is to be broadcasted.
@@ -2119,6 +2130,7 @@ private:
     bool                    _reinterpret_input_as_3d;
     bool                    _retain_internal_weights;
     GEMMLowpOutputStageInfo _gemmlowp_output_stage;
+    bool                    _fast_math;
     bool                    _fp_mixed_precision;
     bool                    _broadcast_bias;
     bool                    _pretranpose_B;

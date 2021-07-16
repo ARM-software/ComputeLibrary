@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,9 +22,10 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#ifdef ARM_COMPUTE_ENABLE_SVE
 
+#ifdef ARM_COMPUTE_ENABLE_SVE
 #include "../std_transforms_sve.hpp"
+#include "../performance_parameters.hpp"
 
 #define ARGLIST  \
     unsigned int, const unsigned int *, \
@@ -42,7 +43,8 @@ void sve_hybrid_u8u32_dot_6x4VL( ARGLIST );
 class cls_sve_hybrid_u8u32_dot_6x4VL
 {
 public:
-    typedef uint8_t operand_type;
+    typedef uint8_t lhs_operand_type;
+    typedef uint8_t rhs_operand_type;
     typedef uint32_t result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -68,7 +70,36 @@ public:
         return true;
     }
 
-    StdTransformsSVE<operand_type, result_type, 6, 4, 4> transforms = {};
+    StdTransformsSVE<rhs_operand_type, result_type, 6, 4, 4> transforms = {};
+    template<typename T>
+    static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    {
+
+        if (std::is_same<T, uint32_t>::value) {
+            switch (ci->get_cpu_model()) {
+                default:
+                    return { 31.56 };
+                case CPUModel::A510:
+                    return { 20.98 };
+                case CPUModel::V1:
+                    return { 62.19 };
+            }
+        }
+
+
+        if (std::is_same<T, uint8_t>::value) {
+            switch (ci->get_cpu_model()) {
+                default:
+                    return { 31.59, 15.67, 0.61 };
+                case CPUModel::A510:
+                    return { 22.75, 3.90, 0.47 };
+                case CPUModel::V1:
+                    return { 62.97, 19.27, 0.92 };
+            }
+        }
+
+        return { 1.0 };
+    }
 
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_u8u32_dot_6x4VL;
@@ -80,4 +111,5 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
+
 #endif // ARM_COMPUTE_ENABLE_SVE

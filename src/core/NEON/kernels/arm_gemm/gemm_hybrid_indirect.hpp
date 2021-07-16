@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,31 +55,31 @@ namespace {
 template<typename OutputStage, bool SeparateQuantize = false>
 class run_hybrid_kernel {
 public:
-    template<typename strategy, typename To, typename Tr>
-    static void run (
+    template<typename strategy, typename Tlo, typename Tro, typename Tr>
+    static inline void run (
 #ifdef CYCLE_PROFILING
         profiler &prof,
 #endif
-        const strategy &strat, unsigned int num_strings, const unsigned int *string_ptr, IndirectInputArg<To> A_arg, unsigned int M, unsigned int N,
-        unsigned int kern_k, const To *b_ptr, IndirectOutputArg<Tr> output_arg, const Tr *bias_ptr, Activation act, bool accumulate,
+        const strategy &strat, unsigned int num_strings, const unsigned int *string_ptr, IndirectInputArg<Tlo> A_arg, unsigned int M, unsigned int N,
+        unsigned int kern_k, const Tro *b_ptr, IndirectOutputArg<Tr> output_arg, const Tr *bias_ptr, Activation act, bool accumulate,
         const OutputStage &os, const int32_t *col_bias, unsigned int n_0 );
 };
 
 template<>
-template<typename strategy, typename To, typename Tr>
-void run_hybrid_kernel<Nothing, false>::run(
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
+inline void run_hybrid_kernel<Nothing, false>::run(
 #ifdef CYCLE_PROFILING
         profiler &prof,
 #endif
-        const strategy &strat, unsigned int num_strings, const unsigned int *string_ptr, IndirectInputArg<To> A_arg, unsigned int M, unsigned int N,
-        unsigned int kern_k, const To *b_ptr, IndirectOutputArg<Tr> output_arg, const Tr *bias_ptr, Activation act, bool accumulate,
+        const strategy &strat, unsigned int num_strings, const unsigned int *string_ptr, IndirectInputArg<Tlo> A_arg, unsigned int M, unsigned int N,
+        unsigned int kern_k, const Tro *b_ptr, IndirectOutputArg<Tr> output_arg, const Tr *bias_ptr, Activation act, bool accumulate,
         const Nothing &, const int32_t *, unsigned int) {
 #ifdef CYCLE_PROFILING
     auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)M * kern_k * roundup(N, strategy::out_width()));
 #endif
     UNUSED(kern_k);
 
-    /* Indirect hybrid kernels read the full width of the bias. So we need to detect the case where we are writing
+    /* Indirect hybrid kernels read the full width of the bias.  So we need to detect the case where we are writing
      * a partial block and pad the bias for that block. */
     if (bias_ptr && !accumulate && (N % strategy::out_width() != 0)) {
         /* Break N into "N_bulk" (a multiple of output width) and "N_remainder" */
@@ -112,13 +112,13 @@ void run_hybrid_kernel<Nothing, false>::run(
 }
 
 template<>
-template<typename strategy, typename To, typename Tr>
-void run_hybrid_kernel<Requantize32, false>::run(
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
+inline void run_hybrid_kernel<Requantize32, false>::run(
 #ifdef CYCLE_PROFILING
         profiler &prof,
 #endif
-        const strategy &strat, unsigned int num_strings, const unsigned int *string_ptr, IndirectInputArg<To> A_arg, unsigned int M, unsigned int N,
-        unsigned int kern_k, const To *b_ptr, IndirectOutputArg<Tr> output_arg, const Tr *, Activation, bool,
+        const strategy &strat, unsigned int num_strings, const unsigned int *string_ptr, IndirectInputArg<Tlo> A_arg, unsigned int M, unsigned int N,
+        unsigned int kern_k, const Tro *b_ptr, IndirectOutputArg<Tr> output_arg, const Tr *, Activation, bool,
         const Requantize32 &os, const int32_t *col_bias, unsigned int n_0 ) {
 #ifdef CYCLE_PROFILING
     auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)M * kern_k * roundup(N, strategy::out_width()));
@@ -129,13 +129,13 @@ void run_hybrid_kernel<Requantize32, false>::run(
 }
 
 template<>
-template<typename strategy, typename To, typename Tr>
-void run_hybrid_kernel<Requantize32, true>::run(
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
+inline void run_hybrid_kernel<Requantize32, true>::run(
 #ifdef CYCLE_PROFILING
         profiler &prof,
 #endif
-        const strategy &strat, unsigned int num_strings, const unsigned int *string_ptr, IndirectInputArg<To> A_arg, unsigned int M, unsigned int N,
-        unsigned int kern_k, const To *b_ptr, IndirectOutputArg<Tr> output_arg, const Tr *, Activation, bool,
+        const strategy &strat, unsigned int num_strings, const unsigned int *string_ptr, IndirectInputArg<Tlo> A_arg, unsigned int M, unsigned int N,
+        unsigned int kern_k, const Tro *b_ptr, IndirectOutputArg<Tr> output_arg, const Tr *, Activation, bool,
         const Requantize32 &os, const int32_t *col_bias, unsigned int n_0 ) {
     UNUSED(kern_k);
     // On this route we will only process one kernel height at a time and will make sure this happens in the driver loop.
@@ -183,7 +183,8 @@ void run_hybrid_kernel<Requantize32, true>::run(
 // Implementation of the GemmCommon abstract class.
 template<typename strategy, typename To, typename Tr, typename OutputStage = Nothing, bool SeparateQuantize = false>
 class GemmHybridIndirect : public GemmCommon<To, Tr> {
-    typedef typename strategy::operand_type Toi;
+    typedef typename strategy::lhs_operand_type Tloi;
+    typedef typename strategy::rhs_operand_type Troi;
     typedef typename strategy::result_type Tri;
 
     GemmArgs           _args;
@@ -201,7 +202,7 @@ class GemmHybridIndirect : public GemmCommon<To, Tr> {
     const unsigned int _Mround;
 
     /* Pretransposed buffer. */
-    const Toi *_B_transposed=nullptr;
+    const Troi *_B_transposed=nullptr;
 
     /* Indirect parameters.  _indirect_buf doubles as a flag to indicate that "indirect" transform should be used. */
     const To * const * const * _indirect_buf = nullptr;
@@ -233,7 +234,7 @@ class GemmHybridIndirect : public GemmCommon<To, Tr> {
         }
 
         if (args._cfg && args._cfg->inner_block_size) {
-            return args._cfg->inner_block_size;
+            return roundup(args._cfg->inner_block_size, strategy::k_unroll());
         }
 
         // Experimental data suggests an optimal block size of 512 for FP32 (scaling accordingly for other
@@ -356,8 +357,8 @@ public:
 
         // In convolution mode, we need input pointers.
         if (_convolver) {
-            in_row_ptrs.resize(strategy::out_height() * _args._Ksections, nullptr);
-            in_row_strings.resize(_args._Ksections, nullptr);
+            in_row_ptrs = std::vector<const To *>(strategy::out_height() * _args._Ksections, nullptr);
+            in_row_strings = std::vector<const To * const *>(_args._Ksections, nullptr);
 
             for (unsigned int i=0; i<_args._Ksections; i++) {
                 in_row_strings[i] = &(in_row_ptrs[i * strategy::out_height()]);
@@ -371,7 +372,7 @@ public:
 
         /* Make sure we've been set up correctly. */
         assert(_B_transposed);
-        static_assert(std::is_same<To, Toi>::value, "gemm_native: Operand types must be the same.");
+        static_assert(std::is_same<To, Tloi>::value, "gemm_native: Operand types must be the same.");
 //        static_assert(std::is_same<Tr, Tri>::value, "gemm_native: Result types must be the same.");
 
         /* For now, each work item implies all the K for a given output
@@ -422,7 +423,7 @@ public:
                 const unsigned int nmax    = std::min(n0 + _n_block, _args._Nsize);
                 const unsigned int multi   = p.dim(3);
 
-                const Toi *b_panel = _B_transposed +
+                const Troi *b_panel = _B_transposed +
                                      (multi * roundup(_args._Nsize, strategy::out_width()) * _Ktotal) +
                                      (k0 * roundup(_args._Nsize, strategy::out_width())) +
                                      (n0 * kern_k);
@@ -510,7 +511,7 @@ public:
 
     size_t get_B_pretransposed_array_size() const override {
         // Start with actual pretransposed buffer...
-        size_t size = roundup(_args._Nsize, strategy::out_width()) * _Ktotal * _args._nmulti * sizeof(Toi);
+        size_t size = roundup(_args._Nsize, strategy::out_width()) * _Ktotal * _args._nmulti * sizeof(Troi);
 
         // Space for result row pointers (not strictly needed any more but retained for indirect output testing)
         size += _args._Msize * _args._nbatches * _args._nmulti * sizeof(const Tr *);
@@ -536,7 +537,7 @@ public:
 
         // Put the transposed data after the column sums - in non-transposing cases get_col_sum_size() == 0
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(in_buffer);
-        Toi *buffer = reinterpret_cast<Toi *>(buffer_int + get_col_sum_size());
+        Troi *buffer = reinterpret_cast<Troi *>(buffer_int + get_col_sum_size());
         _B_transposed = buffer;
 
         strategy strat(_args._ci);
@@ -548,47 +549,55 @@ public:
                 /* Figure out the size of each block. */
                 unsigned int k_size = kmax - k0;
 
-                // We need to insert padding at the end of each K section.
-                // The computation needed is a little delicate - the coordinates from the block walker are expressed in
-                // terms of the full, padded, _Ktotal.
-                // But we need to transform each section with reference to the original, unpadded, input, letting the
-                // transform pad each section as needed.
+                if (_args._Ksections > 1) {
+                    // We need to insert padding at the end of each K section.
+                    // The computation needed is a little delicate - the coordinates from the block walker are expressed in
+                    // terms of the full, padded, _Ktotal.
+                    // But we need to transform each section with reference to the original, unpadded, input, letting the
+                    // transform pad each section as needed.
 
-                // This is needed for computations below.
-                const unsigned int rounded_section_size = roundup(_args._Ksize, strategy::k_unroll());
+                    // This is needed for computations below.
+                    const unsigned int rounded_section_size = roundup(_args._Ksize, strategy::k_unroll());
 
-                // The expected output format is also an entire <out_width> columns interleaved, then the next set of
-                // columns, and so on.  This means, as we are breaking it up vertically, we have to do it one column at
-                // a time.
-                for (unsigned int x0=0; x0 < _args._Nsize; x0 += strategy::out_width() ){
-                    unsigned int xmax = std::min(x0 + strategy::out_width(), _args._Nsize);
+                    // The expected output format is also an entire <out_width> columns interleaved, then the next set of
+                    // columns, and so on.  This means, as we are breaking it up vertically, we have to do it one column at
+                    // a time.
+                    for (unsigned int x0=0; x0 < _args._Nsize; x0 += strategy::out_width() ){
+                        unsigned int xmax = std::min(x0 + strategy::out_width(), _args._Nsize);
 
-                    // Track where we are and how much work is left.
-                    unsigned int kpos  = k0;
-                    unsigned int kleft = k_size;
+                        // Track where we are and how much work is left.
+                        unsigned int kpos  = k0;
+                        unsigned int kleft = k_size;
 
-                    while (kleft) {
-                        // Which section are we in?  Based on the rounded-up section size.
-                        unsigned int k_section_base = kpos / rounded_section_size;
-                        // How far into the section are we?
-                        unsigned int k_offset = kpos - (k_section_base * rounded_section_size);
+                        while (kleft) {
+                            // Which section are we in?  Based on the rounded-up section size.
+                            unsigned int k_section_base = kpos / rounded_section_size;
+                            // How far into the section are we?
+                            unsigned int k_offset = kpos - (k_section_base * rounded_section_size);
 
-                        // We will either copy the rest of this section, or to the end of the requested length.
-                        unsigned int k_length = std::min(_args._Ksize - k_offset, kleft);
+                            // We will either copy the rest of this section, or to the end of the requested length.
+                            unsigned int k_length = std::min(_args._Ksize - k_offset, kleft);
 
-                        strat.transforms.PrepareB(buffer, B + (multi * B_multi_stride), ldb,
-                                                  x0, xmax,
-                                                  (k_section_base * _args._Ksize) + k_offset,               // K starting point - compute row to read based on our section and the true section length.
-                                                  (k_section_base * _args._Ksize) + k_offset + k_length);   // K end point - starting point plus length computed above.
+                            strat.transforms.PrepareB(buffer, B + (multi * B_multi_stride), ldb,
+                                                      x0, xmax,
+                                                      (k_section_base * _args._Ksize) + k_offset,               // K starting point - compute row to read based on our section and the true section length.
+                                                      (k_section_base * _args._Ksize) + k_offset + k_length);   // K end point - starting point plus length computed above.
 
-                        // We need to modify our position based on the ROUNDED version of what we just did.
-                        unsigned int padded_length = roundup(k_length, strategy::k_unroll());
+                            // We need to modify our position based on the ROUNDED version of what we just did.
+                            unsigned int padded_length = roundup(k_length, strategy::k_unroll());
 
-                        buffer += strategy::out_width() * padded_length;
+                            buffer += strategy::out_width() * padded_length;
 
-                        kpos  += padded_length;
-                        kleft -= padded_length;
+                            kpos  += padded_length;
+                            kleft -= padded_length;
+                        }
                     }
+                } else {
+                // In the single K section case, can process the whole lot in one go.
+                // Caution: 'blockwalker::kmax()' rounds up, so clamp to valid _Ksize.
+                    strat.transforms.PrepareB(buffer, B + (multi * B_multi_stride), ldb,
+                                              0, _args._Nsize, k0, std::min(kmax, _args._Ksize));
+                    buffer += roundup(_args._Nsize, strategy::out_width()) * roundup(kmax-k0, strategy::k_unroll());
                 }
             }
         }
@@ -597,12 +606,17 @@ public:
     void set_pretransposed_B_data(void *in_buffer) override {
         // Put the transposed data after the column sums - in non-transposing cases get_col_sum_size() == 0
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(in_buffer);
-        _B_transposed = reinterpret_cast<Toi *>(buffer_int + get_col_sum_size());
+        _B_transposed = reinterpret_cast<Troi *>(buffer_int + get_col_sum_size());
         _col_bias = reinterpret_cast<int32_t *>(in_buffer);
     }
 
-    // Estimate cycles for given problem given provided parameters
-    static uint64_t estimate_cycles(const GemmArgs &args, const PerformanceParameters &params, const OutputStage &os = {} ) {
+    // Estimate cycles for given problem given provided parameters.
+    // "perf_type" is a type to pass along to get_performance_parameters to get the right set of performance
+    // parameters - it's arbitrary but usually either the input or output type.
+    template <typename perf_type>
+    static uint64_t estimate_cycles(const GemmArgs &args, const OutputStage &os = {}) {
+        const PerformanceParameters params = strategy::template get_performance_parameters<perf_type>(args._ci);
+
         // Note: Current hybrid kernels don't actually round up height (they
         // have paths for each possible height).  Might need to make this
         // configurable in future.
@@ -665,6 +679,17 @@ public:
     void set_convolution_parameters(ConvolutionParameters parms) override {
         assert(parms.input_channels == _args._Ksize);
         _convolver = std::unique_ptr<convolver<To>>(new convolver<To>(parms));
+    }
+
+    GemmConfig get_config() override {
+        GemmConfig c;
+
+        c.method = GemmMethod::GEMM_HYBRID;
+        c.inner_block_size = _k_block;
+        c.outer_block_size = _n_block;
+        c.filter = get_type_name<strategy>();
+
+        return c;
     }
 };
 

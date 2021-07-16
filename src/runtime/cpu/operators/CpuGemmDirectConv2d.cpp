@@ -86,6 +86,7 @@ cpu::AsmGemmInfo init_assembly_metadata(const Conv2dInfo &info, bool is_indirect
     asm_info.padding_left            = info.conv_info.pad_left();
     asm_info.padding_value           = 0.f;
     asm_info.negated_offsets         = false;
+    asm_info.fast_mode               = info.enable_fast_math;
     return asm_info;
 }
 } // namespace
