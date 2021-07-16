@@ -1,5 +1,5 @@
 //
-// Copyright © 2020 ARM Ltd. All rights reserved.
+// Copyright © 2020-2021 ARM Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 
@@ -20,10 +20,12 @@ func globalFlags(ctx android.BaseContext) []string {
         cppflags = append(cppflags, "-fno-addrsig")
     }
 
-   if (ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11") &&
-      (ctx.AConfig().DevicePrimaryArchType().String() == "armv8-2a") {
-        cppflags = append(cppflags, "-march=armv8.2-a+fp16")
-      }
+   if ((ctx.AConfig().PlatformVersionName() != "P" || ctx.AConfig().PlatformVersionName() != "9") && (ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11")) {
+      if (ctx.AConfig().DevicePrimaryArchType().String() == "armv8-2a") {
+                cppflags = append(cppflags, "-march=armv8.2-a+fp16")
+           }
+   }
+
 
     data_types := strings.Split(ctx.AConfig().GetenvWithDefault("COMPUTE_LIB_DATA_TYPE", "ALL"), ",")
 
