@@ -9,7 +9,6 @@ import (
     "android/soong/android"
     "android/soong/cc"
     "strings"
-    "fmt"
 )
 
 func globalFlags(ctx android.BaseContext) []string {
@@ -21,11 +20,8 @@ func globalFlags(ctx android.BaseContext) []string {
         cppflags = append(cppflags, "-fno-addrsig")
     }
 
-    if ctx.AConfig().PlatformVersionName() == "P" || ctx.AConfig().PlatformVersionName() == "9" {
-      fmt.Println("!! This is Android P!!")
-    } else if ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11" {
-       fmt.Println("!! This is Android R!!")
-       if ctx.AConfig().DevicePrimaryArchType().String() == "armv8-2a" {
+    if ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11" {
+       if ctx.AConfig().Targets[Android][0].Arch.ArchType.String() == "armv8-2a" {
          cppflags = append(cppflags, "-march=armv8.2-a+fp16")
        }
     }
