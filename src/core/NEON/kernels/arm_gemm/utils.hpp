@@ -164,9 +164,15 @@ struct IndirectInputArg {
 };
 
 namespace utils {
+
+// get_vector_length(): Returns SVE vector length for type "T".
+//
+// It is required that this can be compiled by a compiler in non-SVE mode, but it must be prevented from running (at
+// runtime) if SVE is not enabled.  Typically this is used by switchyard/driver code which is built in normal mode
+// which then calls SVE kernels (compiled accordingly) iff SVE is detected at runtime.
 template <typename T>
 inline unsigned long get_vector_length() {
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(__aarch64__)
     uint64_t vl;
 
     __asm __volatile (
@@ -178,18 +184,20 @@ inline unsigned long get_vector_length() {
     );
 
     return vl / sizeof(T);
-#else // !defined(ARM_COMPUTE_ENABLE_SVE)
+#else // !defined(__aarch64__)
     return 16 / sizeof(T);
-#endif // defined(ARM_COMPUTE_ENABLE_SVE)
+#endif // defined(__aarch64__)
 }
+
+// get_vector_length(VLType): Returns vector length for type "T".
+//
+// This has the same requirements and constraints as the SVE-only form above, so we call into that code for SVE.
 
 template <typename T>
 inline unsigned long get_vector_length(VLType vl_type) {
   switch (vl_type) {
-#if defined(ARM_COMPUTE_ENABLE_SVE)
     case VLType::SVE:
       return get_vector_length<T>();
-#endif // defined(ARM_COMPUTE_ENABLE_SVE)
     default:
       return 16 / sizeof(T);
   }
