@@ -56,12 +56,12 @@ NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryMana
 NEGEMMConvolutionLayer::~NEGEMMConvolutionLayer() = default;
 
 void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                       const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
+                                       const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     _impl->weights = weights;
     _impl->op      = std::make_unique<cpu::CpuGemmConvolution>();
-    _impl->op->configure(input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info, num_groups);
+    _impl->op->configure(input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
 
     _impl->run_pack =
     {
@@ -80,9 +80,9 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 }
 
 Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                        const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
+                                        const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
-    return cpu::CpuGemmConvolution::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups);
+    return cpu::CpuGemmConvolution::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
 }
 
 void NEGEMMConvolutionLayer::run()
