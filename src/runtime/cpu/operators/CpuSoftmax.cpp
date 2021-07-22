@@ -160,11 +160,11 @@ void CpuSoftmaxGeneric<IS_LOG>::run(ITensorPack &tensors)
     auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    CpuAuxTensorHandler tmp(offset_int_vec(InternalTensorIdx::TMP), _tmp, tensors, false);
-    CpuAuxTensorHandler max(offset_int_vec(InternalTensorIdx::MAX), _max, tensors, false);
+    CpuAuxTensorHandler tmp(offset_int_vec(InternalTensorIdx::TMP), _tmp, tensors, true);
+    CpuAuxTensorHandler max(offset_int_vec(InternalTensorIdx::MAX), _max, tensors, true);
 
-    CpuAuxTensorHandler input_permuted(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), _input_permuted, tensors, false);
-    CpuAuxTensorHandler output_permuted(offset_int_vec(InternalTensorIdx::PERMUTED_DST), _output_permuted, tensors, false);
+    CpuAuxTensorHandler input_permuted(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), _input_permuted, tensors, true);
+    CpuAuxTensorHandler output_permuted(offset_int_vec(InternalTensorIdx::PERMUTED_DST), _output_permuted, tensors, true);
 
     ITensorPack max_pack;
     ITensorPack softmax_pack;
