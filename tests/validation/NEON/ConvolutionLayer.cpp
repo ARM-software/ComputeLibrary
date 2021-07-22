@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/helpers/MemoryHelpers.h"
+#include "src/runtime/cpu/operators/CpuConv2d.h"
 #include "src/runtime/cpu/operators/CpuGemmConvolution.h"
 #include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
 #include "src/runtime/cpu/operators/CpuWinogradConv2d.h"
@@ -142,7 +143,7 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                            framework::dataset::make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
                input_info, weights_info, output_info, conv_info, fast_math, expected)
 {
-    ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
+    ConvolutionMethod is_valid = cpu::CpuConv2d::get_convolution_method(&input_info.clone()->set_is_resizable(true),
                                                                             &weights_info.clone()->set_is_resizable(true),
                                                                             &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);

@@ -879,6 +879,13 @@
           ]
         }
       },
+      "Convolution": {
+        "files": {
+          "operator": [
+            "src/runtime/cpu/operators/CpuConv2d.cpp"
+          ]
+        }
+      },
       "Copy": {
         "files": {
           "operator": [

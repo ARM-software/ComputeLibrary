@@ -630,6 +630,7 @@ cc_library_static {
         "src/runtime/cpu/operators/CpuAdd.cpp",
         "src/runtime/cpu/operators/CpuCast.cpp",
         "src/runtime/cpu/operators/CpuConcatenate.cpp",
+        "src/runtime/cpu/operators/CpuConv2d.cpp",
         "src/runtime/cpu/operators/CpuConvertFullyConnectedWeights.cpp",
         "src/runtime/cpu/operators/CpuCopy.cpp",
         "src/runtime/cpu/operators/CpuDepthwiseConv2d.cpp",

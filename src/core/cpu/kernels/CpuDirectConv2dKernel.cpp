@@ -987,7 +987,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
     return std::make_pair(err, win);
 }
 
-bool have_zero_x_internal_padding(ITensorInfo *src, ITensorInfo *weights)
+bool have_zero_x_internal_padding(ITensorInfo *src, const ITensorInfo *weights)
 {
     return (src->padding().left == 0 && weights->padding().left == 0 && src->padding().right == 0 && weights->padding().right == 0);
 }

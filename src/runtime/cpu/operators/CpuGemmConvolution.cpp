@@ -575,8 +575,7 @@ void CpuGemmConvolution::prepare(ITensorPack &tensors)
     if(!_is_prepared)
     {
         // Run weights reshaping and mark original weights tensor as unused
-        ITensor            *weights_reshaped_p = utils::cast::polymorphic_downcast<ITensor *>(tensors.get_tensor(offset_int_vec(WeightsReshaped)));
-        CpuAuxTensorHandler weights_reshaped(_weights_reshaped, *weights_reshaped_p);
+        CpuAuxTensorHandler weights_reshaped(offset_int_vec(WeightsReshaped), _weights_reshaped, tensors);
         auto                weights = tensors.get_const_tensor(TensorType::ACL_SRC_1);
         ITensorPack         pack =
         {
