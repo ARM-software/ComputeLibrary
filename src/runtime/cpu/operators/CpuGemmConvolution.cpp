@@ -208,7 +208,7 @@ Status CpuGemmConvolution::validate_gemm3d(const ITensorInfo *input_info, const 
     const TensorInfo dummy_weights_info(TensorShape(4U, 4U), 1, data_type, weights_info->quantization_info());
     const TensorInfo dummy_output_info(TensorShape(4U, 4U, gemm_3d_depth), 1, data_type, input_info->quantization_info());
 
-    return validate_mm(&dummy_input_info, &dummy_weights_info, nullptr, &dummy_output_info, act_info, gemm_3d_depth, skip_im2col);
+    return validate_mm(&dummy_input_info, &dummy_weights_info, nullptr, &dummy_output_info, act_info, false, gemm_3d_depth, skip_im2col);
 }
 
 void CpuGemmConvolution::configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
