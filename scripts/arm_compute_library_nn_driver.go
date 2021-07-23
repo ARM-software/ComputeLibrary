@@ -21,9 +21,12 @@ func globalFlags(ctx android.BaseContext) []string {
     }
 
     if ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11" {
-       if ctx.AConfig().Targets[Android][0].Arch.ArchType.String() == "armv8-2a" {
-         cppflags = append(cppflags, "-march=armv8.2-a+fp16")
-       }
+      for _, a := range ctx.DeviceConfig().Arches() {
+        theArch := a.ArchType.String()
+        if theArch == "armv8-2a" {
+          cppflags = append(cppflags, "-march=armv8.2-a+fp16")
+        }
+      }
     }
 
     data_types := strings.Split(ctx.AConfig().GetenvWithDefault("COMPUTE_LIB_DATA_TYPE", "ALL"), ",")
