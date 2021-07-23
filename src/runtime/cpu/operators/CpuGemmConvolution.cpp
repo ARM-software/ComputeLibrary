@@ -488,8 +488,6 @@ void CpuGemmConvolution::run(ITensorPack &tensors)
     prepare(tensors);
 
     auto src               = tensors.get_const_tensor(ACL_SRC_0);
-    auto weights           = tensors.get_const_tensor(ACL_SRC_1);
-    auto biases            = tensors.get_const_tensor(ACL_SRC_2);
     auto dst               = tensors.get_tensor(ACL_DST);
     auto gemm_input_to_use = src;
 
@@ -525,13 +523,9 @@ void CpuGemmConvolution::run(ITensorPack &tensors)
     }
 
     // Runs CpuGemm or CpuGemmLowpMatrixMultiplyCore functions
-    ITensorPack pack_mm =
-    {
-        { TensorType::ACL_SRC_0, gemm_input_to_use },
-        { TensorType::ACL_SRC_1, weights },
-        { TensorType::ACL_SRC_2, biases },
-        { TensorType::ACL_DST, gemm_output_to_use }
-    };
+    ITensorPack pack_mm = tensors;
+    pack_mm.add_const_tensor(TensorType::ACL_SRC_0, gemm_input_to_use);
+    pack_mm.add_tensor(TensorType::ACL_DST, gemm_output_to_use);
     if(_is_quantized)
     {
         // Run gemmlowp

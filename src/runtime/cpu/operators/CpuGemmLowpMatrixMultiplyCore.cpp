@@ -502,6 +502,7 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITens
 void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
 {
     prepare(tensors);
+
     auto a        = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     auto b        = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto c        = tensors.get_const_tensor(TensorType::ACL_SRC_2);
