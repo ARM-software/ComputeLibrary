@@ -171,7 +171,10 @@ void JSONPrinter::print_info(const std::string &info)
 
 void JSONPrinter::print_profiler_header(const std::string &header_data)
 {
-    print_separator(_first_test_entry);
+    if(header_data.size() > 0)
+    {
+        print_separator(_first_test_entry);
+    }
     *_stream << header_data;
 }
 
