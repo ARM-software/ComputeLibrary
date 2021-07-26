@@ -177,6 +177,7 @@ namespace opencl
 {
 const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
 {
+    // Common Kernels
     { "activation_layer", "common/activation_layer.cl" },
     { "activation_layer_quant", "common/activation_layer_quant.cl" },
     { "activation_layer_quant_f32", "common/activation_layer_quant.cl" },
@@ -184,20 +185,12 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "arg_min_max_y", "common/arg_min_max.cl" },
     { "arg_min_max_z", "common/arg_min_max.cl" },
     { "arg_min_max_w", "common/arg_min_max.cl" },
-    { "batch_to_space_nchw", "nchw/batch_to_space.cl" },
-    { "batch_to_space_static_nchw", "nchw/batch_to_space.cl" },
-    { "batch_to_space_nhwc", "nhwc/batch_to_space.cl" },
-    { "batch_to_space_static_nhwc", "nhwc/batch_to_space.cl" },
-    { "batchnormalization_layer_nchw", "nchw/batchnormalization_layer.cl" },
-    { "batchnormalization_layer_nhwc", "nhwc/batchnormalization_layer.cl" },
     { "bitwise_or", "common/bitwise_op.cl" },
     { "bitwise_and", "common/bitwise_op.cl" },
     { "bitwise_xor", "common/bitwise_op.cl" },
     { "bitwise_not", "common/bitwise_op.cl" },
     { "bounding_box_transform", "common/bounding_box_transform.cl" },
     { "bounding_box_transform_quantized", "common/bounding_box_transform_quantized.cl" },
-    { "channel_shuffle_nchw", "nchw/channel_shuffle.cl" },
-    { "channel_shuffle_nhwc", "nhwc/channel_shuffle.cl" },
     { "compare_equal", "common/comparisons.cl" },
     { "compare_equal_quantized", "common/comparisons.cl" },
     { "compare_notequal", "common/comparisons.cl" },
@@ -223,21 +216,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "crop_tensor", "common/crop_tensor.cl" },
     { "deconvolution_reshape", "common/deconvolution_layer.cl" },
     { "deconvolution_upsample", "common/deconvolution_layer.cl" },
-    { "depth_to_space_nchw", "nchw/depth_to_space.cl" },
-    { "depth_to_space_nhwc", "nhwc/depth_to_space.cl" },
     { "dequantization_layer", "common/dequantization_layer.cl" },
-    { "dequantization_layer_per_channel_nhwc", "nhwc/dequantization_layer.cl" },
-    { "dequantization_layer_per_channel_nchw", "nchw/dequantization_layer.cl" },
-    { "dwc_native_fp_nhwc", "nhwc/dwc_native_fp_nhwc.cl" },
-    { "dwc_native_quantized_nhwc", "nhwc/dwc_native_quantized_nhwc.cl" },
-    { "direct_convolution_nhwc", "nhwc/direct_convolution.cl" },
-    { "direct_convolution1x1", "nchw/direct_convolution1x1.cl" },
-    { "direct_convolution1x1_f32_bifrost", "nchw/direct_convolution1x1.cl" },
-    { "direct_convolution3x3", "nchw/direct_convolution3x3.cl" },
-    { "direct_convolution3x3_f32_bifrost", "nchw/direct_convolution3x3.cl" },
-    { "direct_convolution5x5", "nchw/direct_convolution5x5.cl" },
-    { "direct_convolution5x5_f32_bifrost", "nchw/direct_convolution5x5.cl" },
-    { "direct_convolution_quantized", "nchw/direct_convolution_quantized.cl" },
     { "elementwise_operation_ADD", "common/elementwise_operation.cl" },
     { "elementwise_operation_SUB", "common/elementwise_operation.cl" },
     { "elementwise_operation_MAX", "common/elementwise_operation.cl" },
@@ -332,15 +311,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemmlowp_output_stage_quantize_down_float", "common/gemmlowp.cl" },
     { "generate_proposals_compute_all_anchors", "common/generate_proposals.cl" },
     { "generate_proposals_compute_all_anchors_quantized", "common/generate_proposals_quantized.cl" },
-    { "im2col1x1_stridex1_nchw", "nchw/im2col.cl" },
-    { "im2col3x3_nchw", "nchw/im2col.cl" },
-    { "im2col5x5_nchw", "nchw/im2col.cl" },
-    { "im2col11x11_padx0_pady0_nchw", "nchw/im2col.cl" },
-    { "im2col_generic_nchw", "nchw/im2col.cl" },
-    { "im2col_generic_padx0_pady0_nchw", "nchw/im2col.cl" },
-    { "im2col3x3_nhwc", "nhwc/im2col.cl" },
-    { "im2col9x9_nhwc", "nhwc/im2col.cl" },
-    { "im2col_generic_nhwc", "nhwc/im2col.cl" },
     { "instance_normalization", "common/instance_normalization.cl" },
     { "compute_mean_var", "common/instance_normalization.cl" },
     { "l2_normalize_x", "common/l2_normalize.cl" },
@@ -351,14 +321,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "memset", "common/memset.cl" },
     { "minmax_layer", "common/minmax_layer.cl" },
     { "non_max_suppression", "common/nonmax.cl" },
-    { "normalization_layer_cross_map_nchw", "nchw/normalization_layer.cl" },
-    { "normalization_layer_cross_map_nhwc", "nhwc/normalization_layer.cl" },
-    { "normalization_layer_in_map_nchw", "nchw/normalization_layer.cl" },
-    { "normalization_layer_in_map_nhwc", "nhwc/normalization_layer.cl" },
-    { "normalize_planar_yuv_layer_nchw", "nchw/normalize_planar_yuv_layer.cl" },
-    { "normalize_planar_yuv_layer_nhwc", "nhwc/normalize_planar_yuv_layer.cl" },
-    { "normalize_planar_yuv_layer_q8_nchw", "nchw/normalize_planar_yuv_layer_quantized.cl" },
-    { "normalize_planar_yuv_layer_q8_nhwc", "nhwc/normalize_planar_yuv_layer_quantized.cl" },
     { "pad_layer_constant", "common/pad_layer.cl" },
     { "pad_layer_symmetric_reflect", "common/pad_layer.cl" },
     { "permute", "common/permute.cl" },
@@ -370,14 +332,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "pooling_layer_3", "common/pooling_layer.cl" },
     { "pooling_layer_optimized_3", "common/pooling_layer.cl" },
     { "pooling_layer_7", "common/pooling_layer.cl" },
-    { "pooling_layer_MxN_nchw", "nchw/pooling_layer.cl" },
-    { "pooling_layer_MxN_nhwc", "nhwc/pooling_layer.cl" },
-    { "pooling_layer_2x2_nhwc", "nhwc/pooling_layer.cl" },
-    { "pooling_layer_2_nchw_indices_fp32", "nchw/pooling_layer.cl" },
-    { "pooling_layer_2_nchw_indices_fp16", "nchw/pooling_layer.cl" },
-    { "pooling_layer_MxN_quantized_nhwc", "nhwc/pooling_layer_quantized.cl" },
-    { "pooling_layer_MxN_quantized_nchw", "nchw/pooling_layer_quantized.cl" },
-    { "prior_box_layer_nchw", "nchw/prior_box_layer.cl" },
     { "qlstm_layer_normalization", "common/qlstm_layer_normalization.cl" },
     { "quantization_layer", "common/quantization_layer.cl" },
     { "range", "common/range.cl" },
@@ -387,24 +341,12 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "reduction_operation_y", "common/reduction_operation.cl" },
     { "reduction_operation_z", "common/reduction_operation.cl" },
     { "reduction_operation_w", "common/reduction_operation.cl" },
-    { "remap_nearest_neighbour_nchw", "nchw/remap.cl" },
-    { "remap_bilinear_nchw", "nchw/remap.cl" },
-    { "remap_nearest_neighbour_nhwc", "nhwc/remap.cl" },
-    { "remap_bilinear_nhwc", "nhwc/remap.cl" },
-    { "reorg_layer_nchw", "nchw/reorg_layer.cl" },
-    { "reorg_layer_nhwc", "nhwc/reorg_layer.cl" },
     { "reshape_layer", "common/reshape_layer.cl" },
     { "reshape_to_columns", "common/convolution_layer.cl" },
     { "reverse", "common/reverse.cl" },
     { "roi_align_layer", "common/roi_align_layer.cl" },
     { "roi_align_layer_quantized", "common/roi_align_layer_quantized.cl" },
     { "roi_pooling_layer", "common/roi_pooling_layer.cl" },
-    { "scale_nearest_neighbour_nchw", "nchw/scale.cl" },
-    { "scale_nearest_neighbour_nhwc", "nhwc/scale.cl" },
-    { "scale_bilinear_nchw", "nchw/scale.cl" },
-    { "scale_bilinear_nhwc", "nhwc/scale.cl" },
-    { "scale_bilinear_quantized_nchw", "nchw/scale_quantized.cl" },
-    { "scale_bilinear_quantized_nhwc", "nhwc/scale_quantized.cl" },
     { "select_same_rank", "common/select.cl" },
     { "select_different_rank_2", "common/select.cl" },
     { "select_different_rank_n", "common/select.cl" },
@@ -413,19 +355,50 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "softmax_layer_max_shift_exp_sum_quantized_serial", "common/softmax_layer_quantized.cl" },
     { "softmax_layer_max_shift_exp_sum_quantized_parallel", "common/softmax_layer_quantized.cl" },
     { "softmax_layer_max_shift_exp_sum_serial", "common/softmax_layer.cl" },
-    { "space_to_batch_nchw", "nchw/space_to_batch.cl" },
-    { "space_to_batch_static_nchw", "nchw/space_to_batch.cl" },
-    { "space_to_batch_nhwc", "nhwc/space_to_batch.cl" },
-    { "space_to_batch_static_nhwc", "nhwc/space_to_batch.cl" },
-    { "space_to_depth_nchw", "nchw/space_to_depth.cl" },
-    { "space_to_depth_nhwc", "nhwc/space_to_depth.cl" },
     { "softmax_layer_max_shift_exp_sum_parallel", "common/softmax_layer.cl" },
     { "stack_layer", "common/stack_layer.cl" },
     { "strided_slice", "common/slice_ops.cl" },
     { "tile", "common/tile.cl" },
     { "transpose", "common/transpose.cl" },
+#ifdef ENABLE_NCHW_KERNELS
+    { "batch_to_space_nchw", "nchw/batch_to_space.cl" },
+    { "batch_to_space_static_nchw", "nchw/batch_to_space.cl" },
+    { "batchnormalization_layer_nchw", "nchw/batchnormalization_layer.cl" },
+    { "channel_shuffle_nchw", "nchw/channel_shuffle.cl" },
+    { "depth_to_space_nchw", "nchw/depth_to_space.cl" },
+    { "dequantization_layer_per_channel_nchw", "nchw/dequantization_layer.cl" },
+    { "direct_convolution1x1", "nchw/direct_convolution1x1.cl" },
+    { "direct_convolution1x1_f32_bifrost", "nchw/direct_convolution1x1.cl" },
+    { "direct_convolution3x3", "nchw/direct_convolution3x3.cl" },
+    { "direct_convolution3x3_f32_bifrost", "nchw/direct_convolution3x3.cl" },
+    { "direct_convolution5x5", "nchw/direct_convolution5x5.cl" },
+    { "direct_convolution5x5_f32_bifrost", "nchw/direct_convolution5x5.cl" },
+    { "direct_convolution_quantized", "nchw/direct_convolution_quantized.cl" },
+    { "im2col1x1_stridex1_nchw", "nchw/im2col.cl" },
+    { "im2col3x3_nchw", "nchw/im2col.cl" },
+    { "im2col5x5_nchw", "nchw/im2col.cl" },
+    { "im2col11x11_padx0_pady0_nchw", "nchw/im2col.cl" },
+    { "im2col_generic_nchw", "nchw/im2col.cl" },
+    { "im2col_generic_padx0_pady0_nchw", "nchw/im2col.cl" },
+    { "normalization_layer_cross_map_nchw", "nchw/normalization_layer.cl" },
+    { "normalization_layer_in_map_nchw", "nchw/normalization_layer.cl" },
+    { "normalize_planar_yuv_layer_nchw", "nchw/normalize_planar_yuv_layer.cl" },
+    { "normalize_planar_yuv_layer_q8_nchw", "nchw/normalize_planar_yuv_layer_quantized.cl" },
+    { "pooling_layer_MxN_nchw", "nchw/pooling_layer.cl" },
+    { "pooling_layer_2_nchw_indices_fp32", "nchw/pooling_layer.cl" },
+    { "pooling_layer_2_nchw_indices_fp16", "nchw/pooling_layer.cl" },
+    { "pooling_layer_MxN_quantized_nchw", "nchw/pooling_layer_quantized.cl" },
+    { "prior_box_layer_nchw", "nchw/prior_box_layer.cl" },
+    { "remap_nearest_neighbour_nchw", "nchw/remap.cl" },
+    { "remap_bilinear_nchw", "nchw/remap.cl" },
+    { "reorg_layer_nchw", "nchw/reorg_layer.cl" },
+    { "scale_nearest_neighbour_nchw", "nchw/scale.cl" },
+    { "scale_bilinear_nchw", "nchw/scale.cl" },
+    { "scale_bilinear_quantized_nchw", "nchw/scale_quantized.cl" },
+    { "space_to_batch_nchw", "nchw/space_to_batch.cl" },
+    { "space_to_batch_static_nchw", "nchw/space_to_batch.cl" },
+    { "space_to_depth_nchw", "nchw/space_to_depth.cl" },
     { "upsample_layer_nchw", "nchw/upsample_layer.cl" },
-    { "upsample_layer_nhwc", "nhwc/upsample_layer.cl" },
     { "winograd_filter_transform_2x2_3x3_nchw", "nchw/winograd_filter_transform.cl" },
     { "winograd_filter_transform_2x1_3x1_nchw", "nchw/winograd_filter_transform.cl" },
     { "winograd_filter_transform_1x2_1x3_nchw", "nchw/winograd_filter_transform.cl" },
@@ -435,15 +408,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "winograd_filter_transform_4x4_5x5_nchw", "nchw/winograd_filter_transform.cl" },
     { "winograd_filter_transform_4x1_5x1_nchw", "nchw/winograd_filter_transform.cl" },
     { "winograd_filter_transform_1x4_1x5_nchw", "nchw/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x1_3x1_nhwc", "nhwc/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x4_1x3_nhwc", "nhwc/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x4_3x3_nhwc", "nhwc/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x4_5x5_nhwc", "nhwc/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_4x1_5x1_nhwc", "nhwc/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x4_1x5_nhwc", "nhwc/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_2x2_7x7_nhwc", "nhwc/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_2x1_7x1_nhwc", "nhwc/winograd_filter_transform.cl" },
-    { "winograd_filter_transform_1x2_1x7_nhwc", "nhwc/winograd_filter_transform.cl" },
     { "winograd_input_transform_2x2_3x3_stepz1_nchw", "nchw/winograd_input_transform.cl" },
     { "winograd_input_transform_2x2_3x3_stepz2_nchw", "nchw/winograd_input_transform.cl" },
     { "winograd_input_transform_2x1_3x1_stepz1_nchw", "nchw/winograd_input_transform.cl" },
@@ -456,15 +420,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "winograd_input_transform_4x4_5x5_stepz1_nchw", "nchw/winograd_input_transform.cl" },
     { "winograd_input_transform_4x1_5x1_stepz1_nchw", "nchw/winograd_input_transform.cl" },
     { "winograd_input_transform_1x4_1x5_stepz1_nchw", "nchw/winograd_input_transform.cl" },
-    { "winograd_input_transform_4x1_3x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
-    { "winograd_input_transform_1x4_1x3_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
-    { "winograd_input_transform_4x4_3x3_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
-    { "winograd_input_transform_4x4_5x5_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
-    { "winograd_input_transform_4x1_5x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
-    { "winograd_input_transform_1x4_1x5_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
-    { "winograd_input_transform_2x2_7x7_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
-    { "winograd_input_transform_2x1_7x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
-    { "winograd_input_transform_1x2_1x7_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
     { "winograd_output_transform_2x2_3x3_nchw", "nchw/winograd_output_transform.cl" },
     { "winograd_output_transform_2x1_3x1_nchw", "nchw/winograd_output_transform.cl" },
     { "winograd_output_transform_1x2_1x3_nchw", "nchw/winograd_output_transform.cl" },
@@ -474,6 +429,55 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "winograd_output_transform_4x4_5x5_nchw", "nchw/winograd_output_transform.cl" },
     { "winograd_output_transform_4x1_5x1_nchw", "nchw/winograd_output_transform.cl" },
     { "winograd_output_transform_1x4_1x5_nchw", "nchw/winograd_output_transform.cl" },
+#endif /* ENABLE_NCHW_KERNELS */
+#ifdef ENABLE_NHWC_KERNELS
+    { "batch_to_space_nhwc", "nhwc/batch_to_space.cl" },
+    { "batch_to_space_static_nhwc", "nhwc/batch_to_space.cl" },
+    { "batchnormalization_layer_nhwc", "nhwc/batchnormalization_layer.cl" },
+    { "channel_shuffle_nhwc", "nhwc/channel_shuffle.cl" },
+    { "depth_to_space_nhwc", "nhwc/depth_to_space.cl" },
+    { "dequantization_layer_per_channel_nhwc", "nhwc/dequantization_layer.cl" },
+    { "dwc_native_fp_nhwc", "nhwc/dwc_native_fp_nhwc.cl" },
+    { "dwc_native_quantized_nhwc", "nhwc/dwc_native_quantized_nhwc.cl" },
+    { "direct_convolution_nhwc", "nhwc/direct_convolution.cl" },
+    { "im2col3x3_nhwc", "nhwc/im2col.cl" },
+    { "im2col9x9_nhwc", "nhwc/im2col.cl" },
+    { "im2col_generic_nhwc", "nhwc/im2col.cl" },
+    { "normalization_layer_cross_map_nhwc", "nhwc/normalization_layer.cl" },
+    { "normalization_layer_in_map_nhwc", "nhwc/normalization_layer.cl" },
+    { "normalize_planar_yuv_layer_nhwc", "nhwc/normalize_planar_yuv_layer.cl" },
+    { "normalize_planar_yuv_layer_q8_nhwc", "nhwc/normalize_planar_yuv_layer_quantized.cl" },
+    { "pooling_layer_MxN_nhwc", "nhwc/pooling_layer.cl" },
+    { "pooling_layer_2x2_nhwc", "nhwc/pooling_layer.cl" },
+    { "pooling_layer_MxN_quantized_nhwc", "nhwc/pooling_layer_quantized.cl" },
+    { "remap_nearest_neighbour_nhwc", "nhwc/remap.cl" },
+    { "remap_bilinear_nhwc", "nhwc/remap.cl" },
+    { "reorg_layer_nhwc", "nhwc/reorg_layer.cl" },
+    { "scale_nearest_neighbour_nhwc", "nhwc/scale.cl" },
+    { "scale_bilinear_nhwc", "nhwc/scale.cl" },
+    { "scale_bilinear_quantized_nhwc", "nhwc/scale_quantized.cl" },
+    { "space_to_batch_nhwc", "nhwc/space_to_batch.cl" },
+    { "space_to_batch_static_nhwc", "nhwc/space_to_batch.cl" },
+    { "space_to_depth_nhwc", "nhwc/space_to_depth.cl" },
+    { "upsample_layer_nhwc", "nhwc/upsample_layer.cl" },
+    { "winograd_filter_transform_4x1_3x1_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x3_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_3x3_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_5x5_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_5x1_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x5_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_2x2_7x7_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_2x1_7x1_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x2_1x7_nhwc", "nhwc/winograd_filter_transform.cl" },
+    { "winograd_input_transform_4x1_3x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x3_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_3x3_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_5x5_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_5x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x5_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_2x2_7x7_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_2x1_7x1_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
+    { "winograd_input_transform_1x2_1x7_stepz1_nhwc", "nhwc/winograd_input_transform.cl" },
     { "winograd_output_transform_4x1_3x1_nhwc", "nhwc/winograd_output_transform.cl" },
     { "winograd_output_transform_1x4_1x3_nhwc", "nhwc/winograd_output_transform.cl" },
     { "winograd_output_transform_4x4_3x3_nhwc", "nhwc/winograd_output_transform.cl" },
@@ -483,6 +487,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "winograd_output_transform_2x2_7x7_nhwc", "nhwc/winograd_output_transform.cl" },
     { "winograd_output_transform_2x1_7x1_nhwc", "nhwc/winograd_output_transform.cl" },
     { "winograd_output_transform_1x2_1x7_nhwc", "nhwc/winograd_output_transform.cl" },
+#endif /* ENABLE_NHWC_KERNELS */
 };
 
 const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
@@ -501,14 +506,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/arg_min_max.clembed"
     },
     {
-        "nchw/batch_to_space.cl",
-#include "./cl_kernels/nchw/batch_to_space.clembed"
-    },
-    {
-        "nhwc/batch_to_space.cl",
-#include "./cl_kernels/nhwc/batch_to_space.clembed"
-    },
-    {
         "common/bitwise_op.cl",
 #include "./cl_kernels/common/bitwise_op.clembed"
     },
@@ -519,14 +516,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/bounding_box_transform_quantized.cl",
 #include "./cl_kernels/common/bounding_box_transform_quantized.clembed"
-    },
-    {
-        "nchw/channel_shuffle.cl",
-#include "./cl_kernels/nchw/channel_shuffle.clembed"
-    },
-    {
-        "nhwc/channel_shuffle.cl",
-#include "./cl_kernels/nhwc/channel_shuffle.clembed"
     },
     {
         "common/col2im.cl",
@@ -557,14 +546,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/crop_tensor.clembed"
     },
     {
-        "nchw/upsample_layer.cl",
-#include "./cl_kernels/nchw/upsample_layer.clembed"
-    },
-    {
-        "nhwc/upsample_layer.cl",
-#include "./cl_kernels/nhwc/upsample_layer.clembed"
-    },
-    {
         "common/deconvolution_layer.cl",
 #include "./cl_kernels/common/deconvolution_layer.clembed"
     },
@@ -573,52 +554,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/cast.clembed"
     },
     {
-        "nchw/depth_to_space.cl",
-#include "./cl_kernels/nchw/depth_to_space.clembed"
-    },
-    {
-        "nhwc/depth_to_space.cl",
-#include "./cl_kernels/nhwc/depth_to_space.clembed"
-    },
-    {
         "common/dequantization_layer.cl",
 #include "./cl_kernels/common/dequantization_layer.clembed"
-    },
-    {
-        "nchw/dequantization_layer.cl",
-#include "./cl_kernels/nchw/dequantization_layer.clembed"
-    },
-    {
-        "nhwc/dequantization_layer.cl",
-#include "./cl_kernels/nhwc/dequantization_layer.clembed"
-    },
-    {
-        "nchw/direct_convolution1x1.cl",
-#include "./cl_kernels/nchw/direct_convolution1x1.clembed"
-    },
-    {
-        "nchw/direct_convolution3x3.cl",
-#include "./cl_kernels/nchw/direct_convolution3x3.clembed"
-    },
-    {
-        "nchw/direct_convolution5x5.cl",
-#include "./cl_kernels/nchw/direct_convolution5x5.clembed"
-    },
-    {
-        "nchw/direct_convolution_quantized.cl",
-#include "./cl_kernels/nchw/direct_convolution_quantized.clembed"
-    },
-    {
-        "nhwc/direct_convolution.cl",
-#include "./cl_kernels/nhwc/direct_convolution.clembed"
-    },
-    {
-        "nhwc/dwc_native_fp_nhwc.cl",
-#include "./cl_kernels/nhwc/dwc_native_fp_nhwc.clembed"
-    },
-    {
-        "nhwc/dwc_native_quantized_nhwc.cl",
-#include "./cl_kernels/nhwc/dwc_native_quantized_nhwc.clembed"
     },
     {
         "common/elementwise_operation.cl",
@@ -689,14 +626,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/helpers_asymm.hembed"
     },
     {
-        "nchw/im2col.cl",
-#include "./cl_kernels/nchw/im2col.clembed"
-    },
-    {
-        "nhwc/im2col.cl",
-#include "./cl_kernels/nhwc/im2col.clembed"
-    },
-    {
         "common/instance_normalization.cl",
 #include "./cl_kernels/common/instance_normalization.clembed"
     },
@@ -721,40 +650,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/nonmax.clembed"
     },
     {
-        "nchw/normalization_layer.cl",
-#include "./cl_kernels/nchw/normalization_layer.clembed"
-    },
-    {
-        "nhwc/normalization_layer.cl",
-#include "./cl_kernels/nhwc/normalization_layer.clembed"
-    },
-    {
-        "nchw/normalize_planar_yuv_layer.cl",
-#include "./cl_kernels/nchw/normalize_planar_yuv_layer.clembed"
-    },
-    {
-        "nhwc/normalize_planar_yuv_layer.cl",
-#include "./cl_kernels/nhwc/normalize_planar_yuv_layer.clembed"
-    },
-    {
-        "nchw/normalize_planar_yuv_layer_quantized.cl",
-#include "./cl_kernels/nchw/normalize_planar_yuv_layer_quantized.clembed"
-    },
-    {
-        "nhwc/normalize_planar_yuv_layer_quantized.cl",
-#include "./cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.clembed"
-    },
-    {
         "common/batchnormalization_layer.cl",
 #include "./cl_kernels/common/batchnormalization_layer.clembed"
-    },
-    {
-        "nchw/batchnormalization_layer.cl",
-#include "./cl_kernels/nchw/batchnormalization_layer.clembed"
-    },
-    {
-        "nhwc/batchnormalization_layer.cl",
-#include "./cl_kernels/nhwc/batchnormalization_layer.clembed"
     },
     {
         "common/pad_layer.cl",
@@ -777,26 +674,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/pooling_layer.clembed"
     },
     {
-        "nchw/pooling_layer.cl",
-#include "./cl_kernels/nchw/pooling_layer.clembed"
-    },
-    {
-        "nhwc/pooling_layer.cl",
-#include "./cl_kernels/nhwc/pooling_layer.clembed"
-    },
-    {
-        "nchw/pooling_layer_quantized.cl",
-#include "./cl_kernels/nchw/pooling_layer_quantized.clembed"
-    },
-    {
-        "nhwc/pooling_layer_quantized.cl",
-#include "./cl_kernels/nhwc/pooling_layer_quantized.clembed"
-    },
-    {
-        "nchw/prior_box_layer.cl",
-#include "./cl_kernels/nchw/prior_box_layer.clembed"
-    },
-    {
         "common/qlstm_layer_normalization.cl",
 #include "./cl_kernels/common/qlstm_layer_normalization.clembed"
     },
@@ -811,22 +688,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/reduction_operation.cl",
 #include "./cl_kernels/common/reduction_operation.clembed"
-    },
-    {
-        "nchw/remap.cl",
-#include "./cl_kernels/nchw/remap.clembed"
-    },
-    {
-        "nhwc/remap.cl",
-#include "./cl_kernels/nhwc/remap.clembed"
-    },
-    {
-        "nchw/reorg_layer.cl",
-#include "./cl_kernels/nchw/reorg_layer.clembed"
-    },
-    {
-        "nhwc/reorg_layer.cl",
-#include "./cl_kernels/nhwc/reorg_layer.clembed"
     },
     {
         "common/reshape_layer.cl",
@@ -849,22 +710,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/roi_pooling_layer.clembed"
     },
     {
-        "nchw/scale.cl",
-#include "./cl_kernels/nchw/scale.clembed"
-    },
-    {
-        "nhwc/scale.cl",
-#include "./cl_kernels/nhwc/scale.clembed"
-    },
-    {
-        "nchw/scale_quantized.cl",
-#include "./cl_kernels/nchw/scale_quantized.clembed"
-    },
-    {
-        "nhwc/scale_quantized.cl",
-#include "./cl_kernels/nhwc/scale_quantized.clembed"
-    },
-    {
         "common/select.cl",
 #include "./cl_kernels/common/select.clembed"
     },
@@ -879,22 +724,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/slice_ops.cl",
 #include "./cl_kernels/common/slice_ops.clembed"
-    },
-    {
-        "nchw/space_to_batch.cl",
-#include "./cl_kernels/nchw/space_to_batch.clembed"
-    },
-    {
-        "nhwc/space_to_batch.cl",
-#include "./cl_kernels/nhwc/space_to_batch.clembed"
-    },
-    {
-        "nchw/space_to_depth.cl",
-#include "./cl_kernels/nchw/space_to_depth.clembed"
-    },
-    {
-        "nhwc/space_to_depth.cl",
-#include "./cl_kernels/nhwc/space_to_depth.clembed"
     },
     {
         "common/stack_layer.cl",
@@ -916,30 +745,211 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
         "common/unpooling_layer.cl",
 #include "./cl_kernels/common/unpooling_layer.clembed"
     },
+#ifdef ENABLE_NCHW_KERNELS
+    {
+        "nchw/batch_to_space.cl",
+#include "./cl_kernels/nchw/batch_to_space.clembed"
+    },
+    {
+        "nchw/channel_shuffle.cl",
+#include "./cl_kernels/nchw/channel_shuffle.clembed"
+    },
+    {
+        "nchw/upsample_layer.cl",
+#include "./cl_kernels/nchw/upsample_layer.clembed"
+    },
+    {
+        "nchw/depth_to_space.cl",
+#include "./cl_kernels/nchw/depth_to_space.clembed"
+    },
+    {
+        "nchw/dequantization_layer.cl",
+#include "./cl_kernels/nchw/dequantization_layer.clembed"
+    },
+    {
+        "nchw/direct_convolution1x1.cl",
+#include "./cl_kernels/nchw/direct_convolution1x1.clembed"
+    },
+    {
+        "nchw/direct_convolution3x3.cl",
+#include "./cl_kernels/nchw/direct_convolution3x3.clembed"
+    },
+    {
+        "nchw/direct_convolution5x5.cl",
+#include "./cl_kernels/nchw/direct_convolution5x5.clembed"
+    },
+    {
+        "nchw/direct_convolution_quantized.cl",
+#include "./cl_kernels/nchw/direct_convolution_quantized.clembed"
+    },
+    {
+        "nchw/im2col.cl",
+#include "./cl_kernels/nchw/im2col.clembed"
+    },
+    {
+        "nchw/normalization_layer.cl",
+#include "./cl_kernels/nchw/normalization_layer.clembed"
+    },
+    {
+        "nchw/normalize_planar_yuv_layer.cl",
+#include "./cl_kernels/nchw/normalize_planar_yuv_layer.clembed"
+    },
+    {
+        "nchw/normalize_planar_yuv_layer_quantized.cl",
+#include "./cl_kernels/nchw/normalize_planar_yuv_layer_quantized.clembed"
+    },
+    {
+        "nchw/batchnormalization_layer.cl",
+#include "./cl_kernels/nchw/batchnormalization_layer.clembed"
+    },
+    {
+        "nchw/pooling_layer.cl",
+#include "./cl_kernels/nchw/pooling_layer.clembed"
+    },
+    {
+        "nchw/pooling_layer_quantized.cl",
+#include "./cl_kernels/nchw/pooling_layer_quantized.clembed"
+    },
+    {
+        "nchw/prior_box_layer.cl",
+#include "./cl_kernels/nchw/prior_box_layer.clembed"
+    },
+    {
+        "nchw/remap.cl",
+#include "./cl_kernels/nchw/remap.clembed"
+    },
+    {
+        "nchw/reorg_layer.cl",
+#include "./cl_kernels/nchw/reorg_layer.clembed"
+    },
+    {
+        "nchw/scale.cl",
+#include "./cl_kernels/nchw/scale.clembed"
+    },
+    {
+        "nchw/scale_quantized.cl",
+#include "./cl_kernels/nchw/scale_quantized.clembed"
+    },
+    {
+        "nchw/space_to_batch.cl",
+#include "./cl_kernels/nchw/space_to_batch.clembed"
+    },
+    {
+        "nchw/space_to_depth.cl",
+#include "./cl_kernels/nchw/space_to_depth.clembed"
+    },
     {
         "nchw/winograd_filter_transform.cl",
 #include "./cl_kernels/nchw/winograd_filter_transform.clembed"
-    },
-    {
-        "nhwc/winograd_filter_transform.cl",
-#include "./cl_kernels/nhwc/winograd_filter_transform.clembed"
     },
     {
         "nchw/winograd_input_transform.cl",
 #include "./cl_kernels/nchw/winograd_input_transform.clembed"
     },
     {
-        "nhwc/winograd_input_transform.cl",
-#include "./cl_kernels/nhwc/winograd_input_transform.clembed"
-    },
-    {
         "nchw/winograd_output_transform.cl",
 #include "./cl_kernels/nchw/winograd_output_transform.clembed"
+    },
+#endif /* ENABLE_NCHW_KERNELS */
+
+#ifdef ENABLE_NHWC_KERNELS
+    {
+        "nhwc/batch_to_space.cl",
+#include "./cl_kernels/nhwc/batch_to_space.clembed"
+    },
+    {
+        "nhwc/channel_shuffle.cl",
+#include "./cl_kernels/nhwc/channel_shuffle.clembed"
+    },
+    {
+        "nhwc/upsample_layer.cl",
+#include "./cl_kernels/nhwc/upsample_layer.clembed"
+    },
+    {
+        "nhwc/depth_to_space.cl",
+#include "./cl_kernels/nhwc/depth_to_space.clembed"
+    },
+    {
+        "nhwc/dequantization_layer.cl",
+#include "./cl_kernels/nhwc/dequantization_layer.clembed"
+    },
+    {
+        "nhwc/direct_convolution.cl",
+#include "./cl_kernels/nhwc/direct_convolution.clembed"
+    },
+    {
+        "nhwc/dwc_native_fp_nhwc.cl",
+#include "./cl_kernels/nhwc/dwc_native_fp_nhwc.clembed"
+    },
+    {
+        "nhwc/dwc_native_quantized_nhwc.cl",
+#include "./cl_kernels/nhwc/dwc_native_quantized_nhwc.clembed"
+    },
+    {
+        "nhwc/normalization_layer.cl",
+#include "./cl_kernels/nhwc/normalization_layer.clembed"
+    },
+    {
+        "nhwc/normalize_planar_yuv_layer.cl",
+#include "./cl_kernels/nhwc/normalize_planar_yuv_layer.clembed"
+    },
+    {
+        "nhwc/normalize_planar_yuv_layer_quantized.cl",
+#include "./cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.clembed"
+    },
+    {
+        "nhwc/im2col.cl",
+#include "./cl_kernels/nhwc/im2col.clembed"
+    },
+    {
+        "nhwc/batchnormalization_layer.cl",
+#include "./cl_kernels/nhwc/batchnormalization_layer.clembed"
+    },
+    {
+        "nhwc/pooling_layer.cl",
+#include "./cl_kernels/nhwc/pooling_layer.clembed"
+    },
+    {
+        "nhwc/pooling_layer_quantized.cl",
+#include "./cl_kernels/nhwc/pooling_layer_quantized.clembed"
+    },
+    {
+        "nhwc/remap.cl",
+#include "./cl_kernels/nhwc/remap.clembed"
+    },
+    {
+        "nhwc/reorg_layer.cl",
+#include "./cl_kernels/nhwc/reorg_layer.clembed"
+    },
+    {
+        "nhwc/scale.cl",
+#include "./cl_kernels/nhwc/scale.clembed"
+    },
+    {
+        "nhwc/scale_quantized.cl",
+#include "./cl_kernels/nhwc/scale_quantized.clembed"
+    },
+    {
+        "nhwc/space_to_batch.cl",
+#include "./cl_kernels/nhwc/space_to_batch.clembed"
+    },
+    {
+        "nhwc/space_to_depth.cl",
+#include "./cl_kernels/nhwc/space_to_depth.clembed"
+    },
+    {
+        "nhwc/winograd_filter_transform.cl",
+#include "./cl_kernels/nhwc/winograd_filter_transform.clembed"
+    },
+    {
+        "nhwc/winograd_input_transform.cl",
+#include "./cl_kernels/nhwc/winograd_input_transform.clembed"
     },
     {
         "nhwc/winograd_output_transform.cl",
 #include "./cl_kernels/nhwc/winograd_output_transform.clembed"
     },
+#endif /* ENABLE_NHWC_KERNELS */
 #endif /* EMBEDDED_KERNELS */
 };
 
