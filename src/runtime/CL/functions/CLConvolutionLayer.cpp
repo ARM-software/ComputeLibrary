@@ -231,8 +231,9 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
             // Floating-point case: GeMM/Direct/Winograd
             if(is_data_type_float(input->data_type()))
             {
-                const bool is_large_kernel_sz = (weights->dimension(idx_w) >= 7) && (weights->dimension(idx_h) >= 7);
+                const bool is_large_kernel_sz = (weights->dimension(idx_w) >= 5) && (weights->dimension(idx_h) >= 5);
                 const bool is_ifm_ge_16       = input->dimension(idx_c) >= 16;
+                const bool are_ifm_ge_ofm     = input->dimension(idx_c) >= output->dimension(idx_c);
 
                 // Run Winograd if valid and IFM >= 16
                 if(is_wino_valid && is_ifm_ge_16)
@@ -240,7 +241,7 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
                     return ConvolutionMethod::WINOGRAD;
                 }
                 // Run Direct for Large kernel size
-                if(is_large_kernel_sz && is_ifm_ge_16 && is_direct_valid)
+                if(is_direct_valid && is_large_kernel_sz && is_ifm_ge_16 && are_ifm_ge_ofm)
                 {
                     return ConvolutionMethod::DIRECT;
                 }
