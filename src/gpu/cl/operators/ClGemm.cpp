@@ -574,7 +574,7 @@ void ClGemm::configure(const CLCompileContext &compile_context, ITensorInfo *a, 
 
     // Select GEMMType
     _gemm_kernel_type = auto_select_gemm_kernel(auto_heuristics::CommonQuery{ CLScheduler::get().target(), a->data_type(), m, n, k, batch_size }, _reshape_b_only_on_first_run,
-                                                gemm_info.constant_weights());
+                                                b->are_values_constant());
 
     const bool fuse_add_c = (!(helpers::float_ops::is_zero(beta)) && c != nullptr);
 
@@ -623,7 +623,7 @@ Status ClGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     {
         CLScheduler::get().target(), a->data_type(), m, n, k, batch_size,
     },
-    gemm_info.reshape_b_only_on_first_run(), gemm_info.constant_weights());
+    gemm_info.reshape_b_only_on_first_run(), b->are_values_constant());
 
     const bool fuse_add_c = (!(helpers::float_ops::is_zero(beta)) && c != nullptr);
 

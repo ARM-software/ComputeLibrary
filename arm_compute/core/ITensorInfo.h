@@ -240,6 +240,11 @@ public:
      * @return True if its dynamic else false
      */
     virtual bool is_dynamic() const = 0;
+    /** Flag indicating whether the values of the tensor are constant, meaning that they can change on kernel/function execution.
+     *
+     * @return True if values are constant else false
+     */
+    virtual bool are_values_constant() const = 0;
     /** Set the flag whether the tensor size can be changed.
      *
      * @param[in] is_resizable Flag that marks the tensor if it can be changed or not.
@@ -247,6 +252,13 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_is_resizable(bool is_resizable) = 0;
+    /** Set the flag whether the tensor values can change during kernel/function execution.
+     *
+     * @param[in] are_values_constant Flag that marks the tensor values if they can be changed or not.
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_are_values_constant(bool are_values_constant) = 0;
     /** Valid region of the tensor. All elements in the valid region have defined values, i.e. are not undefined.
      *
      * @return The valid region.

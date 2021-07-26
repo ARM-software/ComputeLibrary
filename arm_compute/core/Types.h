@@ -1544,7 +1544,6 @@ struct FullyConnectedLayerInfo
     bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
     bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
     bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
-    bool       constant_weights{ true };                   /**<  If false, weights can vary between runs. */
     /* Other parameters */
     bool fp_mixed_precision{ false }; /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
 
@@ -1951,9 +1950,8 @@ public:
           _fast_math(false),
           _fp_mixed_precision(false),
           _broadcast_bias(false),
-          _pretranpose_B(true),
-          _activation_info(),
-          _constant_weights(true)
+          _pretranspose_B(true),
+          _activation_info()
     {
     }
     /** Constructor
@@ -1971,11 +1969,10 @@ public:
      * @param[in] fast_math                   (Optional) Use a data type of shorter width to improve performance
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
-     * @param[in] constant_weights            (Optional) Weights have constant values throughout multiple executions
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
              GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
-             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), bool constant_weights = true) noexcept
+             const ActivationLayerInfo &activation_info = ActivationLayerInfo()) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -1986,9 +1983,8 @@ public:
           _fast_math(fast_math),
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
-          _pretranpose_B(reshape_b_only_on_first_run),
-          _activation_info(activation_info),
-          _constant_weights(constant_weights)
+          _pretranspose_B(reshape_b_only_on_first_run),
+          _activation_info(activation_info)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -2085,17 +2081,17 @@ public:
      *
      * @return True if b should be pre-transposed else false.
      */
-    bool pretranpose_B() const
+    bool pretranspose_B() const
     {
-        return _pretranpose_B;
+        return _pretranspose_B;
     };
     /** Set pre-transpose b flag
      *
      * @param[in] flag Flag to set
      */
-    void set_pretranpose_B(bool flag)
+    void set_pretranspose_B(bool flag)
     {
-        _pretranpose_B = flag;
+        _pretranspose_B = flag;
     }
     /** Activation layer to apply after the matrix multiplication
      *
@@ -2113,14 +2109,6 @@ public:
     {
         _activation_info = activation_info;
     }
-    /** Flag which specifies if the values of the weights tensor are constant throughout multiple executions or not
-     *
-     * @return True if the weights tensor is constant
-     */
-    bool constant_weights() const
-    {
-        return _constant_weights;
-    };
 
 private:
     bool                    _is_a_reshaped;
@@ -2133,9 +2121,8 @@ private:
     bool                    _fast_math;
     bool                    _fp_mixed_precision;
     bool                    _broadcast_bias;
-    bool                    _pretranpose_B;
+    bool                    _pretranspose_B;
     ActivationLayerInfo     _activation_info;
-    bool                    _constant_weights;
 };
 
 /** Winograd information */
