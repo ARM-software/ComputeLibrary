@@ -108,11 +108,11 @@ public:
 private:
     enum AuxTensorIdx
     {
-        VecSumCol = 0,
-        VecSumRow,
+        ResultS32 = 0,
         RhsQAsymm8,
         RhsReshape,
-        ResultS32,
+        VecSumCol,
+        VecSumRow,
         Multipliers,
         Shifts,
         Count

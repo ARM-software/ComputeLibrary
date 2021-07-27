@@ -673,6 +673,7 @@ cc_library_static {
         "src/runtime/gpu/cl/operators/ClFill.cpp",
         "src/runtime/gpu/cl/operators/ClFlatten.cpp",
         "src/runtime/gpu/cl/operators/ClFloor.cpp",
+        "src/runtime/gpu/cl/operators/ClFullyConnected.cpp",
         "src/runtime/gpu/cl/operators/ClGemm.cpp",
         "src/runtime/gpu/cl/operators/ClGemmConvolution.cpp",
         "src/runtime/gpu/cl/operators/ClGemmLowpMatrixMultiplyCore.cpp",

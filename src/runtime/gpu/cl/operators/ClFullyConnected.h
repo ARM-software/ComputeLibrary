@@ -21,17 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
-#define ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
+#ifndef ARM_COMPUTE_CL_FULLY_CONNECTED_H
+#define ARM_COMPUTE_CL_FULLY_CONNECTED_H
 
-#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/core/TensorInfo.h"
 
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/IWeightsManager.h"
-#include "arm_compute/runtime/MemoryGroup.h"
+#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/runtime/gpu/cl/IClOperator.h"
+
+#include <memory>
 
 namespace arm_compute
 {
+namespace opencl
+{
+// Forward declarations
+class ClConvertFullyConnectedWeights;
+class ClFlatten;
+class ClGemm;
+class ClGemmLowpMatrixMultiplyCore;
+class ClTranspose;
+
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
  *
  *  -# @ref opencl::kernels::ClIm2ColKernel (called when the input comes from a convolutional layer)
@@ -40,21 +50,11 @@ namespace arm_compute
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
-class CLFullyConnectedLayer : public IFunction
+class ClFullyConnected : public IClOperator
 {
 public:
-    /** Constructor */
-    CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
-    /** Default destructor */
-    ~CLFullyConnectedLayer();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLFullyConnectedLayer(const CLFullyConnectedLayer &) = delete;
-    /** Default move constructor */
-    CLFullyConnectedLayer(CLFullyConnectedLayer &&) = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLFullyConnectedLayer &operator=(const CLFullyConnectedLayer &) = delete;
-    /** Default move assignment operator */
-    CLFullyConnectedLayer &operator=(CLFullyConnectedLayer &&) = default;
+    ClFullyConnected();
+    ~ClFullyConnected();
     /** Set the input and output tensors.
      *
      * Valid data layouts:
@@ -70,42 +70,69 @@ public:
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  src             Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights         Weights tensor. The weights must be 2 dimensional.
      *                             If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
      *                             If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
-     *                             Data type supported: Same as @p input.
-     * @param[in]  biases          Bias tensor. Can be nullptr. Data type supported:Same as @p input.
-     * @param[out] output          Destination tensor. Its shape should be equal to the output of a matrix multiplication between:
+     *                             Data type supported: Same as @p src.
+     * @param[in]  biases          Bias tensor. Can be nullptr. Data type supported:Same as @p src.
+     * @param[out] dst             Destination tensor. Its shape should be equal to the output of a matrix multiplication between:
      *                             - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
      *                             - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
-     *                             Data type supported: Same as @p input.
+     *                             Data type supported: Same as @p src.
      * @param[in]  fc_info         (Optional) Fully connected layer additional info
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
-    /** Set the input and output tensors.
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * Similar to @ref CLFullyConnectedLayer
-     */
-    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
-                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
-     *
-     * Similar to @ref CLFullyConnectedLayer
+     * Similar to ClFullyConnected::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
                            FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
 
-    //Inherited methods override
-    void run() override;
-    void prepare() override;
+    // Inherited methods overriden
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &tensors) override;
+    experimental::MemoryRequirements workspace() const override;
 
 private:
-    struct Impl;
-    std::unique_ptr<Impl> _impl;
+    void configure_fc_fc(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *dst, const FullyConnectedLayerInfo &fc_info);
+    void configure_conv_fc(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *dst, const FullyConnectedLayerInfo &fc_info);
+    void configure_mm(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *dst, const FullyConnectedLayerInfo &fc_info);
+
+private:
+    enum AuxTensorIdx
+    {
+        TransposedWeights = 10,
+        ConvertedWeights  = 11,
+        FlattenedSrc      = 12,
+        Count             = 13
+    };
+
+    std::unique_ptr<ClConvertFullyConnectedWeights> _convert_weights;
+    std::unique_ptr<ClFlatten>                      _flatten;
+    std::unique_ptr<ClTranspose>                    _reshape_weights;
+    std::unique_ptr<ClGemm>                         _mm_gemm;
+    std::unique_ptr<ClGemmLowpMatrixMultiplyCore>   _mm_gemmlowp;
+
+    experimental::MemoryRequirements _aux_mem{};
+
+    TensorInfo _flattened_src{};
+    TensorInfo _converted_weights{};
+    TensorInfo _reshaped_weights{};
+
+    TensorInfo _weights_to_use{};
+    int        _weights_to_use_idx{ ACL_SRC_1 };
+
+    bool _are_weights_converted{ true };
+    bool _are_weights_reshaped{ true };
+    bool _is_fc_after_conv{ true };
+    bool _is_quantized{ false };
+    bool _is_prepared{ false };
 };
+} // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H */
+#endif /* ARM_COMPUTE_CL_FULLY_CONNECTED_H */

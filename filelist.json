@@ -133,6 +133,20 @@
           ]
         }
       },
+      "FullyConnected": {
+        "deps": [
+          "ClFlatten",
+          "ClConvertFullyConnectedWeights",
+          "ClGemm",
+          "ClGemmLowpMatrixMultiplyCore",
+          "ClTranspose"
+        ],
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClFullyConnected.cpp"
+          ]
+        }
+      },
       "ConvertFullyConnectedWeights": {
         "files": {
           "operator": [
