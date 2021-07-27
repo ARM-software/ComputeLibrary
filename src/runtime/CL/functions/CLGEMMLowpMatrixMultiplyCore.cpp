@@ -112,34 +112,8 @@ void CLGEMMLowpMatrixMultiplyCore::prepare()
     {
         _impl->op->prepare(_impl->run_pack);
 
-        auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
-                                        _impl->aux_mem_req.end(),
-                                        [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
-
-        if(has_reshape != std::end(_impl->aux_mem_req))
-        {
-            _impl->b->mark_as_unused();
-        }
-        else
-        {
-            // Pack the B matrix to be used as the underlying GEMM performs no reshapes
-            _impl->run_pack.add_const_tensor(ACL_SRC_1, _impl->b);
-        }
-
         // Release temporary tensors that are only used in prepare stage
-        for(auto &ws : _impl->workspace_tensors)
-        {
-            const int slot = ws.slot;
-            for(auto &m : _impl->aux_mem_req)
-            {
-                if(m.slot == slot && m.lifetime == MemoryLifetime::Prepare)
-                {
-                    auto tensor = ws.tensor.get();
-                    tensor->allocator()->free();
-                    break;
-                }
-            }
-        }
+        release_temporaries(_impl->aux_mem_req, _impl->workspace_tensors);
 
         _impl->is_prepared = true;
     }

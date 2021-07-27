@@ -335,8 +335,6 @@ void ClGemmLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
         {
             _run_output_stage = true;
 
-            // _memory_group.manage(&_mm_result_s32);
-
             if(_is_gemm_reshaped)
             {
                 _mm_reshaped_only_rhs_kernel->configure(compile_context, a, matrix_b, &_mm_result_s32, gemm_kernel_info);
@@ -726,12 +724,11 @@ void ClGemmLowpMatrixMultiplyCore::prepare(ITensorPack &tensors)
         {
             ITensorPack convert_to_qs8_pack = { { ACL_SRC, b }, { ACL_DST, rhs_qasymm8.get() } };
             CLScheduler::get().enqueue_op(*_weights_to_qasymm8, convert_to_qs8_pack, false);
+            b->mark_as_unused();
         }
 
         if(_is_gemm_reshaped && _reshape_b_only_on_first_run)
         {
-            ARM_COMPUTE_ERROR_ON(!b->is_used());
-
             // Run reshape kernel and mark original weights tensor as unused
             ITensorPack mtx_b_pack =
             {
