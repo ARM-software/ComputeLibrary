@@ -92,6 +92,8 @@ public:
             switch (ci->get_cpu_model()) {
                 default:
                     return { 31.63 };
+                case CPUModel::A55r1:
+                    return { 9.217 };
                 case CPUModel::A510:
                     return { 15.89 };
                 case CPUModel::V1:
