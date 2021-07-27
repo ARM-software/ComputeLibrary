@@ -25,6 +25,7 @@
 /* As some of the merges need these headers, but are all included in the
  * arm_gemm namespace, put these headers here.  */
 #include <algorithm>
+#include <limits>
 
 #include <arm_neon.h>
 
