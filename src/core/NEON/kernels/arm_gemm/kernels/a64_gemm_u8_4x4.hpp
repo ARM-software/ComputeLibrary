@@ -69,7 +69,7 @@ public:
 
     template<typename T>
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
-        if (std::is_same<T, int32_t>::value) {
+        if (std::is_same<T, uint32_t>::value) {
             switch (ci->get_cpu_model()) {
                 case CPUModel::A510:
                     return { 2.64, 2.72, 2.64 };
@@ -79,7 +79,7 @@ public:
             }
         }
 
-        if (std::is_same<T, int8_t>::value) {
+        if (std::is_same<T, uint8_t>::value) {
             switch(ci->get_cpu_model()) {
                 case CPUModel::A510:
                     return { 2.64, 1.79, 0.10 };
