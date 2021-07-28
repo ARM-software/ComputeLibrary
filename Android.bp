@@ -663,6 +663,7 @@ cc_library_static {
         "src/runtime/gpu/cl/operators/ClAdd.cpp",
         "src/runtime/gpu/cl/operators/ClCast.cpp",
         "src/runtime/gpu/cl/operators/ClConcatenate.cpp",
+        "src/runtime/gpu/cl/operators/ClConv2d.cpp",
         "src/runtime/gpu/cl/operators/ClConvertFullyConnectedWeights.cpp",
         "src/runtime/gpu/cl/operators/ClCopy.cpp",
         "src/runtime/gpu/cl/operators/ClCrop.cpp",

@@ -177,6 +177,13 @@
           ]
         }
       },
+      "Conv2d": {
+        "files": {
+          "operator": [
+            "src/runtime/gpu/cl/operators/ClConv2d.cpp"
+          ]
+        }
+      },
       "PRelu": {
         "files": {
           "operator": [

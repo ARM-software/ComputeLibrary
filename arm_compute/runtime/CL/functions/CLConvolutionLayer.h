@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_CLCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_CLCONVOLUTIONLAYER_H
 
-#include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/core/CL/CLCompileContext.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 
@@ -35,11 +34,15 @@
 
 namespace arm_compute
 {
+class CLCompileContext;
+class ICLTensor;
+class ITensorInfo;
+
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
  *
- * -# @ref CLGEMMConvolutionLayer
- * -# @ref CLWinogradConvolutionLayer
- * -# @ref CLDirectConvolutionLayer
+ * -# @ref opencl::ClGemmConvolution
+ * -# @ref opencl::ClWinogradConv2d
+ * -# @ref opencl::ClDirectConv2d
  * -# @ref CLFFTConvolutionLayer
  *
  * The function selects one of the algorithms mentioned above based on:
@@ -182,7 +185,7 @@ public:
      * @param[in] enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                             available which may introduce a drop of accuracy as well. Default is false
      *
-     * @return a status
+     * @return the Convolution Method Hint
      */
     static ConvolutionMethod get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                                     const WeightsInfo &weights_info, const ActivationLayerInfo &act_info, const GPUTarget gpu_target, const Size2D &dilation = Size2D(1U, 1U), bool enable_fast_math = false);
@@ -191,8 +194,8 @@ public:
     void prepare() override;
 
 private:
-    std::shared_ptr<IMemoryManager> _memory_manager;
-    std::unique_ptr<IFunction>      _function;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 }
 #endif /* ARM_COMPUTE_CLCONVOLUTIONLAYER_H */

@@ -75,5 +75,5 @@ private:
     unsigned int                            _axis{ 0 };
 };
 } // namespace opencl
-} // namespace arm_comPUTE
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CL_CONCATENATE_H */
