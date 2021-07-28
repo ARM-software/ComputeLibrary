@@ -101,7 +101,7 @@ void matrix_addition_f16(const ITensor *src, ITensor *dst, const Window &window,
     Iterator in(src, win);
     Iterator out(dst, win);
 
-    execute_window_loop(window, [&](const Coordinates &)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto in_ptr  = reinterpret_cast<const float16_t *>(in.ptr());
         const auto out_ptr = reinterpret_cast<float16_t *>(out.ptr());
