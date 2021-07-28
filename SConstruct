@@ -222,10 +222,13 @@ elif 'v8' in env['arch']:
     else:
         env.Append(CXXFLAGS = ['-march=armv8-a'])
 
-    if 'v8.6-a' in env['arch'] or env['fat_binary']:
+    if 'v8.6-a' in env['arch']:
         env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16'])
         if "disable_mmla_fp" not in env['custom_options']:
             env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
+    if 'v8.' in env['arch']:
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
+
 elif 'x86' in env['arch']:
     if env['estate'] == '32':
         env.Append(CCFLAGS = ['-m32'])
@@ -309,9 +312,10 @@ if env['fat_binary']:
     if env['arch'] != 'armv8.2-a':
         print("Currently fat binary is only supported with armv8.2-a")
         Exit(1)
-    env.Append(CXXFLAGS = ['-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE',
-                           '-DARM_COMPUTE_ENABLE_BF16', '-DARM_COMPUTE_ENABLE_I8MM', '-DARM_COMPUTE_ENABLE_SVEF32MM'])
-    env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON'])
+    env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON',
+                           '-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE',
+                           '-DARM_COMPUTE_ENABLE_FP16', '-DARM_COMPUTE_ENABLE_BF16',
+                           '-DARM_COMPUTE_ENABLE_I8MM', '-DARM_COMPUTE_ENABLE_SVEF32MM'])
 
 if env['data_type_support']:
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):

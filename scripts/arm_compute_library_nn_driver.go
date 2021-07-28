@@ -25,6 +25,7 @@ func globalFlags(ctx android.BaseContext) []string {
         theArch := a.ArchType.String()
         if theArch == "armv8-2a" {
           cppflags = append(cppflags, "-march=armv8.2-a+fp16")
+          cppflags = append(cppflags, "-DARM_COMPUTE_ENABLE_FP16")
         }
       }
     }
