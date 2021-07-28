@@ -69,15 +69,6 @@ public:
 private:
     unsigned int _factor1{ 0 }; /* equals to the number of elements per original src plane if @p data_layout == NCHW; its number of channels otherwise */
     unsigned int _factor2{ 0 }; /* equals to the number of elements per original src plane if @p data_layout == NHWC; its number of channels otherwise */
-
-    /** Template function to run the permute
-     *
-     * @param[in] in     Source weights tensor info to convert. Must be 2 dimensional. Data types supported: All.
-     * @param[in] out    The converted weights tensor info. Shape and Data Type: Same as @p in.
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T>
-    void run_convert_fc_weights(const ITensor *in, ITensor *out, const Window &window);
 };
 } // namespace kernels
 } // namespace cpu
