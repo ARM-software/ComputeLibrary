@@ -26,6 +26,7 @@
   "gpu": {
     "common": [
       "src/core/CL/CLCompileContext.cpp",
+      "src/core/CL/DefaultLWSHeuristics.cpp",
       "src/core/CL/CLHelpers.cpp",
       "src/core/CL/CLKernelLibrary.cpp",
       "src/core/CL/CLUtils.cpp",

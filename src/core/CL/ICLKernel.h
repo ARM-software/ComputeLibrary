@@ -33,6 +33,8 @@
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/CL/CLTuningParams.h"
 
+#include "src/core/CL/DefaultLWSHeuristics.h"
+
 #include <string>
 
 namespace arm_compute
@@ -87,8 +89,7 @@ private:
 
     cl::NDRange default_lws_tune(const Window &window)
     {
-        ARM_COMPUTE_UNUSED(window);
-        return CLKernelLibrary::get().default_ndrange();
+        return get_default_lws_for_type(_type, gws_from_window(window));
     }
 
     using IKernel::configure; //Prevent children from calling IKernel::configure() directly

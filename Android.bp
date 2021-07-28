@@ -74,6 +74,7 @@ cc_library_static {
         "src/core/CL/CLHelpers.cpp",
         "src/core/CL/CLKernelLibrary.cpp",
         "src/core/CL/CLUtils.cpp",
+        "src/core/CL/DefaultLWSHeuristics.cpp",
         "src/core/CL/ICLKernel.cpp",
         "src/core/CL/ICLSimple2DKernel.cpp",
         "src/core/CL/ICLSimple3DKernel.cpp",
