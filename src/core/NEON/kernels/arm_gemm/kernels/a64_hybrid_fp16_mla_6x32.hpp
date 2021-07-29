@@ -78,13 +78,13 @@ public:
         if (std::is_same<T, __fp16>::value) {
             switch (ci->get_cpu_model()) {
                 case CPUModel::A55r1:
-                    return { 5.22 };
-                default:
-                    return { 14.53 };
+                    return { 6.94 };
                 case CPUModel::A510:
                     return { 8.94 };
                 case CPUModel::V1:
                     return { 29.26 };
+                default:
+                    return { 14.53 };
             }
         }
 
