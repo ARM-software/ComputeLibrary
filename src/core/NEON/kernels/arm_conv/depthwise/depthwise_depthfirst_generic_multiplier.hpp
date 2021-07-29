@@ -426,16 +426,7 @@ class DepthwiseDepthfirstGenericWithMultiplier : public DepthwiseDepthfirstGener
 
     // Compute activation values
     TAccum activation_min, activation_max;
-    if (std::numeric_limits<TAccum>::is_integer)
-    {
-      activation_min = std::numeric_limits<TAccum>::min();
-      activation_max = std::numeric_limits<TAccum>::max();
-    }
-    else
-    {
-      activation_min = static_cast<TAccum>(-std::numeric_limits<float>::infinity());
-      activation_max = static_cast<TAccum>(std::numeric_limits<float>::infinity());
-    }
+    std::tie(activation_min, activation_max) = get_default_activation_values<TAccum>();
 
     switch (this->m_args.activation.type)
     {

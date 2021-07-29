@@ -27,6 +27,7 @@
 #include "arm_gemm.hpp"
 
 #include <cstddef>
+#include <tuple>
 
 // Macro for unreachable code (e.g. impossible default cases on switch)
 #define UNREACHABLE(why)  __builtin_unreachable()
@@ -202,6 +203,38 @@ inline unsigned long get_vector_length(VLType vl_type) {
       return 16 / sizeof(T);
   }
 }
+
+// get_default_activation_values(): Returns the default values for activation min and max for integer activation.
+template <typename T>
+inline std::tuple<T, T> get_default_activation_values()
+{
+    const T min = static_cast<T>(std::numeric_limits<T>::min());
+    const T max = static_cast<T>(std::numeric_limits<T>::max());
+
+    return std::make_tuple(min, max);
+}
+
+// get_default_activation_values(): Returns the default values for activation min and max for float activation.
+template <>
+inline std::tuple<float, float> get_default_activation_values()
+{
+    const float min = static_cast<float>(-std::numeric_limits<float>::infinity());
+    const float max = static_cast<float>(std::numeric_limits<float>::infinity());
+
+    return std::make_tuple(min, max);
+}
+
+#if defined(__ARM_FP16_ARGS)
+// get_default_activation_values(): Returns the default values for activation min and max for __fp16 activation.
+template <>
+inline std::tuple<__fp16, __fp16> get_default_activation_values()
+{
+    const __fp16 min = static_cast<__fp16>(-std::numeric_limits<float>::infinity());
+    const __fp16 max = static_cast<__fp16>(std::numeric_limits<float>::infinity());
+
+    return std::make_tuple(min, max);
+}
+#endif  // defined(__ARM_FP16_ARGS)
 } // utils namespace
 } // arm_gemm namespace
 
