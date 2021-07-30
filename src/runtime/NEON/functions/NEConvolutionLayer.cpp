@@ -124,6 +124,14 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
     return Status{};
 }
 
+ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights,
+                                                             const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                                             const WeightsInfo &weights_info, const Size2D &dilation,
+                                                             const ActivationLayerInfo &act_info, bool enable_fast_math)
+{
+    return cpu::CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info, enable_fast_math);
+}
+
 void NEConvolutionLayer::run()
 {
     prepare();
