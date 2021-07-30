@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/Log.h"
 #include "support/Cast.h"
 
 namespace arm_compute
@@ -38,7 +39,7 @@ namespace cpu
 class CpuAuxTensorHandler
 {
 public:
-    CpuAuxTensorHandler(int slot_id, TensorInfo &info, ITensorPack &pack, bool pack_inject = false)
+    CpuAuxTensorHandler(int slot_id, TensorInfo &info, ITensorPack &pack, bool pack_inject = false, bool bypass_alloc = false)
         : _tensor()
     {
         if(info.total_size() == 0)
@@ -50,7 +51,12 @@ public:
         ITensor *packed_tensor = utils::cast::polymorphic_downcast<ITensor *>(pack.get_tensor(slot_id));
         if((packed_tensor == nullptr) || (info.total_size() > packed_tensor->info()->total_size()))
         {
-            _tensor.allocator()->allocate();
+            if(!bypass_alloc)
+            {
+                _tensor.allocator()->allocate();
+                ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL("Allocating auxiliary tensor");
+            }
+
             if(pack_inject)
             {
                 pack.add_tensor(slot_id, &_tensor);

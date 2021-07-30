@@ -549,12 +549,6 @@ void CpuWinogradConv2d::configure(const ITensorInfo *src, const ITensorInfo *wei
     _kernel_storage     = b_info;
     _output_transformed = d_info;
 
-    // configure and allocate dst tensor to be used to convert from winograd domain to spatial domain when calling to reshape_output()
-    TensorInfo info(TensorShape(dst->dimension(2), dst->dimension(0),
-                                dst->dimension(1), dst->dimension(3)),
-                    1, dst->data_type());
-    _output_nhwc = info;
-
     const ITensorInfo *input_to_use  = src;
     ITensorInfo       *output_to_use = dst;
     PermutationVector  weights_permutation_vector(3U, 0U, 1U, 2U);
@@ -573,7 +567,7 @@ void CpuWinogradConv2d::configure(const ITensorInfo *src, const ITensorInfo *wei
     transform_input_kernel->configure(input_to_use, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
                                       &_input_transformed, input_matrix_stride, &_input_workspace);
     const size_t input_workspace_size = transform_input_kernel->get_working_space_size(max_num_threads);
-    TensorInfo   input_workspace_info(TensorShape(input_workspace_size), 1, src->data_type());
+    TensorInfo   input_workspace_info(TensorShape(input_workspace_size), 1, DataType::U8);
     _input_workspace = input_workspace_info;
 
     // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
@@ -587,6 +581,11 @@ void CpuWinogradConv2d::configure(const ITensorInfo *src, const ITensorInfo *wei
     // The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
     if(_data_layout == DataLayout::NCHW)
     {
+        // configure and allocate dst tensor to be used to convert from winograd domain to spatial domain when calling to reshape_output()
+        TensorInfo info(TensorShape(dst->dimension(2), dst->dimension(0),
+                                    dst->dimension(1), dst->dimension(3)),
+                        1, dst->data_type());
+        _output_nhwc  = info;
         output_to_use = &_output_nhwc;
     }
     const arm_gemm::Activation activation = arm_gemm_activation_from_acl_activation(act_info);
@@ -603,7 +602,7 @@ void CpuWinogradConv2d::configure(const ITensorInfo *src, const ITensorInfo *wei
                                        activation);
 
     const size_t output_workspace_size = transform_output_kernel->get_working_space_size(max_num_threads);
-    TensorInfo   output_workspace_info(TensorShape(output_workspace_size), 1, dst->data_type());
+    TensorInfo   output_workspace_info(TensorShape(output_workspace_size), 1, DataType::U8);
     _output_workspace = output_workspace_info;
 
     // Reorder the convoluted output to ACL's ordering NCHW
@@ -631,20 +630,12 @@ void CpuWinogradConv2d::configure(const ITensorInfo *src, const ITensorInfo *wei
     _aux_mem[TransposedRHS]  = asm_mem_req[TransposedRHS];
     _aux_mem[TempResult]     = asm_mem_req[TempResult];
 
-    _aux_mem[InputTransformed] = MemoryInfo(offset_int_vec(InputTransformed), MemoryLifetime::Persistent, input_storage_size, storage_alignment);
-    _aux_mem[InputWorkspace]   = MemoryInfo(offset_int_vec(InputWorkspace), MemoryLifetime::Persistent, input_workspace_size);
-    if(_aux_mem[Pretranspose].size > 0)
-    {
-        // Release permuted weights at the of prepare as they are further transposed by the assembly dispatch
-        _aux_mem[PermutedWeights] = MemoryInfo(offset_int_vec(PermutedWeights), MemoryLifetime::Prepare, _weights_hwio.total_size());
-    }
-    else
-    {
-        _aux_mem[PermutedWeights] = MemoryInfo(offset_int_vec(PermutedWeights), MemoryLifetime::Persistent, _weights_hwio.total_size());
-    }
+    _aux_mem[InputTransformed]   = MemoryInfo(offset_int_vec(InputTransformed), MemoryLifetime::Temporary, input_storage_size, storage_alignment);
+    _aux_mem[InputWorkspace]     = MemoryInfo(offset_int_vec(InputWorkspace), MemoryLifetime::Temporary, input_workspace_size);
+    _aux_mem[PermutedWeights]    = MemoryInfo(offset_int_vec(PermutedWeights), MemoryLifetime::Prepare, _weights_hwio.total_size());
     _aux_mem[WeightsTransformed] = MemoryInfo(offset_int_vec(WeightsTransformed), MemoryLifetime::Persistent, kernel_storage_size, storage_alignment);
-    _aux_mem[OutputTransformed]  = MemoryInfo(offset_int_vec(OutputTransformed), MemoryLifetime::Persistent, output_storage_size, storage_alignment);
-    _aux_mem[OutputWorkspace]    = MemoryInfo(offset_int_vec(OutputWorkspace), MemoryLifetime::Persistent, output_workspace_size);
+    _aux_mem[OutputTransformed]  = MemoryInfo(offset_int_vec(OutputTransformed), MemoryLifetime::Temporary, output_storage_size, storage_alignment);
+    _aux_mem[OutputWorkspace]    = MemoryInfo(offset_int_vec(OutputWorkspace), MemoryLifetime::Temporary, output_workspace_size);
 }
 
 Status CpuWinogradConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
@@ -829,10 +820,7 @@ void CpuWinogradConv2d::prepare(ITensorPack &tensors)
         ITensorPack         transform_tensors{ { ACL_SRC, permuted_weights.get() }, { ACL_DST, transformed_weights.get() } };
         NEScheduler::get().schedule_op(_transform_weights_kernel.get(), Window::DimX, _transform_weights_kernel->window(), transform_tensors);
 
-        CpuAuxTensorHandler input_transformed(offset_int_vec(InputTransformed), _input_transformed, tensors, true);
-        CpuAuxTensorHandler output_transformed(offset_int_vec(OutputTransformed), _output_transformed, tensors, true);
-        ITensorPack         gemm_pack = tensors;
-        gemm_pack.add_const_tensor(ACL_SRC_0, input_transformed.get());
+        ITensorPack gemm_pack = tensors;
         gemm_pack.add_const_tensor(ACL_SRC_1, transformed_weights.get());
         _gemm_function->prepare(gemm_pack);
 
