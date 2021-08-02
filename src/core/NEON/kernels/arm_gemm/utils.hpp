@@ -28,6 +28,7 @@
 
 #include <cstddef>
 #include <tuple>
+#include <limits>
 
 // Macro for unreachable code (e.g. impossible default cases on switch)
 #define UNREACHABLE(why)  __builtin_unreachable()
