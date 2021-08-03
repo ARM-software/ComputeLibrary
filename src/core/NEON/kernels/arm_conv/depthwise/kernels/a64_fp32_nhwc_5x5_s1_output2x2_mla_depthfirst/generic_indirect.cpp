@@ -25,6 +25,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#if defined(__aarch64__)
+
 namespace arm_conv {
 namespace depthwise {
 
@@ -1039,3 +1041,5 @@ void a64_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_indirect_impl(
 
 }  // namespace depthwise
 }  // namespace arm_conv
+
+#endif  // defined(__aarch64__)

@@ -33,7 +33,7 @@
 #pragma once
 
 #include "arm_gemm.hpp"
-#include "depthwise.hpp"
+#include "src/core/NEON/kernels/assembly/depthwise.hpp"
 
 namespace arm_conv
 {
@@ -95,6 +95,12 @@ bool cpu_has_sve2(const DepthwiseArgs &args, const void *) __attribute__ ((unuse
 bool cpu_has_sve2(const DepthwiseArgs &args, const void *)
 {
   return args.cpu_info->has_sve2();
+}
+
+bool cpu_has_fp16(const DepthwiseArgs &args, const void *) __attribute__ ((unused));
+bool cpu_has_fp16(const DepthwiseArgs &args, const void *)
+{
+  return args.cpu_info->has_fp16();
 }
 
 bool has_no_channel_multiplier(const DepthwiseArgs &args, const void *) __attribute__ ((unused));

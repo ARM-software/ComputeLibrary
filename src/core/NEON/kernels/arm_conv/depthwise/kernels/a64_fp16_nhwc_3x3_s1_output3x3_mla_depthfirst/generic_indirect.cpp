@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#if defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if defined(__aarch64__) && defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 
 namespace arm_conv {
 namespace depthwise {
@@ -1289,4 +1289,4 @@ void a64_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst_indirect_impl(
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#endif  // defined(__aarch64__) && defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)

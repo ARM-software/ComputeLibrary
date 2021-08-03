@@ -35,19 +35,61 @@
 namespace arm_conv {
 namespace depthwise {
 
-template <class strategy>
-class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type,
-                                                   typename strategy::weight_type,
-                                                   typename strategy::return_type>
+struct IDepthwiseDepthfirstStrategy
 {
-  using TInput = typename strategy::input_type;
-  using TWeight = typename strategy::weight_type;
-  using TOutput = typename strategy::return_type;
-  using TAccum = typename strategy::bias_type;
+  virtual arm_gemm::VLType get_vl_type() const = 0;
+
+  virtual unsigned int get_input_rows() const = 0;
+  virtual unsigned int get_input_cols() const = 0;
+
+  virtual unsigned int get_output_rows() const = 0;
+  virtual unsigned int get_output_cols() const = 0;
+
+  virtual unsigned int get_kernel_rows() const = 0;
+  virtual unsigned int get_kernel_cols() const = 0;
+
+  virtual unsigned int get_stride_rows() const = 0;
+  virtual unsigned int get_stride_cols() const = 0;
+
+  virtual void indirect_kernel(
+    const void *const *const input_ptrs,
+    void *const *const output_ptrs,
+    const void *params,
+    unsigned int n_channels,
+    const void *activation_min,
+    const void *activation_max
+  ) const = 0;
+
+  virtual void direct_kernel(
+    const unsigned int n_tile_rows, const unsigned int n_tile_cols,
+    const void *inptr, int64_t ld_input_row, int64_t ld_input_col,
+    void *outptr, int64_t ld_output_row, int64_t ld_output_col,
+    const void *params, unsigned int n_channels,
+    const void *activation_min,
+    const void *activation_max
+  ) const = 0;
+
+  virtual ~IDepthwiseDepthfirstStrategy() {}
+};
+
+template <typename TInput, typename TWeight, typename TOutput, typename TAccum>
+class DepthwiseDepthfirst : public DepthwiseCommon<TInput, TWeight, TOutput>
+{
+  const std::unique_ptr<IDepthwiseDepthfirstStrategy> m_strat;
+
+  size_t sizeof_inptr_array(void) const
+  {
+    return sizeof(TInput *) * m_strat->get_input_rows() * m_strat->get_input_cols();
+  }
 
   size_t sizeof_input_buffer(unsigned int n_input_channels) const
   {
-    return sizeof(TInput) * n_input_channels;
+   return sizeof(TInput) * n_input_channels;
+  }
+
+  size_t sizeof_outptr_array(void) const
+  {
+    return sizeof(TInput *) * m_strat->get_output_rows() * m_strat->get_output_cols();
   }
 
   size_t sizeof_output_buffer(unsigned int n_output_channels) const
@@ -56,8 +98,10 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
   }
 
   public:
-
-  DepthwiseDepthfirst(const DepthwiseArgs &args) : DepthwiseCommon<TInput, TWeight, TOutput>(args)
+  DepthwiseDepthfirst(
+    IDepthwiseDepthfirstStrategy *const strat,
+    const DepthwiseArgs &args
+  ) : DepthwiseCommon<TInput, TWeight, TOutput>(args), m_strat(strat)
   {
   }
 
@@ -67,7 +111,7 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
   size_t get_storage_size(void) const override
   {
     // TODO What if we insert extra padding? Biases are a different size to the inputs, ...
-    const unsigned int vl = arm_gemm::utils::get_vector_length<TInput>(strategy::vl_type);
+    const unsigned int vl = arm_gemm::utils::get_vector_length<TInput>(m_strat->get_vl_type());
     const auto rounded_channels = arm_gemm::roundup(this->m_args.input_channels, vl);
     return (1 + this->m_args.kernel_rows * this->m_args.kernel_cols) * rounded_channels * sizeof(TWeight);
   }
@@ -81,7 +125,7 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
     const TAccum *biases = static_cast<const TAccum *>(_biases);
     const TWeight *const weights = static_cast<const TWeight *>(_weights);
 
-    const unsigned int vl = arm_gemm::utils::get_vector_length<TAccum>(strategy::vl_type);
+    const unsigned int vl = arm_gemm::utils::get_vector_length<TAccum>(m_strat->get_vl_type());
     ld_weight_col = (ld_weight_col == 0) ? this->m_args.input_channels : ld_weight_col;
     ld_weight_row = (ld_weight_row == 0) ? this->m_args.kernel_cols * ld_weight_col : ld_weight_row;
 
@@ -121,10 +165,12 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
   size_t get_working_size(const unsigned int n_threads, const unsigned int n_channels) const override
   {
     const unsigned int n_output_channels = n_channels * this->m_args.channel_multiplier;
-    return n_threads * (sizeof_output_buffer(n_output_channels) + sizeof_input_buffer(n_channels));
+    return n_threads * (sizeof_inptr_array() + sizeof_outptr_array() +
+                        sizeof_output_buffer(n_output_channels) +
+                        sizeof_input_buffer(n_channels));
   }
 
-  using DepthwiseCommon<typename strategy::input_type, typename strategy::weight_type, typename strategy::return_type>::execute;
+  using DepthwiseCommon<TInput, TWeight, TOutput>::execute;
   void execute(
     const unsigned int batches,
     const unsigned int input_height,
@@ -147,7 +193,6 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
     const unsigned int n_threads
   ) const override
   {
-    strategy strat(this->m_args.cpu_info);
 #ifdef CYCLE_PROFILING
     arm_gemm::profiler prof;
 #endif
@@ -177,18 +222,19 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
     const TInput *const inptr = static_cast<const TInput *>(_input);
     TOutput *const outptr = static_cast<TOutput *>(_output);
 
-    // Create an array for the input pointers
-    const TInput * _inptr_array[strategy::input_rows * strategy::input_cols];
-    const TInput **const inptr_array = _inptr_array;
-
-    // Create an array for the output pointers
-    TOutput * _outptr_array[strategy::output_rows * strategy::output_cols];
-    TOutput **const outptr_array = _outptr_array;
-
     // Allocate portions of the working space
-    uint8_t *const working_space = static_cast<uint8_t *>(_working_space) + get_working_size(thread_id, input_channels);
+    uint8_t *working_space = static_cast<uint8_t *>(_working_space) + get_working_size(thread_id, input_channels);
+
+    const void **const inptr_array = reinterpret_cast<const void **>(working_space);
+    working_space += sizeof_inptr_array();
+
+    void **const outptr_array = reinterpret_cast<void **>(working_space);
+    working_space += sizeof_outptr_array();
+
     TOutput *const output_buffer = reinterpret_cast<TOutput *>(working_space);
-    TInput *const input_buffer = reinterpret_cast<TInput *>(working_space + sizeof_output_buffer(input_channels * this->m_args.channel_multiplier));
+    working_space += sizeof_output_buffer(input_channels * this->m_args.channel_multiplier);
+
+    TInput *const input_buffer = reinterpret_cast<TInput *>(working_space);
 
     // Initialise the input buffer
     for (unsigned int c = 0; c < input_channels; c++)
@@ -206,11 +252,11 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
 
       for (int start_out_i = start_out_height;
            start_out_i < end_out_height;
-           start_out_i += static_cast<int>(strategy::output_rows))
+           start_out_i += static_cast<int>(m_strat->get_output_rows()))
       {
-        const int end_out_i = start_out_i + strategy::output_rows;
-        const int start_in_i = start_out_i * strategy::stride_rows - padding.top;
-        const int end_in_i = start_in_i + strategy::input_rows;
+        const int end_out_i = start_out_i + m_strat->get_output_rows();
+        const int start_in_i = start_out_i * m_strat->get_stride_rows() - padding.top;
+        const int end_in_i = start_in_i + m_strat->get_input_rows();
 
         // Compute top/bottom padding
         const auto pad_top = static_cast<unsigned int>(-std::min(start_in_i, 0));
@@ -221,14 +267,14 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
         );
 
         // Fill the input pointer array with padding values
-        for (auto index = 0u; index < strategy::input_rows * strategy::input_cols; index++)
+        for (auto index = 0u; index < m_strat->get_input_rows() * m_strat->get_input_cols(); index++)
         {
           inptr_array[index] = input_buffer;
         }
 
         for (int start_out_j = 0; start_out_j < static_cast<int>(output_width);)
         {
-          const int start_in_j = start_out_j * strategy::stride_cols - this->m_args.padding.left;
+          const int start_in_j = start_out_j * m_strat->get_stride_cols() - this->m_args.padding.left;
           const int pad_left = -std::min(0, start_in_j);
 
           // Compute how many output tiles we can compute with the direct kernel.
@@ -236,17 +282,17 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
           if (!pad_top && !pad_bottom && !pad_left)
           {
             // Determine the maximum number of tiles we could handle.
-            n_direct_tiles = (output_width - start_out_j) / strategy::output_cols;
+            n_direct_tiles = (output_width - start_out_j) / m_strat->get_output_cols();
 
             // Continue to reduce this number as required to avoid reading
             // padding on the right edge.
-            int end_in_j = start_in_j + n_direct_tiles * strategy::input_cols;
+            int end_in_j = start_in_j + n_direct_tiles * m_strat->get_input_cols();
             int pad_right = std::max(0, end_in_j - static_cast<int>(input_width));
 
             while (pad_right && n_direct_tiles)
             {
               n_direct_tiles--;
-              end_in_j -= strategy::input_cols;
+              end_in_j -= m_strat->get_input_cols();
               pad_right = std::max(0, end_in_j - static_cast<int>(input_width));
             }
           }
@@ -256,21 +302,21 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
           {
             auto inptr = inptr_batch + start_in_i*ld_input_row + start_in_j*ld_input_col;
             auto outptr = outptr_batch + start_out_i*ld_output_row + start_out_j*ld_output_col;
-            start_out_j += n_direct_tiles*strategy::output_cols;
+            start_out_j += n_direct_tiles*m_strat->get_output_cols();
 
 #ifdef CYCLE_PROFILING
             auto p = prof.ScopedProfiler(PROFILE_KERNEL, 0);
 #endif
-            strat.direct_kernel(1, n_direct_tiles,
-                                inptr, ld_input_row, ld_input_col,
-                                outptr, ld_output_row, ld_output_col,
-                                parameters, this->m_args.input_channels,
-                                activation_min, activation_max);
+            m_strat->direct_kernel(1, n_direct_tiles,
+                                   inptr, ld_input_row, ld_input_col,
+                                   outptr, ld_output_row, ld_output_col,
+                                   parameters, this->m_args.input_channels,
+                                   &activation_min, &activation_max);
             continue;
           }
 
-          const int end_out_j = start_out_j + strategy::output_cols;
-          const int end_in_j = start_in_j + strategy::input_cols;
+          const int end_out_j = start_out_j + m_strat->get_output_cols();
+          const int end_in_j = start_in_j + m_strat->get_input_cols();
 
           const auto pad_right = static_cast<unsigned int>(-std::min(static_cast<int>(input_width) - end_in_j, 0));
           const unsigned int valid_output_cols = std::min(
@@ -280,26 +326,26 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
 
           // Construct the input pointer array - fill the array with pointers to
           // the input buffer and then fill in the required values.
-          for (auto i = pad_top; i < strategy::input_rows - pad_bottom; i++)
+          for (auto i = pad_top; i < m_strat->get_input_rows() - pad_bottom; i++)
           {
             // Can skip over the left padding because we will have either the
             // same or less than the previous tile.
             unsigned int j = pad_left;
             const TInput *colptr = inptr_batch + (start_in_i + i) * ld_input_row + (start_in_j + j) * ld_input_col;
-            const TInput **ptrs = inptr_array + i * strategy::input_cols + j;
-            for (; j < strategy::input_cols - pad_right; j++)
+            const void **ptrs = inptr_array + i * m_strat->get_input_cols() + j;
+            for (; j < m_strat->get_input_cols() - pad_right; j++)
             {
               *(ptrs++) = colptr;
               colptr += ld_input_col;
             }
-            for (; j < strategy::input_cols; j++)
+            for (; j < m_strat->get_input_cols(); j++)
             {
               *(ptrs++) = input_buffer;
             }
           }
 
           // Construct the output pointer array.
-          TOutput **outptr_pos = outptr_array;
+          void **outptr_pos = outptr_array;
           for (auto i = 0u; i < valid_output_rows; i++)
           {
             unsigned int j = 0u;
@@ -309,27 +355,28 @@ class DepthwiseDepthfirst : public DepthwiseCommon<typename strategy::input_type
               *(outptr_pos++) = colptr;
                colptr += ld_output_col;
             }
-            for (; j < strategy::output_cols; j++)
+            for (; j < m_strat->get_output_cols(); j++)
             {
               *(outptr_pos++) = output_buffer;
             }
           }
-          for (auto i = valid_output_rows; i < strategy::output_rows; i++)
+          for (auto i = valid_output_rows; i < m_strat->get_output_rows(); i++)
           {
-            for (auto j = 0u; j < strategy::output_cols; j++)
+            for (auto j = 0u; j < m_strat->get_output_cols(); j++)
             {
               *(outptr_pos++) = output_buffer;
             }
           }
 
-          start_out_j += strategy::output_cols;
+          start_out_j += m_strat->get_output_cols();
 
 #ifdef CYCLE_PROFILING
           // TODO Work number
           auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)(0));
 #endif
-          strat.indirect_kernel(inptr_array, outptr_array, parameters,
-                                this->m_args.input_channels, activation_min, activation_max);
+          m_strat->indirect_kernel(inptr_array, outptr_array, parameters,
+                                   this->m_args.input_channels,
+                                   &activation_min, &activation_max);
         }
       }
     }
