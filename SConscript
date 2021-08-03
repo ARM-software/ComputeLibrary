@@ -406,6 +406,7 @@ runtime_files = Glob('src/runtime/CPP/functions/*.cpp')
 
 # C API files
 runtime_files_hp += filelist['c_api']['common']
+runtime_files_hp += filelist['c_api']['operators']
 
 if env['opencl']:
     runtime_files_hp += filelist['c_api']['gpu']

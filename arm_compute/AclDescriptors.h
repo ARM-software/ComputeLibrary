@@ -40,7 +40,7 @@ typedef enum
     AclLuBoundedRelu      = 6,  /**< Lower and Upper Bounded Rectifier */
     AclLeakyRelu          = 7,  /**< Leaky Rectifier */
     AclSoftRelu           = 8,  /**< Soft Rectifier */
-    AclSoftElu            = 9,  /**< Exponential Linear Unit */
+    AclElu                = 9,  /**< Exponential Linear Unit */
     AclAbs                = 10, /**< Absolute */
     AclSquare             = 11, /**< Square */
     AclSqrt               = 12, /**< Square root */
@@ -51,9 +51,10 @@ typedef enum
 /**< Activation layer descriptor */
 typedef struct
 {
-    AclActivationType type; /**< Activation type */
-    float             a;    /**< Factor &alpha used by some activations */
-    float             b;    /**< Factor &beta used by some activations */
+    AclActivationType type;    /**< Activation type */
+    float             a;       /**< Factor &alpha used by some activations */
+    float             b;       /**< Factor &beta used by some activations */
+    bool              inplace; /**< Hint that src and dst tensors will be the same */
 } AclActivationDescriptor;
 #ifdef __cplusplus
 }

@@ -21,42 +21,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_TYPES_H_
-#define SRC_COMMON_TYPES_H_
-
-#include "arm_compute/AclDescriptors.h"
-#include "arm_compute/AclTypes.h"
+#include "src/common/IOperator.h"
+#include "src/common/utils/Validate.h"
 
 namespace arm_compute
 {
-enum class StatusCode
+#ifndef DOXYGEN_SKIP_THIS
+IOperator::IOperator(IContext *ctx)
+    : AclOperator_()
 {
-    Success            = AclSuccess,
-    RuntimeError       = AclRuntimeError,
-    OutOfMemory        = AclOutOfMemory,
-    Unimplemented      = AclUnimplemented,
-    UnsupportedTarget  = AclUnsupportedTarget,
-    InvalidTarget      = AclInvalidTarget,
-    InvalidArgument    = AclInvalidArgument,
-    UnsupportedConfig  = AclUnsupportedConfig,
-    InvalidObjectState = AclInvalidObjectState,
-};
+    ARM_COMPUTE_ASSERT_NOT_NULLPTR(ctx);
+    this->header.ctx = ctx;
+    this->header.ctx->inc_ref();
+}
 
-enum class Target
+IOperator::~IOperator()
 {
-    Cpu    = AclTarget::AclCpu,
-    GpuOcl = AclTarget::AclGpuOcl,
-};
+    this->header.ctx->dec_ref();
+    this->header.type = detail::ObjectType::Invalid;
+}
 
-enum class ExecutionMode
+bool IOperator::is_valid() const
 {
-    FastRerun = AclPreferFastRerun,
-    FastStart = AclPreferFastStart,
-};
+    return this->header.type == detail::ObjectType::Operator;
+}
 
-enum class ImportMemoryType
+StatusCode IOperator::run(ITensorPack &tensors)
 {
-    HostPtr = AclImportMemoryType::AclHostPtr
-};
+    _op->run(tensors);
+    return StatusCode::Success;
+}
+
+StatusCode IOperator::run(IQueue &queue, ITensorPack &tensors)
+{
+    ARM_COMPUTE_UNUSED(queue);
+    _op->run(tensors);
+    return StatusCode::Success;
+}
+
+StatusCode IOperator::prepare(ITensorPack &tensors)
+{
+    _op->prepare(tensors);
+    return StatusCode::Success;
+}
+
+MemoryRequirements IOperator::workspace() const
+{
+    return _op->workspace();
+}
+#endif /* DOXYGEN_SKIP_THIS */
 } // namespace arm_compute
-#endif /* SRC_COMMON_TYPES_H_ */

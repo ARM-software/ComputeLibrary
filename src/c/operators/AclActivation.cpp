@@ -21,42 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_TYPES_H_
-#define SRC_COMMON_TYPES_H_
+#include "arm_compute/AclOperators.h"
 
-#include "arm_compute/AclDescriptors.h"
-#include "arm_compute/AclTypes.h"
+#include "src/common/IOperator.h"
+#include "src/common/utils/Macros.h"
+#include "src/common/utils/Validate.h"
 
-namespace arm_compute
+extern "C" AclStatus AclActivation(AclOperator                  *external_op,
+                                   AclContext                    external_ctx,
+                                   const AclTensorDescriptor    *src,
+                                   const AclTensorDescriptor    *dst,
+                                   const AclActivationDescriptor info)
 {
-enum class StatusCode
-{
-    Success            = AclSuccess,
-    RuntimeError       = AclRuntimeError,
-    OutOfMemory        = AclOutOfMemory,
-    Unimplemented      = AclUnimplemented,
-    UnsupportedTarget  = AclUnsupportedTarget,
-    InvalidTarget      = AclInvalidTarget,
-    InvalidArgument    = AclInvalidArgument,
-    UnsupportedConfig  = AclUnsupportedConfig,
-    InvalidObjectState = AclInvalidObjectState,
-};
+    using namespace arm_compute;
 
-enum class Target
-{
-    Cpu    = AclTarget::AclCpu,
-    GpuOcl = AclTarget::AclGpuOcl,
-};
+    // Extract internal context
+    auto       ctx    = get_internal(external_ctx);
+    StatusCode status = detail::validate_internal_context(ctx);
+    ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 
-enum class ExecutionMode
-{
-    FastRerun = AclPreferFastRerun,
-    FastStart = AclPreferFastStart,
-};
+    bool is_validate = (external_op == ARM_COMPUTE_VALIDATE_OPERATOR_SUPPORT);
 
-enum class ImportMemoryType
-{
-    HostPtr = AclImportMemoryType::AclHostPtr
-};
-} // namespace arm_compute
-#endif /* SRC_COMMON_TYPES_H_ */
+    std::tie(*external_op, status) = ctx->create_activation(*src, *dst, info, is_validate);
+    ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
+
+    return AclSuccess;
+}

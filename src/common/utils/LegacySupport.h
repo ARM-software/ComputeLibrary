@@ -26,6 +26,7 @@
 
 #include "arm_compute/Acl.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
@@ -45,6 +46,13 @@ TensorInfo convert_to_legacy_tensor_info(const AclTensorDescriptor &desc);
  * @return A converted descriptor
  */
 AclTensorDescriptor convert_to_descriptor(const TensorInfo &info);
+/** Convert an AclActivation descriptor to an internal one
+ *
+ * @param[in] desc Descriptor to convert
+ *
+ * @return Legacy tensor meta-data
+ */
+ActivationLayerInfo convert_to_activation_info(const AclActivationDescriptor &desc);
 } // namespace detail
 } // namespace arm_compute
 

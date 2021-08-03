@@ -6,7 +6,8 @@
     "src/common/utils/LegacySupport.cpp",
     "src/common/AllocatorWrapper.cpp",
     "src/common/ITensorV2.cpp",
-    "src/common/TensorPack.cpp"
+    "src/common/TensorPack.cpp",
+    "src/common/IOperator.cpp"
   ],
   "c_api": {
     "common": [
@@ -21,6 +22,10 @@
     ],
     "gpu": [
       "src/c/cl/AclOpenClExt.cpp"
+    ],
+    "operators":
+    [
+      "src/c/operators/AclActivation.cpp"
     ]
   },
   "gpu": {

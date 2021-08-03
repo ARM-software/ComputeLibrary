@@ -87,6 +87,7 @@ OBJECT_DELETER(AclContext, AclDestroyContext)
 OBJECT_DELETER(AclQueue, AclDestroyQueue)
 OBJECT_DELETER(AclTensor, AclDestroyTensor)
 OBJECT_DELETER(AclTensorPack, AclDestroyTensorPack)
+OBJECT_DELETER(AclOperator, AclDestroyOperator)
 
 #undef OBJECT_DELETER
 
@@ -772,6 +773,24 @@ public:
 protected:
     /** Constructor */
     Operator() = default;
+};
+
+/// Operators
+using ActivationDesc = AclActivationDescriptor;
+class Activation : public Operator
+{
+public:
+    Activation(Context &ctx, const TensorDescriptor &src, const TensorDescriptor &dst, const ActivationDesc &desc, StatusCode *status = nullptr)
+    {
+        AclOperator op;
+        const auto  st = detail::as_enum<StatusCode>(AclActivation(&op, ctx.get(), src.get(), dst.get(), desc));
+        reset(op);
+        report_status(st, "[Compute Library] Failure during Activation operator creation");
+        if(status)
+        {
+            *status = st;
+        }
+    }
 };
 } // namespace acl
 #undef ARM_COMPUTE_IGNORE_UNUSED
