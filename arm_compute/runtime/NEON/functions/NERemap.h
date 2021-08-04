@@ -62,7 +62,7 @@ public:
      * @deprecated This function is deprecated and is intended to be removed in 22.02 release
      *
      */
-    ARM_COMPUTE_DEPRECATED_REL(22.02)
+    ARM_COMPUTE_DEPRECATED_REL(21.08)
     void configure(ITensor *input, const ITensor *map_x, const ITensor *map_y, ITensor *output,
                    InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value = 0);
     /** Initialise the function's sources, destination, interpolation policy and border mode.

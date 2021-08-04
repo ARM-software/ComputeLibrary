@@ -68,7 +68,7 @@ public:
      * @deprecated This function is deprecated and is intended to be removed in 22.02 release
      *
      */
-    ARM_COMPUTE_DEPRECATED_REL(22.02)
+    ARM_COMPUTE_DEPRECATED_REL(21.08)
     void configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output,
                    InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value = 0);
 
@@ -80,7 +80,7 @@ public:
      * @deprecated This function is deprecated and is intended to be removed in 22.02 release
      *
      */
-    ARM_COMPUTE_DEPRECATED_REL(22.02)
+    ARM_COMPUTE_DEPRECATED_REL(21.08)
     void configure(ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output,
                    InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value = 0);
 
