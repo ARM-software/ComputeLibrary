@@ -164,9 +164,6 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
     <tr><td>QSYMM16<td>QSYMM16<td>S32
     <tr><td>U8<td>U8<td>U8
-    <tr><td>U8<td>U8<td>S16
-    <tr><td>U8<td>S16<td>S16
-    <tr><td>S16<td>U8<td>S16
     <tr><td>S16<td>S16<td>S16
     <tr><td>S32<td>S32<td>S32
     <tr><td>F16<td>F16<td>F16
@@ -192,9 +189,6 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
     <tr><td>QSYMM16<td>QSYMM16<td>S32
     <tr><td>U8<td>U8<td>U8
-    <tr><td>U8<td>U8<td>S16
-    <tr><td>U8<td>S16<td>S16
-    <tr><td>S16<td>U8<td>S16
     <tr><td>S16<td>S16<td>S16
     <tr><td>S32<td>S32<td>S32
     <tr><td>F16<td>F16<td>F16
@@ -3107,18 +3101,6 @@ where N = batches, C = channels, H = height, W = width
       <ul>
        <li>n/a
       </ul>
-  <td>CLWinogradInputTransform
-  <td>
-      <ul>
-       <li>NHWC
-       <li>NCHW
-      </ul>
-  <td>
-    <table>
-    <tr><th>src<th>dst
-    <tr><td>F16<td>F16
-    <tr><td>F32<td>F32
-    </table>
 </table>
 
 */
