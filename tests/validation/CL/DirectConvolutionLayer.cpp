@@ -43,10 +43,12 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<half>              tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
-RelativeTolerance<float>             tolerance_fp32(0.05f);     /**< Tolerance for floating point tests */
-constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
+RelativeTolerance<half>  tolerance_fp16(half(0.2));  /**< Tolerance for floating point tests */
+RelativeTolerance<float> tolerance_fp32(0.05f);      /**< Tolerance for floating point tests */
+constexpr float          abs_tolerance_f32(0.0001f); /**< Absolute tolerance for FP32 tests*/
+
+constexpr float                      tolerance_num = 0.07f; /**< Tolerance number */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);  /**< Tolerance for quantized tests */
 
 const auto data_strides          = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
 const auto data_strides_small    = combine(framework::dataset::make("StrideX", 1), framework::dataset::make("StrideY", 1));
@@ -273,7 +275,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framewo
                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
                framework::dataset::make("DataLayout", DataLayout::NHWC)))
 {
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
@@ -291,7 +293,7 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerMixedDataLayo
                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) )),
                framework::dataset::make("DataLayout", DataLayout::NHWC)))
 {
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
@@ -306,7 +308,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framewo
                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::IDENTITY) )),
                framework::dataset::make("DataLayout", DataLayout::NHWC)))
 {
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 
@@ -454,20 +456,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framewo
                                                                                                                     ActivationFunctionsDataset),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
-                                                                                                                    DataType::F32)),
-                                                                                                                    ActivationFunctionsDataset),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit,
+                       framework::dataset::make("DataType",
+                                                DataType::F32)),
+                       ActivationFunctionsDataset),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly, framework::dataset::make("DataType", DataType::F32)),
                                                                                                                   ActivationFunctionsDataset),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 
@@ -477,7 +480,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture
                        ActivationFunctionsDataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
 TEST_SUITE_END() // FP32_CustomDataset
 TEST_SUITE_END() // Float
@@ -492,7 +495,7 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data_precommit,
                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10)})),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })),
                        QuantizedActivationFunctionsDataset),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
@@ -564,11 +567,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(data_precommit, framework::dataset::make("DataType",
-                                                                                                                        DataType::QASYMM8_SIGNED)),
-                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.1f, -10) })),
-                                                                                                                        QuantizedActivationFunctionsDataset),
-                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(data_precommit,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.1f, -10) })),
+                       QuantizedActivationFunctionsDataset),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
