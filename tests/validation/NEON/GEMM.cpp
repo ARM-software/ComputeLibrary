@@ -356,6 +356,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixtureDisabledC<float>, framework::Datas
 }
 TEST_SUITE_END()
 
+TEST_SUITE(BatchedGEMMDisabledC)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixtureDisabledC<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedGEMMDataset(),
+                                                                                                                   framework::dataset::make("ReshapeWeights", { true, false })),
+
+                                                                                                           framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f);
+}
+TEST_SUITE_END()
+
 TEST_SUITE_END()
 TEST_SUITE_END()
 
