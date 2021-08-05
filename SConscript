@@ -431,14 +431,19 @@ if env['openmp']:
      runtime_files_hp += Glob('src/runtime/OMP/OMPScheduler.cpp')
 
 if env['opencl']:
-    runtime_files_hp += filelist['gpu']['common']
-    runtime_files += Glob('src/runtime/CL/functions/*.cpp')
-
     operators = filelist['gpu']['operators']
     for operator in operators:
-        runtime_files += get_gpu_runtime_files(operator)
-        if "kernel" in operators[operator]["files"]:
-            core_files += operators[operator]["files"]["kernel"]
+        if operator in filelist['gpu']['high_priority']:
+            runtime_files_hp += get_gpu_runtime_files(operator)
+            if "kernel" in operators[operator]["files"]:
+                core_files_hp += operators[operator]["files"]["kernel"]
+        else:
+            runtime_files += get_gpu_runtime_files(operator)
+            if "kernel" in operators[operator]["files"]:
+                core_files += operators[operator]["files"]["kernel"]
+
+    runtime_files_hp += filelist['gpu']['common']
+    runtime_files += Glob('src/runtime/CL/functions/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
