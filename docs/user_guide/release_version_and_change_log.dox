@@ -40,6 +40,41 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v21.08 Public major release
+ - Various bug fixes.
+ - Various optimizations:
+  - Improve LWS (Local-Workgroup-Size) heuristic in OpenCL for GeMM, Direct Convolution and Winograd Transformations when OpenCL tuner is not used
+  - Improve QASYMM8/QSYMM8 performance on OpenCL for various Arm® Mali™ GPU architectures
+  - Add dynamic weights support in Fully connected layer (CPU/GPU)
+  - Various performance optimizations for floating-point data types (CPU/GPU)
+ - Add a reduced core library build arm_compute_core_v2
+ - Expose Operator API
+ - Support fat binary build for arm8.2-a via fat_binary build flag
+ - Add CPU discovery capabilities
+ - Add data type f16 support for:
+  - @ref CLRemapKernel
+ - Port the following functions to stateless API:
+   - @ref CLConvolutionLayer
+   - @ref CLFlattenLayer
+   - @ref CLFullyConnectedLayer
+   - @ref CLGEMM
+   - @ref CLGEMMConvolutionLayer
+   - @ref CLGEMMLowpMatrixMultiplyCore
+   - @ref CLWinogradConvolutionLayer
+   - @ref NEConvolutionLayer
+   - @ref NEFlattenLayer
+   - @ref NEFullyConnectedLayer
+   - @ref NEGEMM
+   - @ref NEGEMMConv2d
+   - @ref NEGEMMConvolutionLayer
+   - @ref NEGEMMLowpMatrixMultiplyCore
+   - @ref NEWinogradConvolutionLayer
+ - Remove the following functions:
+   - CLWinogradInputTransform
+ - Remove CLCoreRuntimeContext
+ - Remove ICPPSimpleKernel
+ - Rename file arm_compute/runtime/CL/functions/CLElementWiseUnaryLayer.h to arm_compute/runtime/CL/functions/CLElementwiseUnaryLayer.h
+
 v21.05 Public major release
  - Various bug fixes.
  - Various optimisations.
