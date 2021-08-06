@@ -25,6 +25,7 @@ import re
 import subprocess
 import zlib
 import json
+import codecs
 
 VERSION = "v0.0-unreleased"
 LIBRARY_VERSION_MAJOR = 24
@@ -136,7 +137,8 @@ def resolve_includes(target, source, env):
         with open(file[1].target_name.get_path(), 'w+') as out_file:
             file_to_write = "\n".join( file[1].file_contents )
             if env['compress_kernels']:
-                file_to_write = zlib.compress(file_to_write, 9).encode("base64").replace("\n", "")
+                file_to_write = zlib.compress(file_to_write.encode('utf-8'), 9)
+                file_to_write = codecs.encode(file_to_write, "base64").decode('utf-8').replace("\n", "")
             file_to_write = "R\"(" + file_to_write + ")\""
             out_file.write(file_to_write)
 
