@@ -69,7 +69,7 @@ std::tuple<IOperator *, StatusCode> ClContext::create_activation(const AclTensor
     if(op == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("Couldn't allocate internal resources");
-        return { nullptr, StatusCode::OutOfMemory };
+        return std::make_tuple(nullptr, StatusCode::OutOfMemory);
     }
     op->set_internal_operator(std::move(act_op));
 
