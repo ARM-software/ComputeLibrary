@@ -773,9 +773,9 @@ void ClGemmLowpMatrixMultiplyCore::prepare(ITensorPack &tensors)
                 shifts_tensor->unmap(CLScheduler::get().queue());
             }
         }
+        CLScheduler::get().queue().finish();
         _is_prepared = true;
     }
-    CLScheduler::get().queue().finish();
 }
 
 experimental::MemoryRequirements ClGemmLowpMatrixMultiplyCore::workspace() const
