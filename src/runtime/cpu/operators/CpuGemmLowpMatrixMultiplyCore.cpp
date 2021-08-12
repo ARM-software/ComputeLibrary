@@ -529,6 +529,7 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
         };
         NEScheduler::get().schedule_op(_convert_to_signed_asymm.get(), Window::DimY, _convert_to_signed_asymm->window(), pack);
         a_to_use = signed_a.get();
+        matrix_a = signed_a.get();
     }
 
     // Run GEMM

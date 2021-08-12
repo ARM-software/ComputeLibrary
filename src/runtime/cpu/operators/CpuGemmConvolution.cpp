@@ -341,10 +341,16 @@ void CpuGemmConvolution::configure(const ITensorInfo *src, const ITensorInfo *we
         _reshape_kernel->configure(gemm_output_to_use, dst);
     }
 
+    // Check if GEMM transforms weights
+    // Modernise through COMPMID-4535
+    bool gemm_trans_wei = _aux_mem[1].size > 0;                                            // Asm Pretranspose
+    gemm_trans_wei      = _mm_gemm != nullptr ? _aux_mem[3].size > 0 : gemm_trans_wei;     // Tranpose RHS
+    gemm_trans_wei      = _mm_gemmlowp != nullptr ? _aux_mem[5].size > 0 : gemm_trans_wei; // Transpose RHS
+
+    // Check lifetime
     _aux_mem[Im2ColOutput]    = MemoryInfo(offset_int_vec(Im2ColOutput), MemoryLifetime::Temporary, _im2col_output.total_size());
-    _aux_mem[WeightsReshaped] = MemoryInfo(offset_int_vec(WeightsReshaped), MemoryLifetime::Prepare, _weights_reshaped.total_size());
+    _aux_mem[WeightsReshaped] = MemoryInfo(offset_int_vec(WeightsReshaped), gemm_trans_wei ? MemoryLifetime::Prepare : MemoryLifetime::Persistent, _weights_reshaped.total_size());
     _aux_mem[GemmOutput]      = MemoryInfo(offset_int_vec(GemmOutput), MemoryLifetime::Temporary, _gemm_output.total_size());
-    _aux_mem[GemmOutput3d]    = MemoryInfo(offset_int_vec(GemmOutput3d), MemoryLifetime::Temporary, _gemm_output_3d.total_size());
 }
 
 Status CpuGemmConvolution::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info,
@@ -493,6 +499,7 @@ void CpuGemmConvolution::run(ITensorPack &tensors)
 
     CpuAuxTensorHandler im2col_output(offset_int_vec(Im2ColOutput), _im2col_output, tensors, false);
     CpuAuxTensorHandler gemm_output(offset_int_vec(GemmOutput), _gemm_output, tensors, false);
+    CpuAuxTensorHandler reshaped_wei(offset_int_vec(WeightsReshaped), _weights_reshaped, tensors, false);
 
     bool out_has_padding = _skip_col2im && (dst->info()->padding().bottom != 0 || dst->info()->padding().top != 0);
     if(!_skip_im2col)
@@ -510,12 +517,15 @@ void CpuGemmConvolution::run(ITensorPack &tensors)
 
     // Handle the case where output has top/bottom padding
     const ITensor *out_to_use = out_has_padding ? gemm_output.get() : dst;
+    Tensor         gemm3d;
     _gemm_output_3d.extend_padding(out_to_use->info()->padding());
-    CpuAuxTensorHandler gemm_output_3d(offset_int_vec(GemmOutput3d), _gemm_output_3d, tensors, true);
-    auto                gemm_output_to_use = gemm_output.get();
+    gemm3d.allocator()->soft_init(_gemm_output_3d);
+    gemm3d.allocator()->import_memory(out_to_use->buffer());
+    auto gemm_output_to_use = gemm_output.get();
+
     if(_skip_im2col)
     {
-        gemm_output_to_use = gemm_output_3d.get();
+        gemm_output_to_use = &gemm3d;
     }
     if(_skip_col2im && !out_has_padding)
     {
@@ -525,6 +535,7 @@ void CpuGemmConvolution::run(ITensorPack &tensors)
     // Runs CpuGemm or CpuGemmLowpMatrixMultiplyCore functions
     ITensorPack pack_mm = tensors;
     pack_mm.add_const_tensor(TensorType::ACL_SRC_0, gemm_input_to_use);
+    pack_mm.add_const_tensor(TensorType::ACL_SRC_1, reshaped_wei.get());
     pack_mm.add_tensor(TensorType::ACL_DST, gemm_output_to_use);
     if(_is_quantized)
     {
@@ -583,10 +594,13 @@ void CpuGemmConvolution::prepare(ITensorPack &tensors)
             { TensorType::ACL_DST, weights_reshaped.get() }
         };
         NEScheduler::get().schedule_op(_weights_reshape_kernel.get(), 3, _weights_reshape_kernel->window(), pack);
-        tensors.add_const_tensor(TensorType::ACL_SRC_1, weights_reshaped.get());
+        weights->mark_as_unused();
 
         // Prepare GEMM
-        _is_quantized ? _mm_gemmlowp->prepare(tensors) : _mm_gemm->prepare(tensors);
+        ITensorPack gemm_pack = tensors;
+        gemm_pack.add_const_tensor(TensorType::ACL_SRC_1, weights_reshaped.get());
+        _is_quantized ? _mm_gemmlowp->prepare(gemm_pack) : _mm_gemm->prepare(gemm_pack);
+
         _is_prepared = true;
     }
 }

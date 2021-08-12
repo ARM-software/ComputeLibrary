@@ -174,7 +174,6 @@ private:
         Im2ColOutput = 9,
         WeightsReshaped,
         GemmOutput,
-        GemmOutput3d,
         Count
     };
 

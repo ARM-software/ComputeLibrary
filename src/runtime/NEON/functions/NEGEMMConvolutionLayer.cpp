@@ -39,7 +39,6 @@ struct NEGEMMConvolutionLayer::Impl
     const ITensor                           *weights{ nullptr };
     std::unique_ptr<cpu::CpuGemmConvolution> op{ nullptr };
     ITensorPack                              run_pack{};
-    ITensorPack                              prep_pack{};
     MemoryGroup                              memory_group{};
     IWeightsManager                         *weights_manager{ nullptr };
     MemoryRequirements                       aux_mem_req{};
@@ -70,13 +69,8 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         { TensorType::ACL_SRC_2, biases },
         { TensorType::ACL_DST, output }
     };
-    _impl->prep_pack =
-    {
-        { TensorType::ACL_SRC_1, weights },
-        { TensorType::ACL_SRC_2, biases },
-    };
     _impl->aux_mem_req       = _impl->op->workspace();
-    _impl->workspace_tensors = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->workspace_tensors = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
 }
 
 Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
@@ -96,15 +90,7 @@ void NEGEMMConvolutionLayer::prepare()
 {
     if(!_impl->is_prepared)
     {
-        _impl->op->prepare(_impl->prep_pack);
-        auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
-                                        _impl->aux_mem_req.end(),
-                                        [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
-
-        if(has_reshape != std::end(_impl->aux_mem_req))
-        {
-            _impl->weights->mark_as_unused();
-        }
+        _impl->op->prepare(_impl->run_pack);
 
         // Release temporary tensors that are only used in prepare stage
         release_temporaries<Tensor>(_impl->aux_mem_req, _impl->workspace_tensors);
